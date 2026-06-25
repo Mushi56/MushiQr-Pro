@@ -1,4 +1,4 @@
-import { Moon, Sun, Info, Shield, FileText, ChevronRight, Crown } from 'lucide-react';
+import { Moon, Sun, Info, Shield, FileText, ChevronRight } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import AppIcon from './AppIcon';
 
@@ -77,24 +77,7 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
 
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px var(--main-padding-x) 100px' }}>
-        {/* Pro Banner */}
-        <div className="hero-card-premium" style={{
-          padding: '20px',
-          borderRadius: '24px',
-          color: '#fff',
-          marginBottom: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px'
-        }}>
-          <div className="premium-badge">
-            <Crown size={12} fill="#FFD700" strokeWidth={0} /> PRO ACCOUNT ACTIVE
-          </div>
-          <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Mushi QR Pro Member</h3>
-          <p style={{ fontSize: '12px', opacity: 0.85, margin: 0, lineHeight: 1.4 }}>
-            Unrestricted access to custom shapes, gradients, vector SVG exports, and high-fidelity textures.
-          </p>
-        </div>
+
 
         <div className="settings-group-container">
           {menuItems.map((item, index) => {
