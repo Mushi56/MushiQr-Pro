@@ -34,7 +34,7 @@ import {
   Home,
   Bookmark,
   Settings,
-  Type,
+  TextCursorInput,
   Plus,
   Maximize,
   Shapes,
@@ -1877,7 +1877,7 @@ export default function App() {
     { id: 'shapes', label: 'Shapes', icon: Hexagon },
     { id: 'logo', label: 'Logo', icon: ImageIcon },
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
-    { id: 'text', label: 'Text', icon: Type },
+    { id: 'text', label: 'Add Text', icon: TextCursorInput },
   ];
 
   // ── Get the frame CSS class for the preview wrapper ──
