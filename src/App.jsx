@@ -34,7 +34,8 @@ import {
   Home,
   Bookmark,
   Settings,
-  TextCursorInput,
+  Type,
+  ALargeSmall,
   Plus,
   Maximize,
   Shapes,
@@ -1877,7 +1878,7 @@ export default function App() {
     { id: 'shapes', label: 'Shapes', icon: Hexagon },
     { id: 'logo', label: 'Logo', icon: ImageIcon },
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
-    { id: 'text', label: 'Add Text', icon: TextCursorInput },
+    { id: 'text', label: 'Text', icon: Type },
   ];
 
   // ── Get the frame CSS class for the preview wrapper ──
@@ -3006,9 +3007,9 @@ export default function App() {
                       )}
                       {activeTab === 'text' && (
                         <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><PlusCircle size={18} /><span>Content</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Add Text</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'pos')}><Maximize size={18} /><span>Position</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'fonts')}><Type size={18} /><span>Fonts</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'size')}><ChevronUp size={18} /><span>Size</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'color')}><Palette size={18} /><span>Color</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'stroke')}><Pencil size={18} /><span>Stroke</span></button>
