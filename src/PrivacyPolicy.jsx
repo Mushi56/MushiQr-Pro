@@ -1,5 +1,4 @@
 // PrivacyPolicy.jsx
-// Add this file to your src/ folder in your project
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
@@ -9,61 +8,40 @@ export default function PrivacyPolicy() {
       <div style={styles.card}>
         <div style={styles.badge}>Legal</div>
         <h1 style={styles.title}>Privacy Policy</h1>
-        <p style={styles.updated}>Last updated: April 7, 2026</p>
+        <p style={styles.updated}>Last updated: June 25, 2026</p>
 
-        <Section title="1. Introduction">
-          Welcome to <strong>Mushi Qr Pro</strong>. We are committed to protecting
-          your privacy. This Privacy Policy explains how we collect, use, and
-          safeguard your information when you visit our website.
+        <Section title="1. Overview">
+          Welcome to <strong>Mushi Qr Pro</strong>. We value your privacy above all else. This Privacy Policy outlines how your data is handled when you use our application.
         </Section>
 
-        <Section title="2. Information We Collect">
-          We do <strong>not</strong> collect any personal information such as your
-          name, email address, or phone number. The only data we collect is
-          anonymous usage data through third-party services like Google AdSense
-          and Google Analytics to help us understand how our website is used.
+        <Section title="2. 100% Client-Side Processing">
+          Mushi Qr Pro is designed as a client-side application. Any content, URLs, text, Wi-Fi credentials, or image logos you upload to blend onto the QR code are processed **entirely within your local browser**. No logo image files or QR data are ever transmitted to, stored on, or processed by external web servers.
         </Section>
 
-        <Section title="3. QR Code Data">
-          Any text, URL, or information you enter to generate a QR code is
-          processed entirely in your browser. We do <strong>not</strong> store,
-          transmit, or share any data you enter into our QR code generator.
+        <Section title="3. Local Storage for Projects">
+          Your project history, preferences, and saved custom templates are stored locally in your browser's <code>localStorage</code> database. This data never leaves your device and is not shared with us or any third party. You can clear this data at any time through the Settings page or by clearing your browser site settings.
         </Section>
 
-        <Section title="4. Cookies & Advertising">
-          We use Google AdSense to display advertisements. Google may use cookies
-          to show ads based on your prior visits to our website or other websites.
-          You can opt out of personalized advertising by visiting{" "}
-          <a href="https://www.google.com/settings/ads" style={styles.link}>
-            Google Ads Settings
-          </a>
-          .
+        <Section title="4. Cookies and Advertising">
+          We use Google AdSense to serve non-intrusive advertisements to help support this free service. Google may use cookies to serve ads based on your visits to our website and other sites on the Internet. You can manage or disable personalized ads by visiting your Google Ad Settings page.
         </Section>
 
-        <Section title="5. Third-Party Services">
-          Our website may use the following third-party services:
+        <Section title="5. Web Analytics">
+          We use Google Analytics and Vercel hosting metrics to gather anonymous, aggregated web server traffic statistics (such as page views, browser types, and screen sizes) to monitor performance and improve usability. No individual QR code contents, text, or logos are tracked or logged.
+        </Section>
+
+        <Section title="6. Third-Party Services">
+          Our hosting environment and external services are managed by:
           <ul style={styles.list}>
-            <li>Google AdSense (advertising)</li>
-            <li>Google Analytics (anonymous usage statistics)</li>
-            <li>Vercel (website hosting)</li>
+            <li>Vercel (Website Hosting and Performance Logging)</li>
+            <li>Google AdSense (Ad Delivery)</li>
+            <li>Google Analytics (Aggregated Traffic Insights)</li>
           </ul>
-          Each of these services has their own privacy policy governing their use
-          of data.
+          Please refer to their respective privacy policy pages for details on their data security standards.
         </Section>
 
-        <Section title="6. Children's Privacy">
-          Our service is not directed to children under the age of 13. We do not
-          knowingly collect personal information from children.
-        </Section>
-
-        <Section title="7. Changes to This Policy">
-          We may update this Privacy Policy from time to time. Any changes will be
-          posted on this page with an updated date.
-        </Section>
-
-        <Section title="8. Contact Us">
-          If you have any questions about this Privacy Policy, please contact us
-          at:{" "}
+        <Section title="7. Contact Us">
+          For any inquiries regarding this policy or data safety, you can contact us at:{" "}
           <a href="mailto:contact@mushiqr-pro.com" style={styles.link}>
             contact@mushiqr-pro.com
           </a>
@@ -83,7 +61,7 @@ function Section({ title, children }) {
   return (
     <div style={styles.section}>
       <h2 style={styles.sectionTitle}>{title}</h2>
-      <p style={styles.sectionText}>{children}</p>
+      <div style={styles.sectionText}>{children}</div>
     </div>
   );
 }

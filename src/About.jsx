@@ -1,42 +1,40 @@
 // About.jsx
-// Add this file to your src/ folder in your project
 import { Link } from 'react-router-dom';
-import { Zap, Sliders, ShieldCheck, Smartphone, ArrowLeft } from 'lucide-react';
+import { Zap, Sliders, ShieldCheck, Smartphone, ArrowLeft, Paintbrush, Layers, Maximize } from 'lucide-react';
 
 export default function About() {
   return (
     <div style={styles.container}>
       <div style={styles.hero}>
-        <div style={styles.badge}>About Us</div>
+        <div style={styles.badge}>About the App</div>
         <h1 style={styles.title}>Mushi Qr Pro</h1>
         <p style={styles.subtitle}>
-          The fastest, simplest, and most powerful free QR code generator on the web.
+          A professional-grade, fully customizable QR code generator. Design custom shapes, blend logos, remove backgrounds, and export vectors in real-time.
         </p>
       </div>
 
       <div style={styles.grid}>
-        <FeatureCard icon={<Zap size={32} color="var(--accent-primary)" />} title="Instant Generation" desc="Generate QR codes in real-time as you type. No waiting, no delays." />
-        <FeatureCard icon={<Sliders size={32} color="var(--accent-primary)" />} title="Fully Customizable" desc="Change colors, styles, and formats to match your brand." />
-        <FeatureCard icon={<ShieldCheck size={32} color="var(--accent-primary)" />} title="100% Private" desc="Your data never leaves your browser. Nothing is stored on our servers." />
-        <FeatureCard icon={<Smartphone size={32} color="var(--accent-primary)" />} title="Works Everywhere" desc="Optimized for mobile and desktop. Works on any device, any browser." />
+        <FeatureCard icon={<Zap size={32} color="var(--accent-primary)" />} title="Instant Live Preview" desc="QR codes update instantly on the canvas as you adjust content, colors, shapes, or presets." />
+        <FeatureCard icon={<Maximize size={32} color="var(--accent-primary)" />} title="Interactive Canvas" desc="Click and drag elements directly on the preview canvas to scale, rotate, or reposition them." />
+        <FeatureCard icon={<Paintbrush size={32} color="var(--accent-primary)" />} title="Advanced Styling" desc="Customize dot designs, select custom eye frame styles, and add linear or radial gradients." />
+        <FeatureCard icon={<Layers size={32} color="var(--accent-primary)" />} title="Background Remover" desc="Erase white or black backgrounds, or pick target colors precisely with a pixel magnifier pipette." />
+        <FeatureCard icon={<ShieldCheck size={32} color="var(--accent-primary)" />} title="100% Client-Side" desc="All logo blending, background removal, and rendering are done locally in your browser for absolute privacy." />
+        <FeatureCard icon={<Smartphone size={32} color="var(--accent-primary)" />} title="Responsive Design" desc="Designed for mobile, tablet, and desktop. Tap, swipe, and drag on any screen size." />
       </div>
 
       <div style={styles.card}>
         <h2 style={styles.cardTitle}>Our Mission</h2>
         <p style={styles.cardText}>
-          Mushi Qr Pro was built with one goal: to give everyone access to a
-          professional-grade QR code generator — completely free. Whether you're a
-          small business owner, a student, or a developer, you deserve powerful
-          tools without paying a subscription fee.
+          Mushi Qr Pro was created to provide everyone with free access to high-fidelity, professional QR code creation tools. We believe that custom branding, vector exports, and high-quality designs should be available to small business owners, developers, and creators without subscription limits, accounts, or watermarks.
         </p>
       </div>
 
       <div style={styles.card}>
-        <h2 style={styles.cardTitle}>How to Use</h2>
+        <h2 style={styles.cardTitle}>Key Features</h2>
         <div style={styles.steps}>
-          <Step num="1" text="Type your URL, text, or any content in the input box" />
-          <Step num="2" text="Your QR code is generated instantly" />
-          <Step num="3" text="Download it as PNG or SVG and use it anywhere" />
+          <Step num="1" text="Custom Typography: Support for Center and Frame text, with Top/Bottom options and backgrounds like pill, outline, underline, ribbon, glow, or hexagon." />
+          <Step num="2" text="Official Preset Library: Instantly load high-resolution app store brand icon presets onto the QR code canvas." />
+          <Step num="3" text="Vector Formats: Export your final creations instantly as PNG, JPG, vector SVG, or print-ready PDF files." />
         </div>
       </div>
 
@@ -115,7 +113,7 @@ const styles = {
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "24px",
     maxWidth: "1000px",
     margin: "0 auto 40px",
@@ -151,7 +149,7 @@ const styles = {
     fontWeight: "800", fontSize: "16px", color: "#fff", flexShrink: 0,
     boxShadow: "var(--shadow-glow)",
   },
-  stepText: { fontSize: "16px", color: "var(--text-secondary)", margin: 0, fontWeight: "500" },
+  stepText: { fontSize: "15px", color: "var(--text-secondary)", margin: 0, fontWeight: "500", lineHeight: "1.5" },
   footer: { textAlign: "center", marginTop: "80px" },
   footerText: { color: "var(--text-tertiary)", fontSize: "14px", marginBottom: "16px" },
   link: { color: "var(--accent-primary)", textDecoration: "none", fontSize: "14px", fontWeight: "600" },
