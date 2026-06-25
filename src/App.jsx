@@ -35,7 +35,6 @@ import {
   Bookmark,
   Settings,
   Type,
-  Heading,
   ALargeSmall,
   Paintbrush,
   Plus,
@@ -447,6 +446,8 @@ export default function App() {
   const [activePreset, setActivePreset] = useState(null);
   const [isPipetteActive, setIsPipetteActive] = useState(false);
   const [pipetteTarget, setPipetteTarget] = useState(null); // { setter }
+  const [hoverColor, setHoverColor] = useState(null);
+  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
   const [canvasSelection, setCanvasSelection] = useState(null); // 'logo' | 'text' | null
 
   // ── Gradient ──
@@ -492,6 +493,7 @@ export default function App() {
   const [logoInnerShadowEnabled, setLogoInnerShadowEnabled] = useState(false);
   const [logoEraseColorEnabled, setLogoEraseColorEnabled] = useState(false);
   const [logoEraseColor, setLogoEraseColor] = useState('#ffffff');
+  const [logoEraseMode, setLogoEraseMode] = useState('none'); // 'none' | 'white' | 'black' | 'custom'
   const [logoEraseTolerance, setLogoEraseTolerance] = useState(50);
   const [logoEraseSmoothing, setLogoEraseSmoothing] = useState(10);
   const [logoTexture, setLogoTexture] = useState('none');
@@ -500,7 +502,6 @@ export default function App() {
 
   // ── Frame ──
   const [frameStyle, setFrameStyle] = useState('none');
-  const [framePosition, setFramePosition] = useState('bottom');
   const [frameText, setFrameText] = useState('SCAN ME');
   const [frameColor, setFrameColor] = useState('');
   const [frameFont, setFrameFont] = useState('Inter');
@@ -511,6 +512,8 @@ export default function App() {
   const [frameShadowEnabled, setFrameShadowEnabled] = useState(false);
   const [frameShadowBlur, setFrameShadowBlur] = useState(10);
   const [frameShadowColor, setFrameShadowColor] = useState('rgba(0,0,0,0.5)');
+  const [framePosition, setFramePosition] = useState('bottom'); // 'top' | 'bottom'
+  const [frameRotation, setFrameRotation] = useState(0); // 0-360
   const [textCenterEnabled, setTextCenterEnabled] = useState(false);
   const [textPopup, setTextPopup] = useState(null);
   const [logoPopup, setLogoPopup] = useState(null);
@@ -609,9 +612,9 @@ export default function App() {
       setTabHistory(prev => [...prev, activeTab]);
       setActiveTab(tabId);
 
-      // Manage canvas selections and text edit modes for text tool
+      // Manage canvas selections for interactive outlines/handles
       if (tabId === 'text') {
-        setCanvasSelection(textEditMode === 'center' ? 'text' : null);
+        setCanvasSelection('text');
       } else if (tabId === 'logo') {
         setCanvasSelection('logo');
       } else {
@@ -652,9 +655,10 @@ export default function App() {
       logoOutline, logoOutlineColor, logoOutlineWidth, logoPosX, logoPosY,
       logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
       logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, logoAspectRatioLocked,
-      frameStyle, framePosition, frameText, frameColor, frameFont, frameSize,
+      frameStyle, frameText, frameColor, frameFont, frameSize,
       frameStrokeEnabled, frameStrokeWidth, frameStrokeColor,
       frameShadowEnabled, frameShadowBlur, frameShadowColor,
+      framePosition, frameRotation,
       textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
       textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
       textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
@@ -670,9 +674,10 @@ export default function App() {
     logoOutline, logoOutlineColor, logoOutlineWidth, logoPosX, logoPosY,
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, logoAspectRatioLocked,
-    frameStyle, framePosition, frameText, frameColor, frameFont, frameSize,
+    frameStyle, frameText, frameColor, frameFont, frameSize,
     frameStrokeEnabled, frameStrokeWidth, frameStrokeColor,
     frameShadowEnabled, frameShadowBlur, frameShadowColor,
+    framePosition, frameRotation,
     textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
     textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
     textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
@@ -768,12 +773,24 @@ export default function App() {
     if (s.logoOutlineWidth !== undefined) setLogoOutlineWidth(s.logoOutlineWidth);
     if (s.logoPosX !== undefined) setLogoPosX(s.logoPosX);
     if (s.logoPosY !== undefined) setLogoPosY(s.logoPosY);
-    if (s.logoEraseColorEnabled !== undefined) setLogoEraseColorEnabled(s.logoEraseColorEnabled);
-    if (s.logoEraseColor !== undefined) setLogoEraseColor(s.logoEraseColor);
+    if (s.logoEraseColorEnabled !== undefined) {
+      setLogoEraseColorEnabled(s.logoEraseColorEnabled);
+      if (!s.logoEraseColorEnabled) {
+        setLogoEraseMode('none');
+      }
+    }
+    if (s.logoEraseColor !== undefined) {
+      setLogoEraseColor(s.logoEraseColor);
+      if (s.logoEraseColorEnabled) {
+        const c = s.logoEraseColor.toLowerCase();
+        if (c === '#ffffff') setLogoEraseMode('white');
+        else if (c === '#000000') setLogoEraseMode('black');
+        else setLogoEraseMode('custom');
+      }
+    }
     if (s.logoEraseTolerance !== undefined) setLogoEraseTolerance(s.logoEraseTolerance);
     if (s.logoEraseSmoothing !== undefined) setLogoEraseSmoothing(s.logoEraseSmoothing);
     if (s.frameStyle !== undefined) setFrameStyle(s.frameStyle);
-    if (s.framePosition !== undefined) setFramePosition(s.framePosition);
     if (s.frameText !== undefined) setFrameText(s.frameText);
     if (s.frameColor !== undefined) setFrameColor(s.frameColor);
     if (s.frameFont !== undefined) setFrameFont(s.frameFont);
@@ -784,6 +801,8 @@ export default function App() {
     if (s.frameShadowEnabled !== undefined) setFrameShadowEnabled(s.frameShadowEnabled);
     if (s.frameShadowBlur !== undefined) setFrameShadowBlur(s.frameShadowBlur);
     if (s.frameShadowColor !== undefined) setFrameShadowColor(s.frameShadowColor);
+    if (s.framePosition !== undefined) setFramePosition(s.framePosition);
+    if (s.frameRotation !== undefined) setFrameRotation(s.frameRotation);
     if (s.textCenterEnabled !== undefined) setTextCenterEnabled(s.textCenterEnabled);
     if (s.textCenterText !== undefined) setTextCenterText(s.textCenterText);
     if (s.textCenterSize !== undefined) setTextCenterSize(s.textCenterSize);
@@ -822,8 +841,9 @@ export default function App() {
   }, [
     qrColor, bgColor, logoWidth, logoHeight, logoPosX, logoPosY, textCenterSize, textCenterPosX, textCenterPosY,
     frameSize, dotPadding, eyePadding, textCenterText, frameText,
-    dotStyle, eyeStyle, qrType, logo, syncEyes, gradientEnabled, frameStyle, framePosition,
-    eyeColor, eyeOuterColor, logoBackground, logoOutline, textCenterEnabled
+    dotStyle, eyeStyle, qrType, logo, syncEyes, gradientEnabled, frameStyle,
+    eyeColor, eyeOuterColor, logoBackground, logoOutline, textCenterEnabled,
+    framePosition, frameRotation, textCenterRotation
   ]);
 
   const handleFontUpload = (e) => {
@@ -1138,7 +1158,6 @@ export default function App() {
     }
 
     setFrameColor(item.frameColor);
-    if (item.framePosition !== undefined) setFramePosition(item.framePosition);
 
     // Reset tab history when loading a template
     setTabHistory([]);
@@ -1194,7 +1213,6 @@ export default function App() {
 
     // Frame
     setFrameStyle('none');
-    setFramePosition('bottom');
     setFrameText('SCAN ME');
     setFrameColor('');
 
@@ -1249,7 +1267,7 @@ export default function App() {
         logo: logo?.image, logoWidth, logoHeight, logoPadding,
         logoBackground, logoBgColor, logoBgShape,
         logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
-        quietZone: 2, frameStyle, framePosition, frameText, frameColor, frameFont,
+        quietZone: 2, frameStyle, frameText, frameColor, frameFont,
         frameSize,
         frameStrokeEnabled,
         frameStrokeWidth,
@@ -1257,6 +1275,8 @@ export default function App() {
         frameShadowEnabled,
         frameShadowBlur,
         frameShadowColor,
+        framePosition,
+        frameRotation,
         textCenterEnabled, 
         textCenter: textCenterEnabled ? textCenterText : null,
         textCenterSize, textCenterColor, textCenterFont,
@@ -1267,8 +1287,8 @@ export default function App() {
         logoPosX, logoPosY,
         logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
         logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop,
-        showHandle: canvasSelection === 'logo' || canvasSelection === 'text',
-        selectedType: canvasSelection
+        showHandle: canvasSelection === 'logo' || canvasSelection === 'text' || canvasSelection === 'frame-text',
+        selectedType: canvasSelection === 'text' ? 'text' : (canvasSelection === 'frame-text' ? 'frame-text' : canvasSelection)
       });
     };
 
@@ -1284,7 +1304,7 @@ export default function App() {
     eyeOuterColor, syncEyes, gradientEnabled, gradientColor1, gradientColor2, gradientType,
     logo, logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
     logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
-    dotPadding, eyePadding, frameStyle, framePosition, frameText, frameColor, frameFont,
+    dotPadding, eyePadding, frameStyle, frameText, frameColor, frameFont,
         frameSize,
         frameStrokeEnabled,
         frameStrokeWidth,
@@ -1292,6 +1312,8 @@ export default function App() {
         frameShadowEnabled,
         frameShadowBlur,
         frameShadowColor,
+        framePosition,
+        frameRotation,
     textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
 
     textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
@@ -1300,7 +1322,7 @@ export default function App() {
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, 
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
-    activeTab, canvasSelection, textEditMode
+    activeTab, canvasSelection
   ]);
 
   useEffect(() => {
@@ -1325,14 +1347,81 @@ export default function App() {
       const labelHeight = size * 0.14;
       contentSize = size - (padding * 2) - labelHeight - (size * 0.06); 
       contentX = (size - contentSize) / 2;
-      if (framePosition === 'top') {
-        contentY = padding + labelHeight + (size - padding * 2 - labelHeight - contentSize) / 2;
-      } else {
-        contentY = padding + (size - padding * 2 - labelHeight - contentSize) / 2;
-      }
+      contentY = padding + (size - padding * 2 - labelHeight - contentSize) / 2;
     }
     return { contentX, contentY, contentSize };
-  }, [frameStyle, framePosition]);
+  }, [frameStyle]);
+
+  // ── Pipette Handling ──
+  const handlePipettePick = useCallback((e) => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const canvasRect = canvas.getBoundingClientRect();
+    
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+
+    if (
+      clientX >= canvasRect.left &&
+      clientX <= canvasRect.right &&
+      clientY >= canvasRect.top &&
+      clientY <= canvasRect.bottom
+    ) {
+      const scale = 512 / canvasRect.width;
+      const x = (clientX - canvasRect.left) * scale;
+      const y = (clientY - canvasRect.top) * scale;
+      
+      const ctx = canvas.getContext('2d');
+      try {
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`;
+        
+        if (pipetteTarget?.setter) {
+          pipetteTarget.setter(hex);
+        }
+        setIsPipetteActive(false);
+        setHoverColor(null);
+        setAdvPicker(prev => ({ ...prev, open: true, color: hex }));
+      } catch (err) {
+        console.error("Failed to sample color:", err);
+      }
+      e.preventDefault();
+    } else {
+      e.preventDefault();
+    }
+  }, [pipetteTarget]);
+
+  const handlePointerMove = useCallback((e) => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const canvasRect = canvas.getBoundingClientRect();
+    
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    
+    if (
+      clientX >= canvasRect.left &&
+      clientX <= canvasRect.right &&
+      clientY >= canvasRect.top &&
+      clientY <= canvasRect.bottom
+    ) {
+      const scale = 512 / canvasRect.width;
+      const x = (clientX - canvasRect.left) * scale;
+      const y = (clientY - canvasRect.top) * scale;
+      
+      const ctx = canvas.getContext('2d');
+      try {
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`;
+        setHoverColor(hex);
+        setHoverPos({ x: clientX, y: clientY });
+      } catch (err) {
+        setHoverColor(null);
+      }
+    } else {
+      setHoverColor(null);
+    }
+  }, []);
 
   // ── Canvas Interaction (Drag to Position) ──
   const handleCanvasInteraction = useCallback((e) => {
@@ -1349,25 +1438,6 @@ export default function App() {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    if (isPipetteActive) {
-      const rect = canvas.getBoundingClientRect();
-      const scale = 512 / rect.width;
-      const x = (clientX - rect.left) * scale;
-      const y = (clientY - rect.top) * scale;
-      
-      const ctx = canvas.getContext('2d');
-      const pixel = ctx.getImageData(x, y, 1, 1).data;
-      const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`;
-      
-      if (pipetteTarget?.setter) {
-        pipetteTarget.setter(hex);
-      }
-      setIsPipetteActive(false);
-      setAdvPicker(prev => ({ ...prev, open: true, color: hex }));
-      e.preventDefault();
-      return;
-    }
     
     // Convert click to canvas coordinates (0-512)
     const scale = 512 / rect.width;
@@ -1463,7 +1533,6 @@ export default function App() {
       
       // Clicking inside the body region always triggers dragging/selection
       if (inRect(localX, localY, lx, ly, lw, lh)) {
-        handleTabChange('logo');
         setCanvasSelection('logo');
         setIsDraggingCanvas(true);
         dragType.current = 'logo';
@@ -1558,12 +1627,89 @@ export default function App() {
 
       // Clicking inside the body region always triggers dragging/selection
       if (inRect(localX, localY, tx, ty, tw, th)) {
-        setTextEditMode('center');
-        handleTabChange('text');
         setCanvasSelection('text');
+        setTextEditMode('center');
         setIsDraggingCanvas(true);
         dragType.current = 'text';
         dragStartOffset.current = { x: x - tx, y: y - ty };
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // 3. Check Frame Text
+    if (frameStyle !== 'none' && frameText) {
+      const framePadding = 512 * 0.03;
+      const labelHeight = 512 * 0.14;
+      const textY = framePosition === 'top' ? (framePadding + labelHeight / 2) : (512 - framePadding - labelHeight / 2);
+      
+      tempCtx.current.font = `bold ${512 * frameSize}px '${frameFont}', Outfit, sans-serif`;
+      const metrics = tempCtx.current.measureText(frameText);
+      const tw = metrics.width + 512 * 0.04;
+      const th = (512 * frameSize) * 1.2;
+      const tx = 256 - tw / 2;
+      const ty = textY - th / 2;
+      
+      const centerX = 256;
+      const centerY = textY;
+
+      const dx_raw = x - centerX;
+      const dy_raw = y - centerY;
+      const ang = (-(frameRotation || 0) * Math.PI) / 180;
+      const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
+      const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
+
+      const hSize = 24;
+      const checkH = (hx, hy, type) => {
+          if (localX >= hx - hSize && localX <= hx + hSize && localY >= hy - hSize && localY <= hy + hSize) {
+              setIsDraggingCanvas(true);
+              dragType.current = type;
+              dragStartOffset.current = { 
+                  startX: x,
+                  startY: y,
+                  startSize: frameSize,
+                  startRotation: frameRotation || 0,
+                  startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
+              };
+              e.preventDefault();
+              return true;
+          }
+          return false;
+      };
+
+      if (canvasSelection === 'frame-text') {
+        const checkRotateFrame = (hx, hy) => {
+            if (localX >= hx - hSize && localX <= hx + hSize && localY >= hy - hSize && localY <= hy + hSize) {
+                setIsDraggingCanvas(true);
+                dragType.current = 'rotate-frame';
+                dragStartOffset.current = { 
+                    startRotation: frameRotation || 0,
+                    startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
+                };
+                e.preventDefault();
+                return true;
+            }
+            return false;
+        };
+        // Rotate handle at bottom-left
+        if (checkRotateFrame(tx - 20, ty + th + 20)) return;
+        // Resize handle at bottom-right
+        if (checkH(tx + tw, ty + th, 'resize-frame-br')) return;
+        // Delete handle at top-right
+        if (checkH(tx + tw, ty, 'delete-frame')) {
+          setFrameText('');
+          setFrameStyle('none');
+          setCanvasSelection(null);
+          setIsDraggingCanvas(false);
+          dragType.current = null;
+          e.preventDefault();
+          return;
+        }
+      }
+
+      if (inRect(localX, localY, tx, ty, tw, th)) {
+        setCanvasSelection('frame-text');
+        setTextEditMode('frame');
         e.preventDefault();
         return;
       }
@@ -1573,7 +1719,104 @@ export default function App() {
     if (!isPipetteActive) {
       setCanvasSelection(null);
     }
-  }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, canvasSelection, getSnapshot]);
+  }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, canvasSelection, getSnapshot, frameStyle, frameText, frameSize, frameFont, framePosition, frameRotation]);
+
+  const handleCanvasDoubleClick = useCallback((e) => {
+    if (!canvasRef.current || !qrMatrixInfo) return;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    const scale = 512 / rect.width;
+    const x = (clientX - rect.left) * scale;
+    const y = (clientY - rect.top) * scale;
+
+    const { contentX, contentY, contentSize } = getQRContentArea();
+    const inRect = (px, py, rx, ry, rw, rh) => {
+      const pad = 25; 
+      return px >= rx - pad && px <= rx + rw + pad && py >= ry - pad && py <= ry + rh + pad;
+    };
+
+    // 1. Check Center Text
+    if (textCenterEnabled && textCenterText) {
+      const fontSize = contentSize * textCenterSize;
+      tempCtx.current.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
+      const metrics = tempCtx.current.measureText(textCenterText);
+      const tw = textCenterWidth ? (textCenterWidth * contentSize) : (metrics.width + (logoPadding || 10) * 2);
+      const th = textCenterHeight ? (textCenterHeight * contentSize) : ((fontSize * 0.8) + (logoPadding || 10) * 2);
+      
+      const rawTx = contentX + (contentSize - tw) * textCenterPosX;
+      const rawTy = contentY + (contentSize - th) * textCenterPosY;
+      const moduleCount = qrMatrixInfo?.width || 21;
+      const safePos = constrainToSafeZone(rawTx, rawTy, tw, th, contentX, contentY, contentSize, moduleCount, 2);
+      const tx = safePos.x;
+      const ty = safePos.y;
+      
+      const centerX = tx + tw / 2;
+      const centerY = ty + th / 2;
+
+      const dx_raw = x - centerX;
+      const dy_raw = y - centerY;
+      const ang = (-textCenterRotation * Math.PI) / 180;
+      const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
+      const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
+
+      if (inRect(localX, localY, tx, ty, tw, th)) {
+        handleTabChange('text');
+        setTextPopup('input');
+        setTextEditMode('center');
+        setCanvasSelection('text');
+        setTimeout(() => {
+          const input = document.getElementById('center-text-input');
+          if (input) {
+            input.focus();
+            input.select();
+          }
+        }, 100);
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // 2. Check Frame Text
+    if (frameStyle !== 'none' && frameText) {
+      const framePadding = 512 * 0.03;
+      const labelHeight = 512 * 0.14;
+      const textY = framePosition === 'top' ? (framePadding + labelHeight / 2) : (512 - framePadding - labelHeight / 2);
+      
+      tempCtx.current.font = `bold ${512 * frameSize}px '${frameFont}', Outfit, sans-serif`;
+      const metrics = tempCtx.current.measureText(frameText);
+      const tw = metrics.width + 512 * 0.04;
+      const th = (512 * frameSize) * 1.2;
+      const tx = 256 - tw / 2;
+      const ty = textY - th / 2;
+      
+      const centerX = 256;
+      const centerY = textY;
+
+      const dx_raw = x - centerX;
+      const dy_raw = y - centerY;
+      const ang = (-(frameRotation || 0) * Math.PI) / 180;
+      const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
+      const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
+
+      if (inRect(localX, localY, tx, ty, tw, th)) {
+        handleTabChange('text');
+        setTextPopup('input');
+        setTextEditMode('frame');
+        setCanvasSelection('frame-text');
+        setTimeout(() => {
+          const input = document.getElementById('frame-text-input');
+          if (input) {
+            input.focus();
+            input.select();
+          }
+        }, 100);
+        e.preventDefault();
+        return;
+      }
+    }
+  }, [textCenterEnabled, textCenterText, textCenterSize, textCenterFont, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, qrMatrixInfo, frameStyle, frameText, frameSize, frameFont, framePosition, frameRotation, handleTabChange]);
 
   const handleCanvasMove = useCallback((e) => {
     if (!isDraggingCanvas || !canvasRef.current) return;
@@ -1644,6 +1887,40 @@ export default function App() {
             }
         }
         setTextCenterRotation(Math.round(normalizedRot));
+    } else if (dragType.current === 'rotate-frame') {
+        const framePadding = 512 * 0.03;
+        const labelHeight = 512 * 0.14;
+        const textY = framePosition === 'top' ? (framePadding + labelHeight / 2) : (512 - framePadding - labelHeight / 2);
+        const centerX = 256;
+        const centerY = textY;
+        
+        const currentMouseAngle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
+        const angleDelta = currentMouseAngle - dragStartOffset.current.startMouseAngle;
+        let newRotation = dragStartOffset.current.startRotation + angleDelta;
+        
+        let normalizedRot = (newRotation % 360 + 360) % 360;
+        const snapTargets = [0, 45, 90, 135, 180, 225, 270, 315, 360];
+        const snapTolerance = 4;
+        for (const target of snapTargets) {
+            if (Math.abs(normalizedRot - target) <= snapTolerance) {
+                normalizedRot = target === 360 ? 0 : target;
+                break;
+            }
+        }
+        setFrameRotation(Math.round(normalizedRot));
+    } else if (dragType.current === 'resize-frame-br') {
+        const framePadding = 512 * 0.03;
+        const labelHeight = 512 * 0.14;
+        const textY = framePosition === 'top' ? (framePadding + labelHeight / 2) : (512 - framePadding - labelHeight / 2);
+        const centerX = 256;
+        const centerY = textY;
+        
+        const currentDist = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+        const startDist = Math.sqrt((dragStartOffset.current.startX - centerX) ** 2 + (dragStartOffset.current.startY - centerY) ** 2);
+        
+        const scale = startDist > 0 ? (currentDist / startDist) : 1;
+        const newSize = Math.max(0.04, Math.min(0.24, dragStartOffset.current.startSize * scale));
+        setFrameSize(Math.round(newSize * 100) / 100);
     } else if (dragType.current && dragType.current.startsWith('resize-logo')) {
         const lw = contentSize * logoWidth;
         const lh = contentSize * logoHeight;
@@ -1868,7 +2145,7 @@ export default function App() {
       setTextCenterPosX(Math.round(valX * 1000) / 1000);
       setTextCenterPosY(Math.round(valY * 1000) / 1000);
     }
-  }, [isDraggingCanvas, qrMatrixInfo, logo, logoWidth, logoHeight, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, textCenterFont, logoPadding, getQRContentArea]);
+  }, [isDraggingCanvas, qrMatrixInfo, logo, logoWidth, logoHeight, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, textCenterFont, logoPadding, getQRContentArea, framePosition, frameRotation, frameSize, setFrameRotation, setFrameSize]);
 
   const stopCanvasDrag = useCallback(() => {
     setIsDraggingCanvas(false);
@@ -1897,7 +2174,7 @@ export default function App() {
     { id: 'shapes', label: 'Shapes', icon: Hexagon },
     { id: 'logo', label: 'Logo', icon: ImageIcon },
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
-    { id: 'text', label: 'Add Text', icon: Type },
+    { id: 'text', label: 'Text', icon: Type },
   ];
 
   // ── Get the frame CSS class for the preview wrapper ──
@@ -2196,6 +2473,7 @@ export default function App() {
                       className="preview-canvas" 
                       onMouseDown={handleCanvasInteraction}
                       onTouchStart={handleCanvasInteraction}
+                      onDoubleClick={handleCanvasDoubleClick}
                       style={{ 
                         willChange: 'transform',
                         cursor: isDraggingCanvas ? 'grabbing' : (logo?.image || textCenterEnabled ? 'move' : 'default'),
@@ -2265,45 +2543,11 @@ export default function App() {
 
             </section>
 
-             {/* ─── Shared Unified Expandable Toolbar (Centralized Bottom Layer) ─── */}
+            {/* ─── Shared Unified Expandable Toolbar (Centralized Bottom Layer) ─── */}
             {((activeTab === 'logo' && logo) || activeTab === 'text' || activeTab === 'color' || activeTab === 'shapes') && (
               <div className="logo-toolbar-container">
                 <div className="unified-toolbar-card">
-                  {activeTab === 'text' && (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '12px 16px',
-                      background: 'rgba(255, 255, 255, 0.02)',
-                      borderBottom: '1px solid var(--border-color)',
-                      borderTopLeftRadius: 'inherit',
-                      borderTopRightRadius: 'inherit'
-                    }}>
-                      <div className="seg-control" style={{ width: '100%', maxWidth: '320px', margin: '0 auto' }}>
-                        <button 
-                          className={`seg-btn ${textEditMode === 'center' ? 'active' : ''}`}
-                          onClick={() => {
-                            setTextEditMode('center');
-                            setCanvasSelection('text');
-                            if (textPopup) cancelEditing(); // Clear edit sub-drawer when switching modes
-                          }}
-                        >
-                          Center Text
-                        </button>
-                        <button 
-                          className={`seg-btn ${textEditMode === 'bottom' ? 'active' : ''}`}
-                          onClick={() => {
-                            setTextEditMode('bottom');
-                            setCanvasSelection(null);
-                            if (textPopup) cancelEditing(); // Clear edit sub-drawer when switching modes
-                          }}
-                        >
-                          Banner Text
-                        </button>
-                      </div>
-                    </div>
-                  )}
+
                   {(logoPopup || textPopup || colorPopup || shapePopup) ? (
                     <div className="toolbar-editing-view fade-in">
                       <div className="toolbar-editing-header">
@@ -2442,8 +2686,15 @@ export default function App() {
                           <Toggle label="Drop Shadow" checked={logoShadowEnabled} onChange={setLogoShadowEnabled} />
                           {logoShadowEnabled && (
                             <div className="fade-in" style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                               <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '-8px' }}>Shadow Color</div>
-                               <ColorPicker value={logoShadowColor} onChange={setLogoShadowColor} />
+                               <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                                 <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: '8px' }}>Shadow Color</div>
+                                 <div className="swatch-grid-mini">
+                                   <ColorPicker isSwatch={true} icon={Pipette} value={logoShadowColor} onChange={setLogoShadowColor} onOpenAdvanced={handleOpenAdv} />
+                                   {SWATCH_PRESETS.map(color => (
+                                     <div key={color} className={`swatch-item${logoShadowColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => setLogoShadowColor(color)} />
+                                   ))}
+                                 </div>
+                               </div>
                                <Slider label="Blur" value={logoShadowBlur} min={0} max={40} step={1} onChange={setLogoShadowBlur} />
                                <div style={{ display: 'flex', gap: '12px' }}>
                                  <div style={{ flex: 1 }}><Slider label="Offset X" value={logoShadowOffsetX} min={-20} max={20} step={1} onChange={setLogoShadowOffsetX} /></div>
@@ -2464,8 +2715,9 @@ export default function App() {
                               <button 
                                 onClick={() => {
                                   setLogoEraseColorEnabled(false);
+                                  setLogoEraseMode('none');
                                 }}
-                                className={`seg-btn ${!logoEraseColorEnabled ? 'active' : ''}`}
+                                className={`seg-btn ${logoEraseMode === 'none' || !logoEraseColorEnabled ? 'active' : ''}`}
                                 style={{ flex: '1', padding: '10px', fontSize: '12px' }}
                               >
                                 Keep BG
@@ -2474,8 +2726,9 @@ export default function App() {
                                 onClick={() => {
                                   setLogoEraseColorEnabled(true);
                                   setLogoEraseColor('#ffffff');
+                                  setLogoEraseMode('white');
                                 }}
-                                className={`seg-btn ${logoEraseColorEnabled && logoEraseColor.toLowerCase() === '#ffffff' ? 'active' : ''}`}
+                                className={`seg-btn ${logoEraseColorEnabled && logoEraseMode === 'white' ? 'active' : ''}`}
                                 style={{ flex: '1', padding: '10px', fontSize: '12px' }}
                               >
                                 Remove White
@@ -2484,8 +2737,9 @@ export default function App() {
                                 onClick={() => {
                                   setLogoEraseColorEnabled(true);
                                   setLogoEraseColor('#000000');
+                                  setLogoEraseMode('black');
                                 }}
-                                className={`seg-btn ${logoEraseColorEnabled && logoEraseColor.toLowerCase() === '#000000' ? 'active' : ''}`}
+                                className={`seg-btn ${logoEraseColorEnabled && logoEraseMode === 'black' ? 'active' : ''}`}
                                 style={{ flex: '1', padding: '10px', fontSize: '12px' }}
                               >
                                 Remove Black
@@ -2493,8 +2747,13 @@ export default function App() {
                               <button 
                                 onClick={() => {
                                   setLogoEraseColorEnabled(true);
+                                  setLogoEraseMode('custom');
+                                  // Default to red if color is white or black to show custom picker
+                                  if (logoEraseColor.toLowerCase() === '#ffffff' || logoEraseColor.toLowerCase() === '#000000') {
+                                    setLogoEraseColor('#ff0000');
+                                  }
                                 }}
-                                className={`seg-btn ${logoEraseColorEnabled && logoEraseColor.toLowerCase() !== '#ffffff' && logoEraseColor.toLowerCase() !== '#000000' ? 'active' : ''}`}
+                                className={`seg-btn ${logoEraseColorEnabled && logoEraseMode === 'custom' ? 'active' : ''}`}
                                 style={{ flex: '1', padding: '10px', fontSize: '12px' }}
                               >
                                 Custom Color
@@ -2504,10 +2763,15 @@ export default function App() {
 
                           {logoEraseColorEnabled && (
                             <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                              {logoEraseColor.toLowerCase() !== '#ffffff' && logoEraseColor.toLowerCase() !== '#000000' && (
+                              {logoEraseMode === 'custom' && (
                                 <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                                   <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: '8px' }}>Select Target Color</div>
-                                  <ColorPicker value={logoEraseColor} onChange={setLogoEraseColor} />
+                                  <div className="swatch-grid-mini">
+                                    <ColorPicker isSwatch={true} icon={Pipette} value={logoEraseColor} onChange={setLogoEraseColor} onOpenAdvanced={handleOpenAdv} />
+                                    {SWATCH_PRESETS.map(color => (
+                                      <div key={color} className={`swatch-item${logoEraseColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => setLogoEraseColor(color)} />
+                                    ))}
+                                  </div>
                                 </div>
                               )}
 
@@ -2571,94 +2835,112 @@ export default function App() {
                       {/* TEXT PROPERTIES */}
                       {textPopup === 'input' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          {/* 1. Center Text Section */}
-                          {textEditMode === 'center' && (
-                            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-primary)', display: 'inline-block' }} />
-                                  Enable Center Text
-                                </div>
-                                <Toggle
-                                  checked={textCenterEnabled}
-                                  onChange={(val) => {
-                                    setTextCenterEnabled(val);
-                                    if (val) {
-                                      setLogo(null);
-                                      setLogoWidth(0.18);
-                                      setLogoHeight(0.18);
-                                      setLogoRotation(0);
-                                      setTextCenterWidth(null);
-                                      setTextCenterHeight(null);
-                                    }
-                                  }}
-                                />
-                              </div>
-                              {textCenterEnabled && (
-                                <input 
-                                  type="text" 
-                                  maxLength={18} 
-                                  value={textCenterText} 
-                                  onChange={(e) => {
-                                    setTextCenterText(e.target.value);
-                                    setTextCenterWidth(null);
-                                    setTextCenterHeight(null);
-                                  }} 
-                                  placeholder="Type center text..." 
-                                  className="text-input-premium" 
-                                  style={{ width: '100%', borderColor: 'var(--accent-primary)' }} 
-                                />
-                              )}
-                            </div>
-                          )}
+                          <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <Toggle
+                              label={
+                                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: textEditMode === 'center' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--border-color)', display: 'inline-block', flexShrink: 0 }} />
+                                  Center Text
+                                </span>
+                              }
+                              checked={textCenterEnabled}
+                              onChange={(val) => {
+                                setTextCenterEnabled(val);
+                                if (val) {
+                                  setLogo(null);
+                                  setLogoWidth(0.18);
+                                  setLogoHeight(0.18);
+                                  setLogoRotation(0);
+                                  setTextCenterWidth(null);
+                                  setTextCenterHeight(null);
+                                  setTextEditMode('center');
+                                  setCanvasSelection('text');
+                                } else {
+                                  if (canvasSelection === 'text') setCanvasSelection(null);
+                                }
+                              }}
+                            />
+                            {textCenterEnabled && (
+                              <input 
+                                id="center-text-input"
+                                type="text" 
+                                maxLength={18} 
+                                value={textCenterText} 
+                                onChange={(e) => {
+                                  setTextCenterText(e.target.value);
+                                  setTextCenterWidth(null);
+                                  setTextCenterHeight(null);
+                                }} 
+                                onFocus={() => {
+                                  setTextEditMode('center');
+                                  setCanvasSelection('text');
+                                }}
+                                placeholder="Type center text..." 
+                                className="text-input-premium" 
+                                style={{ width: '100%', borderColor: textEditMode === 'center' ? 'var(--accent-primary)' : 'var(--border-color)' }} 
+                              />
+                            )}
+                          </div>
 
-                          {/* 2. Banner Text Section */}
-                          {textEditMode === 'bottom' && (
-                            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-primary)', display: 'inline-block' }} />
-                                  Enable Banner Text
-                                </div>
-                                <Toggle
-                                  checked={frameStyle !== 'none'}
-                                  onChange={(val) => {
-                                    setFrameStyle(val ? 'text-bottom' : 'none');
+                          <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <Toggle
+                              label={
+                                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: textEditMode === 'frame' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--border-color)', display: 'inline-block', flexShrink: 0 }} />
+                                  Frame Text
+                                </span>
+                              }
+                              checked={frameStyle !== 'none'}
+                              onChange={(val) => {
+                                setFrameStyle(val ? (frameStyle === 'none' ? 'text' : frameStyle) : 'none');
+                                if (val) {
+                                  setTextEditMode('frame');
+                                  setCanvasSelection('frame-text');
+                                } else {
+                                  if (canvasSelection === 'frame-text') setCanvasSelection(null);
+                                }
+                              }}
+                            />
+                            {frameStyle !== 'none' && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <input 
+                                  id="frame-text-input"
+                                  type="text" 
+                                  maxLength={50} 
+                                  value={frameText} 
+                                  onChange={(e) => setFrameText(e.target.value)} 
+                                  onFocus={() => {
+                                    setTextEditMode('frame');
+                                    setCanvasSelection('frame-text');
                                   }}
+                                  placeholder="Type frame text..." 
+                                  className="text-input-premium" 
+                                  style={{ width: '100%', borderColor: textEditMode === 'frame' ? 'var(--accent-primary)' : 'var(--border-color)' }} 
                                 />
-                              </div>
-                              {frameStyle !== 'none' && (
-                                <>
-                                  <input 
-                                    type="text" 
-                                    maxLength={50} 
-                                    value={frameText} 
-                                    onChange={(e) => setFrameText(e.target.value)} 
-                                    placeholder="Type banner text..." 
-                                    className="text-input-premium" 
-                                    style={{ width: '100%', borderColor: 'var(--accent-primary)' }} 
-                                  />
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
-                                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Banner Position</div>
-                                    <div className="seg-control">
-                                      <button 
-                                        className={`seg-btn ${framePosition === 'top' ? 'active' : ''}`}
-                                        onClick={() => setFramePosition('top')}
-                                      >
-                                        Top
-                                      </button>
-                                      <button 
-                                        className={`seg-btn ${framePosition === 'bottom' ? 'active' : ''}`}
-                                        onClick={() => setFramePosition('bottom')}
-                                      >
-                                        Bottom
-                                      </button>
-                                    </div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px' }}>
+                                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Position</span>
+                                  <div className="seg-control" style={{ width: '150px', height: '32px', display: 'flex' }}>
+                                    <button 
+                                      type="button"
+                                      className={`seg-btn ${framePosition === 'top' ? 'active' : ''}`} 
+                                      onClick={() => setFramePosition('top')}
+                                      style={{ flex: 1, padding: '2px 8px', fontSize: '11px' }}
+                                    >
+                                      Top
+                                    </button>
+                                    <button 
+                                      type="button"
+                                      className={`seg-btn ${framePosition === 'bottom' ? 'active' : ''}`} 
+                                      onClick={() => setFramePosition('bottom')}
+                                      style={{ flex: 1, padding: '2px 8px', fontSize: '11px' }}
+                                    >
+                                      Bottom
+                                    </button>
                                   </div>
-                                </>
-                              )}
-                            </div>
-                          )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                       
@@ -2668,10 +2950,10 @@ export default function App() {
                           <input type="file" ref={fontInputRef} style={{ display: 'none' }} accept=".ttf,.otf,.woff,.woff2" onChange={handleFontUpload} />
                           <div className="fonts-grid">
                             {customFonts.map(font => (
-                              <button key={font.id} onClick={() => { if (textEditMode === 'center') setTextCenterFont(font.id); else { setFrameFont(font.id); if (frameStyle === 'none') setFrameStyle('text-bottom'); } }} className={`font-btn ${(textEditMode === 'center' ? textCenterFont : frameFont) === font.id ? 'active' : ''}`} style={{ fontFamily: font.id }}>{font.label} ★</button>
+                              <button key={font.id} onClick={() => { if (textEditMode === 'center') setTextCenterFont(font.id); else { setFrameFont(font.id); if (frameStyle === 'none') setFrameStyle('text'); } }} className={`font-btn ${(textEditMode === 'center' ? textCenterFont : frameFont) === font.id ? 'active' : ''}`} style={{ fontFamily: font.id }}>{font.label} ★</button>
                             ))}
                             {FONT_OPTIONS.map(font => (
-                              <button key={font.id} onClick={() => { if (textEditMode === 'center') setTextCenterFont(font.id); else { setFrameFont(font.id); if (frameStyle === 'none') setFrameStyle('text-bottom'); } }} className={`font-btn ${(textEditMode === 'center' ? textCenterFont : frameFont) === font.id ? 'active' : ''}`} style={{ fontFamily: font.id }}>{font.label}</button>
+                              <button key={font.id} onClick={() => { if (textEditMode === 'center') setTextCenterFont(font.id); else { setFrameFont(font.id); if (frameStyle === 'none') setFrameStyle('text'); } }} className={`font-btn ${(textEditMode === 'center' ? textCenterFont : frameFont) === font.id ? 'active' : ''}`} style={{ fontFamily: font.id }}>{font.label}</button>
                             ))}
                           </div>
                         </div>
@@ -2745,7 +3027,7 @@ export default function App() {
                           {textEditMode === 'center' && (
                             <Toggle label="Enable Background" checked={logoBackground} onChange={setLogoBackground} />
                           )}
-                          {(textEditMode === 'bottom' || logoBackground) && (
+                          {(textEditMode === 'frame' || logoBackground) && (
                             <div className="fade-in" style={{ marginTop: textEditMode === 'center' ? '14px' : '0' }}>
                               <div className="font-scroll-container" style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '4px 0 8px 0', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', marginBottom: '14px' }}>
                                 {TEXT_SHAPES.map(shape => {
@@ -2795,12 +3077,13 @@ export default function App() {
                         <div className="fade-in">
                           <Slider 
                             label="Rotation" 
-                            value={textCenterRotation} 
+                            value={textEditMode === 'center' ? textCenterRotation : frameRotation} 
                             min={0} 
                             max={360} 
                             step={1} 
                             onChange={(val) => {
                               if (textEditMode === 'center') setTextCenterRotation(val);
+                              else setFrameRotation(val);
                             }} 
                           />
                         </div>
@@ -3092,9 +3375,9 @@ export default function App() {
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'crop')}><Crop size={18} /><span>Crop</span></button>
                         </>
                       )}
-                      {activeTab === 'text' && textEditMode === 'center' && (
+                      {activeTab === 'text' && (
                         <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Text</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Add Text</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'pos')}><Maximize size={18} /><span>Position</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'size')}><ChevronUp size={18} /><span>Size</span></button>
@@ -3102,17 +3385,6 @@ export default function App() {
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'shadow')}><Moon size={18} /><span>Shadow</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'rotate')}><RotateCw size={18} /><span>Rotate</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'bg')}><Hexagon size={18} /><span>Shape</span></button>
-                        </>
-                      )}
-                      {activeTab === 'text' && textEditMode === 'bottom' && (
-                        <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Text</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'size')}><ChevronUp size={18} /><span>Size</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'color')}><Palette size={18} /><span>Color</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'shadow')}><Moon size={18} /><span>Shadow</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'bg')}><Hexagon size={18} /><span>Shape</span></button>
                         </>
                       )}
@@ -3303,39 +3575,109 @@ export default function App() {
       {isPipetteActive && (
         <div 
           className="pipette-overlay fade-in"
+          onPointerDown={handlePipettePick}
+          onPointerMove={handlePointerMove}
           style={{
             position: 'fixed',
             inset: 0,
             zIndex: 10000,
-            pointerEvents: 'none',
+            pointerEvents: 'all',
+            touchAction: 'none',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(2px)'
+            justifyContent: 'flex-end',
+            paddingBottom: '40px',
+            background: 'rgba(0,0,0,0.08)',
+            cursor: 'crosshair'
           }}
         >
-          <div style={{ 
-            background: 'var(--bg-primary)', 
-            padding: '16px 24px', 
-            borderRadius: '20px', 
-            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+          <div 
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerMove={(e) => e.stopPropagation()}
+            style={{ 
+              background: 'var(--bg-primary)', 
+              padding: '6px 12px', 
+              borderRadius: '30px', 
+              boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              border: '1px solid var(--accent-primary)',
+              pointerEvents: 'all',
+              cursor: 'default'
+            }}
+          >
+            <Pipette size={14} className="text-accent" />
+            <span style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', userSelect: 'none' }}>Pick Color</span>
+            <div style={{ width: '1px', height: '12px', background: 'var(--border-color)', margin: '0 2px' }} />
+            <button 
+              onClick={() => { setIsPipetteActive(false); setHoverColor(null); setAdvPicker(prev => ({ ...prev, open: true })); }}
+              style={{ 
+                background: 'transparent', 
+                border: 'none', 
+                color: 'var(--text-secondary)', 
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2px',
+                borderRadius: '50%',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isPipetteActive && hoverColor && (
+        <div 
+          style={{
+            position: 'fixed',
+            left: `${hoverPos.x}px`,
+            top: `${hoverPos.y - 70}px`,
+            transform: 'translate(-50%, -50%)',
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            border: '4px solid white',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+            backgroundColor: hoverColor,
+            pointerEvents: 'none',
+            zIndex: 10001,
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            border: '1px solid var(--accent-primary)',
-            pointerEvents: 'all'
+            justifyContent: 'center',
+            transition: 'background-color 0.05s ease'
+          }}
+        >
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            border: '1px solid rgba(0,0,0,0.15)',
+            pointerEvents: 'none'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '-28px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            backdropFilter: 'blur(4px)',
+            color: 'white',
+            padding: '2px 8px',
+            borderRadius: '6px',
+            fontSize: '10px',
+            fontWeight: 'bold',
+            fontFamily: 'monospace',
+            letterSpacing: '0.5px',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+            whiteSpace: 'nowrap'
           }}>
-            <Pipette size={24} className="text-accent" />
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '15px' }}>Pipette Active</div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Tap on the preview to pick a color</div>
-            </div>
-            <button 
-              onClick={() => { setIsPipetteActive(false); setAdvPicker(prev => ({ ...prev, open: true })); }}
-              style={{ marginLeft: '12px', padding: '8px 16px', borderRadius: '10px', background: 'var(--bg-elevated)', border: 'none', color: 'var(--text-primary)', fontWeight: 600 }}
-            >Cancel</button>
+            {hoverColor.toUpperCase()}
           </div>
         </div>
       )}

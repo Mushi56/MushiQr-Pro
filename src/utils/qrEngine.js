@@ -231,7 +231,6 @@ export function renderQR(canvas, options) {
     quietZone = 2,
     frameStyle = FRAME_STYLES.NONE,
     frameText = 'SCAN ME',
-    framePosition = 'bottom',
     frameColor = '',
     textCenter = null,
     textCenterSize = 0.1,
@@ -267,6 +266,8 @@ export function renderQR(canvas, options) {
     logoEraseSmoothing = 10,
     logoTexture = 'none',
     logoCrop = 'none',
+    frameRotation = 0,
+    framePosition = 'bottom',
     textCenterRotation = 0,
     textCenterWidth = null,
     textCenterHeight = null,
@@ -299,12 +300,13 @@ export function renderQR(canvas, options) {
   // Adjust content area for frames to give proper breathing space
   if (frameStyle !== FRAME_STYLES.NONE) {
     const labelHeight = size * 0.14; // Unify label height
-    // Shrink and shift UP/DOWN to give more breathing space
     contentSize = size - (padding * 2) - labelHeight - (size * 0.06); 
     contentX = (size - contentSize) / 2;
     if (framePosition === 'top') {
+      // Shift down to leave space at the top
       contentY = padding + labelHeight + (size - padding * 2 - labelHeight - contentSize) / 2;
     } else {
+      // Shift up to leave space at the bottom
       contentY = padding + (size - padding * 2 - labelHeight - contentSize) / 2;
     }
   }
@@ -314,7 +316,6 @@ export function renderQR(canvas, options) {
     drawFrame(ctx, size, padding, {
       frameStyle,
       frameText,
-      framePosition,
       frameColor: frameColor || (gradientEnabled ? gradientColor1 : qrColor),
       frameFont,
       frameSize,
@@ -324,6 +325,10 @@ export function renderQR(canvas, options) {
       frameShadowEnabled,
       frameShadowBlur,
       frameShadowColor,
+      showHandle: options.showHandle,
+      selectedType: options.selectedType,
+      frameRotation: options.frameRotation,
+      framePosition: options.framePosition,
       bgColor,
       bgTransparent
     });
@@ -1164,13 +1169,7 @@ function drawCenterText(ctx, text, canvasSize, options) {
   ctx.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
   const metrics = ctx.measureText(text);
   const textWidth = metrics.width;
-  
-  // Use a stable reference string "Hg" to measure the font's standard visual bounds.
-  // This prevents the text baseline and shape height from jumping when the user types different characters.
-  const refMetrics = ctx.measureText("Hg");
-  const refAscent = refMetrics.actualBoundingBoxAscent !== undefined ? refMetrics.actualBoundingBoxAscent : fontSize * 0.7;
-  const refDescent = refMetrics.actualBoundingBoxDescent !== undefined ? refMetrics.actualBoundingBoxDescent : fontSize * 0.15;
-  const textHeight = refAscent + refDescent; 
+  const textHeight = fontSize * 0.8; 
 
   const paddedW = textCenterWidth ? (textCenterWidth * contentSize) : (textWidth + (logoPadding || 10) * 2);
   const paddedH = textCenterHeight ? (textCenterHeight * contentSize) : (textHeight + (logoPadding || 10) * 2);
@@ -1202,11 +1201,8 @@ function drawCenterText(ctx, text, canvasSize, options) {
   // 2. Setup Text Properties
   ctx.save();
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic'; // Use alphabetic baseline for pixel-perfect vertical centering
+  ctx.textBaseline = 'middle';
   ctx.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
-
-  // Visual text bounds based on stable reference measurements
-  const textY = centerY + (refAscent - refDescent) / 2;
 
   // 4. Draw Stroke (behind fill, no shadow)
   if (textCenterStrokeEnabled) {
@@ -1214,7 +1210,7 @@ function drawCenterText(ctx, text, canvasSize, options) {
     ctx.lineWidth = fontSize * (textCenterStrokeWidth / 100);
     ctx.lineJoin = 'round';
     ctx.miterLimit = 2;
-    ctx.strokeText(text, centerX, textY);
+    ctx.strokeText(text, centerX, centerY + fontSize * 0.045);
   }
 
   // 5. Apply Shadow (to fill only)
@@ -1227,7 +1223,7 @@ function drawCenterText(ctx, text, canvasSize, options) {
 
   // 6. Draw Fill (on top of stroke)
   ctx.fillStyle = textCenterColor || '#000000';
-  ctx.fillText(text, centerX, textY);
+  ctx.fillText(text, centerX, centerY + fontSize * 0.045);
   ctx.restore();
   ctx.restore();
 
@@ -1358,9 +1354,12 @@ function drawFrame(ctx, size, padding, options) {
     frameShadowEnabled,
     frameShadowBlur,
     frameShadowColor,
+    showHandle = false,
+    selectedType = null,
+    frameRotation = 0,
+    framePosition = 'bottom',
     bgColor,
-    bgTransparent,
-    framePosition = 'bottom'
+    bgTransparent
   } = options;
 
   const innerSize = size - padding * 2;
@@ -1382,12 +1381,12 @@ function drawFrame(ctx, size, padding, options) {
   const labelW = innerSize - size * 0.1;
   const labelX = padding + size * 0.05;
 
-  if (frameStyle !== 'text-bottom') {
+  if (frameStyle !== 'text' && frameStyle !== 'text-bottom' && frameStyle !== 'text-top') {
     drawBackgroundShape(ctx, frameStyle, labelX, labelY, labelW, labelHeight, frameColor, size * 0.005);
   }
 
   // Text
-  if (frameStyle === 'text-bottom') {
+  if (frameStyle === 'text' || frameStyle === 'text-bottom' || frameStyle === 'text-top') {
     ctx.fillStyle = frameColor;
   } else {
     ctx.fillStyle = bgTransparent ? '#ffffff' : bgColor;
@@ -1403,17 +1402,85 @@ function drawFrame(ctx, size, padding, options) {
     ctx.shadowOffsetY = 2; 
   }
   
+  // Apply rotation
+  ctx.save();
+  ctx.translate(size / 2, textY);
+  ctx.rotate(((frameRotation || 0) * Math.PI) / 180);
+  ctx.translate(-size / 2, -textY);
+
   if (frameStrokeEnabled) { 
     ctx.strokeStyle = frameStrokeColor; 
     ctx.lineWidth = frameStrokeWidth; 
-    ctx.strokeText(frameText, size / 2, textY); 
+    ctx.strokeText(frameText, size / 2, textY + (size * frameSize) * 0.045); 
   }
   
-  ctx.fillText(frameText, size / 2, textY);
+  ctx.fillText(frameText, size / 2, textY + (size * frameSize) * 0.045);
+  ctx.restore();
+
   ctx.shadowColor = 'transparent'; 
   ctx.shadowBlur = 0; 
   ctx.shadowOffsetX = 0; 
   ctx.shadowOffsetY = 0;
+
+  // Draw Transformation Frame (5-point system) if requested
+  if (showHandle && selectedType === 'frame-text') {
+    ctx.save();
+    
+    // Draw Center Alignment Guide Lines (horizontal/vertical)
+    ctx.strokeStyle = '#007AFF';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    
+    ctx.beginPath();
+    ctx.moveTo(size / 2, padding);
+    ctx.lineTo(size / 2, size - padding);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(padding, textY);
+    ctx.lineTo(size - padding, textY);
+    ctx.stroke();
+    ctx.restore();
+
+    const tw = ctx.measureText(frameText).width + size * 0.04;
+    const th = (size * frameSize) * 1.2;
+    const tx = size / 2 - tw / 2;
+    const ty = textY - th / 2;
+
+    ctx.save();
+    ctx.translate(size / 2, textY);
+    ctx.rotate(((frameRotation || 0) * Math.PI) / 180);
+    ctx.translate(-size / 2, -textY);
+
+    ctx.strokeStyle = '#007AFF'; 
+    ctx.lineWidth = size * 0.008; 
+    ctx.strokeRect(tx, ty, tw, th);
+    
+    const hSize = size * 0.02;
+    const drawH = (hx, hy, isCircle = false, color = '#ffffff', stroke = '#007AFF') => {
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = size * 0.005;
+        if (isCircle) {
+            ctx.arc(hx, hy, hSize/2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        } else {
+            ctx.fillRect(hx - hSize/2, hy - hSize/2, hSize, hSize);
+            ctx.strokeRect(hx - hSize/2, hy - hSize/2, hSize, hSize);
+        }
+    };
+
+    // Rotate handle at bottom-left
+    drawH(tx - 20 * (size / 512), ty + th + 20 * (size / 512), true, '#007AFF', '#ffffff');
+    // Resize bottom-right
+    drawH(tx + tw, ty + th, false);
+    // Delete top-right
+    drawH(tx + tw, ty, false, '#FF3B30', '#ffffff');
+    
+    ctx.restore();
+  }
   
   ctx.restore();
 }

@@ -12,11 +12,9 @@ export default function ColorPicker({ label, value, onChange, onOpenAdvanced, cl
   const handlePreviewClick = () => {
     if (disabled) return;
     
-    // Only use advanced picker on mobile (screen width < 768px)
-    if (window.innerWidth < 768 && onOpenAdvanced) {
+    if (onOpenAdvanced) {
       onOpenAdvanced(safeColor, onChange);
     } else {
-      // On desktop, trigger the native color input
       nativeInputRef.current?.click();
     }
   };

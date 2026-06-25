@@ -143,32 +143,11 @@ export default function AdvancedColorPicker({ isOpen, initialColor, onConfirm, o
 
   const [isPicking, setIsPicking] = useState(false);
 
-  const openEyeDropper = async () => {
-    if (!window.EyeDropper) {
-      if (onEnterPipetteMode) {
-        onEnterPipetteMode();
-      } else {
-        alert("Your browser does not support the EyeDropper API. Please use a modern browser like Chrome or Edge.");
-      }
-      return;
-    }
-    
-    // Hide the UI so the user can see what's behind
-    setIsPicking(true);
-    
-    const eyeDropper = new window.EyeDropper();
-    try {
-      const result = await eyeDropper.open();
-      const hex = result.sRGBHex;
-      setTempColor(hex);
-      const rgb = hexToRgb(hex);
-      stateRef.current = rgbToHsv(rgb.r, rgb.g, rgb.b);
-      if (onChange) onChange(hex);
-    } catch (e) {
-      console.log("EyeDropper canceled or failed", e);
-    } finally {
-      // Re-show the UI
-      setIsPicking(false);
+  const openEyeDropper = () => {
+    if (onEnterPipetteMode) {
+      onEnterPipetteMode();
+    } else {
+      alert("Pipette mode is not supported in this context.");
     }
   };
 
