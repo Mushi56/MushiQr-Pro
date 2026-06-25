@@ -236,24 +236,10 @@ export default function HistoryPage({ onLoadQR, onNavigate }) {
               <button
                 key={tab}
                 onClick={() => setActiveFilter(tab)}
-                style={{
-                  flex: 1,
-                  padding: '8px 12px',
-                  borderRadius: '20px',
-                  border: isActive ? '1px solid #D60036' : '1px solid var(--border-color)',
-                  background: isActive ? '#D60036' : 'var(--bg-elevated)',
-                  color: isActive ? '#fff' : 'var(--text-primary)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px'
-                }}
+                className={`tab-pill-premium ${isActive ? 'active' : ''}`}
+                style={{ flex: 1, justifyContent: 'center' }}
               >
-                {tab} {count > 0 && <span style={{ opacity: 0.8 }}>({count})</span>}
+                {tab} {count > 0 && <span style={{ opacity: 0.8, fontSize: '11px', fontWeight: 700 }}>({count})</span>}
               </button>
             );
           })}
@@ -261,30 +247,21 @@ export default function HistoryPage({ onLoadQR, onNavigate }) {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px var(--main-padding-x) 100px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '8px var(--main-padding-x) 100px' }} className="fade-in-up">
         {history.length === 0 ? (
-          <div style={{
-            height: '100%', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-            gap: '20px', color: 'var(--text-muted)'
-          }}>
-             <div style={{
-              width: '120px', height: '120px', borderRadius: '40px',
-              background: 'var(--bg-elevated)', display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.05)'
-            }}>
-              <HistoryIcon size={60} strokeWidth={1} color="var(--text-tertiary)" />
+          <div className="premium-empty-state">
+             <div className="premium-empty-icon-wrapper">
+              <Clock size={40} color="var(--accent-primary)" />
             </div>
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>No history yet</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px 0', fontFamily: 'var(--font-display)' }}>No History Yet</h3>
               <p style={{ fontSize: '14px', maxWidth: '240px', lineHeight: 1.5 }}>
-                Your scans and created QR codes will appear here.
+                Your scanned and created QR codes will appear here automatically.
               </p>
             </div>
           </div>
         ) : filteredHistory.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+          <div className="premium-empty-state" style={{ padding: '40px 0' }}>
             No matching items found.
           </div>
         ) : (
@@ -296,8 +273,8 @@ export default function HistoryPage({ onLoadQR, onNavigate }) {
               return (
                 <div key={group}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', padding: '0 4px' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{group}</h3>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{items.length} items</span>
+                    <h3 style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', margin: 0, color: 'var(--text-secondary)' }}>{group}</h3>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)' }}>{items.length} items</span>
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

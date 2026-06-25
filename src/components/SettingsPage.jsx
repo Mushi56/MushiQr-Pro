@@ -1,4 +1,4 @@
-import { Moon, Sun, Info, Shield, FileText, ChevronRight } from 'lucide-react';
+import { Moon, Sun, Info, Shield, FileText, ChevronRight, Crown } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import AppIcon from './AppIcon';
 
@@ -52,7 +52,7 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
   ];
 
   return (
-    <div className="settings-page fade-in" style={{
+    <div className="settings-page fade-in-up" style={{
       width: '100%',
       height: '100%',
       display: 'flex',
@@ -69,7 +69,7 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
         background: 'var(--bg-primary)',
         zIndex: 10
       }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>Settings</h2>
+        <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Settings</h2>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
           App preferences and information
         </p>
@@ -77,50 +77,58 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
 
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px var(--main-padding-x) 100px' }}>
-        <div style={{
-          background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-color)',
+        {/* Pro Banner */}
+        <div className="hero-card-premium" style={{
+          padding: '20px',
           borderRadius: '24px',
-          overflow: 'hidden',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
+          color: '#fff',
+          marginBottom: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
         }}>
-          {menuItems.map((item, index) => (
-            <div key={item.id}>
-              <div 
-                onClick={item.onClick}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '16px 20px',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                <div style={{
-                  width: '36px', height: '36px', borderRadius: '10px',
-                  background: 'rgba(214, 0, 54, 0.08)', color: '#D60036',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginRight: '16px'
-                }}>
-                  {item.icon}
-                </div>
-                <div style={{ flex: 1, fontSize: '15px', fontWeight: 600 }}>
-                  {item.label}
-                </div>
-                {item.value && (
-                  <div style={{ marginRight: '12px', fontSize: '14px' }}>
-                    {item.value}
+          <div className="premium-badge">
+            <Crown size={12} fill="#FFD700" strokeWidth={0} /> PRO ACCOUNT ACTIVE
+          </div>
+          <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Mushi QR Pro Member</h3>
+          <p style={{ fontSize: '12px', opacity: 0.85, margin: 0, lineHeight: 1.4 }}>
+            Unrestricted access to custom shapes, gradients, vector SVG exports, and high-fidelity textures.
+          </p>
+        </div>
+
+        <div className="settings-group-container">
+          {menuItems.map((item, index) => {
+            // Pick a background gradient based on the setting ID
+            let gradient = 'linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)';
+            if (item.id === 'about') gradient = 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)';
+            else if (item.id === 'privacy') gradient = 'linear-gradient(135deg, #0d9488 0%, #10b981 100%)';
+            else if (item.id === 'terms') gradient = 'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)';
+
+            return (
+              <div key={item.id}>
+                <div 
+                  onClick={item.onClick}
+                  className="settings-row-item"
+                >
+                  <div className="icon-container-gradient" style={{ background: gradient }}>
+                    {item.icon}
                   </div>
+                  <div style={{ flex: 1, fontSize: '15px', fontWeight: 600 }}>
+                    {item.label}
+                  </div>
+                  {item.value && (
+                    <div style={{ marginRight: '12px', fontSize: '14px' }}>
+                      {item.value}
+                    </div>
+                  )}
+                  <ChevronRight size={18} color="var(--text-muted)" />
+                </div>
+                {index < menuItems.length - 1 && (
+                  <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '72px' }} />
                 )}
-                <ChevronRight size={18} color="var(--text-muted)" />
               </div>
-              {index < menuItems.length - 1 && (
-                <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '72px' }} />
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '32px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>

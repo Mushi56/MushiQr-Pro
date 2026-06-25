@@ -84,20 +84,16 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
       position: 'relative',
       paddingTop: 'env(safe-area-inset-top)'
     }}>
-      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up">
         {/* Hero Card */}
         <div style={{ padding: '0 var(--main-padding-x)', marginTop: '24px' }}>
-          <div style={{ 
-            background: 'linear-gradient(135deg, #8B0020 0%, #D60036 45%, #FF2D5E 100%)',
-            borderRadius: '12px',
-            padding: '20px 18px',
+          <div className="hero-card-premium" style={{ 
+            borderRadius: '24px',
+            padding: '24px 20px',
             color: '#fff',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 10px 32px rgba(214, 0, 54, 0.35)',
             gap: '12px'
           }}>
             {/* Decorative circles for depth */}
@@ -112,17 +108,23 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
               background: 'rgba(255,255,255,0.06)', pointerEvents: 'none'
             }} />
 
-            <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0, justifyContent: 'center' }}>
+            <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', minWidth: 0, justifyContent: 'center' }}>
+                <div>
+                  <span className="premium-badge" style={{ marginBottom: '8px' }}>
+                    <Crown size={12} fill="#FFD700" strokeWidth={0} /> PRO ENABLED
+                  </span>
+                </div>
                 <h2 style={{ 
-                  fontSize: '24px', fontWeight: 800, 
+                  fontSize: '26px', fontWeight: 800, 
                   margin: 0, color: '#fff',
-                  lineHeight: 1.1, whiteSpace: 'nowrap'
+                  lineHeight: 1.1, whiteSpace: 'nowrap',
+                  fontFamily: 'var(--font-display)'
                 }}>Create QR Code</h2>
                 <p style={{ 
                   fontSize: '13px', margin: 0, 
-                  color: 'rgba(255,255,255,0.75)',
+                  color: 'rgba(255,255,255,0.8)',
                   fontWeight: 500, whiteSpace: 'nowrap'
-                }}>Fast, Simple & Beautiful</p>
+                }}>Fast, Custom & Beautiful</p>
 
               <button 
                 onClick={() => onNavigate('generator')}
@@ -130,23 +132,20 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
                   backgroundColor: '#fff',
                   color: '#D60036',
                   border: 'none',
-                  borderRadius: '10px',
-                  padding: '10px 18px',
+                  borderRadius: '12px',
+                  padding: '11px 20px',
                   fontSize: '14px',
                   fontWeight: 700,
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  transition: 'transform 0.2s',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   alignSelf: 'flex-start',
                   whiteSpace: 'nowrap',
                   zIndex: 1,
-                  marginTop: '2px'
+                  marginTop: '6px'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <Plus size={16} /> Create New
               </button>
@@ -155,72 +154,40 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
             <div style={{ 
               background: 'rgba(255,255,255,0.15)',
               backdropFilter: 'blur(8px)',
-              padding: '16px',
-              borderRadius: '16px',
+              padding: '18px',
+              borderRadius: '20px',
               border: '1px solid rgba(255,255,255,0.2)',
               flexShrink: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              zIndex: 1
+              zIndex: 1,
+              boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
             }}>
-              <QrCode size={60} color="#fff" />
+              <QrCode size={64} color="#fff" />
             </div>
           </div>
         </div>
 
         {/* Quick Create Grid */}
         <div style={{ padding: '24px var(--main-padding-x)' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--text-primary)' }}>Quick Create</h3>
+          <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Quick Create</h3>
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(5, 1fr)', 
-            gap: '10px' 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', 
+            gap: '12px' 
           }}>
             {quickOptions.map(option => (
               <button
                 key={option.id}
                 onClick={() => onQuickCreate(option.id)}
-                style={{
-                  aspectRatio: '1 / 1',
-                  backgroundColor: 'var(--bg-elevated)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '8px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  cursor: 'pointer',
-                  boxShadow: 'var(--shadow-sm)',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  color: 'var(--text-secondary)',
-                  width: '100%'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.borderColor = 'var(--accent-primary)';
-                  e.currentTarget.style.color = 'var(--text-primary)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.borderColor = 'var(--border-color)';
-                  e.currentTarget.style.color = 'var(--text-secondary)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-                }}
+                className="quick-option-card"
+                style={{ width: '100%' }}
               >
-                <div style={{ 
-                  color: 'var(--accent-primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  {React.cloneElement(option.icon, { size: 22, strokeWidth: 1.5 })}
+                <div className="quick-option-icon-wrapper">
+                  {React.cloneElement(option.icon, { size: 20, strokeWidth: 1.8 })}
                 </div>
-                <span style={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.2px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.3px', marginTop: '2px' }}>
                   {option.label}
                 </span>
               </button>

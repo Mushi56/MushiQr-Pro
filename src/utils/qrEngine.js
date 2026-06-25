@@ -265,6 +265,8 @@ export function renderQR(canvas, options) {
     logoTexture = 'none',
     logoCrop = 'none',
     textCenterRotation = 0,
+    textCenterWidth = null,
+    textCenterHeight = null,
     qrTextureEnabled = false,
     qrTexture = null,
     qrTextureSyncEyes = true
@@ -453,6 +455,8 @@ export function renderQR(canvas, options) {
       textCenterPosX,
       textCenterPosY,
       textCenterRotation,
+      textCenterWidth,
+      textCenterHeight,
       logoPadding,
       logoBackground,
       logoBgColor,
@@ -462,7 +466,8 @@ export function renderQR(canvas, options) {
       contentSize,
       moduleCount,
       quietZone,
-      showHandle: options.showHandle
+      showHandle: options.showHandle,
+      selectedType: options.selectedType
     });
   }
 
@@ -1120,6 +1125,8 @@ function drawCenterText(ctx, text, canvasSize, options) {
     textCenterPosX = 0.5,
     textCenterPosY = 0.5,
     textCenterRotation = 0,
+    textCenterWidth = null,
+    textCenterHeight = null,
     logoPadding,
     logoBackground,
     logoBgColor,
@@ -1137,8 +1144,8 @@ function drawCenterText(ctx, text, canvasSize, options) {
   const textWidth = metrics.width;
   const textHeight = fontSize * 0.8; 
 
-  const paddedW = textWidth + (logoPadding || 10) * 2;
-  const paddedH = textHeight + (logoPadding || 10) * 2;
+  const paddedW = textCenterWidth ? (textCenterWidth * contentSize) : (textWidth + (logoPadding || 10) * 2);
+  const paddedH = textCenterHeight ? (textCenterHeight * contentSize) : (textHeight + (logoPadding || 10) * 2);
 
   const rawX = contentX + (contentSize - paddedW) * textCenterPosX;
   const rawY = contentY + (contentSize - paddedH) * textCenterPosY;
@@ -1294,6 +1301,12 @@ function drawCenterText(ctx, text, canvasSize, options) {
     ctx.lineTo(logoX + paddedW - 6, logoY + 6);
     ctx.stroke();
 
+    // 4. Right (Stretch X)
+    drawH(logoX + paddedW, logoY + paddedH/2);
+
+    // 5. Bottom (Stretch Y)
+    drawH(logoX + paddedW/2, logoY + paddedH);
+
     ctx.restore();
   }
 }
@@ -1331,10 +1344,16 @@ function drawFrame(ctx, size, padding, options) {
   const labelW = innerSize - size * 0.1;
   const labelX = padding + size * 0.05;
 
-  drawBackgroundShape(ctx, frameStyle, labelX, labelY, labelW, labelHeight, frameColor, size * 0.005);
+  if (frameStyle !== 'text-bottom') {
+    drawBackgroundShape(ctx, frameStyle, labelX, labelY, labelW, labelHeight, frameColor, size * 0.005);
+  }
 
   // Text
-  ctx.fillStyle = bgTransparent ? '#ffffff' : bgColor;
+  if (frameStyle === 'text-bottom') {
+    ctx.fillStyle = frameColor;
+  } else {
+    ctx.fillStyle = bgTransparent ? '#ffffff' : bgColor;
+  }
   ctx.font = `bold ${size * frameSize}px ${frameFont}, Outfit, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -1466,7 +1485,7 @@ function drawRoundedRectPath(ctx, x, y, w, h, r) {
 /**
  * Constrain an element to stay within the QR content area and avoid the 3 finder patterns (eyes)
  */
-function constrainToSafeZone(x, y, w, h, contentX, contentY, contentSize, moduleCount, quietZone) {
+export function constrainToSafeZone(x, y, w, h, contentX, contentY, contentSize, moduleCount, quietZone) {
   const totalModules = moduleCount + quietZone * 2;
   const cellSize = contentSize / totalModules;
   // Eye region is 7x7 modules. We add 1 module buffer for safe scanning.

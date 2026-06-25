@@ -57,7 +57,7 @@ import LogoPresets from './components/LogoPresets';
 import QRTypeSelector from './components/QRTypeSelector';
 import QRDataInput from './components/QRDataInput';
 import { DotStyleSelector, EyeStyleSelector } from './components/StyleSelectors';
-import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData } from './utils/qrEngine';
+import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData, constrainToSafeZone } from './utils/qrEngine';
 import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from './utils/exportUtils';
 import { saveToHistory, getSaved, saveToSaved, getPreferences, savePreferences } from './utils/storage';
 import QRScanner from './components/QRScanner';
@@ -523,6 +523,8 @@ export default function App() {
   const [textCenterPosX, setTextCenterPosX] = useState(0.5);
   const [textCenterPosY, setTextCenterPosY] = useState(0.5);
   const [textCenterRotation, setTextCenterRotation] = useState(0);
+  const [textCenterWidth, setTextCenterWidth] = useState(null); // null means auto
+  const [textCenterHeight, setTextCenterHeight] = useState(null); // null means auto
   const [colorPopup, setColorPopup] = useState(null);
   const [shapePopup, setShapePopup] = useState(null);
 
@@ -556,10 +558,19 @@ export default function App() {
     if (!preEditSnapshot.current) {
       preEditSnapshot.current = getSnapshot();
     }
-    if (type === 'logo') setLogoPopup(val);
-    else if (type === 'text') setTextPopup(val);
-    else if (type === 'color') setColorPopup(val);
-    else if (type === 'shapes') setShapePopup(val);
+    if (type === 'logo') {
+      setLogoPopup(val);
+      setCanvasSelection('logo');
+    } else if (type === 'text') {
+      setTextPopup(val);
+      setCanvasSelection('text');
+    } else if (type === 'color') {
+      setColorPopup(val);
+      setCanvasSelection(null);
+    } else if (type === 'shapes') {
+      setShapePopup(val);
+      setCanvasSelection(null);
+    }
   };
 
   const cancelEditing = () => {
@@ -570,6 +581,7 @@ export default function App() {
     setTextPopup(null);
     setColorPopup(null);
     setShapePopup(null);
+    setCanvasSelection(null);
     preEditSnapshot.current = null;
   };
 
@@ -578,6 +590,7 @@ export default function App() {
     setTextPopup(null);
     setColorPopup(null);
     setShapePopup(null);
+    setCanvasSelection(null);
     preEditSnapshot.current = null;
     saveSnapshot(); // Save the final result to history
   };
@@ -589,6 +602,15 @@ export default function App() {
       }
       setTabHistory(prev => [...prev, activeTab]);
       setActiveTab(tabId);
+
+      // Manage canvas selections for interactive outlines/handles
+      if (tabId === 'text') {
+        setCanvasSelection('text');
+      } else if (tabId === 'logo') {
+        setCanvasSelection('logo');
+      } else {
+        setCanvasSelection(null);
+      }
     }
   };
 
@@ -598,12 +620,16 @@ export default function App() {
       if (logoPopup || textPopup || colorPopup || shapePopup) {
         applyEditing();
       }
+      setCanvasSelection(null);
       setPreviousPage(activePage);
       setActivePage(page);
       // Clear tab history when starting a new session or returning home
       if (page === 'generator' || page === 'home') {
         setTabHistory([]);
-        if (page === 'generator') setActiveTab('content');
+        if (page === 'generator') {
+          setActiveTab('content');
+          setCanvasSelection(null);
+        }
       }
     }
   };
@@ -626,7 +652,8 @@ export default function App() {
       textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
       textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
       textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
-      textCenterPosX, textCenterPosY, textCenterRotation
+      textCenterPosX, textCenterPosY, textCenterRotation,
+      textCenterWidth, textCenterHeight
     };
   }, [
     qrType, qrData, qrColor, bgColor, bgTransparent, eyeColor, eyeOuterColor, syncEyes,
@@ -643,7 +670,7 @@ export default function App() {
     textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
     textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
     textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
-    textCenterPosX, textCenterPosY, textCenterRotation
+    textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight
   ]);
 
   const saveSnapshot = useCallback(() => {
@@ -760,6 +787,8 @@ export default function App() {
     if (s.textCenterPosX !== undefined) setTextCenterPosX(s.textCenterPosX);
     if (s.textCenterPosY !== undefined) setTextCenterPosY(s.textCenterPosY);
     if (s.textCenterRotation !== undefined) setTextCenterRotation(s.textCenterRotation);
+    if (s.textCenterWidth !== undefined) setTextCenterWidth(s.textCenterWidth);
+    if (s.textCenterHeight !== undefined) setTextCenterHeight(s.textCenterHeight);
     
     setTimeout(() => { isInternalUpdate.current = false; }, 50);
   };
@@ -1148,6 +1177,8 @@ export default function App() {
     setLogoPosY(0.5);
     setTextCenterPosX(0.5);
     setTextCenterPosY(0.5);
+    setTextCenterWidth(null);
+    setTextCenterHeight(null);
 
     // Frame
     setFrameStyle('none');
@@ -1219,6 +1250,7 @@ export default function App() {
         textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
         textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
         textCenterPosX, textCenterPosY, textCenterRotation,
+        textCenterWidth, textCenterHeight,
         logoPosX, logoPosY,
         logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
         logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoTexture, logoCrop,
@@ -1251,7 +1283,7 @@ export default function App() {
 
     textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
     textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
-    textCenterPosX, textCenterPosY, logoPosX, logoPosY,
+    textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight, logoPosX, logoPosY,
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoTexture, logoCrop, 
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
@@ -1295,10 +1327,7 @@ export default function App() {
       preEditSnapshot.current = getSnapshot();
     }
     
-    // Clear selection if not pipette
-    if (!isPipetteActive) {
-      setCanvasSelection(null);
-    }
+    // Selection will be cleared at the end of this function if no hit is registered
 
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -1340,8 +1369,12 @@ export default function App() {
     if (logo?.image) {
       const lw = contentSize * logoWidth;
       const lh = contentSize * logoHeight;
-      const lx = contentX + (contentSize - lw) * logoPosX;
-      const ly = contentY + (contentSize - lh) * logoPosY;
+      const rawLx = contentX + (contentSize - lw) * logoPosX;
+      const rawLy = contentY + (contentSize - lh) * logoPosY;
+      const moduleCount = qrMatrixInfo?.width || 21;
+      const safePos = constrainToSafeZone(rawLx, rawLy, lw, lh, contentX, contentY, contentSize, moduleCount, 2);
+      const lx = safePos.x;
+      const ly = safePos.y;
       
       const centerX = lx + lw / 2;
       const centerY = ly + lh / 2;
@@ -1426,11 +1459,15 @@ export default function App() {
       const fontSize = contentSize * textCenterSize;
       tempCtx.current.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
       const metrics = tempCtx.current.measureText(textCenterText);
-      const tw = metrics.width + (logoPadding || 10) * 2;
-      const th = (fontSize * 0.8) + (logoPadding || 10) * 2;
+      const tw = textCenterWidth ? (textCenterWidth * contentSize) : (metrics.width + (logoPadding || 10) * 2);
+      const th = textCenterHeight ? (textCenterHeight * contentSize) : ((fontSize * 0.8) + (logoPadding || 10) * 2);
       
-      const tx = contentX + (contentSize - tw) * textCenterPosX;
-      const ty = contentY + (contentSize - th) * textCenterPosY;
+      const rawTx = contentX + (contentSize - tw) * textCenterPosX;
+      const rawTy = contentY + (contentSize - th) * textCenterPosY;
+      const moduleCount = qrMatrixInfo?.width || 21;
+      const safePos = constrainToSafeZone(rawTx, rawTy, tw, th, contentX, contentY, contentSize, moduleCount, 2);
+      const tx = safePos.x;
+      const ty = safePos.y;
       
       const centerX = tx + tw / 2;
       const centerY = ty + th / 2;
@@ -1489,6 +1526,8 @@ export default function App() {
         };
         if (checkRotateText(tx - 20, ty + th + 20)) return;
         if (checkH(tx + tw, ty + th, 'resize-text-br')) return;
+        if (checkH(tx + tw, ty + th/2, 'resize-text-r')) return;
+        if (checkH(tx + tw/2, ty + th, 'resize-text-b')) return;
         
         if (checkH(tx + tw, ty, 'delete-text')) {
           setTextCenterEnabled(false);
@@ -1509,7 +1548,12 @@ export default function App() {
         return;
       }
     }
-  }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, canvasSelection, getSnapshot]);
+
+    // Clear selection if we clicked outside any active elements
+    if (!isPipetteActive) {
+      setCanvasSelection(null);
+    }
+  }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, canvasSelection, getSnapshot]);
 
   const handleCanvasMove = useCallback((e) => {
     if (!isDraggingCanvas || !canvasRef.current) return;
@@ -1527,8 +1571,12 @@ export default function App() {
     if (dragType.current === 'rotate-logo') {
         const lw = contentSize * logoWidth;
         const lh = contentSize * logoHeight;
-        const lx = contentX + (contentSize - lw) * logoPosX;
-        const ly = contentY + (contentSize - lh) * logoPosY;
+        const rawLx = contentX + (contentSize - lw) * logoPosX;
+        const rawLy = contentY + (contentSize - lh) * logoPosY;
+        const moduleCount = qrMatrixInfo?.width || 21;
+        const safePos = constrainToSafeZone(rawLx, rawLy, lw, lh, contentX, contentY, contentSize, moduleCount, 2);
+        const lx = safePos.x;
+        const ly = safePos.y;
         const centerX = lx + lw / 2;
         const centerY = ly + lh / 2;
         
@@ -1550,10 +1598,15 @@ export default function App() {
         const fontSize = contentSize * textCenterSize;
         tempCtx.current.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
         const metrics = tempCtx.current.measureText(textCenterText);
-        const tw = metrics.width + (logoPadding || 10) * 2;
-        const th = (fontSize * 0.8) + (logoPadding || 10) * 2;
-        const tx = contentX + (contentSize - tw) * textCenterPosX;
-        const ty = contentY + (contentSize - th) * textCenterPosY;
+        const tw = textCenterWidth ? (textCenterWidth * contentSize) : (metrics.width + (logoPadding || 10) * 2);
+        const th = textCenterHeight ? (textCenterHeight * contentSize) : ((fontSize * 0.8) + (logoPadding || 10) * 2);
+        
+        const rawTx = contentX + (contentSize - tw) * textCenterPosX;
+        const rawTy = contentY + (contentSize - th) * textCenterPosY;
+        const moduleCount = qrMatrixInfo?.width || 21;
+        const safePos = constrainToSafeZone(rawTx, rawTy, tw, th, contentX, contentY, contentSize, moduleCount, 2);
+        const tx = safePos.x;
+        const ty = safePos.y;
         const centerX = tx + tw / 2;
         const centerY = ty + th / 2;
         
@@ -1574,8 +1627,12 @@ export default function App() {
     } else if (dragType.current && dragType.current.startsWith('resize-logo')) {
         const lw = contentSize * logoWidth;
         const lh = contentSize * logoHeight;
-        const lx = contentX + (contentSize - lw) * logoPosX;
-        const ly = contentY + (contentSize - lh) * logoPosY;
+        const rawLx = contentX + (contentSize - lw) * logoPosX;
+        const rawLy = contentY + (contentSize - lh) * logoPosY;
+        const moduleCount = qrMatrixInfo?.width || 21;
+        const safePos = constrainToSafeZone(rawLx, rawLy, lw, lh, contentX, contentY, contentSize, moduleCount, 2);
+        const lx = safePos.x;
+        const ly = safePos.y;
         const centerX = lx + lw / 2;
         const centerY = ly + lh / 2;
         const dx_raw = x - centerX;
@@ -1638,9 +1695,6 @@ export default function App() {
         let newPosX = dragStartOffset.current.startPosX;
         let newPosY = dragStartOffset.current.startPosY;
         
-        // Symmetrical centering resize locks: if it was already centered at the start of the drag,
-        // we lock it to exactly 0.5 center to keep it centered perfectly.
-        // Otherwise, resize normally by keeping the top-left edge anchored with absolutely no jumps.
         if (dragStartOffset.current.startPosX === 0.5) {
             newPosX = 0.5;
         } else if (contentSize - newW_px > 0) {
@@ -1658,49 +1712,97 @@ export default function App() {
         setLogoPosX(Math.round(newPosX * 1000) / 1000);
         setLogoPosY(Math.round(newPosY * 1000) / 1000);
     } else if (dragType.current && dragType.current.startsWith('resize-text')) {
-        const dx = x - dragStartOffset.current.x;
-        const diff = dx / contentSize;
-        const newSize = Math.max(0.05, Math.min(0.5, dragStartOffset.current.startSize + diff));
-        
-        // Adjust dragStartOffset.current.x to align with the clamp boundaries
-        const maxDiff = 0.5 - dragStartOffset.current.startSize;
-        const minDiff = 0.05 - dragStartOffset.current.startSize;
-        if (diff > maxDiff) {
-            dragStartOffset.current.x = x - maxDiff * contentSize;
-        } else if (diff < minDiff) {
-            dragStartOffset.current.x = x - minDiff * contentSize;
-        }
-        
-        const startW = dragStartOffset.current.startW * contentSize;
-        const startH = dragStartOffset.current.startH * contentSize;
-        const tx_start = contentX + (contentSize - startW) * dragStartOffset.current.startPosX;
-        const ty_start = contentY + (contentSize - startH) * dragStartOffset.current.startPosY;
-        
-        const fontSize = contentSize * newSize;
+        const fontSize = contentSize * textCenterSize;
         tempCtx.current.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
         const metrics = tempCtx.current.measureText(textCenterText);
-        const newTw = metrics.width + (logoPadding || 10) * 2;
-        const newTh = (fontSize * 0.8) + (logoPadding || 10) * 2;
+        const tw = textCenterWidth ? (textCenterWidth * contentSize) : (metrics.width + (logoPadding || 10) * 2);
+        const th = textCenterHeight ? (textCenterHeight * contentSize) : ((fontSize * 0.8) + (logoPadding || 10) * 2);
         
+        const rawTx = contentX + (contentSize - tw) * textCenterPosX;
+        const rawTy = contentY + (contentSize - th) * textCenterPosY;
+        const moduleCount = qrMatrixInfo?.width || 21;
+        const safePos = constrainToSafeZone(rawTx, rawTy, tw, th, contentX, contentY, contentSize, moduleCount, 2);
+        const tx = safePos.x;
+        const ty = safePos.y;
+        
+        const centerX = tx + tw / 2;
+        const centerY = ty + th / 2;
+        const dx_raw = x - centerX;
+        const dy_raw = y - centerY;
+        const ang = (-textCenterRotation * Math.PI) / 180;
+        const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
+        const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
+        const diffX = (localX - dragStartOffset.current.x) / contentSize;
+        const diffY = (localY - dragStartOffset.current.y) / contentSize;
+        
+        const startW_px = contentSize * dragStartOffset.current.startW;
+        const startH_px = contentSize * dragStartOffset.current.startH;
+        const tx_start = contentX + (contentSize - startW_px) * dragStartOffset.current.startPosX;
+        const ty_start = contentY + (contentSize - startH_px) * dragStartOffset.current.startPosY;
+        
+        let newW = dragStartOffset.current.startW;
+        let newH = dragStartOffset.current.startH;
+        let newSize = dragStartOffset.current.startSize;
+        
+        if (dragType.current === 'resize-text-br') {
+            const scale = Math.max(0.1, (dragStartOffset.current.startW + diffX) / dragStartOffset.current.startW);
+            newW = Math.max(0.05, Math.min(0.6, dragStartOffset.current.startW * scale));
+            newH = Math.max(0.05, Math.min(0.6, dragStartOffset.current.startH * scale));
+            newSize = Math.max(0.02, Math.min(0.18, dragStartOffset.current.startSize * scale));
+            
+            // Adjust dragStartOffset.current.x for boundary constraints
+            const maxScale = 0.6 / dragStartOffset.current.startW;
+            const minScale = 0.05 / dragStartOffset.current.startW;
+            const currentScale = (dragStartOffset.current.startW + diffX) / dragStartOffset.current.startW;
+            if (currentScale > maxScale) {
+                const maxDiffX = (maxScale - 1) * dragStartOffset.current.startW;
+                dragStartOffset.current.x = localX - maxDiffX * contentSize;
+            } else if (currentScale < minScale) {
+                const minDiffX = (minScale - 1) * dragStartOffset.current.startW;
+                dragStartOffset.current.x = localX - minDiffX * contentSize;
+            }
+        } else if (dragType.current === 'resize-text-r') {
+            newW = Math.max(0.05, Math.min(0.6, dragStartOffset.current.startW + diffX));
+            
+            const maxDiffX = 0.6 - dragStartOffset.current.startW;
+            const minDiffX = 0.05 - dragStartOffset.current.startW;
+            if (diffX > maxDiffX) {
+                dragStartOffset.current.x = localX - maxDiffX * contentSize;
+            } else if (diffX < minDiffX) {
+                dragStartOffset.current.x = localX - minDiffX * contentSize;
+            }
+        } else if (dragType.current === 'resize-text-b') {
+            newH = Math.max(0.05, Math.min(0.6, dragStartOffset.current.startH + diffY));
+            
+            const maxDiffY = 0.6 - dragStartOffset.current.startH;
+            const minDiffY = 0.05 - dragStartOffset.current.startH;
+            if (diffY > maxDiffY) {
+                dragStartOffset.current.y = localY - maxDiffY * contentSize;
+            } else if (diffY < minDiffY) {
+                dragStartOffset.current.y = localY - minDiffY * contentSize;
+            }
+        }
+        
+        const newW_px = contentSize * newW;
+        const newH_px = contentSize * newH;
         let newPosX = dragStartOffset.current.startPosX;
         let newPosY = dragStartOffset.current.startPosY;
         
-        // Symmetrical centering resize locks: if it was already centered at the start of the drag,
-        // we lock it to exactly 0.5 center to keep it centered perfectly.
-        // Otherwise, resize normally by keeping the top-left edge anchored with absolutely no jumps.
         if (dragStartOffset.current.startPosX === 0.5) {
             newPosX = 0.5;
-        } else if (contentSize - newTw > 0) {
-            newPosX = Math.max(0, Math.min(1, (tx_start - contentX) / (contentSize - newTw)));
+        } else if (contentSize - newW_px > 0) {
+            newPosX = Math.max(0, Math.min(1, (tx_start - contentX) / (contentSize - newW_px)));
         }
         
         if (dragStartOffset.current.startPosY === 0.5) {
             newPosY = 0.5;
-        } else if (contentSize - newTh > 0) {
-            newPosY = Math.max(0, Math.min(1, (ty_start - contentY) / (contentSize - newTh)));
+        } else if (contentSize - newH_px > 0) {
+            newPosY = Math.max(0, Math.min(1, (ty_start - contentY) / (contentSize - newH_px)));
         }
         
         setTextCenterSize(Math.round(newSize * 100) / 100);
+        setTextCenterWidth(Math.round(newW * 100) / 100);
+        setTextCenterHeight(Math.round(newH * 100) / 100);
         setTextCenterPosX(Math.round(newPosX * 1000) / 1000);
         setTextCenterPosY(Math.round(newPosY * 1000) / 1000);
     } else if (dragType.current === 'logo' && logo?.image) {
@@ -1726,8 +1828,8 @@ export default function App() {
       const fontSize = contentSize * textCenterSize;
       tempCtx.current.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
       const metrics = tempCtx.current.measureText(textCenterText);
-      const tw = metrics.width + (logoPadding || 10) * 2;
-      const th = (fontSize * 0.8) + (logoPadding || 10) * 2;
+      const tw = textCenterWidth ? (textCenterWidth * contentSize) : (metrics.width + (logoPadding || 10) * 2);
+      const th = textCenterHeight ? (textCenterHeight * contentSize) : ((fontSize * 0.8) + (logoPadding || 10) * 2);
       
       const newTx = x - dragStartOffset.current.x;
       const newTy = y - dragStartOffset.current.y;
@@ -1746,7 +1848,7 @@ export default function App() {
       setTextCenterPosX(Math.round(valX * 1000) / 1000);
       setTextCenterPosY(Math.round(valY * 1000) / 1000);
     }
-  }, [isDraggingCanvas, logo, logoWidth, logoHeight, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterPosX, textCenterPosY, textCenterRotation, textCenterFont, logoPadding, getQRContentArea]);
+  }, [isDraggingCanvas, qrMatrixInfo, logo, logoWidth, logoHeight, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, textCenterFont, logoPadding, getQRContentArea]);
 
   const stopCanvasDrag = useCallback(() => {
     setIsDraggingCanvas(false);
@@ -2147,6 +2249,56 @@ export default function App() {
             {((activeTab === 'logo' && logo) || activeTab === 'text' || activeTab === 'color' || activeTab === 'shapes') && (
               <div className="logo-toolbar-container">
                 <div className="unified-toolbar-card">
+                  {activeTab === 'text' && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 16px',
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      borderBottom: '1px solid var(--border-color)',
+                      borderTopLeftRadius: 'inherit',
+                      borderTopRightRadius: 'inherit'
+                    }}>
+                      <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                        Configure Text
+                      </span>
+                      <div style={{ display: 'flex', background: 'var(--bg-input)', padding: '2px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                        <button 
+                          onClick={() => setTextEditMode('center')} 
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: textEditMode === 'center' ? 'var(--accent-primary)' : 'transparent',
+                            color: textEditMode === 'center' ? '#fff' : 'var(--text-secondary)',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          QR Center Text
+                        </button>
+                        <button 
+                          onClick={() => setTextEditMode('bottom')} 
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: textEditMode === 'bottom' ? 'var(--accent-primary)' : 'transparent',
+                            color: textEditMode === 'bottom' ? '#fff' : 'var(--text-secondary)',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          Bottom Frame Text
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   {(logoPopup || textPopup || colorPopup || shapePopup) ? (
                     <div className="toolbar-editing-view fade-in">
                       <div className="toolbar-editing-header">
@@ -2347,41 +2499,77 @@ export default function App() {
 
                       {/* TEXT PROPERTIES */}
                       {textPopup === 'input' && (
-                        <div className="fade-in">
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>Enable Text</div>
-                            <Toggle
-                              checked={textEditMode === 'center' ? textCenterEnabled : frameStyle !== 'none'}
-                              onChange={(val) => {
-                                if (textEditMode === 'center') {
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          {/* 1. QR Center Text Section */}
+                          <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: textEditMode === 'center' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--border-color)', display: 'inline-block' }} />
+                                QR Center Text
+                              </div>
+                              <Toggle
+                                checked={textCenterEnabled}
+                                onChange={(val) => {
                                   setTextCenterEnabled(val);
                                   if (val) {
                                     setLogo(null);
                                     setLogoWidth(0.18);
                                     setLogoHeight(0.18);
                                     setLogoRotation(0);
+                                    setTextCenterWidth(null);
+                                    setTextCenterHeight(null);
+                                    setTextEditMode('center');
                                   }
-                                } else {
-                                  setFrameStyle(val ? 'text-bottom' : 'none');
-                                }
-                              }}
-                            />
+                                }}
+                              />
+                            </div>
+                            {textCenterEnabled && (
+                              <input 
+                                type="text" 
+                                maxLength={18} 
+                                value={textCenterText} 
+                                onChange={(e) => {
+                                  setTextCenterText(e.target.value);
+                                  setTextCenterWidth(null);
+                                  setTextCenterHeight(null);
+                                }} 
+                                onFocus={() => setTextEditMode('center')}
+                                placeholder="Type QR center text..." 
+                                className="text-input-premium" 
+                                style={{ width: '100%', borderColor: textEditMode === 'center' ? 'var(--accent-primary)' : 'var(--border-color)' }} 
+                              />
+                            )}
                           </div>
 
-                          <div className="editing-row-item">
-                            <div className="seg-control" style={{ marginBottom: '16px' }}>
-                              <button className={`seg-btn ${textEditMode === 'center' ? 'active' : ''}`} onClick={() => setTextEditMode('center')}>QR Text</button>
-                              <button className={`seg-btn ${textEditMode === 'bottom' ? 'active' : ''}`} onClick={() => setTextEditMode('bottom')}>Bottom Text</button>
+                          {/* 2. Bottom Frame Text Section */}
+                          <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: textEditMode === 'bottom' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--border-color)', display: 'inline-block' }} />
+                                Bottom Frame Text
+                              </div>
+                              <Toggle
+                                checked={frameStyle !== 'none'}
+                                onChange={(val) => {
+                                  setFrameStyle(val ? 'text-bottom' : 'none');
+                                  if (val) {
+                                    setTextEditMode('bottom');
+                                  }
+                                }}
+                              />
                             </div>
-                            <input 
-                              type="text" 
-                              maxLength={textEditMode === 'center' ? 18 : 50} 
-                              value={textEditMode === 'center' ? textCenterText : frameText} 
-                              onChange={(e) => textEditMode === 'center' ? setTextCenterText(e.target.value) : setFrameText(e.target.value)} 
-                              placeholder={`Type ${textEditMode === 'center' ? 'QR' : 'bottom'} text...`} 
-                              className="text-input-premium" 
-                              style={{ width: '100%' }} 
-                            />
+                            {frameStyle !== 'none' && (
+                              <input 
+                                type="text" 
+                                maxLength={50} 
+                                value={frameText} 
+                                onChange={(e) => setFrameText(e.target.value)} 
+                                onFocus={() => setTextEditMode('bottom')}
+                                placeholder="Type bottom frame text..." 
+                                className="text-input-premium" 
+                                style={{ width: '100%', borderColor: textEditMode === 'bottom' ? 'var(--accent-primary)' : 'var(--border-color)' }} 
+                              />
+                            )}
                           </div>
                         </div>
                       )}
@@ -2402,7 +2590,22 @@ export default function App() {
                       )}
                       {textPopup === 'size' && (
                         <div className="fade-in">
-                          <Slider label="Size" min={0.02} max={0.18} step={0.01} value={textEditMode === 'center' ? textCenterSize : frameSize} onChange={textEditMode === 'center' ? setTextCenterSize : setFrameSize} />
+                          <Slider 
+                            label="Size" 
+                            min={0.02} 
+                            max={0.18} 
+                            step={0.01} 
+                            value={textEditMode === 'center' ? textCenterSize : frameSize} 
+                            onChange={(val) => {
+                              if (textEditMode === 'center') {
+                                setTextCenterSize(val);
+                                setTextCenterWidth(null);
+                                setTextCenterHeight(null);
+                              } else {
+                                setFrameSize(val);
+                              }
+                            }} 
+                          />
                         </div>
                       )}
                       {textPopup === 'color' && (
@@ -2903,7 +3106,7 @@ export default function App() {
             }}
           >
             <button 
-              className="floating-scan-btn"
+              className="floating-scan-btn glow-scan-btn"
               style={{ 
                 width: '64px',
                 height: '64px',

@@ -185,23 +185,9 @@ export default function SavedPage({ onLoadQR }) {
               <button
                 key={type}
                 onClick={() => setActiveFilter(type)}
-                style={{
-                  whiteSpace: 'nowrap',
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  border: isActive ? '1px solid #D60036' : '1px solid var(--border-color)',
-                  background: isActive ? '#D60036' : 'var(--bg-elevated)',
-                  color: isActive ? '#fff' : 'var(--text-primary)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
+                className={`tab-pill-premium ${isActive ? 'active' : ''}`}
               >
-                {type} {count > 0 && <span style={{ opacity: 0.8 }}>({count})</span>}
+                {type} {count > 0 && <span style={{ opacity: 0.8, fontSize: '11px', fontWeight: 700 }}>({count})</span>}
               </button>
             );
           })}
@@ -209,30 +195,21 @@ export default function SavedPage({ onLoadQR }) {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px 100px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px 100px' }} className="fade-in-up">
         {saved.length === 0 ? (
-          <div style={{
-            height: '100%', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-            gap: '20px', color: 'var(--text-muted)'
-          }}>
-             <div style={{
-              width: '120px', height: '120px', borderRadius: '40px',
-              background: 'var(--bg-elevated)', display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.05)'
-            }}>
-              <Star size={60} strokeWidth={1} color="var(--text-tertiary)" />
+          <div className="premium-empty-state">
+             <div className="premium-empty-icon-wrapper">
+              <Star size={42} fill="var(--accent-primary)" strokeWidth={0} />
             </div>
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>No saved items yet</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px 0', fontFamily: 'var(--font-display)' }}>No Saved Items Yet</h3>
               <p style={{ fontSize: '14px', maxWidth: '240px', lineHeight: 1.5 }}>
-                Save QR codes to access them anytime.
+                Save customized QR codes to access them instantly at any time.
               </p>
             </div>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+          <div className="premium-empty-state" style={{ padding: '40px 0' }}>
             No matching saved QR codes found.
           </div>
         ) : (
