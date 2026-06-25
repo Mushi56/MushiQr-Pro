@@ -262,6 +262,8 @@ export function renderQR(canvas, options) {
     logoInnerShadowEnabled = false,
     logoEraseColorEnabled = false,
     logoEraseColor = '#ffffff',
+    logoEraseTolerance = 50,
+    logoEraseSmoothing = 10,
     logoTexture = 'none',
     logoCrop = 'none',
     textCenterRotation = 0,
@@ -433,6 +435,8 @@ export function renderQR(canvas, options) {
       logoInnerShadowEnabled,
       logoEraseColorEnabled,
       logoEraseColor,
+      logoEraseTolerance,
+      logoEraseSmoothing,
       logoTexture,
       logoCrop,
       contentX,
@@ -785,6 +789,8 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
     logoInnerShadowEnabled = false,
     logoEraseColorEnabled = false,
     logoEraseColor = '#ffffff',
+    logoEraseTolerance = 50,
+    logoEraseSmoothing = 10,
     logoTexture = 'none',
     logoCrop = 'none',
     logoPosX = 0.5,
@@ -885,16 +891,26 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
 
       pctx.drawImage(logoImg, 0, 0, logoW, logoH);
 
-      // Erase Color Filter
+      // Erase Color Filter (Remove Background)
       if (logoEraseColorEnabled && logoEraseColor) {
         const imgData = pctx.getImageData(0, 0, Math.max(1, logoW), Math.max(1, logoH));
         const data = imgData.data;
         const target = hexToRgb(logoEraseColor);
-        const tolerance = 50; // Color distance tolerance
+        const tolerance = logoEraseTolerance !== undefined ? logoEraseTolerance : 50;
+        const smoothing = logoEraseSmoothing !== undefined ? logoEraseSmoothing : 10;
+        
         for (let i = 0; i < data.length; i += 4) {
           const r = data[i], g = data[i+1], b = data[i+2];
-          const dist = Math.sqrt((r-target.r)**2 + (g-target.g)**2 + (b-target.b)**2);
-          if (dist < tolerance) data[i+3] = 0;
+          // Euclidean distance in RGB color space
+          const dist = Math.sqrt((r - target.r) ** 2 + (g - target.g) ** 2 + (b - target.b) ** 2);
+          
+          if (dist < tolerance) {
+            data[i+3] = 0; // Fully transparent
+          } else if (dist < tolerance + smoothing && smoothing > 0) {
+            // Smooth edge feathering
+            const factor = (dist - tolerance) / smoothing;
+            data[i+3] = Math.round(data[i+3] * factor);
+          }
         }
         pctx.putImageData(imgData, 0, 0);
       }

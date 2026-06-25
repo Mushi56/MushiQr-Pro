@@ -36,6 +36,7 @@ import {
   Settings,
   Type,
   ALargeSmall,
+  Paintbrush,
   Plus,
   Maximize,
   Shapes,
@@ -490,6 +491,8 @@ export default function App() {
   const [logoInnerShadowEnabled, setLogoInnerShadowEnabled] = useState(false);
   const [logoEraseColorEnabled, setLogoEraseColorEnabled] = useState(false);
   const [logoEraseColor, setLogoEraseColor] = useState('#ffffff');
+  const [logoEraseTolerance, setLogoEraseTolerance] = useState(50);
+  const [logoEraseSmoothing, setLogoEraseSmoothing] = useState(10);
   const [logoTexture, setLogoTexture] = useState('none');
   const [logoCrop, setLogoCrop] = useState({ x: 0, y: 0, w: 1, h: 1 });
   const [logoAspectRatioLocked, setLogoAspectRatioLocked] = useState(true);
@@ -646,7 +649,7 @@ export default function App() {
       logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
       logoOutline, logoOutlineColor, logoOutlineWidth, logoPosX, logoPosY,
       logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
-      logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoTexture, logoCrop, logoAspectRatioLocked,
+      logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, logoAspectRatioLocked,
       frameStyle, frameText, frameColor, frameFont, frameSize,
       frameStrokeEnabled, frameStrokeWidth, frameStrokeColor,
       frameShadowEnabled, frameShadowBlur, frameShadowColor,
@@ -664,7 +667,7 @@ export default function App() {
     logo, logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
     logoOutline, logoOutlineColor, logoOutlineWidth, logoPosX, logoPosY,
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
-    logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoTexture, logoCrop, logoAspectRatioLocked,
+    logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, logoAspectRatioLocked,
     frameStyle, frameText, frameColor, frameFont, frameSize,
     frameStrokeEnabled, frameStrokeWidth, frameStrokeColor,
     frameShadowEnabled, frameShadowBlur, frameShadowColor,
@@ -763,6 +766,10 @@ export default function App() {
     if (s.logoOutlineWidth !== undefined) setLogoOutlineWidth(s.logoOutlineWidth);
     if (s.logoPosX !== undefined) setLogoPosX(s.logoPosX);
     if (s.logoPosY !== undefined) setLogoPosY(s.logoPosY);
+    if (s.logoEraseColorEnabled !== undefined) setLogoEraseColorEnabled(s.logoEraseColorEnabled);
+    if (s.logoEraseColor !== undefined) setLogoEraseColor(s.logoEraseColor);
+    if (s.logoEraseTolerance !== undefined) setLogoEraseTolerance(s.logoEraseTolerance);
+    if (s.logoEraseSmoothing !== undefined) setLogoEraseSmoothing(s.logoEraseSmoothing);
     if (s.frameStyle !== undefined) setFrameStyle(s.frameStyle);
     if (s.frameText !== undefined) setFrameText(s.frameText);
     if (s.frameColor !== undefined) setFrameColor(s.frameColor);
@@ -1254,7 +1261,7 @@ export default function App() {
         textCenterWidth, textCenterHeight,
         logoPosX, logoPosY,
         logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
-        logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoTexture, logoCrop,
+        logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop,
         showHandle: canvasSelection === 'logo' || canvasSelection === 'text',
         selectedType: canvasSelection
       });
@@ -1286,7 +1293,7 @@ export default function App() {
     textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
     textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight, logoPosX, logoPosY,
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
-    logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoTexture, logoCrop, 
+    logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, 
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
     activeTab, canvasSelection
   ]);
@@ -2453,15 +2460,81 @@ export default function App() {
                         </div>
                       )}
                       {logoPopup === 'filter' && (
-                        <div className="fade-in">
-                           <Toggle label="Erase Color (Green Screen)" checked={logoEraseColorEnabled} onChange={setLogoEraseColorEnabled} />
-                           {logoEraseColorEnabled && (
-                             <div className="fade-in" style={{ marginTop: '16px' }}>
-                               <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px' }}>Target Color to Remove</div>
-                               <ColorPicker value={logoEraseColor} onChange={setLogoEraseColor} />
-                               <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '8px' }}>Automatically removes the selected color (e.g. white/black backgrounds).</p>
-                             </div>
-                           )}
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Method</div>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              <button 
+                                onClick={() => {
+                                  setLogoEraseColorEnabled(false);
+                                }}
+                                className={`seg-btn ${!logoEraseColorEnabled ? 'active' : ''}`}
+                                style={{ flex: '1', padding: '10px', fontSize: '12px' }}
+                              >
+                                Keep BG
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  setLogoEraseColorEnabled(true);
+                                  setLogoEraseColor('#ffffff');
+                                }}
+                                className={`seg-btn ${logoEraseColorEnabled && logoEraseColor.toLowerCase() === '#ffffff' ? 'active' : ''}`}
+                                style={{ flex: '1', padding: '10px', fontSize: '12px' }}
+                              >
+                                Remove White
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  setLogoEraseColorEnabled(true);
+                                  setLogoEraseColor('#000000');
+                                }}
+                                className={`seg-btn ${logoEraseColorEnabled && logoEraseColor.toLowerCase() === '#000000' ? 'active' : ''}`}
+                                style={{ flex: '1', padding: '10px', fontSize: '12px' }}
+                              >
+                                Remove Black
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  setLogoEraseColorEnabled(true);
+                                }}
+                                className={`seg-btn ${logoEraseColorEnabled && logoEraseColor.toLowerCase() !== '#ffffff' && logoEraseColor.toLowerCase() !== '#000000' ? 'active' : ''}`}
+                                style={{ flex: '1', padding: '10px', fontSize: '12px' }}
+                              >
+                                Custom Color
+                              </button>
+                            </div>
+                          </div>
+
+                          {logoEraseColorEnabled && (
+                            <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                              {logoEraseColor.toLowerCase() !== '#ffffff' && logoEraseColor.toLowerCase() !== '#000000' && (
+                                <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: '8px' }}>Select Target Color</div>
+                                  <ColorPicker value={logoEraseColor} onChange={setLogoEraseColor} />
+                                </div>
+                              )}
+
+                              <Slider 
+                                label="Sensitivity (Tolerance)" 
+                                value={logoEraseTolerance} 
+                                min={5} 
+                                max={150} 
+                                step={1} 
+                                onChange={logoEraseTolerance => setLogoEraseTolerance(logoEraseTolerance)} 
+                              />
+                              <Slider 
+                                label="Edge Smoothing (Feather)" 
+                                value={logoEraseSmoothing} 
+                                min={0} 
+                                max={80} 
+                                step={1} 
+                                onChange={logoEraseSmoothing => setLogoEraseSmoothing(logoEraseSmoothing)} 
+                              />
+                              <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', margin: 0 }}>
+                                Drag sliders to adjust how cleanly the background color is removed.
+                              </p>
+                            </div>
+                          )}
                         </div>
                       )}
                       {logoPopup === 'texture' && (
@@ -2995,12 +3068,12 @@ export default function App() {
                         <>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'size')}><ChevronUp size={18} /><span>Size</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'pos')}><Maximize size={18} /><span>Position</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'stroke')}><Pencil size={18} /><span>Stroke</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'bg')}><Hexagon size={18} /><span>Background</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'rotate')}><RotateCw size={18} /><span>Rotate</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'opacity')}><Sun size={18} /><span>Opacity</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'shadow')}><Moon size={18} /><span>Shadow</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'filter')}><Filter size={18} /><span>Filters</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'filter')}><Eraser size={18} /><span>Remove BG</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'texture')}><Layers size={18} /><span>Texture</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'crop')}><Crop size={18} /><span>Crop</span></button>
                         </>
@@ -3012,7 +3085,7 @@ export default function App() {
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'size')}><ChevronUp size={18} /><span>Size</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'color')}><Palette size={18} /><span>Color</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'stroke')}><Pencil size={18} /><span>Stroke</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'shadow')}><Moon size={18} /><span>Shadow</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'rotate')}><RotateCw size={18} /><span>Rotate</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'bg')}><Hexagon size={18} /><span>Shape</span></button>
