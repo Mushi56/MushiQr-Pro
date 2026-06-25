@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, MoreVertical, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2 } from 'lucide-react';
+import { Menu, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, MoreVertical, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2 } from 'lucide-react';
 import { QR_TYPES } from '../utils/qrEngine';
 import { getHistory, deleteFromHistory, clearHistory } from '../utils/storage';
 import AppIcon from './AppIcon';
@@ -109,11 +109,6 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
             }} />
 
             <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', minWidth: 0, justifyContent: 'center' }}>
-                <div>
-                  <span className="premium-badge" style={{ marginBottom: '8px' }}>
-                    <Crown size={12} fill="#FFD700" strokeWidth={0} /> PRO ENABLED
-                  </span>
-                </div>
                 <h2 style={{ 
                   fontSize: '26px', fontWeight: 800, 
                   margin: 0, color: '#fff',
@@ -173,16 +168,20 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
         <div style={{ padding: '24px var(--main-padding-x)' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Quick Create</h3>
           <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', 
-            gap: '12px' 
+            display: 'flex', 
+            gap: '12px', 
+            overflowX: 'auto', 
+            paddingBottom: '8px', 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none', 
+            WebkitOverflowScrolling: 'touch' 
           }}>
             {quickOptions.map(option => (
               <button
                 key={option.id}
                 onClick={() => onQuickCreate(option.id)}
                 className="quick-option-card"
-                style={{ width: '100%' }}
+                style={{ flexShrink: 0, width: '80px' }}
               >
                 <div className="quick-option-icon-wrapper">
                   {React.cloneElement(option.icon, { size: 20, strokeWidth: 1.8 })}
