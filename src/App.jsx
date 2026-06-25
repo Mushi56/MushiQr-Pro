@@ -35,6 +35,7 @@ import {
   Bookmark,
   Settings,
   Type,
+  Heading,
   ALargeSmall,
   Paintbrush,
   Plus,
@@ -607,9 +608,13 @@ export default function App() {
       setTabHistory(prev => [...prev, activeTab]);
       setActiveTab(tabId);
 
-      // Manage canvas selections for interactive outlines/handles
-      if (tabId === 'text') {
+      // Manage canvas selections and text edit modes for separated tools
+      if (tabId === 'badge') {
         setCanvasSelection('text');
+        setTextEditMode('center');
+      } else if (tabId === 'banner') {
+        setCanvasSelection(null); // Banner is fixed bottom frame text
+        setTextEditMode('bottom');
       } else if (tabId === 'logo') {
         setCanvasSelection('logo');
       } else {
@@ -1454,6 +1459,7 @@ export default function App() {
       
       // Clicking inside the body region always triggers dragging/selection
       if (inRect(localX, localY, lx, ly, lw, lh)) {
+        handleTabChange('logo');
         setCanvasSelection('logo');
         setIsDraggingCanvas(true);
         dragType.current = 'logo';
@@ -1548,6 +1554,7 @@ export default function App() {
 
       // Clicking inside the body region always triggers dragging/selection
       if (inRect(localX, localY, tx, ty, tw, th)) {
+        handleTabChange('badge');
         setCanvasSelection('text');
         setIsDraggingCanvas(true);
         dragType.current = 'text';
@@ -1885,7 +1892,8 @@ export default function App() {
     { id: 'shapes', label: 'Shapes', icon: Hexagon },
     { id: 'logo', label: 'Logo', icon: ImageIcon },
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
-    { id: 'text', label: 'Text', icon: Type },
+    { id: 'badge', label: 'Badge Text', icon: Type },
+    { id: 'banner', label: 'Banner Text', icon: Heading },
   ];
 
   // ── Get the frame CSS class for the preview wrapper ──
@@ -2254,10 +2262,10 @@ export default function App() {
             </section>
 
             {/* ─── Shared Unified Expandable Toolbar (Centralized Bottom Layer) ─── */}
-            {((activeTab === 'logo' && logo) || activeTab === 'text' || activeTab === 'color' || activeTab === 'shapes') && (
+            {((activeTab === 'logo' && logo) || activeTab === 'badge' || activeTab === 'banner' || activeTab === 'color' || activeTab === 'shapes') && (
               <div className="logo-toolbar-container">
                 <div className="unified-toolbar-card">
-                  {activeTab === 'text' && (
+                  {(activeTab === 'badge' || activeTab === 'banner') && (
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -2269,42 +2277,8 @@ export default function App() {
                       borderTopRightRadius: 'inherit'
                     }}>
                       <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                        Configure Text
+                        {activeTab === 'badge' ? 'Configure Badge Text' : 'Configure Banner Text'}
                       </span>
-                      <div style={{ display: 'flex', background: 'var(--bg-input)', padding: '2px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <button 
-                          onClick={() => setTextEditMode('center')} 
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            background: textEditMode === 'center' ? 'var(--accent-primary)' : 'transparent',
-                            color: textEditMode === 'center' ? '#fff' : 'var(--text-secondary)',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                          }}
-                        >
-                          QR Center Text
-                        </button>
-                        <button 
-                          onClick={() => setTextEditMode('bottom')} 
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            background: textEditMode === 'bottom' ? 'var(--accent-primary)' : 'transparent',
-                            color: textEditMode === 'bottom' ? '#fff' : 'var(--text-secondary)',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                          }}
-                        >
-                          Bottom Frame Text
-                        </button>
-                      </div>
                     </div>
                   )}
                   {(logoPopup || textPopup || colorPopup || shapePopup) ? (
@@ -2574,77 +2548,75 @@ export default function App() {
                       {/* TEXT PROPERTIES */}
                       {textPopup === 'input' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          {/* 1. QR Center Text Section */}
-                          <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: textEditMode === 'center' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--border-color)', display: 'inline-block' }} />
-                                QR Center Text
+                          {/* 1. Badge Text Section */}
+                          {activeTab === 'badge' && (
+                            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-primary)', display: 'inline-block' }} />
+                                  Enable Badge Text
+                                </div>
+                                <Toggle
+                                  checked={textCenterEnabled}
+                                  onChange={(val) => {
+                                    setTextCenterEnabled(val);
+                                    if (val) {
+                                      setLogo(null);
+                                      setLogoWidth(0.18);
+                                      setLogoHeight(0.18);
+                                      setLogoRotation(0);
+                                      setTextCenterWidth(null);
+                                      setTextCenterHeight(null);
+                                    }
+                                  }}
+                                />
                               </div>
-                              <Toggle
-                                checked={textCenterEnabled}
-                                onChange={(val) => {
-                                  setTextCenterEnabled(val);
-                                  if (val) {
-                                    setLogo(null);
-                                    setLogoWidth(0.18);
-                                    setLogoHeight(0.18);
-                                    setLogoRotation(0);
+                              {textCenterEnabled && (
+                                <input 
+                                  type="text" 
+                                  maxLength={18} 
+                                  value={textCenterText} 
+                                  onChange={(e) => {
+                                    setTextCenterText(e.target.value);
                                     setTextCenterWidth(null);
                                     setTextCenterHeight(null);
-                                    setTextEditMode('center');
-                                  }
-                                }}
-                              />
+                                  }} 
+                                  placeholder="Type badge text..." 
+                                  className="text-input-premium" 
+                                  style={{ width: '100%', borderColor: 'var(--accent-primary)' }} 
+                                />
+                              )}
                             </div>
-                            {textCenterEnabled && (
-                              <input 
-                                type="text" 
-                                maxLength={18} 
-                                value={textCenterText} 
-                                onChange={(e) => {
-                                  setTextCenterText(e.target.value);
-                                  setTextCenterWidth(null);
-                                  setTextCenterHeight(null);
-                                }} 
-                                onFocus={() => setTextEditMode('center')}
-                                placeholder="Type QR center text..." 
-                                className="text-input-premium" 
-                                style={{ width: '100%', borderColor: textEditMode === 'center' ? 'var(--accent-primary)' : 'var(--border-color)' }} 
-                              />
-                            )}
-                          </div>
+                          )}
 
-                          {/* 2. Bottom Frame Text Section */}
-                          <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: textEditMode === 'bottom' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--border-color)', display: 'inline-block' }} />
-                                Bottom Frame Text
+                          {/* 2. Banner Text Section */}
+                          {activeTab === 'banner' && (
+                            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-primary)', display: 'inline-block' }} />
+                                  Enable Banner Text
+                                </div>
+                                <Toggle
+                                  checked={frameStyle !== 'none'}
+                                  onChange={(val) => {
+                                    setFrameStyle(val ? 'text-bottom' : 'none');
+                                  }}
+                                />
                               </div>
-                              <Toggle
-                                checked={frameStyle !== 'none'}
-                                onChange={(val) => {
-                                  setFrameStyle(val ? 'text-bottom' : 'none');
-                                  if (val) {
-                                    setTextEditMode('bottom');
-                                  }
-                                }}
-                              />
+                              {frameStyle !== 'none' && (
+                                <input 
+                                  type="text" 
+                                  maxLength={50} 
+                                  value={frameText} 
+                                  onChange={(e) => setFrameText(e.target.value)} 
+                                  placeholder="Type banner text..." 
+                                  className="text-input-premium" 
+                                  style={{ width: '100%', borderColor: 'var(--accent-primary)' }} 
+                                />
+                              )}
                             </div>
-                            {frameStyle !== 'none' && (
-                              <input 
-                                type="text" 
-                                maxLength={50} 
-                                value={frameText} 
-                                onChange={(e) => setFrameText(e.target.value)} 
-                                onFocus={() => setTextEditMode('bottom')}
-                                placeholder="Type bottom frame text..." 
-                                className="text-input-premium" 
-                                style={{ width: '100%', borderColor: textEditMode === 'bottom' ? 'var(--accent-primary)' : 'var(--border-color)' }} 
-                              />
-                            )}
-                          </div>
+                          )}
                         </div>
                       )}
                       
@@ -3078,9 +3050,9 @@ export default function App() {
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'crop')}><Crop size={18} /><span>Crop</span></button>
                         </>
                       )}
-                      {activeTab === 'text' && (
+                      {activeTab === 'badge' && (
                         <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Add Text</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Text</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'pos')}><Maximize size={18} /><span>Position</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'size')}><ChevronUp size={18} /><span>Size</span></button>
@@ -3088,6 +3060,17 @@ export default function App() {
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'shadow')}><Moon size={18} /><span>Shadow</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'rotate')}><RotateCw size={18} /><span>Rotate</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'bg')}><Hexagon size={18} /><span>Shape</span></button>
+                        </>
+                      )}
+                      {activeTab === 'banner' && (
+                        <>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Text</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'size')}><ChevronUp size={18} /><span>Size</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'color')}><Palette size={18} /><span>Color</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'shadow')}><Moon size={18} /><span>Shadow</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'bg')}><Hexagon size={18} /><span>Shape</span></button>
                         </>
                       )}
