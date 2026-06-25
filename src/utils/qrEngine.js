@@ -231,6 +231,7 @@ export function renderQR(canvas, options) {
     quietZone = 2,
     frameStyle = FRAME_STYLES.NONE,
     frameText = 'SCAN ME',
+    framePosition = 'bottom',
     frameColor = '',
     textCenter = null,
     textCenterSize = 0.1,
@@ -298,10 +299,14 @@ export function renderQR(canvas, options) {
   // Adjust content area for frames to give proper breathing space
   if (frameStyle !== FRAME_STYLES.NONE) {
     const labelHeight = size * 0.14; // Unify label height
-    // Shrink and shift UP to give more breathing space
+    // Shrink and shift UP/DOWN to give more breathing space
     contentSize = size - (padding * 2) - labelHeight - (size * 0.06); 
     contentX = (size - contentSize) / 2;
-    contentY = padding + (size - padding * 2 - labelHeight - contentSize) / 2;
+    if (framePosition === 'top') {
+      contentY = padding + labelHeight + (size - padding * 2 - labelHeight - contentSize) / 2;
+    } else {
+      contentY = padding + (size - padding * 2 - labelHeight - contentSize) / 2;
+    }
   }
 
   // Draw frame if enabled
@@ -309,6 +314,7 @@ export function renderQR(canvas, options) {
     drawFrame(ctx, size, padding, {
       frameStyle,
       frameText,
+      framePosition,
       frameColor: frameColor || (gradientEnabled ? gradientColor1 : qrColor),
       frameFont,
       frameSize,
@@ -1158,7 +1164,13 @@ function drawCenterText(ctx, text, canvasSize, options) {
   ctx.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
   const metrics = ctx.measureText(text);
   const textWidth = metrics.width;
-  const textHeight = fontSize * 0.8; 
+  
+  // Use a stable reference string "Hg" to measure the font's standard visual bounds.
+  // This prevents the text baseline and shape height from jumping when the user types different characters.
+  const refMetrics = ctx.measureText("Hg");
+  const refAscent = refMetrics.actualBoundingBoxAscent !== undefined ? refMetrics.actualBoundingBoxAscent : fontSize * 0.7;
+  const refDescent = refMetrics.actualBoundingBoxDescent !== undefined ? refMetrics.actualBoundingBoxDescent : fontSize * 0.15;
+  const textHeight = refAscent + refDescent; 
 
   const paddedW = textCenterWidth ? (textCenterWidth * contentSize) : (textWidth + (logoPadding || 10) * 2);
   const paddedH = textCenterHeight ? (textCenterHeight * contentSize) : (textHeight + (logoPadding || 10) * 2);
@@ -1190,8 +1202,11 @@ function drawCenterText(ctx, text, canvasSize, options) {
   // 2. Setup Text Properties
   ctx.save();
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+  ctx.textBaseline = 'alphabetic'; // Use alphabetic baseline for pixel-perfect vertical centering
   ctx.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
+
+  // Visual text bounds based on stable reference measurements
+  const textY = centerY + (refAscent - refDescent) / 2;
 
   // 4. Draw Stroke (behind fill, no shadow)
   if (textCenterStrokeEnabled) {
@@ -1199,7 +1214,7 @@ function drawCenterText(ctx, text, canvasSize, options) {
     ctx.lineWidth = fontSize * (textCenterStrokeWidth / 100);
     ctx.lineJoin = 'round';
     ctx.miterLimit = 2;
-    ctx.strokeText(text, centerX, centerY);
+    ctx.strokeText(text, centerX, textY);
   }
 
   // 5. Apply Shadow (to fill only)
@@ -1212,7 +1227,7 @@ function drawCenterText(ctx, text, canvasSize, options) {
 
   // 6. Draw Fill (on top of stroke)
   ctx.fillStyle = textCenterColor || '#000000';
-  ctx.fillText(text, centerX, centerY);
+  ctx.fillText(text, centerX, textY);
   ctx.restore();
   ctx.restore();
 
@@ -1344,7 +1359,8 @@ function drawFrame(ctx, size, padding, options) {
     frameShadowBlur,
     frameShadowColor,
     bgColor,
-    bgTransparent
+    bgTransparent,
+    framePosition = 'bottom'
   } = options;
 
   const innerSize = size - padding * 2;
@@ -1355,8 +1371,14 @@ function drawFrame(ctx, size, padding, options) {
   ctx.lineWidth = size * 0.025; // Slightly thicker for premium feel
   
   const labelHeight = size * 0.14;
-  const labelY = size - padding - labelHeight;
-  const textY = size - padding - labelHeight / 2;
+  let labelY, textY;
+  if (framePosition === 'top') {
+    labelY = padding;
+    textY = padding + labelHeight / 2;
+  } else {
+    labelY = size - padding - labelHeight;
+    textY = size - padding - labelHeight / 2;
+  }
   const labelW = innerSize - size * 0.1;
   const labelX = padding + size * 0.05;
 

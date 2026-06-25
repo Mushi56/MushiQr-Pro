@@ -500,6 +500,7 @@ export default function App() {
 
   // ── Frame ──
   const [frameStyle, setFrameStyle] = useState('none');
+  const [framePosition, setFramePosition] = useState('bottom');
   const [frameText, setFrameText] = useState('SCAN ME');
   const [frameColor, setFrameColor] = useState('');
   const [frameFont, setFrameFont] = useState('Inter');
@@ -608,13 +609,9 @@ export default function App() {
       setTabHistory(prev => [...prev, activeTab]);
       setActiveTab(tabId);
 
-      // Manage canvas selections and text edit modes for separated tools
-      if (tabId === 'badge') {
-        setCanvasSelection('text');
-        setTextEditMode('center');
-      } else if (tabId === 'banner') {
-        setCanvasSelection(null); // Banner is fixed bottom frame text
-        setTextEditMode('bottom');
+      // Manage canvas selections and text edit modes for text tool
+      if (tabId === 'text') {
+        setCanvasSelection(textEditMode === 'center' ? 'text' : null);
       } else if (tabId === 'logo') {
         setCanvasSelection('logo');
       } else {
@@ -655,7 +652,7 @@ export default function App() {
       logoOutline, logoOutlineColor, logoOutlineWidth, logoPosX, logoPosY,
       logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
       logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, logoAspectRatioLocked,
-      frameStyle, frameText, frameColor, frameFont, frameSize,
+      frameStyle, framePosition, frameText, frameColor, frameFont, frameSize,
       frameStrokeEnabled, frameStrokeWidth, frameStrokeColor,
       frameShadowEnabled, frameShadowBlur, frameShadowColor,
       textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
@@ -673,7 +670,7 @@ export default function App() {
     logoOutline, logoOutlineColor, logoOutlineWidth, logoPosX, logoPosY,
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, logoAspectRatioLocked,
-    frameStyle, frameText, frameColor, frameFont, frameSize,
+    frameStyle, framePosition, frameText, frameColor, frameFont, frameSize,
     frameStrokeEnabled, frameStrokeWidth, frameStrokeColor,
     frameShadowEnabled, frameShadowBlur, frameShadowColor,
     textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
@@ -776,6 +773,7 @@ export default function App() {
     if (s.logoEraseTolerance !== undefined) setLogoEraseTolerance(s.logoEraseTolerance);
     if (s.logoEraseSmoothing !== undefined) setLogoEraseSmoothing(s.logoEraseSmoothing);
     if (s.frameStyle !== undefined) setFrameStyle(s.frameStyle);
+    if (s.framePosition !== undefined) setFramePosition(s.framePosition);
     if (s.frameText !== undefined) setFrameText(s.frameText);
     if (s.frameColor !== undefined) setFrameColor(s.frameColor);
     if (s.frameFont !== undefined) setFrameFont(s.frameFont);
@@ -824,7 +822,7 @@ export default function App() {
   }, [
     qrColor, bgColor, logoWidth, logoHeight, logoPosX, logoPosY, textCenterSize, textCenterPosX, textCenterPosY,
     frameSize, dotPadding, eyePadding, textCenterText, frameText,
-    dotStyle, eyeStyle, qrType, logo, syncEyes, gradientEnabled, frameStyle,
+    dotStyle, eyeStyle, qrType, logo, syncEyes, gradientEnabled, frameStyle, framePosition,
     eyeColor, eyeOuterColor, logoBackground, logoOutline, textCenterEnabled
   ]);
 
@@ -1140,6 +1138,7 @@ export default function App() {
     }
 
     setFrameColor(item.frameColor);
+    if (item.framePosition !== undefined) setFramePosition(item.framePosition);
 
     // Reset tab history when loading a template
     setTabHistory([]);
@@ -1195,6 +1194,7 @@ export default function App() {
 
     // Frame
     setFrameStyle('none');
+    setFramePosition('bottom');
     setFrameText('SCAN ME');
     setFrameColor('');
 
@@ -1249,7 +1249,7 @@ export default function App() {
         logo: logo?.image, logoWidth, logoHeight, logoPadding,
         logoBackground, logoBgColor, logoBgShape,
         logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
-        quietZone: 2, frameStyle, frameText, frameColor, frameFont,
+        quietZone: 2, frameStyle, framePosition, frameText, frameColor, frameFont,
         frameSize,
         frameStrokeEnabled,
         frameStrokeWidth,
@@ -1284,7 +1284,7 @@ export default function App() {
     eyeOuterColor, syncEyes, gradientEnabled, gradientColor1, gradientColor2, gradientType,
     logo, logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
     logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
-    dotPadding, eyePadding, frameStyle, frameText, frameColor, frameFont,
+    dotPadding, eyePadding, frameStyle, framePosition, frameText, frameColor, frameFont,
         frameSize,
         frameStrokeEnabled,
         frameStrokeWidth,
@@ -1300,7 +1300,7 @@ export default function App() {
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, 
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
-    activeTab, canvasSelection
+    activeTab, canvasSelection, textEditMode
   ]);
 
   useEffect(() => {
@@ -1325,10 +1325,14 @@ export default function App() {
       const labelHeight = size * 0.14;
       contentSize = size - (padding * 2) - labelHeight - (size * 0.06); 
       contentX = (size - contentSize) / 2;
-      contentY = padding + (size - padding * 2 - labelHeight - contentSize) / 2;
+      if (framePosition === 'top') {
+        contentY = padding + labelHeight + (size - padding * 2 - labelHeight - contentSize) / 2;
+      } else {
+        contentY = padding + (size - padding * 2 - labelHeight - contentSize) / 2;
+      }
     }
     return { contentX, contentY, contentSize };
-  }, [frameStyle]);
+  }, [frameStyle, framePosition]);
 
   // ── Canvas Interaction (Drag to Position) ──
   const handleCanvasInteraction = useCallback((e) => {
@@ -1554,7 +1558,8 @@ export default function App() {
 
       // Clicking inside the body region always triggers dragging/selection
       if (inRect(localX, localY, tx, ty, tw, th)) {
-        handleTabChange('badge');
+        setTextEditMode('center');
+        handleTabChange('text');
         setCanvasSelection('text');
         setIsDraggingCanvas(true);
         dragType.current = 'text';
@@ -1892,8 +1897,7 @@ export default function App() {
     { id: 'shapes', label: 'Shapes', icon: Hexagon },
     { id: 'logo', label: 'Logo', icon: ImageIcon },
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
-    { id: 'badge', label: 'Badge Text', icon: Type },
-    { id: 'banner', label: 'Banner Text', icon: Heading },
+    { id: 'text', label: 'Add Text', icon: Type },
   ];
 
   // ── Get the frame CSS class for the preview wrapper ──
@@ -2261,24 +2265,43 @@ export default function App() {
 
             </section>
 
-            {/* ─── Shared Unified Expandable Toolbar (Centralized Bottom Layer) ─── */}
-            {((activeTab === 'logo' && logo) || activeTab === 'badge' || activeTab === 'banner' || activeTab === 'color' || activeTab === 'shapes') && (
+             {/* ─── Shared Unified Expandable Toolbar (Centralized Bottom Layer) ─── */}
+            {((activeTab === 'logo' && logo) || activeTab === 'text' || activeTab === 'color' || activeTab === 'shapes') && (
               <div className="logo-toolbar-container">
                 <div className="unified-toolbar-card">
-                  {(activeTab === 'badge' || activeTab === 'banner') && (
+                  {activeTab === 'text' && (
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '10px 16px',
+                      justifyContent: 'center',
+                      padding: '12px 16px',
                       background: 'rgba(255, 255, 255, 0.02)',
                       borderBottom: '1px solid var(--border-color)',
                       borderTopLeftRadius: 'inherit',
                       borderTopRightRadius: 'inherit'
                     }}>
-                      <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                        {activeTab === 'badge' ? 'Configure Badge Text' : 'Configure Banner Text'}
-                      </span>
+                      <div className="seg-control" style={{ width: '100%', maxWidth: '320px', margin: '0 auto' }}>
+                        <button 
+                          className={`seg-btn ${textEditMode === 'center' ? 'active' : ''}`}
+                          onClick={() => {
+                            setTextEditMode('center');
+                            setCanvasSelection('text');
+                            if (textPopup) cancelEditing(); // Clear edit sub-drawer when switching modes
+                          }}
+                        >
+                          Center Text
+                        </button>
+                        <button 
+                          className={`seg-btn ${textEditMode === 'bottom' ? 'active' : ''}`}
+                          onClick={() => {
+                            setTextEditMode('bottom');
+                            setCanvasSelection(null);
+                            if (textPopup) cancelEditing(); // Clear edit sub-drawer when switching modes
+                          }}
+                        >
+                          Banner Text
+                        </button>
+                      </div>
                     </div>
                   )}
                   {(logoPopup || textPopup || colorPopup || shapePopup) ? (
@@ -2548,13 +2571,13 @@ export default function App() {
                       {/* TEXT PROPERTIES */}
                       {textPopup === 'input' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          {/* 1. Badge Text Section */}
-                          {activeTab === 'badge' && (
+                          {/* 1. Center Text Section */}
+                          {textEditMode === 'center' && (
                             <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-primary)', display: 'inline-block' }} />
-                                  Enable Badge Text
+                                  Enable Center Text
                                 </div>
                                 <Toggle
                                   checked={textCenterEnabled}
@@ -2581,7 +2604,7 @@ export default function App() {
                                     setTextCenterWidth(null);
                                     setTextCenterHeight(null);
                                   }} 
-                                  placeholder="Type badge text..." 
+                                  placeholder="Type center text..." 
                                   className="text-input-premium" 
                                   style={{ width: '100%', borderColor: 'var(--accent-primary)' }} 
                                 />
@@ -2590,7 +2613,7 @@ export default function App() {
                           )}
 
                           {/* 2. Banner Text Section */}
-                          {activeTab === 'banner' && (
+                          {textEditMode === 'bottom' && (
                             <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2605,15 +2628,34 @@ export default function App() {
                                 />
                               </div>
                               {frameStyle !== 'none' && (
-                                <input 
-                                  type="text" 
-                                  maxLength={50} 
-                                  value={frameText} 
-                                  onChange={(e) => setFrameText(e.target.value)} 
-                                  placeholder="Type banner text..." 
-                                  className="text-input-premium" 
-                                  style={{ width: '100%', borderColor: 'var(--accent-primary)' }} 
-                                />
+                                <>
+                                  <input 
+                                    type="text" 
+                                    maxLength={50} 
+                                    value={frameText} 
+                                    onChange={(e) => setFrameText(e.target.value)} 
+                                    placeholder="Type banner text..." 
+                                    className="text-input-premium" 
+                                    style={{ width: '100%', borderColor: 'var(--accent-primary)' }} 
+                                  />
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+                                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Banner Position</div>
+                                    <div className="seg-control">
+                                      <button 
+                                        className={`seg-btn ${framePosition === 'top' ? 'active' : ''}`}
+                                        onClick={() => setFramePosition('top')}
+                                      >
+                                        Top
+                                      </button>
+                                      <button 
+                                        className={`seg-btn ${framePosition === 'bottom' ? 'active' : ''}`}
+                                        onClick={() => setFramePosition('bottom')}
+                                      >
+                                        Bottom
+                                      </button>
+                                    </div>
+                                  </div>
+                                </>
                               )}
                             </div>
                           )}
@@ -3050,7 +3092,7 @@ export default function App() {
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'crop')}><Crop size={18} /><span>Crop</span></button>
                         </>
                       )}
-                      {activeTab === 'badge' && (
+                      {activeTab === 'text' && textEditMode === 'center' && (
                         <>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Text</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'pos')}><Maximize size={18} /><span>Position</span></button>
@@ -3063,7 +3105,7 @@ export default function App() {
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'bg')}><Hexagon size={18} /><span>Shape</span></button>
                         </>
                       )}
-                      {activeTab === 'banner' && (
+                      {activeTab === 'text' && textEditMode === 'bottom' && (
                         <>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Text</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
