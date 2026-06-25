@@ -539,6 +539,7 @@ export default function App() {
 
   // ── References ──
   const canvasRef = useRef(null);
+  const loupeCanvasRef = useRef(null);
   const renderTimeoutRef = useRef(null);
   const tempCanvas = useRef(document.createElement('canvas'));
   const tempCtx = useRef(tempCanvas.current.getContext('2d'));
@@ -1353,6 +1354,48 @@ export default function App() {
   }, [frameStyle]);
 
   // ── Pipette Handling ──
+  // ── Pipette Handling ──
+  const updateLoupe = useCallback((clientX, clientY) => {
+    if (!canvasRef.current || !loupeCanvasRef.current) return;
+    const mainCanvas = canvasRef.current;
+    const loupeCanvas = loupeCanvasRef.current;
+    const canvasRect = mainCanvas.getBoundingClientRect();
+
+    const scale = 512 / canvasRect.width;
+    const x = (clientX - canvasRect.left) * scale;
+    const y = (clientY - canvasRect.top) * scale;
+
+    const ctx = loupeCanvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, 80, 80);
+
+    // Source size: 11x11 pixels from main canvas (zooms by ~7.3x)
+    const srcSize = 11; 
+    const sx = Math.floor(x - srcSize / 2);
+    const sy = Math.floor(y - srcSize / 2);
+
+    // Draw magnified pixels
+    try {
+      ctx.drawImage(mainCanvas, sx, sy, srcSize, srcSize, 0, 0, 80, 80);
+    } catch (err) {
+      console.error("Loupe draw error:", err);
+    }
+
+    // Draw central pixel outline (crosshair)
+    const pixelSize = 80 / srcSize;
+    const cx = Math.floor(srcSize / 2) * pixelSize;
+    const cy = Math.floor(srcSize / 2) * pixelSize;
+
+    // Draw a border around the central pixel (the pixel currently being picked)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(cx, cy, pixelSize, pixelSize);
+    
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(cx - 0.5, cy - 0.5, pixelSize + 1, pixelSize + 1);
+  }, []);
+
   const handlePipettePointerDown = useCallback((e) => {
     if (!canvasRef.current) return;
     try {
@@ -1382,6 +1425,9 @@ export default function App() {
         setHoverColor(hex);
         setHoverPos({ x: clientX, y: clientY });
         
+        // Update the loupe canvas immediately on pointer down
+        setTimeout(() => updateLoupe(clientX, clientY), 0);
+        
         // On desktop click style (pointerType === 'mouse') picks color immediately on click
         if (e.pointerType === 'mouse') {
           if (pipetteTarget?.setter) {
@@ -1396,7 +1442,7 @@ export default function App() {
       }
     }
     e.preventDefault();
-  }, [pipetteTarget]);
+  }, [pipetteTarget, updateLoupe]);
 
   const handlePipettePointerMove = useCallback((e) => {
     if (!canvasRef.current) return;
@@ -1421,6 +1467,9 @@ export default function App() {
         const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`;
         setHoverColor(hex);
         setHoverPos({ x: clientX, y: clientY });
+        
+        // Update the loupe canvas immediately on move
+        updateLoupe(clientX, clientY);
       } catch (err) {
         setHoverColor(null);
       }
@@ -1428,7 +1477,7 @@ export default function App() {
       setHoverColor(null);
     }
     e.preventDefault();
-  }, []);
+  }, [updateLoupe]);
 
   const handlePipettePointerUp = useCallback((e) => {
     try {
@@ -3657,7 +3706,7 @@ export default function App() {
         </div>
       )}
 
-      {isPipetteActive && hoverColor && (
+      {isPipetteActive && (
         <div 
           style={{
             position: 'fixed',
@@ -3665,31 +3714,55 @@ export default function App() {
             top: `${hoverPos.y - 70}px`,
             transform: 'translate(-50%, -50%)',
             width: '80px',
+            height: '110px',
+            pointerEvents: 'none',
+            zIndex: 10001,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            visibility: hoverColor ? 'visible' : 'hidden',
+            opacity: hoverColor ? 1 : 0,
+            transition: 'opacity 0.15s ease, visibility 0.15s ease'
+          }}
+        >
+          {/* Circular bubble */}
+          <div style={{
+            width: '80px',
             height: '80px',
             borderRadius: '50%',
             border: '4px solid white',
             boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
-            backgroundColor: hoverColor,
-            pointerEvents: 'none',
-            zIndex: 10001,
+            overflow: 'hidden',
+            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transition: 'background-color 0.05s ease'
-          }}
-        >
+            backgroundColor: hoverColor || 'transparent'
+          }}>
+            <canvas 
+              ref={loupeCanvasRef} 
+              width={80} 
+              height={80} 
+              style={{ 
+                width: '80px', 
+                height: '80px',
+                display: 'block'
+              }} 
+            />
+            {/* Inner ring for visual contrast */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '50%',
+              border: '1px solid rgba(0,0,0,0.2)',
+              pointerEvents: 'none'
+            }} />
+          </div>
+
+          {/* Color Code Label under the bubble */}
           <div style={{
-            position: 'absolute',
-            inset: 0,
-            borderRadius: '50%',
-            border: '1px solid rgba(0,0,0,0.15)',
-            pointerEvents: 'none'
-          }} />
-          <div style={{
-            position: 'absolute',
-            bottom: '-28px',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            marginTop: '8px',
             backgroundColor: 'rgba(0,0,0,0.85)',
             backdropFilter: 'blur(4px)',
             color: 'white',
@@ -3702,7 +3775,7 @@ export default function App() {
             boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
             whiteSpace: 'nowrap'
           }}>
-            {hoverColor.toUpperCase()}
+            {hoverColor ? hoverColor.toUpperCase() : ''}
           </div>
         </div>
       )}
