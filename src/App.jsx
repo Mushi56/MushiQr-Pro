@@ -1353,11 +1353,14 @@ export default function App() {
   }, [frameStyle]);
 
   // ── Pipette Handling ──
-  const handlePipettePick = useCallback((e) => {
+  const handlePipettePointerDown = useCallback((e) => {
     if (!canvasRef.current) return;
+    try {
+      e.target.setPointerCapture(e.pointerId);
+    } catch (err) {}
+
     const canvas = canvasRef.current;
     const canvasRect = canvas.getBoundingClientRect();
-    
     const clientX = e.clientX;
     const clientY = e.clientY;
 
@@ -1376,26 +1379,29 @@ export default function App() {
         const pixel = ctx.getImageData(x, y, 1, 1).data;
         const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`;
         
-        if (pipetteTarget?.setter) {
-          pipetteTarget.setter(hex);
+        setHoverColor(hex);
+        setHoverPos({ x: clientX, y: clientY });
+        
+        // On desktop click style (pointerType === 'mouse') picks color immediately on click
+        if (e.pointerType === 'mouse') {
+          if (pipetteTarget?.setter) {
+            pipetteTarget.setter(hex);
+          }
+          setIsPipetteActive(false);
+          setHoverColor(null);
+          setAdvPicker(prev => ({ ...prev, open: true, color: hex }));
         }
-        setIsPipetteActive(false);
-        setHoverColor(null);
-        setAdvPicker(prev => ({ ...prev, open: true, color: hex }));
       } catch (err) {
         console.error("Failed to sample color:", err);
       }
-      e.preventDefault();
-    } else {
-      e.preventDefault();
     }
+    e.preventDefault();
   }, [pipetteTarget]);
 
-  const handlePointerMove = useCallback((e) => {
+  const handlePipettePointerMove = useCallback((e) => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const canvasRect = canvas.getBoundingClientRect();
-    
     const clientX = e.clientX;
     const clientY = e.clientY;
     
@@ -1421,7 +1427,25 @@ export default function App() {
     } else {
       setHoverColor(null);
     }
+    e.preventDefault();
   }, []);
+
+  const handlePipettePointerUp = useCallback((e) => {
+    try {
+      e.target.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+
+    // On touch screen, lifting finger completes selection
+    if (e.pointerType === 'touch' && hoverColor) {
+      if (pipetteTarget?.setter) {
+        pipetteTarget.setter(hoverColor);
+      }
+      setIsPipetteActive(false);
+      setHoverColor(null);
+      setAdvPicker(prev => ({ ...prev, open: true, color: hoverColor }));
+    }
+    e.preventDefault();
+  }, [hoverColor, pipetteTarget]);
 
   // ── Canvas Interaction (Drag to Position) ──
   const handleCanvasInteraction = useCallback((e) => {
@@ -3575,8 +3599,9 @@ export default function App() {
       {isPipetteActive && (
         <div 
           className="pipette-overlay fade-in"
-          onPointerDown={handlePipettePick}
-          onPointerMove={handlePointerMove}
+          onPointerDown={handlePipettePointerDown}
+          onPointerMove={handlePipettePointerMove}
+          onPointerUp={handlePipettePointerUp}
           style={{
             position: 'fixed',
             inset: 0,
