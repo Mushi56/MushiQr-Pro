@@ -70,9 +70,6 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
         zIndex: 10
       }}>
         <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Settings</h2>
-        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-          App preferences and information
-        </p>
       </div>
 
       {/* Content */}
