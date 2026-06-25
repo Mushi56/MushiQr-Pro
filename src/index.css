@@ -3485,7 +3485,7 @@ input[type="range"]::-moz-range-thumb {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ QR Preview Card Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* ── QR Preview Card ── */
 .qr-preview-card {
   position: sticky;
   top: 0;
@@ -3493,9 +3493,9 @@ input[type="range"]::-moz-range-thumb {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px; /* Increased gap */
-  padding: 30px 16px 24px; /* Increased vertical padding */
-  min-height: 480px; /* Increased from 440px for larger preview */
+  gap: 12px; /* Reduced gap */
+  padding: 16px; /* Reduced vertical and horizontal padding */
+  min-height: auto; /* Allow height to fit contents on mobile */
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
@@ -3506,8 +3506,7 @@ input[type="range"]::-moz-range-thumb {
 .qr-preview-wrapper {
   position: relative;
   width: 100%;
-  max-width: 360px;
-  /* Increased from 320px */
+  max-width: 300px; /* Reduced from 360px to prevent excessive height on mobile */
   aspect-ratio: 1;
 
   display: flex;
@@ -3516,7 +3515,7 @@ input[type="range"]::-moz-range-thumb {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
-  padding: 20px;
+  padding: 12px;
   box-shadow: var(--shadow-md);
   transition: all var(--transition-base);
 }
