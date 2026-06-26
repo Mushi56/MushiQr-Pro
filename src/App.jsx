@@ -791,6 +791,7 @@ export default function App() {
 
   // ── References ──
   const canvasRef = useRef(null);
+  const latestThumbnailRef = useRef(null);
   const loupeCanvasRef = useRef(null);
   const renderTimeoutRef = useRef(null);
   const tempCanvas = useRef(document.createElement('canvas'));
@@ -1223,7 +1224,7 @@ export default function App() {
           logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
           logoSrc: logo?.src || null,
           logoName: logo?.name || null,
-          thumbnail: canvasRef.current?.toDataURL('image/jpeg', 0.2) || null
+          thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.2) || null
         });
       }
     }
@@ -1361,7 +1362,7 @@ export default function App() {
       logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
       logoSrc: logo?.src || null,
       logoName: logo?.name || null,
-      thumbnail: canvasRef.current.toDataURL('image/jpeg', 0.5)
+      thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.5) || null
     });
     showToast('Added to Saved QRs', 'success');
   };
@@ -1562,6 +1563,13 @@ export default function App() {
         showHandle: canvasSelection === 'logo' || canvasSelection === 'text' || canvasSelection === 'frame-text',
         selectedType: canvasSelection === 'text' ? 'text' : (canvasSelection === 'frame-text' ? 'frame-text' : canvasSelection)
       });
+
+      // Cache latest thumbnail base64 data url for saving to history later
+      try {
+        latestThumbnailRef.current = canvasRef.current.toDataURL('image/jpeg', 0.25);
+      } catch (e) {
+        console.warn('Failed to cache thumbnail:', e);
+      }
     };
 
     if (isLowEndDevice) {
