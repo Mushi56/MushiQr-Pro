@@ -3963,9 +3963,9 @@ export default function App() {
       {toast && (
         <div className={`toast ${toast.type}`}>
           {toast.type === 'success' ? (
-            <CheckCircle2 color="var(--success)" size={15} />
+            <CheckCircle2 color="var(--success)" size={18} />
           ) : (
-            <XCircle color="var(--error)" size={15} />
+            <XCircle color="var(--error)" size={18} />
           )}
           {toast.message}
         </div>

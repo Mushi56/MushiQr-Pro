@@ -40,8 +40,8 @@ function HeroQRCanvas() {
       width="120" 
       height="120" 
       style={{ 
-        width: '84%', 
-        height: '84%', 
+        width: '80px', 
+        height: '80px', 
         display: 'block'
       }} 
     />
@@ -138,7 +138,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
             color: '#fff',
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'stretch',
+            alignItems: 'center',
             position: 'relative',
             overflow: 'hidden',
             boxShadow: '0 10px 32px rgba(214, 0, 54, 0.35)',
@@ -199,7 +199,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
             <div style={{ 
                background: 'rgba(255,255,255,0.15)',
                backdropFilter: 'blur(8px)',
-               aspectRatio: '1 / 1',
+               width: '100px',
+               height: '100px',
                borderRadius: '6px',
                border: '1px solid rgba(255,255,255,0.2)',
                flexShrink: 0,

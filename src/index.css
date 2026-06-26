@@ -7367,14 +7367,14 @@ button:active,
   background: var(--bg-dropdown-solid);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
-  padding: 8px 16px;
+  padding: 12px 22px;
   border-radius: 99px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  gap: 10px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
   z-index: 999999;
   pointer-events: none;
   animation: toastSlideDown 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
