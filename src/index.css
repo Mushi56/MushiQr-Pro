@@ -1155,7 +1155,7 @@ input[type="range"]::-moz-range-thumb {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 12px;
+  padding: 0;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: 6px;
