@@ -336,7 +336,7 @@ export default function HistoryPage({ onLoadQR, onNavigate }) {
                             }}
                           >
                             <div style={{
-                              width: '48px', height: '48px', borderRadius: '12px',
+                              width: '56px', height: '56px', borderRadius: '12px',
                               background: '#fff', display: 'flex', alignItems: 'center',
                               justifyContent: 'center', flexShrink: 0,
                               border: '1px solid var(--border-color)', overflow: 'hidden'
@@ -344,7 +344,7 @@ export default function HistoryPage({ onLoadQR, onNavigate }) {
                               {item.thumbnail ? (
                                 <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                               ) : (
-                                <QrCode size={24} color="var(--accent-primary)" />
+                                <QrCode size={28} color="var(--accent-primary)" />
                               )}
                             </div>
                             

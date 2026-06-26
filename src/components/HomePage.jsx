@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, MoreVertical, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2 } from 'lucide-react';
+import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2, Star } from 'lucide-react';
 import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
-import { getHistory, deleteFromHistory, clearHistory } from '../utils/storage';
+import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved } from '../utils/storage';
 import AppIcon from './AppIcon';
 
 function HeroQRCanvas() {
@@ -26,7 +26,7 @@ function HeroQRCanvas() {
       textCenter: null,
       frameStyle: 'none',
       quietZone: 0,                // No quiet zone for maximum size
-      size: 120,                   // High-res render size
+      size: 360,                   // High-res render size
       dotStyle: 'rounded',         // Rounded dot style
       eyeStyle: 'rounded'          // Rounded eye style
     };
@@ -37,8 +37,8 @@ function HeroQRCanvas() {
   return (
     <canvas 
       ref={canvasRef} 
-      width="120" 
-      height="120" 
+      width="360" 
+      height="360" 
       style={{ 
         width: '80px', 
         height: '80px', 
@@ -50,32 +50,20 @@ function HeroQRCanvas() {
 
 export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
   const [recentItems, setRecentItems] = useState([]);
-  const [openMenuId, setOpenMenuId] = useState(null);
-  const menuRef = useRef(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setOpenMenuId(null);
-      }
-    };
-    if (openMenuId) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [openMenuId]);
+  const [savedIds, setSavedIds] = useState(new Set());
 
   useEffect(() => {
     if (activePage === 'home') {
       const history = getHistory();
       setRecentItems(history.slice(0, 10));
+      setSavedIds(new Set(getSaved().map(s => s.id)));
     }
   }, [activePage]);
+
+  const handleSave = (item) => {
+    saveToSaved(item);
+    setSavedIds(new Set([...savedIds, item.id]));
+  };
 
   const quickOptions = [
     { id: QR_TYPES.URL, label: 'Website', icon: <Link2 size={20} /> },
@@ -289,7 +277,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
               }}
               >
                 <div style={{
-                  width: '48px', height: '48px', borderRadius: '12px',
+                  width: '56px', height: '56px', borderRadius: '12px',
                   background: '#fff', display: 'flex', alignItems: 'center',
                   justifyContent: 'center', flexShrink: 0,
                   border: '1px solid var(--border-color)', overflow: 'hidden'
@@ -297,7 +285,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
                   {item.thumbnail ? (
                     <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                   ) : (
-                    <QrCode size={24} color="var(--accent-primary)" />
+                    <QrCode size={28} color="var(--accent-primary)" />
                   )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -311,53 +299,49 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
                     {formatDate(item.timestamp)}
                   </p>
                 </div>
-                <div style={{ position: 'relative' }} ref={openMenuId === item.id ? menuRef : null}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                  {/* Save/Favorite Star */}
                   <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenMenuId(openMenuId === item.id ? null : item.id);
+                    onClick={() => handleSave(item)}
+                    style={{ 
+                      background: 'transparent', border: 'none', 
+                      color: 'var(--text-tertiary)', cursor: 'pointer',
+                      padding: '4px', borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}
-                    style={{ background: 'var(--bg-hover)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', cursor: 'pointer', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#F39C12'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
                   >
-                    <MoreVertical size={20} />
+                    <Star 
+                      size={18} 
+                      fill={savedIds.has(item.id) ? '#F39C12' : 'none'}
+                      style={{ 
+                        transition: 'all 0.3s ease',
+                        transform: savedIds.has(item.id) ? 'scale(1.2)' : 'scale(1)',
+                        color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'
+                      }}
+                    />
                   </button>
-                  {openMenuId === item.id && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      right: 0,
-                      background: 'var(--bg-elevated)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '12px',
-                      padding: '4px',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                      zIndex: 100,
-                      minWidth: '140px',
-                      animation: 'fadeIn 0.15s ease'
-                    }}>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const updated = deleteFromHistory(item.id);
-                          setRecentItems(updated.slice(0, 10));
-                          setOpenMenuId(null);
-                        }}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '10px',
-                          width: '100%', padding: '10px 12px',
-                          background: 'none', border: 'none',
-                          borderRadius: '8px',
-                          color: '#D60036', fontSize: '13px', fontWeight: 600,
-                          cursor: 'pointer',
-                          transition: 'background 0.15s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(214,0,54,0.15)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(214,0,54,0.06)'}
-                      >
-                        <Trash2 size={16} /> Delete
-                      </button>
-                    </div>
-                  )}
+
+                  {/* Delete Item */}
+                  <button 
+                    onClick={() => {
+                      if (window.confirm('Delete this item from history?')) {
+                        const updated = deleteFromHistory(item.id);
+                        setRecentItems(updated.slice(0, 10));
+                      }
+                    }}
+                    style={{ 
+                      background: 'transparent', border: 'none', 
+                      color: 'var(--text-tertiary)', cursor: 'pointer',
+                      padding: '4px', borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#D60036'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
               </div>
             )) : (
