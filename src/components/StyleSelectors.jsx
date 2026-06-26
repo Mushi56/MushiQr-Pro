@@ -36,6 +36,7 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
       style={{ 
         width: '100%', 
         height: '100%', 
+        borderRadius: '6px',
         objectFit: 'cover',
         display: 'block'
       }} 

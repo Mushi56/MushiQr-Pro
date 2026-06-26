@@ -1155,10 +1155,10 @@ input[type="range"]::-moz-range-thumb {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 6px;
+  padding: 12px;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 6px;
   cursor: pointer;
   transition: var(--transition-fast);
   font-size: 9px;
@@ -1176,7 +1176,7 @@ input[type="range"]::-moz-range-thumb {
 .style-option.active {
   background: var(--accent-soft);
   border: 2px solid var(--accent-primary) !important;
-  border-radius: 12px;
+  border-radius: 6px;
   /* Restored rounded edges */
   color: var(--accent-primary);
 }
@@ -1195,7 +1195,7 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: inherit;
+  border-radius: 6px;
   overflow: hidden;
 }
 
