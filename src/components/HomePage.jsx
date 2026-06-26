@@ -87,13 +87,17 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up">
         {/* Hero Card */}
         <div style={{ padding: '0 var(--main-padding-x)', marginTop: '24px' }}>
-          <div className="hero-card-premium" style={{ 
-            borderRadius: '24px',
-            padding: '24px 20px',
+          <div style={{ 
+            background: 'linear-gradient(135deg, #8B0020 0%, #D60036 45%, #FF2D5E 100%)',
+            borderRadius: '12px',
+            padding: '20px 18px',
             color: '#fff',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: '0 10px 32px rgba(214, 0, 54, 0.35)',
             gap: '12px'
           }}>
             {/* Decorative circles for depth */}
@@ -108,23 +112,17 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
               background: 'rgba(255,255,255,0.06)', pointerEvents: 'none'
             }} />
 
-            <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', minWidth: 0, justifyContent: 'center' }}>
-                <div>
-                  <span className="premium-badge" style={{ marginBottom: '8px' }}>
-                    <Crown size={12} fill="#FFD700" strokeWidth={0} /> PRO ENABLED
-                  </span>
-                </div>
+            <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0, justifyContent: 'center' }}>
                 <h2 style={{ 
-                  fontSize: '26px', fontWeight: 800, 
+                  fontSize: '24px', fontWeight: 800, 
                   margin: 0, color: '#fff',
-                  lineHeight: 1.1, whiteSpace: 'nowrap',
-                  fontFamily: 'var(--font-display)'
+                  lineHeight: 1.1, whiteSpace: 'nowrap'
                 }}>Create QR Code</h2>
                 <p style={{ 
                   fontSize: '13px', margin: 0, 
-                  color: 'rgba(255,255,255,0.8)',
+                  color: 'rgba(255,255,255,0.75)',
                   fontWeight: 500, whiteSpace: 'nowrap'
-                }}>Fast, Custom & Beautiful</p>
+                }}>Fast, Simple & Beautiful</p>
 
               <button 
                 onClick={() => onNavigate('generator')}
@@ -132,20 +130,23 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
                   backgroundColor: '#fff',
                   color: '#D60036',
                   border: 'none',
-                  borderRadius: '12px',
-                  padding: '11px 20px',
+                  borderRadius: '10px',
+                  padding: '10px 18px',
                   fontSize: '14px',
                   fontWeight: 700,
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  transition: 'transform 0.2s',
                   alignSelf: 'flex-start',
                   whiteSpace: 'nowrap',
                   zIndex: 1,
-                  marginTop: '6px'
+                  marginTop: '2px'
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <Plus size={16} /> Create New
               </button>
@@ -154,17 +155,16 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
             <div style={{ 
               background: 'rgba(255,255,255,0.15)',
               backdropFilter: 'blur(8px)',
-              padding: '18px',
-              borderRadius: '20px',
+              padding: '16px',
+              borderRadius: '16px',
               border: '1px solid rgba(255,255,255,0.2)',
               flexShrink: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              zIndex: 1,
-              boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+              zIndex: 1
             }}>
-              <QrCode size={64} color="#fff" />
+              <QrCode size={60} color="#fff" />
             </div>
           </div>
         </div>
