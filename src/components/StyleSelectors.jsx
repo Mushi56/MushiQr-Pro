@@ -226,18 +226,15 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
           className={`style-option ${value === style ? 'active' : ''}`}
           onClick={() => onChange(style)}
           title={style}
-          style={{ height: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 6px' }}
+          style={{ padding: '4px' }}
         >
-          <div className="style-option-preview" style={{ width: '44px', height: '44px' }}>
+          <div className="style-option-preview" style={{ width: '52px', height: '52px' }}>
             {qrParams && qrParams.qrMatrixInfo ? (
               <MiniQRCanvas qrParams={qrParams} overrideParams={{ dotStyle: style }} />
             ) : (
               preview
             )}
           </div>
-          <span style={{ fontSize: '8px', fontWeight: 600, opacity: 0.8, textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
-            {style.replace('-', ' ')}
-          </span>
         </button>
       ))}
     </div>
@@ -253,18 +250,15 @@ export function EyeStyleSelector({ value, onChange, qrParams }) {
           className={`style-option ${value === style ? 'active' : ''}`}
           onClick={() => onChange(style)}
           title={style}
-          style={{ height: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 6px' }}
+          style={{ padding: '4px' }}
         >
-          <div className="style-option-preview" style={{ width: '44px', height: '44px' }}>
+          <div className="style-option-preview" style={{ width: '52px', height: '52px' }}>
             {qrParams && qrParams.qrMatrixInfo ? (
               <MiniQRCanvas qrParams={qrParams} overrideParams={{ eyeStyle: style }} />
             ) : (
               preview
             )}
           </div>
-          <span style={{ fontSize: '8px', fontWeight: 600, opacity: 0.8, textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
-            {style.replace('-', ' ')}
-          </span>
         </button>
       ))}
     </div>
