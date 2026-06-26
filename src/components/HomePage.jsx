@@ -156,44 +156,50 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
               background: 'rgba(255,255,255,0.06)', pointerEvents: 'none'
             }} />
 
-            <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0, justifyContent: 'center' }}>
-                <h2 style={{ 
-                  fontSize: '24px', fontWeight: 800, 
-                  margin: 0, color: '#fff',
-                  lineHeight: 1.1, whiteSpace: 'nowrap'
-                }}>Create QR Code</h2>
-                <p style={{ 
-                  fontSize: '13px', margin: 0, 
-                  color: 'rgba(255,255,255,0.75)',
-                  fontWeight: 500, whiteSpace: 'nowrap'
-                }}>Fast, Simple & Beautiful</p>
+            <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: 'fit-content', alignItems: 'stretch' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                  <h2 style={{ 
+                    fontSize: '21px', fontWeight: 800, 
+                    margin: 0, color: '#fff',
+                    lineHeight: 1.1, whiteSpace: 'nowrap',
+                    textAlign: 'left'
+                  }}>Create QR Code</h2>
+                  <p style={{ 
+                    fontSize: '13px', margin: 0, 
+                    color: 'rgba(255,255,255,0.75)',
+                    fontWeight: 500, whiteSpace: 'nowrap',
+                    textAlign: 'left'
+                  }}>Fast, Simple & Beautiful</p>
+                </div>
 
-              <button 
-                onClick={() => onNavigate('generator')}
-                style={{
-                  backgroundColor: '#fff',
-                  color: '#D60036',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '10px 18px',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  transition: 'transform 0.2s',
-                  alignSelf: 'flex-start',
-                  whiteSpace: 'nowrap',
-                  zIndex: 1,
-                  marginTop: '2px'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              >
-                <Plus size={16} /> Create New
-              </button>
+                <button 
+                  onClick={() => onNavigate('generator')}
+                  style={{
+                    backgroundColor: '#fff',
+                    color: '#D60036',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '10px 18px',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    transition: 'transform 0.2s',
+                    width: '100%',
+                    whiteSpace: 'nowrap',
+                    zIndex: 1
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  <Plus size={16} /> Create New
+                </button>
+              </div>
             </div>
 
             <div style={{ 
