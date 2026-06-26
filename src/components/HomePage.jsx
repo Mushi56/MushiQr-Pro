@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, MoreVertical, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2 } from 'lucide-react';
+import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, MoreVertical, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2 } from 'lucide-react';
 import { QR_TYPES } from '../utils/qrEngine';
 import { getHistory, deleteFromHistory, clearHistory } from '../utils/storage';
 import AppIcon from './AppIcon';
@@ -109,6 +109,11 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
             }} />
 
             <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', minWidth: 0, justifyContent: 'center' }}>
+                <div>
+                  <span className="premium-badge" style={{ marginBottom: '8px' }}>
+                    <Crown size={12} fill="#FFD700" strokeWidth={0} /> PRO ENABLED
+                  </span>
+                </div>
                 <h2 style={{ 
                   fontSize: '26px', fontWeight: 800, 
                   margin: 0, color: '#fff',
@@ -168,20 +173,16 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
         <div style={{ padding: '24px var(--main-padding-x)' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Quick Create</h3>
           <div style={{ 
-            display: 'flex', 
-            gap: '12px', 
-            overflowX: 'auto', 
-            paddingBottom: '8px', 
-            scrollbarWidth: 'none', 
-            msOverflowStyle: 'none', 
-            WebkitOverflowScrolling: 'touch' 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(5, 1fr)', 
+            gap: '12px' 
           }}>
             {quickOptions.map(option => (
               <button
                 key={option.id}
                 onClick={() => onQuickCreate(option.id)}
                 className="quick-option-card"
-                style={{ flexShrink: 0, width: '80px' }}
+                style={{ width: '100%' }}
               >
                 <div className="quick-option-icon-wrapper">
                   {React.cloneElement(option.icon, { size: 20, strokeWidth: 1.8 })}
@@ -240,8 +241,17 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
                 e.currentTarget.style.borderColor = 'var(--border-color)';
               }}
               >
-                <div style={{ width: '48px', height: '48px', background: 'rgba(214, 0, 54, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <QrCode size={24} color="var(--accent-primary)" />
+                <div style={{
+                  width: '48px', height: '48px', borderRadius: '12px',
+                  background: '#fff', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', flexShrink: 0,
+                  border: '1px solid var(--border-color)', overflow: 'hidden'
+                }}>
+                  {item.thumbnail ? (
+                    <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                  ) : (
+                    <QrCode size={24} color="var(--accent-primary)" />
+                  )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
