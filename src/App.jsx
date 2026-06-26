@@ -615,12 +615,9 @@ export default function App() {
   useEffect(() => {
     const page = location.state?.activePage || getPageFromPath(location.pathname);
     if (page !== activePage) {
-      if (activePage === 'generator' && page !== 'generator') {
-        triggerSaveToHistory();
-      }
       setActivePage(page);
     }
-  }, [location.pathname, location.state, activePage]);
+  }, [location.pathname, location.state]);
 
 
 
@@ -819,25 +816,6 @@ export default function App() {
   const isInternalUpdate = useRef(false);
   const preEditSnapshot = useRef(null);
 
-  function triggerSaveToHistory() {
-    if (activePage === 'generator') {
-      const dataString = formatQRData(qrType, qrData);
-      if (dataString) {
-        saveToHistory({
-          source: 'create',
-          qrType, qrData, displayText: dataString.substring(0, 50), errorLevel,
-          qrColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType,
-          dotStyle, eyeStyle, eyeColor, eyeOuterColor, dotPadding, eyePadding,
-          logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
-          logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
-          logoSrc: logo?.src || null,
-          logoName: logo?.name || null,
-          thumbnail: canvasRef.current?.toDataURL('image/png') || null
-        });
-      }
-    }
-  }
-
   const startEditing = (type, val) => {
     if (!preEditSnapshot.current) {
       preEditSnapshot.current = getSnapshot();
@@ -901,9 +879,6 @@ export default function App() {
   // Custom navigation wrapper to track history
   const navigateTo = (page) => {
     if (page !== activePage) {
-      if (activePage === 'generator' && page !== 'generator') {
-        triggerSaveToHistory();
-      }
       if (logoPopup || textPopup || colorPopup || shapePopup) {
         applyEditing();
       }
@@ -1229,7 +1204,30 @@ export default function App() {
   }, []);
 
 
+  // ── Save to History when leaving the generator page ──
+  const prevPageRef = useRef(activePage);
+  useEffect(() => {
+    const prevPage = prevPageRef.current;
+    prevPageRef.current = activePage;
 
+    // Save generated code to history when navigating AWAY from the generator
+    if (prevPage === 'generator' && activePage !== 'generator') {
+      const dataString = formatQRData(qrType, qrData);
+      if (dataString) {
+        saveToHistory({
+          source: 'create',
+          qrType, qrData, displayText: dataString.substring(0, 50), errorLevel,
+          qrColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType,
+          dotStyle, eyeStyle, eyeColor, eyeOuterColor, dotPadding, eyePadding,
+          logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
+          logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
+          logoSrc: logo?.src || null,
+          logoName: logo?.name || null,
+          thumbnail: canvasRef.current?.toDataURL('image/jpeg', 0.2) || null
+        });
+      }
+    }
+  }, [activePage]);
 
   // ── Auto-upgrade error correction when logo is present ──
   useEffect(() => {
@@ -3965,9 +3963,9 @@ export default function App() {
       {toast && (
         <div className={`toast ${toast.type}`}>
           {toast.type === 'success' ? (
-            <CheckCircle2 color="var(--success)" size={18} />
+            <CheckCircle2 color="var(--success)" size={15} />
           ) : (
-            <XCircle color="var(--error)" size={18} />
+            <XCircle color="var(--error)" size={15} />
           )}
           {toast.message}
         </div>
