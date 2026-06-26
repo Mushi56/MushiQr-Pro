@@ -13,6 +13,11 @@ createRoot(document.getElementById('root')).render(
     <HashRouter>
       <Routes>
         <Route path="/" element={<App />} />
+        <Route path="/generator" element={<App />} />
+        <Route path="/settings" element={<App />} />
+        <Route path="/saved" element={<App />} />
+        <Route path="/history" element={<App />} />
+        <Route path="/scanner" element={<App />} />
         <Route path="/about" element={<About />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />

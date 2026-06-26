@@ -70,7 +70,7 @@ import SettingsPage from './components/SettingsPage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const TEXT_SHAPES = [
   { id: 'solid', label: 'Solid Box' },
@@ -548,20 +548,32 @@ function parseRawQRText(text) {
 export default function App() {
   // ── Tab & Theme ──
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const getPageFromPath = (path) => {
+    if (path === '/generator') return 'generator';
+    if (path === '/settings') return 'settings';
+    if (path === '/saved') return 'saved';
+    if (path === '/history') return 'history';
+    if (path === '/scanner') return 'scanner';
+    return 'home';
+  };
+
   const [activeTab, setActiveTab] = useState('content');
   const [tabHistory, setTabHistory] = useState([]);
   const [activePage, setActivePage] = useState(() => {
-    return location.state?.activePage || 'home';
+    return location.state?.activePage || getPageFromPath(location.pathname);
   });
   const [previousPage, setPreviousPage] = useState('home');
   const [theme, setTheme] = useState('auto');
   const [effectiveTheme, setEffectiveTheme] = useState('dark');
 
   useEffect(() => {
-    if (location.state?.activePage) {
-      setActivePage(location.state.activePage);
+    const page = location.state?.activePage || getPageFromPath(location.pathname);
+    if (page !== activePage) {
+      setActivePage(page);
     }
-  }, [location.state]);
+  }, [location.pathname, location.state]);
 
 
 
@@ -591,7 +603,7 @@ export default function App() {
     // 2. Navigation logic
     if (activePage === 'scanner') {
       // From Scan to Home
-      setActivePage('home');
+      navigateTo('home');
     } else if (activePage === 'generator') {
       // ── IMPROVED CREATOR NAVIGATION ──
       // If we have tab history, go back to previous tab
@@ -603,12 +615,12 @@ export default function App() {
       }
 
       // If no tab history, exit to home immediately
-      setActivePage(previousPage || 'home');
+      navigateTo(previousPage || 'home');
     } else if (activePage === 'history') {
       // From History/Recent/Menu to previous tab
-      setActivePage(previousPage || 'home');
+      navigateTo(previousPage || 'home');
     } else if (activePage !== 'home') {
-      setActivePage('home');
+      navigateTo('home');
     }
   };
 
@@ -828,6 +840,18 @@ export default function App() {
       }
       setCanvasSelection(null);
       setPreviousPage(activePage);
+
+      let path = '/';
+      if (page === 'generator') path = '/generator';
+      else if (page === 'settings') path = '/settings';
+      else if (page === 'saved') path = '/saved';
+      else if (page === 'history') path = '/history';
+      else if (page === 'scanner') path = '/scanner';
+
+      if (location.pathname !== path) {
+        navigate(path);
+      }
+
       setActivePage(page);
       // Clear tab history when starting a new session or returning home
       if (page === 'generator' || page === 'home') {
