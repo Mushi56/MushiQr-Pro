@@ -2532,6 +2532,83 @@ export default function App() {
       default: return '';
     }
   };
+  const qrParams = {
+    qrMatrixInfo,
+    qrColor,
+    bgColor,
+    bgTransparent,
+    dotStyle,
+    eyeStyle,
+    eyeColor,
+    eyeOuterColor,
+    syncEyes,
+    dotPadding,
+    eyePadding,
+    gradientEnabled,
+    gradientColor1,
+    gradientColor2,
+    gradientType,
+    qrTextureEnabled,
+    qrTexture,
+    qrTextureSyncEyes,
+    logo: logo?.image,
+    logoWidth,
+    logoHeight,
+    logoPadding,
+    logoBackground,
+    logoBgColor,
+    logoBgShape,
+    logoOutline,
+    logoOutlineColor,
+    logoOutlineWidth,
+    logoOutlineOpacity,
+    quietZone: 2,
+    frameStyle,
+    frameText,
+    frameColor,
+    frameFont,
+    frameSize,
+    frameStrokeEnabled,
+    frameStrokeWidth,
+    frameStrokeColor,
+    frameShadowEnabled,
+    frameShadowBlur,
+    frameShadowColor,
+    framePosition,
+    frameRotation,
+    textCenterEnabled,
+    textCenter: textCenterEnabled ? textCenterText : null,
+    textCenterSize,
+    textCenterColor,
+    textCenterFont,
+    textCenterStrokeEnabled,
+    textCenterStrokeWidth,
+    textCenterStrokeColor,
+    textCenterShadowEnabled,
+    textCenterShadowBlur,
+    textCenterShadowColor,
+    textCenterPosX,
+    textCenterPosY,
+    textCenterRotation,
+    textCenterWidth,
+    textCenterHeight,
+    logoPosX,
+    logoPosY,
+    logoOpacity,
+    logoRotation,
+    logoShadowEnabled,
+    logoShadowColor,
+    logoShadowBlur,
+    logoShadowOffsetX,
+    logoShadowOffsetY,
+    logoInnerShadowEnabled,
+    logoEraseColorEnabled,
+    logoEraseColor,
+    logoEraseTolerance,
+    logoEraseSmoothing,
+    logoTexture,
+    logoCrop
+  };
 
   return (
     <div className="app redesigned">
@@ -3675,14 +3752,14 @@ export default function App() {
                           )}
                         </div>
                       )}
-                      {shapePopup === 'dots' && (
+                       {shapePopup === 'dots' && (
                         <div className="fade-in">
-                          <DotStyleSelector value={dotStyle} onChange={setDotStyle} />
+                          <DotStyleSelector value={dotStyle} onChange={setDotStyle} qrParams={qrParams} />
                         </div>
                       )}
                       {shapePopup === 'eyes' && (
                         <div className="fade-in">
-                          <EyeStyleSelector value={eyeStyle} onChange={setEyeStyle} />
+                          <EyeStyleSelector value={eyeStyle} onChange={setEyeStyle} qrParams={qrParams} />
                         </div>
                       )}
                     </div>

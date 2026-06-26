@@ -1,4 +1,38 @@
-import { DOT_STYLES, EYE_STYLES } from '../utils/qrEngine';
+import React, { useEffect, useRef } from 'react';
+import { DOT_STYLES, EYE_STYLES, renderQR } from '../utils/qrEngine';
+
+function MiniQRCanvas({ qrParams, overrideParams }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current || !qrParams || !qrParams.qrMatrixInfo) return;
+
+    const options = {
+      ...qrParams,
+      ...qrParams.qrMatrixInfo,
+      size: 96,           // small preview size
+      quietZone: 0,        // no margin inside the preview box
+      // Overrides for dots/eyes specific preview
+      ...overrideParams
+    };
+
+    renderQR(canvasRef.current, options);
+  }, [qrParams, overrideParams]);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      width="96" 
+      height="96" 
+      style={{ 
+        width: '100%', 
+        height: '100%', 
+        borderRadius: '6px',
+        objectFit: 'contain'
+      }} 
+    />
+  );
+}
 
 const DOT_PREVIEWS = {
   [DOT_STYLES.SQUARE]: (
@@ -174,7 +208,7 @@ const EYE_PREVIEWS = {
   ),
 };
 
-export function DotStyleSelector({ value, onChange }) {
+export function DotStyleSelector({ value, onChange, qrParams }) {
   return (
     <div className="style-grid">
       {Object.entries(DOT_PREVIEWS).map(([style, preview]) => (
@@ -183,15 +217,25 @@ export function DotStyleSelector({ value, onChange }) {
           className={`style-option ${value === style ? 'active' : ''}`}
           onClick={() => onChange(style)}
           title={style}
+          style={{ height: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 6px' }}
         >
-          <div className="style-option-preview">{preview}</div>
+          <div className="style-option-preview" style={{ width: '44px', height: '44px' }}>
+            {qrParams && qrParams.qrMatrixInfo ? (
+              <MiniQRCanvas qrParams={qrParams} overrideParams={{ dotStyle: style }} />
+            ) : (
+              preview
+            )}
+          </div>
+          <span style={{ fontSize: '8px', fontWeight: 600, opacity: 0.8, textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+            {style.replace('-', ' ')}
+          </span>
         </button>
       ))}
     </div>
   );
 }
 
-export function EyeStyleSelector({ value, onChange }) {
+export function EyeStyleSelector({ value, onChange, qrParams }) {
   return (
     <div className="style-grid">
       {Object.entries(EYE_PREVIEWS).map(([style, preview]) => (
@@ -200,8 +244,18 @@ export function EyeStyleSelector({ value, onChange }) {
           className={`style-option ${value === style ? 'active' : ''}`}
           onClick={() => onChange(style)}
           title={style}
+          style={{ height: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 6px' }}
         >
-          <div className="style-option-preview">{preview}</div>
+          <div className="style-option-preview" style={{ width: '44px', height: '44px' }}>
+            {qrParams && qrParams.qrMatrixInfo ? (
+              <MiniQRCanvas qrParams={qrParams} overrideParams={{ eyeStyle: style }} />
+            ) : (
+              preview
+            )}
+          </div>
+          <span style={{ fontSize: '8px', fontWeight: 600, opacity: 0.8, textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+            {style.replace('-', ' ')}
+          </span>
         </button>
       ))}
     </div>
