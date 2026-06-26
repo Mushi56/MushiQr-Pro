@@ -827,7 +827,10 @@ export default function App() {
       setCanvasSelection('logo');
     } else if (type === 'text') {
       setTextPopup(val);
-      setCanvasSelection('text');
+      if (canvasSelection !== 'text' && canvasSelection !== 'frame-text') {
+        setCanvasSelection('text');
+        setTextEditMode('center');
+      }
     } else if (type === 'color') {
       setColorPopup(val);
       setCanvasSelection(null);
@@ -869,7 +872,10 @@ export default function App() {
 
       // Manage canvas selections for interactive outlines/handles
       if (tabId === 'text') {
-        setCanvasSelection('text');
+        if (canvasSelection !== 'text' && canvasSelection !== 'frame-text') {
+          setCanvasSelection('text');
+          setTextEditMode('center');
+        }
       } else if (tabId === 'logo') {
         setCanvasSelection('logo');
       } else {
