@@ -1,8 +1,52 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, MoreVertical, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2 } from 'lucide-react';
-import { QR_TYPES } from '../utils/qrEngine';
+import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
 import { getHistory, deleteFromHistory, clearHistory } from '../utils/storage';
 import AppIcon from './AppIcon';
+
+function HeroQRCanvas() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    // Generate a clean "Hello User" matrix
+    const demoMatrixInfo = generateQRMatrix("Hello User", 'H');
+    if (!demoMatrixInfo) return;
+
+    const options = {
+      ...demoMatrixInfo,
+      bgColor: 'transparent',
+      bgTransparent: true,
+      qrColor: '#FFFFFF',          // Consistent white color
+      eyeColor: '#FFFFFF',
+      eyeOuterColor: '#FFFFFF',
+      logo: null,
+      textCenterEnabled: false,
+      textCenter: null,
+      frameStyle: 'none',
+      quietZone: 0,                // No quiet zone for maximum size
+      size: 120,                   // High-res render size
+      dotStyle: 'rounded',         // Rounded dot style
+      eyeStyle: 'rounded'          // Rounded eye style
+    };
+
+    renderQR(canvasRef.current, options);
+  }, []);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      width="120" 
+      height="120" 
+      style={{ 
+        width: '60px', 
+        height: '60px', 
+        display: 'block'
+      }} 
+    />
+  );
+}
 
 export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
   const [recentItems, setRecentItems] = useState([]);
@@ -153,19 +197,20 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
             </div>
 
             <div style={{ 
-              background: 'rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(8px)',
-              padding: '16px',
-              borderRadius: '16px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1
-            }}>
-              <QrCode size={60} color="#fff" />
-            </div>
+               background: 'rgba(255,255,255,0.15)',
+               backdropFilter: 'blur(8px)',
+               width: '100px',
+               height: '100px',
+               borderRadius: '6px',
+               border: '1px solid rgba(255,255,255,0.2)',
+               flexShrink: 0,
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
+               zIndex: 1
+             }}>
+               <HeroQRCanvas />
+             </div>
           </div>
         </div>
 
