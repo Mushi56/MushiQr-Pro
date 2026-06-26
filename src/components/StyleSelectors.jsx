@@ -21,7 +21,7 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
       textCenter: null,
       frameStyle: 'none',          // Remove outer frames
       quietZone: 1,                // Add a very small quiet zone to maximize visual size
-      size: 128,                   // Render size
+      size: 384,                   // Render size
       ...overrideParams
     };
 
@@ -31,8 +31,8 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
   return (
     <canvas 
       ref={canvasRef} 
-      width="128" 
-      height="128" 
+      width="384" 
+      height="384" 
       style={{ 
         width: '100%', 
         height: '100%', 

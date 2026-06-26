@@ -804,6 +804,7 @@ export default function App() {
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', setter: null });
   const handleOpenAdv = (color, setter) => setAdvPicker({ open: true, color, setter });
   const [selectedFormat, setSelectedFormat] = useState('PNG');
+  const [exportQuality, setExportQuality] = useState('High'); // Default to High (2048px)
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
   const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
   const downloadBtnRef = useRef(null);
@@ -1224,7 +1225,7 @@ export default function App() {
           logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
           logoSrc: logo?.src || null,
           logoName: logo?.name || null,
-          thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.2) || null
+          thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.8) || null
         });
       }
     }
@@ -1335,12 +1336,71 @@ export default function App() {
 
   // ── Download ──
   const FORMAT_MAP = { PNG: downloadPNG, SVG: downloadSVG, PDF: downloadPDF, JPG: downloadJPG };
+  const QUALITY_SIZES = {
+    'Low': 512,
+    'Medium': 1024,
+    'High': 2048,
+    'Ultra': 4096
+  };
+
+  const generateExportCanvas = (exportSize) => {
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = exportSize;
+    tempCanvas.height = exportSize;
+    
+    renderQR(tempCanvas, {
+      ...qrMatrixInfo, 
+      size: exportSize,
+      qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
+      eyeColor,
+      eyeOuterColor,
+      syncEyes,
+      dotPadding, eyePadding,
+      gradientEnabled,
+      gradientColor1,
+      gradientColor2,
+      gradientType,
+      qrTextureEnabled,
+      qrTexture,
+      qrTextureSyncEyes,
+      logo: logo?.image, logoWidth, logoHeight, logoPadding,
+      logoBackground, logoBgColor, logoBgShape,
+      logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
+      quietZone: 2, frameStyle, frameText, frameColor, frameFont,
+      frameSize,
+      frameStrokeEnabled,
+      frameStrokeWidth,
+      frameStrokeColor,
+      frameShadowEnabled,
+      frameShadowBlur,
+      frameShadowColor,
+      framePosition,
+      frameRotation,
+      textCenterEnabled, 
+      textCenter: textCenterEnabled ? textCenterText : null,
+      textCenterSize, textCenterColor, textCenterFont,
+      textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
+      textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
+      textCenterPosX, textCenterPosY, textCenterRotation,
+      textCenterWidth, textCenterHeight,
+      logoPosX, logoPosY,
+      logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
+      logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop,
+      showHandle: false,
+      selectedType: null
+    });
+    
+    return tempCanvas;
+  };
 
   const handleDownload = async (format, downloadFn) => {
     if (!canvasRef.current) return;
     setDownloadingFormat(format);
     try {
-      const result = await downloadFn(canvasRef.current);
+      const exportSize = QUALITY_SIZES[exportQuality] || 2048;
+      const exportCanvas = generateExportCanvas(exportSize);
+      
+      const result = await downloadFn(exportCanvas);
       if (result === 'gallery') {
         showToast('Saved to Gallery');
       } else if (result === 'share') {
@@ -1372,7 +1432,7 @@ export default function App() {
       logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
       logoSrc: logo?.src || null,
       logoName: logo?.name || null,
-      thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.5) || null
+      thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.8) || null
     });
     showToast('Added to Saved QRs', 'success');
   };
@@ -1576,7 +1636,7 @@ export default function App() {
 
       // Cache latest thumbnail base64 data url for saving to history later
       try {
-        latestThumbnailRef.current = canvasRef.current.toDataURL('image/jpeg', 0.25);
+        latestThumbnailRef.current = canvasRef.current.toDataURL('image/jpeg', 0.8);
       } catch (e) {
         console.warn('Failed to cache thumbnail:', e);
       }
@@ -2752,6 +2812,51 @@ export default function App() {
                           >
                             <Icon size={18} />
                             <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="dropdown-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '0' }} />
+
+                    <div className="dropdown-section" style={{ padding: '12px' }}>
+                      <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Export Quality</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {[
+                          { key: 'Low', label: 'Low Quality', desc: '512 × 512 px • Fast' },
+                          { key: 'Medium', label: 'Normal Quality', desc: '1024 × 1024 px • Standard' },
+                          { key: 'High', label: 'High Quality', desc: '2048 × 2048 px • HD Recommended' },
+                          { key: 'Ultra', label: 'Ultra High (4K)', desc: '4096 × 4096 px • Ultra Sharp' }
+                        ].map((q) => (
+                          <button
+                            key={q.key}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExportQuality(q.key);
+                            }}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '8px 12px',
+                              background: exportQuality === q.key ? 'var(--accent-soft)' : 'transparent',
+                              border: '1px solid',
+                              borderColor: exportQuality === q.key ? 'var(--accent-primary)' : 'var(--border-color)',
+                              borderRadius: '8px',
+                              color: 'var(--text-primary)',
+                              cursor: 'pointer',
+                              width: '100%',
+                              transition: 'all 0.15s ease',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <div>
+                              <span style={{ fontSize: '12px', fontWeight: 700, display: 'block', color: exportQuality === q.key ? 'var(--accent-primary)' : 'var(--text-primary)' }}>{q.label}</span>
+                              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{q.desc}</span>
+                            </div>
+                            {exportQuality === q.key && (
+                              <CheckCircle2 size={14} color="var(--accent-primary)" />
+                            )}
                           </button>
                         ))}
                       </div>
