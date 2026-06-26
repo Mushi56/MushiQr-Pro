@@ -64,8 +64,8 @@ export default function Terms() {
         </Section>
 
         <div style={{ marginTop: '40px', textAlign: 'center' }}>
-          <Link to="/" style={styles.backLink}>
-            <ArrowLeft size={16} /> Back to Generator
+          <Link to="/" state={{ activePage: 'settings' }} style={styles.backLink}>
+            <ArrowLeft size={16} /> Back to Settings
           </Link>
         </div>
       </div>

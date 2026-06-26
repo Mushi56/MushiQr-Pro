@@ -70,6 +70,7 @@ import SettingsPage from './components/SettingsPage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
+import { useLocation } from 'react-router-dom';
 
 const TEXT_SHAPES = [
   { id: 'solid', label: 'Solid Box' },
@@ -360,12 +361,21 @@ class ErrorBoundary extends Component {
 
 export default function App() {
   // ── Tab & Theme ──
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('content');
   const [tabHistory, setTabHistory] = useState([]);
-  const [activePage, setActivePage] = useState('home'); // 'home', 'generator', 'scanner', 'history'
+  const [activePage, setActivePage] = useState(() => {
+    return location.state?.activePage || 'home';
+  });
   const [previousPage, setPreviousPage] = useState('home');
   const [theme, setTheme] = useState('auto');
   const [effectiveTheme, setEffectiveTheme] = useState('dark');
+
+  useEffect(() => {
+    if (location.state?.activePage) {
+      setActivePage(location.state.activePage);
+    }
+  }, [location.state]);
 
 
 

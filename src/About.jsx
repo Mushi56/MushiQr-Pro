@@ -44,8 +44,8 @@ export default function About() {
         </p>
         <Link to="/privacy-policy" style={styles.link}>Privacy Policy</Link>
         <div style={{ marginTop: '20px' }}>
-          <Link to="/" style={styles.backLink}>
-            <ArrowLeft size={16} /> Back to Generator
+          <Link to="/" state={{ activePage: 'settings' }} style={styles.backLink}>
+            <ArrowLeft size={16} /> Back to Settings
           </Link>
         </div>
       </div>
