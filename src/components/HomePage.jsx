@@ -172,11 +172,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
         {/* Quick Create Grid */}
         <div style={{ padding: '24px var(--main-padding-x)' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Quick Create</h3>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(5, 1fr)', 
-            gap: '12px' 
-          }}>
+          <div className="quick-options-grid">
             {quickOptions.map(option => (
               <button
                 key={option.id}

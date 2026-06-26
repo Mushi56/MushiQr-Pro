@@ -7145,6 +7145,13 @@ button:active,
 }
 
 /* Quick Options Grid */
+.quick-options-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
 .quick-option-card {
   aspect-ratio: 1 / 1;
   background: var(--bg-elevated) !important;
@@ -7184,6 +7191,30 @@ button:active,
 .quick-option-card:hover .quick-option-icon-wrapper {
   background: var(--accent-soft);
   transform: scale(1.08);
+}
+
+@media (max-width: 600px) {
+  .quick-options-grid {
+    gap: 8px !important;
+  }
+  .quick-option-card {
+    padding: 8px 4px !important;
+    border-radius: 12px !important;
+    gap: 4px !important;
+  }
+  .quick-option-icon-wrapper {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 10px !important;
+  }
+  .quick-option-icon-wrapper svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .quick-option-card span {
+    font-size: 8px !important;
+    letter-spacing: 0.1px !important;
+  }
 }
 
 /* Apple-style Grouped Settings Layout */
