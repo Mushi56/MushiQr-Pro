@@ -359,6 +359,192 @@ class ErrorBoundary extends Component {
 }
 
 
+function parseRawQRText(text) {
+  if (!text) return { type: 'text', data: { text: '' } };
+
+  const t = text.trim();
+
+  // 1. WiFi
+  // Example: WIFI:T:WPA;S:MySSID;P:password;H:false;;
+  if (/^WIFI:/i.test(t)) {
+    const ssidMatch = t.match(/S:(.*?)(?:[;]|$)/i);
+    const passwordMatch = t.match(/P:(.*?)(?:[;]|$)/i);
+    const encryptionMatch = t.match(/T:(.*?)(?:[;]|$)/i);
+    const hiddenMatch = t.match(/H:(.*?)(?:[;]|$)/i);
+
+    return {
+      type: 'wifi',
+      data: {
+        ssid: ssidMatch ? ssidMatch[1] : '',
+        password: passwordMatch ? passwordMatch[1] : '',
+        encryption: encryptionMatch ? encryptionMatch[1] : 'WPA',
+        hidden: hiddenMatch ? hiddenMatch[1] === 'true' : false
+      }
+    };
+  }
+
+  // 2. Email
+  // Example: mailto:test@example.com?subject=Hello&body=World
+  if (/^mailto:/i.test(t)) {
+    const email = t.substring(7).split('?')[0];
+    const query = t.includes('?') ? t.split('?')[1] : '';
+    let subject = '';
+    let body = '';
+    if (query) {
+      const subjectMatch = query.match(/subject=(.*?)(?:[&]|$)/i);
+      const bodyMatch = query.match(/body=(.*?)(?:[&]|$)/i);
+      if (subjectMatch) subject = decodeURIComponent(subjectMatch[1]);
+      if (bodyMatch) body = decodeURIComponent(bodyMatch[1]);
+    }
+    return {
+      type: 'email',
+      data: { email, subject, body }
+    };
+  }
+
+  // 3. Phone
+  // Example: tel:+123456789
+  if (/^tel:/i.test(t)) {
+    return {
+      type: 'phone',
+      data: { phone: t.substring(4) }
+    };
+  }
+
+  // 4. SMS
+  // Example: smsto:+123456789:Hello World
+  if (/^smsto:/i.test(t)) {
+    const parts = t.substring(6).split(':');
+    const phone = parts[0] || '';
+    const message = parts.slice(1).join(':') || '';
+    return {
+      type: 'sms',
+      data: { phone, message }
+    };
+  }
+
+  // 5. vCard / Contact Card
+  if (/^BEGIN:VCARD/i.test(t)) {
+    // Parse standard vCard fields
+    const firstNameMatch = t.match(/N:(.*?);(.*?)(?:[\r\n]|$)/i);
+    const fnMatch = t.match(/FN:(.*?)(?:[\r\n]|$)/i);
+    const phoneMatch = t.match(/TEL.*?:(.*?)(?:[\r\n]|$)/i);
+    const emailMatch = t.match(/EMAIL.*?:(.*?)(?:[\r\n]|$)/i);
+    const orgMatch = t.match(/ORG:(.*?)(?:[\r\n]|$)/i);
+    const titleMatch = t.match(/TITLE:(.*?)(?:[\r\n]|$)/i);
+    const urlMatch = t.match(/URL.*?:(.*?)(?:[\r\n]|$)/i);
+
+    let firstName = '';
+    let lastName = '';
+    if (firstNameMatch) {
+      lastName = firstNameMatch[1] || '';
+      firstName = firstNameMatch[2] || '';
+    } else if (fnMatch) {
+      const names = fnMatch[1].split(' ');
+      firstName = names[0] || '';
+      lastName = names.slice(1).join(' ') || '';
+    }
+
+    return {
+      type: 'vcard',
+      data: {
+        firstName,
+        lastName,
+        org: orgMatch ? orgMatch[1] : '',
+        title: titleMatch ? titleMatch[1] : '',
+        phone: phoneMatch ? phoneMatch[1] : '',
+        email: emailMatch ? emailMatch[1] : '',
+        url: urlMatch ? urlMatch[1] : ''
+      }
+    };
+  }
+
+  // 6. Location / Geo coordinates
+  // Example: geo:37.7749,-122.4194
+  if (/^geo:/i.test(t)) {
+    const coords = t.substring(4).split(',');
+    return {
+      type: 'location',
+      data: {
+        latitude: coords[0] || '',
+        longitude: coords[1] || ''
+      }
+    };
+  }
+
+  // 7. WhatsApp
+  // Example: https://wa.me/123456789 or https://api.whatsapp.com/send?phone=123456789
+  if (/wa\.me/i.test(t) || /whatsapp\.com/i.test(t)) {
+    const phoneMatch = t.match(/(?:phone=|wa\.me\/)([0-9+]+)/i);
+    const textMatch = t.match(/text=(.*?)(?:[&]|$)/i);
+    return {
+      type: 'whatsapp',
+      data: {
+        phone: phoneMatch ? phoneMatch[1] : '',
+        message: textMatch ? decodeURIComponent(textMatch[1]) : ''
+      }
+    };
+  }
+
+  // 8. Instagram
+  if (/instagram\.com/i.test(t)) {
+    const usernameMatch = t.match(/instagram\.com\/([^/?#\s]+)/i);
+    return {
+      type: 'instagram',
+      data: { username: usernameMatch ? usernameMatch[1] : '' }
+    };
+  }
+
+  // 9. Facebook
+  if (/facebook\.com/i.test(t)) {
+    const usernameMatch = t.match(/facebook\.com\/([^/?#\s]+)/i);
+    return {
+      type: 'facebook',
+      data: { username: usernameMatch ? usernameMatch[1] : '' }
+    };
+  }
+
+  // 10. Twitter/X
+  if (/twitter\.com/i.test(t) || /x\.com/i.test(t)) {
+    const usernameMatch = t.match(/(?:twitter\.com|x\.com)\/([^/?#\s]+)/i);
+    return {
+      type: 'x',
+      data: { username: usernameMatch ? usernameMatch[1] : '' }
+    };
+  }
+
+  // 11. LinkedIn
+  if (/linkedin\.com/i.test(t)) {
+    const usernameMatch = t.match(/linkedin\.com\/(?:in|company)\/([^/?#\s]+)/i);
+    return {
+      type: 'linkedin',
+      data: { username: usernameMatch ? usernameMatch[1] : t }
+    };
+  }
+
+  // 12. YouTube
+  if (/youtube\.com|youtu\.be/i.test(t)) {
+    return {
+      type: 'youtube',
+      data: { url: t }
+    };
+  }
+
+  // 13. URL (falls back to URL if it looks like one)
+  if (/^https?:\/\//i.test(t) || /^www\./i.test(t) || /^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.[a-z]{2,}(\/.*)?$/i.test(t)) {
+    return {
+      type: 'url',
+      data: { url: t.startsWith('http') ? t : 'https://' + t }
+    };
+  }
+
+  // 14. Fallback to Text
+  return {
+    type: 'text',
+    data: { text: t }
+  };
+}
+
 export default function App() {
   // ── Tab & Theme ──
   const location = useLocation();
@@ -1117,8 +1303,15 @@ export default function App() {
     if (!item) return;
     
     // Core data
-    if (item.qrType) setQrType(item.qrType);
-    if (item.qrData) setQrData(item.qrData);
+    if (item.source === 'scan' || (!item.qrType && item.qrData?.text)) {
+      const rawText = item.qrData?.text || item.displayText || '';
+      const parsed = parseRawQRText(rawText);
+      setQrType(parsed.type);
+      setQrData(parsed.data);
+    } else {
+      if (item.qrType) setQrType(item.qrType);
+      if (item.qrData) setQrData(item.qrData);
+    }
     if (item.errorLevel) setErrorLevel(item.errorLevel);
 
     // Appearance

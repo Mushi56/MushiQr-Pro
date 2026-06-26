@@ -11,6 +11,8 @@ import {
   ShieldCheck, Minus, Plus, AlertCircle, RefreshCcw, Bookmark,
   History
 } from 'lucide-react';
+import { generateQRMatrix, renderQR } from '../utils/qrEngine';
+
 
 const parseQRData = (text) => {
   if (!text) return { type: 'Text', icon: FileText, title: 'Text Content', action: 'Copy Text', actionIcon: Copy };
@@ -121,8 +123,35 @@ export default function QRScanner({ onBack, navigateTo }) {
       const parsed = parseQRData(decodedText);
       setQrTypeData(parsed);
       setResult(decodedText);
+      let thumbnail = null;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 120;
+        canvas.height = 120;
+        const matrixInfo = generateQRMatrix(decodedText, 'M');
+        if (matrixInfo) {
+          renderQR(canvas, {
+            matrix: matrixInfo.matrix,
+            moduleCount: matrixInfo.moduleCount,
+            size: 120,
+            qrColor: '#000000',
+            bgColor: '#ffffff',
+            bgTransparent: false
+          });
+          thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+        }
+      } catch (err) {
+        console.error('Failed to generate thumbnail for scanned QR:', err);
+      }
+
       import('../utils/storage').then(({ saveToHistory }) => {
-        saveToHistory({ source: 'scan', qrData: { text: decodedText }, type: parsed.type.toUpperCase(), displayText: decodedText });
+        saveToHistory({
+          source: 'scan',
+          qrData: { text: decodedText },
+          type: parsed.type.toUpperCase(),
+          displayText: decodedText,
+          thumbnail: thumbnail
+        });
       });
       return 'DETECTED';
     });
@@ -215,7 +244,35 @@ export default function QRScanner({ onBack, navigateTo }) {
 
   const handleSave = async () => {
     if (!result || !qrTypeData) return;
-    import('../utils/storage').then(({ saveToSaved }) => { saveToSaved({ qrData: { text: result }, type: qrTypeData.type.toUpperCase(), displayText: result }); });
+    let thumbnail = null;
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 120;
+      canvas.height = 120;
+      const matrixInfo = generateQRMatrix(result, 'M');
+      if (matrixInfo) {
+        renderQR(canvas, {
+          matrix: matrixInfo.matrix,
+          moduleCount: matrixInfo.moduleCount,
+          size: 120,
+          qrColor: '#000000',
+          bgColor: '#ffffff',
+          bgTransparent: false
+        });
+        thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+      }
+    } catch (err) {
+      console.error('Failed to generate thumbnail for saved scanned QR:', err);
+    }
+
+    import('../utils/storage').then(({ saveToSaved }) => {
+      saveToSaved({
+        qrData: { text: result },
+        type: qrTypeData.type.toUpperCase(),
+        displayText: result,
+        thumbnail: thumbnail
+      });
+    });
     alert('Saved to favorites!');
   };
 
