@@ -40,8 +40,8 @@ function HeroQRCanvas() {
       width="120" 
       height="120" 
       style={{ 
-        width: '60px', 
-        height: '60px', 
+        width: '80px', 
+        height: '80px', 
         display: 'block'
       }} 
     />
