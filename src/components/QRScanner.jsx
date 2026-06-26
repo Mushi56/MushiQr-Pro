@@ -43,6 +43,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   const mountedRef = useRef(true);
   const busyRef = useRef(false);
   const touchStateRef = useRef({ distance: 0, initialZoom: 1 });
+  const capTimersRef = useRef([]);
 
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
@@ -64,6 +65,8 @@ export default function QRScanner({ onBack, navigateTo }) {
     setZoomCapabilities(null);
     setFlashOn(false);
     setFlashSupported(false);
+    capTimersRef.current.forEach(clearTimeout);
+    capTimersRef.current = [];
   }, []);
 
   const safeBack = useCallback(() => { stopScanner(); if (onBack) onBack(); }, [stopScanner, onBack]);
@@ -89,21 +92,27 @@ export default function QRScanner({ onBack, navigateTo }) {
     const next = !flashOn;
     
     try {
-      // Use Html5Qrcode Web API for torch control
       if (!qr || !qr.isScanning) return;
       const track = qr.getRunningTrack();
       if (track) {
-        const caps = track.getCapabilities();
-        if (caps.torch !== undefined) {
-          await track.applyConstraints({
-            advanced: [{ torch: next }]
-          });
-          setFlashOn(next);
-        } else {
-          // Some browsers might use 'fillLightMode'
-          await track.applyConstraints({
-            advanced: [{ fillLightMode: next ? 'torch' : 'off' }]
-          });
+        // Try multiple constraints format sequentially to maximize compatibility on mobile WebViews
+        const constraintSequences = [
+          { advanced: [{ torch: next }] },
+          { advanced: [{ fillLightMode: next ? 'torch' : 'off' }] }
+        ];
+        
+        let success = false;
+        for (const constraints of constraintSequences) {
+          try {
+            await track.applyConstraints(constraints);
+            success = true;
+            break;
+          } catch (e) {
+            console.warn('Failed to apply constraints:', constraints, e);
+          }
+        }
+        
+        if (success) {
           setFlashOn(next);
         }
       }
@@ -188,14 +197,39 @@ export default function QRScanner({ onBack, navigateTo }) {
       };
       await html5Qr.start({ facingMode: facingBack ? 'environment' : 'user' }, config, (t) => handleScanResult(t), () => {});
       if (!mountedRef.current) { busyRef.current = false; return; }
-      try {
-        const track = html5Qr.getRunningTrack();
-        if (track) {
-          const caps = track.getCapabilities();
-          if (caps.zoom) { setZoomCapabilities({ min: caps.zoom.min || 1, max: Math.min(caps.zoom.max || 10, 10), step: caps.zoom.step || 0.1 }); setZoom(caps.zoom.min || 1); }
-          if (caps.torch) setFlashSupported(true);
+      capTimersRef.current.forEach(clearTimeout);
+      capTimersRef.current = [];
+
+      const checkCapabilities = () => {
+        try {
+          const track = html5QrRef.current?.getRunningTrack();
+          if (track) {
+            const caps = track.getCapabilities();
+            if (caps.zoom) {
+              setZoomCapabilities({
+                min: caps.zoom.min || 1,
+                max: Math.min(caps.zoom.max || 10, 10),
+                step: caps.zoom.step || 0.1
+              });
+              setZoom(prev => prev === 1 ? (caps.zoom.min || 1) : prev);
+            }
+            if (caps.torch || (Capacitor.isNativePlatform() && facingBack)) {
+              setFlashSupported(true);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to check capabilities:', e);
+          if (Capacitor.isNativePlatform() && facingBack) {
+            setFlashSupported(true);
+          }
         }
-      } catch {}
+      };
+
+      checkCapabilities();
+      const t1 = setTimeout(checkCapabilities, 500);
+      const t2 = setTimeout(checkCapabilities, 1000);
+      const t3 = setTimeout(checkCapabilities, 2000);
+      capTimersRef.current.push(t1, t2, t3);
       try {
         const vp = document.getElementById('qr-scanner-viewport');
         if (vp) {
