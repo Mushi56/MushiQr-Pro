@@ -65,8 +65,9 @@ async function saveToGallery(base64Data, filename) {
     if (albumId) saveOpts.albumIdentifier = albumId;
 
     await Media.savePhoto(saveOpts);
-    alert('QR Code saved to Gallery!');
-    return;
+    // Cleanup temp cache file
+    try { await Filesystem.deleteFile({ path: tempFile.path, directory: Directory.Cache }); } catch {}
+    return 'gallery';
   } catch (mediaErr) {
     console.warn('Media.savePhoto failed, trying fallback:', mediaErr);
   }
@@ -83,17 +84,15 @@ async function saveToGallery(base64Data, filename) {
       url: docFile.uri,
       dialogTitle: 'Save or Share your QR Code',
     });
+    return 'share';
   } catch {
     // Last resort: try sharing the cache file
-    try {
-      await Share.share({
-        title: 'Mushi Qr Pro - Save QR Code',
-        url: tempFile.uri,
-        dialogTitle: 'Save or Share your QR Code',
-      });
-    } catch {
-      alert('Could not save. Please try using the Share option instead.');
-    }
+    await Share.share({
+      title: 'Mushi Qr Pro - Save QR Code',
+      url: tempFile.uri,
+      dialogTitle: 'Save or Share your QR Code',
+    });
+    return 'share';
   }
 }
 
@@ -120,18 +119,14 @@ async function saveFileViaShare(base64Data, filename) {
     url: fileUri,
     dialogTitle: 'Save or Share your QR Code',
   });
+  return 'share';
 }
 
 async function saveFileNative(base64Data, filename) {
-  try {
-    if (filename.endsWith('.png') || filename.endsWith('.jpg')) {
-      await saveToGallery(base64Data, filename);
-    } else {
-      await saveFileViaShare(base64Data, filename);
-    }
-  } catch (e) {
-    console.error('File save failed:', e);
-    alert('Failed to save file. Please try again.');
+  if (filename.endsWith('.png') || filename.endsWith('.jpg')) {
+    return await saveToGallery(base64Data, filename);
+  } else {
+    return await saveFileViaShare(base64Data, filename);
   }
 }
 
@@ -145,9 +140,10 @@ function triggerDownload(url, filename) {
 export async function downloadPNG(canvas, filename = 'qrcode') {
   const dataUrl = canvas.toDataURL('image/png');
   if (Capacitor.isNativePlatform()) {
-    await saveFileNative(dataUrl.split(',')[1], `${filename}.png`);
+    return await saveFileNative(dataUrl.split(',')[1], `${filename}.png`);
   } else {
     triggerDownload(dataUrl, `${filename}.png`);
+    return 'download';
   }
 }
 
@@ -162,9 +158,10 @@ export async function downloadJPG(canvas, filename = 'qrcode') {
   
   const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.95);
   if (Capacitor.isNativePlatform()) {
-    await saveFileNative(dataUrl.split(',')[1], `${filename}.jpg`);
+    return await saveFileNative(dataUrl.split(',')[1], `${filename}.jpg`);
   } else {
     triggerDownload(dataUrl, `${filename}.jpg`);
+    return 'download';
   }
 }
 
@@ -182,12 +179,13 @@ export async function downloadSVG(canvas, filename = 'qrcode') {
   if (Capacitor.isNativePlatform()) {
     // Use chunked base64 conversion to avoid call-stack overflow on large SVGs
     const base64Data = stringToBase64(svgContent);
-    await saveFileNative(base64Data, `${filename}.svg`);
+    return await saveFileNative(base64Data, `${filename}.svg`);
   } else {
     const blob = new Blob([svgContent], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     triggerDownload(url, `${filename}.svg`);
     URL.revokeObjectURL(url);
+    return 'download';
   }
 }
 
@@ -209,8 +207,9 @@ export async function downloadPDF(canvas, filename = 'qrcode') {
     // Use arraybuffer output → binary-safe base64 (avoids datauristring issues)
     const pdfArrayBuffer = pdf.output('arraybuffer');
     const base64Data = arrayBufferToBase64(pdfArrayBuffer);
-    await saveFileNative(base64Data, `${filename}.pdf`);
+    return await saveFileNative(base64Data, `${filename}.pdf`);
   } else {
     pdf.save(`${filename}.pdf`);
+    return 'download';
   }
 }

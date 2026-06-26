@@ -1340,7 +1340,17 @@ export default function App() {
     if (!canvasRef.current) return;
     setDownloadingFormat(format);
     try {
-      await downloadFn(canvasRef.current);
+      const result = await downloadFn(canvasRef.current);
+      if (result === 'gallery') {
+        showToast('Saved to Gallery');
+      } else if (result === 'share') {
+        showToast('Save Options Opened');
+      } else {
+        showToast('Saved successfully');
+      }
+    } catch (err) {
+      console.error('Download failed:', err);
+      showToast('Save failed', 'error');
     } finally {
       setTimeout(() => setDownloadingFormat(null), 800);
     }
@@ -3971,11 +3981,11 @@ export default function App() {
       {toast && (
         <div className={`toast ${toast.type}`}>
           {toast.type === 'success' ? (
-            <CheckCircle2 color="var(--success)" size={18} />
+            <CheckCircle2 color="#10B981" size={12} strokeWidth={3} />
           ) : (
-            <XCircle color="var(--error)" size={18} />
+            <XCircle color="#EF4444" size={12} strokeWidth={3} />
           )}
-          {toast.message}
+          <span>{toast.message}</span>
         </div>
       )}
       {/* Advanced Color Picker Modal */}
