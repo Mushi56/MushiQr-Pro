@@ -20,8 +20,8 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
       textCenterEnabled: false,    // Remove center text
       textCenter: null,
       frameStyle: 'none',          // Remove outer frames
-      quietZone: 2,                // Add a small quiet zone for standard margin spacing
-      size: 96,                    // Render size
+      quietZone: 1,                // Add a very small quiet zone to maximize visual size
+      size: 128,                   // Render size
       ...overrideParams
     };
 
@@ -31,13 +31,13 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
   return (
     <canvas 
       ref={canvasRef} 
-      width="96" 
-      height="96" 
+      width="128" 
+      height="128" 
       style={{ 
         width: '100%', 
         height: '100%', 
-        borderRadius: '6px',
-        objectFit: 'contain'
+        objectFit: 'cover',
+        display: 'block'
       }} 
     />
   );
@@ -226,9 +226,8 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
           className={`style-option ${value === style ? 'active' : ''}`}
           onClick={() => onChange(style)}
           title={style}
-          style={{ padding: '4px' }}
         >
-          <div className="style-option-preview" style={{ width: '52px', height: '52px' }}>
+          <div className="style-option-preview">
             {qrParams && qrParams.qrMatrixInfo ? (
               <MiniQRCanvas qrParams={qrParams} overrideParams={{ dotStyle: style }} />
             ) : (
@@ -250,9 +249,8 @@ export function EyeStyleSelector({ value, onChange, qrParams }) {
           className={`style-option ${value === style ? 'active' : ''}`}
           onClick={() => onChange(style)}
           title={style}
-          style={{ padding: '4px' }}
         >
-          <div className="style-option-preview" style={{ width: '52px', height: '52px' }}>
+          <div className="style-option-preview">
             {qrParams && qrParams.qrMatrixInfo ? (
               <MiniQRCanvas qrParams={qrParams} overrideParams={{ eyeStyle: style }} />
             ) : (
