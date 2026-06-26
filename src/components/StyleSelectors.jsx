@@ -1,18 +1,27 @@
 import React, { useEffect, useRef } from 'react';
-import { DOT_STYLES, EYE_STYLES, renderQR } from '../utils/qrEngine';
+import { DOT_STYLES, EYE_STYLES, renderQR, generateQRMatrix } from '../utils/qrEngine';
 
 function MiniQRCanvas({ qrParams, overrideParams }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    if (!canvasRef.current || !qrParams || !qrParams.qrMatrixInfo) return;
+    if (!canvasRef.current || !qrParams) return;
+
+    // Generate a clean "Hello User" matrix for maximum shape readability
+    const demoMatrixInfo = generateQRMatrix("Hello User", qrParams.errorLevel || 'H');
+    if (!demoMatrixInfo) return;
 
     const options = {
       ...qrParams,
-      ...qrParams.qrMatrixInfo,
-      size: 96,           // small preview size
-      quietZone: 0,        // no margin inside the preview box
-      // Overrides for dots/eyes specific preview
+      ...demoMatrixInfo,
+      bgColor: '#FFFFFF',          // Force solid white background
+      bgTransparent: false,        // Disable transparency
+      logo: null,                  // Remove logo to avoid blocking center dots
+      textCenterEnabled: false,    // Remove center text
+      textCenter: null,
+      frameStyle: 'none',          // Remove outer frames
+      quietZone: 2,                // Add a small quiet zone for standard margin spacing
+      size: 96,                    // Render size
       ...overrideParams
     };
 
