@@ -72,6 +72,50 @@ import AppIcon from './components/AppIcon';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+const QRDotsIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="10.25" y="3" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="17.5" y="3" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+    
+    <rect x="3" y="10.25" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="10.25" y="10.25" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="17.5" y="10.25" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+    
+    <rect x="3" y="17.5" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="10.25" y="17.5" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="17.5" y="17.5" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+const QREyesIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    {/* Top-Left Eye */}
+    <rect x="2.5" y="2.5" width="6.5" height="6.5" rx="1.5" />
+    <rect x="4.5" y="4.5" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+    
+    {/* Top-Right Eye */}
+    <rect x="15" y="2.5" width="6.5" height="6.5" rx="1.5" />
+    <rect x="17" y="4.5" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+    
+    {/* Bottom-Left Eye */}
+    <rect x="2.5" y="15" width="6.5" height="6.5" rx="1.5" />
+    <rect x="4.5" y="17" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+const QRGradientIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <defs>
+      <linearGradient id="qr-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="currentColor" stopOpacity="1" />
+        <stop offset="100%" stopColor="currentColor" stopOpacity="0.15" />
+      </linearGradient>
+    </defs>
+    <circle cx="12" cy="12" r="9" fill="url(#qr-icon-grad)" />
+  </svg>
+);
+
 const TEXT_SHAPES = [
   { id: 'solid', label: 'Solid Box' },
   { id: 'rounded', label: 'Rounded Box' },
@@ -3648,17 +3692,17 @@ export default function App() {
                       {activeTab === 'color' && (
                         <>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'presets')}><Bookmark size={18} /><span>Presets</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'dots')}><Palette size={18} /><span>Dots</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'dots')}><QRDotsIcon /><span>Dots</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'bg')}><ImageIcon size={18} /><span>BG</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'eyes')}><ScanLine size={18} /><span>Eyes</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'gradient')}><Shapes size={18} /><span>Gradient</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'gradient')}><QRGradientIcon /><span>Gradient</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'texture')}><Layers size={18} /><span>Texture</span></button>
                         </>
                       )}
                       {activeTab === 'shapes' && (
                         <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('shapes', 'dots')}><LayoutGrid size={18} /><span>Dots</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('shapes', 'eyes')}><Hexagon size={18} /><span>Eyes</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('shapes', 'dots')}><QRDotsIcon /><span>Dots</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('shapes', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
                         </>
                       )}
                       {activeTab === 'logo' && (
