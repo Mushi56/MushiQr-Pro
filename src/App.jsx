@@ -916,6 +916,31 @@ export default function App() {
     }
   };
 
+  // ── Native App Actions / Deep Links (from Widget or quick settings tile) ──
+  useEffect(() => {
+    // 1. Check cold boot action via Android Javascript Interface
+    try {
+      if (window.NativeAndroidApp && typeof window.NativeAndroidApp.getPendingAction === 'function') {
+        const action = window.NativeAndroidApp.getPendingAction();
+        if (action === 'scan') {
+          navigateTo('scanner');
+        }
+      }
+    } catch (e) {
+      console.warn('Native JS interface check failed:', e);
+    }
+
+    // 2. Listen for hot start action event dispatched from MainActivity
+    const handleAppAction = (e) => {
+      if (e.detail === 'scan') {
+        navigateTo('scanner');
+      }
+    };
+    window.addEventListener('appAction', handleAppAction);
+    return () => window.removeEventListener('appAction', handleAppAction);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const getSnapshot = useCallback(() => {
     return {
       qrType, qrData, qrColor, bgColor, bgTransparent, eyeColor, eyeOuterColor, syncEyes,

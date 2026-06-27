@@ -1,6 +1,7 @@
 package com.mushiqr.pro;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,11 +9,13 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.getcapacitor.Bridge;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 100;
+    private String pendingAction = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -26,6 +29,43 @@ public class MainActivity extends BridgeActivity {
         WebView webView = getBridge().getWebView();
         WebSettings settings = webView.getSettings();
         settings.setMediaPlaybackRequiresUserGesture(false);
+
+        // Add native Javascript Interface for cold-boot launcher actions
+        webView.addJavascriptInterface(new Object() {
+            @android.webkit.JavascriptInterface
+            public String getPendingAction() {
+                String act = pendingAction;
+                pendingAction = null; // consume
+                return act;
+            }
+        }, "NativeAndroidApp");
+
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (intent != null && "scan".equals(intent.getStringExtra("action"))) {
+            pendingAction = "scan";
+            // Dispatch custom event for already running app (hot boot)
+            Bridge bridge = getBridge();
+            if (bridge != null) {
+                final WebView webView = bridge.getWebView();
+                if (webView != null) {
+                    webView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('appAction', { detail: 'scan' }));", null);
+                        }
+                    });
+                }
+            }
+        }
     }
 
     private void requestAllPermissions() {
