@@ -9,7 +9,7 @@ import {
   Copy, ExternalLink, Share2, Star, Wifi, Mail,
   Phone, User, Globe, FileText, Link2, ScanLine,
   ShieldCheck, Minus, Plus, AlertCircle, RefreshCcw, Bookmark,
-  History
+  History, Settings, Clock
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 
@@ -364,17 +364,23 @@ export default function QRScanner({ onBack, navigateTo }) {
       <div className="qrs">
         {/* Header */}
         <header className="qrs-header">
-          <button className="qrs-icon-btn" onClick={safeBack} aria-label="Go back">
-            <ArrowLeft size={20} />
-          </button>
-          <div className="qrs-header-center">
-            <h1 className="qrs-title">Scan QR Code</h1>
-            <p className="qrs-subtitle">Align QR code within the frame</p>
+          <div className="qrs-header-left">
+            <button className="qrs-icon-btn" onClick={safeBack} aria-label="Go back">
+              <ArrowLeft size={20} />
+            </button>
+            <div className="qrs-logo-icon">
+              <ScanLine size={20} />
+            </div>
+            <h1 className="qrs-title">AI Scanner</h1>
           </div>
-          <button className={`qrs-icon-btn qrs-flash ${flashOn ? 'on' : ''}`} onClick={toggleFlash} aria-label="Toggle flash">
-            {flashOn ? <Zap size={18} /> : <ZapOff size={18} />}
-            <span className="qrs-flash-lbl">Flash</span>
-          </button>
+          <div className="qrs-header-right">
+            <button className={`qrs-icon-btn qrs-flash ${flashOn ? 'on' : ''}`} onClick={toggleFlash} aria-label="Toggle flash">
+              {flashOn ? <Zap size={18} /> : <ZapOff size={18} />}
+            </button>
+            <button className="qrs-icon-btn" onClick={() => { triggerHapticFeedback(); if (navigateTo) navigateTo('settings'); }} aria-label="Settings">
+              <Settings size={20} />
+            </button>
+          </div>
         </header>
 
         {/* Body */}
@@ -401,18 +407,23 @@ export default function QRScanner({ onBack, navigateTo }) {
           <div className={`qrs-frame ${status === 'DETECTED' ? 'detected' : ''}`}>
             {/* 3:4 Ratio Frame Viewport */}
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`} />
-            
 
-
+            {/* Subtle L-shaped Corners */}
+            <div className="qrs-corners">
+              <div className="qrs-corner tl" />
+              <div className="qrs-corner tr" />
+              <div className="qrs-corner bl" />
+              <div className="qrs-corner br" />
+            </div>
 
             {/* Laser Scanning Line */}
             {status === 'SCANNING' && <div className="qrs-laser" />}
             {status === 'DETECTED' && <div className="qrs-laser frozen" />}
           </div>
 
-          {/* Info */}
-          <div className="qrs-info-line">
-            <ShieldCheck size={14} /><span>Scanning happens automatically</span>
+          {/* Floating Hint Pill */}
+          <div className="qrs-hint-pill">
+            <span>Align QR code inside viewfinder</span>
           </div>
 
           {/* Zoom */}
@@ -426,25 +437,29 @@ export default function QRScanner({ onBack, navigateTo }) {
           )}
         </div>
 
+        {/* Mode Selector Tabs */}
+        <div className="qrs-mode-selector">
+          <div className="qrs-mode-tab">Cards</div>
+          <div className="qrs-mode-tab">Translate</div>
+          <div className="qrs-mode-tab active">
+            Scan
+            <div className="qrs-mode-dot" />
+          </div>
+          <div className="qrs-mode-tab">Convert</div>
+        </div>
+
         {/* Bottom Controls */}
         <div className="qrs-controls">
-          <button className="qrs-ctrl-btn" onClick={() => { triggerHapticFeedback(); fileInputRef.current?.click(); }}>
-            <div className="qrs-ctrl-icon"><Image size={20} /></div>
-            <span>Gallery</span>
+          <button className="qrs-side-btn" onClick={() => { triggerHapticFeedback(); stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }} aria-label="History">
+            <Clock size={22} />
           </button>
           
-          <div className="qrs-center-status">
-            {status === 'SCANNING' && (
-              <div className="qrs-pill-inline active"><ScanLine size={16} /><span>Scanning</span></div>
-            )}
-            {status === 'DETECTED' && (
-              <div className="qrs-pill-inline detected"><CheckCircle2 size={16} /><span>Detected</span></div>
-            )}
-          </div>
+          <button className="qrs-shutter-btn" onClick={status === 'DETECTED' ? resumeScanning : () => { triggerHapticFeedback(); fileInputRef.current?.click(); }} aria-label="Shutter Button">
+            <div className="qrs-shutter-btn-inner" style={{ background: status === 'DETECTED' ? '#ef4444' : '#fff' }} />
+          </button>
 
-          <button className="qrs-ctrl-btn" onClick={() => { triggerHapticFeedback(); stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }}>
-            <div className="qrs-ctrl-icon"><History size={20} /></div>
-            <span>History</span>
+          <button className="qrs-side-btn" onClick={() => { triggerHapticFeedback(); fileInputRef.current?.click(); }} aria-label="Gallery">
+            <Image size={22} />
           </button>
         </div>
 
