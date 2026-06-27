@@ -10,11 +10,18 @@ const MAX_DRAFTS = 10;
 
 export function saveToHistory(entry) {
   const history = getHistory();
+  const existingIndex = entry.id ? history.findIndex(item => item.id === entry.id) : -1;
+  
   const newEntry = {
-    id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+    id: entry.id || (Date.now().toString(36) + Math.random().toString(36).substr(2)),
     timestamp: new Date().toISOString(),
     ...entry,
   };
+  
+  if (existingIndex !== -1) {
+    history.splice(existingIndex, 1);
+  }
+  
   history.unshift(newEntry);
   if (history.length > MAX_HISTORY) history.pop();
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
@@ -67,8 +74,10 @@ export function saveToSaved(entry) {
     savedAt: new Date().toISOString()
   };
 
-  // Check if already exists to avoid duplicates
-  if (saved.find(item => item.id === entryToSave.id)) return entryToSave;
+  const existingIndex = saved.findIndex(item => item.id === entryToSave.id);
+  if (existingIndex !== -1) {
+    saved.splice(existingIndex, 1);
+  }
   
   saved.unshift(entryToSave);
   if (saved.length > MAX_SAVED) saved.pop();

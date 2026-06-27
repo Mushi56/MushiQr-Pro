@@ -5,24 +5,15 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg"
     android:gravity="center"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="12dp"
     android:clickable="true"
     android:focusable="true">
 
     <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:src="@drawable/ic_scan_white"
-        android:contentDescription="Scan QR"
-        android:layout_marginEnd="8dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Scan QR"
-        android:textColor="#FFFFFF"
-        android:textSize="15sp"
-        android:textStyle="bold" />
+        android:contentDescription="Scan QR" />
 
 </LinearLayout>

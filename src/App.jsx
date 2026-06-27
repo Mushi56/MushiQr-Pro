@@ -646,8 +646,12 @@ export default function App() {
 
     // 2. Navigation logic
     if (activePage === 'scanner') {
-      // From Scan to Home
-      navigateTo('home');
+      // From Scan to Home or Exit if launched from widget
+      if (launchedDirectlyToScanner) {
+        CapApp.exitApp();
+      } else {
+        navigateTo('home');
+      }
     } else if (activePage === 'generator') {
       // ── IMPROVED CREATOR NAVIGATION ──
       // If we have tab history, go back to previous tab
@@ -687,6 +691,8 @@ export default function App() {
   const [qrType, setQrType] = useState(QR_TYPES.URL);
   const [qrData, setQrData] = useState({ url: 'https://example.com' });
   const [errorLevel, setErrorLevel] = useState('M');
+  const [loadedItemId, setLoadedItemId] = useState(null);
+  const [launchedDirectlyToScanner, setLaunchedDirectlyToScanner] = useState(false);
 
   // ── Colors ──
   const [qrColor, setQrColor] = useState('#000000');
@@ -887,6 +893,9 @@ export default function App() {
   // Custom navigation wrapper to track history
   const navigateTo = (page) => {
     if (page !== activePage) {
+      if (page !== 'scanner') {
+        setLaunchedDirectlyToScanner(false);
+      }
       if (logoPopup || textPopup || colorPopup || shapePopup) {
         applyEditing();
       }
@@ -923,6 +932,7 @@ export default function App() {
       if (window.NativeAndroidApp && typeof window.NativeAndroidApp.getPendingAction === 'function') {
         const action = window.NativeAndroidApp.getPendingAction();
         if (action === 'scan') {
+          setLaunchedDirectlyToScanner(true);
           navigateTo('scanner');
         }
       }
@@ -933,6 +943,7 @@ export default function App() {
     // 2. Listen for hot start action event dispatched from MainActivity
     const handleAppAction = (e) => {
       if (e.detail === 'scan') {
+        setLaunchedDirectlyToScanner(true);
         navigateTo('scanner');
       }
     };
@@ -1248,12 +1259,16 @@ export default function App() {
     if (prevPage === 'generator' && activePage !== 'generator') {
       const dataString = formatQRData(qrType, qrData);
       if (dataString) {
-        saveToHistory({
+        const savedEntry = saveToHistory({
+          id: loadedItemId,
           source: 'create',
           qrType, qrData, displayText: dataString.substring(0, 50), errorLevel,
           ...getSnapshot(),
           thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.8) || null
         });
+        if (savedEntry && savedEntry.id) {
+          setLoadedItemId(savedEntry.id);
+        }
       }
     }
   }, [activePage]);
@@ -1450,12 +1465,16 @@ export default function App() {
     if (!dataString) { showToast('Please enter QR data first', 'error'); return; }
     
     // We already save to history automatically, but user clicked "Add to Saved"
-    saveToSaved({
+    const savedEntry = saveToSaved({
+      id: loadedItemId,
       source: 'create',
       qrType, qrData, displayText: dataString.substring(0, 50), errorLevel,
       ...getSnapshot(),
       thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.8) || null
     });
+    if (savedEntry && savedEntry.id) {
+      setLoadedItemId(savedEntry.id);
+    }
     showToast('Added to Saved QRs', 'success');
   };
 
@@ -1480,9 +1499,12 @@ export default function App() {
       setEyeStyle('square');
       setFrameStyle('none');
       setTextCenterEnabled(false);
+      
+      setLoadedItemId(null);
     } else {
       // Generated QR template: apply all saved snapshot settings
       applySnapshot(item);
+      setLoadedItemId(item.id || null);
     }
 
     // Reset tab history when loading a template
@@ -1492,6 +1514,7 @@ export default function App() {
   };
 
   const resetGenerator = () => {
+    setLoadedItemId(null);
     // Content
     setQrType(QR_TYPES.URL);
     setQrData({ url: 'https://example.com' });
@@ -2803,45 +2826,35 @@ export default function App() {
                     <div className="dropdown-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '0' }} />
 
                     <div className="dropdown-section" style={{ padding: '12px' }}>
-                      <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Export Quality</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {[
-                          { key: 'Low', label: 'Low Quality', desc: '512 × 512 px • Fast' },
-                          { key: 'Medium', label: 'Normal Quality', desc: '1024 × 1024 px • Standard' },
-                          { key: 'High', label: 'High Quality', desc: '2048 × 2048 px • HD Recommended' },
-                          { key: 'Ultra', label: 'Ultra High (4K)', desc: '4096 × 4096 px • Ultra Sharp' }
-                        ].map((q) => (
-                          <button
-                            key={q.key}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setExportQuality(q.key);
-                            }}
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              padding: '8px 12px',
-                              background: exportQuality === q.key ? 'var(--accent-soft)' : 'transparent',
-                              border: '1px solid',
-                              borderColor: exportQuality === q.key ? 'var(--accent-primary)' : 'var(--border-color)',
-                              borderRadius: '8px',
-                              color: 'var(--text-primary)',
-                              cursor: 'pointer',
-                              width: '100%',
-                              transition: 'all 0.15s ease',
-                              textAlign: 'left'
-                            }}
-                          >
-                            <div>
-                              <span style={{ fontSize: '12px', fontWeight: 700, display: 'block', color: exportQuality === q.key ? 'var(--accent-primary)' : 'var(--text-primary)' }}>{q.label}</span>
-                              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{q.desc}</span>
-                            </div>
-                            {exportQuality === q.key && (
-                              <CheckCircle2 size={14} color="var(--accent-primary)" />
-                            )}
-                          </button>
-                        ))}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Export Quality</div>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent-primary)' }}>
+                          {exportQuality === 'Low' && 'Low (512px)'}
+                          {exportQuality === 'Medium' && 'Normal (1024px)'}
+                          {exportQuality === 'High' && 'HD (2048px)'}
+                          {exportQuality === 'Ultra' && '4K (4096px)'}
+                        </span>
+                      </div>
+                      <div style={{ padding: '0 8px', marginTop: '12px', marginBottom: '8px' }}>
+                        <input
+                          type="range"
+                          min="0"
+                          max="3"
+                          step="1"
+                          value={['Low', 'Medium', 'High', 'Ultra'].indexOf(exportQuality)}
+                          onChange={(e) => {
+                            const steps = ['Low', 'Medium', 'High', 'Ultra'];
+                            const selected = steps[parseInt(e.target.value)] || 'High';
+                            setExportQuality(selected);
+                          }}
+                          className="export-quality-slider"
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '9px', fontWeight: 600, color: 'var(--text-muted)' }}>
+                          <span>Low</span>
+                          <span>Normal</span>
+                          <span>HD</span>
+                          <span>4K</span>
+                        </div>
                       </div>
                     </div>
 
@@ -3923,7 +3936,16 @@ export default function App() {
 
           </>
         ) : activePage === 'scanner' ? (
-          <QRScanner onBack={() => setActivePage('home')} navigateTo={navigateTo} />
+          <QRScanner
+            onBack={() => {
+              if (launchedDirectlyToScanner) {
+                CapApp.exitApp();
+              } else {
+                setActivePage('home');
+              }
+            }}
+            navigateTo={navigateTo}
+          />
         ) : activePage === 'home' ? (
           <HomePage 
             onNavigate={(page) => {

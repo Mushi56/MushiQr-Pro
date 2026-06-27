@@ -3448,7 +3448,7 @@ input[type="range"]::-moz-range-thumb {
 .app.redesigned .app-header {
   height: var(--header-height);
   flex-shrink: 0;
-  z-index: 2000;
+  z-index: 6000;
 }
 
 .app-main-redesigned {
@@ -4207,6 +4207,53 @@ input[type="range"]::-moz-range-thumb {
   z-index: 3000;
   overflow: hidden;
   animation: dropdownSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Save-as dropdown: scrollable so it never hides behind bottom nav */
+.app-dropdown-menu.save-as-dropdown {
+  max-height: calc(100dvh - var(--header-height, 60px) - 80px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.app-dropdown-menu.save-as-dropdown::-webkit-scrollbar { display: none; }
+
+/* Export quality slider */
+.export-quality-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border-color);
+  outline: none;
+  cursor: pointer;
+}
+.export-quality-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(108, 92, 231, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.export-quality-slider:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px rgba(108, 92, 231, 0.7);
+}
+.export-quality-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 8px rgba(108, 92, 231, 0.5);
 }
 
 @keyframes dropdownSlideIn {

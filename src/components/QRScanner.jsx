@@ -27,7 +27,7 @@ const parseQRData = (text) => {
 };
 
 export default function QRScanner({ onBack, navigateTo }) {
-  const [status, setStatus] = useState('LOADING');
+  const [status, setStatus] = useState('SCANNING');
   const [result, setResult] = useState(null);
   const [qrTypeData, setQrTypeData] = useState(null);
   const [error, setError] = useState(null);
@@ -178,7 +178,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     if (busyRef.current) return;
     busyRef.current = true;
     if (!mountedRef.current) return;
-    setResult(null); setQrTypeData(null); setError(null); setStatus('LOADING'); setZoom(1);
+    setResult(null); setQrTypeData(null); setError(null); setStatus('SCANNING'); setZoom(1);
     try {
       await stopScanner();
       await new Promise(r => setTimeout(r, 50));
