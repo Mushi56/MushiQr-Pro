@@ -448,10 +448,6 @@ export default function QRScanner({ onBack, navigateTo }) {
             {status === 'DETECTED' && <div className="qrs-laser frozen" />}
           </div>
 
-          {/* Floating Hint Pill */}
-          <div className="qrs-hint-pill">
-            <span>Align QR code inside viewfinder</span>
-          </div>
 
           {/* Zoom */}
           {status === 'SCANNING' && zoomCapabilities && (
