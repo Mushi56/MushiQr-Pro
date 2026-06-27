@@ -403,8 +403,6 @@ export default function QRScanner({ onBack, navigateTo }) {
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`} />
             
 
-            {/* Crosshair */}
-            <div className="qrs-hud-crosshair" />
 
 
             {/* Laser Scanning Line */}
