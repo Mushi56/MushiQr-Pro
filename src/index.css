@@ -5798,12 +5798,7 @@ video {
   overflow: hidden;
 }
 
-/* ── Header ── */
 .qrs-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -5811,8 +5806,33 @@ video {
   padding-top: max(16px, env(safe-area-inset-top));
   z-index: 100;
   flex-shrink: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%);
+  background: #000;
   border-bottom: none;
+}
+
+.qrs-flash-viewport-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 25;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  transition: opacity 0.2s, color 0.2s, transform 0.2s;
+}
+
+.qrs-flash-viewport-btn.on {
+  color: #eab308; /* warm yellow */
+}
+
+.qrs-flash-viewport-btn:active {
+  transform: scale(0.9);
+  opacity: 0.7;
 }
 
 .qrs-header-left {

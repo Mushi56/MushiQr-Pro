@@ -411,11 +411,6 @@ export default function QRScanner({ onBack, navigateTo }) {
               <ArrowLeft size={20} />
             </button>
           </div>
-          <div className="qrs-header-right">
-            <button className={`qrs-icon-btn qrs-flash ${flashOn ? 'on' : ''}`} onClick={toggleFlash} aria-label="Toggle flash">
-              {flashOn ? <Zap size={18} /> : <ZapOff size={18} />}
-            </button>
-          </div>
         </header>
 
         {/* Body */}
@@ -442,6 +437,13 @@ export default function QRScanner({ onBack, navigateTo }) {
           <div className={`qrs-frame ${status === 'DETECTED' ? 'detected' : ''}`}>
             {/* 3:4 Ratio Frame Viewport */}
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`} />
+
+            {/* Flashlight button inside camera */}
+            {flashSupported && (
+              <button className={`qrs-flash-viewport-btn ${flashOn ? 'on' : ''}`} onClick={toggleFlash} aria-label="Toggle flash">
+                {flashOn ? <Zap size={22} /> : <ZapOff size={22} />}
+              </button>
+            )}
 
             {/* Laser Scanning Line */}
             {status === 'SCANNING' && <div className="qrs-laser" />}
