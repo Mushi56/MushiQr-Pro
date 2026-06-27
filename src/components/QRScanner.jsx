@@ -44,6 +44,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   const busyRef = useRef(false);
   const touchStateRef = useRef({ distance: 0, initialZoom: 1 });
   const capTimersRef = useRef([]);
+  const zoomRafRef = useRef(null);
 
   const triggerHapticFeedback = useCallback(() => {
     if (Capacitor.isNativePlatform()) {
@@ -180,25 +181,25 @@ export default function QRScanner({ onBack, navigateTo }) {
     setResult(null); setQrTypeData(null); setError(null); setStatus('LOADING'); setZoom(1);
     try {
       await stopScanner();
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 50));
       if (!mountedRef.current) { busyRef.current = false; return; }
       const el = document.getElementById('qr-scanner-viewport');
       if (!el) throw new Error('Scanner viewport not found.');
       el.innerHTML = '';
       const html5Qr = new Html5Qrcode('qr-scanner-viewport');
       html5QrRef.current = html5Qr;
+      const el2 = document.getElementById('qr-scanner-viewport');
+      const vw = el2?.clientWidth || 320;
+      const vh = el2?.clientHeight || 427;
       const config = {
-        fps: 30,
-        qrbox: (vw, vh) => { 
-          const w = Math.floor(vw * 0.8);
-          const h = Math.floor(vh * 0.8);
-          return { width: w, height: h }; 
-        },
+        fps: 10, // decode tick rate only — camera renders at native framerate
+        qrbox: { width: Math.floor(vw * 0.82), height: Math.floor(vh * 0.82) },
         aspectRatio: 0.75, // 3:4 ratio
         disableFlip: false,
         videoConstraints: {
           facingMode: facingBack ? 'environment' : 'user',
-          width: { min: 640, ideal: 1080, max: 1920 },
+          width: { ideal: 1280 },
+          height: { ideal: 960 },
           aspectRatio: { ideal: 0.75 }
         }
       };
@@ -347,8 +348,6 @@ export default function QRScanner({ onBack, navigateTo }) {
     triggerHapticFeedback();
     const video = document.querySelector('#qr-scanner-viewport video');
     if (!video) return;
-
-    setStatus('LOADING');
     try {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth || video.clientWidth || 640;
@@ -393,8 +392,13 @@ export default function QRScanner({ onBack, navigateTo }) {
   };
   const handleTouchMove = (e) => {
     if (e.touches.length === 2 && zoomCapabilities) {
+      if (zoomRafRef.current) return; // throttle to one rAF per frame
       const d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-      applyZoom(touchStateRef.current.initialZoom * (d / touchStateRef.current.distance));
+      const targetZoom = touchStateRef.current.initialZoom * (d / touchStateRef.current.distance);
+      zoomRafRef.current = requestAnimationFrame(() => {
+        applyZoom(targetZoom);
+        zoomRafRef.current = null;
+      });
     }
   };
 

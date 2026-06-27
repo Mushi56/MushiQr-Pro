@@ -5910,6 +5910,8 @@ video {
   padding: 0;
   margin: 0;
   background: #000;
+  /* Prevent browser touch delay on pinch-zoom gestures */
+  touch-action: pan-y;
 }
 
 /* ── Loading / Error ── */
@@ -5982,8 +5984,15 @@ video {
   aspect-ratio: 3 / 4;
   overflow: hidden;
   background: #000;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Only transition opacity-related props, not layout */
+  transition: opacity 0.3s ease;
   margin: 0 auto;
+  /* Promote to GPU compositor layer */
+  transform: translateZ(0);
+  will-change: opacity;
+  /* Laser sweep uses this to fill the frame without top layout */
+  --laser-sweep-distance: 100cqh;
+  container-type: size;
 }
 
 .qrs-viewport {
@@ -5992,17 +6001,31 @@ video {
   width: 100% !important;
   height: 100% !important;
   z-index: 1;
+  /* Ensure video is on its own GPU layer */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .qrs-viewport video {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
+  /* Prevent sub-pixel rendering jitter */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-.qrs-viewport.blur {
-  filter: blur(8px) brightness(0.65);
-  transition: all 0.4s;
+/* Use overlay instead of filter:blur to avoid full-layer repaint */
+.qrs-viewport.blur::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2;
+  transition: opacity 0.3s ease;
 }
 
 /* ── Floating Hint Pill ── */
@@ -6081,17 +6104,20 @@ video {
   position: absolute;
   left: 0;
   right: 0;
+  top: 0; /* Base position — animation uses translateY */
   height: 2px;
   background: linear-gradient(90deg, transparent, #22d3ee 20%, #a855f7 80%, transparent);
   z-index: 18;
   pointer-events: none;
   box-shadow: 0 0 10px rgba(34, 211, 238, 0.6);
-  animation: qrsLaserSweep 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: qrsLaserSweep 2.5s linear infinite;
+  /* GPU layer for animation — transform only, no layout reflow */
+  will-change: transform, opacity;
 }
 
 .qrs-laser.frozen {
   animation: none;
-  top: 50%;
+  transform: translateY(calc(50vh - 50%));
   height: 2px;
   background: #22d3ee;
   box-shadow: 0 0 20px rgba(34, 211, 238, 0.8);
@@ -6099,14 +6125,17 @@ video {
 
 @keyframes qrsLaserSweep {
   0% {
-    top: 5%;
+    transform: translateY(0);
     opacity: 0;
   }
-  10%, 90% {
+  8% {
+    opacity: 1;
+  }
+  92% {
     opacity: 1;
   }
   100% {
-    top: 95%;
+    transform: translateY(var(--laser-sweep-distance, 48vh));
     opacity: 0;
   }
 }
