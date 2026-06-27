@@ -368,17 +368,10 @@ export default function QRScanner({ onBack, navigateTo }) {
             <button className="qrs-icon-btn" onClick={safeBack} aria-label="Go back">
               <ArrowLeft size={20} />
             </button>
-            <div className="qrs-logo-icon">
-              <ScanLine size={20} />
-            </div>
-            <h1 className="qrs-title">AI Scanner</h1>
           </div>
           <div className="qrs-header-right">
             <button className={`qrs-icon-btn qrs-flash ${flashOn ? 'on' : ''}`} onClick={toggleFlash} aria-label="Toggle flash">
               {flashOn ? <Zap size={18} /> : <ZapOff size={18} />}
-            </button>
-            <button className="qrs-icon-btn" onClick={() => { triggerHapticFeedback(); if (navigateTo) navigateTo('settings'); }} aria-label="Settings">
-              <Settings size={20} />
             </button>
           </div>
         </header>
@@ -408,14 +401,6 @@ export default function QRScanner({ onBack, navigateTo }) {
             {/* 3:4 Ratio Frame Viewport */}
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`} />
 
-            {/* Subtle L-shaped Corners */}
-            <div className="qrs-corners">
-              <div className="qrs-corner tl" />
-              <div className="qrs-corner tr" />
-              <div className="qrs-corner bl" />
-              <div className="qrs-corner br" />
-            </div>
-
             {/* Laser Scanning Line */}
             {status === 'SCANNING' && <div className="qrs-laser" />}
             {status === 'DETECTED' && <div className="qrs-laser frozen" />}
@@ -439,13 +424,10 @@ export default function QRScanner({ onBack, navigateTo }) {
 
         {/* Mode Selector Tabs */}
         <div className="qrs-mode-selector">
-          <div className="qrs-mode-tab">Cards</div>
-          <div className="qrs-mode-tab">Translate</div>
           <div className="qrs-mode-tab active">
             Scan
             <div className="qrs-mode-dot" />
           </div>
-          <div className="qrs-mode-tab">Convert</div>
         </div>
 
         {/* Bottom Controls */}
