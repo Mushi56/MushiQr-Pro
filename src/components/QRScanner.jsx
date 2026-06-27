@@ -402,20 +402,6 @@ export default function QRScanner({ onBack, navigateTo }) {
             {/* 3:4 Ratio Frame Viewport */}
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`} />
             
-            {/* HUD Telemetry Overlay */}
-            <div className="qrs-hud-overlay">
-              <div className="qrs-hud-row">
-                <div className="qrs-hud-blink">
-                  <div className={`qrs-hud-dot ${status === 'DETECTED' ? 'detected-state' : ''}`} />
-                  <span>{status === 'DETECTED' ? 'LOCKED' : 'LIVE'}</span>
-                </div>
-                <span>FPS: 30</span>
-              </div>
-              <div className="qrs-hud-row">
-                <span>AUTO_FOCUS</span>
-                <span>CAM_01</span>
-              </div>
-            </div>
 
             {/* Crosshair */}
             <div className="qrs-hud-crosshair" />
