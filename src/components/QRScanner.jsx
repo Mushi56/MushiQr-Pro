@@ -45,6 +45,12 @@ export default function QRScanner({ onBack, navigateTo }) {
   const touchStateRef = useRef({ distance: 0, initialZoom: 1 });
   const capTimersRef = useRef([]);
 
+  const triggerHapticFeedback = useCallback(() => {
+    if (Capacitor.isNativePlatform()) {
+      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+    }
+  }, []);
+
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
   useEffect(() => {
@@ -69,7 +75,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     capTimersRef.current = [];
   }, []);
 
-  const safeBack = useCallback(() => { stopScanner(); if (onBack) onBack(); }, [stopScanner, onBack]);
+  const safeBack = useCallback(() => { triggerHapticFeedback(); stopScanner(); if (onBack) onBack(); }, [stopScanner, onBack, triggerHapticFeedback]);
 
   const applyZoom = useCallback(async (value) => {
     const qr = html5QrRef.current;
@@ -88,6 +94,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   }, []);
 
   const toggleFlash = useCallback(async () => {
+    triggerHapticFeedback();
     const qr = html5QrRef.current;
     const next = !flashOn;
     
@@ -265,18 +272,21 @@ export default function QRScanner({ onBack, navigateTo }) {
   };
 
   const handleCopy = async () => {
+    triggerHapticFeedback();
     if (!result) return;
     try { await navigator.clipboard.writeText(result); } catch { const t = document.createElement('textarea'); t.value = result; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); }
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShare = async () => {
+    triggerHapticFeedback();
     if (!result) return;
     try { await Share.share({ title: 'Scanned QR Code', text: result, dialogTitle: 'Share QR Content' }); }
     catch { if (navigator.share) navigator.share({ title: 'Scanned QR Code', text: result }).catch(() => {}); }
   };
 
   const handleSave = async () => {
+    triggerHapticFeedback();
     if (!result || !qrTypeData) return;
     let thumbnail = null;
     try {
@@ -311,6 +321,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   };
 
   const handlePrimaryAction = async () => {
+    triggerHapticFeedback();
     if (!result || !qrTypeData) return;
     const t = result.trim();
     try {
@@ -326,6 +337,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   };
 
   const resumeScanning = () => {
+    triggerHapticFeedback();
     const qr = html5QrRef.current;
     if (qr && qr.isPaused) { try { qr.resume(); } catch {} } else { startScanner(); }
     setResult(null); setQrTypeData(null); setStatus('SCANNING');
@@ -353,7 +365,7 @@ export default function QRScanner({ onBack, navigateTo }) {
         {/* Header */}
         <header className="qrs-header">
           <button className="qrs-icon-btn" onClick={safeBack} aria-label="Go back">
-            <ArrowLeft size={22} />
+            <ArrowLeft size={20} />
           </button>
           <div className="qrs-header-center">
             <h1 className="qrs-title">Scan QR Code</h1>
@@ -387,17 +399,34 @@ export default function QRScanner({ onBack, navigateTo }) {
 
           {/* Scanner Frame */}
           <div className={`qrs-frame ${status === 'DETECTED' ? 'detected' : ''}`}>
-            {/* Status Pill */}
-            {/* 3:4 Ratio Frame */}
+            {/* 3:4 Ratio Frame Viewport */}
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`} />
             
+            {/* HUD Telemetry Overlay */}
+            <div className="qrs-hud-overlay">
+              <div className="qrs-hud-row">
+                <div className="qrs-hud-blink">
+                  <div className={`qrs-hud-dot ${status === 'DETECTED' ? 'detected-state' : ''}`} />
+                  <span>{status === 'DETECTED' ? 'LOCKED' : 'LIVE'}</span>
+                </div>
+                <span>FPS: 30</span>
+              </div>
+              <div className="qrs-hud-row">
+                <span>AUTO_FOCUS</span>
+                <span>CAM_01</span>
+              </div>
+            </div>
+
+            {/* Crosshair */}
+            <div className="qrs-hud-crosshair" />
+
             {/* Corner Brackets */}
             <div className="qrs-corners">
               <div className="qrs-corner tl" /><div className="qrs-corner tr" />
               <div className="qrs-corner bl" /><div className="qrs-corner br" />
             </div>
 
-            {/* Laser */}
+            {/* Laser Scanning Line */}
             {status === 'SCANNING' && <div className="qrs-laser" />}
             {status === 'DETECTED' && <div className="qrs-laser frozen" />}
           </div>
@@ -420,7 +449,7 @@ export default function QRScanner({ onBack, navigateTo }) {
 
         {/* Bottom Controls */}
         <div className="qrs-controls">
-          <button className="qrs-ctrl-btn" onClick={() => fileInputRef.current?.click()}>
+          <button className="qrs-ctrl-btn" onClick={() => { triggerHapticFeedback(); fileInputRef.current?.click(); }}>
             <div className="qrs-ctrl-icon"><Image size={20} /></div>
             <span>Gallery</span>
           </button>
@@ -434,7 +463,7 @@ export default function QRScanner({ onBack, navigateTo }) {
             )}
           </div>
 
-          <button className="qrs-ctrl-btn" onClick={() => { stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }}>
+          <button className="qrs-ctrl-btn" onClick={() => { triggerHapticFeedback(); stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }}>
             <div className="qrs-ctrl-icon"><History size={20} /></div>
             <span>History</span>
           </button>
@@ -446,43 +475,62 @@ export default function QRScanner({ onBack, navigateTo }) {
             <div className="qrs-sheet" onClick={e => e.stopPropagation()}>
               <div className="qrs-sheet-handle" />
               <div className="qrs-sheet-head">
-                <CheckCircle2 size={22} color="#4ade80" />
+                <CheckCircle2 size={22} color="#ef4444" />
                 <h3>QR Detected</h3>
               </div>
               <div className="qrs-sheet-type">
                 <TypeIcon size={14} />
                 <span>{qrTypeData.title}</span>
               </div>
-              <div className="qrs-sheet-preview">
-                <div className="qrs-sheet-link-text">
-                  <p className="qrs-sheet-url">{result}</p>
+              
+              {/* Type-Specific Preview Card */}
+              {qrTypeData.type === 'WiFi' ? (
+                <div className="qrs-type-card-wifi">
+                  <div className="qrs-type-card-wifi-field">
+                    <span className="qrs-type-card-wifi-lbl">SSID</span>
+                    <span className="qrs-type-card-wifi-val">{result.match(/S:(.*?)(?:[;]|$)/i)?.[1] || 'Unknown'}</span>
+                  </div>
+                  <div className="qrs-type-card-wifi-field">
+                    <span className="qrs-type-card-wifi-lbl">Security</span>
+                    <span className="qrs-type-card-wifi-val">{result.match(/T:(.*?)(?:[;]|$)/i)?.[1] || 'WPA'}</span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="qrs-sheet-preview">
+                  <div className="qrs-sheet-link-icon">
+                    <TypeIcon size={20} />
+                  </div>
+                  <div className="qrs-sheet-link-text">
+                    <p className="qrs-sheet-url">{result}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="qrs-sheet-actions">
                 <button className="qrs-sheet-act primary" onClick={handlePrimaryAction}>
                   <ActionIcon size={20} />
                   <span>{qrTypeData.action}</span>
                 </button>
                 <button className="qrs-sheet-act" onClick={handleCopy}>
-                  {copied ? <CheckCircle2 size={20} color="#4ade80" /> : <Copy size={20} />}
+                  {copied ? <CheckCircle2 size={18} color="#ef4444" /> : <Copy size={18} />}
                   <span>{copied ? 'Copied!' : 'Copy'}</span>
                 </button>
                 <button className="qrs-sheet-act" onClick={handleShare}>
-                  <Share2 size={20} />
+                  <Share2 size={18} />
                   <span>Share</span>
                 </button>
                 <button className="qrs-sheet-act" onClick={handleSave}>
-                  <Star size={20} />
+                  <Star size={18} />
                   <span>Save</span>
                 </button>
               </div>
               
               <button 
                 className="qrs-retry-btn" 
-                style={{ width: '100%', marginTop: '24px', justifyContent: 'center', background: 'rgba(255,255,255,0.05)' }} 
+                style={{ width: '100%', marginTop: '16px', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)' }} 
                 onClick={resumeScanning}
               >
-                <RefreshCcw size={16} /> Resume Scanning
+                <RefreshCcw size={14} /> Resume Scanning
               </button>
             </div>
           </div>
