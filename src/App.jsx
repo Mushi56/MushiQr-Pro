@@ -1048,12 +1048,13 @@ export default function App() {
     if (s.dotPadding !== undefined) setDotPadding(s.dotPadding);
     if (s.eyePadding !== undefined) setEyePadding(s.eyePadding);
     
-    if (s.logo) {
-      if (!logo || logo.src !== s.logo.src) {
+    const logoData = s.logo || (s.logoSrc ? { src: s.logoSrc, name: s.logoName } : null);
+    if (logoData && logoData.src) {
+      if (!logo || logo.src !== logoData.src) {
         const img = new Image();
         img.crossOrigin = "anonymous";
-        img.onload = () => setLogo({ src: s.logo.src, name: s.logo.name, image: img });
-        img.src = s.logo.src;
+        img.onload = () => setLogo({ src: logoData.src, name: logoData.name || 'Logo', image: img });
+        img.src = logoData.src;
       }
     } else {
       setLogo(null);
@@ -1250,12 +1251,7 @@ export default function App() {
         saveToHistory({
           source: 'create',
           qrType, qrData, displayText: dataString.substring(0, 50), errorLevel,
-          qrColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType,
-          dotStyle, eyeStyle, eyeColor, eyeOuterColor, dotPadding, eyePadding,
-          logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
-          logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
-          logoSrc: logo?.src || null,
-          logoName: logo?.name || null,
+          ...getSnapshot(),
           thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.8) || null
         });
       }
@@ -1457,12 +1453,7 @@ export default function App() {
     saveToSaved({
       source: 'create',
       qrType, qrData, displayText: dataString.substring(0, 50), errorLevel,
-      qrColor, bgColor, bgTransparent, gradientEnabled, gradientColor1, gradientColor2, gradientType,
-      dotStyle, eyeStyle, eyeColor, eyeOuterColor, dotPadding, eyePadding,
-      logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
-      logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
-      logoSrc: logo?.src || null,
-      logoName: logo?.name || null,
+      ...getSnapshot(),
       thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.8) || null
     });
     showToast('Added to Saved QRs', 'success');
@@ -1478,60 +1469,21 @@ export default function App() {
       const parsed = parseRawQRText(rawText);
       setQrType(parsed.type);
       setQrData(parsed.data);
-    } else {
-      if (item.qrType) setQrType(item.qrType);
-      if (item.qrData) setQrData(item.qrData);
-    }
-    if (item.errorLevel) setErrorLevel(item.errorLevel);
-
-    // Appearance
-    if (item.qrColor) setQrColor(item.qrColor);
-    if (item.bgColor) setBgColor(item.bgColor);
-    if (item.bgTransparent !== undefined) setBgTransparent(item.bgTransparent);
-    if (item.gradientEnabled !== undefined) setGradientEnabled(item.gradientEnabled);
-    if (item.gradientColor1) setGradientColor1(item.gradientColor1);
-    if (item.gradientColor2) setGradientColor2(item.gradientColor2);
-    if (item.gradientType) setGradientType(item.gradientType);
-
-    // Shapes
-    if (item.dotStyle) setDotStyle(item.dotStyle);
-    if (item.eyeStyle) setEyeStyle(item.eyeStyle);
-    if (item.dotPadding !== undefined) setDotPadding(item.dotPadding);
-    if (item.eyePadding !== undefined) setEyePadding(item.eyePadding);
-
-    // Logo (Note: logo.image is not serializable, so we only have metadata in storage usually)
-    // If the storage includes a logo placeholder or source, we'd handle it here.
-    // For now, we clear the logo or keep it if it's not provided in the template.
-    if (item.logo === null) setLogo(null);
-    if (item.logoWidth) setLogoWidth(item.logoWidth);
-    if (item.logoHeight) setLogoHeight(item.logoHeight);
-    else if (item.logoWidth, logoHeight) { setLogoWidth(item.logoWidth, logoHeight); setLogoHeight(item.logoWidth, logoHeight); }
-    if (item.logoPadding !== undefined) setLogoPadding(item.logoPadding);
-    if (item.logoBackground !== undefined) setLogoBackground(item.logoBackground);
-    if (item.logoBgColor) setLogoBgColor(item.logoBgColor);
-    if (item.logoBgShape) setLogoBgShape(item.logoBgShape);
-    if (item.logoOutline !== undefined) setLogoOutline(item.logoOutline);
-    if (item.logoOutlineColor) setLogoOutlineColor(item.logoOutlineColor);
-    if (item.logoOutlineWidth !== undefined) setLogoOutlineWidth(item.logoOutlineWidth);
-    if (item.logoOutlineOpacity !== undefined) setLogoOutlineOpacity(item.logoOutlineOpacity);
-
-    // Reconstruct logo image if src exists
-    if (item.logoSrc) {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        setLogo({
-          image: img,
-          name: item.logoName || 'Logo',
-          src: item.logoSrc
-        });
-      };
-      img.src = item.logoSrc;
-    } else {
+      
+      // Reset layout options for scanned QRs to clear the designer
       setLogo(null);
+      setQrColor('#000000');
+      setBgColor('#ffffff');
+      setBgTransparent(false);
+      setGradientEnabled(false);
+      setDotStyle('square');
+      setEyeStyle('square');
+      setFrameStyle('none');
+      setTextCenterEnabled(false);
+    } else {
+      // Generated QR template: apply all saved snapshot settings
+      applySnapshot(item);
     }
-
-    setFrameColor(item.frameColor);
 
     // Reset tab history when loading a template
     setTabHistory([]);

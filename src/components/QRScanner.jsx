@@ -241,7 +241,29 @@ export default function QRScanner({ onBack, navigateTo }) {
       try {
         const vp = document.getElementById('qr-scanner-viewport');
         if (vp) {
-          const strip = (c) => { c.querySelectorAll('video').forEach(v => { v.removeAttribute('controls'); v.controls = false; v.setAttribute('playsinline', ''); v.setAttribute('disablepictureinpicture', ''); v.style.pointerEvents = 'none'; }); };
+          const strip = (c) => {
+            c.querySelectorAll('video').forEach(v => {
+              v.removeAttribute('controls');
+              v.controls = false;
+              v.setAttribute('playsinline', '');
+              v.setAttribute('disablepictureinpicture', '');
+              v.style.pointerEvents = 'none';
+              v.style.background = 'transparent';
+              v.style.backgroundColor = 'transparent';
+              v.setAttribute('poster', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+              
+              if (v.readyState < 3) {
+                v.style.opacity = '0';
+                v.style.transition = 'opacity 0.25s ease-in-out';
+                const showVideo = () => { v.style.opacity = '1'; };
+                v.onplay = showVideo;
+                v.onloadedmetadata = showVideo;
+                v.onplaying = showVideo;
+              } else {
+                v.style.opacity = '1';
+              }
+            });
+          };
           strip(vp);
           const obs = new MutationObserver(() => strip(vp));
           obs.observe(vp, { childList: true, subtree: true, attributes: true, attributeFilter: ['controls'] });
