@@ -5883,10 +5883,13 @@ video {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   position: relative;
   min-height: 0;
   padding: 0;
   margin: 0;
+  background: #000;
 }
 
 /* ── Loading / Error ── */
@@ -5954,15 +5957,13 @@ video {
 
 /* ── Full-Bleed Viewport Container ── */
 .qrs-frame {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   background: #000;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  margin: 0;
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
+  margin: 0 auto;
 }
 
 .qrs-viewport {
