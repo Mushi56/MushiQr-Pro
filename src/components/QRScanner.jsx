@@ -343,6 +343,48 @@ export default function QRScanner({ onBack, navigateTo }) {
     setResult(null); setQrTypeData(null); setStatus('SCANNING');
   };
 
+  const captureImage = useCallback(async () => {
+    triggerHapticFeedback();
+    const video = document.querySelector('#qr-scanner-viewport video');
+    if (!video) return;
+
+    setStatus('LOADING');
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || video.clientWidth || 640;
+      canvas.height = video.videoHeight || video.clientHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      await stopScanner();
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          setError('Failed to capture image.');
+          setStatus('ERROR');
+          return;
+        }
+        const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+        try {
+          const qr = new Html5Qrcode('qr-scanner-file-temp');
+          const text = await qr.scanFile(file, true);
+          if (mountedRef.current) {
+            handleScanResult(text);
+          }
+        } catch {
+          if (mountedRef.current) {
+            setError('No QR code found in the captured image.');
+            setStatus('ERROR');
+          }
+        }
+      }, 'image/jpeg', 0.95);
+    } catch (err) {
+      console.error('Capture failed:', err);
+      setError('Failed to capture camera frame.');
+      setStatus('ERROR');
+    }
+  }, [stopScanner, handleScanResult, triggerHapticFeedback]);
+
   const handleTouchStart = (e) => {
     if (e.touches.length === 2 && zoomCapabilities) {
       const d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
@@ -436,7 +478,7 @@ export default function QRScanner({ onBack, navigateTo }) {
             <Clock size={22} />
           </button>
           
-          <button className="qrs-shutter-btn" onClick={status === 'DETECTED' ? resumeScanning : () => { triggerHapticFeedback(); fileInputRef.current?.click(); }} aria-label="Shutter Button">
+          <button className="qrs-shutter-btn" onClick={status === 'DETECTED' ? resumeScanning : captureImage} aria-label="Shutter Button">
             <div className="qrs-shutter-btn-inner" style={{ background: status === 'DETECTED' ? '#ef4444' : '#fff' }} />
           </button>
 
