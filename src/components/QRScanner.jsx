@@ -406,11 +406,6 @@ export default function QRScanner({ onBack, navigateTo }) {
             {/* Crosshair */}
             <div className="qrs-hud-crosshair" />
 
-            {/* Corner Brackets */}
-            <div className="qrs-corners">
-              <div className="qrs-corner tl" /><div className="qrs-corner tr" />
-              <div className="qrs-corner bl" /><div className="qrs-corner br" />
-            </div>
 
             {/* Laser Scanning Line */}
             {status === 'SCANNING' && <div className="qrs-laser" />}
