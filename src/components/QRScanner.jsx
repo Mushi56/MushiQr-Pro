@@ -415,14 +415,8 @@ export default function QRScanner({ onBack, navigateTo }) {
 
         {/* Body */}
         <div className="qrs-body" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}>
-          {/* Loading */}
-          {status === 'LOADING' && (
-            <div className="qrs-center-msg">
-              <div className="qrs-spinner" />
-              <p>Starting Camera...</p>
-              <p className="qrs-hint">Allow camera access when prompted</p>
-            </div>
-          )}
+
+
 
           {/* Error */}
           {status === 'ERROR' && (
