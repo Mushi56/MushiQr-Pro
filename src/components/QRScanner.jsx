@@ -199,7 +199,7 @@ export default function QRScanner({ onBack, navigateTo }) {
       const el = document.getElementById('qr-scanner-viewport');
       if (!el) throw new Error('Scanner viewport not found.');
       el.innerHTML = '';
-      const html5Qr = new Html5Qrcode('qr-scanner-viewport');
+      const html5Qr = new Html5Qrcode('qr-scanner-viewport', { verbose: false, rememberLastUsedCamera: false });
       html5QrRef.current = html5Qr;
       const el2 = document.getElementById('qr-scanner-viewport');
       const vw = el2?.clientWidth || 320;
@@ -209,6 +209,10 @@ export default function QRScanner({ onBack, navigateTo }) {
         qrbox: { width: Math.floor(vw * 0.82), height: Math.floor(vh * 0.82) },
         aspectRatio: 0.75, // 3:4 ratio
         disableFlip: false,
+        rememberLastUsedCamera: false,
+        videoStreamConstraint: {
+          facingMode: facingBack ? 'environment' : 'user'
+        },
         videoConstraints: {
           facingMode: facingBack ? 'environment' : 'user',
           width: { ideal: 1280 },
@@ -217,6 +221,15 @@ export default function QRScanner({ onBack, navigateTo }) {
         }
       };
       await html5Qr.start({ facingMode: facingBack ? 'environment' : 'user' }, config, (t) => handleScanResult(t), () => {});
+      
+      // Force play properties on the injected video element immediately
+      const videoElem = document.querySelector("#qr-scanner-viewport video");
+      if (videoElem) {
+        videoElem.setAttribute("playsinline", "true");
+        videoElem.muted = true;
+        videoElem.play().catch(e => console.log("Force play error:", e));
+      }
+
       if (!mountedRef.current) { busyRef.current = false; return; }
       capTimersRef.current.forEach(clearTimeout);
       capTimersRef.current = [];
