@@ -101,28 +101,41 @@ export default function QRScanner({ onBack, navigateTo }) {
     
     try {
       if (!qr || !qr.isScanning) return;
-      const track = qr.getRunningTrack();
-      if (track) {
-        // Try multiple constraints format sequentially to maximize compatibility on mobile WebViews
-        const constraintSequences = [
-          { advanced: [{ torch: next }] },
-          { advanced: [{ fillLightMode: next ? 'torch' : 'off' }] }
-        ];
-        
-        let success = false;
-        for (const constraints of constraintSequences) {
-          try {
-            await track.applyConstraints(constraints);
-            success = true;
-            break;
-          } catch (e) {
-            console.warn('Failed to apply constraints:', constraints, e);
+      
+      // Try html5-qrcode's built-in applyVideoConstraints API first
+      let success = false;
+      try {
+        await qr.applyVideoConstraints({
+          advanced: [{ torch: next }]
+        });
+        success = true;
+      } catch (e) {
+        console.warn('html5Qr.applyVideoConstraints failed, falling back to track directly:', e);
+      }
+      
+      if (!success) {
+        const track = qr.getRunningTrack();
+        if (track) {
+          // Try multiple constraints format sequentially to maximize compatibility on mobile WebViews
+          const constraintSequences = [
+            { advanced: [{ torch: next }] },
+            { advanced: [{ fillLightMode: next ? 'torch' : 'off' }] }
+          ];
+          
+          for (const constraints of constraintSequences) {
+            try {
+              await track.applyConstraints(constraints);
+              success = true;
+              break;
+            } catch (e) {
+              console.warn('Failed to apply track constraints:', constraints, e);
+            }
           }
         }
-        
-        if (success) {
-          setFlashOn(next);
-        }
+      }
+      
+      if (success) {
+        setFlashOn(next);
       }
     } catch (err) {
       console.error('Flash toggle error:', err);
@@ -246,7 +259,11 @@ export default function QRScanner({ onBack, navigateTo }) {
               v.removeAttribute('controls');
               v.controls = false;
               v.setAttribute('playsinline', '');
-              v.setAttribute('disablepictureinpicture', '');
+              v.setAttribute('autoplay', '');
+              v.setAttribute('muted', '');
+              v.playsInline = true;
+              v.autoplay = true;
+              v.muted = true;
               v.style.pointerEvents = 'none';
               v.style.background = 'transparent';
               v.style.backgroundColor = 'transparent';
@@ -259,9 +276,19 @@ export default function QRScanner({ onBack, navigateTo }) {
                 v.onplay = showVideo;
                 v.onloadedmetadata = showVideo;
                 v.onplaying = showVideo;
+                
+                // Fallback timeout to ensure the camera preview becomes visible even if events are delayed/missed
+                setTimeout(() => {
+                  if (v && v.style.opacity === '0') {
+                    v.style.opacity = '1';
+                  }
+                }, 800);
               } else {
                 v.style.opacity = '1';
               }
+              
+              // Force playback stream
+              v.play().catch(() => {});
             });
           };
           strip(vp);
