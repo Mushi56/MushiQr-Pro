@@ -69,10 +69,23 @@
 
     <!-- Splash Screen Logic -->
     <script>
+      let initialAction = null;
+      try {
+        if (window.NativeAndroidApp && typeof window.NativeAndroidApp.getPendingAction === 'function') {
+          initialAction = window.NativeAndroidApp.getPendingAction();
+          window.INITIAL_ACTION = initialAction;
+        }
+      } catch(e) {}
+
+      const splash = document.getElementById('initial-loader');
+      if (initialAction === 'scan' && splash) {
+        splash.style.display = 'none';
+      }
+
       // Wait for everything to load, then wait an extra 2 seconds for a premium feel
       window.addEventListener('load', () => {
+        if (initialAction === 'scan') return;
         setTimeout(() => {
-          const splash = document.getElementById('initial-loader');
           if (splash) {
             splash.style.opacity = '0';
             splash.style.pointerEvents = 'none'; // Instantly allow clicks underneath

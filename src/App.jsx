@@ -927,14 +927,15 @@ export default function App() {
 
   // ── Native App Actions / Deep Links (from Widget or quick settings tile) ──
   useEffect(() => {
-    // 1. Check cold boot action via Android Javascript Interface
+    // 1. Check cold boot action via Android Javascript Interface or stored initial action
     try {
-      if (window.NativeAndroidApp && typeof window.NativeAndroidApp.getPendingAction === 'function') {
-        const action = window.NativeAndroidApp.getPendingAction();
-        if (action === 'scan') {
-          setLaunchedDirectlyToScanner(true);
-          navigateTo('scanner');
-        }
+      let action = window.INITIAL_ACTION;
+      if (!action && window.NativeAndroidApp && typeof window.NativeAndroidApp.getPendingAction === 'function') {
+        action = window.NativeAndroidApp.getPendingAction();
+      }
+      if (action === 'scan') {
+        setLaunchedDirectlyToScanner(true);
+        navigateTo('scanner');
       }
     } catch (e) {
       console.warn('Native JS interface check failed:', e);
