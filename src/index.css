@@ -5892,18 +5892,18 @@ video {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .qrs-title {
   font-size: 18px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.2px;
 }
@@ -5918,9 +5918,9 @@ video {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5930,8 +5930,8 @@ video {
 }
 
 .qrs-icon-btn:hover {
-  background: rgba(0, 0, 0, 0.6);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--bg-hover);
+  border-color: var(--border-light);
   transform: scale(1.05);
 }
 
@@ -6262,12 +6262,12 @@ video {
   gap: 24px;
   background: var(--nav-bg);
   padding: 16px 0;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.2px;
   flex-shrink: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: none;
 }
 
 .qrs-mode-tab {
@@ -6277,7 +6277,7 @@ video {
 }
 
 .qrs-mode-tab.active {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .qrs-mode-dot {
@@ -6306,9 +6306,9 @@ video {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6318,7 +6318,7 @@ video {
 
 .qrs-side-btn:active {
   transform: scale(0.92);
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--bg-hover);
 }
 
 .qrs-shutter-btn {
