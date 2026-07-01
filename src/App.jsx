@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback, Component } from 'react';
 import { App as CapApp } from '@capacitor/app';
 import { StatusBar } from '@capacitor/status-bar';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 import {
   QrCode,
   Sun,
@@ -1368,9 +1371,26 @@ export default function App() {
     if (!canvasRef.current) return;
     canvasRef.current.toBlob(async (blob) => {
       try {
-        const file = new File([blob], 'qrcode.png', { type: 'image/png' });
-        await navigator.share({ files: [file], title: 'My QR Code' });
-        showToast('Shared successfully!');
+        if (Capacitor.isNativePlatform()) {
+          try { await Filesystem.requestPermissions(); } catch {}
+          const base64Data = canvasRef.current.toDataURL('image/png').split(',')[1];
+          const filename = `qrcode_${Date.now()}.png`;
+          const savedFile = await Filesystem.writeFile({
+            path: filename,
+            data: base64Data,
+            directory: Directory.Cache
+          });
+          await Share.share({
+            title: 'Mushi Qr Pro',
+            url: savedFile.uri,
+            dialogTitle: 'Share your QR Code'
+          });
+          showToast('Shared successfully!');
+        } else {
+          const file = new File([blob], 'qrcode.png', { type: 'image/png' });
+          await navigator.share({ files: [file], title: 'My QR Code' });
+          showToast('Shared successfully!');
+        }
       } catch (err) {
         if (err.name !== 'AbortError') showToast('Share failed', 'error');
       }
@@ -2910,7 +2930,7 @@ export default function App() {
                         >
                           <Bookmark size={20} />
                         </button>
-                        {typeof navigator !== 'undefined' && navigator.canShare && (
+                        {((typeof navigator !== 'undefined' && navigator.canShare) || Capacitor.isNativePlatform()) && (
                           <button
                             className="menu-link-btn"
                             onClick={(e) => { e.stopPropagation(); handleShare(); setFormatDropdownOpen(false); }}
