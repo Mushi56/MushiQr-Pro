@@ -47,6 +47,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [flashSupported, setFlashSupported] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [zoomCapabilities, setZoomCapabilities] = useState(null);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   const qrScannerRef = useRef(null);
   const videoRef = useRef(null);
@@ -98,11 +99,13 @@ export default function QRScanner({ onBack, navigateTo }) {
       const track = stream?.getVideoTracks()?.[0];
       if (track) {
         const caps = track.getCapabilities();
-        if (caps.zoom) {
-          const val = Math.min(Math.max(value, caps.zoom.min), caps.zoom.max);
+        const minVal = caps.zoom?.min || 1;
+        const maxVal = caps.zoom?.max || 8;
+        const val = Math.min(Math.max(value, minVal), maxVal);
+        try {
           await track.applyConstraints({ advanced: [{ zoom: val }] });
-          setZoom(val);
-        }
+        } catch {}
+        setZoom(val);
       }
     } catch {}
   }, []);
@@ -112,6 +115,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     const scanner = qrScannerRef.current;
     if (!scanner) return;
     const next = !flashOn;
+    setVideoPlaying(false);
     try {
       if (next) {
         await scanner.turnFlashOn();
@@ -177,7 +181,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     if (busyRef.current) return;
     busyRef.current = true;
     if (!mountedRef.current) return;
-    setResult(null); setQrTypeData(null); setError(null); setStatus('SCANNING'); setZoom(1);
+    setResult(null); setQrTypeData(null); setError(null); setStatus('SCANNING'); setZoom(1); setVideoPlaying(false);
     try {
       await stopScanner();
       if (!mountedRef.current) { busyRef.current = false; return; }
@@ -223,6 +227,13 @@ export default function QRScanner({ onBack, navigateTo }) {
                 step: caps.zoom.step || 0.1
               });
               setZoom(prev => prev === 1 ? (caps.zoom.min || 1) : prev);
+            } else {
+              // Fallback zoom capabilities so the slider is always rendered in WebViews
+              setZoomCapabilities({
+                min: 1,
+                max: 8,
+                step: 0.1
+              });
             }
             scanner.hasFlash().then(hasFlash => {
               if (hasFlash || (Capacitor.isNativePlatform() && facingBack)) {
@@ -443,7 +454,21 @@ export default function QRScanner({ onBack, navigateTo }) {
           <div className={`qrs-frame ${status === 'DETECTED' ? 'detected' : ''}`}>
             {/* 3:4 Ratio Frame Viewport */}
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`}>
-              <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline autoPlay />
+              <video
+                ref={videoRef}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  opacity: videoPlaying ? 1 : 0,
+                  transition: 'opacity 0.2s ease-in-out',
+                }}
+                muted
+                playsInline
+                autoPlay
+                onPlay={() => setVideoPlaying(true)}
+                onPlaying={() => setVideoPlaying(true)}
+              />
             </div>
 
             {/* Flashlight button inside camera */}
@@ -529,15 +554,20 @@ export default function QRScanner({ onBack, navigateTo }) {
                 </div>
               )}
 
+              {/* Primary Full-Width Action */}
+              <button className="qrs-sheet-act primary" onClick={handlePrimaryAction}>
+                <ActionIcon size={20} />
+                <span>{qrTypeData.action}</span>
+              </button>
+
+              {/* Secondary Actions Grid */}
               <div className="qrs-sheet-actions">
-                <button className="qrs-sheet-act primary" onClick={handlePrimaryAction}>
-                  <ActionIcon size={20} />
-                  <span>{qrTypeData.action}</span>
-                </button>
-                <button className="qrs-sheet-act" onClick={handleCopy}>
-                  {copied ? <CheckCircle2 size={18} color="#ef4444" /> : <Copy size={18} />}
-                  <span>{copied ? 'Copied!' : 'Copy'}</span>
-                </button>
+                {qrTypeData.action !== 'Copy Text' && qrTypeData.action !== 'Copy Password' && (
+                  <button className="qrs-sheet-act" onClick={handleCopy}>
+                    {copied ? <CheckCircle2 size={18} color="var(--success)" /> : <Copy size={18} />}
+                    <span>{copied ? 'Copied!' : 'Copy'}</span>
+                  </button>
+                )}
                 <button className="qrs-sheet-act" onClick={handleShare}>
                   <Share2 size={18} />
                   <span>Share</span>

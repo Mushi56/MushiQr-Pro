@@ -222,7 +222,19 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
                 <div className="quick-option-icon-wrapper">
                   {React.cloneElement(option.icon, { size: 20, strokeWidth: 1.8 })}
                 </div>
-                <span style={{ fontSize: '10px', fontWeight: 700, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.3px', marginTop: '2px' }}>
+                <span style={{ 
+                  fontSize: '9px', 
+                  fontWeight: 700, 
+                  textAlign: 'center', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.2px', 
+                  marginTop: '2px',
+                  width: '100%',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: 'block'
+                }}>
                   {option.label}
                 </span>
               </button>
