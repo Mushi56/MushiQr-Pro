@@ -23,22 +23,17 @@ const parseQRData = (text) => {
 };
 
 // Dynamically load QrScanner CDN
-const loadQrScanner = () => {
-  return new Promise((resolve, reject) => {
-    if (window.QrScanner) {
-      resolve(window.QrScanner);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js';
-    script.async = true;
-    script.onload = () => {
-      window.QrScanner.WORKER_PATH = 'https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner-worker.min.js';
-      resolve(window.QrScanner);
-    };
-    script.onerror = (e) => reject(new Error('Failed to load QR scanner library.'));
-    document.body.appendChild(script);
-  });
+const loadQrScanner = async () => {
+  if (window.QrScanner) return window.QrScanner;
+  try {
+    const module = await import('https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js');
+    const QrScannerLib = module.default;
+    QrScannerLib.WORKER_PATH = 'https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner-worker.min.js';
+    window.QrScanner = QrScannerLib;
+    return QrScannerLib;
+  } catch (err) {
+    throw new Error('Failed to load QR scanner library.');
+  }
 };
 
 export default function QRScanner({ onBack, navigateTo }) {
@@ -444,7 +439,7 @@ export default function QRScanner({ onBack, navigateTo }) {
           <div className={`qrs-frame ${status === 'DETECTED' ? 'detected' : ''}`}>
             {/* 3:4 Ratio Frame Viewport */}
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`}>
-              <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline />
+              <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline autoPlay />
             </div>
 
             {/* Flashlight button inside camera */}
