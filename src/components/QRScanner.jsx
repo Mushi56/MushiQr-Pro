@@ -193,8 +193,8 @@ export default function QRScanner({ onBack, navigateTo }) {
           handleScanResult(text);
         },
         {
-          preferredCamera: facingBack ? 'environment' : 'user',
-          highlightScanRegion: false,
+          preferredCamera: 'environment',
+          highlightScanRegion: true,
           maxScansPerSecond: 10,
         }
       );
