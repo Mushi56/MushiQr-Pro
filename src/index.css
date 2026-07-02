@@ -6420,21 +6420,11 @@ video {
   margin-bottom: 32px;
 }
 
-.qrs-result-icon-container {
-  width: 80px;
-  height: 80px;
-  border-radius: 24px;
-  background: var(--accent-soft);
-  color: var(--accent-primary);
+.qrs-result-type-label {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-accent);
-  box-shadow: 0 8px 30px var(--accent-glow);
-  margin-bottom: 16px;
-}
-
-.qrs-result-type-label {
+  gap: 6px;
   font-size: 11px;
   font-weight: 700;
   color: var(--text-secondary);
@@ -7458,7 +7448,7 @@ button:active,
   top: calc(8px + env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.95);
+  background: #000000;
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.15);
   padding: 6px 14px;
@@ -7470,33 +7460,41 @@ button:active,
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   z-index: 999999;
   pointer-events: none;
-  animation: toastSlideDown 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
-             toastFadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) 2.7s forwards;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+  transform-origin: top center;
+  animation: dynamicIslandEnter 0.45s cubic-bezier(0.19, 1, 0.22, 1) forwards,
+             dynamicIslandExit 0.35s cubic-bezier(0.19, 1, 0.22, 1) 2.65s forwards;
 }
 
-@keyframes toastSlideDown {
-  from {
+@keyframes dynamicIslandEnter {
+  0% {
     opacity: 0;
-    transform: translate(-50%, -20px) scale(0.9);
+    transform: translate(-50%, -5px) scaleX(0.1) scaleY(0.4);
+    filter: blur(4px);
   }
-  to {
+  30% {
+    opacity: 1;
+    transform: translate(-50%, 0) scaleX(0.5) scaleY(0.7);
+    filter: blur(0);
+  }
+  100% {
     opacity: 1;
     transform: translate(-50%, 0) scale(1);
   }
 }
 
-@keyframes toastFadeOut {
-  from {
+@keyframes dynamicIslandExit {
+  0% {
     opacity: 1;
     transform: translate(-50%, 0) scale(1);
   }
-  to {
+  100% {
     opacity: 0;
-    transform: translate(-50%, -10px) scale(0.95);
+    transform: translate(-50%, -5px) scaleX(0.1) scaleY(0.4);
+    filter: blur(4px);
   }
 }
 

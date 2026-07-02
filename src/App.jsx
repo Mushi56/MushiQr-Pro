@@ -2849,11 +2849,20 @@ export default function App() {
                     <div className="dropdown-section" style={{ padding: '12px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Export Quality</div>
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent-primary)' }}>
-                          {exportQuality === 'Low' && 'Low (512px)'}
-                          {exportQuality === 'Medium' && 'Normal (1024px)'}
-                          {exportQuality === 'High' && 'HD (2048px)'}
-                          {exportQuality === 'Ultra' && '4K (4096px)'}
+                        <span style={{ 
+                          fontSize: '10px', 
+                          fontWeight: 800, 
+                          color: 'var(--accent-primary)',
+                          background: 'var(--accent-soft)',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(214, 0, 54, 0.15)',
+                          letterSpacing: '0.5px'
+                        }}>
+                          {exportQuality === 'Low' && '512px'}
+                          {exportQuality === 'Medium' && '1024px'}
+                          {exportQuality === 'High' && '2048px'}
+                          {exportQuality === 'Ultra' && '4096px'}
                         </span>
                       </div>
                       <div style={{ padding: '0 8px', marginTop: '12px', marginBottom: '8px' }}>

@@ -531,11 +531,9 @@ export default function QRScanner({ onBack, navigateTo }) {
 
             {/* Central content */}
             <div className="qrs-result-body">
-              <div className="qrs-result-icon-container">
-                <TypeIcon size={36} />
-              </div>
               <div className="qrs-result-type-label">
-                {qrTypeData.title}
+                <TypeIcon size={14} color="var(--accent-primary)" />
+                <span>{qrTypeData.title}</span>
               </div>
 
               {/* Data Card */}
