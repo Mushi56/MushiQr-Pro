@@ -196,6 +196,10 @@ export default function QRScanner({ onBack, navigateTo }) {
           preferredCamera: 'environment',
           highlightScanRegion: true,
           maxScansPerSecond: 10,
+          videoConstraints: {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+          },
         }
       );
       
