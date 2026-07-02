@@ -9,6 +9,7 @@ import {
   Phone, User, Globe, FileText, Minus, Plus, AlertCircle, RefreshCcw, Clock
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
+import qrNotFoundSvg from '../assets/qr-not-found.svg';
 
 const parseQRData = (text) => {
   if (!text) return { type: 'Text', icon: FileText, title: 'Text Content', action: 'Copy Text', actionIcon: Copy };
@@ -60,7 +61,7 @@ export default function QRScanner({ onBack, navigateTo }) {
 
   const triggerHapticFeedback = useCallback(() => {
     if (Capacitor.isNativePlatform()) {
-      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+      Haptics.impact({ style: ImpactStyle.Light }).catch(() => { });
     }
   }, []);
 
@@ -104,10 +105,10 @@ export default function QRScanner({ onBack, navigateTo }) {
         const val = Math.min(Math.max(value, minVal), maxVal);
         try {
           await track.applyConstraints({ advanced: [{ zoom: val }] });
-        } catch {}
+        } catch { }
         setZoom(val);
       }
-    } catch {}
+    } catch { }
   }, []);
 
   const toggleFlash = useCallback(async () => {
@@ -115,7 +116,6 @@ export default function QRScanner({ onBack, navigateTo }) {
     const scanner = qrScannerRef.current;
     if (!scanner) return;
     const next = !flashOn;
-    setVideoPlaying(false);
     try {
       if (next) {
         await scanner.turnFlashOn();
@@ -132,14 +132,14 @@ export default function QRScanner({ onBack, navigateTo }) {
     if (!mountedRef.current || busyRef.current) return;
     setStatus(prev => {
       if (prev === 'DETECTED') return prev;
-      if (Capacitor.isNativePlatform()) { Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {}); }
+      if (Capacitor.isNativePlatform()) { Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => { }); }
       else if (navigator.vibrate) { navigator.vibrate(200); }
-      
+
       const scanner = qrScannerRef.current;
       if (scanner) {
-        try { scanner.pause(); } catch {}
+        try { scanner.pause(); } catch { }
       }
-      
+
       const parsed = parseQRData(decodedText);
       setQrTypeData(parsed);
       setResult(decodedText);
@@ -185,7 +185,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     try {
       await stopScanner();
       if (!mountedRef.current) { busyRef.current = false; return; }
-      
+
       const QrScannerLib = await loadQrScanner();
       if (!mountedRef.current) { busyRef.current = false; return; }
       if (!videoRef.current) throw new Error('Video element not found.');
@@ -206,7 +206,7 @@ export default function QRScanner({ onBack, navigateTo }) {
           },
         }
       );
-      
+
       qrScannerRef.current = scanner;
       await scanner.start();
 
@@ -300,7 +300,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     triggerHapticFeedback();
     if (!result) return;
     try { await Share.share({ title: 'Scanned QR Code', text: result, dialogTitle: 'Share QR Content' }); }
-    catch { if (navigator.share) navigator.share({ title: 'Scanned QR Code', text: result }).catch(() => {}); }
+    catch { if (navigator.share) navigator.share({ title: 'Scanned QR Code', text: result }).catch(() => { }); }
   };
 
   const handleSave = async () => {
@@ -358,7 +358,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     triggerHapticFeedback();
     const scanner = qrScannerRef.current;
     if (scanner) {
-      try { scanner.start(); } catch {}
+      try { scanner.start(); } catch { }
     } else {
       startScanner();
     }
@@ -441,14 +441,30 @@ export default function QRScanner({ onBack, navigateTo }) {
 
         {/* Body */}
         <div className="qrs-body" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}>
-          {/* Error */}
-          {status === 'ERROR' && (
+          {/* Error - QR Not Found (illustrated) */}
+          {status === 'ERROR' && error && error.toLowerCase().includes('no qr') ? (
+            <div className="qrs-no-qr-screen">
+              <img src={qrNotFoundSvg} alt="No QR Code Found" className="qrs-no-qr-illustration" />
+              <h2 className="qrs-no-qr-title">No QR Code <span>Found</span></h2>
+              <p className="qrs-no-qr-desc">We couldn't find any QR code in the image.<br />Try a clearer image or check the lighting.</p>
+              <button className="qrs-no-qr-btn" onClick={startScanner}>
+                <RefreshCcw size={18} /> Try Again
+              </button>
+              <div className="qrs-no-qr-tip">
+                <div className="qrs-no-qr-tip-icon">💡</div>
+                <div>
+                  <div className="qrs-no-qr-tip-title">Tips for better results</div>
+                  <div className="qrs-no-qr-tip-text">Ensure the QR code is within the frame, well-lit, and not blurry.</div>
+                </div>
+              </div>
+            </div>
+          ) : status === 'ERROR' ? (
             <div className="qrs-center-msg">
               <AlertCircle size={44} color="#ef4444" />
               <p>{error}</p>
               <button className="qrs-retry-btn" onClick={startScanner}><RefreshCcw size={16} /> Try Again</button>
             </div>
-          )}
+          ) : null}
 
           {/* Scanner Frame */}
           <div className={`qrs-frame ${status === 'DETECTED' ? 'detected' : ''}`}>
@@ -461,6 +477,7 @@ export default function QRScanner({ onBack, navigateTo }) {
                   height: '100%',
                   objectFit: 'cover',
                   opacity: videoPlaying ? 1 : 0,
+                  visibility: videoPlaying ? 'visible' : 'hidden',
                   transition: 'opacity 0.2s ease-in-out',
                 }}
                 muted
@@ -481,17 +498,17 @@ export default function QRScanner({ onBack, navigateTo }) {
             {/* Laser Scanning Line */}
             {status === 'SCANNING' && <div className="qrs-laser" />}
             {status === 'DETECTED' && <div className="qrs-laser frozen" />}
-          </div>
 
-          {/* Zoom */}
-          {status === 'SCANNING' && zoomCapabilities && (
-            <div className="qrs-zoom">
-              <button onClick={() => applyZoom(zoom - 0.5)}><Minus size={14} /></button>
-              <input type="range" min={zoomCapabilities.min} max={zoomCapabilities.max} step={zoomCapabilities.step} value={zoom} onChange={e => applyZoom(parseFloat(e.target.value))} />
-              <button onClick={() => applyZoom(zoom + 0.5)}><Plus size={14} /></button>
-              <span>{zoom.toFixed(1)}x</span>
-            </div>
-          )}
+            {/* Zoom overlay inside viewport frame */}
+            {status === 'SCANNING' && zoomCapabilities && (
+              <div className="qrs-zoom">
+                <button onClick={() => applyZoom(zoom - 0.5)}><Minus size={14} /></button>
+                <input type="range" min={zoomCapabilities.min} max={zoomCapabilities.max} step={zoomCapabilities.step} value={zoom} onChange={e => applyZoom(parseFloat(e.target.value))} />
+                <button onClick={() => applyZoom(zoom + 0.5)}><Plus size={14} /></button>
+                <span>{zoom.toFixed(1)}x</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Mode Selector Tabs */}
@@ -507,7 +524,7 @@ export default function QRScanner({ onBack, navigateTo }) {
           <button className="qrs-side-btn" onClick={() => { triggerHapticFeedback(); stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }} aria-label="History">
             <Clock size={22} />
           </button>
-          
+
           <button className="qrs-shutter-btn" onClick={status === 'DETECTED' ? resumeScanning : captureImage} aria-label="Shutter Button">
             <div className="qrs-shutter-btn-inner" style={{ background: status === 'DETECTED' ? '#ef4444' : '#fff' }} />
           </button>
@@ -582,7 +599,7 @@ export default function QRScanner({ onBack, navigateTo }) {
                 <ActionIcon size={20} />
                 <span>{qrTypeData.action}</span>
               </button>
-              
+
               <button className="qrs-result-secondary-btn" onClick={resumeScanning}>
                 <RefreshCcw size={18} />
                 <span>Scan Again</span>
