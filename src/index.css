@@ -5983,28 +5983,36 @@ video {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   position: absolute;
   inset: 0;
   z-index: 5;
-  background: #FFF5F7;
+  background: #0B0B14;
   overflow-y: hidden;
-  padding: 16px 24px 28px;
+  padding: 24px;
   justify-content: center;
+  box-sizing: border-box;
+
+  /* SVG variables for Dark theme */
+  --qrs-svg-blob: rgba(255, 90, 118, 0.08);
+  --qrs-svg-card-bg: #1A1A26;
+  --qrs-svg-card-border: #2D2D3F;
+  --qrs-svg-qr-bracket: #4F4F66;
+  --qrs-svg-qr-module: #4F4F66;
 }
 
 .qrs-no-qr-illustration {
   width: 100%;
-  max-width: 300px;
+  max-width: 280px;
   height: auto;
   flex-shrink: 0;
-  filter: drop-shadow(0 8px 24px rgba(255, 90, 118, 0.12));
+  filter: drop-shadow(0 8px 24px rgba(255, 90, 118, 0.08));
 }
 
 .qrs-no-qr-title {
   font-size: 22px;
   font-weight: 800;
-  color: #1A1A2E;
+  color: #FFFFFF;
   margin: 0;
   text-align: center;
   letter-spacing: -0.3px;
@@ -6017,7 +6025,7 @@ video {
 .qrs-no-qr-desc {
   font-size: 14px;
   font-weight: 400;
-  color: #7A7A9A;
+  color: rgba(255, 255, 255, 0.6);
   margin: 0;
   text-align: center;
   line-height: 1.55;
@@ -6049,18 +6057,20 @@ video {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: #fff;
+  background: #161622;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 14px 16px;
   width: 100%;
   max-width: 320px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   margin-top: 2px;
+  box-sizing: border-box;
 }
 
 .qrs-no-qr-tip-icon {
   font-size: 22px;
-  background: #FFF0F3;
+  background: rgba(255, 61, 90, 0.1);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -6073,14 +6083,50 @@ video {
 .qrs-no-qr-tip-title {
   font-size: 13px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: #FFFFFF;
   margin-bottom: 3px;
 }
 
 .qrs-no-qr-tip-text {
   font-size: 12px;
-  color: #7A7A9A;
+  color: rgba(255, 255, 255, 0.5);
   line-height: 1.5;
+}
+
+/* ── Light Mode Override ── */
+[data-theme="light"] .qrs-no-qr-screen {
+  background: #FFF5F7;
+  --qrs-svg-blob: #FFF0F2;
+  --qrs-svg-card-bg: #FFFFFF;
+  --qrs-svg-card-border: #EDEDED;
+  --qrs-svg-qr-bracket: #C8C8D0;
+  --qrs-svg-qr-module: #D8D8E0;
+}
+
+[data-theme="light"] .qrs-no-qr-title {
+  color: #1A1A2E;
+}
+
+[data-theme="light"] .qrs-no-qr-desc {
+  color: #7A7A9A;
+}
+
+[data-theme="light"] .qrs-no-qr-tip {
+  background: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .qrs-no-qr-tip-icon {
+  background: #FFF0F3;
+}
+
+[data-theme="light"] .qrs-no-qr-tip-title {
+  color: #1A1A2E;
+}
+
+[data-theme="light"] .qrs-no-qr-tip-text {
+  color: #7A7A9A;
 }
 
 .qrs-center-msg .qrs-hint {

@@ -48,6 +48,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [flashSupported, setFlashSupported] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [zoomCapabilities, setZoomCapabilities] = useState(null);
+  const [hasHardwareZoom, setHasHardwareZoom] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
 
   const qrScannerRef = useRef(null);
@@ -99,16 +100,24 @@ export default function QRScanner({ onBack, navigateTo }) {
       const stream = videoRef.current.srcObject;
       const track = stream?.getVideoTracks()?.[0];
       if (track) {
-        const caps = track.getCapabilities();
+        const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
         const minVal = caps.zoom?.min || 1;
         const maxVal = caps.zoom?.max || 8;
         const val = Math.min(Math.max(value, minVal), maxVal);
         try {
-          await track.applyConstraints({ advanced: [{ zoom: val }] });
+          if (caps.zoom) {
+            await track.applyConstraints({ advanced: [{ zoom: val }] });
+          }
         } catch { }
         setZoom(val);
+      } else {
+        const val = Math.min(Math.max(value, 1), 4);
+        setZoom(val);
       }
-    } catch { }
+    } catch {
+      const val = Math.min(Math.max(value, 1), 4);
+      setZoom(val);
+    }
   }, []);
 
   const toggleFlash = useCallback(async () => {
@@ -219,8 +228,9 @@ export default function QRScanner({ onBack, navigateTo }) {
           const stream = videoRef.current?.srcObject;
           const track = stream?.getVideoTracks()?.[0];
           if (track) {
-            const caps = track.getCapabilities();
+            const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
             if (caps.zoom) {
+              setHasHardwareZoom(true);
               setZoomCapabilities({
                 min: caps.zoom.min || 1,
                 max: Math.min(caps.zoom.max || 10, 10),
@@ -228,10 +238,11 @@ export default function QRScanner({ onBack, navigateTo }) {
               });
               setZoom(prev => prev === 1 ? (caps.zoom.min || 1) : prev);
             } else {
+              setHasHardwareZoom(false);
               // Fallback zoom capabilities so the slider is always rendered in WebViews
               setZoomCapabilities({
                 min: 1,
-                max: 8,
+                max: 4,
                 step: 0.1
               });
             }
@@ -441,6 +452,38 @@ export default function QRScanner({ onBack, navigateTo }) {
 
         {/* Body */}
         <div className="qrs-body" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}>
+          {/* Error - QR Not Found (illustrated) */}
+          {status === 'ERROR' && error && error.toLowerCase().includes('no qr') ? (
+            <div 
+              className="qrs-no-qr-screen"
+              onTouchStart={e => e.stopPropagation()}
+              onTouchMove={e => e.stopPropagation()}
+            >
+              <img src={qrNotFoundSvg} alt="No QR Code Found" className="qrs-no-qr-illustration" />
+              <h2 className="qrs-no-qr-title">No QR Code <span>Found</span></h2>
+              <p className="qrs-no-qr-desc">We couldn't find any QR code in the image.<br />Try a clearer image or check the lighting.</p>
+              <button className="qrs-no-qr-btn" onClick={startScanner}>
+                <RefreshCcw size={18} /> Try Again
+              </button>
+              <div className="qrs-no-qr-tip">
+                <div className="qrs-no-qr-tip-icon">💡</div>
+                <div>
+                  <div className="qrs-no-qr-tip-title">Tips for better results</div>
+                  <div className="qrs-no-qr-tip-text">Ensure the QR code is within the frame, well-lit, and not blurry.</div>
+                </div>
+              </div>
+            </div>
+          ) : status === 'ERROR' ? (
+            <div 
+              className="qrs-center-msg"
+              onTouchStart={e => e.stopPropagation()}
+              onTouchMove={e => e.stopPropagation()}
+            >
+              <AlertCircle size={44} color="#ef4444" />
+              <p>{error}</p>
+              <button className="qrs-retry-btn" onClick={startScanner}><RefreshCcw size={16} /> Try Again</button>
+            </div>
+          ) : null}
 
 
           {/* Scanner Frame */}
@@ -456,6 +499,8 @@ export default function QRScanner({ onBack, navigateTo }) {
                   opacity: videoPlaying ? 1 : 0,
                   visibility: videoPlaying ? 'visible' : 'hidden',
                   transition: 'opacity 0.2s ease-in-out',
+                  transform: !hasHardwareZoom && zoom > 1 ? `scale(${zoom})` : 'none',
+                  transformOrigin: 'center center',
                 }}
                 muted
                 playsInline
@@ -465,30 +510,7 @@ export default function QRScanner({ onBack, navigateTo }) {
               />
             </div>
 
-            {/* Error - QR Not Found (illustrated) */}
-            {status === 'ERROR' && error && error.toLowerCase().includes('no qr') ? (
-              <div className="qrs-no-qr-screen">
-                <img src={qrNotFoundSvg} alt="No QR Code Found" className="qrs-no-qr-illustration" />
-                <h2 className="qrs-no-qr-title">No QR Code <span>Found</span></h2>
-                <p className="qrs-no-qr-desc">We couldn't find any QR code in the image.<br />Try a clearer image or check the lighting.</p>
-                <button className="qrs-no-qr-btn" onClick={startScanner}>
-                  <RefreshCcw size={18} /> Try Again
-                </button>
-                <div className="qrs-no-qr-tip">
-                  <div className="qrs-no-qr-tip-icon">💡</div>
-                  <div>
-                    <div className="qrs-no-qr-tip-title">Tips for better results</div>
-                    <div className="qrs-no-qr-tip-text">Ensure the QR code is within the frame, well-lit, and not blurry.</div>
-                  </div>
-                </div>
-              </div>
-            ) : status === 'ERROR' ? (
-              <div className="qrs-center-msg">
-                <AlertCircle size={44} color="#ef4444" />
-                <p>{error}</p>
-                <button className="qrs-retry-btn" onClick={startScanner}><RefreshCcw size={16} /> Try Again</button>
-              </div>
-            ) : null}
+
 
             {/* Flashlight button inside camera */}
             {flashSupported && (

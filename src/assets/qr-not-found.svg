@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 340" fill="none">
   <!-- Background blob -->
-  <ellipse cx="200" cy="145" rx="158" ry="130" fill="#FFF0F2" opacity="0.9"/>
+  <ellipse cx="200" cy="145" rx="158" ry="130" fill="var(--qrs-svg-blob, #FFF0F2)" opacity="0.9"/>
 
   <!-- Decorative scatter elements -->
   <!-- Blue X top-left -->
@@ -35,11 +35,11 @@
     <!-- Card shadow -->
     <rect x="8" y="8" width="178" height="178" rx="22" fill="rgba(0,0,0,0.06)"/>
     <!-- Card white body -->
-    <rect width="178" height="178" rx="22" fill="#FFFFFF" stroke="#EDEDED" stroke-width="1.5"/>
+    <rect width="178" height="178" rx="22" fill="var(--qrs-svg-card-bg, #FFFFFF)" stroke="var(--qrs-svg-card-border, #EDEDED)" stroke-width="1.5"/>
 
     <!-- QR corner brackets (scan frame effect) -->
     <!-- Top-left bracket -->
-    <g stroke="#C8C8D0" stroke-width="3" stroke-linecap="round" fill="none">
+    <g stroke="var(--qrs-svg-qr-bracket, #C8C8D0)" stroke-width="3" stroke-linecap="round" fill="none">
       <polyline points="20,46 20,24 42,24"/>
       <!-- Top-right bracket -->
       <polyline points="136,24 158,24 158,46"/>
@@ -51,19 +51,19 @@
 
     <!-- QR modules (simplified stylised QR art) -->
     <!-- Top-left position square -->
-    <rect x="30" y="34" width="36" height="36" rx="5" fill="#D8D8E0" opacity="0.6"/>
-    <rect x="37" y="41" width="22" height="22" rx="3" fill="#FFFFFF" opacity="0.9"/>
-    <rect x="43" y="47" width="10" height="10" rx="2" fill="#D0D0D8" opacity="0.7"/>
+    <rect x="30" y="34" width="36" height="36" rx="5" fill="var(--qrs-svg-qr-module, #D8D8E0)" opacity="0.6"/>
+    <rect x="37" y="41" width="22" height="22" rx="3" fill="var(--qrs-svg-card-bg, #FFFFFF)" opacity="0.9"/>
+    <rect x="43" y="47" width="10" height="10" rx="2" fill="var(--qrs-svg-qr-bracket, #D0D0D8)" opacity="0.7"/>
 
     <!-- Top-right position square -->
-    <rect x="112" y="34" width="36" height="36" rx="5" fill="#D8D8E0" opacity="0.6"/>
-    <rect x="119" y="41" width="22" height="22" rx="3" fill="#FFFFFF" opacity="0.9"/>
+    <rect x="112" y="34" width="36" height="36" rx="5" fill="var(--qrs-svg-qr-module, #D8D8E0)" opacity="0.6"/>
+    <rect x="119" y="41" width="22" height="22" rx="3" fill="var(--qrs-svg-card-bg, #FFFFFF)" opacity="0.9"/>
     <rect x="125" y="47" width="10" height="10" rx="2" fill="#D0D0D8" opacity="0.7"/>
 
     <!-- Bottom-left position square -->
-    <rect x="30" y="108" width="36" height="36" rx="5" fill="#D8D8E0" opacity="0.6"/>
-    <rect x="37" y="115" width="22" height="22" rx="3" fill="#FFFFFF" opacity="0.9"/>
-    <rect x="43" y="121" width="10" height="10" rx="2" fill="#D0D0D8" opacity="0.7"/>
+    <rect x="30" y="108" width="36" height="36" rx="5" fill="var(--qrs-svg-qr-module, #D8D8E0)" opacity="0.6"/>
+    <rect x="37" y="115" width="22" height="22" rx="3" fill="var(--qrs-svg-card-bg, #FFFFFF)" opacity="0.9"/>
+    <rect x="43" y="121" width="10" height="10" rx="2" fill="var(--qrs-svg-qr-bracket, #D0D0D8)" opacity="0.7"/>
 
     <!-- QR data modules (middle abstract patterns) -->
     <rect x="78" y="34" width="8" height="8" rx="2" fill="#D8D8E0" opacity="0.5"/>
