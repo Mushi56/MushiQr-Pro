@@ -517,73 +517,77 @@ export default function QRScanner({ onBack, navigateTo }) {
           </button>
         </div>
 
-        {/* Detection Bottom Sheet */}
+        {/* Full-Screen Detection Result */}
         {status === 'DETECTED' && qrTypeData && (
-          <div className="qrs-sheet-bg" onClick={resumeScanning}>
-            <div className="qrs-sheet" onClick={e => e.stopPropagation()}>
-              <div className="qrs-sheet-handle" />
-              <div className="qrs-sheet-head">
-                <CheckCircle2 size={22} color="#ef4444" />
-                <h3>QR Detected</h3>
-              </div>
-              <div className="qrs-sheet-type">
-                <TypeIcon size={14} />
-                <span>{qrTypeData.title}</span>
-              </div>
-              
-              {/* Type-Specific Preview Card */}
-              {qrTypeData.type === 'WiFi' ? (
-                <div className="qrs-type-card-wifi">
-                  <div className="qrs-type-card-wifi-field">
-                    <span className="qrs-type-card-wifi-lbl">SSID</span>
-                    <span className="qrs-type-card-wifi-val">{result.match(/S:(.*?)(?:[;]|$)/i)?.[1] || 'Unknown'}</span>
-                  </div>
-                  <div className="qrs-type-card-wifi-field">
-                    <span className="qrs-type-card-wifi-lbl">Security</span>
-                    <span className="qrs-type-card-wifi-val">{result.match(/T:(.*?)(?:[;]|$)/i)?.[1] || 'WPA'}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="qrs-sheet-preview">
-                  <div className="qrs-sheet-link-icon">
-                    <TypeIcon size={20} />
-                  </div>
-                  <div className="qrs-sheet-link-text">
-                    <p className="qrs-sheet-url">{result}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Primary Full-Width Action */}
-              <button className="qrs-sheet-act primary" onClick={handlePrimaryAction}>
-                <ActionIcon size={20} />
-                <span>{qrTypeData.action}</span>
+          <div className="qrs-result-fullscreen">
+            {/* Header bar */}
+            <div className="qrs-result-header">
+              <button className="qrs-result-back-btn" onClick={resumeScanning} aria-label="Go Back">
+                <ArrowLeft size={20} />
               </button>
+              <h3>Scan Result</h3>
+              <div className="qrs-result-header-placeholder" />
+            </div>
+
+            {/* Central content */}
+            <div className="qrs-result-body">
+              <div className="qrs-result-icon-container">
+                <TypeIcon size={36} />
+              </div>
+              <div className="qrs-result-type-label">
+                {qrTypeData.title}
+              </div>
+
+              {/* Data Card */}
+              <div className="qrs-result-card">
+                <div className="qrs-result-data-title">Content</div>
+                {qrTypeData.type === 'WiFi' ? (
+                  <div className="qrs-result-wifi-fields">
+                    <div className="qrs-result-wifi-row">
+                      <span className="qrs-result-wifi-label">SSID</span>
+                      <span className="qrs-result-wifi-value">{result.match(/S:(.*?)(?:[;]|$)/i)?.[1] || 'Unknown'}</span>
+                    </div>
+                    <div className="qrs-result-wifi-row">
+                      <span className="qrs-result-wifi-label">Security</span>
+                      <span className="qrs-result-wifi-value">{result.match(/T:(.*?)(?:[;]|$)/i)?.[1] || 'WPA'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="qrs-result-text-box">
+                    {result}
+                  </div>
+                )}
+              </div>
 
               {/* Secondary Actions Grid */}
-              <div className="qrs-sheet-actions">
+              <div className="qrs-result-actions-grid">
                 {qrTypeData.action !== 'Copy Text' && qrTypeData.action !== 'Copy Password' && (
-                  <button className="qrs-sheet-act" onClick={handleCopy}>
+                  <button className="qrs-result-act-btn" onClick={handleCopy}>
                     {copied ? <CheckCircle2 size={18} color="var(--success)" /> : <Copy size={18} />}
                     <span>{copied ? 'Copied!' : 'Copy'}</span>
                   </button>
                 )}
-                <button className="qrs-sheet-act" onClick={handleShare}>
+                <button className="qrs-result-act-btn" onClick={handleShare}>
                   <Share2 size={18} />
                   <span>Share</span>
                 </button>
-                <button className="qrs-sheet-act" onClick={handleSave}>
+                <button className="qrs-result-act-btn" onClick={handleSave}>
                   <Star size={18} />
                   <span>Save</span>
                 </button>
               </div>
+            </div>
+
+            {/* Bottom action buttons */}
+            <div className="qrs-result-bottom-row">
+              <button className="qrs-result-primary-btn" onClick={handlePrimaryAction}>
+                <ActionIcon size={20} />
+                <span>{qrTypeData.action}</span>
+              </button>
               
-              <button 
-                className="qrs-retry-btn" 
-                style={{ width: '100%', marginTop: '16px', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)' }} 
-                onClick={resumeScanning}
-              >
-                <RefreshCcw size={14} /> Resume Scanning
+              <button className="qrs-result-secondary-btn" onClick={resumeScanning}>
+                <RefreshCcw size={18} />
+                <span>Scan Again</span>
               </button>
             </div>
           </div>
