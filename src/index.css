@@ -5988,7 +5988,7 @@ video {
   inset: 0;
   z-index: 5;
   background: #FFF5F7;
-  overflow-y: auto;
+  overflow-y: hidden;
   padding: 16px 24px 28px;
   justify-content: center;
 }
