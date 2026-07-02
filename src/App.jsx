@@ -781,7 +781,7 @@ export default function App() {
   const [textEditMode, setTextEditMode] = useState('center');
 
   const [textCenterText, setTextCenterText] = useState('');
-  const [textCenterSize, setTextCenterSize] = useState(0.18);
+  const [textCenterSize, setTextCenterSize] = useState(0.08);
   const [textCenterColor, setTextCenterColor] = useState('#000000');
   const [textCenterFont, setTextCenterFont] = useState('Inter');
   const [textCenterStrokeEnabled, setTextCenterStrokeEnabled] = useState(false);
@@ -2492,12 +2492,12 @@ export default function App() {
         
         if (dragType.current === 'resize-text-br') {
             const scale = Math.max(0.1, (dragStartOffset.current.startW + diffX) / dragStartOffset.current.startW);
-            newW = Math.max(0.05, Math.min(0.6, dragStartOffset.current.startW * scale));
-            newH = Math.max(0.05, Math.min(0.6, dragStartOffset.current.startH * scale));
-            newSize = Math.max(0.02, Math.min(0.18, dragStartOffset.current.startSize * scale));
+            newW = Math.max(0.05, Math.min(0.35, dragStartOffset.current.startW * scale));
+            newH = Math.max(0.05, Math.min(0.35, dragStartOffset.current.startH * scale));
+            newSize = Math.max(0.02, Math.min(0.35, dragStartOffset.current.startSize * scale));
             
             // Adjust dragStartOffset.current.x for boundary constraints
-            const maxScale = 0.6 / dragStartOffset.current.startW;
+            const maxScale = 0.35 / dragStartOffset.current.startW;
             const minScale = 0.05 / dragStartOffset.current.startW;
             const currentScale = (dragStartOffset.current.startW + diffX) / dragStartOffset.current.startW;
             if (currentScale > maxScale) {
@@ -2508,9 +2508,9 @@ export default function App() {
                 dragStartOffset.current.x = localX - minDiffX * contentSize;
             }
         } else if (dragType.current === 'resize-text-r') {
-            newW = Math.max(0.05, Math.min(0.6, dragStartOffset.current.startW + diffX));
+            newW = Math.max(0.05, Math.min(0.35, dragStartOffset.current.startW + diffX));
             
-            const maxDiffX = 0.6 - dragStartOffset.current.startW;
+            const maxDiffX = 0.35 - dragStartOffset.current.startW;
             const minDiffX = 0.05 - dragStartOffset.current.startW;
             if (diffX > maxDiffX) {
                 dragStartOffset.current.x = localX - maxDiffX * contentSize;
@@ -2518,9 +2518,9 @@ export default function App() {
                 dragStartOffset.current.x = localX - minDiffX * contentSize;
             }
         } else if (dragType.current === 'resize-text-b') {
-            newH = Math.max(0.05, Math.min(0.6, dragStartOffset.current.startH + diffY));
+            newH = Math.max(0.05, Math.min(0.35, dragStartOffset.current.startH + diffY));
             
-            const maxDiffY = 0.6 - dragStartOffset.current.startH;
+            const maxDiffY = 0.35 - dragStartOffset.current.startH;
             const minDiffY = 0.05 - dragStartOffset.current.startH;
             if (diffY > maxDiffY) {
                 dragStartOffset.current.y = localY - maxDiffY * contentSize;
@@ -3530,22 +3530,30 @@ export default function App() {
                       )}
                       {textPopup === 'size' && (
                         <div className="fade-in">
-                          <Slider 
-                            label="Size" 
-                            min={0.02} 
-                            max={0.18} 
-                            step={0.01} 
-                            value={textEditMode === 'center' ? textCenterSize : frameSize} 
-                            onChange={(val) => {
-                              if (textEditMode === 'center') {
-                                setTextCenterSize(val);
+                          {textEditMode === 'center' ? (
+                            <Slider 
+                              label="Size" 
+                              min={2} 
+                              max={100} 
+                              step={1} 
+                              value={Math.round(((textCenterSize - 0.02) / 0.33) * 98 + 2)} 
+                              onChange={(val) => {
+                                const newSize = 0.02 + ((val - 2) / 98) * 0.33;
+                                setTextCenterSize(Math.round(newSize * 1000) / 1000);
                                 setTextCenterWidth(null);
                                 setTextCenterHeight(null);
-                              } else {
-                                setFrameSize(val);
-                              }
-                            }} 
-                          />
+                              }} 
+                            />
+                          ) : (
+                            <Slider 
+                              label="Size" 
+                              min={0.02} 
+                              max={0.18} 
+                              step={0.01} 
+                              value={frameSize} 
+                              onChange={(val) => setFrameSize(val)} 
+                            />
+                          )}
                         </div>
                       )}
                       {textPopup === 'color' && (
@@ -3570,7 +3578,7 @@ export default function App() {
                                   <div key={color} className={`swatch-item${(textEditMode === 'center' ? textCenterStrokeColor : frameStrokeColor) === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => textEditMode === 'center' ? setTextCenterStrokeColor(color) : setFrameStrokeColor(color)} />
                                 ))}
                               </div>
-                              <Slider label="Stroke Width" min={1} max={20} value={textEditMode === 'center' ? textCenterStrokeWidth : frameStrokeWidth} onChange={textEditMode === 'center' ? setTextCenterStrokeWidth : setFrameStrokeWidth} />
+                              <Slider label="Stroke Width" min={1} max={textEditMode === 'center' ? 100 : 20} value={textEditMode === 'center' ? textCenterStrokeWidth : frameStrokeWidth} onChange={textEditMode === 'center' ? setTextCenterStrokeWidth : setFrameStrokeWidth} />
                             </div>
                           )}
                         </div>
@@ -3948,14 +3956,28 @@ export default function App() {
                       {activeTab === 'text' && (
                         <>
                           <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Add Text</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'pos')}><Maximize size={18} /><span>Position</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'size')}><ChevronUp size={18} /><span>Size</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'color')}><Palette size={18} /><span>Color</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'shadow')}><Moon size={18} /><span>Shadow</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'rotate')}><RotateCw size={18} /><span>Rotate</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'bg')}><Hexagon size={18} /><span>Shape</span></button>
+                          {(() => {
+                            const isTextEnabled = textCenterEnabled || frameStyle !== 'none';
+                            const handleTextToolClick = (tool) => {
+                              if (!isTextEnabled) {
+                                showToast('Please enable Center Text or Frame Text first', 'info');
+                                return;
+                              }
+                              startEditing('text', tool);
+                            };
+                            return (
+                              <>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('pos')}><Maximize size={18} /><span>Position</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('size')}><ChevronUp size={18} /><span>Size</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('color')}><Palette size={18} /><span>Color</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('shadow')}><Moon size={18} /><span>Shadow</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('rotate')}><RotateCw size={18} /><span>Rotate</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('bg')}><Hexagon size={18} /><span>Shape</span></button>
+                              </>
+                            );
+                          })()}
                         </>
                       )}
                     </div>
