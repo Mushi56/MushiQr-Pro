@@ -125,6 +125,10 @@ export default function QRScanner({ onBack, navigateTo }) {
     const scanner = qrScannerRef.current;
     if (!scanner) return;
     const next = !flashOn;
+    
+    // Temporarily hide video stream to prevent native play button overlays during stream recreation
+    setVideoPlaying(false);
+    
     try {
       if (next) {
         await scanner.turnFlashOn();
@@ -134,6 +138,8 @@ export default function QRScanner({ onBack, navigateTo }) {
       setFlashOn(next);
     } catch (err) {
       console.error('Flash toggle error:', err);
+      // Restore video visibility if toggle fails
+      setVideoPlaying(true);
     }
   }, [flashOn, triggerHapticFeedback]);
 
