@@ -1206,10 +1206,10 @@ export default function App() {
         
         if (effectiveTheme === 'dark') {
           await StatusBar.setStyle({ style: 'DARK' }); // Light text/icons for dark background
-          await StatusBar.setBackgroundColor({ color: '#13131D' });
+          await StatusBar.setBackgroundColor({ color: '#00000000' });
         } else {
           await StatusBar.setStyle({ style: 'LIGHT' }); // Dark text/icons for light background
-          await StatusBar.setBackgroundColor({ color: '#FFFFFF' });
+          await StatusBar.setBackgroundColor({ color: '#00000000' });
         }
       } catch (e) {
         console.warn('StatusBar plugin failed to update:', e);
