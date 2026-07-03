@@ -98,18 +98,30 @@ export default function SavedPage({ onLoadQR }) {
     }}>
       {/* Header */}
       <div style={{ padding: '24px var(--main-padding-x) 16px', background: 'var(--bg-primary)', zIndex: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '12px',
-            background: 'rgba(214, 0, 54, 0.1)', color: '#D60036',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          position: 'relative'
+        }}>
+          <div className="page-header-icon-box" style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'var(--accent-gradient)',
+            color: '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(214, 0, 54, 0.2)',
+            flexShrink: 0
           }}>
-            <Star size={24} fill="#D60036" strokeWidth={0} />
+            <Star size={20} fill="#FFFFFF" strokeWidth={0} />
           </div>
           <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>Saved</h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
-              Your saved QR codes
+            <h2 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', lineHeight: '1.2' }}>Saved Projects</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0 0', lineHeight: '1.4' }}>
+              Your bookmarked and favorite QR codes
             </p>
           </div>
           {saved.length > 0 && (
@@ -118,7 +130,7 @@ export default function SavedPage({ onLoadQR }) {
                  onClick={() => setShowRangeMenu(!showRangeMenu)}
                  style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '8px' }}
                >
-                 <MoreVertical size={24} />
+                 <Trash2 size={22} />
                </button>
                
                {showRangeMenu && (
@@ -160,6 +172,7 @@ export default function SavedPage({ onLoadQR }) {
         <div style={{
           display: 'flex', alignItems: 'center', background: 'var(--bg-elevated)',
           borderRadius: '16px', padding: '0 16px', border: '1px solid var(--border-color)',
+          marginTop: '20px',
           marginBottom: '16px'
         }}>
           <Search size={20} color="var(--text-muted)" />

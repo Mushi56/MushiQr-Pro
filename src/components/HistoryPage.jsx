@@ -168,17 +168,29 @@ export default function HistoryPage({ onLoadQR, onNavigate }) {
     }}>
       {/* Header */}
       <div style={{ padding: '24px var(--main-padding-x) 16px', background: 'var(--bg-primary)', zIndex: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '12px',
-            background: 'rgba(214, 0, 54, 0.1)', color: '#D60036',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          position: 'relative'
+        }}>
+          <div className="page-header-icon-box" style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'var(--accent-gradient)',
+            color: '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(214, 0, 54, 0.2)',
+            flexShrink: 0
           }}>
-            <HistoryIcon size={24} color="#D60036" />
+            <HistoryIcon size={20} color="#FFFFFF" />
           </div>
           <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>History</h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', lineHeight: '1.2' }}>History</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0 0', lineHeight: '1.4' }}>
               Your scan and creation history
             </p>
           </div>
@@ -188,7 +200,7 @@ export default function HistoryPage({ onLoadQR, onNavigate }) {
                  onClick={() => setShowRangeMenu(!showRangeMenu)}
                  style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '8px' }}
                >
-                 <MoreVertical size={24} />
+                  <Trash2 size={22} />
                </button>
                
                {showRangeMenu && (
@@ -227,7 +239,7 @@ export default function HistoryPage({ onLoadQR, onNavigate }) {
         </div>
 
         {/* Filter Tabs */}
-        <div style={{ display: 'flex', gap: '8px', paddingBottom: '4px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '20px', paddingBottom: '4px' }}>
           {['All', 'Scanned', 'Created'].map(tab => {
             const count = tab === 'All' ? history.length : history.filter(i => (tab === 'Scanned' ? i.source === 'scan' : i.source !== 'scan')).length;
             const isActive = activeFilter === tab;

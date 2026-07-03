@@ -1,4 +1,4 @@
-import { Moon, Sun, Info, Shield, FileText, ChevronRight } from 'lucide-react';
+import { Moon, Sun, Info, Shield, FileText, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import AppIcon from './AppIcon';
 
@@ -52,7 +52,7 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
   ];
 
   return (
-    <div className="settings-page fade-in-up" style={{
+    <div className="settings-page fade-in" style={{
       width: '100%',
       height: '100%',
       display: 'flex',
@@ -62,13 +62,34 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
       overflow: 'hidden'
     }}>
       {/* Header */}
-      <div style={{
-        padding: '24px var(--main-padding-x) 16px',
-        borderBottom: '1px solid var(--border-color)',
-        background: 'var(--bg-primary)',
-        zIndex: 10
-      }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Settings</h2>
+      <div style={{ padding: '24px var(--main-padding-x) 16px', background: 'var(--bg-primary)', zIndex: 10 }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          position: 'relative'
+        }}>
+          <div className="page-header-icon-box" style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'var(--accent-gradient)',
+            color: '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(214, 0, 54, 0.2)',
+            flexShrink: 0
+          }}>
+            <SettingsIcon size={20} color="#FFFFFF" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', lineHeight: '1.2' }}>Settings</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0 0', lineHeight: '1.4' }}>
+              Customize your app experience
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Content */}

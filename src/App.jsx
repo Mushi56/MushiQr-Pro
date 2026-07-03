@@ -53,7 +53,8 @@ import {
   Filter,
   Crop,
   Eraser,
-  Layers
+  Layers,
+  AlertCircle
 } from 'lucide-react';
 import ColorPicker from './components/ColorPicker';
 import Slider from './components/Slider';
@@ -696,6 +697,9 @@ export default function App() {
   const [errorLevel, setErrorLevel] = useState('M');
   const [loadedItemId, setLoadedItemId] = useState(null);
   const [launchedDirectlyToScanner, setLaunchedDirectlyToScanner] = useState(false);
+  // Tracks whether the user has meaningfully changed the QR generator since it was last reset/loaded
+  const generatorIsDirtyRef = useRef(false);
+  const ignoreDirtyRef = useRef(false);
 
   // ── Colors ──
   const [qrColor, setQrColor] = useState('#000000');
@@ -815,6 +819,7 @@ export default function App() {
   const [selectedFormat, setSelectedFormat] = useState('PNG');
   const [exportQuality, setExportQuality] = useState('High'); // Default to High (2048px)
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
+  const [unsavedChangesModal, setUnsavedChangesModal] = useState({ isOpen: false, nextPage: null });
   const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
   const downloadBtnRef = useRef(null);
   const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
@@ -896,34 +901,42 @@ export default function App() {
   // Custom navigation wrapper to track history
   const navigateTo = (page) => {
     if (page !== activePage) {
-      if (page !== 'scanner') {
-        setLaunchedDirectlyToScanner(false);
+      if (activePage === 'generator' && generatorIsDirtyRef.current) {
+        setUnsavedChangesModal({ isOpen: true, nextPage: page });
+        return;
       }
-      if (logoPopup || textPopup || colorPopup || shapePopup) {
-        applyEditing();
-      }
-      setCanvasSelection(null);
-      setPreviousPage(activePage);
+      performNavigation(page);
+    }
+  };
 
-      let path = '/';
-      if (page === 'generator') path = '/generator';
-      else if (page === 'settings') path = '/settings';
-      else if (page === 'saved') path = '/saved';
-      else if (page === 'history') path = '/history';
-      else if (page === 'scanner') path = '/scanner';
+  const performNavigation = (page) => {
+    if (page !== 'scanner') {
+      setLaunchedDirectlyToScanner(false);
+    }
+    if (logoPopup || textPopup || colorPopup || shapePopup) {
+      applyEditing();
+    }
+    setCanvasSelection(null);
+    setPreviousPage(activePage);
 
-      if (location.pathname !== path) {
-        navigate(path);
-      }
+    let path = '/';
+    if (page === 'generator') path = '/generator';
+    else if (page === 'settings') path = '/settings';
+    else if (page === 'saved') path = '/saved';
+    else if (page === 'history') path = '/history';
+    else if (page === 'scanner') path = '/scanner';
 
-      setActivePage(page);
-      // Clear tab history when starting a new session or returning home
-      if (page === 'generator' || page === 'home') {
-        setTabHistory([]);
-        if (page === 'generator') {
-          setActiveTab('content');
-          setCanvasSelection(null);
-        }
+    if (location.pathname !== path) {
+      navigate(path);
+    }
+
+    setActivePage(page);
+    // Clear tab history when starting a new session or returning home
+    if (page === 'generator' || page === 'home') {
+      setTabHistory([]);
+      if (page === 'generator') {
+        setActiveTab('content');
+        setCanvasSelection(null);
       }
     }
   };
@@ -999,6 +1012,9 @@ export default function App() {
 
   const saveSnapshot = useCallback(() => {
     if (isInternalUpdate.current) return;
+    if (!ignoreDirtyRef.current) {
+      generatorIsDirtyRef.current = true;
+    }
     const current = getSnapshot();
     
     // Avoid saving if the current state matches the one we're already at in history
@@ -1253,20 +1269,43 @@ export default function App() {
   }, []);
 
 
-  // ── Save to History when leaving the generator page ──
-  const prevPageRef = useRef(activePage);
-  useEffect(() => {
-    const prevPage = prevPageRef.current;
-    prevPageRef.current = activePage;
+  // ── Helper: build a human-readable display name from qrType + qrData ──
+  const getQRDisplayName = (type, data) => {
+    if (!data) return 'QR Code';
+    switch (type) {
+      case QR_TYPES.URL:    return data.url || 'QR Code';
+      case QR_TYPES.TEXT:   return data.text || 'QR Code';
+      case QR_TYPES.EMAIL:  return data.email || data.subject || 'Email QR';
+      case QR_TYPES.PHONE:  return data.phone || 'Phone QR';
+      case QR_TYPES.SMS:    return data.phone || data.message || 'SMS QR';
+      case QR_TYPES.WIFI:   return data.ssid ? `Wi-Fi: ${data.ssid}` : 'Wi-Fi QR';
+      case QR_TYPES.VCARD:  return [data.firstName, data.lastName].filter(Boolean).join(' ') || data.organization || 'Contact QR';
+      case QR_TYPES.GEO:    return (data.latitude && data.longitude) ? `${data.latitude}, ${data.longitude}` : 'Location QR';
+      case QR_TYPES.EVENT:  return data.summary || data.title || 'Event QR';
+      case QR_TYPES.CRYPTO: return data.address || 'Crypto QR';
+      default:              return formatQRData(type, data)?.substring(0, 50) || 'QR Code';
+    }
+  };
 
-    // Save generated code to history when navigating AWAY from the generator
-    if (prevPage === 'generator' && activePage !== 'generator') {
-      const dataString = formatQRData(qrType, qrData);
-      if (dataString) {
+  // ── Unsaved Changes Modal Actions ──
+  const handleSaveAndExit = () => {
+    const dataString = formatQRData(qrType, qrData);
+    if (dataString) {
+      const displayText = getQRDisplayName(qrType, qrData);
+      
+      if (loadedItemId && loadedItemId.startsWith('saved_')) {
+        saveToSaved({
+          id: loadedItemId,
+          source: 'create',
+          qrType, qrData, displayText: displayText.substring(0, 80), errorLevel,
+          ...getSnapshot(),
+          thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.8) || null
+        });
+      } else {
         const savedEntry = saveToHistory({
           id: loadedItemId,
           source: 'create',
-          qrType, qrData, displayText: dataString.substring(0, 50), errorLevel,
+          qrType, qrData, displayText: displayText.substring(0, 80), errorLevel,
           ...getSnapshot(),
           thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.8) || null
         });
@@ -1275,7 +1314,22 @@ export default function App() {
         }
       }
     }
-  }, [activePage]);
+    generatorIsDirtyRef.current = false;
+    const nextPage = unsavedChangesModal.nextPage;
+    setUnsavedChangesModal({ isOpen: false, nextPage: null });
+    performNavigation(nextPage);
+  };
+
+  const handleDiscardAndExit = () => {
+    generatorIsDirtyRef.current = false;
+    const nextPage = unsavedChangesModal.nextPage;
+    setUnsavedChangesModal({ isOpen: false, nextPage: null });
+    performNavigation(nextPage);
+  };
+
+  const handleCancelExit = () => {
+    setUnsavedChangesModal({ isOpen: false, nextPage: null });
+  };
 
   // ── Auto-upgrade error correction when logo is present ──
   useEffect(() => {
@@ -1503,6 +1557,13 @@ export default function App() {
   const handleLoadQR = (item) => {
     if (!item) return;
     
+    ignoreDirtyRef.current = true;
+    generatorIsDirtyRef.current = false;
+    setTimeout(() => {
+      ignoreDirtyRef.current = false;
+      generatorIsDirtyRef.current = false;
+    }, 1000);
+    
     // Core data
     if (item.source === 'scan' || (!item.qrType && item.qrData?.text)) {
       const rawText = item.qrData?.text || item.displayText || '';
@@ -1520,13 +1581,12 @@ export default function App() {
       setEyeStyle('square');
       setFrameStyle('none');
       setTextCenterEnabled(false);
-      
-      setLoadedItemId(null);
     } else {
       // Generated QR template: apply all saved snapshot settings
       applySnapshot(item);
-      setLoadedItemId(item.id || null);
     }
+
+    setLoadedItemId(item.id || null);
 
     // Reset tab history when loading a template
     setTabHistory([]);
@@ -1535,7 +1595,13 @@ export default function App() {
   };
 
   const resetGenerator = () => {
+    ignoreDirtyRef.current = true;
     setLoadedItemId(null);
+    generatorIsDirtyRef.current = false; // reset dirty flag on fresh generator open
+    setTimeout(() => {
+      ignoreDirtyRef.current = false;
+      generatorIsDirtyRef.current = false;
+    }, 1000);
     // Content
     setQrType(QR_TYPES.URL);
     setQrData({ url: 'https://example.com' });
@@ -3070,6 +3136,7 @@ export default function App() {
                       activeType={qrType}
                       onTypeChange={(type) => {
                         setQrType(type);
+                        generatorIsDirtyRef.current = true;
                         setIsDataModalOpen(true);
                       }}
                     />
@@ -4130,7 +4197,7 @@ export default function App() {
               </button>
             </div>
             <div className="modal-content">
-              <QRDataInput type={qrType} data={qrData} onChange={setQrData} />
+              <QRDataInput type={qrType} data={qrData} onChange={(newData) => { generatorIsDirtyRef.current = true; setQrData(newData); }} />
             </div>
             <button className="modal-done-btn" onClick={() => setIsDataModalOpen(false)}>
               Update QR Code
@@ -4304,6 +4371,90 @@ export default function App() {
             whiteSpace: 'nowrap'
           }}>
             {hoverColor ? hoverColor.toUpperCase() : ''}
+          </div>
+        </div>
+      )}
+
+      {/* ── Unsaved Changes Modal ── */}
+      {unsavedChangesModal.isOpen && (
+        <div className="modal-overlay" onClick={handleCancelExit}>
+          <div className="modal-container glass-panel" style={{ maxWidth: '360px', padding: '24px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: 'rgba(214, 0, 54, 0.1)',
+                color: 'var(--accent-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px'
+              }}>
+                <AlertCircle size={28} />
+              </div>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 8px', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Unsaved Changes</h3>
+              <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
+                You have modified this QR code. Do you want to update your changes before leaving?
+              </p>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button 
+                onClick={handleSaveAndExit}
+                style={{
+                  background: 'var(--accent-gradient)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 12px rgba(214, 0, 54, 0.2)'
+                }}
+              >
+                Update Changes
+              </button>
+              
+              <button 
+                onClick={handleDiscardAndExit}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--border-color)',
+                  color: '#D60036',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(214, 0, 54, 0.1)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
+              >
+                Discard Changes
+              </button>
+              
+              <button 
+                onClick={handleCancelExit}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

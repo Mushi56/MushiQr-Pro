@@ -13,9 +13,9 @@ export function saveToHistory(entry) {
   const existingIndex = entry.id ? history.findIndex(item => item.id === entry.id) : -1;
   
   const newEntry = {
-    id: entry.id || (Date.now().toString(36) + Math.random().toString(36).substr(2)),
     timestamp: new Date().toISOString(),
     ...entry,
+    id: entry.id || (Date.now().toString(36) + Math.random().toString(36).substr(2)),
   };
   
   if (existingIndex !== -1) {
