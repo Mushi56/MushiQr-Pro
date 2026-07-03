@@ -138,8 +138,10 @@ export default function QRScanner({ onBack, navigateTo }) {
       setFlashOn(next);
     } catch (err) {
       console.error('Flash toggle error:', err);
-      // Restore video visibility if toggle fails
-      setVideoPlaying(true);
+    } finally {
+      setTimeout(() => {
+        setVideoPlaying(true);
+      }, 150);
     }
   }, [flashOn, triggerHapticFeedback]);
 
