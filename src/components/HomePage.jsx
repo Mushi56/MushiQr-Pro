@@ -113,8 +113,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
       color: 'var(--text-primary)',
       display: 'flex',
       flexDirection: 'column',
-      position: 'relative',
-      paddingTop: 'env(safe-area-inset-top)'
+      position: 'relative'
     }}>
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up">
         {/* Hero Card */}
