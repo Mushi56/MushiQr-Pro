@@ -7649,4 +7649,14 @@ button:active,
   }
 }
 
+/* Completely disable native play button overlays in WebViews */
+video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+  opacity: 0 !important;
+}
+video::-webkit-media-controls {
+  display: none !important;
+}
+
 
