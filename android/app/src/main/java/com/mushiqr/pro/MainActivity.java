@@ -37,6 +37,11 @@ public class MainActivity extends BridgeActivity {
             public void onPermissionRequest(final PermissionRequest request) {
                 request.grant(request.getResources());
             }
+
+            @Override
+            public android.graphics.Bitmap getDefaultVideoPoster() {
+                return android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888);
+            }
         });
 
         // Add native Javascript Interface for cold-boot launcher actions
