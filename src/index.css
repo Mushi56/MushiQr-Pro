@@ -4344,7 +4344,7 @@ input[type="range"]::-moz-range-thumb {
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 3000;
+  z-index: 10000;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -5355,12 +5355,12 @@ input[type="range"]::-moz-range-thumb {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 3000;
+  z-index: 10000;
   display: flex;
   align-items: flex-start;
   /* Start from top to stay above keyboard */
   justify-content: center;
-  padding: calc(20px + env(safe-area-inset-top)) 20px 20px;
+  padding: calc(20px + env(safe-area-inset-top, 24px)) 20px 20px;
   overflow-y: auto;
   /* Allow scrolling if keyboard takes too much space */
   animation: fadeIn 0.3s ease-out;

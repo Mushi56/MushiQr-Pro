@@ -620,8 +620,14 @@ export default function App() {
     const page = location.state?.activePage || getPageFromPath(location.pathname);
     if (page !== activePage) {
       setActivePage(page);
+      
+      if (page !== 'generator') {
+        setIsDataModalOpen(false);
+        setAdvPicker(prev => ({ ...prev, open: false }));
+        setFormatDropdownOpen(false);
+      }
     }
-  }, [location.pathname, location.state]);
+  }, [location.pathname, location.state, activePage]);
 
 
 
@@ -918,6 +924,12 @@ export default function App() {
     }
     setCanvasSelection(null);
     setPreviousPage(activePage);
+
+    if (page !== 'generator') {
+      setIsDataModalOpen(false);
+      setAdvPicker(prev => ({ ...prev, open: false }));
+      setFormatDropdownOpen(false);
+    }
 
     let path = '/';
     if (page === 'generator') path = '/generator';
