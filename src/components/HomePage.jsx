@@ -160,32 +160,60 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
                   }}>Fast, Simple & Beautiful</p>
                 </div>
 
-                <button 
-                  onClick={() => onNavigate('generator')}
-                  style={{
-                    backgroundColor: '#fff',
-                    color: '#D60036',
-                    border: 'none',
-                    borderRadius: '10px',
-                    padding: '10px 18px',
-                    fontSize: '14px',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    transition: 'transform 0.2s',
-                    width: '100%',
-                    whiteSpace: 'nowrap',
-                    zIndex: 1
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                >
-                  <Plus size={16} /> Create New
-                </button>
+                <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                  <button 
+                    onClick={() => onNavigate('generator')}
+                    style={{
+                      flex: 1,
+                      backgroundColor: '#fff',
+                      color: '#D60036',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '10px 12px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      transition: 'transform 0.2s',
+                      whiteSpace: 'nowrap',
+                      zIndex: 1
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                  >
+                    <Plus size={14} /> Single QR
+                  </button>
+
+                  <button 
+                    onClick={() => onNavigate('batch')}
+                    style={{
+                      flex: 1,
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      color: '#fff',
+                      border: '1px solid rgba(255, 255, 255, 0.4)',
+                      borderRadius: '10px',
+                      padding: '10px 12px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s',
+                      whiteSpace: 'nowrap',
+                      zIndex: 1
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                  >
+                    <FileText size={14} /> Batch QR
+                  </button>
+                </div>
               </div>
             </div>
 
