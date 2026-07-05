@@ -830,6 +830,8 @@ export default function App() {
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [isSecureLocked, setIsSecureLocked] = useState(false);
   const [securePassword, setSecurePassword] = useState('');
+  const [batchData, setBatchData] = useState(null);
+  const [isBatchDesignMode, setIsBatchDesignMode] = useState(false);
 
   // ── Advanced Picker State ──
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', setter: null });
@@ -3147,6 +3149,72 @@ export default function App() {
       <main className="app-main-redesigned">
         {activePage === 'generator' ? (
           <>
+            {isBatchDesignMode && batchData && (
+              <div style={{
+                margin: '16px var(--main-padding-x) 0',
+                background: 'linear-gradient(135deg, rgba(214, 0, 54, 0.15) 0%, rgba(255, 45, 94, 0.1) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(214, 0, 54, 0.3)',
+                borderRadius: '16px',
+                padding: '12px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                boxShadow: '0 8px 32px rgba(214, 0, 54, 0.15)'
+              }} className="fade-in">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                  <Wand2 size={20} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
+                  <div style={{ minWidth: 0, textAlign: 'left' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>Batch Designing Mode</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      Designing for: {batchData.fileName}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                  <button
+                    onClick={() => {
+                      setIsBatchDesignMode(false);
+                      setBatchData(null);
+                      resetGenerator();
+                      showToast('Batch design cancelled', 'info');
+                    }}
+                    style={{
+                      background: 'var(--bg-hover)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '8px',
+                      padding: '6px 12px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsBatchModalOpen(true);
+                    }}
+                    style={{
+                      background: 'var(--accent-gradient)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '6px 12px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: 'white',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px var(--accent-glow)'
+                    }}
+                  >
+                    Export Batch
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* ── QR Preview Card (always visible) ── */}
             <ErrorBoundary>
               <section className="qr-preview-card">
@@ -4471,6 +4539,19 @@ export default function App() {
       <BatchQRModal 
         isOpen={isBatchModalOpen} 
         onClose={() => setIsBatchModalOpen(false)} 
+        preloadedBatchData={batchData}
+        onStartDesignMode={(data, firstRowValue) => {
+          setBatchData(data);
+          setIsBatchDesignMode(true);
+          setQrType('text');
+          setQrData({ text: firstRowValue });
+          setIsBatchModalOpen(false);
+          navigateTo('generator');
+          showToast('Batch design mode active! Customize this template.', 'info');
+        }}
+        onUpdateBatchConfig={(newCol) => {
+          setBatchData(prev => prev ? { ...prev, selectedColumn: newCol } : null);
+        }}
         qrOptions={{
           qrColor,
           bgColor,

@@ -4,7 +4,14 @@ import JSZip from 'jszip';
 import { jsPDF } from 'jspdf';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 
-export default function BatchQRModal({ isOpen, onClose, qrOptions = {} }) {
+export default function BatchQRModal({ 
+  isOpen, 
+  onClose, 
+  qrOptions = {}, 
+  preloadedBatchData = null, 
+  onStartDesignMode = null, 
+  onUpdateBatchConfig = null 
+}) {
   const [fileData, setFileData] = useState(null);
   const [columns, setColumns] = useState([]);
   const [selectedColumn, setSelectedColumn] = useState('');
@@ -16,17 +23,52 @@ export default function BatchQRModal({ isOpen, onClose, qrOptions = {} }) {
   const [applyCustomDesign, setApplyCustomDesign] = useState(true);
   const [batchQuality, setBatchQuality] = useState('Medium');
   const fileInputRef = useRef(null);
+  const previewCanvasRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
-      setStatus('idle');
-      setFileData(null);
-      setColumns([]);
-      setSelectedColumn('');
-      setPreviewRows([]);
-      setProgress(0);
+      if (preloadedBatchData) {
+        setColumns(preloadedBatchData.columns || []);
+        setSelectedColumn(preloadedBatchData.selectedColumn || '');
+        setPreviewRows((preloadedBatchData.rows || []).slice(0, 5));
+        setFileData(preloadedBatchData.rows || null);
+        setTotalCount((preloadedBatchData.rows || []).length);
+        setStatus('loaded');
+      } else {
+        setStatus('idle');
+        setFileData(null);
+        setColumns([]);
+        setSelectedColumn('');
+        setPreviewRows([]);
+        setProgress(0);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, preloadedBatchData]);
+
+  useEffect(() => {
+    if (status === 'loaded' && fileData && selectedColumn && previewCanvasRef.current) {
+      const colIdx = columns.indexOf(selectedColumn);
+      const firstRowValue = fileData[0]?.[colIdx]?.trim();
+      if (firstRowValue) {
+        const matrixInfo = generateQRMatrix(firstRowValue, qrOptions.ecLevel || 'H');
+        if (matrixInfo) {
+          renderQR(previewCanvasRef.current, {
+            ...qrOptions,
+            ...matrixInfo,
+            size: 256
+          });
+        }
+      }
+    }
+  }, [status, fileData, selectedColumn, columns, qrOptions]);
+
+  const handleColumnChange = (e) => {
+    const val = e.target.value;
+    setSelectedColumn(val);
+    if (onUpdateBatchConfig) {
+      onUpdateBatchConfig(val);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -250,12 +292,71 @@ export default function BatchQRModal({ isOpen, onClose, qrOptions = {} }) {
                 <select 
                   className="form-select" 
                   value={selectedColumn} 
-                  onChange={(e) => setSelectedColumn(e.target.value)}
+                  onChange={handleColumnChange}
                 >
                   {columns.map(col => (
                     <option key={col} value={col}>{col}</option>
                   ))}
                 </select>
+              </div>
+
+              {/* Preview & Customization Card */}
+              <div style={{
+                background: 'var(--bg-hover)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '20px',
+                padding: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px'
+              }}>
+                <canvas 
+                  ref={previewCanvasRef} 
+                  width="100" 
+                  height="100" 
+                  style={{
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '12px',
+                    background: '#fff',
+                    border: '1px solid var(--border-color)',
+                    padding: '4px',
+                    flexShrink: 0
+                  }}
+                />
+                <div style={{ textAlign: 'left', flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px', color: 'var(--text-primary)' }}>QR Template Design</div>
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '0 0 10px 0', lineHeight: '1.3' }}>
+                    Preview of your first QR code. Customize its colors, shapes, logo, or frames interactively.
+                  </p>
+                  <button
+                    onClick={() => {
+                      const colIdx = columns.indexOf(selectedColumn);
+                      const firstRowValue = fileData[0]?.[colIdx]?.trim();
+                      if (onStartDesignMode) {
+                        onStartDesignMode({
+                          rows: fileData,
+                          columns: columns,
+                          selectedColumn: selectedColumn,
+                          fileName: fileInputRef.current?.files?.[0]?.name || 'batch_file.csv'
+                        }, firstRowValue);
+                      }
+                    }}
+                    style={{
+                      background: 'var(--accent-gradient)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '6px 12px',
+                      color: 'white',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px var(--accent-glow)'
+                    }}
+                  >
+                    Customize Design
+                  </button>
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '12px' }}>
