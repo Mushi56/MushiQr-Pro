@@ -1632,6 +1632,8 @@ export default function App() {
     setQrType(QR_TYPES.URL);
     setQrData({ url: 'https://example.com' });
     setErrorLevel('M');
+    setIsSecureLocked(false);
+    setSecurePassword('');
 
     // Appearance
     setQrColor('#000000');
