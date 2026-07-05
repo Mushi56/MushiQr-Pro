@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, FileText, Download, Check, AlertCircle, Play, Loader } from 'lucide-react';
 import JSZip from 'jszip';
 import { jsPDF } from 'jspdf';
@@ -16,6 +16,17 @@ export default function BatchQRModal({ isOpen, onClose, qrOptions = {} }) {
   const [applyCustomDesign, setApplyCustomDesign] = useState(true);
   const [batchQuality, setBatchQuality] = useState('Medium');
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setStatus('idle');
+      setFileData(null);
+      setColumns([]);
+      setSelectedColumn('');
+      setPreviewRows([]);
+      setProgress(0);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
