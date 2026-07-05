@@ -13,6 +13,8 @@ export default function BatchQRModal({ isOpen, onClose, qrOptions = {} }) {
   const [progress, setProgress] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [exportFormat, setExportFormat] = useState('all'); // 'png', 'svg', 'pdf', 'all'
+  const [applyCustomDesign, setApplyCustomDesign] = useState(true);
+  const [batchQuality, setBatchQuality] = useState('Medium');
   const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
@@ -92,8 +94,13 @@ export default function BatchQRModal({ isOpen, onClose, qrOptions = {} }) {
     const zip = new JSZip();
     const tempCanvas = document.createElement('canvas');
 
-    // Make it high-res for premium print quality
-    const size = 1024;
+    const QUALITY_SIZES = {
+      Low: 512,
+      Medium: 1024,
+      High: 2048,
+      Ultra: 4096
+    };
+    const size = QUALITY_SIZES[batchQuality] || 1024;
     tempCanvas.width = size;
     tempCanvas.height = size;
 
@@ -107,10 +114,20 @@ export default function BatchQRModal({ isOpen, onClose, qrOptions = {} }) {
       if (!matrixInfo) continue;
 
       // 2. Render to canvas
-      const options = {
+      const options = applyCustomDesign ? {
         ...qrOptions,
         ...matrixInfo,
         size: size,
+      } : {
+        ...matrixInfo,
+        size: size,
+        bgColor: '#ffffff',
+        qrColor: '#000000',
+        dotStyle: 'square',
+        eyeStyle: 'square',
+        gradientEnabled: false,
+        logo: null,
+        frameStyle: 'none'
       };
       renderQR(tempCanvas, options);
 
@@ -228,6 +245,42 @@ export default function BatchQRModal({ isOpen, onClose, qrOptions = {} }) {
                     <option key={col} value={col}>{col}</option>
                   ))}
                 </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label className="form-label">Export Quality</label>
+                  <select 
+                    className="form-select" 
+                    value={batchQuality} 
+                    onChange={(e) => setBatchQuality(e.target.value)}
+                  >
+                    <option value="Low">Low (512px)</option>
+                    <option value="Medium">Medium (1024px)</option>
+                    <option value="High">High (2048px)</option>
+                    <option value="Ultra">Ultra (4096px)</option>
+                  </select>
+                </div>
+                
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-hover)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '12px 14px', height: '42px', boxSizing: 'border-box' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>Apply Custom Design</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={applyCustomDesign}
+                      onChange={(e) => setApplyCustomDesign(e.target.checked)}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        accentColor: 'var(--accent-primary)',
+                        cursor: 'pointer',
+                        margin: 0
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="form-group">
