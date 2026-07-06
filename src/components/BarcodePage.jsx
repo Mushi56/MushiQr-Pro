@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Download, Share2, Save, Barcode, Palette, Sliders, Type } from 'lucide-react';
+import { Save, Barcode, Palette, Sliders, Undo2, Redo2, ChevronDown, FileImage, FileCode, FileText, Copy, Bookmark, Share2 } from 'lucide-react';
 import { renderBarcode } from '../utils/barcodeEngine';
-import { saveToHistory } from '../utils/storage';
+import { saveToHistory, saveToSaved } from '../utils/storage';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from '../utils/exportUtils';
+import AppIcon from './AppIcon';
 import AdvancedColorPicker from './AdvancedColorPicker';
 
 const COLOR_PRESETS = [
@@ -30,23 +32,101 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   const [margin, setMargin] = useState(16);
   const [displayValue, setDisplayValue] = useState(true);
   
-  const [activeTab, setActiveTab] = useState('content'); // 'content' | 'color' | 'size'
+  const [activeTab, setActiveTab] = useState('content');
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', type: 'bar' });
+  const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState('PNG');
+  
+  // History Undo/Redo States
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const isUndoRedoActionRef = useRef(false);
+
   const canvasRef = useRef(null);
 
-  const openAdvancedPicker = (type, currentColor) => {
-    setAdvPicker({ open: true, color: currentColor, type });
+  // Initialize history
+  useEffect(() => {
+    const initialState = {
+      text,
+      barColor,
+      bgColor,
+      barWidth,
+      height,
+      margin,
+      displayValue
+    };
+    setHistory([initialState]);
+    setHistoryIndex(0);
+  }, []);
+
+  // Sync state and push to history
+  const updateStateAndHistory = (updates) => {
+    // Current state values merged with new updates
+    const newState = {
+      text: updates.text !== undefined ? updates.text : text,
+      barColor: updates.barColor !== undefined ? updates.barColor : barColor,
+      bgColor: updates.bgColor !== undefined ? updates.bgColor : bgColor,
+      barWidth: updates.barWidth !== undefined ? updates.barWidth : barWidth,
+      height: updates.height !== undefined ? updates.height : height,
+      margin: updates.margin !== undefined ? updates.margin : margin,
+      displayValue: updates.displayValue !== undefined ? updates.displayValue : displayValue
+    };
+    
+    // Apply updates to react states
+    if (updates.text !== undefined) setText(updates.text);
+    if (updates.barColor !== undefined) setBarColor(updates.barColor);
+    if (updates.bgColor !== undefined) setBgColor(updates.bgColor);
+    if (updates.barWidth !== undefined) setBarWidth(updates.barWidth);
+    if (updates.height !== undefined) setHeight(updates.height);
+    if (updates.margin !== undefined) setMargin(updates.margin);
+    if (updates.displayValue !== undefined) setDisplayValue(updates.displayValue);
+
+    if (isUndoRedoActionRef.current) {
+      isUndoRedoActionRef.current = false;
+      return;
+    }
+
+    // Push new state to history list, trimming anything after the current index
+    const cleanHistory = history.slice(0, historyIndex + 1);
+    setHistory([...cleanHistory, newState]);
+    setHistoryIndex(cleanHistory.length);
   };
 
-  const handleAdvColorChange = (newColor) => {
-    if (advPicker.type === 'bar') {
-      setBarColor(newColor);
-    } else {
-      setBgColor(newColor);
+  const undo = () => {
+    if (historyIndex > 0) {
+      isUndoRedoActionRef.current = true;
+      const prevIdx = historyIndex - 1;
+      setHistoryIndex(prevIdx);
+      const state = history[prevIdx];
+      
+      setText(state.text);
+      setBarColor(state.barColor);
+      setBgColor(state.bgColor);
+      setBarWidth(state.barWidth);
+      setHeight(state.height);
+      setMargin(state.margin);
+      setDisplayValue(state.displayValue);
     }
   };
 
-  // Restore saved barcode from history or bookmark
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      isUndoRedoActionRef.current = true;
+      const nextIdx = historyIndex + 1;
+      setHistoryIndex(nextIdx);
+      const state = history[nextIdx];
+      
+      setText(state.text);
+      setBarColor(state.barColor);
+      setBgColor(state.bgColor);
+      setBarWidth(state.barWidth);
+      setHeight(state.height);
+      setMargin(state.margin);
+      setDisplayValue(state.displayValue);
+    }
+  };
+
+  // Restore saved barcode
   useEffect(() => {
     if (loadedBarcodeItem) {
       const val = loadedBarcodeItem.displayText || loadedBarcodeItem.qrData?.text || '';
@@ -77,16 +157,32 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
     });
   }, [text, barColor, bgColor, barWidth, height, margin, displayValue]);
 
-  const handleDownload = () => {
+  const handleDownload = async (format) => {
     if (!canvasRef.current) return;
-    const url = canvasRef.current.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `barcode_${text.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    showToast('Barcode PNG downloaded successfully!', 'success');
+    try {
+      const filename = `barcode_${text.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      let result;
+      if (format === 'PNG') {
+        result = await downloadPNG(canvasRef.current, filename);
+      } else if (format === 'JPG') {
+        result = await downloadJPG(canvasRef.current, filename);
+      } else if (format === 'SVG') {
+        result = await downloadSVG(canvasRef.current, filename);
+      } else if (format === 'PDF') {
+        result = await downloadPDF(canvasRef.current, filename);
+      }
+      
+      if (result === 'gallery') {
+        showToast('Saved to Gallery', 'success');
+      } else if (result === 'share') {
+        showToast('Share Sheet Opened', 'success');
+      } else {
+        showToast('Saved successfully', 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Export failed', 'error');
+    }
   };
 
   const handleSave = () => {
@@ -94,7 +190,6 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       showToast('Please enter text value to save', 'error');
       return;
     }
-
     try {
       const entry = {
         qrType: 'BARCODE',
@@ -110,12 +205,30 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
           displayValue
         }
       };
-
-      saveToHistory(entry);
-      showToast('Barcode saved to history!', 'success');
+      saveToSaved(entry);
+      showToast('Added to Saved', 'success');
     } catch (err) {
       console.error(err);
       showToast('Failed to save barcode', 'error');
+    }
+  };
+
+  const handleCopyToClipboard = async () => {
+    if (!canvasRef.current) return;
+    try {
+      canvasRef.current.toBlob(async (blob) => {
+        if (!blob) return;
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+          showToast('Copied to clipboard!', 'success');
+        } catch {
+          showToast('Failed to copy to clipboard.', 'error');
+        }
+      }, 'image/png');
+    } catch {
+      showToast('Platform clipboard not supported.', 'error');
     }
   };
 
@@ -150,12 +263,34 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
             text: text
           });
         } else {
-          handleDownload();
+          handleDownload('PNG');
         }
       } catch (err) {
-        handleDownload();
+        handleDownload('PNG');
       }
     }
+  };
+
+  const openAdvancedPicker = (type, currentColor) => {
+    setAdvPicker({ open: true, color: currentColor, type });
+  };
+
+  const handleAdvColorChange = (newColor) => {
+    if (advPicker.type === 'bar') {
+      setBarColor(newColor);
+    } else {
+      setBgColor(newColor);
+    }
+  };
+
+  const handleAdvColorConfirm = (newColor) => {
+    // Commit color and push to undo/redo history
+    if (advPicker.type === 'bar') {
+      updateStateAndHistory({ barColor: newColor });
+    } else {
+      updateStateAndHistory({ bgColor: newColor });
+    }
+    setAdvPicker(prev => ({ ...prev, open: false }));
   };
 
   return (
@@ -168,16 +303,144 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       backgroundColor: 'var(--bg-primary)',
       position: 'relative'
     }}>
-      {/* ── Top Header Navigation ── */}
-      <div className="modal-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', zIndex: 10 }}>
-        <div className="modal-header-title">
-          <h3 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>Barcode Generator</h3>
-          <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', margin: 0 }}>Create standard high-contrast 1D barcodes</p>
+      {/* ── Top Header Navigation (Consistent with QR header) ── */}
+      <header className="app-header">
+        <div className="app-logo">
+          <button 
+            onClick={() => onNavigate('home')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              padding: '8px',
+              marginRight: '8px',
+              marginLeft: '-8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%'
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          
+          <AppIcon size={36} shadow />
+          
+          <div className="header-undo-redo" style={{ display: 'flex', gap: '8px', marginLeft: '12px' }}>
+            <button 
+              onClick={undo} 
+              disabled={historyIndex <= 0}
+              style={{ 
+                width: '36px', height: '36px', borderRadius: '10px', 
+                background: 'var(--bg-hover)', 
+                border: '1px solid var(--border-color)', 
+                color: historyIndex <= 0 ? 'var(--text-tertiary)' : 'var(--accent-primary)', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                cursor: historyIndex <= 0 ? 'default' : 'pointer',
+                transition: 'all 0.2s ease',
+                opacity: historyIndex <= 0 ? 0.5 : 1
+              }}
+              title="Undo"
+            >
+              <Undo2 size={18} strokeWidth={2.5} />
+            </button>
+            <button 
+              onClick={redo} 
+              disabled={historyIndex >= history.length - 1}
+              style={{ 
+                width: '36px', height: '36px', borderRadius: '10px', 
+                background: 'var(--bg-hover)', 
+                border: '1px solid var(--border-color)', 
+                color: historyIndex >= history.length - 1 ? 'var(--text-tertiary)' : 'var(--accent-primary)', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                cursor: historyIndex >= history.length - 1 ? 'default' : 'pointer',
+                transition: 'all 0.2s ease',
+                opacity: historyIndex >= history.length - 1 ? 0.5 : 1
+              }}
+              title="Redo"
+            >
+              <Redo2 size={18} strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
-        <button className="modal-close" onClick={() => onNavigate('home')}>
-          <X size={20} />
-        </button>
-      </div>
+
+        <div className="app-header-actions">
+          <div className="header-save-container" style={{ position: 'relative' }}>
+            <button
+              className={`btn-header-action btn-header-save ${formatDropdownOpen ? 'active' : ''}`}
+              onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
+              title="Save As..."
+            >
+              <Save size={20} />
+              <ChevronDown size={14} style={{ marginLeft: 2, opacity: 0.8 }} />
+            </button>
+
+            {formatDropdownOpen && (
+              <div className="app-dropdown-menu save-as-dropdown fade-in" style={{ top: 'calc(100% + 12px)', right: 0, width: '280px' }}>
+                <div className="dropdown-section" style={{ padding: '12px' }}>
+                  <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Export Format</div>
+                  <div className="format-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                    {[
+                      { label: 'PNG', Icon: FileImage },
+                      { label: 'SVG', Icon: FileCode },
+                      { label: 'PDF', Icon: FileText },
+                      { label: 'JPG', Icon: FileImage },
+                    ].map(({ label, Icon }) => (
+                      <button
+                        key={label}
+                        className={`format-option ${selectedFormat === label ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFormat(label);
+                          setFormatDropdownOpen(false);
+                          handleDownload(label);
+                        }}
+                      >
+                        <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="dropdown-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '0' }} />
+
+                <div className="dropdown-section" style={{ padding: '12px' }}>
+                  <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Quick Actions</div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="menu-link-btn"
+                      onClick={(e) => { e.stopPropagation(); handleCopyToClipboard(); setFormatDropdownOpen(false); }}
+                      style={{ flex: 1, height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', padding: 0 }}
+                      title="Copy Image"
+                    >
+                      <Copy size={20} />
+                    </button>
+                    <button
+                      className="menu-link-btn"
+                      onClick={(e) => { e.stopPropagation(); handleSave(); setFormatDropdownOpen(false); }}
+                      style={{ flex: 1, height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', padding: 0 }}
+                      title="Add to Saved"
+                    >
+                      <Bookmark size={20} />
+                    </button>
+                    {((typeof navigator !== 'undefined' && navigator.canShare) || Capacitor.isNativePlatform()) && (
+                      <button
+                        className="menu-link-btn"
+                        onClick={(e) => { e.stopPropagation(); handleShare(); setFormatDropdownOpen(false); }}
+                        style={{ flex: 1, height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', padding: 0 }}
+                        title="Share Barcode"
+                      >
+                        <Share2 size={20} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
 
       {/* ── Main Canvas Viewport Area ── */}
       <div style={{ 
@@ -219,19 +482,6 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
           }}>
             <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%' }} />
           </div>
-
-          {/* Quick Actions (Save, Share, Download) */}
-          <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-            <button onClick={handleSave} className="action-btn" style={{ flex: 1, gap: '6px', fontSize: '13px' }}>
-              <Save size={16} /> Save
-            </button>
-            <button onClick={handleShare} className="action-btn" style={{ flex: 1, gap: '6px', fontSize: '13px' }}>
-              <Share2 size={16} /> Share
-            </button>
-            <button onClick={handleDownload} className="action-btn-primary" style={{ flex: 1, gap: '6px', fontSize: '13px', background: 'var(--accent-gradient)' }}>
-              <Download size={16} /> Export
-            </button>
-          </div>
         </div>
       </div>
 
@@ -260,7 +510,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
               <input
                 type="text"
                 value={text}
-                onChange={(e) => setText(e.target.value.toUpperCase())}
+                onChange={(e) => updateStateAndHistory({ text: e.target.value.toUpperCase() })}
                 placeholder="Enter text to encode"
                 style={{
                   width: '100%',
@@ -292,7 +542,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Show text value underneath the barcode</span>
               </div>
               <button
-                onClick={() => setDisplayValue(!displayValue)}
+                onClick={() => updateStateAndHistory({ displayValue: !displayValue })}
                 style={{
                   background: displayValue ? 'var(--accent-primary)' : 'var(--bg-hover)',
                   border: '1px solid var(--border-color)',
@@ -333,7 +583,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                   <input
                     type="text"
                     value={barColor}
-                    onChange={(e) => setBarColor(e.target.value)}
+                    onChange={(e) => updateStateAndHistory({ barColor: e.target.value })}
                     style={{
                       flex: 1,
                       padding: '10px',
@@ -369,7 +619,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                   <input
                     type="text"
                     value={bgColor}
-                    onChange={(e) => setBgColor(e.target.value)}
+                    onChange={(e) => updateStateAndHistory({ bgColor: e.target.value })}
                     style={{
                       flex: 1,
                       padding: '10px',
@@ -403,8 +653,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                     <button
                       key={p.name}
                       onClick={() => {
-                        setBarColor(p.qr);
-                        setBgColor(p.bg);
+                        updateStateAndHistory({ barColor: p.qr, bgColor: p.bg });
                       }}
                       style={{
                         flex: '0 0 auto',
@@ -463,7 +712,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                 max="4"
                 step="1"
                 value={barWidth}
-                onChange={(e) => setBarWidth(parseInt(e.target.value))}
+                onChange={(e) => updateStateAndHistory({ barWidth: parseInt(e.target.value) })}
                 style={{ width: '100%', cursor: 'pointer' }}
               />
             </div>
@@ -478,7 +727,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                 max="180"
                 step="10"
                 value={height}
-                onChange={(e) => setHeight(parseInt(e.target.value))}
+                onChange={(e) => updateStateAndHistory({ height: parseInt(e.target.value) })}
                 style={{ width: '100%', cursor: 'pointer' }}
               />
             </div>
@@ -493,7 +742,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                 max="40"
                 step="4"
                 value={margin}
-                onChange={(e) => setMargin(parseInt(e.target.value))}
+                onChange={(e) => updateStateAndHistory({ margin: parseInt(e.target.value) })}
                 style={{ width: '100%', cursor: 'pointer' }}
               />
             </div>
@@ -527,10 +776,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
         isOpen={advPicker.open}
         initialColor={advPicker.color}
         onChange={handleAdvColorChange}
-        onConfirm={(newColor) => {
-          handleAdvColorChange(newColor);
-          setAdvPicker(prev => ({ ...prev, open: false }));
-        }}
+        onConfirm={handleAdvColorConfirm}
         onCancel={() => {
           handleAdvColorChange(advPicker.color);
           setAdvPicker(prev => ({ ...prev, open: false }));
