@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileSpreadsheet, Download, Edit3, Trash2, ArrowLeft, Check, AlertCircle, Info, Sparkles, RefreshCw, FileImage, FileCode, FileText, Layers, X } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -7,6 +7,7 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
+import { renderBarcode } from '../utils/barcodeEngine';
 import { jsPDF } from 'jspdf';
 
 // Helper for mobile ZIP saving
@@ -20,7 +21,7 @@ async function saveZipNative(base64Data, filename) {
   await Share.share({
     title: 'Mushi Qr Pro - Batch Export',
     url: savedFile.uri,
-    dialogTitle: 'Save or Share your Bulk QR ZIP',
+    dialogTitle: 'Save or Share your Bulk ZIP file',
   });
 }
 
@@ -31,6 +32,7 @@ export default function BatchPage({
   batchItems,
   onEditBatchItemStyle 
 }) {
+  const [batchType, setBatchType] = useState('QR'); // 'QR' | 'BARCODE'
   const [fileData, setFileData] = useState(null);
   const [columns, setColumns] = useState([]);
   const [dataCol, setDataCol] = useState('');
@@ -49,6 +51,12 @@ export default function BatchPage({
     'HD': 2048,
     'HQ': 4096
   };
+
+  // Reset file upload when batch type changes
+  useEffect(() => {
+    setFileData(null);
+    setColumns([]);
+  }, [batchType]);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -76,7 +84,6 @@ export default function BatchPage({
           return;
         }
 
-        // Determine columns
         const firstRow = rows[0] || [];
         const colList = firstRow.map((val, idx) => ({
           index: idx,
@@ -86,7 +93,6 @@ export default function BatchPage({
         setColumns(colList);
         setFileData(rows);
 
-        // Auto-select columns
         if (colList.length > 0) {
           setDataCol(colList[0].index.toString());
           if (colList.length > 1) {
@@ -148,28 +154,39 @@ export default function BatchPage({
     const startIndex = hasHeader ? 1 : 0;
     const imported = [];
 
+    // Base default style configurations depending on QR vs BARCODE
+    const defaultStyle = batchType === 'BARCODE' ? {
+      barColor: '#000000',
+      bgColor: '#ffffff',
+      barWidth: 2,
+      height: 90,
+      margin: 16,
+      displayValue: true
+    } : { ...activeGeneratorStyle };
+
     for (let i = startIndex; i < fileData.length; i++) {
       const row = fileData[i];
       if (!row || row.length === 0) continue;
 
-      const qrData = row[parseInt(dataCol)];
-      if (!qrData || qrData.toString().trim() === '') continue;
+      const codeData = row[parseInt(dataCol)];
+      if (!codeData || codeData.toString().trim() === '') continue;
 
       const fileNameVal = nameCol !== 'none' && nameCol !== '' ? row[parseInt(nameCol)] : null;
       const cleanFileName = fileNameVal 
         ? fileNameVal.toString().trim().replace(/[^a-zA-Z0-9-_]/g, '_') 
-        : `qr_code_${i - startIndex + 1}`;
+        : `${batchType.toLowerCase()}_code_${i - startIndex + 1}`;
 
       imported.push({
         id: `batch-${Date.now()}-${i}`,
-        data: qrData.toString().trim(),
+        data: codeData.toString().trim(),
         filename: cleanFileName,
-        style: { ...activeGeneratorStyle } // Copies current editor design
+        type: batchType,
+        style: defaultStyle
       });
     }
 
     setBatchItems(imported);
-    setFileData(null); // Clear raw upload state to show table
+    setFileData(null);
   };
 
   const applyGlobalStyle = () => {
@@ -192,43 +209,46 @@ export default function BatchPage({
   };
 
   const downloadSampleCSV = () => {
-    const csvContent = "data:text/csv;charset=utf-8,QR Data,Filename\nhttps://google.com,google_qr\nhttps://youtube.com,youtube_qr\nConnect to Free WiFi,wifi_qr";
+    const csvContent = batchType === 'BARCODE' 
+      ? "data:text/csv;charset=utf-8,Barcode Data,Filename\n7501031311309,product_barcode_1\n9780201379624,book_barcode_2\nCODE128-TEST,generic_barcode"
+      : "data:text/csv;charset=utf-8,QR Data,Filename\nhttps://google.com,google_qr\nhttps://youtube.com,youtube_qr\nConnect to Free WiFi,wifi_qr";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "mushi_batch_template.csv");
+    link.setAttribute("download", `mushi_${batchType.toLowerCase()}_batch_template.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
-
 
   const generateZip = async () => {
     if (batchItems.length === 0) return;
     setIsExporting(true);
     setExportProgress(0);
 
-    // Preload all unique logo images in batchItems
+    // Preload logos only for QR codes
     const logoCache = {};
     const logoPromises = [];
-    batchItems.forEach(item => {
-      const src = item.style?.logo?.src;
-      if (src && !logoCache[src]) {
-        logoCache[src] = null; // placeholder
-        logoPromises.push(
-          new Promise((resolve) => {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.onload = () => {
-              logoCache[src] = img;
-              resolve();
-            };
-            img.onerror = () => resolve();
-            img.src = src;
-          })
-        );
-      }
-    });
+    if (batchType === 'QR') {
+      batchItems.forEach(item => {
+        const src = item.style?.logo?.src;
+        if (src && !logoCache[src]) {
+          logoCache[src] = null;
+          logoPromises.push(
+            new Promise((resolve) => {
+              const img = new Image();
+              img.crossOrigin = "anonymous";
+              img.onload = () => {
+                logoCache[src] = img;
+                resolve();
+              };
+              img.onerror = () => resolve();
+              img.src = src;
+            })
+          );
+        }
+      });
+    }
 
     if (logoPromises.length > 0) {
       await Promise.all(logoPromises);
@@ -239,99 +259,110 @@ export default function BatchPage({
 
     for (let idx = 0; idx < batchItems.length; idx++) {
       const item = batchItems[idx];
-      
-      // Render canvas offscreen
       const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = exportSize;
-      tempCanvas.height = exportSize;
 
-      const matrixInfo = generateQRMatrix(item.data, item.style.errorCorrection || 'H');
-      const logoImgElement = item.style?.logo?.src ? logoCache[item.style.logo.src] : null;
+      if (batchType === 'BARCODE') {
+        // High quality scale multiplier for barcode export canvas
+        const scale = exportQuality === 'Low' ? 1 : exportQuality === 'Normal' ? 2 : exportQuality === 'HD' ? 3 : 4;
+        tempCanvas.width = 400 * scale;
+        tempCanvas.height = 150 * scale;
 
-      renderQR(tempCanvas, {
-        ...matrixInfo,
-        size: exportSize,
-        ...item.style,
-        logo: logoImgElement,
-        textCenter: item.style.textCenterEnabled ? item.style.textCenterText : null,
-        showHandle: false,
-        selectedType: null
-      });
+        renderBarcode(tempCanvas, item.data, {
+          barColor: item.style?.barColor || '#000000',
+          bgColor: item.style?.bgColor || '#ffffff',
+          barWidth: (item.style?.barWidth || 2) * scale,
+          height: (item.style?.height || 90) * scale,
+          margin: (item.style?.margin || 16) * scale,
+          displayValue: item.style?.displayValue !== undefined ? item.style.displayValue : true,
+          font: `${12 * scale}px Inter, sans-serif`
+        });
+      } else {
+        tempCanvas.width = exportSize;
+        tempCanvas.height = exportSize;
+
+        const matrixInfo = generateQRMatrix(item.data, item.style.errorCorrection || 'H');
+        const logoImgElement = item.style?.logo?.src ? logoCache[item.style.logo.src] : null;
+
+        renderQR(tempCanvas, {
+          ...matrixInfo,
+          size: exportSize,
+          ...item.style,
+          logo: logoImgElement,
+          textCenter: item.style.textCenterEnabled ? item.style.textCenterText : null,
+          showHandle: false,
+          selectedType: null
+        });
+      }
+
+      let pngDataUrl = tempCanvas.toDataURL('image/png');
+      let pngBase64 = pngDataUrl.split(',')[1];
 
       // 1. PNG Base64
-      let pngDataUrl = '';
-      let pngBase64 = '';
-      if (selectedFormat === 'ALL' || selectedFormat === 'PNG' || selectedFormat === 'SVG' || selectedFormat === 'PDF') {
-        pngDataUrl = tempCanvas.toDataURL('image/png');
-        pngBase64 = pngDataUrl.split(',')[1];
-      }
-
-      // 2. JPG Base64
-      let jpgDataUrl = '';
-      let jpgBase64 = '';
-      if (selectedFormat === 'ALL' || selectedFormat === 'JPG') {
-        // Draw white background for JPG since JPEG does not support transparency
-        const jpgCanvas = document.createElement('canvas');
-        jpgCanvas.width = exportSize;
-        jpgCanvas.height = exportSize;
-        const ctx = jpgCanvas.getContext('2d');
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, exportSize, exportSize);
-        ctx.drawImage(tempCanvas, 0, 0);
-        jpgDataUrl = jpgCanvas.toDataURL('image/jpeg', 0.9);
-        jpgBase64 = jpgDataUrl.split(',')[1];
-      }
-
-      // Add to ZIP files structure depending on selected format
       if (selectedFormat === 'ALL' || selectedFormat === 'PNG') {
         zip.file(`png/${item.filename}.png`, pngBase64, { base64: true });
       }
 
+      // 2. JPG Base64
       if (selectedFormat === 'ALL' || selectedFormat === 'JPG') {
+        const jpgCanvas = document.createElement('canvas');
+        jpgCanvas.width = tempCanvas.width;
+        jpgCanvas.height = tempCanvas.height;
+        const ctx = jpgCanvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, jpgCanvas.width, jpgCanvas.height);
+        ctx.drawImage(tempCanvas, 0, 0);
+        const jpgDataUrl = jpgCanvas.toDataURL('image/jpeg', 0.9);
+        const jpgBase64 = jpgDataUrl.split(',')[1];
         zip.file(`jpg/${item.filename}.jpg`, jpgBase64, { base64: true });
       }
 
+      // 3. SVG Base64
       if (selectedFormat === 'ALL' || selectedFormat === 'SVG') {
         const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="${exportSize}" height="${exportSize}"
-     viewBox="0 0 ${exportSize} ${exportSize}">
-  <image width="${exportSize}" height="${exportSize}" xlink:href="data:image/png;base64,${pngBase64}"/>
+     width="${tempCanvas.width}" height="${tempCanvas.height}"
+     viewBox="0 0 ${tempCanvas.width} ${tempCanvas.height}">
+  <image width="${tempCanvas.width}" height="${tempCanvas.height}" xlink:href="data:image/png;base64,${pngBase64}"/>
 </svg>`;
         zip.file(`svg/${item.filename}.svg`, svgContent);
       }
 
+      // 4. PDF
       if (selectedFormat === 'ALL' || selectedFormat === 'PDF') {
         const pdf = new jsPDF({
-          orientation: 'portrait',
+          orientation: batchType === 'BARCODE' ? 'landscape' : 'portrait',
           unit: 'mm',
           format: 'a4',
         });
-        const pdfSize = 210;
-        const margin = 20;
-        const qrSize = pdfSize - margin * 2;
-        pdf.addImage(pngDataUrl, 'PNG', margin, margin, qrSize, qrSize);
+        
+        if (batchType === 'BARCODE') {
+          // Fit barcode nicely on landscape A4 PDF
+          pdf.addImage(pngDataUrl, 'PNG', 15, 30, 260, 100);
+        } else {
+          pdf.addImage(pngDataUrl, 'PNG', 20, 20, 170, 170);
+        }
+
         const pdfArrayBuffer = pdf.output('arraybuffer');
         zip.file(`pdf/${item.filename}.pdf`, pdfArrayBuffer);
       }
 
       setExportProgress(Math.round(((idx + 1) / batchItems.length) * 100));
-      // Yield control back to browser event loop to prevent unresponsive page freeze
       await new Promise(resolve => setTimeout(resolve, 0));
     }
 
     try {
       const content = await zip.generateAsync({ type: 'blob' });
+      const archiveName = `mushi-${batchType.toLowerCase()}-batch.zip`;
       if (Capacitor.isNativePlatform()) {
         const reader = new FileReader();
         reader.onloadend = async () => {
           const base64Data = reader.result.split(',')[1];
-          await saveZipNative(base64Data, 'mushi-qr-batch.zip');
+          await saveZipNative(base64Data, archiveName);
           setIsExporting(false);
         };
         reader.readAsDataURL(content);
       } else {
-        saveAs(content, 'mushi-qr-batch.zip');
+        saveAs(content, archiveName);
         setIsExporting(false);
       }
     } catch (err) {
@@ -354,8 +385,12 @@ export default function BatchPage({
       {/* Header matching modal styling */}
       <div className="modal-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
         <div className="modal-header-title">
-          <h3 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>Bulk QR Generator</h3>
-          <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', margin: 0 }}>Generate multiple branded QR codes at once</p>
+          <h3 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>
+            {batchType === 'BARCODE' ? 'Bulk Barcode Generator' : 'Bulk QR Generator'}
+          </h3>
+          <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', margin: 0 }}>
+            {batchType === 'BARCODE' ? 'Generate multiple barcodes at once' : 'Generate multiple branded QR codes at once'}
+          </p>
         </div>
         <button className="modal-close" onClick={() => onNavigate('home')}>
           <X size={20} />
@@ -363,6 +398,47 @@ export default function BatchPage({
       </div>
 
       <div className="modal-content" style={{ flex: 1, padding: '20px var(--main-padding-x) 100px' }}>
+        
+        {/* Toggle Selector for Batch Mode */}
+        {!fileData && batchItems.length === 0 && (
+          <div style={{ display: 'flex', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '12px', marginBottom: '20px' }}>
+            <button 
+              onClick={() => setBatchType('QR')}
+              style={{
+                flex: 1,
+                padding: '10px',
+                borderRadius: '8px',
+                border: 'none',
+                background: batchType === 'QR' ? 'var(--bg-elevated)' : 'transparent',
+                color: batchType === 'QR' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                fontWeight: 700,
+                fontSize: '13px',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              Bulk QR
+            </button>
+            <button 
+              onClick={() => setBatchType('BARCODE')}
+              style={{
+                flex: 1,
+                padding: '10px',
+                borderRadius: '8px',
+                border: 'none',
+                background: batchType === 'BARCODE' ? 'var(--bg-elevated)' : 'transparent',
+                color: batchType === 'BARCODE' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                fontWeight: 700,
+                fontSize: '13px',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              Bulk Barcode
+            </button>
+          </div>
+        )}
+
         {/* Step 1: Upload or Import */}
         {!fileData && batchItems.length === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -398,7 +474,7 @@ export default function BatchPage({
               </div>
               <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Upload CSV or Excel</h3>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 max(20px, 10%)', lineHeight: '1.4' }}>
-                Select a `.csv`, `.xlsx`, or `.xls` file containing your QR code entries.
+                Select a `.csv`, `.xlsx`, or `.xls` file containing your {batchType === 'BARCODE' ? 'barcode' : 'QR code'} values.
               </p>
               <input 
                 ref={fileInputRef}
@@ -457,7 +533,9 @@ export default function BatchPage({
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div className="form-group">
-                <label className="form-label">Select QR Data Column</label>
+                <label className="form-label">
+                  Select {batchType === 'BARCODE' ? 'Barcode' : 'QR'} Data Column
+                </label>
                 <select 
                   className="form-select" 
                   value={dataCol} 
@@ -526,85 +604,90 @@ export default function BatchPage({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '15px', fontWeight: 700 }}>Batch Summary</span>
                 <span style={{ fontSize: '13px', background: 'rgba(214, 0, 54, 0.1)', color: 'var(--accent-primary)', padding: '4px 10px', borderRadius: '12px', fontWeight: 700 }}>
-                  {batchItems.length} QR Codes
+                  {batchItems.length} {batchType === 'BARCODE' ? 'Barcodes' : 'QR Codes'}
                 </span>
               </div>
 
               {/* Design Style Preview Card */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                background: 'var(--bg-elevated)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '16px',
-                padding: '12px 16px'
-              }}>
+              {batchType === 'QR' && (
                 <div style={{
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '10px',
-                  background: '#fff',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  gap: '16px',
+                  background: 'var(--bg-elevated)',
                   border: '1px solid var(--border-color)',
-                  flexShrink: 0,
-                  overflow: 'hidden'
+                  borderRadius: '16px',
+                  padding: '12px 16px'
                 }}>
-                  <QRThumbnail data={batchItems[0]?.data || "Preview"} style={batchItems[0]?.style || activeGeneratorStyle} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Bulk QR Style Template</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Click edit to customize the style of all QRs</div>
-                </div>
-                <button
-                  onClick={() => onEditBatchItemStyle(batchItems[0], 0)}
-                  title="Customize batch design"
-                  style={{
-                    width: '38px',
-                    height: '38px',
+                  <div style={{
+                    width: '50px',
+                    height: '50px',
                     borderRadius: '10px',
-                    background: 'var(--accent-gradient)',
-                    border: 'none',
-                    color: 'white',
+                    background: '#fff',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(214, 0, 54, 0.2)'
-                  }}
-                >
-                  <Edit3 size={16} />
-                </button>
-              </div>
+                    border: '1px solid var(--border-color)',
+                    flexShrink: 0,
+                    overflow: 'hidden'
+                  }}>
+                    <BatchThumbnail type="QR" data={batchItems[0]?.data || "Preview"} style={batchItems[0]?.style || activeGeneratorStyle} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Bulk QR Style Template</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Click edit to customize the style of all QRs</div>
+                  </div>
+                  <button
+                    onClick={() => onEditBatchItemStyle(batchItems[0], 0)}
+                    title="Customize batch design"
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '10px',
+                      background: 'var(--accent-gradient)',
+                      border: 'none',
+                      color: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(214, 0, 54, 0.2)'
+                    }}
+                  >
+                    <Edit3 size={16} />
+                  </button>
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <button 
-                  onClick={applyGlobalStyle}
-                  style={{
-                    flex: 1,
-                    minWidth: '180px',
-                    background: 'var(--bg-hover)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '14px',
-                    padding: '12px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    color: 'var(--text-primary)'
-                  }}
-                >
-                  <RefreshCw size={16} /> Apply Active Editor Style
-                </button>
+                {batchType === 'QR' && (
+                  <button 
+                    onClick={applyGlobalStyle}
+                    style={{
+                      flex: 1,
+                      minWidth: '180px',
+                      background: 'var(--bg-hover)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '14px',
+                      padding: '12px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      cursor: 'pointer',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    <RefreshCw size={16} /> Apply Active Editor Style
+                  </button>
+                )}
                 
                 <button 
                   onClick={handleClearBatch}
                   style={{
+                    flex: batchType === 'BARCODE' ? 1 : '0 0 auto',
                     background: 'rgba(239, 68, 68, 0.1)',
                     border: 'none',
                     borderRadius: '14px',
@@ -624,7 +707,7 @@ export default function BatchPage({
               </div>
 
               <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {/* Export Format Section matching app design */}
+                {/* Export Format Section */}
                 <div>
                   <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Export Format</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
@@ -665,7 +748,7 @@ export default function BatchPage({
                   </div>
                 </div>
 
-                {/* Export Quality matching app design */}
+                {/* Export Quality */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Export Quality</div>
@@ -679,10 +762,10 @@ export default function BatchPage({
                       border: '1px solid rgba(214, 0, 54, 0.15)',
                       letterSpacing: '0.5px'
                     }}>
-                      {exportQuality === 'Low' && '512px'}
-                      {exportQuality === 'Normal' && '1024px'}
-                      {exportQuality === 'HD' && '2048px'}
-                      {exportQuality === 'HQ' && '4096px'}
+                      {batchType === 'BARCODE' 
+                        ? (exportQuality === 'Low' ? '400x150' : exportQuality === 'Normal' ? '800x300' : exportQuality === 'HD' ? '1200x450' : '1600x600')
+                        : (exportQuality === 'Low' ? '512px' : exportQuality === 'Normal' ? '1024px' : exportQuality === 'HD' ? '2048px' : '4096px')
+                      }
                     </span>
                   </div>
                   <div style={{ padding: '0 8px', marginTop: '12px', marginBottom: '8px' }}>
@@ -738,7 +821,7 @@ export default function BatchPage({
                       fontSize: '13px',
                       color: exportProgress > 50 ? '#FFFFFF' : 'var(--text-primary)'
                     }}>
-                      Exporting Bulk QR... {exportProgress}%
+                      Exporting Batch... {exportProgress}%
                     </span>
                   </div>
                 ) : (
@@ -770,7 +853,7 @@ export default function BatchPage({
 
             {/* Batch List Grid */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px 0' }}>QR Code Preview Items</h4>
+              <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px 0' }}>Item Preview List</h4>
               {batchItems.map((item, idx) => (
                 <div 
                   key={item.id}
@@ -785,7 +868,7 @@ export default function BatchPage({
                   }}
                 >
                   <div style={{
-                    width: '44px',
+                    width: batchType === 'BARCODE' ? '80px' : '44px',
                     height: '44px',
                     borderRadius: '10px',
                     background: '#fff',
@@ -793,9 +876,12 @@ export default function BatchPage({
                     alignItems: 'center',
                     justifyContent: 'center',
                     border: '1px solid var(--border-color)',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    padding: '4px',
+                    boxSizing: 'border-box',
+                    overflow: 'hidden'
                   }}>
-                    <QRThumbnail data={item.data} style={item.style} />
+                    <BatchThumbnail type={batchType} data={item.data} style={item.style} />
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -820,24 +906,26 @@ export default function BatchPage({
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button 
-                      onClick={() => onEditBatchItemStyle(item, idx)}
-                      title="Edit QR style in generator"
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '10px',
-                        background: 'var(--bg-hover)',
-                        border: '1px solid var(--border-color)',
-                        color: 'var(--accent-primary)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Edit3 size={16} />
-                    </button>
+                    {batchType === 'QR' && (
+                      <button 
+                        onClick={() => onEditBatchItemStyle(item, idx)}
+                        title="Edit QR style in generator"
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '10px',
+                          background: 'var(--bg-hover)',
+                          border: '1px solid var(--border-color)',
+                          color: 'var(--accent-primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Edit3 size={16} />
+                      </button>
+                    )}
                     <button 
                       onClick={() => handleRemoveItem(item.id)}
                       title="Remove item"
@@ -867,14 +955,13 @@ export default function BatchPage({
   );
 }
 
-function QRThumbnail({ data, style }) {
+function BatchThumbnail({ type, data, style }) {
   const canvasRef = useRef(null);
   const [loadedLogoImg, setLoadedLogoImg] = useState(null);
   const safeStyle = style || {};
 
-  // Load logo image if it exists in style
   useEffect(() => {
-    if (safeStyle.logo && safeStyle.logo.src) {
+    if (type !== 'BARCODE' && safeStyle.logo && safeStyle.logo.src) {
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
@@ -884,28 +971,42 @@ function QRThumbnail({ data, style }) {
     } else {
       setLoadedLogoImg(null);
     }
-  }, [safeStyle.logo?.src]);
+  }, [safeStyle.logo?.src, type]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
-    const matrixInfo = generateQRMatrix(data, safeStyle.errorCorrection || 'H');
     
-    // Override style.logo and textCenter with render-safe mappings
-    renderQR(canvasRef.current, {
-      ...matrixInfo,
-      size: 100,
-      ...safeStyle,
-      logo: safeStyle.logo && safeStyle.logo.src ? loadedLogoImg : null,
-      textCenter: safeStyle.textCenterEnabled ? safeStyle.textCenterText : null,
-      showHandle: false,
-      selectedType: null
-    });
-  }, [data, safeStyle, loadedLogoImg]);
+    if (type === 'BARCODE') {
+      // Clear canvas before drawing
+      const ctx = canvasRef.current.getContext('2d');
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+
+      renderBarcode(canvasRef.current, data, {
+        barColor: safeStyle.barColor || '#000000',
+        bgColor: safeStyle.bgColor || '#ffffff',
+        barWidth: 1.5,
+        height: 40,
+        margin: 8,
+        displayValue: false
+      });
+    } else {
+      const matrixInfo = generateQRMatrix(data, safeStyle.errorCorrection || 'H');
+      renderQR(canvasRef.current, {
+        ...matrixInfo,
+        size: 100,
+        ...safeStyle,
+        logo: safeStyle.logo && safeStyle.logo.src ? loadedLogoImg : null,
+        textCenter: safeStyle.textCenterEnabled ? safeStyle.textCenterText : null,
+        showHandle: false,
+        selectedType: null
+      });
+    }
+  }, [data, safeStyle, loadedLogoImg, type]);
 
   return (
     <canvas 
       ref={canvasRef} 
-      width="100" 
+      width={type === 'BARCODE' ? '180' : '100'} 
       height="100" 
       style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
     />

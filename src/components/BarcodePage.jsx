@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Save, Barcode, Palette, Sliders, Undo2, Redo2, ChevronDown, FileImage, FileCode, FileText, Copy, Bookmark, Share2 } from 'lucide-react';
+import { Save, Barcode, Palette, Sliders, Undo2, Redo2, ChevronDown, FileImage, FileCode, FileText, Copy, Bookmark, Share2, Menu, Home, History, Moon, Sun, Info, Shield, FileText as FileIcon } from 'lucide-react';
 import { renderBarcode } from '../utils/barcodeEngine';
 import { saveToHistory, saveToSaved } from '../utils/storage';
 import { Share } from '@capacitor/share';
@@ -23,7 +23,7 @@ const COLOR_PRESETS = [
   { name: 'Rose Gold', qr: '#E91E63', bg: '#FFF1F2' }
 ];
 
-export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, setLoadedBarcodeItem }) {
+export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, setLoadedBarcodeItem, theme, setTheme, effectiveTheme }) {
   const [text, setText] = useState('CODE128-BARCODE');
   const [barColor, setBarColor] = useState('#000000');
   const [bgColor, setBgColor] = useState('#ffffff');
@@ -35,6 +35,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   const [activeTab, setActiveTab] = useState('content');
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', type: 'bar' });
   const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState('PNG');
   
   // History Undo/Redo States
@@ -61,7 +62,6 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
   // Sync state and push to history
   const updateStateAndHistory = (updates) => {
-    // Current state values merged with new updates
     const newState = {
       text: updates.text !== undefined ? updates.text : text,
       barColor: updates.barColor !== undefined ? updates.barColor : barColor,
@@ -72,7 +72,6 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       displayValue: updates.displayValue !== undefined ? updates.displayValue : displayValue
     };
     
-    // Apply updates to react states
     if (updates.text !== undefined) setText(updates.text);
     if (updates.barColor !== undefined) setBarColor(updates.barColor);
     if (updates.bgColor !== undefined) setBgColor(updates.bgColor);
@@ -86,7 +85,6 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       return;
     }
 
-    // Push new state to history list, trimming anything after the current index
     const cleanHistory = history.slice(0, historyIndex + 1);
     setHistory([...cleanHistory, newState]);
     setHistoryIndex(cleanHistory.length);
@@ -284,7 +282,6 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   };
 
   const handleAdvColorConfirm = (newColor) => {
-    // Commit color and push to undo/redo history
     if (advPicker.type === 'bar') {
       updateStateAndHistory({ barColor: newColor });
     } else {
@@ -303,28 +300,9 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       backgroundColor: 'var(--bg-primary)',
       position: 'relative'
     }}>
-      {/* ── Top Header Navigation (Consistent with QR header) ── */}
+      {/* ── Top Header Navigation (Unified with QR header copy) ── */}
       <header className="app-header">
         <div className="app-logo">
-          <button 
-            onClick={() => onNavigate('home')}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'inherit',
-              cursor: 'pointer',
-              padding: '8px',
-              marginRight: '8px',
-              marginLeft: '-8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%'
-            }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          </button>
-          
           <AppIcon size={36} shadow />
           
           <div className="header-undo-redo" style={{ display: 'flex', gap: '8px', marginLeft: '12px' }}>
@@ -365,7 +343,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
           </div>
         </div>
 
-        <div className="app-header-actions">
+        <div className="app-header-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <div className="header-save-container" style={{ position: 'relative' }}>
             <button
               className={`btn-header-action btn-header-save ${formatDropdownOpen ? 'active' : ''}`}
@@ -435,6 +413,67 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                       </button>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="menu-container" style={{ position: 'relative' }}>
+            <button
+              className={`btn-menu-toggle ${isMenuOpen ? 'active' : ''}`}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <Menu size={20} />
+            </button>
+
+            {isMenuOpen && (
+              <div className="app-dropdown-menu fade-in" style={{ top: 'calc(100% + 12px)', right: 0 }}>
+                <div className="menu-links">
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); onNavigate('home'); }}>
+                    <Home size={16} /> Home
+                  </button>
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); onNavigate('history'); }}>
+                    <History size={16} /> History
+                  </button>
+                  <button
+                    className="menu-link-btn"
+                    onClick={() => {
+                      let next;
+                      if (theme === 'dark') next = 'light';
+                      else if (theme === 'light') next = 'auto';
+                      else next = 'dark';
+                      setTheme(next);
+                    }}
+                  >
+                    {theme === 'dark' ? (
+                      <Moon size={16} />
+                    ) : theme === 'light' ? (
+                      <Sun size={16} />
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v20" />
+                        <path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" />
+                        <circle cx="12" cy="12" r="10" />
+                      </svg>
+                    )}
+                    Theme <span style={{
+                      textTransform: 'capitalize',
+                      marginLeft: 4,
+                      color: theme === 'dark' ? '#00F0FF' : theme === 'light' ? '#FF007F' : (effectiveTheme === 'dark' ? '#00F0FF' : '#FF007F'),
+                      fontWeight: 'bold'
+                    }}>{theme}</span>
+                  </button>
+                  <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/about'; }}>
+                    <Info size={16} /> About
+                  </button>
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/privacy-policy'; }}>
+                    <Shield size={16} /> Privacy Policy
+                  </button>
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/terms'; }}>
+                    <FileIcon size={16} /> Terms of Service
+                  </button>
                 </div>
               </div>
             )}

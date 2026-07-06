@@ -2846,7 +2846,10 @@ export default function App() {
   return (
     <div className="app redesigned">
       {/* ── Header ── */}
-      <header className={`app-header ${['home', 'saved', 'history', 'settings'].includes(activePage) ? 'header-home' : ''}`}>
+      <header 
+        className={`app-header ${['home', 'saved', 'history', 'settings'].includes(activePage) ? 'header-home' : ''}`}
+        style={{ display: activePage === 'barcode' ? 'none' : 'flex' }}
+      >
         <div className="app-logo">
           {activePage === 'scanner' && (
             <button 
@@ -4236,6 +4239,9 @@ export default function App() {
             showToast={showToast} 
             loadedBarcodeItem={loadedBarcodeItem}
             setLoadedBarcodeItem={setLoadedBarcodeItem}
+            theme={theme}
+            setTheme={setTheme}
+            effectiveTheme={effectiveTheme}
           />
         ) : activePage === 'settings' ? (
           <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
