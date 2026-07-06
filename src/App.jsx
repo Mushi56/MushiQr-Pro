@@ -1596,8 +1596,13 @@ export default function App() {
     setQrType(parsed.type);
     setQrData(parsed.data);
 
-    setActiveBatchItemIndex(idx);
     navigateTo('generator');
+    setActiveTab('color');
+    
+    // Delay setting activeBatchItemIndex to prevent route sync race condition from resetting it to null
+    setTimeout(() => {
+      setActiveBatchItemIndex(idx);
+    }, 100);
   };
 
   // ── Load QR ──
@@ -1825,7 +1830,7 @@ export default function App() {
       qrTexture.image.onload = renderCanvas;
       qrTexture.image.onerror = () => showToast('Texture failed to load', 'error');
     }
-  }, [renderCanvas, logo, qrTexture]);
+  }, [renderCanvas, logo, qrTexture, activePage]);
   const getQRContentArea = useCallback(() => {
     const size = 512;
     const padding = size * 0.03;
@@ -2901,16 +2906,72 @@ export default function App() {
         <div className="app-header-actions">
           {activePage === 'generator' && (
             <>
-              <div className="header-save-container" ref={downloadBtnRef} style={{ position: 'relative' }}>
-                <button
-                  className={`btn-header-action btn-header-save ${!qrMatrixInfo ? 'disabled' : ''} ${formatDropdownOpen ? 'active' : ''}`}
-                  onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
-                  disabled={!qrMatrixInfo}
-                  title="Save As..."
-                >
-                  <Save size={20} />
-                  <ChevronDown size={14} style={{ marginLeft: 2, opacity: 0.8 }} />
-                </button>
+              {activeBatchItemIndex !== null ? (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    onClick={() => {
+                      const currentStyle = getSnapshot();
+                      const updated = batchItems.map(item => ({
+                        ...item,
+                        style: currentStyle
+                      }));
+                      setBatchItems(updated);
+                      generatorIsDirtyRef.current = false;
+                      setActiveBatchItemIndex(null);
+                      navigateTo('batch');
+                    }}
+                    style={{
+                      background: 'var(--accent-gradient)',
+                      border: 'none',
+                      color: 'white',
+                      padding: '8px 12px',
+                      borderRadius: '10px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Apply to All
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const updated = [...batchItems];
+                      updated[activeBatchItemIndex] = {
+                        ...updated[activeBatchItemIndex],
+                        style: getSnapshot()
+                      };
+                      setBatchItems(updated);
+                      generatorIsDirtyRef.current = false;
+                      setActiveBatchItemIndex(null);
+                      navigateTo('batch');
+                    }}
+                    style={{
+                      background: 'var(--bg-hover)',
+                      border: '1px solid var(--border-color)',
+                      color: 'var(--text-primary)',
+                      padding: '8px 12px',
+                      borderRadius: '10px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    This Only
+                  </button>
+                </div>
+              ) : (
+                <div className="header-save-container" ref={downloadBtnRef} style={{ position: 'relative' }}>
+                  <button
+                    className={`btn-header-action btn-header-save ${!qrMatrixInfo ? 'disabled' : ''} ${formatDropdownOpen ? 'active' : ''}`}
+                    onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
+                    disabled={!qrMatrixInfo}
+                    title="Save As..."
+                  >
+                    <Save size={20} />
+                    <ChevronDown size={14} style={{ marginLeft: 2, opacity: 0.8 }} />
+                  </button>
 
                 {formatDropdownOpen && (
                   <div className="app-dropdown-menu save-as-dropdown fade-in" style={{ top: 'calc(100% + 12px)', right: 0, width: '280px' }}>
@@ -3067,15 +3128,31 @@ export default function App() {
                   </div>
                 )}
               </div>
+              )}
 
               <div className="menu-container" ref={menuRef} style={{ position: 'relative' }}>
-                <button
-                  className={`btn-menu-toggle ${isMenuOpen ? 'active' : ''}`}
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  aria-label="Toggle menu"
-                >
-                  <Menu size={20} />
-                </button>
+                {activeBatchItemIndex !== null ? (
+                  <button
+                    className="btn-menu-toggle"
+                    onClick={() => {
+                      generatorIsDirtyRef.current = false;
+                      setActiveBatchItemIndex(null);
+                      navigateTo('batch');
+                    }}
+                    aria-label="Cancel editing"
+                    title="Cancel"
+                  >
+                    <X size={20} />
+                  </button>
+                ) : (
+                  <button
+                    className={`btn-menu-toggle ${isMenuOpen ? 'active' : ''}`}
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    aria-label="Toggle menu"
+                  >
+                    <Menu size={20} />
+                  </button>
+                )}
 
                 {isMenuOpen && (
                   <div className="app-dropdown-menu fade-in" style={{ top: 'calc(100% + 12px)', right: 0 }}>
@@ -3139,98 +3216,6 @@ export default function App() {
       <main className="app-main-redesigned">
         {activePage === 'generator' ? (
           <>
-            {/* ── Batch QR Styling Banner ── */}
-            {activeBatchItemIndex !== null && (
-              <div className="batch-edit-banner" style={{
-                background: 'rgba(214, 0, 54, 0.15)',
-                borderBottom: '1px solid var(--accent-primary)',
-                padding: '12px 20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '12px',
-                color: 'var(--text-primary)',
-                zIndex: 100
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                  <div style={{
-                    width: '8px', height: '8px', borderRadius: '50%',
-                    background: 'var(--accent-primary)',
-                    animation: 'pulse 1.5s infinite'
-                  }} />
-                  <span style={{ fontSize: '13px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    Editing Batch QR Style: Item {batchItems[activeBatchItemIndex]?.filename || `No. ${activeBatchItemIndex + 1}`}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                  <button 
-                    onClick={() => {
-                      const updated = [...batchItems];
-                      updated[activeBatchItemIndex] = {
-                        ...updated[activeBatchItemIndex],
-                        style: getSnapshot()
-                      };
-                      setBatchItems(updated);
-                      setActiveBatchItemIndex(null);
-                      navigateTo('batch');
-                    }}
-                    style={{
-                      background: 'var(--accent-gradient)',
-                      border: 'none',
-                      color: 'white',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Apply to Item
-                  </button>
-                  <button 
-                    onClick={() => {
-                      const currentStyle = getSnapshot();
-                      const updated = batchItems.map(item => ({
-                        ...item,
-                        style: currentStyle
-                      }));
-                      setBatchItems(updated);
-                      setActiveBatchItemIndex(null);
-                      navigateTo('batch');
-                    }}
-                    style={{
-                      background: 'var(--bg-hover)',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-primary)',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Apply to All
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setActiveBatchItemIndex(null);
-                      navigateTo('batch');
-                    }}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--text-secondary)',
-                      padding: '6px 10px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
             {/* ── QR Preview Card (always visible) ── */}
             <ErrorBoundary>
               <section className="qr-preview-card">
@@ -4245,7 +4230,7 @@ export default function App() {
       {/* ── Bottom Navigation Bar (Only for Generator) ── */}
       {activePage === 'generator' && (
         <nav className="bottom-nav">
-          {TABS.map(tab => (
+          {TABS.filter(tab => activeBatchItemIndex === null || tab.id !== 'content').map(tab => (
             <button
               key={tab.id}
               className={`bottom-nav-tab${activeTab === tab.id ? ' active' : ''}`}

@@ -779,6 +779,16 @@ function drawRoundedRect(ctx, x, y, w, h, r) {
  * Draw logo with transparency, background, and outline
  */
 function drawLogo(ctx, logoImg, canvasSize, options) {
+  let imgElement = logoImg;
+  if (logoImg && typeof logoImg === 'object' && !(logoImg instanceof HTMLImageElement) && !(logoImg instanceof HTMLCanvasElement)) {
+    if (logoImg.image) {
+      imgElement = logoImg.image;
+    } else {
+      return;
+    }
+  }
+  if (!imgElement) return;
+
   const {
     logoWidth,
     logoHeight,
@@ -857,7 +867,7 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
     // 4. Draw Outline
     if (logoOutline && logoOutlineWidth > 0) {
       ctx.globalAlpha = logoOpacity * logoOutlineOpacity;
-      drawSmartOutline(ctx, logoImg, canvasSize, logoW, logoH, logoX, logoY, {
+      drawSmartOutline(ctx, imgElement, canvasSize, logoW, logoH, logoX, logoY, {
         outlineColor: logoOutlineColor,
         outlineWidth: logoOutlineWidth,
         logoBgShape,
@@ -900,7 +910,7 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
         pctx.clip();
       }
 
-      pctx.drawImage(logoImg, 0, 0, logoW, logoH);
+      pctx.drawImage(imgElement, 0, 0, logoW, logoH);
 
       // Erase Color Filter (Remove Background)
       if (logoEraseColorEnabled && logoEraseColor) {
@@ -937,7 +947,7 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
 
       ctx.drawImage(procCanvas, logoX, logoY, logoW, logoH);
     } else {
-      ctx.drawImage(logoImg, logoX, logoY, logoW, logoH);
+      ctx.drawImage(imgElement, logoX, logoY, logoW, logoH);
     }
 
     // 6. Draw Inner Shadow (on top of the logo)
@@ -947,7 +957,7 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
       isCanvas.height = Math.max(1, logoH);
       const isCtx = isCanvas.getContext('2d');
       
-      isCtx.drawImage(logoImg, 0, 0, logoW, logoH);
+      isCtx.drawImage(imgElement, 0, 0, logoW, logoH);
       isCtx.globalCompositeOperation = 'source-out';
       isCtx.shadowColor = logoShadowColor; 
       isCtx.shadowBlur = 10;
@@ -956,14 +966,14 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
       isCtx.fillRect(0, 0, logoW, logoH);
       
       isCtx.globalCompositeOperation = 'destination-in';
-      isCtx.drawImage(logoImg, 0, 0, logoW, logoH);
+      isCtx.drawImage(imgElement, 0, 0, logoW, logoH);
       
       ctx.drawImage(isCanvas, logoX, logoY, logoW, logoH);
     }
   } catch (err) {
     console.error("Logo Render Error:", err);
     // Fallback: Just draw the basic logo
-    ctx.drawImage(logoImg, logoX, logoY, logoW, logoH);
+    ctx.drawImage(imgElement, logoX, logoY, logoW, logoH);
   }
 
   ctx.restore();

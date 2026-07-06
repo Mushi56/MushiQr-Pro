@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileSpreadsheet, Download, Edit3, Trash2, ArrowLeft, Check, AlertCircle, Info, Sparkles, RefreshCw } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Edit3, Trash2, ArrowLeft, Check, AlertCircle, Info, Sparkles, RefreshCw, FileImage, FileCode, FileText, Layers, X } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -36,6 +36,7 @@ export default function BatchPage({
   const [dataCol, setDataCol] = useState('');
   const [nameCol, setNameCol] = useState('');
   const [hasHeader, setHasHeader] = useState(true);
+  const [selectedFormat, setSelectedFormat] = useState('ALL');
   const [exportQuality, setExportQuality] = useState('Normal');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
@@ -201,10 +202,37 @@ export default function BatchPage({
     document.body.removeChild(link);
   };
 
+
   const generateZip = async () => {
     if (batchItems.length === 0) return;
     setIsExporting(true);
     setExportProgress(0);
+
+    // Preload all unique logo images in batchItems
+    const logoCache = {};
+    const logoPromises = [];
+    batchItems.forEach(item => {
+      const src = item.style?.logo?.src;
+      if (src && !logoCache[src]) {
+        logoCache[src] = null; // placeholder
+        logoPromises.push(
+          new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+              logoCache[src] = img;
+              resolve();
+            };
+            img.onerror = () => resolve();
+            img.src = src;
+          })
+        );
+      }
+    });
+
+    if (logoPromises.length > 0) {
+      await Promise.all(logoPromises);
+    }
 
     const zip = new JSZip();
     const exportSize = QUALITY_SIZES[exportQuality] || 1024;
@@ -218,45 +246,78 @@ export default function BatchPage({
       tempCanvas.height = exportSize;
 
       const matrixInfo = generateQRMatrix(item.data, item.style.errorCorrection || 'H');
-      
+      const logoImgElement = item.style?.logo?.src ? logoCache[item.style.logo.src] : null;
+
       renderQR(tempCanvas, {
         ...matrixInfo,
         size: exportSize,
         ...item.style,
+        logo: logoImgElement,
+        textCenter: item.style.textCenterEnabled ? item.style.textCenterText : null,
         showHandle: false,
         selectedType: null
       });
 
       // 1. PNG Base64
-      const pngDataUrl = tempCanvas.toDataURL('image/png');
-      const pngBase64 = pngDataUrl.split(',')[1];
+      let pngDataUrl = '';
+      let pngBase64 = '';
+      if (selectedFormat === 'ALL' || selectedFormat === 'PNG' || selectedFormat === 'SVG' || selectedFormat === 'PDF') {
+        pngDataUrl = tempCanvas.toDataURL('image/png');
+        pngBase64 = pngDataUrl.split(',')[1];
+      }
 
-      // 2. SVG XML
-      const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+      // 2. JPG Base64
+      let jpgDataUrl = '';
+      let jpgBase64 = '';
+      if (selectedFormat === 'ALL' || selectedFormat === 'JPG') {
+        // Draw white background for JPG since JPEG does not support transparency
+        const jpgCanvas = document.createElement('canvas');
+        jpgCanvas.width = exportSize;
+        jpgCanvas.height = exportSize;
+        const ctx = jpgCanvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, exportSize, exportSize);
+        ctx.drawImage(tempCanvas, 0, 0);
+        jpgDataUrl = jpgCanvas.toDataURL('image/jpeg', 0.9);
+        jpgBase64 = jpgDataUrl.split(',')[1];
+      }
+
+      // Add to ZIP files structure depending on selected format
+      if (selectedFormat === 'ALL' || selectedFormat === 'PNG') {
+        zip.file(`png/${item.filename}.png`, pngBase64, { base64: true });
+      }
+
+      if (selectedFormat === 'ALL' || selectedFormat === 'JPG') {
+        zip.file(`jpg/${item.filename}.jpg`, jpgBase64, { base64: true });
+      }
+
+      if (selectedFormat === 'ALL' || selectedFormat === 'SVG') {
+        const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
      width="${exportSize}" height="${exportSize}"
      viewBox="0 0 ${exportSize} ${exportSize}">
   <image width="${exportSize}" height="${exportSize}" xlink:href="data:image/png;base64,${pngBase64}"/>
 </svg>`;
+        zip.file(`svg/${item.filename}.svg`, svgContent);
+      }
 
-      // 3. PDF
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-      const pdfSize = 210;
-      const margin = 20;
-      const qrSize = pdfSize - margin * 2;
-      pdf.addImage(pngDataUrl, 'PNG', margin, margin, qrSize, qrSize);
-      const pdfArrayBuffer = pdf.output('arraybuffer');
-
-      // Add to ZIP files structure
-      zip.file(`png/${item.filename}.png`, pngBase64, { base64: true });
-      zip.file(`svg/${item.filename}.svg`, svgContent);
-      zip.file(`pdf/${item.filename}.pdf`, pdfArrayBuffer);
+      if (selectedFormat === 'ALL' || selectedFormat === 'PDF') {
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+        });
+        const pdfSize = 210;
+        const margin = 20;
+        const qrSize = pdfSize - margin * 2;
+        pdf.addImage(pngDataUrl, 'PNG', margin, margin, qrSize, qrSize);
+        const pdfArrayBuffer = pdf.output('arraybuffer');
+        zip.file(`pdf/${item.filename}.pdf`, pdfArrayBuffer);
+      }
 
       setExportProgress(Math.round(((idx + 1) / batchItems.length) * 100));
+      // Yield control back to browser event loop to prevent unresponsive page freeze
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
 
     try {
@@ -284,46 +345,24 @@ export default function BatchPage({
     <div style={{
       width: '100%',
       height: '100%',
-      backgroundColor: 'var(--bg-primary)',
+      backgroundColor: 'transparent',
       color: 'var(--text-primary)',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden'
     }}>
-      {/* Header */}
-      <div style={{
-        padding: '24px var(--main-padding-x) 16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-        borderBottom: '1px solid var(--border-color)',
-        background: 'var(--bg-primary)',
-        zIndex: 10
-      }}>
-        <button 
-          onClick={() => onNavigate('home')}
-          style={{
-            background: 'var(--bg-hover)',
-            border: 'none',
-            borderRadius: '12px',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer'
-          }}
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>Batch QR Generator</h2>
+      {/* Header matching modal styling */}
+      <div className="modal-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+        <div className="modal-header-title">
+          <h3 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>Batch QR Generator</h3>
           <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', margin: 0 }}>Generate multiple branded QR codes at once</p>
         </div>
+        <button className="modal-close" onClick={() => onNavigate('home')}>
+          <X size={20} />
+        </button>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px var(--main-padding-x) 100px' }}>
+      <div className="modal-content" style={{ flex: 1, padding: '20px var(--main-padding-x) 100px' }}>
         {/* Step 1: Upload or Import */}
         {!fileData && batchItems.length === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -491,6 +530,55 @@ export default function BatchPage({
                 </span>
               </div>
 
+              {/* Design Style Preview Card */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '16px',
+                padding: '12px 16px'
+              }}>
+                <div style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '10px',
+                  background: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid var(--border-color)',
+                  flexShrink: 0,
+                  overflow: 'hidden'
+                }}>
+                  <QRThumbnail data={batchItems[0]?.data || "Preview"} style={batchItems[0]?.style || activeGeneratorStyle} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Batch QR Style Template</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Click edit to customize the style of all QRs</div>
+                </div>
+                <button
+                  onClick={() => onEditBatchItemStyle(batchItems[0], 0)}
+                  title="Customize batch design"
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    background: 'var(--accent-gradient)',
+                    border: 'none',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(214, 0, 54, 0.2)'
+                  }}
+                >
+                  <Edit3 size={16} />
+                </button>
+              </div>
+
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <button 
                   onClick={applyGlobalStyle}
@@ -535,28 +623,129 @@ export default function BatchPage({
                 </button>
               </div>
 
-              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: '150px' }}>
-                    <label className="form-label" style={{ marginBottom: '6px' }}>Export Quality</label>
-                    <select 
-                      className="form-select" 
-                      value={exportQuality} 
-                      onChange={(e) => setExportQuality(e.target.value)}
-                    >
-                      <option value="Low">Low (512px)</option>
-                      <option value="Normal">Normal (1024px)</option>
-                      <option value="HD">HD (2048px)</option>
-                      <option value="HQ">HQ (4096px)</option>
-                    </select>
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Export Format Section matching app design */}
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Export Format</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+                    {[
+                      { label: 'ALL', Icon: Layers },
+                      { label: 'PNG', Icon: FileImage },
+                      { label: 'SVG', Icon: FileCode },
+                      { label: 'PDF', Icon: FileText },
+                      { label: 'JPG', Icon: FileImage },
+                    ].map(({ label, Icon }) => (
+                      <button
+                        key={label}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFormat(label);
+                        }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          aspectRatio: '1 / 1',
+                          padding: '0',
+                          background: selectedFormat === label ? 'var(--accent-soft)' : 'var(--bg-hover)',
+                          border: '1px solid',
+                          borderColor: selectedFormat === label ? 'var(--accent-primary)' : 'transparent',
+                          borderRadius: '12px',
+                          color: selectedFormat === label ? 'var(--accent-primary)' : 'var(--text-primary)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <Icon size={18} />
+                        <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
+                      </button>
+                    ))}
                   </div>
+                </div>
 
+                {/* Export Quality matching app design */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Export Quality</div>
+                    <span style={{ 
+                      fontSize: '10px', 
+                      fontWeight: 800, 
+                      color: 'var(--accent-primary)',
+                      background: 'var(--accent-soft)',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid rgba(214, 0, 54, 0.15)',
+                      letterSpacing: '0.5px'
+                    }}>
+                      {exportQuality === 'Low' && '512px'}
+                      {exportQuality === 'Normal' && '1024px'}
+                      {exportQuality === 'HD' && '2048px'}
+                      {exportQuality === 'HQ' && '4096px'}
+                    </span>
+                  </div>
+                  <div style={{ padding: '0 8px', marginTop: '12px', marginBottom: '8px' }}>
+                    <input
+                      type="range"
+                      min="0"
+                      max="3"
+                      step="1"
+                      value={['Low', 'Normal', 'HD', 'HQ'].indexOf(exportQuality)}
+                      onChange={(e) => {
+                        const steps = ['Low', 'Normal', 'HD', 'HQ'];
+                        const selected = steps[parseInt(e.target.value)] || 'Normal';
+                        setExportQuality(selected);
+                      }}
+                      className="export-quality-slider"
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '9px', fontWeight: 600, color: 'var(--text-muted)' }}>
+                      <span>Low</span>
+                      <span>Normal</span>
+                      <span>HD</span>
+                      <span>4K</span>
+                    </div>
+                  </div>
+                </div>
+
+                {isExporting ? (
+                  <div style={{
+                    width: '100%',
+                    height: '48px',
+                    background: 'var(--bg-hover)',
+                    borderRadius: '16px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid var(--border-color)',
+                    marginTop: '10px'
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: `${exportProgress}%`,
+                      background: 'var(--accent-gradient)',
+                      transition: 'width 0.1s ease-out'
+                    }} />
+                    <span style={{
+                      position: 'relative',
+                      zIndex: 1,
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      color: exportProgress > 50 ? '#FFFFFF' : 'var(--text-primary)'
+                    }}>
+                      Exporting Batch QR... {exportProgress}%
+                    </span>
+                  </div>
+                ) : (
                   <button 
                     onClick={generateZip}
-                    disabled={isExporting}
                     style={{
-                      flex: 1.5,
-                      minWidth: '200px',
+                      width: '100%',
                       background: 'var(--accent-gradient)',
                       border: 'none',
                       borderRadius: '16px',
@@ -569,22 +758,13 @@ export default function BatchPage({
                       gap: '8px',
                       cursor: 'pointer',
                       boxShadow: '0 8px 24px rgba(214, 0, 54, 0.25)',
-                      marginTop: '18px'
+                      marginTop: '10px'
                     }}
                   >
-                    {isExporting ? (
-                      <>
-                        <RefreshCw className="spinning" size={20} />
-                        Exporting Zip ({exportProgress}%)
-                      </>
-                    ) : (
-                      <>
-                        <Download size={20} />
-                        Generate & Download ZIP
-                      </>
-                    )}
+                    <Download size={20} />
+                    Generate & Download {selectedFormat} ZIP
                   </button>
-                </div>
+                )}
               </div>
             </div>
 
@@ -687,21 +867,40 @@ export default function BatchPage({
   );
 }
 
-// Mini preview canvas renderer for each row
 function QRThumbnail({ data, style }) {
   const canvasRef = useRef(null);
+  const [loadedLogoImg, setLoadedLogoImg] = useState(null);
+  const safeStyle = style || {};
+
+  // Load logo image if it exists in style
+  useEffect(() => {
+    if (safeStyle.logo && safeStyle.logo.src) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        setLoadedLogoImg(img);
+      };
+      img.src = safeStyle.logo.src;
+    } else {
+      setLoadedLogoImg(null);
+    }
+  }, [safeStyle.logo?.src]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
-    const matrixInfo = generateQRMatrix(data, style.errorCorrection || 'H');
+    const matrixInfo = generateQRMatrix(data, safeStyle.errorCorrection || 'H');
+    
+    // Override style.logo and textCenter with render-safe mappings
     renderQR(canvasRef.current, {
       ...matrixInfo,
       size: 100,
-      ...style,
+      ...safeStyle,
+      logo: safeStyle.logo && safeStyle.logo.src ? loadedLogoImg : null,
+      textCenter: safeStyle.textCenterEnabled ? safeStyle.textCenterText : null,
       showHandle: false,
       selectedType: null
     });
-  }, [data, style]);
+  }, [data, safeStyle, loadedLogoImg]);
 
   return (
     <canvas 
