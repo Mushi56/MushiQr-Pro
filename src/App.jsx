@@ -54,11 +54,7 @@ import {
   Crop,
   Eraser,
   Layers,
-  AlertCircle,
-  Wand2,
-  Play,
-  Lock,
-  Unlock
+  AlertCircle
 } from 'lucide-react';
 import ColorPicker from './components/ColorPicker';
 import Slider from './components/Slider';
@@ -67,17 +63,15 @@ import LogoPresets from './components/LogoPresets';
 import QRTypeSelector from './components/QRTypeSelector';
 import QRDataInput from './components/QRDataInput';
 import { DotStyleSelector, EyeStyleSelector } from './components/StyleSelectors';
-import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData, constrainToSafeZone, QR_TEMPLATES } from './utils/qrEngine';
+import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData, constrainToSafeZone } from './utils/qrEngine';
 import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from './utils/exportUtils';
 import { saveToHistory, getSaved, saveToSaved, getPreferences, savePreferences } from './utils/storage';
-import { encryptData } from './utils/crypto';
-import BatchQRModal from './components/BatchQRModal';
-import SecureQRViewer from './components/SecureQRViewer';
 import QRScanner from './components/QRScanner';
 import HistoryPage from './components/HistoryPage';
 import HomePage from './components/HomePage';
 import SavedPage from './components/SavedPage';
 import SettingsPage from './components/SettingsPage';
+import BatchPage from './components/BatchPage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
@@ -611,7 +605,7 @@ export default function App() {
     if (path === '/saved') return 'saved';
     if (path === '/history') return 'history';
     if (path === '/scanner') return 'scanner';
-    if (path === '/secure') return 'secure';
+    if (path === '/batch') return 'batch';
     return 'home';
   };
 
@@ -633,6 +627,7 @@ export default function App() {
         setIsDataModalOpen(false);
         setAdvPicker(prev => ({ ...prev, open: false }));
         setFormatDropdownOpen(false);
+        setActiveBatchItemIndex(null);
       }
     }
   }, [location.pathname, location.state, activePage]);
@@ -714,6 +709,10 @@ export default function App() {
   // Tracks whether the user has meaningfully changed the QR generator since it was last reset/loaded
   const generatorIsDirtyRef = useRef(false);
   const ignoreDirtyRef = useRef(false);
+
+  // ── Batch QR ──
+  const [batchItems, setBatchItems] = useState([]);
+  const [activeBatchItemIndex, setActiveBatchItemIndex] = useState(null);
 
   // ── Colors ──
   const [qrColor, setQrColor] = useState('#000000');
@@ -823,15 +822,9 @@ export default function App() {
   const renderTimeoutRef = useRef(null);
   const tempCanvas = useRef(document.createElement('canvas'));
   const tempCtx = useRef(tempCanvas.current.getContext('2d'));
-  const [qrMatrixInfo, setQrMatrixInfo] = useState(() => generateQRMatrix('https://example.com', 'M'));
+  const [qrMatrixInfo, setQrMatrixInfo] = useState(null);
   const [toast, setToast] = useState(null);
   const [downloadingFormat, setDownloadingFormat] = useState(null);
-
-  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
-  const [isSecureLocked, setIsSecureLocked] = useState(false);
-  const [securePassword, setSecurePassword] = useState('');
-  const [batchData, setBatchData] = useState(null);
-  const [isBatchDesignMode, setIsBatchDesignMode] = useState(false);
 
   // ── Advanced Picker State ──
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', setter: null });
@@ -943,6 +936,7 @@ export default function App() {
       setIsDataModalOpen(false);
       setAdvPicker(prev => ({ ...prev, open: false }));
       setFormatDropdownOpen(false);
+      setActiveBatchItemIndex(null);
     }
 
     let path = '/';
@@ -951,6 +945,7 @@ export default function App() {
     else if (page === 'saved') path = '/saved';
     else if (page === 'history') path = '/history';
     else if (page === 'scanner') path = '/scanner';
+    else if (page === 'batch') path = '/batch';
 
     if (location.pathname !== path) {
       navigate(path);
@@ -1015,7 +1010,8 @@ export default function App() {
       textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
       textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
       textCenterPosX, textCenterPosY, textCenterRotation,
-      textCenterWidth, textCenterHeight
+      textCenterWidth, textCenterHeight,
+      errorLevel
     };
   }, [
     qrType, qrData, qrColor, bgColor, bgTransparent, eyeColor, eyeOuterColor, syncEyes,
@@ -1033,7 +1029,8 @@ export default function App() {
     textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
     textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
     textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
-    textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight
+    textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight,
+    errorLevel
   ]);
 
   const saveSnapshot = useCallback(() => {
@@ -1175,6 +1172,7 @@ export default function App() {
     if (s.textCenterRotation !== undefined) setTextCenterRotation(s.textCenterRotation);
     if (s.textCenterWidth !== undefined) setTextCenterWidth(s.textCenterWidth);
     if (s.textCenterHeight !== undefined) setTextCenterHeight(s.textCenterHeight);
+    if (s.errorLevel !== undefined) setErrorLevel(s.errorLevel);
     
     setTimeout(() => { isInternalUpdate.current = false; }, 50);
   };
@@ -1579,6 +1577,29 @@ export default function App() {
     showToast('Added to Saved QRs', 'success');
   };
 
+  const getActiveStyle = () => {
+    return getSnapshot();
+  };
+
+  // ── Edit Batch Item Style ──
+  const handleEditBatchItemStyle = (item, idx) => {
+    ignoreDirtyRef.current = true;
+    generatorIsDirtyRef.current = false;
+    setTimeout(() => {
+      ignoreDirtyRef.current = false;
+      generatorIsDirtyRef.current = false;
+    }, 800);
+
+    applySnapshot(item.style);
+    
+    const parsed = parseRawQRText(item.data);
+    setQrType(parsed.type);
+    setQrData(parsed.data);
+
+    setActiveBatchItemIndex(idx);
+    navigateTo('generator');
+  };
+
   // ── Load QR ──
   const handleLoadQR = (item) => {
     if (!item) return;
@@ -1632,8 +1653,6 @@ export default function App() {
     setQrType(QR_TYPES.URL);
     setQrData({ url: 'https://example.com' });
     setErrorLevel('M');
-    setIsSecureLocked(false);
-    setSecurePassword('');
 
     // Appearance
     setQrColor('#000000');
@@ -1685,47 +1704,17 @@ export default function App() {
     setTabHistory([]);
   };
 
-  const applyTemplate = (tpl) => {
-    if (tpl.dotStyle !== undefined) setDotStyle(tpl.dotStyle);
-    if (tpl.eyeStyle !== undefined) setEyeStyle(tpl.eyeStyle);
-    if (tpl.qrColor !== undefined) setQrColor(tpl.qrColor);
-    if (tpl.bgColor !== undefined) setBgColor(tpl.bgColor);
-    if (tpl.gradientEnabled !== undefined) setGradientEnabled(tpl.gradientEnabled);
-    if (tpl.gradientColor1 !== undefined) setGradientColor1(tpl.gradientColor1);
-    if (tpl.gradientColor2 !== undefined) setGradientColor2(tpl.gradientColor2);
-    if (tpl.gradientType !== undefined) setGradientType(tpl.gradientType);
-    if (tpl.frameStyle !== undefined) setFrameStyle(tpl.frameStyle);
-    if (tpl.frameText !== undefined) setFrameText(tpl.frameText);
-    if (tpl.frameColor !== undefined) setFrameColor(tpl.frameColor);
-    if (tpl.frameFont !== undefined) setFrameFont(tpl.frameFont);
-    if (tpl.frameSize !== undefined) setFrameSize(tpl.frameSize);
-    
-    generatorIsDirtyRef.current = true;
-    showToast(`${tpl.name} template applied!`, 'success');
-  };
-
   // ── Generate QR Matrix ──
-  const regenerateMatrix = useCallback(async () => {
-    let dataString = formatQRData(qrType, qrData);
+  const regenerateMatrix = useCallback(() => {
+    const dataString = formatQRData(qrType, qrData);
     if (!dataString) return;
-
-    if (isSecureLocked && securePassword) {
-      try {
-        const encrypted = await encryptData(dataString, securePassword);
-        const origin = window.location.origin + window.location.pathname;
-        dataString = `${origin}#/secure?d=${encrypted}`;
-      } catch (err) {
-        console.error('Encryption failed:', err);
-      }
-    }
-
     try {
       const matrixInfo = generateQRMatrix(dataString, errorLevel);
       setQrMatrixInfo(matrixInfo);
     } catch (e) {
       console.error('QR Generate Error:', e);
     }
-  }, [qrType, qrData, errorLevel, isSecureLocked, securePassword]);
+  }, [qrType, qrData, errorLevel]);
 
   useEffect(() => { regenerateMatrix(); }, [regenerateMatrix]);
 
@@ -1836,18 +1825,7 @@ export default function App() {
       qrTexture.image.onload = renderCanvas;
       qrTexture.image.onerror = () => showToast('Texture failed to load', 'error');
     }
-  }, [renderCanvas, logo, qrTexture, isLowEndDevice]);
-
-  // Redraw explicitly when entering the generator view to ensure mounting canvas matches current matrix info
-  useEffect(() => {
-    if (activePage === 'generator') {
-      // Small timeout ensures the DOM has updated and canvasRef.current is fully populated
-      const timer = setTimeout(() => {
-        renderCanvas();
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [activePage, renderCanvas]);
+  }, [renderCanvas, logo, qrTexture]);
   const getQRContentArea = useCallback(() => {
     const size = 512;
     const padding = size * 0.03;
@@ -2753,7 +2731,6 @@ export default function App() {
 
   // ── Tab definitions ──
   const TABS = [
-    { id: 'templates', label: 'Templates', icon: Wand2 },
     { id: 'content', label: 'Content', icon: Pencil },
     { id: 'color', label: 'Color', icon: Palette },
     { id: 'shapes', label: 'Shapes', icon: Hexagon },
@@ -3162,72 +3139,98 @@ export default function App() {
       <main className="app-main-redesigned">
         {activePage === 'generator' ? (
           <>
-            {isBatchDesignMode && batchData && (
-              <div style={{
-                margin: '16px var(--main-padding-x) 0',
-                background: 'linear-gradient(135deg, rgba(214, 0, 54, 0.15) 0%, rgba(255, 45, 94, 0.1) 100%)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(214, 0, 54, 0.3)',
-                borderRadius: '16px',
-                padding: '12px 16px',
+            {/* ── Batch QR Styling Banner ── */}
+            {activeBatchItemIndex !== null && (
+              <div className="batch-edit-banner" style={{
+                background: 'rgba(214, 0, 54, 0.15)',
+                borderBottom: '1px solid var(--accent-primary)',
+                padding: '12px 20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: '12px',
-                boxShadow: '0 8px 32px rgba(214, 0, 54, 0.15)'
-              }} className="fade-in">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                  <Wand2 size={20} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
-                  <div style={{ minWidth: 0, textAlign: 'left' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>Batch Designing Mode</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      Designing for: {batchData.fileName}
-                    </div>
-                  </div>
+                color: 'var(--text-primary)',
+                zIndex: 100
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                  <div style={{
+                    width: '8px', height: '8px', borderRadius: '50%',
+                    background: 'var(--accent-primary)',
+                    animation: 'pulse 1.5s infinite'
+                  }} />
+                  <span style={{ fontSize: '13px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    Editing Batch QR Style: Item {batchItems[activeBatchItemIndex]?.filename || `No. ${activeBatchItemIndex + 1}`}
+                  </span>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                  <button
+                  <button 
                     onClick={() => {
-                      setIsBatchDesignMode(false);
-                      setBatchData(null);
-                      resetGenerator();
-                      showToast('Batch design cancelled', 'info');
+                      const updated = [...batchItems];
+                      updated[activeBatchItemIndex] = {
+                        ...updated[activeBatchItemIndex],
+                        style: getSnapshot()
+                      };
+                      setBatchItems(updated);
+                      setActiveBatchItemIndex(null);
+                      navigateTo('batch');
+                    }}
+                    style={{
+                      background: 'var(--accent-gradient)',
+                      border: 'none',
+                      color: 'white',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Apply to Item
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const currentStyle = getSnapshot();
+                      const updated = batchItems.map(item => ({
+                        ...item,
+                        style: currentStyle
+                      }));
+                      setBatchItems(updated);
+                      setActiveBatchItemIndex(null);
+                      navigateTo('batch');
                     }}
                     style={{
                       background: 'var(--bg-hover)',
                       border: '1px solid var(--border-color)',
-                      borderRadius: '8px',
+                      color: 'var(--text-primary)',
                       padding: '6px 12px',
-                      fontSize: '11px',
-                      fontWeight: 700,
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Apply to All
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setActiveBatchItemIndex(null);
+                      navigateTo('batch');
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
                       color: 'var(--text-secondary)',
+                      padding: '6px 10px',
+                      fontSize: '12px',
+                      fontWeight: 600,
                       cursor: 'pointer'
                     }}
                   >
                     Cancel
                   </button>
-                  <button
-                    onClick={() => {
-                      setIsBatchModalOpen(true);
-                    }}
-                    style={{
-                      background: 'var(--accent-gradient)',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '6px 12px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: 'white',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 12px var(--accent-glow)'
-                    }}
-                  >
-                    Export Batch
-                  </button>
                 </div>
               </div>
             )}
-
             {/* ── QR Preview Card (always visible) ── */}
             <ErrorBoundary>
               <section className="qr-preview-card">
@@ -3264,80 +3267,6 @@ export default function App() {
 
             {/* ── Tab Panel Content ── */}
             <section className="tab-panel-area">
-              {/* Templates Tab */}
-              {activeTab === 'templates' && (
-                <div className="tab-panel fade-in" id="panel-templates">
-                  <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '24px 20px 100px 20px' }}>
-                    <div style={{ marginBottom: '16px' }}>
-                      <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 700 }}>Premium Templates</h4>
-                      <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)' }}>Instantly apply pre-designed professional styles</p>
-                    </div>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      {QR_TEMPLATES.map(tpl => (
-                        <div 
-                          key={tpl.id}
-                          onClick={() => applyTemplate(tpl)}
-                          style={{
-                            background: 'var(--bg-elevated)',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '16px',
-                            padding: '16px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.borderColor = 'var(--accent-primary)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.borderColor = 'var(--border-color)';
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            {/* Template Swatch Preview */}
-                            <div style={{
-                              width: '36px',
-                              height: '36px',
-                              borderRadius: '10px',
-                              background: tpl.gradientEnabled 
-                                ? `linear-gradient(135deg, ${tpl.gradientColor1}, ${tpl.gradientColor2})` 
-                                : tpl.qrColor,
-                              border: '1px solid var(--border-color)'
-                            }} />
-                            <div style={{ textAlign: 'left' }}>
-                              <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>{tpl.name}</div>
-                              <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textTransform: 'capitalize' }}>
-                                {tpl.dotStyle} dots • {tpl.frameStyle} frame
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <button
-                            style={{
-                              background: 'var(--bg-hover)',
-                              border: 'none',
-                              borderRadius: '8px',
-                              padding: '6px 12px',
-                              color: 'var(--text-primary)',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            Apply
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Content Tab */}
               {activeTab === 'content' && (
                 <div className="tab-panel fade-in" id="panel-content">
@@ -4196,92 +4125,6 @@ export default function App() {
                           <EyeStyleSelector value={eyeStyle} onChange={setEyeStyle} qrParams={qrParams} />
                         </div>
                       )}
-                      {shapePopup === 'frames' && (
-                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          <div className="form-group">
-                            <label className="form-label">Frame Style</label>
-                            <select 
-                              className="form-select" 
-                              value={frameStyle} 
-                              onChange={(e) => {
-                                setFrameStyle(e.target.value);
-                                if (e.target.value !== 'none') {
-                                  setCanvasSelection('frame-text');
-                                }
-                              }}
-                            >
-                              <option value="none">None</option>
-                              <option value="solid">Solid Box</option>
-                              <option value="rounded">Rounded Box</option>
-                              <option value="pill">Pill Box</option>
-                              <option value="outline">Outline Box</option>
-                              <option value="underline">Underline</option>
-                              <option value="ribbon">Ribbon Sticker</option>
-                              <option value="glow">Neon Glow</option>
-                              <option value="brackets">Brackets Frame</option>
-                              <option value="hexagon">Hexagon</option>
-                              <option value="dots">Dots Frame</option>
-                            </select>
-                          </div>
-
-                          {frameStyle !== 'none' && (
-                            <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                              <div className="form-group">
-                                <label className="form-label">Frame Text / Sticker Label</label>
-                                <input
-                                  type="text"
-                                  className="form-input"
-                                  placeholder="e.g. SCAN ME"
-                                  value={frameText}
-                                  onChange={(e) => setFrameText(e.target.value)}
-                                />
-                              </div>
-
-                              <div style={{ display: 'flex', gap: '12px' }}>
-                                <div style={{ flex: 1 }}>
-                                  <label className="form-label" style={{ fontSize: '11px', marginBottom: '6px' }}>Border / Frame Color</label>
-                                  <ColorPicker value={frameColor || qrColor} onChange={setFrameColor} onOpenAdvanced={handleOpenAdv} />
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                  <label className="form-label" style={{ fontSize: '11px', marginBottom: '6px' }}>Font Family</label>
-                                  <select className="form-select" value={frameFont} onChange={(e) => setFrameFont(e.target.value)}>
-                                    <option value="Inter">Inter</option>
-                                    <option value="Outfit">Outfit</option>
-                                    <option value="monospace">Monospace</option>
-                                    <option value="Georgia">Serif</option>
-                                  </select>
-                                </div>
-                              </div>
-
-                              <Slider 
-                                label="Text Size" 
-                                value={frameSize} 
-                                min={0.05} 
-                                max={0.2} 
-                                step={0.01} 
-                                onChange={setFrameSize} 
-                              />
-
-                              <Slider 
-                                label="Frame Rotation" 
-                                value={frameRotation} 
-                                min={0} 
-                                max={360} 
-                                step={5} 
-                                onChange={setFrameRotation} 
-                              />
-                              
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>Position</span>
-                                <div className="seg-control" style={{ width: '150px', height: '32px' }}>
-                                  <button className={`seg-btn ${framePosition === 'top' ? 'active' : ''}`} onClick={() => setFramePosition('top')}>Top</button>
-                                  <button className={`seg-btn ${framePosition === 'bottom' ? 'active' : ''}`} onClick={() => setFramePosition('bottom')}>Bottom</button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
                 ) : (
@@ -4300,7 +4143,6 @@ export default function App() {
                         <>
                           <button className="text-toolbar-btn" onClick={() => startEditing('shapes', 'dots')}><QRDotsIcon /><span>Dots</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('shapes', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('shapes', 'frames')}><LayoutGrid size={18} /><span>Frames</span></button>
                         </>
                       )}
                       {activeTab === 'logo' && (
@@ -4365,12 +4207,8 @@ export default function App() {
         ) : activePage === 'home' ? (
           <HomePage 
             onNavigate={(page) => {
-              if (page === 'batch') {
-                setIsBatchModalOpen(true);
-              } else {
-                if (page === 'generator') resetGenerator();
-                navigateTo(page);
-              }
+              if (page === 'generator') resetGenerator();
+              navigateTo(page);
             }}
             onQuickCreate={(type) => {
               resetGenerator();
@@ -4389,13 +4227,16 @@ export default function App() {
           />
         ) : activePage === 'saved' ? (
           <SavedPage onLoadQR={handleLoadQR} onNavigate={navigateTo} />
+        ) : activePage === 'batch' ? (
+          <BatchPage
+            onNavigate={navigateTo}
+            activeGeneratorStyle={getActiveStyle()}
+            setBatchItems={setBatchItems}
+            batchItems={batchItems}
+            onEditBatchItemStyle={handleEditBatchItemStyle}
+          />
         ) : activePage === 'settings' ? (
           <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
-        ) : activePage === 'secure' ? (
-          <SecureQRViewer 
-            encryptedData={new URLSearchParams(location.search).get('d') || ''} 
-            onBack={() => navigateTo('home')} 
-          />
         ) : (
           <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} />
         )}
@@ -4504,42 +4345,6 @@ export default function App() {
             </div>
             <div className="modal-content">
               <QRDataInput type={qrType} data={qrData} onChange={(newData) => { generatorIsDirtyRef.current = true; setQrData(newData); }} />
-              
-              <div style={{
-                marginTop: '20px',
-                paddingTop: '20px',
-                borderTop: '1px solid var(--border-color)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {isSecureLocked ? <Lock size={18} style={{ color: 'var(--accent-primary)' }} /> : <Unlock size={18} style={{ color: 'var(--text-secondary)' }} />}
-                    <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>Password Protection</span>
-                  </div>
-                  <Toggle checked={isSecureLocked} onChange={(checked) => {
-                    setIsSecureLocked(checked);
-                    if (!checked) setSecurePassword('');
-                  }} />
-                </div>
-                
-                {isSecureLocked && (
-                  <div className="form-group fade-in" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontSize: '11px' }}>Secret Password</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Enter decryption password..."
-                      value={securePassword}
-                      onChange={(e) => setSecurePassword(e.target.value)}
-                    />
-                    <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '4px' }}>
-                      Scanners must input this password to view content.
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
             <button className="modal-done-btn" onClick={() => setIsDataModalOpen(false)}>
               Update QR Code
@@ -4547,96 +4352,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      {/* ── Batch QR Modal ── */}
-      <BatchQRModal 
-        isOpen={isBatchModalOpen} 
-        onClose={() => setIsBatchModalOpen(false)} 
-        preloadedBatchData={batchData}
-        onStartDesignMode={(data, firstRowValue) => {
-          setBatchData(data);
-          setIsBatchDesignMode(true);
-          setQrType('text');
-          setQrData({ text: firstRowValue });
-          setIsBatchModalOpen(false);
-          navigateTo('generator');
-          showToast('Batch design mode active! Customize this template.', 'info');
-        }}
-        onUpdateBatchConfig={(newCol) => {
-          setBatchData(prev => prev ? { ...prev, selectedColumn: newCol } : null);
-        }}
-        qrOptions={{
-          qrColor,
-          bgColor,
-          bgTransparent,
-          dotStyle,
-          eyeStyle,
-          eyeColor,
-          eyeOuterColor,
-          syncEyes,
-          gradientEnabled,
-          gradientColor1,
-          gradientColor2,
-          gradientType,
-          logo,
-          logoWidth,
-          logoHeight,
-          logoPadding,
-          logoBackground,
-          logoBgColor,
-          logoBgShape,
-          logoOutline,
-          logoOutlineColor,
-          logoOutlineWidth,
-          logoOutlineOpacity,
-          logoPosX,
-          logoPosY,
-          logoOpacity,
-          logoRotation,
-          logoShadowEnabled,
-          logoShadowColor,
-          logoShadowBlur,
-          logoShadowOffsetX,
-          logoShadowOffsetY,
-          logoInnerShadowEnabled,
-          logoEraseColorEnabled,
-          logoEraseColor,
-          logoEraseTolerance,
-          logoEraseSmoothing,
-          logoTexture,
-          logoCrop,
-          frameStyle,
-          frameText,
-          frameColor,
-          frameFont,
-          frameSize,
-          frameStrokeEnabled,
-          frameStrokeWidth,
-          frameStrokeColor,
-          frameShadowEnabled,
-          frameShadowBlur,
-          frameShadowColor,
-          framePosition,
-          frameRotation,
-          textCenterEnabled,
-          textCenterText,
-          textCenterSize,
-          textCenterColor,
-          textCenterFont,
-          textCenterStrokeEnabled,
-          textCenterStrokeWidth,
-          textCenterStrokeColor,
-          textCenterShadowEnabled,
-          textCenterShadowBlur,
-          textCenterShadowColor,
-          textCenterPosX,
-          textCenterPosY,
-          textCenterRotation,
-          textCenterWidth,
-          textCenterHeight,
-          ecLevel: errorLevel
-        }}
-      />
 
       {/* Toast */}
       {toast && (

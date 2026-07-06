@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2, Star } from 'lucide-react';
+import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2, Star, FileSpreadsheet } from 'lucide-react';
 import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
 import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved } from '../utils/storage';
 import AppIcon from './AppIcon';
@@ -164,54 +164,53 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
                   <button 
                     onClick={() => onNavigate('generator')}
                     style={{
-                      flex: 1,
                       backgroundColor: '#fff',
                       color: '#D60036',
                       border: 'none',
                       borderRadius: '10px',
-                      padding: '10px 12px',
-                      fontSize: '13px',
+                      padding: '10px 14px',
+                      fontSize: '14px',
                       fontWeight: 700,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '4px',
+                      gap: '6px',
                       cursor: 'pointer',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                       transition: 'transform 0.2s',
+                      flex: 1,
                       whiteSpace: 'nowrap',
                       zIndex: 1
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                   >
-                    <Plus size={14} /> Single QR
+                    <Plus size={16} /> Create
                   </button>
-
                   <button 
                     onClick={() => onNavigate('batch')}
                     style={{
-                      flex: 1,
-                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
                       color: '#fff',
-                      border: '1px solid rgba(255, 255, 255, 0.4)',
+                      border: '1px solid rgba(255, 255, 255, 0.25)',
                       borderRadius: '10px',
-                      padding: '10px 12px',
-                      fontSize: '13px',
+                      padding: '10px 14px',
+                      fontSize: '14px',
                       fontWeight: 700,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '4px',
+                      gap: '6px',
                       cursor: 'pointer',
                       transition: 'transform 0.2s',
+                      flex: 1,
                       whiteSpace: 'nowrap',
                       zIndex: 1
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                   >
-                    <FileText size={14} /> Batch QR
+                    <FileSpreadsheet size={16} /> Batch
                   </button>
                 </div>
               </div>
