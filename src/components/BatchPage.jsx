@@ -20,7 +20,7 @@ async function saveZipNative(base64Data, filename) {
   await Share.share({
     title: 'Mushi Qr Pro - Batch Export',
     url: savedFile.uri,
-    dialogTitle: 'Save or Share your Batch QR ZIP',
+    dialogTitle: 'Save or Share your Bulk QR ZIP',
   });
 }
 
@@ -354,7 +354,7 @@ export default function BatchPage({
       {/* Header matching modal styling */}
       <div className="modal-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
         <div className="modal-header-title">
-          <h3 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>Batch QR Generator</h3>
+          <h3 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>Bulk QR Generator</h3>
           <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', margin: 0 }}>Generate multiple branded QR codes at once</p>
         </div>
         <button className="modal-close" onClick={() => onNavigate('home')}>
@@ -555,7 +555,7 @@ export default function BatchPage({
                   <QRThumbnail data={batchItems[0]?.data || "Preview"} style={batchItems[0]?.style || activeGeneratorStyle} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Batch QR Style Template</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Bulk QR Style Template</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Click edit to customize the style of all QRs</div>
                 </div>
                 <button
@@ -738,7 +738,7 @@ export default function BatchPage({
                       fontSize: '13px',
                       color: exportProgress > 50 ? '#FFFFFF' : 'var(--text-primary)'
                     }}>
-                      Exporting Batch QR... {exportProgress}%
+                      Exporting Bulk QR... {exportProgress}%
                     </span>
                   </div>
                 ) : (

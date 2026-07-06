@@ -72,6 +72,7 @@ import HomePage from './components/HomePage';
 import SavedPage from './components/SavedPage';
 import SettingsPage from './components/SettingsPage';
 import BatchPage from './components/BatchPage';
+import BarcodePage from './components/BarcodePage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
@@ -606,6 +607,7 @@ export default function App() {
     if (path === '/history') return 'history';
     if (path === '/scanner') return 'scanner';
     if (path === '/batch') return 'batch';
+    if (path === '/barcode') return 'barcode';
     return 'home';
   };
 
@@ -705,6 +707,7 @@ export default function App() {
   const [qrData, setQrData] = useState({ url: 'https://example.com' });
   const [errorLevel, setErrorLevel] = useState('M');
   const [loadedItemId, setLoadedItemId] = useState(null);
+  const [loadedBarcodeItem, setLoadedBarcodeItem] = useState(null);
   const [launchedDirectlyToScanner, setLaunchedDirectlyToScanner] = useState(false);
   // Tracks whether the user has meaningfully changed the QR generator since it was last reset/loaded
   const generatorIsDirtyRef = useRef(false);
@@ -946,6 +949,7 @@ export default function App() {
     else if (page === 'history') path = '/history';
     else if (page === 'scanner') path = '/scanner';
     else if (page === 'batch') path = '/batch';
+    else if (page === 'barcode') path = '/barcode';
 
     if (location.pathname !== path) {
       navigate(path);
@@ -1608,6 +1612,12 @@ export default function App() {
   // ── Load QR ──
   const handleLoadQR = (item) => {
     if (!item) return;
+    
+    if (item.qrType === 'BARCODE') {
+      setLoadedBarcodeItem(item);
+      navigateTo('barcode');
+      return;
+    }
     
     ignoreDirtyRef.current = true;
     generatorIsDirtyRef.current = false;
@@ -4219,6 +4229,13 @@ export default function App() {
             setBatchItems={setBatchItems}
             batchItems={batchItems}
             onEditBatchItemStyle={handleEditBatchItemStyle}
+          />
+        ) : activePage === 'barcode' ? (
+          <BarcodePage 
+            onNavigate={navigateTo} 
+            showToast={showToast} 
+            loadedBarcodeItem={loadedBarcodeItem}
+            setLoadedBarcodeItem={setLoadedBarcodeItem}
           />
         ) : activePage === 'settings' ? (
           <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />

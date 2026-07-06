@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
+import { Html5Qrcode } from 'html5-qrcode';
 
 const parseQRData = (text) => {
   if (!text) return { type: 'Text', icon: FileText, title: 'Text Content', action: 'Copy Text', actionIcon: Copy };
@@ -21,20 +22,6 @@ const parseQRData = (text) => {
   if (/^https?:\/\//i.test(t) || /^www\./i.test(t) || /^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.[a-z]{2,}(\/.*)?$/i.test(t))
     return { type: 'Website', icon: Globe, title: 'Website', action: 'Open Link', actionIcon: ExternalLink };
   return { type: 'Text', icon: FileText, title: 'Text Content', action: 'Copy Text', actionIcon: Copy };
-};
-
-// Dynamically load QrScanner CDN
-const loadQrScanner = async () => {
-  if (window.QrScanner) return window.QrScanner;
-  try {
-    const module = await import('https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js');
-    const QrScannerLib = module.default;
-    QrScannerLib.WORKER_PATH = 'https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner-worker.min.js';
-    window.QrScanner = QrScannerLib;
-    return QrScannerLib;
-  } catch (err) {
-    throw new Error('Failed to load QR scanner library.');
-  }
 };
 
 export default function QRScanner({ onBack, navigateTo }) {
@@ -52,7 +39,6 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [videoPlaying, setVideoPlaying] = useState(false);
 
   const qrScannerRef = useRef(null);
-  const videoRef = useRef(null);
   const fileInputRef = useRef(null);
   const mountedRef = useRef(true);
   const busyRef = useRef(false);
@@ -66,6 +52,23 @@ export default function QRScanner({ onBack, navigateTo }) {
     }
   }, []);
 
+  const playBeep = useCallback(() => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.12);
+    } catch (e) {
+      console.warn("Failed to play scan sound:", e);
+    }
+  }, []);
+
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
   const stopScanner = useCallback(async () => {
@@ -73,11 +76,17 @@ export default function QRScanner({ onBack, navigateTo }) {
     const scanner = qrScannerRef.current;
     if (scanner) {
       try {
-        scanner.destroy();
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
       } catch (e) {
-        console.warn('Error destroying scanner:', e);
+        console.warn('Error stopping scanner:', e);
       }
       qrScannerRef.current = null;
+    }
+    const container = document.getElementById("qr-scanner-viewport");
+    if (container) {
+      container.innerHTML = "";
     }
     setZoomCapabilities(null);
     setFlashOn(false);
@@ -95,9 +104,9 @@ export default function QRScanner({ onBack, navigateTo }) {
   const safeBack = useCallback(() => { triggerHapticFeedback(); stopScanner(); if (onBack) onBack(); }, [stopScanner, onBack, triggerHapticFeedback]);
 
   const applyZoom = useCallback(async (value) => {
-    if (!videoRef.current) return;
     try {
-      const stream = videoRef.current.srcObject;
+      const videoElement = document.querySelector("#qr-scanner-viewport video");
+      const stream = videoElement?.srcObject;
       const track = stream?.getVideoTracks()?.[0];
       if (track) {
         const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
@@ -122,19 +131,18 @@ export default function QRScanner({ onBack, navigateTo }) {
 
   const toggleFlash = useCallback(async () => {
     triggerHapticFeedback();
-    const scanner = qrScannerRef.current;
-    if (!scanner) return;
-    const next = !flashOn;
-    
     try {
-      if (next) {
-        await scanner.turnFlashOn();
-      } else {
-        await scanner.turnFlashOff();
-      }
+      const videoElement = document.querySelector("#qr-scanner-viewport video");
+      const stream = videoElement?.srcObject;
+      const track = stream?.getVideoTracks()?.[0];
+      if (!track) return;
+      const next = !flashOn;
+      await track.applyConstraints({
+        advanced: [{ torch: next }]
+      });
       setFlashOn(next);
     } catch (err) {
-      console.error('Flash toggle error:', err);
+      console.error('Torch toggle error:', err);
     }
   }, [flashOn, triggerHapticFeedback]);
 
@@ -142,6 +150,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     if (!mountedRef.current || busyRef.current) return;
     setStatus(prev => {
       if (prev === 'DETECTED') return prev;
+      playBeep();
       if (Capacitor.isNativePlatform()) { Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => { }); }
       else if (navigator.vibrate) { navigator.vibrate(200); }
 
@@ -196,37 +205,33 @@ export default function QRScanner({ onBack, navigateTo }) {
       await stopScanner();
       if (!mountedRef.current) { busyRef.current = false; return; }
 
-      const QrScannerLib = await loadQrScanner();
-      if (!mountedRef.current) { busyRef.current = false; return; }
-      if (!videoRef.current) throw new Error('Video element not found.');
+      const scanner = new Html5Qrcode("qr-scanner-viewport");
+      qrScannerRef.current = scanner;
 
-      const scanner = new QrScannerLib(
-        videoRef.current,
-        (res) => {
-          const text = typeof res === 'object' ? res.data : res;
-          handleScanResult(text);
-        },
+      await scanner.start(
+        { facingMode: "environment" },
         {
-          preferredCamera: 'environment',
-          highlightScanRegion: true,
-          maxScansPerSecond: 10,
-          videoConstraints: {
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+          fps: 15,
+          qrbox: (width, height) => {
+            return { width: Math.min(width, height) * 0.85, height: Math.min(width, height) * 0.55 };
           },
-        }
+          aspectRatio: 1.333333
+        },
+        (decodedText) => {
+          handleScanResult(decodedText);
+        },
+        () => {}
       );
 
-      qrScannerRef.current = scanner;
-      await scanner.start();
-
+      setVideoPlaying(true);
       if (!mountedRef.current) { busyRef.current = false; return; }
       capTimersRef.current.forEach(clearTimeout);
       capTimersRef.current = [];
 
       const checkCapabilities = () => {
         try {
-          const stream = videoRef.current?.srcObject;
+          const videoElement = document.querySelector("#qr-scanner-viewport video");
+          const stream = videoElement?.srcObject;
           const track = stream?.getVideoTracks()?.[0];
           if (track) {
             const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
@@ -240,36 +245,25 @@ export default function QRScanner({ onBack, navigateTo }) {
               setZoom(prev => prev === 1 ? (caps.zoom.min || 1) : prev);
             } else {
               setHasHardwareZoom(false);
-              // Fallback zoom capabilities so the slider is always rendered in WebViews
               setZoomCapabilities({
                 min: 1,
                 max: 4,
                 step: 0.1
               });
             }
-            scanner.hasFlash().then(hasFlash => {
-              if (hasFlash || (Capacitor.isNativePlatform() && facingBack)) {
-                setFlashSupported(true);
-              }
-            }).catch(() => {
-              if (Capacitor.isNativePlatform() && facingBack) {
-                setFlashSupported(true);
-              }
-            });
+            if (caps.torch) {
+              setFlashSupported(true);
+            }
           }
         } catch (e) {
           console.warn('Failed to check capabilities:', e);
-          if (Capacitor.isNativePlatform() && facingBack) {
-            setFlashSupported(true);
-          }
         }
       };
 
       checkCapabilities();
       const t1 = setTimeout(checkCapabilities, 500);
       const t2 = setTimeout(checkCapabilities, 1000);
-      const t3 = setTimeout(checkCapabilities, 2000);
-      capTimersRef.current.push(t1, t2, t3);
+      capTimersRef.current.push(t1, t2);
 
       busyRef.current = false;
       setStatus('SCANNING');
@@ -277,14 +271,14 @@ export default function QRScanner({ onBack, navigateTo }) {
       busyRef.current = false;
       if (!mountedRef.current) return;
       let msg = 'Failed to start camera.';
-      const m = typeof err?.message === 'string' ? err.message : '';
+      const m = typeof err?.message === 'string' ? err.message : typeof err === 'string' ? err : '';
       if (m.includes('NotAllowed') || m.includes('Permission')) msg = 'Camera permission denied. Please allow camera access in Settings.';
       else if (m.includes('NotReadable') || m.includes('in use')) msg = 'Camera is in use by another app.';
       else if (m.includes('NotFound')) msg = 'No camera found on this device.';
       else if (m) msg = m;
       setError(msg); setStatus('ERROR'); await stopScanner();
     }
-  }, [facingBack, stopScanner, handleScanResult]);
+  }, [stopScanner, handleScanResult]);
 
   useEffect(() => { const t = setTimeout(() => { if (mountedRef.current) startScanner(); }, 200); return () => clearTimeout(t); }, []); // eslint-disable-line
 
@@ -292,12 +286,11 @@ export default function QRScanner({ onBack, navigateTo }) {
     if (!file) return;
     await stopScanner(); setStatus('LOADING'); setResult(null); setQrTypeData(null); setError(null);
     try {
-      const QrScannerLib = await loadQrScanner();
-      const res = await QrScannerLib.scanImage(file, { returnDetailedScanResult: true });
-      const text = typeof res === 'object' ? res.data : res;
-      if (mountedRef.current) handleScanResult(text);
-    } catch {
-      if (mountedRef.current) { setError('No QR code found in this image.'); setStatus('ERROR'); }
+      const scanner = new Html5Qrcode("qr-scanner-viewport", false);
+      const decodedText = await scanner.scanFile(file, true);
+      if (mountedRef.current) handleScanResult(decodedText);
+    } catch (err) {
+      if (mountedRef.current) { setError('No QR code or barcode found in this image.'); setStatus('ERROR'); }
     }
   };
 
@@ -379,7 +372,7 @@ export default function QRScanner({ onBack, navigateTo }) {
 
   const captureImage = useCallback(async () => {
     triggerHapticFeedback();
-    const video = videoRef.current;
+    const video = document.querySelector("#qr-scanner-viewport video");
     if (!video) return;
     try {
       const canvas = document.createElement('canvas');
@@ -398,15 +391,14 @@ export default function QRScanner({ onBack, navigateTo }) {
         }
         const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
         try {
-          const QrScannerLib = await loadQrScanner();
-          const res = await QrScannerLib.scanImage(file, { returnDetailedScanResult: true });
-          const text = typeof res === 'object' ? res.data : res;
+          const scanner = new Html5Qrcode("qr-scanner-viewport", false);
+          const decodedText = await scanner.scanFile(file, true);
           if (mountedRef.current) {
-            handleScanResult(text);
+            handleScanResult(decodedText);
           }
         } catch {
           if (mountedRef.current) {
-            setError('No QR code found in the captured image.');
+            setError('No QR code or barcode found in the captured image.');
             setStatus('ERROR');
           }
         }
@@ -489,27 +481,7 @@ export default function QRScanner({ onBack, navigateTo }) {
 
           {/* Scanner Frame */}
           <div className={`qrs-frame ${status === 'DETECTED' ? 'detected' : ''}`}>
-            {/* 3:4 Ratio Frame Viewport */}
-            <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`}>
-              <video
-                ref={videoRef}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  opacity: videoPlaying ? 1 : 0,
-                  visibility: videoPlaying ? 'visible' : 'hidden',
-                  transition: 'opacity 0.2s ease-in-out',
-                  transform: !hasHardwareZoom && zoom > 1 ? `scale(${zoom})` : 'none',
-                  transformOrigin: 'center center',
-                }}
-                muted
-                playsInline
-                autoPlay
-                onPlay={() => setVideoPlaying(true)}
-                onPlaying={() => setVideoPlaying(true)}
-              />
-            </div>
+            <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`} />
 
 
 

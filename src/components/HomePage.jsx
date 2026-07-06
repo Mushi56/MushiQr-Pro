@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2, Star, FileSpreadsheet } from 'lucide-react';
+import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, ChevronLeft, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2, Star, FileSpreadsheet, Barcode } from 'lucide-react';
 import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
+import { renderBarcode } from '../utils/barcodeEngine';
 import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved } from '../utils/storage';
 import AppIcon from './AppIcon';
 
@@ -48,9 +49,111 @@ function HeroQRCanvas() {
   );
 }
 
+function HeroQRCanvasBatch() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    // Generate a clean batch matrix
+    const demoMatrixInfo = generateQRMatrix("Batch QR", 'H');
+    if (!demoMatrixInfo) return;
+
+    const options = {
+      ...demoMatrixInfo,
+      bgColor: 'transparent',
+      bgTransparent: true,
+      qrColor: '#FFFFFF',
+      eyeColor: '#FFFFFF',
+      eyeOuterColor: '#FFFFFF',
+      logo: null,
+      textCenterEnabled: false,
+      textCenter: null,
+      frameStyle: 'none',
+      quietZone: 0,
+      size: 360,
+      dotStyle: 'dots',         // Different dot style for visual distinction
+      eyeStyle: 'circle'        // Different eye style for visual distinction
+    };
+
+    renderQR(canvasRef.current, options);
+  }, []);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      width="360" 
+      height="360" 
+      style={{ 
+        width: '80px', 
+        height: '80px', 
+        display: 'block'
+      }} 
+    />
+  );
+}
+
+function HeroBarcodeCanvas() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    renderBarcode(canvasRef.current, "BARCODE-PRO", {
+      barColor: '#FFFFFF',
+      bgColor: 'transparent',
+      barWidth: 2,
+      height: 60,
+      margin: 10,
+      displayValue: false
+    });
+  }, []);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      style={{ 
+        width: '80px', 
+        height: '60px', 
+        display: 'block'
+      }} 
+    />
+  );
+}
+
 export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
   const [recentItems, setRecentItems] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
+  const [activeSlide, setActiveSlide] = useState(0);
+  const slideCount = 3;
+
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (diff > 50) {
+      setActiveSlide(prev => (prev + 1) % slideCount);
+    } else if (diff < -50) {
+      setActiveSlide(prev => (prev - 1 + slideCount) % slideCount);
+    }
+  };
+
+  useEffect(() => {
+    if (activePage !== 'home') return;
+    const interval = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % slideCount);
+    }, 5500);
+    return () => clearInterval(interval);
+  }, [activePage]);
 
   useEffect(() => {
     if (activePage === 'home') {
@@ -116,121 +219,269 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
       position: 'relative'
     }}>
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up">
-        {/* Hero Card */}
-        <div style={{ padding: '0 var(--main-padding-x)', marginTop: '24px' }}>
-          <div style={{ 
-            background: 'linear-gradient(135deg, #8B0020 0%, #D60036 45%, #FF2D5E 100%)',
-            borderRadius: '12px',
-            padding: '20px 18px',
-            color: '#fff',
+        {/* Sliding Hero Cards Section */}
+        <div 
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{ position: 'relative', overflow: 'hidden', marginTop: '20px', width: '100%' }}
+        >
+          <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 10px 32px rgba(214, 0, 54, 0.35)',
-            gap: '12px'
+            transform: `translateX(-${activeSlide * 100}%)`,
+            transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+            width: '100%'
           }}>
-            {/* Decorative circles for depth */}
-            <div style={{
-              position: 'absolute', top: '-20px', right: '70px',
-              width: '80px', height: '80px', borderRadius: '50%',
-              background: 'rgba(255,255,255,0.07)', pointerEvents: 'none'
-            }} />
-            <div style={{
-              position: 'absolute', bottom: '-24px', right: '10px',
-              width: '100px', height: '100px', borderRadius: '50%',
-              background: 'rgba(255,255,255,0.06)', pointerEvents: 'none'
-            }} />
+            {/* Slide 1: Single QR */}
+            <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #8B0020 0%, #D60036 45%, #FF2D5E 100%)',
+                borderRadius: '18px',
+                padding: '24px 20px',
+                color: '#fff',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 10px 32px rgba(214, 0, 54, 0.3)',
+                gap: '12px',
+                height: '140px'
+              }}>
+                <div style={{
+                  position: 'absolute', top: '-20px', right: '70px',
+                  width: '80px', height: '80px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.07)', pointerEvents: 'none'
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: '-24px', right: '10px',
+                  width: '100px', height: '100px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.06)', pointerEvents: 'none'
+                }} />
 
-            <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: 'fit-content', alignItems: 'stretch' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
-                  <h2 style={{ 
-                    fontSize: '21px', fontWeight: 800, 
-                    margin: 0, color: '#fff',
-                    lineHeight: 1.1, whiteSpace: 'nowrap',
-                    textAlign: 'left'
-                  }}>Create QR Code</h2>
-                  <p style={{ 
-                    fontSize: '13px', margin: 0, 
-                    color: 'rgba(255,255,255,0.75)',
-                    fontWeight: 500, whiteSpace: 'nowrap',
-                    textAlign: 'left'
-                  }}>Fast, Simple & Beautiful</p>
+                <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+                      <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.1 }}>Single QR Code</h2>
+                      <p style={{ fontSize: '13px', margin: 0, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>Create custom QR codes with styles, logos & frames</p>
+                    </div>
+
+                    <button 
+                      onClick={() => onNavigate('generator')}
+                      style={{
+                        backgroundColor: '#fff',
+                        color: '#D60036',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '10px 20px',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        width: 'fit-content'
+                      }}
+                    >
+                      <Plus size={16} /> Create QR
+                    </button>
+                  </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                  <button 
-                    onClick={() => onNavigate('generator')}
-                    style={{
-                      backgroundColor: '#fff',
-                      color: '#D60036',
-                      border: 'none',
-                      borderRadius: '10px',
-                      padding: '10px 14px',
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                      transition: 'transform 0.2s',
-                      flex: 1,
-                      whiteSpace: 'nowrap',
-                      zIndex: 1
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                  >
-                    <Plus size={16} /> Create
-                  </button>
-                  <button 
-                    onClick={() => onNavigate('batch')}
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                      color: '#fff',
-                      border: '1px solid rgba(255, 255, 255, 0.25)',
-                      borderRadius: '10px',
-                      padding: '10px 14px',
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s',
-                      flex: 1,
-                      whiteSpace: 'nowrap',
-                      zIndex: 1
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                  >
-                    <FileSpreadsheet size={16} /> Batch
-                  </button>
-                </div>
+                <div style={{ 
+                   background: 'rgba(255,255,255,0.15)',
+                   backdropFilter: 'blur(8px)',
+                   width: '90px',
+                   height: '90px',
+                   borderRadius: '12px',
+                   border: '1px solid rgba(255,255,255,0.2)',
+                   flexShrink: 0,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   zIndex: 1
+                 }}>
+                   <HeroQRCanvas />
+                 </div>
               </div>
             </div>
 
-            <div style={{ 
-               background: 'rgba(255,255,255,0.15)',
-               backdropFilter: 'blur(8px)',
-               width: '100px',
-               height: '100px',
-               borderRadius: '6px',
-               border: '1px solid rgba(255,255,255,0.2)',
-               flexShrink: 0,
-               display: 'flex',
-               alignItems: 'center',
-               justifyContent: 'center',
-               zIndex: 1
-             }}>
-               <HeroQRCanvas />
-             </div>
+            {/* Slide 2: Bulk QR */}
+            <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 50%, #6366F1 100%)',
+                borderRadius: '18px',
+                padding: '24px 20px',
+                color: '#fff',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 10px 32px rgba(59, 130, 246, 0.3)',
+                gap: '12px',
+                height: '140px'
+              }}>
+                <div style={{
+                  position: 'absolute', top: '-20px', right: '70px',
+                  width: '80px', height: '80px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.07)', pointerEvents: 'none'
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: '-24px', right: '10px',
+                  width: '100px', height: '100px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.06)', pointerEvents: 'none'
+                }} />
+
+                <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+                      <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.1 }}>Create Bulk QR</h2>
+                      <p style={{ fontSize: '13px', margin: 0, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>Upload CSV/Excel file to generate bulk QR codes</p>
+                    </div>
+
+                    <button 
+                      onClick={() => onNavigate('batch')}
+                      style={{
+                        backgroundColor: '#fff',
+                        color: '#3B82F6',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '10px 20px',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        width: 'fit-content'
+                      }}
+                    >
+                      <FileSpreadsheet size={16} /> Create Bulk QR
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ 
+                   background: 'rgba(255,255,255,0.15)',
+                   backdropFilter: 'blur(8px)',
+                   width: '90px',
+                   height: '90px',
+                   borderRadius: '12px',
+                   border: '1px solid rgba(255,255,255,0.2)',
+                   flexShrink: 0,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   zIndex: 1
+                 }}>
+                   <HeroQRCanvasBatch />
+                 </div>
+              </div>
+            </div>
+
+            {/* Slide 3: Barcode Creator */}
+            <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #0D9488 0%, #0F766E 50%, #115E59 100%)',
+                borderRadius: '18px',
+                padding: '24px 20px',
+                color: '#fff',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 10px 32px rgba(13, 148, 136, 0.3)',
+                gap: '12px',
+                height: '140px'
+              }}>
+                <div style={{
+                  position: 'absolute', top: '-20px', right: '70px',
+                  width: '80px', height: '80px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.07)', pointerEvents: 'none'
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: '-24px', right: '10px',
+                  width: '100px', height: '100px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.06)', pointerEvents: 'none'
+                }} />
+
+                <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+                      <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.1 }}>Barcode Generator</h2>
+                      <p style={{ fontSize: '13px', margin: 0, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>Create standard Code 128 barcodes instantly</p>
+                    </div>
+
+                    <button 
+                      onClick={() => onNavigate('barcode')}
+                      style={{
+                        backgroundColor: '#fff',
+                        color: '#0F766E',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '10px 20px',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        width: 'fit-content'
+                      }}
+                    >
+                      <Barcode size={16} /> Create Barcode
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ 
+                   background: 'rgba(255,255,255,0.15)',
+                   backdropFilter: 'blur(8px)',
+                   width: '90px',
+                   height: '90px',
+                   borderRadius: '12px',
+                   border: '1px solid rgba(255,255,255,0.2)',
+                   flexShrink: 0,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   zIndex: 1
+                 }}>
+                   <HeroBarcodeCanvas />
+                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Controls */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '8px',
+            marginTop: '12px'
+          }}>
+            {[0, 1, 2].map((index) => (
+              <button
+                key={index}
+                onClick={() => setActiveSlide(index)}
+                style={{
+                  width: activeSlide === index ? '20px' : '8px',
+                  height: '8px',
+                  borderRadius: '4px',
+                  background: activeSlide === index ? 'var(--accent-primary)' : 'var(--border-color)',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+            ))}
           </div>
         </div>
 
