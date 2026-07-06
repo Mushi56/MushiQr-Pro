@@ -823,7 +823,7 @@ export default function App() {
   const renderTimeoutRef = useRef(null);
   const tempCanvas = useRef(document.createElement('canvas'));
   const tempCtx = useRef(tempCanvas.current.getContext('2d'));
-  const [qrMatrixInfo, setQrMatrixInfo] = useState(null);
+  const [qrMatrixInfo, setQrMatrixInfo] = useState(() => generateQRMatrix('https://example.com', 'M'));
   const [toast, setToast] = useState(null);
   const [downloadingFormat, setDownloadingFormat] = useState(null);
 
@@ -1823,7 +1823,7 @@ export default function App() {
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, 
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
-    activeTab, canvasSelection, activePage
+    activeTab, canvasSelection
   ]);
 
   useEffect(() => {
@@ -1836,7 +1836,18 @@ export default function App() {
       qrTexture.image.onload = renderCanvas;
       qrTexture.image.onerror = () => showToast('Texture failed to load', 'error');
     }
-  }, [renderCanvas, logo, qrTexture, isLowEndDevice, activePage]);
+  }, [renderCanvas, logo, qrTexture, isLowEndDevice]);
+
+  // Redraw explicitly when entering the generator view to ensure mounting canvas matches current matrix info
+  useEffect(() => {
+    if (activePage === 'generator') {
+      // Small timeout ensures the DOM has updated and canvasRef.current is fully populated
+      const timer = setTimeout(() => {
+        renderCanvas();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [activePage, renderCanvas]);
   const getQRContentArea = useCallback(() => {
     const size = 512;
     const padding = size * 0.03;
