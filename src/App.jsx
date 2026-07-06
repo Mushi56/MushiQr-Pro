@@ -1823,7 +1823,7 @@ export default function App() {
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, 
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
-    activeTab, canvasSelection
+    activeTab, canvasSelection, activePage
   ]);
 
   useEffect(() => {
@@ -1836,7 +1836,7 @@ export default function App() {
       qrTexture.image.onload = renderCanvas;
       qrTexture.image.onerror = () => showToast('Texture failed to load', 'error');
     }
-  }, [renderCanvas, logo, qrTexture]);
+  }, [renderCanvas, logo, qrTexture, isLowEndDevice, activePage]);
   const getQRContentArea = useCallback(() => {
     const size = 512;
     const padding = size * 0.03;
