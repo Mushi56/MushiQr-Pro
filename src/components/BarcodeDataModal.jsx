@@ -1,40 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import {
   X, Check, ChevronRight, Info, Package, ShoppingCart, Truck,
-  BookOpen, Syringe, Mail, Globe, Hash, AlignLeft, Layers, Zap
+  BookOpen, Syringe, Mail, Globe, Hash, AlignLeft, Layers, Zap,
+  Building2, Tag, Key, MapPin, Pill, FileText, Barcode
 } from 'lucide-react';
 
 // ─── Styled Sub-components ──────────────────────────────────────────────────
 
 function FieldLabel({ children, hint }) {
-  return (
-    <div style={{ marginBottom: 6 }}>
-      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-        {children}
-      </span>
-      {hint && (
-        <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 6 }}>— {hint}</span>
-      )}
-    </div>
-  );
+  return null; // Handled directly inside standard-compliant form elements below
 }
 
-function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, width = 1, monospace = false, inputMode = 'text' }) {
+function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, width = 1, monospace = false, inputMode = 'text', Icon }) {
   const [focused, setFocused] = useState(false);
-  const isValid = value.length > 0;
   return (
-    <div style={{ flex: width }}>
-      <FieldLabel hint={hint}>{label}</FieldLabel>
-      <div style={{
-        position: 'relative',
-        background: 'var(--bg-primary)',
-        border: `1.5px solid ${focused ? 'var(--accent-primary)' : isValid ? 'var(--border-color)' : 'var(--border-color)'}`,
-        borderRadius: 12,
-        boxShadow: focused ? '0 0 0 3px var(--accent-soft)' : 'none',
-        transition: 'all 0.2s'
-      }}>
+    <div style={{ flex: width, display: 'flex', flexDirection: 'column' }} className="form-group">
+      {label && (
+        <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+            {label}
+          </span>
+          {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
+        </label>
+      )}
+      <div style={{ position: 'relative', width: '100%' }}>
+        {Icon && (
+          <div style={{
+            position: 'absolute',
+            left: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: focused ? 'var(--accent-primary)' : 'var(--text-muted)',
+            pointerEvents: 'none',
+            zIndex: 5,
+            transition: 'color 0.2s'
+          }}>
+            <Icon size={15} strokeWidth={2.2} />
+          </div>
+        )}
         <input
           type="text"
+          className="form-input"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           maxLength={maxLength}
@@ -43,25 +52,22 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           style={{
-            width: '100%',
-            padding: '11px 14px',
-            background: 'transparent',
-            border: 'none',
-            outline: 'none',
-            color: 'var(--text-primary)',
-            fontSize: 14,
+            paddingLeft: Icon ? '36px' : '14px',
+            paddingRight: maxLength ? '48px' : '14px',
+            fontFamily: monospace ? '"JetBrains Mono", "Fira Code", "Courier New", monospace' : 'inherit',
             fontWeight: 600,
-            fontFamily: monospace ? 'monospace' : 'inherit',
+            fontSize: '13px',
+            height: '42px',
             boxSizing: 'border-box'
           }}
         />
         {maxLength && (
           <span style={{
             position: 'absolute',
-            right: 10,
+            right: '12px',
             top: '50%',
             transform: 'translateY(-50%)',
-            fontSize: 10,
+            fontSize: '9px',
             color: value.length === maxLength ? 'var(--accent-primary)' : 'var(--text-muted)',
             fontWeight: 700
           }}>
@@ -73,20 +79,37 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
   );
 }
 
-function SegmentedTextarea({ label, value, onChange, placeholder, hint, maxLength, rows = 4, monospace = true }) {
+function SegmentedTextarea({ label, value, onChange, placeholder, hint, maxLength, rows = 4, monospace = true, Icon }) {
   const [focused, setFocused] = useState(false);
   return (
-    <div>
-      <FieldLabel hint={hint}>{label}</FieldLabel>
-      <div style={{
-        position: 'relative',
-        background: 'var(--bg-primary)',
-        border: `1.5px solid ${focused ? 'var(--accent-primary)' : 'var(--border-color)'}`,
-        borderRadius: 12,
-        boxShadow: focused ? '0 0 0 3px var(--accent-soft)' : 'none',
-        transition: 'all 0.2s'
-      }}>
+    <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
+      {label && (
+        <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+            {label}
+          </span>
+          {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
+        </label>
+      )}
+      <div style={{ position: 'relative', width: '100%' }}>
+        {Icon && (
+          <div style={{
+            position: 'absolute',
+            left: '12px',
+            top: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: focused ? 'var(--accent-primary)' : 'var(--text-muted)',
+            pointerEvents: 'none',
+            zIndex: 5,
+            transition: 'color 0.2s'
+          }}>
+            <Icon size={15} strokeWidth={2.2} />
+          </div>
+        )}
         <textarea
+          className="form-textarea"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -94,38 +117,17 @@ function SegmentedTextarea({ label, value, onChange, placeholder, hint, maxLengt
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           style={{
-            width: '100%',
-            padding: '11px 14px',
-            background: 'transparent',
-            border: 'none',
-            outline: 'none',
-            resize: 'none',
-            color: 'var(--text-primary)',
-            fontSize: 13,
-            fontWeight: 600,
+            paddingLeft: Icon ? '36px' : '14px',
             fontFamily: monospace ? '"JetBrains Mono", "Fira Code", "Courier New", monospace' : 'inherit',
-            lineHeight: 1.6,
+            fontWeight: 600,
+            fontSize: '13px',
+            lineHeight: 1.5,
             boxSizing: 'border-box'
           }}
         />
         {maxLength && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 14px 8px', gap: 4, alignItems: 'center' }}>
-            <div style={{
-              height: 3,
-              flex: 1,
-              borderRadius: 2,
-              background: 'var(--bg-hover)',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                height: '100%',
-                width: `${Math.min(100, (value.length / maxLength) * 100)}%`,
-                background: value.length > maxLength * 0.9 ? '#FF3B30' : 'var(--accent-primary)',
-                transition: 'width 0.2s, background 0.2s',
-                borderRadius: 2
-              }} />
-            </div>
-            <span style={{ fontSize: 10, fontWeight: 700, color: value.length > maxLength * 0.9 ? '#FF3B30' : 'var(--text-muted)', minWidth: 60, textAlign: 'right' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+            <span style={{ fontSize: '9px', fontWeight: 700, color: value.length > maxLength * 0.9 ? '#FF3B30' : 'var(--text-muted)' }}>
               {value.length}/{maxLength}
             </span>
           </div>
@@ -135,41 +137,65 @@ function SegmentedTextarea({ label, value, onChange, placeholder, hint, maxLengt
   );
 }
 
-function SelectField({ label, value, onChange, options, hint }) {
+function SelectField({ label, value, onChange, options, hint, Icon }) {
   const [focused, setFocused] = useState(false);
   return (
-    <div>
-      <FieldLabel hint={hint}>{label}</FieldLabel>
-      <div style={{
-        position: 'relative',
-        background: 'var(--bg-primary)',
-        border: `1.5px solid ${focused ? 'var(--accent-primary)' : 'var(--border-color)'}`,
-        borderRadius: 12,
-        boxShadow: focused ? '0 0 0 3px var(--accent-soft)' : 'none',
-        transition: 'all 0.2s'
-      }}>
+    <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
+      {label && (
+        <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+            {label}
+          </span>
+          {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
+        </label>
+      )}
+      <div style={{ position: 'relative', width: '100%' }}>
+        {Icon && (
+          <div style={{
+            position: 'absolute',
+            left: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: focused ? 'var(--accent-primary)' : 'var(--text-muted)',
+            pointerEvents: 'none',
+            zIndex: 5,
+            transition: 'color 0.2s'
+          }}>
+            <Icon size={15} strokeWidth={2.2} />
+          </div>
+        )}
         <select
+          className="form-select"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           style={{
-            width: '100%',
-            padding: '11px 36px 11px 14px',
-            background: 'transparent',
-            border: 'none',
-            outline: 'none',
-            color: 'var(--text-primary)',
-            fontSize: 13,
+            paddingLeft: Icon ? '36px' : '14px',
+            paddingRight: '36px',
             fontWeight: 600,
-            cursor: 'pointer',
-            appearance: 'none',
+            fontSize: '13px',
+            height: '42px',
             boxSizing: 'border-box'
           }}
         >
           {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
-        <ChevronRight size={14} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%) rotate(90deg)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+        <div style={{
+          position: 'absolute',
+          right: '12px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          pointerEvents: 'none',
+          color: 'var(--text-muted)'
+        }}>
+          <ChevronRight size={14} style={{ transform: 'rotate(90deg)' }} />
+        </div>
       </div>
     </div>
   );
@@ -177,20 +203,27 @@ function SelectField({ label, value, onChange, options, hint }) {
 
 function TagSelector({ label, value, onChange, options, hint }) {
   return (
-    <div>
-      <FieldLabel hint={hint}>{label}</FieldLabel>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
+      {label && (
+        <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+            {label}
+          </span>
+          {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
+        </label>
+      )}
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {options.map(o => (
           <button
             key={o.value}
             onClick={() => onChange(o.value)}
             style={{
-              padding: '7px 14px',
-              borderRadius: 10,
+              padding: '8px 14px',
+              borderRadius: '10px',
               border: `1.5px solid ${value === o.value ? 'var(--accent-primary)' : 'var(--border-color)'}`,
               background: value === o.value ? 'var(--accent-soft)' : 'var(--bg-primary)',
               color: value === o.value ? 'var(--accent-primary)' : 'var(--text-secondary)',
-              fontSize: 12,
+              fontSize: '12px',
               fontWeight: 700,
               cursor: 'pointer',
               transition: 'all 0.15s'
@@ -303,19 +336,19 @@ function EAN13Form({ fields, setFields }) {
           label="Country Prefix" hint="GS1 region code"
           value={prefix}
           onChange={v => setFields(f => ({ ...f, countryPrefix: v.replace(/\D/g, '').slice(0, 3) }))}
-          maxLength={3} placeholder="400" inputMode="numeric" width={2}
+          maxLength={3} placeholder="400" inputMode="numeric" width={2} Icon={Globe}
         />
         <SegmentedInput
-          label="Manufacturer Code"
+          label="Manufacturer"
           value={mfg}
           onChange={v => setFields(f => ({ ...f, manufacturer: v.replace(/\D/g, '').slice(0, 5) }))}
-          maxLength={5} placeholder="63813" inputMode="numeric" width={3}
+          maxLength={5} placeholder="63813" inputMode="numeric" width={3} Icon={Building2}
         />
         <SegmentedInput
           label="Product Code"
           value={prod}
           onChange={v => setFields(f => ({ ...f, productCode: v.replace(/\D/g, '').slice(0, 4) }))}
-          maxLength={4} placeholder="3393" inputMode="numeric" width={3}
+          maxLength={4} placeholder="3393" inputMode="numeric" width={3} Icon={Tag}
         />
       </div>
       {concat.length === 12 && (
@@ -373,19 +406,19 @@ function UPCAForm({ fields, setFields }) {
           label="Manufacturer Code"
           value={mfg}
           onChange={v => setFields(f => ({ ...f, manufacturer: v.replace(/\D/g, '').slice(0, 5) }))}
-          maxLength={5} placeholder="12345" inputMode="numeric" width={1}
+          maxLength={5} placeholder="12345" inputMode="numeric" width={1} Icon={Building2}
         />
         <SegmentedInput
           label="Product Code"
           value={prod}
           onChange={v => setFields(f => ({ ...f, productCode: v.replace(/\D/g, '').slice(0, 5) }))}
-          maxLength={5} placeholder="67890" inputMode="numeric" width={1}
+          maxLength={5} placeholder="67890" inputMode="numeric" width={1} Icon={Tag}
         />
       </div>
       {concat.length === 11 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'var(--accent-soft)', borderRadius: 10 }}>
           <Check size={14} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-primary)' }}>Check digit: <strong>{check}</strong> → <code style={{ fontFamily: 'monospace' }}>{full}</code></span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-primary)' }}>Check: <strong>{check}</strong> → <code style={{ fontFamily: 'monospace' }}>{full}</code></span>
         </div>
       )}
       <PayloadPreview value={full} isValid={isValid} errorMsg="Need 11 total digits" />
@@ -419,13 +452,13 @@ function EAN8Form({ fields, setFields }) {
           label="Country Prefix" hint="GS1 region"
           value={prefix}
           onChange={v => setFields(f => ({ ...f, countryPrefix: v.replace(/\D/g, '').slice(0, 3) }))}
-          maxLength={3} placeholder="401" inputMode="numeric" width={1}
+          maxLength={3} placeholder="401" inputMode="numeric" width={1} Icon={Globe}
         />
         <SegmentedInput
           label="Product Code"
           value={prod}
           onChange={v => setFields(f => ({ ...f, productCode: v.replace(/\D/g, '').slice(0, 4) }))}
-          maxLength={4} placeholder="2345" inputMode="numeric" width={1}
+          maxLength={4} placeholder="2345" inputMode="numeric" width={1} Icon={Tag}
         />
       </div>
       {concat.length === 7 && (
@@ -461,31 +494,27 @@ function ITF14Form({ fields, setFields }) {
   return (
     <>
       <InfoBox text="ITF-14 encodes a GTIN-14 for shipping cartons. Packaging Indicator (1 digit) + GS1 Company Prefix (6 digits) + Item Reference (6 digits) = 13 digits." type="warn" />
-      <div style={{ display: 'flex', gap: 10 }}>
-        <div style={{ flex: 1 }}>
-          <TagSelector
-            label="Packaging Indicator"
-            value={ind}
-            onChange={v => setFields(f => ({ ...f, indicator: v }))}
-            options={[
-              { value: '0', label: '0' }, { value: '1', label: '1' }, { value: '2', label: '2' },
-              { value: '3', label: '3' }, { value: '4', label: '4' }, { value: '8', label: '8' }, { value: '9', label: '9' }
-            ]}
-          />
-        </div>
-      </div>
+      <TagSelector
+        label="Packaging Indicator"
+        value={ind}
+        onChange={v => setFields(f => ({ ...f, indicator: v }))}
+        options={[
+          { value: '0', label: '0 — Product' }, { value: '1', label: '1 — Box' }, { value: '2', label: '2 — Case' },
+          { value: '3', label: '3 — Pallet' }, { value: '4', label: '4 — Container' }, { value: '8', label: '8 — Reserved' }, { value: '9', label: '9 — Assorted' }
+        ]}
+      />
       <div style={{ display: 'flex', gap: 10 }}>
         <SegmentedInput
           label="GS1 Company Prefix"
           value={gs1}
           onChange={v => setFields(f => ({ ...f, gs1Prefix: v.replace(/\D/g, '').slice(0, 6) }))}
-          maxLength={6} placeholder="001234" inputMode="numeric" width={1}
+          maxLength={6} placeholder="001234" inputMode="numeric" width={1} Icon={Building2}
         />
         <SegmentedInput
           label="Item Reference"
           value={item}
           onChange={v => setFields(f => ({ ...f, itemRef: v.replace(/\D/g, '').slice(0, 6) }))}
-          maxLength={6} placeholder="567890" inputMode="numeric" width={1}
+          maxLength={6} placeholder="567890" inputMode="numeric" width={1} Icon={Tag}
         />
       </div>
       {concat.length === 13 && (
@@ -518,7 +547,7 @@ function UPCEForm({ fields, setFields }) {
         label="Condensed Barcode Body" hint="6 zero-suppressed digits"
         value={body}
         onChange={v => setFields(f => ({ ...f, body: v.replace(/\D/g, '').slice(0, 6) }))}
-        maxLength={6} placeholder="123456" inputMode="numeric"
+        maxLength={6} placeholder="123456" inputMode="numeric" Icon={Hash}
       />
       <PayloadPreview value={full} isValid={isValid} errorMsg="Need number system + 6 digits = 7 chars total" />
     </>
@@ -536,10 +565,11 @@ function Code128Form({ fields, setFields }) {
         label="Barcode Data" hint="full ASCII"
         value={value}
         onChange={v => setFields(f => ({ ...f, data: v }))}
-        placeholder="Enter any alphanumeric text, special chars, URLs, serial numbers…"
+        placeholder="Enter any alphanumeric text, serial numbers, package tags…"
         maxLength={80}
         rows={3}
         monospace
+        Icon={Barcode}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Must contain only ASCII characters" />
     </>
@@ -555,13 +585,14 @@ function Code39Form({ fields, setFields }) {
     <>
       <InfoBox text="Code 39 is an alphanumeric industrial barcode. Supports uppercase A-Z, digits 0-9, and special characters: - . $ / + % (SPACE). Self-checking — no check digit required." type="tip" />
       <SegmentedTextarea
-        label="Barcode Data" hint="uppercase + digits + - . $ / + % space"
+        label="Barcode Data" hint="uppercase + digits + symbols"
         value={value}
         onChange={v => setFields(f => ({ ...f, data: v.toUpperCase() }))}
         placeholder="ITEM-CODE 1234"
         maxLength={43}
         rows={2}
         monospace
+        Icon={Barcode}
       />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {['A-Z', '0-9', '-', '.', '$', '/', '+', '%', 'SPACE'].map(c => (
@@ -589,6 +620,7 @@ function Code93Form({ fields, setFields }) {
         maxLength={48}
         rows={2}
         monospace
+        Icon={Barcode}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Only A-Z, 0-9, and - . $ / + % SPACE allowed" />
     </>
@@ -610,6 +642,7 @@ function DataMatrixForm({ fields, setFields }) {
         maxLength={1000}
         rows={4}
         monospace
+        Icon={FileText}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty or exceed 1000 characters" />
     </>
@@ -631,6 +664,7 @@ function PDF417Form({ fields, setFields }) {
         maxLength={1500}
         rows={5}
         monospace
+        Icon={FileText}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty or exceed 1500 characters" />
     </>
@@ -642,14 +676,14 @@ function CodabarForm({ fields, setFields }) {
   const body = fields.body || '';
   const stop = fields.stop || 'B';
   const full = `${start}${body}${stop}`;
-  const isValid = /^[A-D][0-9\-\$\:\/\.\+]+[A-D]$/.test(full);
+  const isValid = /^[A-D][0-9\-\$\:\/\.\+]+[A-D]$/i.test(full);
 
   return (
     <>
       <InfoBox text="Codabar is used in blood banks, libraries, and photo labs. Start/stop characters define the record boundary. Only digits and - $ : / . + are valid in the body." type="warn" />
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
         <div style={{ flex: 1 }}>
-          <FieldLabel>Start Character</FieldLabel>
+          <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Start Char</label>
           <div style={{ display: 'flex', gap: 6 }}>
             {['A', 'B', 'C', 'D'].map(c => (
               <button
@@ -672,7 +706,7 @@ function CodabarForm({ fields, setFields }) {
           </div>
         </div>
         <div style={{ flex: 1 }}>
-          <FieldLabel>Stop Character</FieldLabel>
+          <label className="form-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Stop Char</label>
           <div style={{ display: 'flex', gap: 6 }}>
             {['A', 'B', 'C', 'D'].map(c => (
               <button
@@ -701,6 +735,7 @@ function CodabarForm({ fields, setFields }) {
         onChange={v => setFields(f => ({ ...f, body: v.replace(/[^0-9\-\$\:\/\.\+]/g, '') }))}
         placeholder="123456"
         monospace
+        Icon={Hash}
       />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {['0-9', '-', '$', ':', '/', '.', '+'].map(c => (
@@ -725,6 +760,7 @@ function Code11Form({ fields, setFields }) {
         onChange={v => setFields(f => ({ ...f, data: v.replace(/[^0-9\-]/g, '') }))}
         placeholder="123-456-789"
         monospace
+        Icon={Hash}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Digits 0-9 and hyphens only" />
     </>
@@ -745,6 +781,7 @@ function MSIForm({ fields, setFields }) {
         placeholder="1234567"
         inputMode="numeric"
         monospace
+        Icon={Hash}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Digits only" />
     </>
@@ -766,6 +803,7 @@ function I25Form({ fields, setFields }) {
         placeholder="12345678"
         inputMode="numeric"
         monospace
+        Icon={Hash}
       />
       {value.length > 0 && !isEven && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px', background: 'rgba(255,149,0,0.1)', border: '1px solid rgba(255,149,0,0.3)', borderRadius: 10 }}>
@@ -809,6 +847,7 @@ function PostalForm({ fields, setFields, type }) {
         placeholder={'0'.repeat(maxLen)}
         inputMode="numeric"
         monospace
+        Icon={MapPin}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg={`Exactly ${maxLen} digits required`} />
     </>
@@ -828,6 +867,7 @@ function RoyalMailForm({ fields, setFields }) {
         onChange={v => setFields(f => ({ ...f, data: v.toUpperCase().replace(/[^A-Z0-9]/g, '') }))}
         placeholder="SN34RD1A"
         monospace
+        Icon={MapPin}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Alphanumeric characters only" />
     </>
@@ -846,9 +886,10 @@ function GS1DataBarForm({ fields, setFields }) {
         value={value}
         onChange={v => setFields(f => ({ ...f, data: v.replace(/\D/g, '').slice(0, 14) }))}
         maxLength={14}
-        placeholder="0101234567890128"
+        placeholder="0100123456789012"
         inputMode="numeric"
         monospace
+        Icon={Hash}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Must be exactly 13 or 14 digits" />
     </>
@@ -870,6 +911,7 @@ function GS1128Form({ fields, setFields }) {
         maxLength={80}
         rows={3}
         monospace
+        Icon={Barcode}
       />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {['(01) GTIN', '(10) Batch', '(11) Prod Date', '(17) Exp Date', '(21) Serial'].map(ai => (
@@ -896,6 +938,7 @@ function TelepenForm({ fields, setFields }) {
         maxLength={69}
         rows={3}
         monospace
+        Icon={Barcode}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="ASCII characters only" />
     </>
@@ -917,6 +960,7 @@ function PharmacodeForm({ fields, setFields }) {
         placeholder="11309"
         inputMode="numeric"
         monospace
+        Icon={Pill}
       />
       {value && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 14px', background: 'var(--bg-primary)', borderRadius: 10, border: '1px solid var(--border-color)' }}>
@@ -957,6 +1001,7 @@ function AztecForm({ fields, setFields }) {
         maxLength={1500}
         rows={4}
         monospace
+        Icon={FileText}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty or exceed 1500 characters" />
     </>
@@ -978,6 +1023,7 @@ function MaxiCodeForm({ fields, setFields }) {
         maxLength={138}
         rows={3}
         monospace
+        Icon={FileText}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot exceed 138 characters" />
     </>
@@ -999,6 +1045,7 @@ function QRCodeForm({ fields, setFields }) {
         maxLength={4296}
         rows={4}
         monospace
+        Icon={FileText}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty" />
     </>
@@ -1019,6 +1066,7 @@ function MicroQRForm({ fields, setFields }) {
         maxLength={35}
         placeholder="MICRO-QR-DATA"
         monospace
+        Icon={Hash}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot exceed 35 characters" />
     </>
@@ -1040,6 +1088,7 @@ function HanXinForm({ fields, setFields }) {
         maxLength={1000}
         rows={4}
         monospace={false}
+        Icon={FileText}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty or exceed 1000 characters" />
     </>
@@ -1061,6 +1110,7 @@ function GenericStackedForm({ fields, setFields, standard }) {
         maxLength={standard.maxLen || 80}
         rows={3}
         monospace
+        Icon={Barcode}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Must contain ASCII characters" />
     </>
@@ -1083,6 +1133,7 @@ function ChannelCodeForm({ fields, setFields }) {
         placeholder="123456"
         inputMode="numeric"
         monospace
+        Icon={Hash}
       />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Positive integer up to 7 digits only" />
     </>
@@ -1172,6 +1223,7 @@ export default function BarcodeDataModal({ isOpen, bcid, initialFields, onApply,
           maxLength={200}
           rows={3}
           monospace
+          Icon={Barcode}
         />
       );
     }
@@ -1205,7 +1257,7 @@ export default function BarcodeDataModal({ isOpen, bcid, initialFields, onApply,
         overflow: 'hidden'
       }}>
         {/* Drag handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0', flexShrink: 0 }}>
           <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border-color)' }} />
         </div>
 
