@@ -659,9 +659,6 @@ export default function QRScanner({ onBack, navigateTo }) {
                 </div>
               </div>
 
-              <button className="modal-done-btn" onClick={() => setShowFormatsInfo(false)}>
-                Close Window
-              </button>
             </div>
           </div>
         )}
