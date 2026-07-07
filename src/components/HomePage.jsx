@@ -336,7 +336,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
   const [activeSlide, setActiveSlide] = useState(0);
   const [showAllBarcodes, setShowAllBarcodes] = useState(false);
   const [showAllQR, setShowAllQR] = useState(false);
-  const slideCount = 3;
+  const slideCount = 4;
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
@@ -597,7 +597,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     </div>
 
                     <button 
-                      onClick={() => onNavigate('batch')}
+                      onClick={() => onNavigate('batch', 'QR')}
                       style={{
                         backgroundColor: '#fff',
                         color: '#3B82F6',
@@ -711,6 +711,81 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                  </div>
               </div>
             </div>
+
+            {/* Slide 4: Bulk Barcode Generator */}
+            <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #0F766E 0%, #14B8A6 50%, #2DD4BF 100%)',
+                borderRadius: '18px',
+                padding: '24px 20px',
+                color: '#fff',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 10px 32px rgba(20, 184, 166, 0.3)',
+                gap: '12px',
+                height: '140px'
+              }}>
+                <div style={{
+                  position: 'absolute', top: '-20px', right: '70px',
+                  width: '80px', height: '80px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.07)', pointerEvents: 'none'
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: '-24px', right: '10px',
+                  width: '100px', height: '100px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.06)', pointerEvents: 'none'
+                }} />
+
+                <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+                      <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.1 }}>Bulk Barcode</h2>
+                      <p style={{ fontSize: '13px', margin: 0, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>Create multiple barcodes at once using CSV/Excel</p>
+                    </div>
+
+                    <button 
+                      onClick={() => onNavigate('batch', 'BARCODE')}
+                      style={{
+                        backgroundColor: '#fff',
+                        color: '#14B8A6',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '10px 20px',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        width: 'fit-content'
+                      }}
+                    >
+                      <FileSpreadsheet size={16} /> Create Bulk Barcode
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ 
+                   background: 'rgba(255,255,255,0.15)',
+                   backdropFilter: 'blur(8px)',
+                   width: '90px',
+                   height: '90px',
+                   borderRadius: '12px',
+                   border: '1px solid rgba(255,255,255,0.2)',
+                   flexShrink: 0,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   zIndex: 1
+                 }}>
+                   <HeroBarcodeCanvas />
+                 </div>
+              </div>
+            </div>
           </div>
 
           {/* Navigation Controls */}
@@ -721,7 +796,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
             gap: '8px',
             marginTop: '12px'
           }}>
-            {[0, 1, 2].map((index) => (
+            {[0, 1, 2, 3].map((index) => (
               <button
                 key={index}
                 onClick={() => setActiveSlide(index)}

@@ -920,8 +920,13 @@ export default function App() {
     }
   };
 
+  const [batchPageDefaultType, setBatchPageDefaultType] = useState('QR');
+
   // Custom navigation wrapper to track history
-  const navigateTo = (page) => {
+  const navigateTo = (page, type = 'QR') => {
+    if (page === 'batch') {
+      setBatchPageDefaultType(type);
+    }
     if (page !== activePage) {
       if (activePage === 'generator' && generatorIsDirtyRef.current) {
         setUnsavedChangesModal({ isOpen: true, nextPage: page });
@@ -4299,6 +4304,7 @@ export default function App() {
             setBatchItems={setBatchItems}
             batchItems={batchItems}
             onEditBatchItemStyle={handleEditBatchItemStyle}
+            initialBatchType={batchPageDefaultType}
           />
         ) : activePage === 'barcode' ? (
           <BarcodePage 

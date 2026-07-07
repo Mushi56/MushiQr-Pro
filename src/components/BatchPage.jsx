@@ -7,7 +7,7 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
-import { renderBarcode } from '../utils/barcodeEngine';
+import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
 import { jsPDF } from 'jspdf';
 
 // Helper for mobile ZIP saving
@@ -30,9 +30,11 @@ export default function BatchPage({
   activeGeneratorStyle, 
   setBatchItems, 
   batchItems,
-  onEditBatchItemStyle 
+  onEditBatchItemStyle,
+  initialBatchType
 }) {
-  const [batchType, setBatchType] = useState('QR'); // 'QR' | 'BARCODE'
+  const [batchType, setBatchType] = useState(initialBatchType || 'QR'); // 'QR' | 'BARCODE'
+  const [barcodeType, setBarcodeType] = useState('code128');
   const [fileData, setFileData] = useState(null);
   const [columns, setColumns] = useState([]);
   const [dataCol, setDataCol] = useState('');
@@ -42,6 +44,12 @@ export default function BatchPage({
   const [exportQuality, setExportQuality] = useState('Normal');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
+
+  useEffect(() => {
+    if (initialBatchType) {
+      setBatchType(initialBatchType);
+    }
+  }, [initialBatchType]);
 
   const fileInputRef = useRef(null);
 
@@ -156,6 +164,7 @@ export default function BatchPage({
 
     // Base default style configurations depending on QR vs BARCODE
     const defaultStyle = batchType === 'BARCODE' ? {
+      bcid: barcodeType,
       barColor: '#000000',
       bgColor: '#ffffff',
       barWidth: 2,
@@ -268,6 +277,7 @@ export default function BatchPage({
         tempCanvas.height = 150 * scale;
 
         renderBarcode(tempCanvas, item.data, {
+          bcid: item.style?.bcid || 'code128',
           barColor: item.style?.barColor || '#000000',
           bgColor: item.style?.bgColor || '#ffffff',
           barWidth: (item.style?.barWidth || 2) * scale,
@@ -560,6 +570,21 @@ export default function BatchPage({
                   ))}
                 </select>
               </div>
+
+              {batchType === 'BARCODE' && (
+                <div className="form-group">
+                  <label className="form-label">Select Barcode Type</label>
+                  <select 
+                    className="form-select" 
+                    value={barcodeType} 
+                    onChange={(e) => setBarcodeType(e.target.value)}
+                  >
+                    {Object.entries(BARCODE_STANDARDS).map(([key, std]) => (
+                      <option key={key} value={key}>{std.name} ({std.desc})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
@@ -656,6 +681,39 @@ export default function BatchPage({
                   >
                     <Edit3 size={16} />
                   </button>
+                </div>
+              )}
+
+              {batchType === 'BARCODE' && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '16px',
+                  padding: '12px 16px'
+                }}>
+                  <div style={{
+                    width: '70px',
+                    height: '44px',
+                    borderRadius: '8px',
+                    background: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid var(--border-color)',
+                    flexShrink: 0,
+                    overflow: 'hidden'
+                  }}>
+                    <BatchThumbnail type="BARCODE" data={batchItems[0]?.data || "12345678"} style={batchItems[0]?.style} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Bulk Barcode Format</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                      Using standard: {BARCODE_STANDARDS[batchItems[0]?.style?.bcid || 'code128']?.name || 'Code 128'}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -982,6 +1040,7 @@ function BatchThumbnail({ type, data, style }) {
       ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
       renderBarcode(canvasRef.current, data, {
+        bcid: safeStyle.bcid || 'code128',
         barColor: safeStyle.barColor || '#000000',
         bgColor: safeStyle.bgColor || '#ffffff',
         barWidth: 1.5,
