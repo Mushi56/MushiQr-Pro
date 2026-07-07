@@ -6,11 +6,64 @@ import { Share } from '@capacitor/share';
 import {
   ArrowLeft, Zap, ZapOff, Image, CheckCircle2,
   Copy, ExternalLink, Share2, Star, Wifi, Mail,
-  Phone, User, Globe, FileText, Minus, Plus, AlertCircle, RefreshCcw, Clock
+  Phone, User, Globe, FileText, Minus, Plus, AlertCircle, RefreshCcw, Clock,
+  ScanLine, Info, ShieldAlert, Barcode
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
-import { Html5Qrcode } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+
+// ─── Barcode format metadata ──────────────────────────────────────────────────
+// Formats supported by html5-qrcode (ZXing) for live camera scanning
+const SCANNABLE_FORMATS = [
+  { id: Html5QrcodeSupportedFormats.QR_CODE,       name: 'QR Code',     category: '2D' },
+  { id: Html5QrcodeSupportedFormats.DATA_MATRIX,   name: 'Data Matrix', category: '2D' },
+  { id: Html5QrcodeSupportedFormats.PDF_417,        name: 'PDF417',      category: '2D' },
+  { id: Html5QrcodeSupportedFormats.AZTEC,          name: 'Aztec',       category: '2D' },
+  { id: Html5QrcodeSupportedFormats.EAN_13,         name: 'EAN-13',      category: '1D' },
+  { id: Html5QrcodeSupportedFormats.EAN_8,          name: 'EAN-8',       category: '1D' },
+  { id: Html5QrcodeSupportedFormats.UPC_A,          name: 'UPC-A',       category: '1D' },
+  { id: Html5QrcodeSupportedFormats.UPC_E,          name: 'UPC-E',       category: '1D' },
+  { id: Html5QrcodeSupportedFormats.CODE_128,       name: 'Code 128',    category: '1D' },
+  { id: Html5QrcodeSupportedFormats.CODE_39,        name: 'Code 39',     category: '1D' },
+  { id: Html5QrcodeSupportedFormats.CODE_93,        name: 'Code 93',     category: '1D' },
+  { id: Html5QrcodeSupportedFormats.ITF,            name: 'ITF (I25)',   category: '1D' },
+  { id: Html5QrcodeSupportedFormats.CODABAR,        name: 'Codabar',     category: '1D' },
+  { id: Html5QrcodeSupportedFormats.MAXICODE,       name: 'MaxiCode',    category: '2D' },
+];
+
+const ALL_SCANNABLE_IDS = SCANNABLE_FORMATS.map(f => f.id);
+
+// These are producible by bwip-js but NOT scannable by a mobile camera lens
+// (require specialized hardware, printed dots/circles, or ultra-high resolution)
+const CAMERA_UNSUPPORTED_FORMATS = new Set([
+  'MaxiCode',    // requires specialized IR scanner
+  'Han Xin',    // no ZXing support
+  'Pharmacode', // 1-7 bars only - too ambiguous for ZXing
+  'Channel Code',// industrial specialized
+  'MSI Plessey', // not in ZXing
+  'Telepen',    // UK-only, not in ZXing
+  'Royal Mail', // postal-only hardware
+  'POSTNET',    // postal-only hardware
+  'PLANET',     // postal-only hardware
+]);
+
+const FORMAT_NAME_MAP = {
+  [Html5QrcodeSupportedFormats.QR_CODE]:     'QR Code',
+  [Html5QrcodeSupportedFormats.DATA_MATRIX]: 'Data Matrix',
+  [Html5QrcodeSupportedFormats.PDF_417]:     'PDF417',
+  [Html5QrcodeSupportedFormats.AZTEC]:       'Aztec',
+  [Html5QrcodeSupportedFormats.EAN_13]:      'EAN-13',
+  [Html5QrcodeSupportedFormats.EAN_8]:       'EAN-8',
+  [Html5QrcodeSupportedFormats.UPC_A]:       'UPC-A',
+  [Html5QrcodeSupportedFormats.UPC_E]:       'UPC-E',
+  [Html5QrcodeSupportedFormats.CODE_128]:    'Code 128',
+  [Html5QrcodeSupportedFormats.CODE_39]:     'Code 39',
+  [Html5QrcodeSupportedFormats.CODE_93]:     'Code 93',
+  [Html5QrcodeSupportedFormats.ITF]:         'ITF / I2of5',
+  [Html5QrcodeSupportedFormats.CODABAR]:     'Codabar',
+  [Html5QrcodeSupportedFormats.MAXICODE]:    'MaxiCode',
+};
 
 const parseQRData = (text) => {
   if (!text) return { type: 'Text', icon: FileText, title: 'Text Content', action: 'Copy Text', actionIcon: Copy };
@@ -28,6 +81,8 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [status, setStatus] = useState('SCANNING');
   const [result, setResult] = useState(null);
   const [qrTypeData, setQrTypeData] = useState(null);
+  const [detectedFormatId, setDetectedFormatId] = useState(null);
+  const [detectedFormatName, setDetectedFormatName] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [facingBack, setFacingBack] = useState(true);
@@ -37,6 +92,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [zoomCapabilities, setZoomCapabilities] = useState(null);
   const [hasHardwareZoom, setHasHardwareZoom] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [showFormatsInfo, setShowFormatsInfo] = useState(false);
 
   const qrScannerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -146,7 +202,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     }
   }, [flashOn, triggerHapticFeedback]);
 
-  const handleScanResult = useCallback((decodedText) => {
+  const handleScanResult = useCallback((decodedText, decodedResult) => {
     if (!mountedRef.current || busyRef.current) return;
     setStatus(prev => {
       if (prev === 'DETECTED') return prev;
@@ -158,6 +214,19 @@ export default function QRScanner({ onBack, navigateTo }) {
       if (scanner) {
         try { scanner.pause(); } catch { }
       }
+
+      // Detect format from result metadata
+      const formatId = decodedResult?.result?.format?.formatName
+        ? null // will use formatId from decodedResult directly
+        : decodedResult?.decodedResult?.result?.format?.formatName
+          ? null
+          : null;
+      const fmtId = decodedResult?.result?.format?.format
+        ?? decodedResult?.decodedResult?.result?.format?.format
+        ?? null;
+      const fmtName = fmtId != null ? (FORMAT_NAME_MAP[fmtId] || 'Unknown') : null;
+      if (fmtId != null) setDetectedFormatId(fmtId);
+      if (fmtName) setDetectedFormatName(fmtName);
 
       const parsed = parseQRData(decodedText);
       setQrTypeData(parsed);
@@ -187,7 +256,7 @@ export default function QRScanner({ onBack, navigateTo }) {
         saveToHistory({
           source: 'scan',
           qrData: { text: decodedText },
-          type: parsed.type.toUpperCase(),
+          type: (fmtName || parsed.type).toUpperCase(),
           displayText: decodedText,
           thumbnail: thumbnail
         });
@@ -200,7 +269,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     if (busyRef.current) return;
     busyRef.current = true;
     if (!mountedRef.current) return;
-    setResult(null); setQrTypeData(null); setError(null); setStatus('SCANNING'); setZoom(1); setVideoPlaying(false);
+    setResult(null); setQrTypeData(null); setDetectedFormatId(null); setDetectedFormatName(null); setError(null); setStatus('SCANNING'); setZoom(1); setVideoPlaying(false);
     try {
       await stopScanner();
       if (!mountedRef.current) { busyRef.current = false; return; }
@@ -215,10 +284,12 @@ export default function QRScanner({ onBack, navigateTo }) {
           qrbox: (width, height) => {
             return { width: Math.min(width, height) * 0.85, height: Math.min(width, height) * 0.55 };
           },
-          aspectRatio: 1.333333
+          aspectRatio: 1.333333,
+          formatsToSupport: ALL_SCANNABLE_IDS,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
         },
-        (decodedText) => {
-          handleScanResult(decodedText);
+        (decodedText, decodedResult) => {
+          handleScanResult(decodedText, decodedResult);
         },
         () => {}
       );
@@ -367,7 +438,7 @@ export default function QRScanner({ onBack, navigateTo }) {
     } else {
       startScanner();
     }
-    setResult(null); setQrTypeData(null); setStatus('SCANNING');
+    setResult(null); setQrTypeData(null); setDetectedFormatId(null); setDetectedFormatName(null); setStatus('SCANNING');
   };
 
   const captureImage = useCallback(async () => {
@@ -514,7 +585,30 @@ export default function QRScanner({ onBack, navigateTo }) {
             Scan
             <div className="qrs-mode-dot" />
           </div>
+          <button
+            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, padding: '4px 8px' }}
+            onClick={() => setShowFormatsInfo(v => !v)}
+          >
+            <Info size={14} />
+            Supported Formats
+          </button>
         </div>
+
+        {/* Supported Formats Info Panel */}
+        {showFormatsInfo && (
+          <div style={{ margin: '0 16px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: 16, padding: '14px 16px', animation: 'fadeIn 0.2s ease' }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>Scannable by Camera</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+              {SCANNABLE_FORMATS.filter(f => f.name !== 'MaxiCode').map(f => (
+                <span key={f.id} style={{ fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 8, background: f.category === '2D' ? 'rgba(88,86,214,0.12)' : 'rgba(0,122,255,0.10)', color: f.category === '2D' ? '#5856D6' : '#007AFF', border: `1px solid ${f.category === '2D' ? 'rgba(88,86,214,0.25)' : 'rgba(0,122,255,0.2)'}` }}>{f.name}</span>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'rgba(255,149,0,0.08)', border: '1px solid rgba(255,149,0,0.25)', borderRadius: 10, padding: '8px 10px' }}>
+              <ShieldAlert size={13} style={{ color: '#FF9500', flexShrink: 0, marginTop: 2 }} />
+              <span style={{ fontSize: 10, color: '#FF9500', fontWeight: 600, lineHeight: 1.5 }}>MaxiCode, Han Xin, Pharmacode, MSI, Telepen, Royal Mail, POSTNET, PLANET require specialized hardware scanners — they cannot be scanned with a mobile camera.</span>
+            </div>
+          </div>
+        )}
 
         {/* Bottom Controls */}
         <div className="qrs-controls">
@@ -548,7 +642,17 @@ export default function QRScanner({ onBack, navigateTo }) {
               <div className="qrs-result-type-label">
                 <TypeIcon size={14} color="var(--accent-primary)" />
                 <span>{qrTypeData.title}</span>
+                {detectedFormatName && (
+                  <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'var(--accent-soft)', color: 'var(--accent-primary)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{detectedFormatName}</span>
+                )}
               </div>
+              {/* Camera support warning for specialty formats */}
+              {detectedFormatName && CAMERA_UNSUPPORTED_FORMATS.has(detectedFormatName) && (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'rgba(255,149,0,0.1)', border: '1px solid rgba(255,149,0,0.3)', borderRadius: 12, padding: '10px 14px', margin: '4px 0' }}>
+                  <ShieldAlert size={15} style={{ color: '#FF9500', flexShrink: 0, marginTop: 1 }} />
+                  <span style={{ fontSize: 12, color: '#FF9500', fontWeight: 600, lineHeight: 1.5 }}>⚠ This barcode type ({detectedFormatName}) is not supported by standard mobile cameras. A dedicated hardware scanner is required to decode it reliably.</span>
+                </div>
+              )}
 
               {/* Data Card */}
               <div className="qrs-result-card">
