@@ -471,7 +471,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
             </div>
 
             {/* Barcode Type Grid (freely swipe/scroll with extra space in the content section) */}
-            <div className="type-tabs" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', width: '100%', padding: '4px 0 20px' }}>
+            <div className="barcode-type-tabs">
               {Object.entries(BARCODE_STANDARDS).map(([key, standard]) => (
                 <button
                   key={key}
