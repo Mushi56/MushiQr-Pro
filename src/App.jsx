@@ -4214,6 +4214,55 @@ export default function App() {
               navigateTo('generator');
               setIsDataModalOpen(true);
             }}
+            onQuickCreateBarcode={(id) => {
+              const defaults = {
+                ean13: '4006381333931',
+                upca: '012345678905',
+                code128: 'MushiPro-128',
+                code39: 'MUSHI 39',
+                datamatrix: 'DataMatrix-Standard',
+                itf14: '10012345678902',
+                ean8: '40123455',
+                gs1databar: '0101234567890128',
+                pdf417: 'PDF417-ID-FORMAT',
+                code93: 'COMPACT-93',
+                upce: '01234565',
+                codabar: 'A123456B',
+                code11: '123-456-789',
+                msi: '1234567',
+                i25: '12345678',
+                postnet: '12345',
+                planet: '12345678901',
+                royalmail: 'SN34RD1A',
+                gs1128: '(01)00012345678905(10)ABC-123',
+                telepen: 'TELEPEN-ASCII',
+                pharmacode: '11309',
+                aztec: 'AZTEC-TICKET-DATA',
+                maxicode: 'UPS-MAXICODE-DATA',
+                qrcode: 'QR-INTEGRATION',
+                microqrcode: 'MICRO-QR',
+                hanxin: 'HANXIN-2D-CODE',
+                codablockf: 'CODABLOCK-F-DATA',
+                code16k: 'CODE-16K-DATA',
+                code49: 'CODE-49-DATA',
+                channelcode: '123456'
+              };
+              const defaultValue = defaults[id] || '12345678';
+              setLoadedBarcodeItem({
+                qrType: 'BARCODE',
+                displayText: defaultValue,
+                style: {
+                  bcid: id,
+                  barColor: '#000000',
+                  bgColor: '#ffffff',
+                  barWidth: 2,
+                  height: 90,
+                  margin: 16,
+                  displayValue: true
+                }
+              });
+              navigateTo('barcode');
+            }}
             onLoadQR={handleLoadQR}
             theme={theme}
             setTheme={(next) => {

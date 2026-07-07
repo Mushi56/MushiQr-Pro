@@ -120,10 +120,11 @@ function HeroBarcodeCanvas() {
   );
 }
 
-export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
+export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
   const [recentItems, setRecentItems] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
   const [activeSlide, setActiveSlide] = useState(0);
+  const [showAllBarcodes, setShowAllBarcodes] = useState(false);
   const slideCount = 3;
 
   const touchStartX = useRef(0);
@@ -179,6 +180,39 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
     { id: QR_TYPES.LOCATION, label: 'Location', icon: <MapPin size={20} /> },
     { id: QR_TYPES.PDF, label: 'PDF', icon: <FileCode size={20} /> },
     { id: QR_TYPES.IMAGE, label: 'Image', icon: <Image size={20} /> },
+  ];
+
+  const barcodeOptions = [
+    { id: 'ean13', label: 'EAN-13' },
+    { id: 'upca', label: 'UPC-A' },
+    { id: 'code128', label: 'Code 128' },
+    { id: 'code39', label: 'Code 39' },
+    { id: 'datamatrix', label: 'Data Matrix' },
+    { id: 'itf14', label: 'ITF-14' },
+    { id: 'ean8', label: 'EAN-8' },
+    { id: 'gs1databar', label: 'GS1 DataBar' },
+    { id: 'pdf417', label: 'PDF 417' },
+    { id: 'code93', label: 'Code 93' },
+    { id: 'upce', label: 'UPC-E' },
+    { id: 'codabar', label: 'Codabar' },
+    { id: 'code11', label: 'Code 11' },
+    { id: 'msi', label: 'MSI Plessey' },
+    { id: 'i25', label: 'Interleaved 2 of 5' },
+    { id: 'postnet', label: 'Postnet' },
+    { id: 'planet', label: 'Planet' },
+    { id: 'royalmail', label: 'Royal Mail' },
+    { id: 'gs1128', label: 'GS1-128' },
+    { id: 'telepen', label: 'Telepen' },
+    { id: 'pharmacode', label: 'Pharmacode' },
+    { id: 'aztec', label: 'Aztec Code' },
+    { id: 'maxicode', label: 'MaxiCode' },
+    { id: 'qrcode', label: 'QR Code (2D)' },
+    { id: 'microqrcode', label: 'Micro QR' },
+    { id: 'hanxin', label: 'Han Xin Code' },
+    { id: 'codablockf', label: 'Codablock F' },
+    { id: 'code16k', label: 'Code 16K' },
+    { id: 'code49', label: 'Code 49' },
+    { id: 'channelcode', label: 'Channel Code' }
   ];
 
   const formatDate = (isoString) => {
@@ -486,7 +520,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
         </div>
 
         {/* Quick Create Grid */}
-        <div style={{ padding: '24px var(--main-padding-x)' }}>
+        <div style={{ padding: '24px var(--main-padding-x) 12px' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Quick Create</h3>
           <div className="quick-options-grid">
             {quickOptions.map(option => (
@@ -516,6 +550,62 @@ export default function HomePage({ onNavigate, onQuickCreate, onLoadQR, theme, s
                 </span>
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Quick Create Barcode Grid */}
+        <div style={{ padding: '12px var(--main-padding-x) 24px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Quick Create Barcode</h3>
+          <div className="quick-options-grid">
+            {(showAllBarcodes ? barcodeOptions : barcodeOptions.slice(0, 9)).map(option => (
+              <button
+                key={option.id}
+                onClick={() => onQuickCreateBarcode(option.id)}
+                className="quick-option-card"
+                style={{ width: '100%' }}
+              >
+                <div className="quick-option-icon-wrapper" style={{ background: 'rgba(0, 240, 255, 0.1)', color: '#00F0FF' }}>
+                  <Barcode size={20} strokeWidth={1.8} />
+                </div>
+                <span style={{ 
+                  fontSize: '9px', 
+                  fontWeight: 700, 
+                  textAlign: 'center', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.2px', 
+                  marginTop: '2px',
+                  width: '100%',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: 'block'
+                }}>
+                  {option.label}
+                </span>
+              </button>
+            ))}
+            
+            <button
+              onClick={() => setShowAllBarcodes(!showAllBarcodes)}
+              className="quick-option-card"
+              style={{ width: '100%', background: 'var(--bg-hover)', border: '1px dashed var(--border-color)' }}
+            >
+              <div className="quick-option-icon-wrapper" style={{ background: 'var(--accent-soft)', color: 'var(--accent-primary)' }}>
+                <Plus size={20} strokeWidth={2.5} style={{ transform: showAllBarcodes ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s' }} />
+              </div>
+              <span style={{ 
+                fontSize: '9px', 
+                fontWeight: 800, 
+                textAlign: 'center', 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.2px', 
+                marginTop: '2px',
+                width: '100%',
+                display: 'block'
+              }}>
+                {showAllBarcodes ? 'LESS' : '+20 MORE'}
+              </span>
+            </button>
           </div>
         </div>
 

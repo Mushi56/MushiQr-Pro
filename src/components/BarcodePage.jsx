@@ -1,13 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Save, Barcode, Palette, Sliders, Undo2, Redo2, ChevronDown, FileImage, FileCode, FileText, Copy, Bookmark, Share2, Menu, Home, History, Moon, Sun, Info, Shield, FileText as FileIcon } from 'lucide-react';
-import { renderBarcode } from '../utils/barcodeEngine';
-import { saveToHistory, saveToSaved } from '../utils/storage';
+import {
+  Save, Palette, Sliders, Undo2, Redo2, ChevronDown,
+  FileImage, FileCode, FileText, Copy, Bookmark, Share2,
+  Menu, Home, History, Moon, Sun, Info, Shield,
+  FileText as FileIcon, AlertCircle, Layers
+} from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
+import { saveToSaved } from '../utils/storage';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from '../utils/exportUtils';
 import AppIcon from './AppIcon';
 import AdvancedColorPicker from './AdvancedColorPicker';
+import BarcodeDataModal from './BarcodeDataModal';
 
+// ─── Color Presets ────────────────────────────────────────────────────────────
 const COLOR_PRESETS = [
   { name: 'Classic', qr: '#000000', bg: '#FFFFFF' },
   { name: 'Midnight', qr: '#FFFFFF', bg: '#030305' },
@@ -23,457 +31,299 @@ const COLOR_PRESETS = [
   { name: 'Rose Gold', qr: '#E91E63', bg: '#FFF1F2' }
 ];
 
+// ─── Parse text → structured fields for BarcodeDataModal ─────────────────────
+function parseValueToFields(val, type) {
+  const digits = (val || '').replace(/\D/g, '');
+  switch (type) {
+    case 'ean13': return { countryPrefix: digits.slice(0, 3), manufacturer: digits.slice(3, 8), productCode: digits.slice(8, 12) };
+    case 'upca': return { numberSystem: digits.slice(0, 1) || '0', manufacturer: digits.slice(1, 6), productCode: digits.slice(6, 11) };
+    case 'ean8': return { countryPrefix: digits.slice(0, 3), productCode: digits.slice(3, 7) };
+    case 'itf14': return { indicator: digits.slice(0, 1) || '1', gs1Prefix: digits.slice(1, 7), itemRef: digits.slice(7, 13) };
+    case 'upce': return { numberSystem: digits.slice(0, 1) || '0', body: digits.slice(1, 7) };
+    case 'codabar': {
+      const hasStart = /^[A-D]/i.test(val || '');
+      const hasStop = /[A-D]$/i.test(val || '');
+      return {
+        start: hasStart ? (val || '').slice(0, 1).toUpperCase() : 'A',
+        body: (val || '').slice(hasStart ? 1 : 0, hasStop ? -1 : undefined) || '',
+        stop: hasStop ? (val || '').slice(-1).toUpperCase() : 'B'
+      };
+    }
+    case 'postnet': return { format: digits.length <= 5 ? '5' : digits.length <= 9 ? '9' : '11', data: digits };
+    case 'planet': return { format: digits.length <= 11 ? '11' : digits.length <= 12 ? '12' : digits.length <= 13 ? '13' : '14', data: digits };
+    default: return { data: val || '' };
+  }
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, setLoadedBarcodeItem, theme, setTheme, effectiveTheme }) {
-  const [text, setText] = useState('CODE128-BARCODE');
+  const [text, setText] = useState('MushiPro-128');
+  const [bcid, setBcid] = useState('code128');
   const [barColor, setBarColor] = useState('#000000');
   const [bgColor, setBgColor] = useState('#ffffff');
   const [barWidth, setBarWidth] = useState(2);
   const [height, setHeight] = useState(90);
   const [margin, setMargin] = useState(16);
   const [displayValue, setDisplayValue] = useState(true);
-  
+
   const [activeTab, setActiveTab] = useState('content');
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', type: 'bar' });
   const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState('PNG');
-  
-  // History Undo/Redo States
+
+  // History
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isUndoRedoActionRef = useRef(false);
 
   const canvasRef = useRef(null);
 
-  // Initialize history
+  // Data modal
+  const [isDataModalOpen, setIsDataModalOpen] = useState(false);
+  const [modalInitialFields, setModalInitialFields] = useState({});
+  const [pendingBcid, setPendingBcid] = useState(null);
+
+  // Init history
   useEffect(() => {
-    const initialState = {
-      text,
-      barColor,
-      bgColor,
-      barWidth,
-      height,
-      margin,
-      displayValue
-    };
-    setHistory([initialState]);
+    setHistory([{ text, bcid, barColor, bgColor, barWidth, height, margin, displayValue }]);
     setHistoryIndex(0);
   }, []);
 
-  // Sync state and push to history
   const updateStateAndHistory = (updates) => {
-    const newState = {
-      text: updates.text !== undefined ? updates.text : text,
-      barColor: updates.barColor !== undefined ? updates.barColor : barColor,
-      bgColor: updates.bgColor !== undefined ? updates.bgColor : bgColor,
-      barWidth: updates.barWidth !== undefined ? updates.barWidth : barWidth,
-      height: updates.height !== undefined ? updates.height : height,
-      margin: updates.margin !== undefined ? updates.margin : margin,
-      displayValue: updates.displayValue !== undefined ? updates.displayValue : displayValue
-    };
-    
+    const cur = { text, bcid, barColor, bgColor, barWidth, height, margin, displayValue };
+    const newState = { ...cur, ...updates };
     if (updates.text !== undefined) setText(updates.text);
+    if (updates.bcid !== undefined) setBcid(updates.bcid);
     if (updates.barColor !== undefined) setBarColor(updates.barColor);
     if (updates.bgColor !== undefined) setBgColor(updates.bgColor);
     if (updates.barWidth !== undefined) setBarWidth(updates.barWidth);
     if (updates.height !== undefined) setHeight(updates.height);
     if (updates.margin !== undefined) setMargin(updates.margin);
     if (updates.displayValue !== undefined) setDisplayValue(updates.displayValue);
-
-    if (isUndoRedoActionRef.current) {
-      isUndoRedoActionRef.current = false;
-      return;
-    }
-
-    const cleanHistory = history.slice(0, historyIndex + 1);
-    setHistory([...cleanHistory, newState]);
-    setHistoryIndex(cleanHistory.length);
+    if (isUndoRedoActionRef.current) { isUndoRedoActionRef.current = false; return; }
+    const cleaned = history.slice(0, historyIndex + 1);
+    setHistory([...cleaned, newState]);
+    setHistoryIndex(cleaned.length);
   };
 
   const undo = () => {
     if (historyIndex > 0) {
       isUndoRedoActionRef.current = true;
-      const prevIdx = historyIndex - 1;
-      setHistoryIndex(prevIdx);
-      const state = history[prevIdx];
-      
-      setText(state.text);
-      setBarColor(state.barColor);
-      setBgColor(state.bgColor);
-      setBarWidth(state.barWidth);
-      setHeight(state.height);
-      setMargin(state.margin);
-      setDisplayValue(state.displayValue);
+      const idx = historyIndex - 1;
+      setHistoryIndex(idx);
+      const s = history[idx];
+      setText(s.text); setBcid(s.bcid || 'code128'); setBarColor(s.barColor);
+      setBgColor(s.bgColor); setBarWidth(s.barWidth); setHeight(s.height);
+      setMargin(s.margin); setDisplayValue(s.displayValue);
     }
   };
 
   const redo = () => {
     if (historyIndex < history.length - 1) {
       isUndoRedoActionRef.current = true;
-      const nextIdx = historyIndex + 1;
-      setHistoryIndex(nextIdx);
-      const state = history[nextIdx];
-      
-      setText(state.text);
-      setBarColor(state.barColor);
-      setBgColor(state.bgColor);
-      setBarWidth(state.barWidth);
-      setHeight(state.height);
-      setMargin(state.margin);
-      setDisplayValue(state.displayValue);
+      const idx = historyIndex + 1;
+      setHistoryIndex(idx);
+      const s = history[idx];
+      setText(s.text); setBcid(s.bcid || 'code128'); setBarColor(s.barColor);
+      setBgColor(s.bgColor); setBarWidth(s.barWidth); setHeight(s.height);
+      setMargin(s.margin); setDisplayValue(s.displayValue);
     }
   };
 
-  // Restore saved barcode
+  const currentStandard = BARCODE_STANDARDS[bcid] || BARCODE_STANDARDS.code128;
+  const isDataValid = currentStandard.validate(text);
+
+  // Open data modal
+  const openDataModal = (targetBcid = bcid) => {
+    const fields = parseValueToFields(text, targetBcid);
+    setModalInitialFields(fields);
+    setPendingBcid(targetBcid);
+    setIsDataModalOpen(true);
+  };
+
+  // Apply modal result
+  const handleModalApply = (compiledValue) => {
+    const updates = { text: compiledValue };
+    if (pendingBcid && pendingBcid !== bcid) {
+      updates.bcid = pendingBcid;
+    }
+    updateStateAndHistory(updates);
+    setIsDataModalOpen(false);
+    setPendingBcid(null);
+  };
+
+  // Load from home / saved
   useEffect(() => {
     if (loadedBarcodeItem) {
       const val = loadedBarcodeItem.displayText || loadedBarcodeItem.qrData?.text || '';
-      if (val) setText(val);
-      
       const s = loadedBarcodeItem.style || {};
+      const targetBcid = s.bcid || 'code128';
+      if (val) setText(val);
+      if (s.bcid) setBcid(s.bcid);
       if (s.barColor) setBarColor(s.barColor);
       if (s.bgColor) setBgColor(s.bgColor);
       if (s.barWidth !== undefined) setBarWidth(s.barWidth);
       if (s.height !== undefined) setHeight(s.height);
       if (s.margin !== undefined) setMargin(s.margin);
       if (s.displayValue !== undefined) setDisplayValue(s.displayValue);
-      
+      // Auto-open modal for editing
+      const fields = parseValueToFields(val, targetBcid);
+      setModalInitialFields(fields);
+      setPendingBcid(targetBcid);
+      setIsDataModalOpen(true);
       setLoadedBarcodeItem(null);
     }
   }, [loadedBarcodeItem, setLoadedBarcodeItem]);
 
+  // Render barcode whenever state changes
   useEffect(() => {
     if (!canvasRef.current) return;
-    renderBarcode(canvasRef.current, text, {
-      barColor,
-      bgColor,
-      barWidth,
-      height,
-      margin,
-      displayValue,
-      font: 'Inter, sans-serif'
-    });
-  }, [text, barColor, bgColor, barWidth, height, margin, displayValue]);
+    renderBarcode(canvasRef.current, text, { bcid, barColor, bgColor, barWidth, height, margin, displayValue });
+  }, [text, bcid, barColor, bgColor, barWidth, height, margin, displayValue]);
 
   const handleDownload = async (format) => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !isDataValid) return;
     try {
-      const filename = `barcode_${text.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      const filename = `barcode_${bcid}_${text.replace(/[^a-zA-Z0-9]/g, '_')}`;
       let result;
-      if (format === 'PNG') {
-        result = await downloadPNG(canvasRef.current, filename);
-      } else if (format === 'JPG') {
-        result = await downloadJPG(canvasRef.current, filename);
-      } else if (format === 'SVG') {
-        result = await downloadSVG(canvasRef.current, filename);
-      } else if (format === 'PDF') {
-        result = await downloadPDF(canvasRef.current, filename);
-      }
-      
-      if (result === 'gallery') {
-        showToast('Saved to Gallery', 'success');
-      } else if (result === 'share') {
-        showToast('Share Sheet Opened', 'success');
-      } else {
-        showToast('Saved successfully', 'success');
-      }
-    } catch (err) {
-      console.error(err);
-      showToast('Export failed', 'error');
-    }
+      if (format === 'PNG') result = await downloadPNG(canvasRef.current, filename);
+      else if (format === 'JPG') result = await downloadJPG(canvasRef.current, filename);
+      else if (format === 'SVG') result = await downloadSVG(canvasRef.current, filename);
+      else if (format === 'PDF') result = await downloadPDF(canvasRef.current, filename);
+      if (result === 'gallery') showToast('Saved to Gallery', 'success');
+      else if (result === 'share') showToast('Share Sheet Opened', 'success');
+      else showToast('Saved successfully', 'success');
+    } catch (err) { console.error(err); showToast('Export failed', 'error'); }
   };
 
   const handleSave = () => {
-    if (!text.trim()) {
-      showToast('Please enter text value to save', 'error');
-      return;
-    }
+    if (!isDataValid) { showToast(currentStandard.errorMsg, 'error'); return; }
     try {
-      const entry = {
+      saveToSaved({
         qrType: 'BARCODE',
         qrData: { text },
         displayText: text,
         thumbnail: canvasRef.current.toDataURL('image/jpeg', 0.8),
-        style: {
-          barColor,
-          bgColor,
-          barWidth,
-          height,
-          margin,
-          displayValue
-        }
-      };
-      saveToSaved(entry);
+        style: { bcid, barColor, bgColor, barWidth, height, margin, displayValue }
+      });
       showToast('Added to Saved', 'success');
-    } catch (err) {
-      console.error(err);
-      showToast('Failed to save barcode', 'error');
-    }
+    } catch (err) { console.error(err); showToast('Failed to save', 'error'); }
   };
 
-  const handleCopyToClipboard = async () => {
-    if (!canvasRef.current) return;
-    try {
-      canvasRef.current.toBlob(async (blob) => {
-        if (!blob) return;
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-          ]);
-          showToast('Copied to clipboard!', 'success');
-        } catch {
-          showToast('Failed to copy to clipboard.', 'error');
-        }
-      }, 'image/png');
-    } catch {
-      showToast('Platform clipboard not supported.', 'error');
-    }
+  const handleCopy = async () => {
+    if (!canvasRef.current || !isDataValid) return;
+    canvasRef.current.toBlob(async (blob) => {
+      if (!blob) return;
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        showToast('Copied to clipboard!', 'success');
+      } catch { showToast('Failed to copy.', 'error'); }
+    }, 'image/png');
   };
 
   const handleShare = async () => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !isDataValid) return;
     try {
       const dataUrl = canvasRef.current.toDataURL('image/png');
       const base64Data = dataUrl.split(',')[1];
       const fileName = `barcode_${Date.now()}.png`;
-      
-      const savedFile = await Filesystem.writeFile({
-        path: fileName,
-        data: base64Data,
-        directory: Directory.Cache
-      });
-
-      await Share.share({
-        title: 'Mushi Qr Pro - Barcode',
-        url: savedFile.uri,
-        dialogTitle: 'Save or Share your Barcode'
-      });
-    } catch (e) {
+      const saved = await Filesystem.writeFile({ path: fileName, data: base64Data, directory: Directory.Cache });
+      await Share.share({ title: `Barcode (${bcid.toUpperCase()})`, url: saved.uri, dialogTitle: 'Share Barcode' });
+    } catch {
       try {
         const dataUrl = canvasRef.current.toDataURL('image/png');
         const blob = await (await fetch(dataUrl)).blob();
         const file = new File([blob], 'barcode.png', { type: 'image/png' });
-        
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'My Barcode',
-            text: text
-          });
-        } else {
-          handleDownload('PNG');
-        }
-      } catch (err) {
-        handleDownload('PNG');
-      }
+        if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: 'My Barcode', text });
+        else handleDownload('PNG');
+      } catch { handleDownload('PNG'); }
     }
   };
 
-  const openAdvancedPicker = (type, currentColor) => {
-    setAdvPicker({ open: true, color: currentColor, type });
-  };
-
-  const handleAdvColorChange = (newColor) => {
-    if (advPicker.type === 'bar') {
-      setBarColor(newColor);
-    } else {
-      setBgColor(newColor);
-    }
-  };
-
-  const handleAdvColorConfirm = (newColor) => {
-    if (advPicker.type === 'bar') {
-      updateStateAndHistory({ barColor: newColor });
-    } else {
-      updateStateAndHistory({ bgColor: newColor });
-    }
-    setAdvPicker(prev => ({ ...prev, open: false }));
+  const openAdvancedPicker = (type, color) => setAdvPicker({ open: true, color, type });
+  const handleAdvColorChange = (c) => { if (advPicker.type === 'bar') setBarColor(c); else setBgColor(c); };
+  const handleAdvColorConfirm = (c) => {
+    if (advPicker.type === 'bar') updateStateAndHistory({ barColor: c });
+    else updateStateAndHistory({ bgColor: c });
+    setAdvPicker(p => ({ ...p, open: false }));
   };
 
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-      backgroundColor: 'var(--bg-primary)',
-      position: 'relative'
-    }}>
-      {/* ── Top Header Navigation (Unified with QR header copy) ── */}
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: 'var(--bg-primary)', position: 'relative' }}>
+      {/* ── Top Header ── */}
       <header className="app-header">
         <div className="app-logo">
           <AppIcon size={36} shadow />
-          
-          <div className="header-undo-redo" style={{ display: 'flex', gap: '8px', marginLeft: '12px' }}>
-            <button 
-              onClick={undo} 
-              disabled={historyIndex <= 0}
-              style={{ 
-                width: '36px', height: '36px', borderRadius: '10px', 
-                background: 'var(--bg-hover)', 
-                border: '1px solid var(--border-color)', 
-                color: historyIndex <= 0 ? 'var(--text-tertiary)' : 'var(--accent-primary)', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                cursor: historyIndex <= 0 ? 'default' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: historyIndex <= 0 ? 0.5 : 1
-              }}
-              title="Undo"
-            >
+          <div style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
+            <button onClick={undo} disabled={historyIndex <= 0} title="Undo" style={undoRedoStyle(historyIndex <= 0)}>
               <Undo2 size={18} strokeWidth={2.5} />
             </button>
-            <button 
-              onClick={redo} 
-              disabled={historyIndex >= history.length - 1}
-              style={{ 
-                width: '36px', height: '36px', borderRadius: '10px', 
-                background: 'var(--bg-hover)', 
-                border: '1px solid var(--border-color)', 
-                color: historyIndex >= history.length - 1 ? 'var(--text-tertiary)' : 'var(--accent-primary)', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                cursor: historyIndex >= history.length - 1 ? 'default' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: historyIndex >= history.length - 1 ? 0.5 : 1
-              }}
-              title="Redo"
-            >
+            <button onClick={redo} disabled={historyIndex >= history.length - 1} title="Redo" style={undoRedoStyle(historyIndex >= history.length - 1)}>
               <Redo2 size={18} strokeWidth={2.5} />
             </button>
           </div>
         </div>
 
-        <div className="app-header-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <div className="header-save-container" style={{ position: 'relative' }}>
+        <div className="app-header-actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Export Dropdown */}
+          <div style={{ position: 'relative' }}>
             <button
               className={`btn-header-action btn-header-save ${formatDropdownOpen ? 'active' : ''}`}
-              onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
-              title="Save As..."
+              onClick={() => { if (!isDataValid) { showToast(currentStandard.errorMsg, 'error'); return; } setFormatDropdownOpen(!formatDropdownOpen); }}
+              style={{ opacity: isDataValid ? 1 : 0.5 }}
+              title="Export"
             >
               <Save size={20} />
               <ChevronDown size={14} style={{ marginLeft: 2, opacity: 0.8 }} />
             </button>
-
-            {formatDropdownOpen && (
-              <div className="app-dropdown-menu save-as-dropdown fade-in" style={{ top: 'calc(100% + 12px)', right: 0, width: '280px' }}>
-                <div className="dropdown-section" style={{ padding: '12px' }}>
-                  <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Export Format</div>
-                  <div className="format-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-                    {[
-                      { label: 'PNG', Icon: FileImage },
-                      { label: 'SVG', Icon: FileCode },
-                      { label: 'PDF', Icon: FileText },
-                      { label: 'JPG', Icon: FileImage },
-                    ].map(({ label, Icon }) => (
-                      <button
-                        key={label}
-                        className={`format-option ${selectedFormat === label ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedFormat(label);
-                          setFormatDropdownOpen(false);
-                          handleDownload(label);
-                        }}
-                      >
-                        <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
+            {formatDropdownOpen && isDataValid && (
+              <div className="app-dropdown-menu save-as-dropdown fade-in" style={{ top: 'calc(100% + 12px)', right: 0, width: 280 }}>
+                <div style={{ padding: 12 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.5px' }}>Export Format</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                    {[{ label: 'PNG', Icon: FileImage }, { label: 'SVG', Icon: FileCode }, { label: 'PDF', Icon: FileText }, { label: 'JPG', Icon: FileImage }].map(({ label }) => (
+                      <button key={label} className={`format-option ${selectedFormat === label ? 'active' : ''}`}
+                        onClick={(e) => { e.stopPropagation(); setSelectedFormat(label); setFormatDropdownOpen(false); handleDownload(label); }}>
+                        <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
-
-                <div className="dropdown-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '0' }} />
-
-                <div className="dropdown-section" style={{ padding: '12px' }}>
-                  <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Quick Actions</div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      className="menu-link-btn"
-                      onClick={(e) => { e.stopPropagation(); handleCopyToClipboard(); setFormatDropdownOpen(false); }}
-                      style={{ flex: 1, height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', padding: 0 }}
-                      title="Copy Image"
-                    >
-                      <Copy size={20} />
-                    </button>
-                    <button
-                      className="menu-link-btn"
-                      onClick={(e) => { e.stopPropagation(); handleSave(); setFormatDropdownOpen(false); }}
-                      style={{ flex: 1, height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', padding: 0 }}
-                      title="Add to Saved"
-                    >
-                      <Bookmark size={20} />
-                    </button>
-                    {((typeof navigator !== 'undefined' && navigator.canShare) || Capacitor.isNativePlatform()) && (
-                      <button
-                        className="menu-link-btn"
-                        onClick={(e) => { e.stopPropagation(); handleShare(); setFormatDropdownOpen(false); }}
-                        style={{ flex: 1, height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', padding: 0 }}
-                        title="Share Barcode"
-                      >
-                        <Share2 size={20} />
-                      </button>
-                    )}
+                <div style={{ height: 1, background: 'var(--border-color)' }} />
+                <div style={{ padding: 12 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.5px' }}>Quick Actions</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="menu-link-btn" onClick={(e) => { e.stopPropagation(); handleCopy(); setFormatDropdownOpen(false); }} style={{ flex: 1, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, padding: 0 }} title="Copy"><Copy size={20} /></button>
+                    <button className="menu-link-btn" onClick={(e) => { e.stopPropagation(); handleSave(); setFormatDropdownOpen(false); }} style={{ flex: 1, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, padding: 0 }} title="Save"><Bookmark size={20} /></button>
+                    <button className="menu-link-btn" onClick={(e) => { e.stopPropagation(); handleShare(); setFormatDropdownOpen(false); }} style={{ flex: 1, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, padding: 0 }} title="Share"><Share2 size={20} /></button>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="menu-container" style={{ position: 'relative' }}>
-            <button
-              className={`btn-menu-toggle ${isMenuOpen ? 'active' : ''}`}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
+          {/* Menu */}
+          <div style={{ position: 'relative' }}>
+            <button className={`btn-menu-toggle ${isMenuOpen ? 'active' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Menu">
               <Menu size={20} />
             </button>
-
             {isMenuOpen && (
               <div className="app-dropdown-menu fade-in" style={{ top: 'calc(100% + 12px)', right: 0 }}>
                 <div className="menu-links">
-                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); onNavigate('home'); }}>
-                    <Home size={16} /> Home
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); onNavigate('home'); }}><Home size={16} /> Home</button>
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); onNavigate('history'); }}><History size={16} /> History</button>
+                  <button className="menu-link-btn" onClick={() => {
+                    const next = theme === 'dark' ? 'light' : theme === 'light' ? 'auto' : 'dark';
+                    setTheme(next);
+                  }}>
+                    {theme === 'dark' ? <Moon size={16} /> : theme === 'light' ? <Sun size={16} /> : <Layers size={16} />}
+                    Theme <span style={{ textTransform: 'capitalize', marginLeft: 4, color: 'var(--accent-primary)', fontWeight: 'bold' }}>{theme}</span>
                   </button>
-                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); onNavigate('history'); }}>
-                    <History size={16} /> History
-                  </button>
-                  <button
-                    className="menu-link-btn"
-                    onClick={() => {
-                      let next;
-                      if (theme === 'dark') next = 'light';
-                      else if (theme === 'light') next = 'auto';
-                      else next = 'dark';
-                      setTheme(next);
-                    }}
-                  >
-                    {theme === 'dark' ? (
-                      <Moon size={16} />
-                    ) : theme === 'light' ? (
-                      <Sun size={16} />
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 2v20" />
-                        <path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" />
-                        <circle cx="12" cy="12" r="10" />
-                      </svg>
-                    )}
-                    Theme <span style={{
-                      textTransform: 'capitalize',
-                      marginLeft: 4,
-                      color: theme === 'dark' ? '#00F0FF' : theme === 'light' ? '#FF007F' : (effectiveTheme === 'dark' ? '#00F0FF' : '#FF007F'),
-                      fontWeight: 'bold'
-                    }}>{theme}</span>
-                  </button>
-                  <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
-                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/about'; }}>
-                    <Info size={16} /> About
-                  </button>
-                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/privacy-policy'; }}>
-                    <Shield size={16} /> Privacy Policy
-                  </button>
-                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/terms'; }}>
-                    <FileIcon size={16} /> Terms of Service
-                  </button>
+                  <div style={{ height: 1, background: 'var(--border-color)', margin: '4px 8px' }} />
+                  <button className="menu-link-btn" onClick={() => setIsMenuOpen(false)}><Info size={16} /> About</button>
+                  <button className="menu-link-btn" onClick={() => setIsMenuOpen(false)}><Shield size={16} /> Privacy Policy</button>
+                  <button className="menu-link-btn" onClick={() => setIsMenuOpen(false)}><FileIcon size={16} /> Terms</button>
                 </div>
               </div>
             )}
@@ -481,256 +331,124 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
         </div>
       </header>
 
-      {/* ── Main Canvas Viewport Area ── */}
-      <div style={{ 
-        flex: 1, 
-        padding: '24px var(--main-padding-x) 180px', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        overflowY: 'auto'
-      }}>
-        {/* Canvas preview card mimicking the main QR page */}
-        <div className="canvas-card" style={{
-          background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '24px',
-          padding: '28px',
-          boxShadow: 'var(--shadow-lg)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '24px',
-          width: '100%',
-          maxWidth: '350px',
-          boxSizing: 'border-box'
-        }}>
-          {/* Barcode Frame container */}
-          <div style={{
-            background: '#ffffff',
-            padding: '20px',
-            borderRadius: '16px',
-            boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.06)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            overflowX: 'auto',
-            boxSizing: 'border-box'
-          }}>
+      {/* ── Canvas Preview ── */}
+      <div style={{ flex: 1, padding: '20px var(--main-padding-x) 195px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto' }}>
+        {/* Type badge */}
+        <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{currentStandard.name}</span>
+          <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--text-muted)', display: 'inline-block' }} />
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{currentStandard.desc}</span>
+        </div>
+
+        <div className="canvas-card" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: 24, padding: 28, boxShadow: 'var(--shadow-lg)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '100%', maxWidth: 360, boxSizing: 'border-box' }}>
+          <div style={{ background: bgColor || '#fff', padding: 20, borderRadius: 16, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflowX: 'auto', boxSizing: 'border-box', minHeight: 100 }}>
             <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%' }} />
           </div>
+
+          {/* Validation status */}
+          {text && (
+            <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: isDataValid ? 'rgba(52,199,89,0.08)' : 'rgba(255,59,48,0.08)', border: `1px solid ${isDataValid ? 'rgba(52,199,89,0.2)' : 'rgba(255,59,48,0.2)'}` }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: isDataValid ? '#34C759' : '#FF3B30', flexShrink: 0 }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: isDataValid ? '#34C759' : '#FF3B30', flex: 1 }}>
+                {isDataValid ? 'Valid — Ready to export' : currentStandard.errorMsg}
+              </span>
+              <button onClick={() => openDataModal()} style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>Edit →</button>
+            </div>
+          )}
         </div>
+
+        {/* Text display */}
+        {text && (
+          <div style={{ marginTop: 12, fontFamily: 'monospace', fontSize: 12, color: 'var(--text-muted)', background: 'var(--bg-elevated)', padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border-color)', maxWidth: 360, textAlign: 'center', wordBreak: 'break-all' }}>
+            {text.length > 40 ? text.slice(0, 38) + '…' : text}
+          </div>
+        )}
       </div>
 
-      {/* ── Sliding Panel (Renders selected Tab Settings above Bottom Nav) ── */}
-      <div 
-        className="bottom-nav-overlay-panel active"
-        style={{
-          position: 'absolute',
-          bottom: '70px',
-          left: 0,
-          right: 0,
-          background: 'var(--bg-elevated)',
-          borderTop: '1px solid var(--border-color)',
-          borderTopLeftRadius: '24px',
-          borderTopRightRadius: '24px',
-          padding: '20px var(--main-padding-x) 24px',
-          boxShadow: '0 -8px 32px rgba(0,0,0,0.1)',
-          zIndex: 90,
-          boxSizing: 'border-box'
-        }}
-      >
+      {/* ── Bottom Panel ── */}
+      <div style={{ position: 'absolute', bottom: 70, left: 0, right: 0, background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-color)', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '20px var(--main-padding-x) 24px', boxShadow: '0 -8px 32px rgba(0,0,0,0.1)', zIndex: 90, boxSizing: 'border-box' }}>
+
+        {/* DATA TAB */}
         {activeTab === 'content' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Barcode Data</label>
-              <input
-                type="text"
-                value={text}
-                onChange={(e) => updateStateAndHistory({ text: e.target.value.toUpperCase() })}
-                placeholder="Enter text to encode"
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '14px',
-                  background: 'var(--bg-primary)',
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--text-primary)',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-              />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Barcode Type</span>
             </div>
-            
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              background: 'var(--bg-primary)',
-              padding: '12px 16px',
-              borderRadius: '14px',
-              border: '1px solid var(--border-color)',
-              marginTop: '4px'
-            }}>
-              <div>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>Display Value Label</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Show text value underneath the barcode</span>
-              </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, maxHeight: 185, overflowY: 'auto', padding: '2px 1px' }}>
+              {Object.entries(BARCODE_STANDARDS).map(([key, standard]) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    const targetBcid = key;
+                    const existingFields = parseValueToFields(targetBcid === bcid ? text : standard.defaultValue, targetBcid);
+                    setModalInitialFields(existingFields);
+                    setPendingBcid(targetBcid);
+                    setIsDataModalOpen(true);
+                  }}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 4px',
+                    borderRadius: 12,
+                    border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                    background: bcid === key ? 'var(--accent-soft)' : 'var(--bg-primary)',
+                    cursor: 'pointer',
+                    color: bcid === key ? 'var(--accent-primary)' : 'var(--text-primary)',
+                    transition: 'all 0.15s',
+                    minWidth: 0, width: '100%', boxSizing: 'border-box', position: 'relative', overflow: 'hidden'
+                  }}
+                >
+                  <div style={{ width: 50, height: 22, flexShrink: 0, background: '#fff', borderRadius: 4, border: `1px solid ${bcid === key ? 'rgba(255,59,48,0.3)' : 'var(--border-color)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    <MiniBarcodePreview type={key} data={standard.defaultValue} />
+                  </div>
+                  <span style={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%', padding: '0 2px' }}>
+                    {standard.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {bcid && (
               <button
-                onClick={() => updateStateAndHistory({ displayValue: !displayValue })}
-                style={{
-                  background: displayValue ? 'var(--accent-primary)' : 'var(--bg-hover)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '10px',
-                  padding: '8px 14px',
-                  color: displayValue ? 'white' : 'var(--text-secondary)',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
+                onClick={() => openDataModal()}
+                style={{ marginTop: 4, padding: '12px', background: 'var(--accent-gradient)', border: 'none', borderRadius: 14, color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 4px 16px var(--accent-glow)' }}
               >
-                {displayValue ? 'ON' : 'OFF'}
+                <AlertCircle size={16} />
+                Edit {currentStandard.name} Data
               </button>
-            </div>
+            )}
           </div>
         )}
 
+        {/* COLOR TAB */}
         {activeTab === 'color' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Bar Color</label>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <div
-                    onClick={() => openAdvancedPicker('bar', barColor)}
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      background: barColor,
-                      border: '2px solid var(--border-color)',
-                      cursor: 'pointer',
-                      boxShadow: 'var(--shadow-sm)',
-                      flexShrink: 0
-                    }}
-                  />
-                  <input
-                    type="text"
-                    value={barColor}
-                    onChange={(e) => updateStateAndHistory({ barColor: e.target.value })}
-                    style={{
-                      flex: 1,
-                      padding: '10px',
-                      borderRadius: '10px',
-                      background: 'var(--bg-primary)',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-primary)',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      outline: 'none',
-                      minWidth: 0
-                    }}
-                  />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', gap: 16 }}>
+              {[
+                { label: 'Bar Color', val: barColor, type: 'bar' },
+                { label: 'Background', val: bgColor, type: 'bg' }
+              ].map(({ label, val, type }) => (
+                <div key={type} style={{ flex: 1 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{label}</label>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <div onClick={() => openAdvancedPicker(type, val)} style={{ width: 36, height: 36, borderRadius: '50%', background: val, border: '2px solid var(--border-color)', cursor: 'pointer', boxShadow: 'var(--shadow-sm)', flexShrink: 0 }} />
+                    <input type="text" value={val} onChange={(e) => updateStateAndHistory(type === 'bar' ? { barColor: e.target.value } : { bgColor: e.target.value })}
+                      style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: 12, fontWeight: 600, outline: 'none', minWidth: 0 }} />
+                  </div>
                 </div>
-              </div>
-
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Background</label>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <div
-                    onClick={() => openAdvancedPicker('bg', bgColor)}
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      background: bgColor,
-                      border: '2px solid var(--border-color)',
-                      cursor: 'pointer',
-                      boxShadow: 'var(--shadow-sm)',
-                      flexShrink: 0
-                    }}
-                  />
-                  <input
-                    type="text"
-                    value={bgColor}
-                    onChange={(e) => updateStateAndHistory({ bgColor: e.target.value })}
-                    style={{
-                      flex: 1,
-                      padding: '10px',
-                      borderRadius: '10px',
-                      background: 'var(--bg-primary)',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-primary)',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      outline: 'none',
-                      minWidth: 0
-                    }}
-                  />
-                </div>
-              </div>
+              ))}
             </div>
-
             <div>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Color Presets</label>
-              <div className="swatch-grid-mini" style={{ 
-                display: 'flex', 
-                gap: '10px', 
-                overflowX: 'auto', 
-                padding: '4px 0 10px 0',
-                scrollBehavior: 'smooth',
-                WebkitOverflowScrolling: 'touch'
-              }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Presets</label>
+              <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '4px 0 10px', WebkitOverflowScrolling: 'touch' }}>
                 {COLOR_PRESETS.map(p => {
-                  const isSelected = barColor.toUpperCase() === p.qr.toUpperCase() && bgColor.toUpperCase() === p.bg.toUpperCase();
+                  const sel = barColor.toUpperCase() === p.qr.toUpperCase() && bgColor.toUpperCase() === p.bg.toUpperCase();
                   return (
-                    <button
-                      key={p.name}
-                      onClick={() => {
-                        updateStateAndHistory({ barColor: p.qr, bgColor: p.bg });
-                      }}
-                      style={{
-                        flex: '0 0 auto',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '6px',
-                        background: 'none',
-                        border: 'none',
-                        padding: '0',
-                        cursor: 'pointer',
-                        width: '54px'
-                      }}
-                    >
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '10px',
-                        background: p.bg,
-                        border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: isSelected ? '0 4px 10px rgba(255,59,48,0.2)' : '0 2px 4px rgba(0,0,0,0.04)',
-                        transition: 'all 0.2s ease'
-                      }}>
-                        <div style={{ width: '18px', height: '18px', borderRadius: '3px', background: p.qr }} />
+                    <button key={p.name} onClick={() => updateStateAndHistory({ barColor: p.qr, bgColor: p.bg })}
+                      style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, background: 'none', border: 'none', padding: 0, cursor: 'pointer', width: 54 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 10, background: p.bg, border: sel ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: sel ? '0 4px 10px rgba(255,59,48,0.2)' : '0 2px 4px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}>
+                        <div style={{ width: 18, height: 18, borderRadius: 3, background: p.qr }} />
                       </div>
-                      <span style={{ 
-                        fontSize: '9px', 
-                        fontWeight: isSelected ? 700 : 500,
-                        color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        width: '100%',
-                        textAlign: 'center'
-                      }}>{p.name}</span>
+                      <span style={{ fontSize: 9, fontWeight: sel ? 700 : 500, color: sel ? 'var(--accent-primary)' : 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', textAlign: 'center' }}>{p.name}</span>
                     </button>
                   );
                 })}
@@ -739,88 +457,101 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
           </div>
         )}
 
+        {/* DIMENSIONS TAB */}
         {activeTab === 'size' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Bar Thickness ({barWidth}px)</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { label: `Bar Thickness (${barWidth}px)`, key: 'barWidth', min: 1, max: 4, step: 1, val: barWidth },
+              { label: `Height (${height}px)`, key: 'height', min: 50, max: 180, step: 10, val: height },
+              { label: `Quiet Zone (${margin}px)`, key: 'margin', min: 8, max: 40, step: 4, val: margin },
+            ].map(({ label, key, min, max, step, val }) => (
+              <div key={key}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{label}</label>
+                <input type="range" min={min} max={max} step={step} value={val}
+                  onChange={(e) => updateStateAndHistory({ [key]: parseInt(e.target.value) })}
+                  style={{ width: '100%', cursor: 'pointer' }} />
               </div>
-              <input
-                type="range"
-                min="1"
-                max="4"
-                step="1"
-                value={barWidth}
-                onChange={(e) => updateStateAndHistory({ barWidth: parseInt(e.target.value) })}
-                style={{ width: '100%', cursor: 'pointer' }}
-              />
-            </div>
+            ))}
 
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Barcode Height ({height}px)</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-primary)', padding: '10px 14px', borderRadius: 12, border: '1px solid var(--border-color)' }}>
+              <div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>Show Text Label</span>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Display human-readable text under bars</span>
               </div>
-              <input
-                type="range"
-                min="50"
-                max="180"
-                step="10"
-                value={height}
-                onChange={(e) => updateStateAndHistory({ height: parseInt(e.target.value) })}
-                style={{ width: '100%', cursor: 'pointer' }}
-              />
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Quiet Zone Margin ({margin}px)</label>
-              </div>
-              <input
-                type="range"
-                min="8"
-                max="40"
-                step="4"
-                value={margin}
-                onChange={(e) => updateStateAndHistory({ margin: parseInt(e.target.value) })}
-                style={{ width: '100%', cursor: 'pointer' }}
-              />
+              <button onClick={() => updateStateAndHistory({ displayValue: !displayValue })}
+                style={{ background: displayValue ? 'var(--accent-primary)' : 'var(--bg-hover)', border: '1px solid var(--border-color)', borderRadius: 8, padding: '6px 14px', color: displayValue ? 'white' : 'var(--text-secondary)', fontWeight: 700, fontSize: 11, cursor: 'pointer', transition: 'all 0.2s' }}>
+                {displayValue ? 'ON' : 'OFF'}
+              </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* ── Bottom Navigation Toolbar (Matches Main Designer Nav) ── */}
+      {/* ── Bottom Nav Tabs ── */}
       <nav className="bottom-nav" style={{ zIndex: 100 }}>
         {[
-          { id: 'content', label: 'Data', Icon: Barcode },
+          { id: 'content', label: 'Barcode', Icon: AlertCircle },
           { id: 'color', label: 'Colors', Icon: Palette },
           { id: 'size', label: 'Dimensions', Icon: Sliders }
         ].map(tab => (
-          <button
-            key={tab.id}
-            className={`bottom-nav-tab${activeTab === tab.id ? ' active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-            style={{ flex: 1 }}
-          >
+          <button key={tab.id} className={`bottom-nav-tab${activeTab === tab.id ? ' active' : ''}`}
+            onClick={() => setActiveTab(tab.id)} style={{ flex: 1 }}>
             <div className="bottom-nav-highlight" />
-            <span className="bottom-nav-icon">
-              <tab.Icon size={20} strokeWidth={2} />
-            </span>
-            <span className="bottom-nav-label" style={{ fontSize: '11px', fontWeight: 700 }}>{tab.label}</span>
+            <span className="bottom-nav-icon"><tab.Icon size={20} strokeWidth={2} /></span>
+            <span className="bottom-nav-label" style={{ fontSize: 11, fontWeight: 700 }}>{tab.label}</span>
           </button>
         ))}
       </nav>
 
+      {/* ── Advanced Color Picker ── */}
       <AdvancedColorPicker
         isOpen={advPicker.open}
         initialColor={advPicker.color}
         onChange={handleAdvColorChange}
         onConfirm={handleAdvColorConfirm}
-        onCancel={() => {
-          handleAdvColorChange(advPicker.color);
-          setAdvPicker(prev => ({ ...prev, open: false }));
-        }}
+        onCancel={() => { handleAdvColorChange(advPicker.color); setAdvPicker(p => ({ ...p, open: false })); }}
+      />
+
+      {/* ── Premium Barcode Data Modal ── */}
+      <BarcodeDataModal
+        isOpen={isDataModalOpen}
+        bcid={pendingBcid || bcid}
+        standard={BARCODE_STANDARDS[pendingBcid || bcid] || BARCODE_STANDARDS.code128}
+        initialFields={modalInitialFields}
+        onApply={handleModalApply}
+        onClose={() => { setIsDataModalOpen(false); setPendingBcid(null); }}
       />
     </div>
   );
+}
+
+// ─── Mini Preview Canvas ──────────────────────────────────────────────────────
+function MiniBarcodePreview({ type, data }) {
+  const ref = useRef(null);
+  // Some 2D/complex types don't render well in a 50x22 thumbnail, use code128 fallback for display only
+  const FALLBACK_AS_1D = new Set(['aztec', 'maxicode', 'hanxin', 'microqrcode', 'codablockf', 'code49']);
+  const previewType = FALLBACK_AS_1D.has(type) ? 'code128' : type;
+  const previewData = FALLBACK_AS_1D.has(type) ? type.toUpperCase().slice(0, 8) : data;
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const ctx = ref.current.getContext('2d');
+    ctx.clearRect(0, 0, 50, 22);
+    renderBarcode(ref.current, previewData, { bcid: previewType, barColor: '#000', bgColor: '#fff', barWidth: 1, height: 18, margin: 2, displayValue: false });
+  }, [previewType, previewData]);
+  return <canvas ref={ref} width={50} height={22} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+}
+
+// ─── Undo/Redo Button Styles ──────────────────────────────────────────────────
+function undoRedoStyle(disabled) {
+  return {
+    width: 36, height: 36, borderRadius: 10,
+    background: 'var(--bg-hover)',
+    border: '1px solid var(--border-color)',
+    color: disabled ? 'var(--text-tertiary)' : 'var(--accent-primary)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: disabled ? 'default' : 'pointer',
+    transition: 'all 0.2s ease',
+    opacity: disabled ? 0.45 : 1
+  };
 }

@@ -23,6 +23,7 @@
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/share": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
+    "bwip-js": "^4.11.2",
     "file-saver": "^2.0.5",
     "html5-qrcode": "^2.3.8",
     "jspdf": "^4.2.1",
