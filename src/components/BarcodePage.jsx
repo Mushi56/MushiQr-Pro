@@ -378,12 +378,12 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
               <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Barcode Type</span>
             </div>
 
-            <div className="type-tabs" style={{ maxHeight: 185, overflowY: 'auto', padding: '4px' }}>
+            <div className="type-tabs" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', maxHeight: 185, overflowY: 'auto', padding: '4px 0' }}>
               {Object.entries(BARCODE_STANDARDS).map(([key, standard]) => (
                 <button
                   key={key}
                   className={`type-tab ${bcid === key ? 'active' : ''}`}
-                  style={{ aspectRatio: '1.35 / 1', padding: '10px 6px' }}
+                  style={{ aspectRatio: '1.35 / 1', padding: '8px 4px' }}
                   onClick={() => {
                     const targetBcid = key;
                     const existingFields = parseValueToFields(targetBcid === bcid ? text : standard.defaultValue, targetBcid);
@@ -392,7 +392,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                     setIsDataModalOpen(true);
                   }}
                 >
-                  <span className="type-tab-icon" style={{ width: '100%', height: '38px', background: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
+                  <span className="type-tab-icon" style={{ width: '100%', height: '32px', background: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
                     <MiniBarcodePreview type={key} data={standard.defaultValue} />
                   </span>
                   {standard.name}
@@ -529,10 +529,10 @@ function MiniBarcodePreview({ type, data }) {
   useEffect(() => {
     if (!ref.current) return;
     const ctx = ref.current.getContext('2d');
-    ctx.clearRect(0, 0, 80, 36);
-    renderBarcode(ref.current, previewData, { bcid: previewType, barColor: '#000', bgColor: '#fff', barWidth: 1.5, height: 32, margin: 2, displayValue: false });
+    ctx.clearRect(0, 0, 80, 32);
+    renderBarcode(ref.current, previewData, { bcid: previewType, barColor: '#000', bgColor: '#fff', barWidth: 1.2, height: 28, margin: 2, displayValue: false });
   }, [previewType, previewData]);
-  return <canvas ref={ref} width={80} height={36} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+  return <canvas ref={ref} width={80} height={32} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
 }
 
 // ─── Undo/Redo Button Styles ──────────────────────────────────────────────────
