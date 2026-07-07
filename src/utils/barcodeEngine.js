@@ -67,8 +67,8 @@ export const BARCODE_STANDARDS = {
   'gs1databar': {
     name: 'GS1 DataBar',
     desc: 'Omnidirectional expanded retail',
-    placeholder: 'e.g. 0100123456789012',
-    defaultValue: '0100123456789012',
+    placeholder: 'e.g. 01234567890128',
+    defaultValue: '01234567890128',
     hint: 'Exactly 13 or 14 digits (GTIN)',
     validate: (val) => /^\d{13,14}$/.test(val),
     errorMsg: 'Must be exactly 13 or 14 digits'

@@ -883,7 +883,7 @@ function GS1DataBarForm({ fields, setFields }) {
         value={value}
         onChange={v => setFields(f => ({ ...f, data: v.replace(/\D/g, '').slice(0, 14) }))}
         maxLength={14}
-        placeholder="0100123456789012"
+        placeholder="01234567890128"
         inputMode="numeric"
         monospace
         Icon={Hash}

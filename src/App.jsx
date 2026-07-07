@@ -4235,7 +4235,7 @@ export default function App() {
                 datamatrix: 'DataMatrix-Standard',
                 itf14: '10012345678902',
                 ean8: '40123455',
-                gs1databar: '0101234567890128',
+                gs1databar: '01234567890128',
                 pdf417: 'PDF417-ID-FORMAT',
                 code93: 'COMPACT-93',
                 upce: '01234565',

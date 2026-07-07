@@ -411,7 +411,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
         {/* COLOR TAB */}
         {activeTab === 'color' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', gap: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ flex: 1 }}>
                 <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Bar Color</label>
                 <div className="swatch-grid-mini">
