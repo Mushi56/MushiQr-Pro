@@ -7392,13 +7392,20 @@ button:active,
 
 /* Quick Options Grid */
 .quick-options-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  display: flex;
+  overflow-x: auto;
   gap: 12px;
   width: 100%;
+  padding: 4px 0 10px;
+  scrollbar-width: none; /* Firefox */
+}
+
+.quick-options-grid::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .quick-option-card {
+  flex: 0 0 76px;
   aspect-ratio: 1 / 1;
   background: var(--bg-elevated) !important;
   border: 1px solid var(--border-color) !important;
@@ -7444,6 +7451,7 @@ button:active,
     gap: 8px !important;
   }
   .quick-option-card {
+    flex: 0 0 64px !important;
     padding: 8px 4px !important;
     border-radius: 12px !important;
     gap: 4px !important;
