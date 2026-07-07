@@ -342,7 +342,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       </section>
 
       {/* Spacing wrapper for body content */}
-      <div style={{ flex: 1, padding: '16px var(--main-padding-x) 180px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ flex: 1, padding: activeTab === 'content' ? '16px var(--main-padding-x) 90px' : '16px var(--main-padding-x) 240px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', width: '100%', boxSizing: 'border-box', transition: 'padding 0.2s ease' }}>
         {/* Type badge */}
         <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, width: '100%', justifyContent: 'flex-start' }}>
           <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{currentStandard.name}</span>
@@ -435,47 +435,8 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       </div>
 
       {/* ── Bottom Panel ── */}
-      <div style={{ position: 'absolute', bottom: 70, left: 0, right: 0, background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-color)', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '20px var(--main-padding-x) 24px', boxShadow: '0 -8px 32px rgba(0,0,0,0.1)', zIndex: 90, boxSizing: 'border-box' }}>
-
-        {/* DATA TAB */}
-        {activeTab === 'content' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Selected Format Payload</span>
-            </div>
-            <button
-              onClick={() => {
-                const existingFields = parseValueToFields(text, bcid);
-                setModalInitialFields(existingFields);
-                setPendingBcid(bcid);
-                setIsDataModalOpen(true);
-              }}
-              style={{
-                width: '100%',
-                padding: '16px',
-                borderRadius: '16px',
-                background: 'var(--accent-primary)',
-                color: 'white',
-                border: 'none',
-                fontSize: '14px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: '0 8px 24px rgba(214, 0, 54, 0.25)',
-                transition: 'all 0.2s'
-              }}
-            >
-              <Pencil size={16} />
-              Edit Barcode Data
-            </button>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '4px' }}>
-              Current: <code style={{ fontFamily: 'monospace', fontWeight: 600 }}>{text}</code>
-            </div>
-          </div>
-        )}
+      {activeTab !== 'content' && (
+        <div style={{ position: 'absolute', bottom: 70, left: 0, right: 0, background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-color)', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '20px var(--main-padding-x) 24px', boxShadow: '0 -8px 32px rgba(0,0,0,0.1)', zIndex: 90, boxSizing: 'border-box' }}>
 
         {/* COLOR TAB */}
         {activeTab === 'color' && (
@@ -551,6 +512,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
           </div>
         )}
       </div>
+      )}
 
       {/* ── Bottom Nav Tabs ── */}
       <nav className="bottom-nav" style={{ zIndex: 100 }}>
