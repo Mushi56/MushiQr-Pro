@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, ChevronLeft, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2, Star, FileSpreadsheet, Barcode } from 'lucide-react';
+import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, ChevronLeft, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2, Star, FileSpreadsheet, Barcode, Link, Contact, File, Music, Coins, MessageCircle, Play, Calendar } from 'lucide-react';
+import { FaInstagram, FaFacebookF, FaXTwitter, FaLinkedinIn } from 'react-icons/fa6';
 import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
 import { renderBarcode } from '../utils/barcodeEngine';
 import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved } from '../utils/storage';
@@ -334,6 +335,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
   const [savedIds, setSavedIds] = useState(new Set());
   const [activeSlide, setActiveSlide] = useState(0);
   const [showAllBarcodes, setShowAllBarcodes] = useState(false);
+  const [showAllQR, setShowAllQR] = useState(false);
   const slideCount = 3;
 
   const touchStartX = useRef(0);
@@ -379,16 +381,26 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
   };
 
   const quickOptions = [
-    { id: QR_TYPES.URL, label: 'Website', icon: <Link2 size={20} /> },
-    { id: QR_TYPES.TEXT, label: 'Text', icon: <Type size={20} /> },
-    { id: QR_TYPES.WIFI, label: 'WiFi', icon: <Wifi size={20} /> },
-    { id: QR_TYPES.EMAIL, label: 'Email', icon: <Mail size={20} /> },
-    { id: QR_TYPES.PHONE, label: 'Phone', icon: <Phone size={20} /> },
-    { id: QR_TYPES.SMS, label: 'SMS', icon: <MessageSquare size={20} /> },
-    { id: QR_TYPES.VCARD, label: 'Contact', icon: <User size={20} /> },
-    { id: QR_TYPES.LOCATION, label: 'Location', icon: <MapPin size={20} /> },
-    { id: QR_TYPES.PDF, label: 'PDF', icon: <FileCode size={20} /> },
-    { id: QR_TYPES.IMAGE, label: 'Image', icon: <Image size={20} /> },
+    { id: QR_TYPES.URL, label: 'Website', icon: <Link size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.TEXT, label: 'Text', icon: <Type size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.WIFI, label: 'WiFi', icon: <Wifi size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.VCARD, label: 'vCard', icon: <Contact size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.EMAIL, label: 'Email', icon: <Mail size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.PHONE, label: 'Phone', icon: <Phone size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.SMS, label: 'SMS', icon: <MessageSquare size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.LOCATION, label: 'Location', icon: <MapPin size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.PDF, label: 'PDF', icon: <FileCode size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.IMAGE, label: 'Image', icon: <Image size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.INSTAGRAM, label: 'Instagram', icon: <FaInstagram size={20} /> },
+    { id: QR_TYPES.FACEBOOK, label: 'Facebook', icon: <FaFacebookF size={20} /> },
+    { id: QR_TYPES.X, label: 'X (Twitter)', icon: <FaXTwitter size={20} /> },
+    { id: QR_TYPES.LINKEDIN, label: 'LinkedIn', icon: <FaLinkedinIn size={20} /> },
+    { id: QR_TYPES.WHATSAPP, label: 'WhatsApp', icon: <MessageCircle size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.YOUTUBE, label: 'YouTube', icon: <Play size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.EVENT, label: 'Event', icon: <Calendar size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.CRYPTO, label: 'Crypto', icon: <Coins size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.AUDIO, label: 'Audio', icon: <Music size={20} strokeWidth={1.8} /> },
+    { id: QR_TYPES.DOCUMENT, label: 'Document', icon: <File size={20} strokeWidth={1.8} /> },
   ];
 
   const barcodeOptions = [
@@ -728,19 +740,27 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
           </div>
         </div>
 
-        {/* Quick Create Grid */}
+        {/* Create QR Grid */}
         <div style={{ padding: '24px var(--main-padding-x) 12px' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Quick Create</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Create QR</h3>
+            <button 
+              onClick={() => setShowAllQR(!showAllQR)}
+              style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+            >
+              {showAllQR ? 'See Less' : 'See All'}
+            </button>
+          </div>
           <div className="quick-options-grid">
-            {quickOptions.map(option => (
+            {(showAllQR ? quickOptions : quickOptions.slice(0, 10)).map(option => (
               <button
                 key={option.id}
                 onClick={() => onQuickCreate(option.id)}
                 className="quick-option-card"
                 style={{ width: '100%' }}
               >
-                <div className="quick-option-icon-wrapper">
-                  {React.cloneElement(option.icon, { size: 20, strokeWidth: 1.8 })}
+                <div className="quick-option-icon-wrapper" style={{ background: 'rgba(214, 0, 54, 0.08)', color: '#D60036' }}>
+                  {React.cloneElement(option.icon, { size: 20 })}
                 </div>
                 <span style={{ 
                   fontSize: '9px', 
@@ -762,18 +782,26 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
           </div>
         </div>
 
-        {/* Quick Create Barcode Grid */}
+        {/* Create Barcode Grid */}
         <div style={{ padding: '12px var(--main-padding-x) 24px' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Quick Create Barcode</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Create Barcode</h3>
+            <button 
+              onClick={() => setShowAllBarcodes(!showAllBarcodes)}
+              style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+            >
+              {showAllBarcodes ? 'See Less' : 'See All'}
+            </button>
+          </div>
           <div className="quick-options-grid">
-            {(showAllBarcodes ? barcodeOptions : barcodeOptions.slice(0, 9)).map(option => (
+            {(showAllBarcodes ? barcodeOptions : barcodeOptions.slice(0, 10)).map(option => (
               <button
                 key={option.id}
                 onClick={() => onQuickCreateBarcode(option.id)}
                 className="quick-option-card"
                 style={{ width: '100%' }}
               >
-                <div className="quick-option-icon-wrapper" style={{ background: 'rgba(0, 240, 255, 0.1)', color: '#00F0FF' }}>
+                <div className="quick-option-icon-wrapper" style={{ background: 'rgba(214, 0, 54, 0.08)', color: '#D60036' }}>
                   {getBarcodeIcon(option.id)}
                 </div>
                 <span style={{ 
@@ -793,28 +821,6 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 </span>
               </button>
             ))}
-            
-            <button
-              onClick={() => setShowAllBarcodes(!showAllBarcodes)}
-              className="quick-option-card"
-              style={{ width: '100%', background: 'var(--bg-hover)', border: '1px dashed var(--border-color)' }}
-            >
-              <div className="quick-option-icon-wrapper" style={{ background: 'var(--accent-soft)', color: 'var(--accent-primary)' }}>
-                <Plus size={20} strokeWidth={2.5} style={{ transform: showAllBarcodes ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s' }} />
-              </div>
-              <span style={{ 
-                fontSize: '9px', 
-                fontWeight: 800, 
-                textAlign: 'center', 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.2px', 
-                marginTop: '2px',
-                width: '100%',
-                display: 'block'
-              }}>
-                {showAllBarcodes ? 'LESS' : '+20 MORE'}
-              </span>
-            </button>
           </div>
         </div>
 
