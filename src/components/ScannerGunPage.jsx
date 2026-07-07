@@ -5,10 +5,8 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import qrcode from 'qrcode-generator';
 import {
   ArrowLeft, Wifi, Bluetooth, Cable, CheckCircle2, XCircle,
-  Copy, RefreshCw, Zap, ZapOff, History, Settings2,
-  Crosshair, Signal, SignalZero, Monitor, Smartphone,
-  Plus, Minus, RotateCcw, Download, ChevronRight, Scan,
-  AlertCircle, Loader2, Send
+  Copy, Zap, ZapOff, History, Settings2,
+  Crosshair, Monitor, ChevronRight, Loader2, Send
 } from 'lucide-react';
 
 // ─── Scannable barcode formats ────────────────────────────────────────────────
@@ -27,7 +25,7 @@ const ALL_SCAN_FORMATS = [
   Html5QrcodeSupportedFormats.AZTEC,
 ];
 
-// ─── Generate a random session ID ────────────────────────────────────────────
+// ─── Generate session ID ──────────────────────────────────────────────────────
 function genSessionId() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let id = 'mqs-';
@@ -35,42 +33,7 @@ function genSessionId() {
   return id;
 }
 
-// ─── Render QR code to canvas ────────────────────────────────────────────────
-function drawQR(canvas, text, size = 200) {
-  try {
-    // We generate the QR pattern manually using qrcode-generator
-    // eslint-disable-next-line no-undef
-    const qr = qrcode(0, 'M');
-    qr.addData(text);
-    qr.make();
-    const count = qr.getModuleCount();
-    const cell = Math.floor(size / count);
-    const offset = Math.floor((size - cell * count) / 2);
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = '#000000';
-    for (let r = 0; r < count; r++) {
-      for (let c = 0; c < count; c++) {
-        if (qr.isDark(r, c)) {
-          ctx.fillRect(offset + c * cell, offset + r * cell, cell, cell);
-        }
-      }
-    }
-  } catch (e) {
-    // Fallback: clear canvas with text
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#000';
-    ctx.font = '10px monospace';
-    ctx.fillText('QR unavailable', 10, 30);
-  }
-}
-
-// ─── Connection Mode Tab ──────────────────────────────────────────────────────
+// ─── Mode Tab ─────────────────────────────────────────────────────────────────
 function ModeTab({ id, active, icon: Icon, label, onClick }) {
   return (
     <button
@@ -100,15 +63,34 @@ function ModeTab({ id, active, icon: Icon, label, onClick }) {
   );
 }
 
+// ─── Step Row ─────────────────────────────────────────────────────────────────
+function StepRow({ n, title, desc, color }) {
+  return (
+    <div style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid var(--border-color)' }}>
+      <div style={{
+        width: '28px', height: '28px', borderRadius: '50%',
+        background: color,
+        color: '#fff', fontSize: '12px', fontWeight: 700,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>{n}</div>
+      <div>
+        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{title}</div>
+        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>{desc}</div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ScannerGunPage({ onNavigate }) {
+  // ── State ────────────────────────────────────────────────────────────────
   const [mode, setMode] = useState('wifi');
   const [sessionId] = useState(() => genSessionId());
   const [isScanning, setIsScanning] = useState(false);
   const [lastScan, setLastScan] = useState('');
   const [scanHistory, setScanHistory] = useState([]);
   const [isSending, setIsSending] = useState(false);
-  const [sendStatus, setSendStatus] = useState(null); // 'ok' | 'err'
+  const [sendStatus, setSendStatus] = useState(null);
   const [addEnter, setAddEnter] = useState(true);
   const [prefix, setPrefix] = useState('');
   const [suffix, setSuffix] = useState('');
@@ -120,20 +102,71 @@ export default function ScannerGunPage({ onNavigate }) {
   const [copied, setCopied] = useState(false);
   const [pcUrl, setPcUrl] = useState('');
 
+  // ── Refs ─────────────────────────────────────────────────────────────────
   const scannerRef = useRef(null);
   const qrCanvasRef = useRef(null);
   const mountedRef = useRef(true);
-  const lastScannedRef = useRef('');
   const cooldownRef = useRef(false);
+  const lastScannedRef = useRef('');
 
-  // Build PC companion URL
+  // ── Haptics / Sound ───────────────────────────────────────────────────────
+  const haptic = useCallback(() => {
+    if (Capacitor.isNativePlatform()) {
+      Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {});
+    }
+  }, []);
+
+  const playBeep = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.15);
+    } catch (e) {}
+  }, []);
+
+  // ── Stop Scanner ──────────────────────────────────────────────────────────
+  // Defined BEFORE any useEffect that references it
+  const stopScanner = useCallback(async () => {
+    const scanner = scannerRef.current;
+    if (scanner) {
+      try {
+        if (scanner.isScanning) await scanner.stop();
+      } catch (e) {}
+      scannerRef.current = null;
+    }
+    const vp = document.getElementById('gun-scanner-viewport');
+    if (vp) vp.innerHTML = '';
+    setFlashOn(false);
+    setFlashSupported(false);
+    setIsScanning(false);
+  }, []);
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      stopScanner();
+    };
+  }, [stopScanner]);
+
+  // ── Build PC companion URL ────────────────────────────────────────────────
   useEffect(() => {
     const base = window.location.origin;
     const url = `${base}/scanner-pc.html?session=${sessionId}`;
     setPcUrl(url);
   }, [sessionId]);
 
-  // Render QR on canvas when URL is ready
+  // ── Render QR on canvas when URL is ready ────────────────────────────────
   useEffect(() => {
     if (!pcUrl || !qrCanvasRef.current) return;
     try {
@@ -163,85 +196,26 @@ export default function ScannerGunPage({ onNavigate }) {
     }
   }, [pcUrl]);
 
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-      stopScanner();
-    };
-  }, []);
-
-  // ── Haptics ────────────────────────────────────────────────────────────────
-  const haptic = useCallback(() => {
-    if (Capacitor.isNativePlatform()) {
-      Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {});
-    }
-  }, []);
-
-  // ── Beep ───────────────────────────────────────────────────────────────────
-  const playBeep = useCallback(() => {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(1800, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.15);
-    } catch (e) {}
-  }, []);
-
-  // ── Stop Scanner ───────────────────────────────────────────────────────────
-  const stopScanner = useCallback(async () => {
-    const scanner = scannerRef.current;
-    if (scanner) {
-      try {
-        if (scanner.isScanning) await scanner.stop();
-      } catch (e) {}
-      scannerRef.current = null;
-    }
-    const vp = document.getElementById('gun-scanner-viewport');
-    if (vp) vp.innerHTML = '';
-    setFlashOn(false);
-    setFlashSupported(false);
-    setIsScanning(false);
-  }, []);
-
-  // ── Start Scanner ──────────────────────────────────────────────────────────
+  // ── Start Scanner ─────────────────────────────────────────────────────────
   const startScanner = useCallback(async () => {
     if (scannerRef.current) await stopScanner();
-
     try {
       const scanner = new Html5Qrcode('gun-scanner-viewport', {
         formatsToSupport: ALL_SCAN_FORMATS,
         verbose: false,
       });
       scannerRef.current = scanner;
-
       await scanner.start(
         { facingMode: 'environment' },
-        {
-          fps: 15,
-          qrbox: { width: 260, height: 160 },
-          aspectRatio: 1.7,
-          disableFlip: false,
-        },
+        { fps: 15, qrbox: { width: 260, height: 160 }, aspectRatio: 1.7 },
         onScanSuccess,
         () => {}
       );
-
       setIsScanning(true);
-
       // Check torch support
       try {
         const videoEl = document.querySelector('#gun-scanner-viewport video');
-        const stream = videoEl?.srcObject;
-        const track = stream?.getVideoTracks?.()?.[0];
+        const track = videoEl?.srcObject?.getVideoTracks?.()[0];
         if (track) {
           const caps = track.getCapabilities?.() || {};
           if (caps.torch) setFlashSupported(true);
@@ -250,13 +224,14 @@ export default function ScannerGunPage({ onNavigate }) {
     } catch (err) {
       console.warn('Scanner start error:', err);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stopScanner]);
 
-  // ── Toggle Flash ───────────────────────────────────────────────────────────
+  // ── Toggle Flash ──────────────────────────────────────────────────────────
   const toggleFlash = useCallback(async () => {
     try {
       const videoEl = document.querySelector('#gun-scanner-viewport video');
-      const track = videoEl?.srcObject?.getVideoTracks?.()?.[0];
+      const track = videoEl?.srcObject?.getVideoTracks?.()[0];
       if (!track) return;
       const newVal = !flashOn;
       await track.applyConstraints({ advanced: [{ torch: newVal }] });
@@ -264,7 +239,7 @@ export default function ScannerGunPage({ onNavigate }) {
     } catch (e) {}
   }, [flashOn]);
 
-  // ── On Scan Success ────────────────────────────────────────────────────────
+  // ── On Scan Success ───────────────────────────────────────────────────────
   const onScanSuccess = useCallback(async (rawData) => {
     if (cooldownRef.current) return;
     if (rawData === lastScannedRef.current) return;
@@ -278,8 +253,7 @@ export default function ScannerGunPage({ onNavigate }) {
     haptic();
     playBeep();
 
-    const processed = prefix + rawData + suffix;
-    const toSend = processed + (addEnter ? '\n' : '');
+    const toSend = prefix + rawData + suffix + (addEnter ? '\n' : '');
 
     if (!mountedRef.current) return;
     setLastScan(rawData);
@@ -289,7 +263,6 @@ export default function ScannerGunPage({ onNavigate }) {
       ...prev.slice(0, 49)
     ]);
 
-    // Send to PC via ntfy.sh relay
     if (mode === 'wifi' && sessionId) {
       setIsSending(true);
       try {
@@ -311,9 +284,10 @@ export default function ScannerGunPage({ onNavigate }) {
       setIsSending(false);
       setTimeout(() => { if (mountedRef.current) setSendStatus(null); }, 1500);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, sessionId, prefix, suffix, addEnter, haptic, playBeep]);
 
-  // ── Copy Session ───────────────────────────────────────────────────────────
+  // ── Copy helpers ──────────────────────────────────────────────────────────
   const copySession = () => {
     navigator.clipboard.writeText(sessionId).then(() => {
       setCopied(true);
@@ -321,20 +295,14 @@ export default function ScannerGunPage({ onNavigate }) {
     }).catch(() => {});
   };
 
-  // ── Copy PC URL ────────────────────────────────────────────────────────────
   const copyPcUrl = () => {
     navigator.clipboard.writeText(pcUrl).catch(() => {});
   };
 
-  const modeData = {
-    wifi: { label: 'WiFi / Internet', icon: Wifi },
-    bt:   { label: 'Bluetooth', icon: Bluetooth },
-    usb:  { label: 'USB Wired', icon: Cable },
-  };
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div style={{
-      minHeight: '100dvh',
+      minHeight: '100vh',
       background: 'var(--bg-primary)',
       display: 'flex',
       flexDirection: 'column',
@@ -374,7 +342,7 @@ export default function ScannerGunPage({ onNavigate }) {
                 position: 'absolute', top: '-2px', right: '-4px',
                 background: 'var(--accent-color)', color: '#fff',
                 borderRadius: '100px', fontSize: '9px', fontWeight: 700,
-                padding: '1px 5px', minWidth: '14px', textAlign: 'center',
+                padding: '1px 5px',
               }}>{scanTotal}</span>
             )}
           </button>
@@ -387,13 +355,14 @@ export default function ScannerGunPage({ onNavigate }) {
         </div>
       </div>
 
+      {/* ── Content ── */}
       <div style={{ flex: 1, padding: '16px 16px 0', display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
-        {/* ── Mode Tabs ── */}
+        {/* Mode Tabs */}
         <div style={{ display: 'flex', gap: '8px' }}>
-          {Object.entries(modeData).map(([id, { label, icon: Icon }]) => (
-            <ModeTab key={id} id={id} active={mode === id} icon={Icon} label={id === 'wifi' ? 'WiFi' : id === 'bt' ? 'Bluetooth' : 'USB'} onClick={setMode} />
-          ))}
+          <ModeTab id="wifi" active={mode === 'wifi'} icon={Wifi}      label="WiFi"      onClick={setMode} />
+          <ModeTab id="bt"   active={mode === 'bt'}   icon={Bluetooth} label="Bluetooth" onClick={setMode} />
+          <ModeTab id="usb"  active={mode === 'usb'}  icon={Cable}     label="USB"       onClick={setMode} />
         </div>
 
         {/* ── WiFi Mode ── */}
@@ -408,7 +377,7 @@ export default function ScannerGunPage({ onNavigate }) {
             }}>
               {/* Card header */}
               <div style={{
-                background: 'linear-gradient(135deg, rgba(214,0,54,0.15) 0%, rgba(0,180,120,0.08) 100%)',
+                background: 'linear-gradient(135deg, rgba(214,0,54,0.12) 0%, rgba(0,180,120,0.06) 100%)',
                 borderBottom: '1px solid var(--border-color)',
                 padding: '14px 16px',
                 display: 'flex',
@@ -430,11 +399,9 @@ export default function ScannerGunPage({ onNavigate }) {
                 <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{
                     width: '8px', height: '8px', borderRadius: '50%',
-                    background: '#00d4a0',
-                    boxShadow: '0 0 8px #00d4a0',
-                    animation: 'pulse 2s infinite',
+                    background: '#00d4a0', boxShadow: '0 0 8px #00d4a0',
                   }} />
-                  <span style={{ fontSize: '11px', color: '#00d4a0', fontWeight: 600 }}>Relay Active</span>
+                  <span style={{ fontSize: '11px', color: '#00d4a0', fontWeight: 600 }}>Active</span>
                 </div>
               </div>
 
@@ -442,35 +409,32 @@ export default function ScannerGunPage({ onNavigate }) {
               <div style={{ padding: '16px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
                 {/* QR Code */}
                 <div style={{
-                  background: '#fff',
-                  borderRadius: '12px',
-                  padding: '10px',
-                  flexShrink: 0,
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+                  background: '#fff', borderRadius: '12px', padding: '8px',
+                  flexShrink: 0, boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
                 }}>
-                  <canvas ref={qrCanvasRef} style={{ display: 'block', width: '140px', height: '140px', imageRendering: 'pixelated' }} />
+                  <canvas
+                    ref={qrCanvasRef}
+                    style={{ display: 'block', width: '130px', height: '130px', imageRendering: 'pixelated' }}
+                  />
                 </div>
-
-                {/* Instructions */}
+                {/* Steps */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '10px' }}>
-                    How to connect:
-                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>How to connect:</div>
                   {[
-                    { n: '1', text: 'Scan QR with PC camera or open the link below' },
-                    { n: '2', text: 'PC companion page opens in browser' },
-                    { n: '3', text: 'Start scanning barcodes on your phone' },
-                    { n: '4', text: 'Each scan instantly appears & types on PC' },
-                  ].map(({ n, text }) => (
-                    <div key={n} style={{ display: 'flex', gap: '8px', marginBottom: '7px', alignItems: 'flex-start' }}>
+                    'Scan this QR with PC camera or copy the link below',
+                    'PC page opens in browser — no install needed',
+                    'Start scanning barcodes on your phone',
+                    'Each scan instantly types on PC ✓',
+                  ].map((text, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '6px', alignItems: 'flex-start' }}>
                       <div style={{
-                        width: '18px', height: '18px', borderRadius: '50%',
-                        background: 'var(--accent-gradient)',
-                        color: '#fff', fontSize: '10px', fontWeight: 700,
+                        width: '16px', height: '16px', borderRadius: '50%',
+                        background: 'var(--accent-gradient)', color: '#fff',
+                        fontSize: '9px', fontWeight: 700,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         flexShrink: 0, marginTop: '1px',
-                      }}>{n}</div>
-                      <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{text}</span>
+                      }}>{i + 1}</div>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{text}</span>
                     </div>
                   ))}
                 </div>
@@ -478,6 +442,7 @@ export default function ScannerGunPage({ onNavigate }) {
 
               {/* Session ID + URL */}
               <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {/* Session ID row */}
                 <div style={{
                   background: 'var(--bg-elevated)',
                   border: '1px solid var(--border-color)',
@@ -489,7 +454,7 @@ export default function ScannerGunPage({ onNavigate }) {
                   gap: '8px',
                 }}>
                   <div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Session ID</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Session ID</div>
                     <div style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em' }}>{sessionId}</div>
                   </div>
                   <button
@@ -497,39 +462,30 @@ export default function ScannerGunPage({ onNavigate }) {
                     style={{
                       background: copied ? 'rgba(0,212,160,0.15)' : 'var(--bg-hover)',
                       border: `1px solid ${copied ? 'rgba(0,212,160,0.3)' : 'var(--border-color)'}`,
-                      borderRadius: '8px',
-                      padding: '7px 12px',
+                      borderRadius: '8px', padding: '7px 12px',
                       color: copied ? '#00d4a0' : 'var(--text-secondary)',
                       fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                      fontFamily: 'inherit',
-                      display: 'flex', alignItems: 'center', gap: '5px',
+                      fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px',
                       transition: 'all 0.2s',
                     }}
                   >
                     {copied ? <CheckCircle2 size={13} /> : <Copy size={13} />}
-                    {copied ? 'Copied!' : 'Copy'}
+                    {copied ? 'Copied!' : 'Copy ID'}
                   </button>
                 </div>
 
+                {/* PC URL */}
                 <button
                   onClick={copyPcUrl}
-                  style={{
-                    background: 'none',
-                    border: '1px dashed var(--border-color)',
-                    borderRadius: '10px',
-                    padding: '9px 12px',
-                    color: 'var(--text-muted)',
-                    fontSize: '11px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    textAlign: 'left',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    width: '100%',
-                    transition: 'all 0.2s',
-                  }}
                   title="Click to copy PC companion URL"
+                  style={{
+                    background: 'none', border: '1px dashed var(--border-color)',
+                    borderRadius: '10px', padding: '9px 12px',
+                    color: 'var(--text-muted)', fontSize: '11px', cursor: 'pointer',
+                    fontFamily: 'monospace', textAlign: 'left',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    width: '100%', transition: 'all 0.2s',
+                  }}
                 >
                   🔗 {pcUrl || 'Building URL...'}
                 </button>
@@ -541,18 +497,13 @@ export default function ScannerGunPage({ onNavigate }) {
               <div style={{
                 background: 'var(--bg-card)',
                 border: `1px solid ${sendStatus === 'ok' ? 'rgba(0,212,160,0.4)' : sendStatus === 'err' ? 'rgba(214,0,54,0.4)' : 'var(--border-color)'}`,
-                borderRadius: '16px',
-                padding: '14px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                transition: 'all 0.3s',
+                borderRadius: '16px', padding: '14px 16px',
+                display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.3s',
               }}>
                 <div style={{
                   width: '40px', height: '40px', borderRadius: '10px',
                   background: sendStatus === 'ok' ? 'rgba(0,212,160,0.15)' : sendStatus === 'err' ? 'rgba(214,0,54,0.15)' : 'var(--bg-elevated)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 }}>
                   {isSending ? (
                     <Loader2 size={18} color="var(--text-secondary)" style={{ animation: 'spin 1s linear infinite' }} />
@@ -568,10 +519,7 @@ export default function ScannerGunPage({ onNavigate }) {
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px' }}>
                     {isSending ? 'Sending to PC...' : sendStatus === 'ok' ? 'Sent to PC ✓' : sendStatus === 'err' ? 'Send failed' : 'Last Scanned'}
                   </div>
-                  <div style={{
-                    fontFamily: 'monospace', fontSize: '15px', fontWeight: 700,
-                    color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {lastScan}
                   </div>
                 </div>
@@ -588,12 +536,7 @@ export default function ScannerGunPage({ onNavigate }) {
 
         {/* ── Bluetooth Mode ── */}
         {mode === 'bt' && (
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '20px',
-            padding: '20px',
-          }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
               <div style={{
                 width: '44px', height: '44px', borderRadius: '12px',
@@ -608,54 +551,25 @@ export default function ScannerGunPage({ onNavigate }) {
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Serial Port Profile keyboard emulation</div>
               </div>
             </div>
-
             <div style={{
-              background: 'rgba(251,191,36,0.08)',
-              border: '1px solid rgba(251,191,36,0.2)',
-              borderRadius: '12px',
-              padding: '12px 14px',
-              marginBottom: '16px',
-              fontSize: '12px',
-              color: '#fbbf24',
-              lineHeight: '1.6',
+              background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)',
+              borderRadius: '12px', padding: '12px 14px', marginBottom: '16px',
+              fontSize: '12px', color: '#fbbf24', lineHeight: '1.6',
             }}>
-              ⚠️ Bluetooth keyboard emulation requires a native Android plugin. Use <strong>WiFi mode</strong> for instant connection without any extra setup.
+              ⚠️ For the easiest connection, use <strong>WiFi mode</strong> — it works on any network with no pairing required.
             </div>
-
             {[
-              { step: '1', title: 'Enable Bluetooth', desc: 'Enable Bluetooth on your phone and PC' },
-              { step: '2', title: 'Pair Devices', desc: 'Pair your phone with the PC in Bluetooth settings' },
-              { step: '3', title: 'Use Input Method', desc: 'Set phone as Bluetooth keyboard in PC Bluetooth settings' },
-              { step: '4', title: 'Scan Barcodes', desc: 'Each scan is sent as keyboard input to the paired device' },
-            ].map(({ step, title, desc }) => (
-              <div key={step} style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid var(--border-color)' }}>
-                <div style={{
-                  width: '28px', height: '28px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #1a56db, #3b82f6)',
-                  color: '#fff', fontSize: '12px', fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>{step}</div>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{title}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>{desc}</div>
-                </div>
-              </div>
-            ))}
-
-            <div style={{ marginTop: '14px', fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-              💡 For the best cross-platform experience, switch to <strong style={{ color: 'var(--text-secondary)' }}>WiFi mode</strong> which works without pairing and on any network.
-            </div>
+              { n: '1', title: 'Enable Bluetooth', desc: 'Enable Bluetooth on both phone and PC' },
+              { n: '2', title: 'Pair Devices', desc: 'Pair your phone with the PC in Bluetooth settings' },
+              { n: '3', title: 'Use as Input', desc: 'Set phone as Bluetooth keyboard on PC' },
+              { n: '4', title: 'Scan', desc: 'Each scan is sent as keyboard input to the paired device' },
+            ].map(s => <StepRow key={s.n} {...s} color="linear-gradient(135deg,#1a56db,#3b82f6)" />)}
           </div>
         )}
 
         {/* ── USB Mode ── */}
         {mode === 'usb' && (
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '20px',
-            padding: '20px',
-          }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
               <div style={{
                 width: '44px', height: '44px', borderRadius: '12px',
@@ -667,45 +581,25 @@ export default function ScannerGunPage({ onNavigate }) {
               </div>
               <div>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>USB / ADB Mode</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Wired connection via Android Debug Bridge</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Wired via Android Debug Bridge</div>
               </div>
             </div>
-
             {[
-              { step: '1', title: 'Enable USB Debugging', desc: 'Go to Settings → Developer Options → USB Debugging → Enable' },
-              { step: '2', title: 'Connect USB Cable', desc: 'Connect phone to PC with a USB data cable' },
-              { step: '3', title: 'Install ADB', desc: 'Install Android Debug Bridge on PC (from platform-tools)' },
-              { step: '4', title: 'Forward Port', desc: 'Run: adb reverse tcp:7070 tcp:7070' },
-              { step: '5', title: 'Open Companion', desc: 'Open http://localhost:7070/scanner-pc.html on PC browser' },
-            ].map(({ step, title, desc }) => (
-              <div key={step} style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid var(--border-color)' }}>
-                <div style={{
-                  width: '28px', height: '28px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #059669, #10b981)',
-                  color: '#fff', fontSize: '12px', fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>{step}</div>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{title}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px', fontFamily: desc.startsWith('Run:') ? 'monospace' : 'inherit' }}>{desc}</div>
-                </div>
-              </div>
-            ))}
+              { n: '1', title: 'Enable USB Debugging', desc: 'Settings → Developer Options → USB Debugging → Enable' },
+              { n: '2', title: 'Connect USB Cable', desc: 'Connect phone to PC with a USB data cable' },
+              { n: '3', title: 'Install ADB on PC', desc: 'Download Android platform-tools from developer.android.com' },
+              { n: '4', title: 'Forward Port', desc: 'Run: adb reverse tcp:7070 tcp:7070' },
+              { n: '5', title: 'Open Companion', desc: 'Open http://localhost:7070/scanner-pc.html in PC browser' },
+            ].map(s => <StepRow key={s.n} {...s} color="linear-gradient(135deg,#059669,#10b981)" />)}
           </div>
         )}
 
         {/* ── Settings Panel ── */}
         {showSettings && (
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '16px',
-            padding: '16px',
-          }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '16px' }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '14px' }}>
               Output Settings
             </div>
-            {/* Add Enter toggle */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--border-color)' }}>
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Append Enter Key</div>
@@ -716,97 +610,60 @@ export default function ScannerGunPage({ onNavigate }) {
                 style={{
                   width: '44px', height: '24px', borderRadius: '12px',
                   background: addEnter ? 'var(--accent-color)' : 'var(--bg-elevated)',
-                  border: '1px solid var(--border-color)',
-                  cursor: 'pointer', position: 'relative', transition: 'all 0.2s',
+                  border: '1px solid var(--border-color)', cursor: 'pointer',
+                  position: 'relative', transition: 'all 0.2s',
                 }}
               >
                 <div style={{
-                  position: 'absolute', top: '2px',
-                  left: addEnter ? '22px' : '2px',
-                  width: '18px', height: '18px',
-                  borderRadius: '50%', background: '#fff',
-                  transition: 'left 0.2s',
+                  position: 'absolute', top: '2px', left: addEnter ? '22px' : '2px',
+                  width: '18px', height: '18px', borderRadius: '50%',
+                  background: '#fff', transition: 'left 0.2s',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
                 }} />
               </button>
             </div>
-            {/* Prefix */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', borderBottom: '1px solid var(--border-color)' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>Prefix</div>
-                <input
-                  type="text"
-                  value={prefix}
-                  onChange={e => setPrefix(e.target.value)}
-                  placeholder="Text before barcode..."
-                  style={{
-                    width: '100%', background: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-color)', borderRadius: '8px',
-                    padding: '8px 10px', color: 'var(--text-primary)',
-                    fontSize: '13px', outline: 'none', fontFamily: 'inherit',
-                  }}
-                />
-              </div>
+            <div style={{ padding: '10px 0', borderBottom: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>Prefix</div>
+              <input
+                type="text" value={prefix} onChange={e => setPrefix(e.target.value)}
+                placeholder="Text before barcode..."
+                style={{
+                  width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                  borderRadius: '8px', padding: '8px 10px', color: 'var(--text-primary)',
+                  fontSize: '13px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+                }}
+              />
             </div>
-            {/* Suffix */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>Suffix</div>
-                <input
-                  type="text"
-                  value={suffix}
-                  onChange={e => setSuffix(e.target.value)}
-                  placeholder="Text after barcode..."
-                  style={{
-                    width: '100%', background: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-color)', borderRadius: '8px',
-                    padding: '8px 10px', color: 'var(--text-primary)',
-                    fontSize: '13px', outline: 'none', fontFamily: 'inherit',
-                  }}
-                />
-              </div>
+            <div style={{ padding: '10px 0' }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>Suffix</div>
+              <input
+                type="text" value={suffix} onChange={e => setSuffix(e.target.value)}
+                placeholder="Text after barcode..."
+                style={{
+                  width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                  borderRadius: '8px', padding: '8px 10px', color: 'var(--text-primary)',
+                  fontSize: '13px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+                }}
+              />
             </div>
           </div>
         )}
 
-        {/* ── Scan History Panel ── */}
+        {/* ── Scan History ── */}
         {showHistory && scanHistory.length > 0 && (
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '16px',
-            overflow: 'hidden',
-          }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden' }}>
             <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Scan History ({scanHistory.length})</span>
-              <button
-                onClick={() => setScanHistory([])}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}
-              >
-                Clear
-              </button>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>History ({scanHistory.length})</span>
+              <button onClick={() => setScanHistory([])} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>Clear</button>
             </div>
             <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
               {scanHistory.map(item => (
-                <div
-                  key={item.id}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '10px 16px', borderBottom: '1px solid var(--border-color)',
-                  }}
-                >
+                <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', borderBottom: '1px solid var(--border-color)' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: '13px', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.text}
-                    </div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      {item.time.toLocaleTimeString()}
-                    </div>
+                    <div style={{ fontFamily: 'monospace', fontSize: '13px', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{item.time.toLocaleTimeString()}</div>
                   </div>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(item.text)}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
-                  >
+                  <button onClick={() => navigator.clipboard.writeText(item.text)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}>
                     <Copy size={13} />
                   </button>
                 </div>
@@ -815,13 +672,8 @@ export default function ScannerGunPage({ onNavigate }) {
           </div>
         )}
 
-        {/* ── Camera Scanner Section ── */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '20px',
-          overflow: 'hidden',
-        }}>
+        {/* ── Camera Scanner ── */}
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', overflow: 'hidden' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
               <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>Camera Scanner</div>
@@ -842,30 +694,31 @@ export default function ScannerGunPage({ onNavigate }) {
                 }}
               >
                 {flashOn ? <Zap size={14} /> : <ZapOff size={14} />}
-                {flashOn ? 'Flash On' : 'Flash'}
+                Flash
               </button>
             )}
           </div>
 
           {/* Camera viewport */}
-          <div style={{ position: 'relative', background: '#000', minHeight: isScanning ? '220px' : '0px' }}>
+          <div style={{ position: 'relative', background: '#000', minHeight: isScanning ? '200px' : '0px' }}>
             <div id="gun-scanner-viewport" style={{ width: '100%' }} />
             {isScanning && (
               <div style={{
                 position: 'absolute', inset: 0, pointerEvents: 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                {/* Scan guide overlay */}
                 <div style={{
-                  width: '260px', height: '120px', border: '2px solid rgba(214,0,54,0.7)',
-                  borderRadius: '8px', boxShadow: '0 0 0 4000px rgba(0,0,0,0.35)',
+                  width: '260px', height: '120px',
+                  border: '2px solid rgba(214,0,54,0.7)',
+                  borderRadius: '8px',
+                  boxShadow: '0 0 0 4000px rgba(0,0,0,0.35)',
+                  position: 'relative', overflow: 'visible',
                 }}>
                   <div style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%,-50%)',
-                    width: '260px', height: '2px',
+                    position: 'absolute', top: '50%', left: 0, right: 0,
+                    height: '2px',
                     background: 'linear-gradient(90deg, transparent, #d60036, transparent)',
-                    animation: 'scanLine 2s ease-in-out infinite',
+                    animation: 'gunScanLine 2s ease-in-out infinite',
                   }} />
                 </div>
               </div>
@@ -880,16 +733,10 @@ export default function ScannerGunPage({ onNavigate }) {
                 width: '100%',
                 background: isScanning ? 'var(--bg-elevated)' : 'var(--accent-gradient)',
                 border: isScanning ? '1px solid var(--border-color)' : 'none',
-                borderRadius: '16px',
-                padding: '16px',
+                borderRadius: '16px', padding: '16px',
                 color: isScanning ? 'var(--text-secondary)' : '#fff',
-                fontSize: '15px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
+                fontSize: '15px', fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                 fontFamily: 'inherit',
                 boxShadow: isScanning ? 'none' : '0 6px 20px rgba(214,0,54,0.35)',
                 transition: 'all 0.2s',
@@ -904,63 +751,39 @@ export default function ScannerGunPage({ onNavigate }) {
           </div>
         </div>
 
-        {/* ── Scan Stats ── */}
+        {/* ── Stats ── */}
         {scanTotal > 0 && (
-          <div style={{
-            display: 'flex', gap: '10px',
-          }}>
-            <div style={{
-              flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)',
-              borderRadius: '14px', padding: '12px 14px', textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)' }}>{scanTotal}</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Total Scans</div>
-            </div>
-            <div style={{
-              flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)',
-              borderRadius: '14px', padding: '12px 14px', textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: '#00d4a0' }}>
-                {mode === 'wifi' ? '✓' : '—'}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {[
+              { val: scanTotal, label: 'Total Scans', color: 'var(--text-primary)' },
+              { val: mode === 'wifi' ? '✓' : '—', label: mode === 'wifi' ? 'Relay On' : 'Local Only', color: '#00d4a0' },
+              { val: addEnter ? '↵' : '—', label: 'Enter Key', color: 'var(--text-primary)' },
+            ].map(({ val, label, color }) => (
+              <div key={label} style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '12px 14px', textAlign: 'center' }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color }}>{val}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>{label}</div>
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                {mode === 'wifi' ? 'Relay On' : 'Local Only'}
-              </div>
-            </div>
-            <div style={{
-              flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)',
-              borderRadius: '14px', padding: '12px 14px', textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                {addEnter ? '↵' : '—'}
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Enter Key</div>
-            </div>
+            ))}
           </div>
         )}
 
-        {/* ── Download Companion ── */}
+        {/* ── PC Companion Info ── */}
         <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '16px',
-          padding: '14px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
+          background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+          borderRadius: '16px', padding: '14px 16px',
+          display: 'flex', alignItems: 'center', gap: '12px',
         }}>
           <div style={{
             width: '40px', height: '40px', borderRadius: '10px',
             background: 'linear-gradient(135deg, #6d28d9, #a855f7)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           }}>
             <Monitor size={18} color="#fff" />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>PC Companion App</div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>PC Companion</div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-              Open <code style={{ color: 'var(--accent-color)', fontSize: '10px' }}>/scanner-pc.html</code> on your PC browser, or use the QR above
+              Open <code style={{ color: 'var(--accent-color)', fontSize: '10px' }}>/scanner-pc.html</code> in your PC browser, or scan the QR above
             </div>
           </div>
           <ChevronRight size={16} color="var(--text-muted)" />
@@ -968,12 +791,12 @@ export default function ScannerGunPage({ onNavigate }) {
 
       </div>
 
-      {/* ── Scan Line Animation ── */}
+      {/* ── Animations ── */}
       <style>{`
-        @keyframes scanLine {
-          0% { top: 20%; }
-          50% { top: 80%; }
-          100% { top: 20%; }
+        @keyframes gunScanLine {
+          0% { transform: translateY(-40px); opacity: 1; }
+          50% { transform: translateY(40px); opacity: 1; }
+          100% { transform: translateY(-40px); opacity: 1; }
         }
         @keyframes spin {
           from { transform: rotate(0deg); }
