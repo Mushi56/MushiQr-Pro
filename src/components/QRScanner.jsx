@@ -594,18 +594,74 @@ export default function QRScanner({ onBack, navigateTo }) {
           </button>
         </div>
 
-        {/* Supported Formats Info Panel */}
+        {/* Supported Formats Modal Popup */}
         {showFormatsInfo && (
-          <div style={{ margin: '0 16px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: 16, padding: '14px 16px', animation: 'fadeIn 0.2s ease' }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>Scannable by Camera</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-              {SCANNABLE_FORMATS.filter(f => f.name !== 'MaxiCode').map(f => (
-                <span key={f.id} style={{ fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 8, background: f.category === '2D' ? 'rgba(88,86,214,0.12)' : 'rgba(0,122,255,0.10)', color: f.category === '2D' ? '#5856D6' : '#007AFF', border: `1px solid ${f.category === '2D' ? 'rgba(88,86,214,0.25)' : 'rgba(0,122,255,0.2)'}` }}>{f.name}</span>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'rgba(255,149,0,0.08)', border: '1px solid rgba(255,149,0,0.25)', borderRadius: 10, padding: '8px 10px' }}>
-              <ShieldAlert size={13} style={{ color: '#FF9500', flexShrink: 0, marginTop: 2 }} />
-              <span style={{ fontSize: 10, color: '#FF9500', fontWeight: 600, lineHeight: 1.5 }}>MaxiCode, Han Xin, Pharmacode, MSI, Telepen, Royal Mail, POSTNET, PLANET require specialized hardware scanners — they cannot be scanned with a mobile camera.</span>
+          <div className="modal-overlay" style={{ zIndex: 11000 }} onClick={() => setShowFormatsInfo(false)}>
+            <div className="modal-container glass-panel" style={{ maxWidth: '460px' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ScanLine size={20} style={{ color: 'var(--accent-primary)' }} />
+                  </div>
+                  <div className="modal-header-title" style={{ flex: 1 }}>
+                    <h3 style={{ margin: 0 }}>Scan Formats</h3>
+                    <p style={{ margin: 0 }}>Supported barcode & matrix standards</p>
+                  </div>
+                  <button className="modal-close" onClick={() => setShowFormatsInfo(false)}>
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="modal-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>Camera Scannable (1D & 2D)</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {SCANNABLE_FORMATS.filter(f => f.name !== 'MaxiCode').map(f => (
+                      <span key={f.id} style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: '6px 12px',
+                        borderRadius: 10,
+                        background: f.category === '2D' ? 'rgba(88,86,214,0.1)' : 'rgba(0,122,255,0.08)',
+                        color: f.category === '2D' ? '#5856D6' : '#007AFF',
+                        border: `1.5px solid ${f.category === '2D' ? 'rgba(88,86,214,0.2)' : 'rgba(0,122,255,0.15)'}`
+                      }}>
+                        {f.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 16 }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>Hardware Required Only</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                    {Array.from(CAMERA_UNSUPPORTED_FORMATS).map(name => (
+                      <span key={name} style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: '6px 12px',
+                        borderRadius: 10,
+                        background: 'rgba(255,149,0,0.08)',
+                        color: '#FF9500',
+                        border: '1px solid rgba(255,149,0,0.15)'
+                      }}>
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'rgba(255,149,0,0.06)', border: '1px solid rgba(255,149,0,0.15)', borderRadius: 12, padding: '10px 12px' }}>
+                    <ShieldAlert size={14} style={{ color: '#FF9500', flexShrink: 0, marginTop: 1 }} />
+                    <span style={{ fontSize: 11, color: '#FF9500', fontWeight: 600, lineHeight: 1.5 }}>
+                      These specialized standards cannot be scanned via a standard phone camera lens. They require high-density laser decoders or industrial camera hardware.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button className="modal-done-btn" onClick={() => setShowFormatsInfo(false)}>
+                Close Window
+              </button>
             </div>
           </div>
         )}
