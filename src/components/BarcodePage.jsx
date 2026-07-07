@@ -342,7 +342,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
         <div className="canvas-card" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: 24, padding: 28, boxShadow: 'var(--shadow-lg)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '100%', maxWidth: 360, boxSizing: 'border-box' }}>
           <div style={{ background: bgColor || '#fff', padding: 20, borderRadius: 16, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflowX: 'auto', boxSizing: 'border-box', minHeight: 100 }}>
-            <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%' }} />
+            <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%', height: 'auto', objectFit: 'contain' }} />
           </div>
 
           {/* Validation status */}
