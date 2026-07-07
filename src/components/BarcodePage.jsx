@@ -439,7 +439,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
         {/* COLOR TAB */}
         {activeTab === 'color' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', maxWidth: 360, padding: '4px 0 20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', padding: '4px 0 20px', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ flex: 1 }}>
                 <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Bar Color</label>
@@ -484,7 +484,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
         {/* DIMENSIONS TAB */}
         {activeTab === 'size' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', maxWidth: 360, padding: '4px 0 20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', padding: '4px 0 20px', boxSizing: 'border-box' }}>
             {[
               { label: `Bar Thickness (${barWidth}px)`, key: 'barWidth', min: 1, max: 4, step: 1, val: barWidth },
               { label: `Height (${height}px)`, key: 'height', min: 50, max: 180, step: 10, val: height },
