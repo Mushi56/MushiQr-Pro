@@ -331,8 +331,17 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
         </div>
       </header>
 
-      {/* ── Canvas Preview ── */}
-      <div style={{ flex: 1, padding: '20px var(--main-padding-x) 195px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto' }}>
+      {/* ── Canvas Preview (Match QR Creator styling) ── */}
+      <section className="qr-preview-card" style={{ position: 'relative', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', width: '100%', boxSizing: 'border-box' }}>
+        <div className="qr-preview-wrapper" style={{ aspectRatio: 'auto', width: '100%', maxWidth: '340px', height: '160px', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: bgColor || '#fff', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', boxSizing: 'border-box' }}>
+            <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+          </div>
+        </div>
+      </section>
+
+      {/* Spacing wrapper for body content */}
+      <div style={{ flex: 1, padding: '16px var(--main-padding-x) 180px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', width: '100%', boxSizing: 'border-box' }}>
         {/* Type badge */}
         <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{currentStandard.name}</span>
@@ -340,26 +349,20 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{currentStandard.desc}</span>
         </div>
 
-        <div className="canvas-card" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: 24, padding: 28, boxShadow: 'var(--shadow-lg)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '100%', maxWidth: 360, boxSizing: 'border-box' }}>
-          <div style={{ background: bgColor || '#fff', padding: 20, borderRadius: 16, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflowX: 'auto', boxSizing: 'border-box', minHeight: 100 }}>
-            <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%', height: 'auto', objectFit: 'contain' }} />
+        {/* Validation status */}
+        {text && (
+          <div style={{ width: '100%', maxWidth: 360, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: isDataValid ? 'rgba(52,199,89,0.08)' : 'rgba(255,59,48,0.08)', border: `1px solid ${isDataValid ? 'rgba(52,199,89,0.2)' : 'rgba(255,59,48,0.2)'}`, marginBottom: 12 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: isDataValid ? '#34C759' : '#FF3B30', flexShrink: 0 }} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: isDataValid ? '#34C759' : '#FF3B30', flex: 1 }}>
+              {isDataValid ? 'Valid — Ready to export' : currentStandard.errorMsg}
+            </span>
+            <button onClick={() => openDataModal()} style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>Edit →</button>
           </div>
-
-          {/* Validation status */}
-          {text && (
-            <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: isDataValid ? 'rgba(52,199,89,0.08)' : 'rgba(255,59,48,0.08)', border: `1px solid ${isDataValid ? 'rgba(52,199,89,0.2)' : 'rgba(255,59,48,0.2)'}` }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: isDataValid ? '#34C759' : '#FF3B30', flexShrink: 0 }} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: isDataValid ? '#34C759' : '#FF3B30', flex: 1 }}>
-                {isDataValid ? 'Valid — Ready to export' : currentStandard.errorMsg}
-              </span>
-              <button onClick={() => openDataModal()} style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}>Edit →</button>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Text display */}
         {text && (
-          <div style={{ marginTop: 12, fontFamily: 'monospace', fontSize: 12, color: 'var(--text-muted)', background: 'var(--bg-elevated)', padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border-color)', maxWidth: 360, textAlign: 'center', wordBreak: 'break-all' }}>
+          <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text-muted)', background: 'var(--bg-elevated)', padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border-color)', maxWidth: 360, textAlign: 'center', wordBreak: 'break-all' }}>
             {text.length > 40 ? text.slice(0, 38) + '…' : text}
           </div>
         )}
@@ -375,10 +378,11 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
               <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Barcode Type</span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, maxHeight: 185, overflowY: 'auto', padding: '2px 1px' }}>
+            <div className="type-tabs" style={{ maxHeight: 185, overflowY: 'auto', padding: '4px' }}>
               {Object.entries(BARCODE_STANDARDS).map(([key, standard]) => (
                 <button
                   key={key}
+                  className={`type-tab ${bcid === key ? 'active' : ''}`}
                   onClick={() => {
                     const targetBcid = key;
                     const existingFields = parseValueToFields(targetBcid === bcid ? text : standard.defaultValue, targetBcid);
@@ -386,23 +390,11 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                     setPendingBcid(targetBcid);
                     setIsDataModalOpen(true);
                   }}
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 4px',
-                    borderRadius: 12,
-                    border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                    background: bcid === key ? 'var(--accent-soft)' : 'var(--bg-primary)',
-                    cursor: 'pointer',
-                    color: bcid === key ? 'var(--accent-primary)' : 'var(--text-primary)',
-                    transition: 'all 0.15s',
-                    minWidth: 0, width: '100%', boxSizing: 'border-box', position: 'relative', overflow: 'hidden'
-                  }}
                 >
-                  <div style={{ width: 50, height: 22, flexShrink: 0, background: '#fff', borderRadius: 4, border: `1px solid ${bcid === key ? 'rgba(255,59,48,0.3)' : 'var(--border-color)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  <span className="type-tab-icon" style={{ width: 44, height: 26, background: '#fff', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px' }}>
                     <MiniBarcodePreview type={key} data={standard.defaultValue} />
-                  </div>
-                  <span style={{ fontSize: '9px', fontWeight: 700, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%', padding: '0 2px' }}>
-                    {standard.name}
                   </span>
+                  {standard.name}
                 </button>
               ))}
             </div>

@@ -4344,6 +4344,7 @@ export default function App() {
             onClick={() => navigateTo('home')}
           >
             <span className="bottom-nav-icon"><Home size={22} /></span>
+            <span className="bottom-nav-label">Home</span>
           </button>
           
           <button 
@@ -4351,6 +4352,7 @@ export default function App() {
             onClick={() => navigateTo('saved')}
           >
             <span className="bottom-nav-icon"><Bookmark size={22} /></span>
+            <span className="bottom-nav-label">Saved</span>
           </button>
           
           {/* Integrated Scan Button */}
@@ -4387,6 +4389,7 @@ export default function App() {
             >
               <ScanLine size={28} />
             </button>
+            <span className="bottom-nav-label" style={{ marginTop: '2px', fontWeight: 600 }}>Scan</span>
           </div>
 
           <button 
@@ -4394,6 +4397,7 @@ export default function App() {
             onClick={() => navigateTo('history')}
           >
             <span className="bottom-nav-icon"><History size={22} /></span>
+            <span className="bottom-nav-label">History</span>
           </button>
           
           <button 
@@ -4401,6 +4405,7 @@ export default function App() {
             onClick={() => navigateTo('settings')}
           >
             <span className="bottom-nav-icon"><Settings size={22} /></span>
+            <span className="bottom-nav-label">Settings</span>
           </button>
         </nav>
       )}
