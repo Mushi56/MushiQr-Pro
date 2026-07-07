@@ -479,7 +479,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          style={{ position: 'relative', overflow: 'hidden', marginTop: '20px', width: '100%' }}
+          style={{ position: 'relative', overflow: 'hidden', marginTop: '5px', width: '100%', padding: '15px 0' }}
         >
           <div style={{
             display: 'flex',
