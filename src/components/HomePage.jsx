@@ -743,7 +743,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
         {/* Create QR Grid */}
         <div style={{ padding: '24px var(--main-padding-x) 12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Create QR</h3>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Create QR Code</h3>
             <button 
               onClick={() => setShowAllQR(!showAllQR)}
               style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
@@ -752,7 +752,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
             </button>
           </div>
           <div className="quick-options-grid">
-            {(showAllQR ? quickOptions : quickOptions.slice(0, 10)).map(option => (
+            {(showAllQR ? quickOptions : quickOptions.slice(0, 5)).map(option => (
               <button
                 key={option.id}
                 onClick={() => onQuickCreate(option.id)}
@@ -794,7 +794,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
             </button>
           </div>
           <div className="quick-options-grid">
-            {(showAllBarcodes ? barcodeOptions : barcodeOptions.slice(0, 10)).map(option => (
+            {(showAllBarcodes ? barcodeOptions : barcodeOptions.slice(0, 5)).map(option => (
               <button
                 key={option.id}
                 onClick={() => onQuickCreateBarcode(option.id)}

@@ -632,6 +632,12 @@ export default function App() {
         setActiveBatchItemIndex(null);
       }
     }
+    if (location.state) {
+      if (location.state.qrType) setQrType(location.state.qrType);
+      if (location.state.qrData) setQrData(location.state.qrData);
+      if (location.state.isDataModalOpen !== undefined) setIsDataModalOpen(location.state.isDataModalOpen);
+      if (location.state.loadedBarcodeItem) setLoadedBarcodeItem(location.state.loadedBarcodeItem);
+    }
   }, [location.pathname, location.state, activePage]);
 
 
@@ -703,11 +709,11 @@ export default function App() {
 
 
   // ── QR Content ──
-  const [qrType, setQrType] = useState(QR_TYPES.URL);
-  const [qrData, setQrData] = useState({ url: 'https://example.com' });
+  const [qrType, setQrType] = useState(() => location.state?.qrType || QR_TYPES.URL);
+  const [qrData, setQrData] = useState(() => location.state?.qrData || { url: 'https://example.com' });
   const [errorLevel, setErrorLevel] = useState('M');
   const [loadedItemId, setLoadedItemId] = useState(null);
-  const [loadedBarcodeItem, setLoadedBarcodeItem] = useState(null);
+  const [loadedBarcodeItem, setLoadedBarcodeItem] = useState(() => location.state?.loadedBarcodeItem || null);
   const [launchedDirectlyToScanner, setLaunchedDirectlyToScanner] = useState(false);
   // Tracks whether the user has meaningfully changed the QR generator since it was last reset/loaded
   const generatorIsDirtyRef = useRef(false);
@@ -834,7 +840,7 @@ export default function App() {
   const handleOpenAdv = (color, setter) => setAdvPicker({ open: true, color, setter });
   const [selectedFormat, setSelectedFormat] = useState('PNG');
   const [exportQuality, setExportQuality] = useState('High'); // Default to High (2048px)
-  const [isDataModalOpen, setIsDataModalOpen] = useState(false);
+  const [isDataModalOpen, setIsDataModalOpen] = useState(() => location.state?.isDataModalOpen || false);
   const [unsavedChangesModal, setUnsavedChangesModal] = useState({ isOpen: false, nextPage: null });
   const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
   const downloadBtnRef = useRef(null);
@@ -4210,9 +4216,15 @@ export default function App() {
             }}
             onQuickCreate={(type) => {
               resetGenerator();
-              setQrType(type);
-              navigateTo('generator');
-              setIsDataModalOpen(true);
+              navigate('/generator', {
+                state: {
+                  qrType: type,
+                  qrData: {},
+                  isDataModalOpen: true,
+                  activePage: 'generator'
+                }
+              });
+              setActivePage('generator');
             }}
             onQuickCreateBarcode={(id) => {
               const defaults = {
@@ -4248,7 +4260,7 @@ export default function App() {
                 channelcode: '123456'
               };
               const defaultValue = defaults[id] || '12345678';
-              setLoadedBarcodeItem({
+              const item = {
                 qrType: 'BARCODE',
                 displayText: defaultValue,
                 style: {
@@ -4260,8 +4272,14 @@ export default function App() {
                   margin: 16,
                   displayValue: true
                 }
+              };
+              navigate('/barcode', {
+                state: {
+                  loadedBarcodeItem: item,
+                  activePage: 'barcode'
+                }
               });
-              navigateTo('barcode');
+              setActivePage('barcode');
             }}
             onLoadQR={handleLoadQR}
             theme={theme}
