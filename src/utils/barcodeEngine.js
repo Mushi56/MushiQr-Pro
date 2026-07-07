@@ -319,8 +319,13 @@ export function renderBarcode(canvas, text, options = {}) {
     const targetBcid = bcidMap[bcid] || bcid;
 
     let renderText = text || ' ';
-    if (bcid === 'gs1databar' && !renderText.startsWith('(01)')) {
-      renderText = `(01)${renderText}`;
+    if (bcid === 'gs1databar') {
+      let clean = renderText.replace(/^\(01\)/, '');
+      let cleanDigits = clean.replace(/\D/g, '');
+      if (cleanDigits.length === 14) {
+        cleanDigits = cleanDigits.slice(0, 13);
+      }
+      renderText = `(01)${cleanDigits}`;
     }
 
     const bwipOptions = {
