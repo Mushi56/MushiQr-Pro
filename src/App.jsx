@@ -4389,7 +4389,6 @@ export default function App() {
             >
               <ScanLine size={28} />
             </button>
-            <span className="bottom-nav-label" style={{ marginTop: '2px', fontWeight: 600 }}>Scan</span>
           </div>
 
           <button 
