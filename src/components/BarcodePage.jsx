@@ -471,12 +471,12 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
             </div>
 
             {/* Barcode Type Grid (freely swipe/scroll with extra space in the content section) */}
-            <div className="type-tabs" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', width: '100%', padding: '4px 0 20px' }}>
+            <div className="type-tabs" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', width: '100%', padding: '4px 0 20px' }}>
               {Object.entries(BARCODE_STANDARDS).map(([key, standard]) => (
                 <button
                   key={key}
                   className={`type-tab ${bcid === key ? 'active' : ''}`}
-                  style={{ aspectRatio: '1.25 / 1', padding: '6px 2px 26px', position: 'relative', overflow: 'hidden' }}
+                  style={{ minHeight: '90px', padding: '8px 6px 30px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                   onClick={() => {
                     if (bcid !== key) {
                       setBcid(key);
@@ -509,15 +509,15 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                           cursor: 'pointer',
                           borderBottomLeftRadius: '8px',
                           borderBottomRightRadius: '8px',
-                          gap: '3px',
+                          gap: '4px',
                           fontWeight: 800,
-                          fontSize: '8px',
+                          fontSize: '9px',
                           textTransform: 'uppercase',
                           letterSpacing: '0.4px',
                           boxShadow: '0 -2px 6px rgba(0,0,0,0.1)'
                         }}
                       >
-                        <Pencil size={8} strokeWidth={3} />
+                        <Pencil size={10} strokeWidth={3} />
                         <span>Edit</span>
                       </div>
                       <div style={{
@@ -543,10 +543,10 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                       </div>
                     </>
                   )}
-                  <span className="type-tab-icon" style={{ width: '100%', height: '24px', background: '#fff', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
+                  <span className="type-tab-icon" style={{ width: '100%', height: '36px', background: '#fff', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
                     <MiniBarcodePreview type={key} data={standard.defaultValue} />
                   </span>
-                  <span style={{ fontSize: '8px', fontWeight: 700, width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', marginTop: '2px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, width: '100%', display: 'block', marginTop: '6px', lineHeight: 1.1, textAlign: 'center' }}>
                     {standard.name}
                   </span>
                 </button>
@@ -557,7 +557,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
         {/* COLOR TAB */}
         {activeTab === 'color' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', padding: '4px 0 20px', boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', padding: '4px 0 20px', boxSizing: 'border-box', marginTop: 'auto' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ flex: 1 }}>
                 <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Bar Color</label>
@@ -602,7 +602,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
         {/* DIMENSIONS TAB */}
         {activeTab === 'size' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', padding: '4px 0 20px', boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', padding: '4px 0 20px', boxSizing: 'border-box', marginTop: 'auto' }}>
             {[
               { label: `Bar Thickness (${barWidth}px)`, key: 'barWidth', min: 1, max: 4, step: 1, val: barWidth },
               { label: `Height (${height}px)`, key: 'height', min: 50, max: 180, step: 10, val: height },
