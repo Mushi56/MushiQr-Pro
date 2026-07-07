@@ -120,6 +120,215 @@ function HeroBarcodeCanvas() {
   );
 }
 
+const getBarcodeIcon = (id) => {
+  switch (id) {
+    // 1D Retail Barcodes (EAN-13, EAN-8, UPC-A, UPC-E)
+    case 'ean13':
+    case 'ean8':
+    case 'upca':
+    case 'upce':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="5" x2="3" y2="19" />
+          <line x1="6" y1="5" x2="6" y2="19" strokeWidth="2.5" />
+          <line x1="10" y1="5" x2="10" y2="19" />
+          <line x1="13" y1="5" x2="13" y2="19" strokeWidth="3" />
+          <line x1="17" y1="5" x2="17" y2="19" />
+          <line x1="21" y1="5" x2="21" y2="19" strokeWidth="1.5" />
+          <rect x="2" y="15" width="8" height="6" rx="1" fill="currentColor" stroke="none" opacity="0.15" />
+          <path d="M4 18h4" strokeWidth="1" />
+        </svg>
+      );
+
+    // 1D General / Industrial Barcodes (Code 128, Code 39, Code 93, Code 11, Codabar, GS1-128)
+    case 'code128':
+    case 'code39':
+    case 'code93':
+    case 'code11':
+    case 'codabar':
+    case 'gs1128':
+    case 'i25':
+    case 'telepen':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2" strokeWidth="1.5" strokeDasharray="3 2" opacity="0.3" />
+          <line x1="5" y1="7" x2="5" y2="17" strokeWidth="2" />
+          <line x1="9" y1="7" x2="9" y2="17" strokeWidth="1" />
+          <line x1="12" y1="7" x2="12" y2="17" strokeWidth="3" />
+          <line x1="15" y1="7" x2="15" y2="17" strokeWidth="1" />
+          <line x1="19" y1="7" x2="19" y2="17" strokeWidth="2" />
+        </svg>
+      );
+
+    // 2D Square Matrix Barcodes (Data Matrix)
+    case 'datamatrix':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <path d="M3 3v18h18" strokeWidth="2.5" />
+          <line x1="7" y1="3" x2="7" y2="5" strokeWidth="1.5" />
+          <line x1="11" y1="3" x2="11" y2="5" strokeWidth="1.5" />
+          <line x1="15" y1="3" x2="15" y2="5" strokeWidth="1.5" />
+          <line x1="19" y1="3" x2="19" y2="5" strokeWidth="1.5" />
+          <line x1="21" y1="7" x2="19" y2="7" strokeWidth="1.5" />
+          <line x1="21" y1="11" x2="19" y2="11" strokeWidth="1.5" />
+          <line x1="21" y1="15" x2="19" y2="15" strokeWidth="1.5" />
+          <rect x="7" y="7" width="2" height="2" fill="currentColor" stroke="none" />
+          <rect x="13" y="7" width="2" height="2" fill="currentColor" stroke="none" />
+          <rect x="7" y="13" width="2" height="2" fill="currentColor" stroke="none" />
+          <rect x="13" y="13" width="2" height="2" fill="currentColor" stroke="none" />
+        </svg>
+      );
+
+    // ITF-14 (Heavy border box standard)
+    case 'itf14':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+          <rect x="2" y="5" width="20" height="14" strokeWidth="2.5" />
+          <line x1="6" y1="8" x2="6" y2="16" strokeWidth="1.5" />
+          <line x1="9" y1="8" x2="9" y2="16" strokeWidth="2.5" />
+          <line x1="12" y1="8" x2="12" y2="16" strokeWidth="1.5" />
+          <line x1="15" y1="8" x2="15" y2="16" strokeWidth="3" />
+          <line x1="18" y1="8" x2="18" y2="16" strokeWidth="1.5" />
+        </svg>
+      );
+
+    // GS1 DataBar (Multiple grouped elements, omnidirectional)
+    case 'gs1databar':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="4" x2="3" y2="14" strokeWidth="2.5" />
+          <line x1="6" y1="4" x2="6" y2="14" />
+          <line x1="10" y1="4" x2="10" y2="14" strokeWidth="2.5" />
+          <line x1="14" y1="4" x2="14" y2="14" />
+          <line x1="17" y1="4" x2="17" y2="14" strokeWidth="2" />
+          <line x1="21" y1="4" x2="21" y2="14" />
+          <path d="M3 17h18" strokeWidth="2" />
+          <line x1="6" y1="20" x2="18" y2="20" />
+        </svg>
+      );
+
+    // PDF 417 / Stacked Linear Codes (Codablock F, Code 16K, Code 49)
+    case 'pdf417':
+    case 'codablockf':
+    case 'code16k':
+    case 'code49':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="4" width="20" height="5" rx="1" />
+          <rect x="2" y="10" width="20" height="5" rx="1" />
+          <rect x="2" y="16" width="20" height="5" rx="1" />
+          
+          <line x1="5" y1="6" x2="5" y2="8" strokeWidth="1.5" />
+          <line x1="12" y1="6" x2="12" y2="8" strokeWidth="2" />
+          <line x1="18" y1="6" x2="18" y2="8" />
+
+          <line x1="7" y1="12" x2="7" y2="14" strokeWidth="2" />
+          <line x1="14" y1="12" x2="14" y2="14" />
+          
+          <line x1="9" y1="18" x2="9" y2="20" />
+          <line x1="16" y1="18" x2="16" y2="20" strokeWidth="2" />
+        </svg>
+      );
+
+    // Postal Barcodes (Postnet, Planet, Royal Mail)
+    case 'postnet':
+    case 'planet':
+    case 'royalmail':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="5" x2="3" y2="19" strokeWidth="2" />
+          <line x1="6" y1="12" x2="6" y2="19" strokeWidth="2" />
+          <line x1="9" y1="5" x2="9" y2="19" strokeWidth="2" />
+          <line x1="12" y1="12" x2="12" y2="19" strokeWidth="2" />
+          <line x1="15" y1="5" x2="15" y2="19" strokeWidth="2" />
+          <line x1="18" y1="12" x2="18" y2="19" strokeWidth="2" />
+          <line x1="21" y1="5" x2="21" y2="19" strokeWidth="2" />
+        </svg>
+      );
+
+    // MSI Plessey / Pharmacode (Varying thick bars with color logic)
+    case 'msi':
+    case 'pharmacode':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="5" x2="3" y2="19" strokeWidth="3" />
+          <line x1="8" y1="5" x2="8" y2="19" strokeWidth="1.5" />
+          <line x1="13" y1="5" x2="13" y2="19" strokeWidth="4" />
+          <line x1="18" y1="5" x2="18" y2="19" strokeWidth="2.5" />
+        </svg>
+      );
+
+    // Aztec Code (2D Concentric Square Finder)
+    case 'aztec':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <rect x="9" y="9" width="6" height="6" strokeWidth="2" />
+          <rect x="11" y="11" width="2" height="2" fill="currentColor" stroke="none" />
+          <line x1="6" y1="6" x2="6" y2="8" />
+          <line x1="18" y1="16" x2="18" y2="18" />
+          <line x1="6" y1="16" x2="8" y2="16" />
+          <line x1="16" y1="6" x2="16" y2="8" />
+        </svg>
+      );
+
+    // MaxiCode (2D Honeycomb with circular bullseye)
+    case 'maxicode':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" strokeDasharray="3 3" opacity="0.4" />
+          <circle cx="12" cy="12" r="3" strokeWidth="2.5" />
+          <circle cx="12" cy="12" r="6" />
+          <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+        </svg>
+      );
+
+    // 2D QR Code / Micro QR / Han Xin
+    case 'qrcode':
+    case 'microqrcode':
+    case 'hanxin':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="6" height="6" rx="1" strokeWidth="2" />
+          <rect x="3" y="15" width="6" height="6" rx="1" strokeWidth="2" />
+          <rect x="15" y="3" width="6" height="6" rx="1" strokeWidth="2" />
+          
+          <rect x="5" y="5" width="2" height="2" fill="currentColor" stroke="none" />
+          <rect x="5" y="17" width="2" height="2" fill="currentColor" stroke="none" />
+          <rect x="17" y="5" width="2" height="2" fill="currentColor" stroke="none" />
+          
+          <rect x="14" y="14" width="3" height="3" rx="0.5" />
+          <line x1="11" y1="3" x2="11" y2="21" strokeDasharray="2 2" opacity="0.5" />
+          <line x1="3" y1="11" x2="21" y2="11" strokeDasharray="2 2" opacity="0.5" />
+        </svg>
+      );
+
+    // Channel Code (Industrial sequential bars)
+    case 'channelcode':
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="4" y1="5" x2="4" y2="19" strokeWidth="1.5" />
+          <line x1="8" y1="5" x2="8" y2="19" strokeWidth="1.5" />
+          <line x1="12" y1="5" x2="12" y2="19" strokeWidth="1.5" />
+          <line x1="16" y1="5" x2="16" y2="19" strokeWidth="1.5" />
+          <line x1="20" y1="5" x2="20" y2="19" strokeWidth="1.5" />
+        </svg>
+      );
+
+    default:
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="5" x2="3" y2="19" />
+          <line x1="8" y1="5" x2="8" y2="19" strokeWidth="2.5" />
+          <line x1="13" y1="5" x2="13" y2="19" strokeWidth="1" />
+          <line x1="17" y1="5" x2="17" y2="19" strokeWidth="3" />
+          <line x1="21" y1="5" x2="21" y2="19" />
+        </svg>
+      );
+  }
+};
+
 export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
   const [recentItems, setRecentItems] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
@@ -565,7 +774,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 style={{ width: '100%' }}
               >
                 <div className="quick-option-icon-wrapper" style={{ background: 'rgba(0, 240, 255, 0.1)', color: '#00F0FF' }}>
-                  <Barcode size={20} strokeWidth={1.8} />
+                  {getBarcodeIcon(option.id)}
                 </div>
                 <span style={{ 
                   fontSize: '9px', 
