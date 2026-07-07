@@ -3,7 +3,7 @@ import {
   Save, Palette, Sliders, Undo2, Redo2, ChevronDown,
   FileImage, FileCode, FileText, Copy, Bookmark, Share2,
   Menu, Home, History, Moon, Sun, Info, Shield,
-  FileText as FileIcon, AlertCircle, Layers
+  FileText as FileIcon, AlertCircle, Layers, Pencil
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
@@ -383,7 +383,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                 <button
                   key={key}
                   className={`type-tab ${bcid === key ? 'active' : ''}`}
-                  style={{ aspectRatio: '1.35 / 1', padding: '8px 4px' }}
+                  style={{ aspectRatio: '1.35 / 1', padding: '8px 4px', position: 'relative' }}
                   onClick={() => {
                     const targetBcid = key;
                     const existingFields = parseValueToFields(targetBcid === bcid ? text : standard.defaultValue, targetBcid);
@@ -392,6 +392,11 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                     setIsDataModalOpen(true);
                   }}
                 >
+                  {bcid === key && (
+                    <div style={{ position: 'absolute', top: 5, right: 5, background: 'var(--accent-primary)', color: 'white', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(214,0,54,0.3)', zIndex: 5 }}>
+                      <Pencil size={8} strokeWidth={2.5} />
+                    </div>
+                  )}
                   <span className="type-tab-icon" style={{ width: '100%', height: '32px', background: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
                     <MiniBarcodePreview type={key} data={standard.defaultValue} />
                   </span>
@@ -399,16 +404,6 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                 </button>
               ))}
             </div>
-
-            {bcid && (
-              <button
-                onClick={() => openDataModal()}
-                style={{ marginTop: 4, padding: '12px', background: 'var(--accent-gradient)', border: 'none', borderRadius: 14, color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 4px 16px var(--accent-glow)' }}
-              >
-                <AlertCircle size={16} />
-                Edit {currentStandard.name} Data
-              </button>
-            )}
           </div>
         )}
 
