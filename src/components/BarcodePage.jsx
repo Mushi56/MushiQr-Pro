@@ -383,6 +383,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                 <button
                   key={key}
                   className={`type-tab ${bcid === key ? 'active' : ''}`}
+                  style={{ aspectRatio: '1.35 / 1', padding: '10px 6px' }}
                   onClick={() => {
                     const targetBcid = key;
                     const existingFields = parseValueToFields(targetBcid === bcid ? text : standard.defaultValue, targetBcid);
@@ -391,7 +392,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                     setIsDataModalOpen(true);
                   }}
                 >
-                  <span className="type-tab-icon" style={{ width: 44, height: 26, background: '#fff', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px' }}>
+                  <span className="type-tab-icon" style={{ width: '100%', height: '38px', background: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
                     <MiniBarcodePreview type={key} data={standard.defaultValue} />
                   </span>
                   {standard.name}
@@ -520,7 +521,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 // ─── Mini Preview Canvas ──────────────────────────────────────────────────────
 function MiniBarcodePreview({ type, data }) {
   const ref = useRef(null);
-  // Some 2D/complex types don't render well in a 50x22 thumbnail, use code128 fallback for display only
+  // Some 2D/complex types don't render well in a widescreen thumbnail, use code128 fallback for display only
   const FALLBACK_AS_1D = new Set(['aztec', 'maxicode', 'hanxin', 'microqrcode', 'codablockf', 'code49']);
   const previewType = FALLBACK_AS_1D.has(type) ? 'code128' : type;
   const previewData = FALLBACK_AS_1D.has(type) ? type.toUpperCase().slice(0, 8) : data;
@@ -528,10 +529,10 @@ function MiniBarcodePreview({ type, data }) {
   useEffect(() => {
     if (!ref.current) return;
     const ctx = ref.current.getContext('2d');
-    ctx.clearRect(0, 0, 50, 22);
-    renderBarcode(ref.current, previewData, { bcid: previewType, barColor: '#000', bgColor: '#fff', barWidth: 1, height: 18, margin: 2, displayValue: false });
+    ctx.clearRect(0, 0, 80, 36);
+    renderBarcode(ref.current, previewData, { bcid: previewType, barColor: '#000', bgColor: '#fff', barWidth: 1.5, height: 32, margin: 2, displayValue: false });
   }, [previewType, previewData]);
-  return <canvas ref={ref} width={50} height={22} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+  return <canvas ref={ref} width={80} height={36} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
 }
 
 // ─── Undo/Redo Button Styles ──────────────────────────────────────────────────
