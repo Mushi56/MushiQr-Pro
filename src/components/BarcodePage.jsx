@@ -342,105 +342,104 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       </section>
 
       {/* Spacing wrapper for body content */}
-      <div style={{ flex: 1, padding: activeTab === 'content' ? '16px var(--main-padding-x) 90px' : '16px var(--main-padding-x) 240px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', width: '100%', boxSizing: 'border-box', transition: 'padding 0.2s ease' }}>
-        {/* Type badge */}
-        <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, width: '100%', justifyContent: 'flex-start' }}>
-          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{currentStandard.name}</span>
-          <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--text-muted)', display: 'inline-block' }} />
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{currentStandard.desc}</span>
-        </div>
+      <div style={{ flex: 1, padding: '16px var(--main-padding-x) 90px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', width: '100%', boxSizing: 'border-box' }}>
+        {activeTab === 'content' && (
+          <>
+            {/* Type badge */}
+            <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, width: '100%', justifyContent: 'flex-start' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{currentStandard.name}</span>
+              <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--text-muted)', display: 'inline-block' }} />
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{currentStandard.desc}</span>
+            </div>
 
-        {/* Barcode Type Grid (freely swipe/scroll with extra space in the content section) */}
-        <div className="type-tabs" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', width: '100%', padding: '4px 0 20px' }}>
-          {Object.entries(BARCODE_STANDARDS).map(([key, standard]) => (
-            <button
-              key={key}
-              className={`type-tab ${bcid === key ? 'active' : ''}`}
-              style={{ aspectRatio: '1.25 / 1', padding: '6px 2px 26px', position: 'relative', overflow: 'hidden' }}
-              onClick={() => {
-                if (bcid !== key) {
-                  setBcid(key);
-                  setText(standard.defaultValue);
-                }
-              }}
-            >
-              {bcid === key && (
-                <>
-                  <div 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const existingFields = parseValueToFields(text, key);
-                      setModalInitialFields(existingFields);
-                      setPendingBcid(key);
-                      setIsDataModalOpen(true);
-                    }}
-                    style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: '24px',
-                      background: 'var(--accent-primary)',
-                      color: 'white',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 10,
-                      cursor: 'pointer',
-                      borderBottomLeftRadius: '8px',
-                      borderBottomRightRadius: '8px',
-                      gap: '3px',
-                      fontWeight: 800,
-                      fontSize: '8px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.4px',
-                      boxShadow: '0 -2px 6px rgba(0,0,0,0.1)'
-                    }}
-                  >
-                    <Pencil size={8} strokeWidth={3} />
-                    <span>Edit</span>
-                  </div>
-                  <div style={{
-                    position: 'absolute',
-                    top: 2,
-                    left: 2,
-                    background: standard.validate(text) ? '#34C759' : '#FF3B30',
-                    color: 'white',
-                    borderRadius: '50%',
-                    width: 14,
-                    height: 14,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-                    zIndex: 5
-                  }}>
-                    {standard.validate(text) ? (
-                      <span style={{ fontSize: '8px', fontWeight: 900, lineHeight: 1 }}>✓</span>
-                    ) : (
-                      <span style={{ fontSize: '8px', fontWeight: 900, lineHeight: 1 }}>✗</span>
-                    )}
-                  </div>
-                </>
-              )}
-              <span className="type-tab-icon" style={{ width: '100%', height: '24px', background: '#fff', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
-                <MiniBarcodePreview type={key} data={standard.defaultValue} />
-              </span>
-              <span style={{ fontSize: '8px', fontWeight: 700, width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', marginTop: '2px' }}>
-                {standard.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Bottom Panel ── */}
-      {activeTab !== 'content' && (
-        <div style={{ position: 'absolute', bottom: 70, left: 0, right: 0, background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-color)', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '20px var(--main-padding-x) 24px', boxShadow: '0 -8px 32px rgba(0,0,0,0.1)', zIndex: 90, boxSizing: 'border-box' }}>
+            {/* Barcode Type Grid (freely swipe/scroll with extra space in the content section) */}
+            <div className="type-tabs" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', width: '100%', padding: '4px 0 20px' }}>
+              {Object.entries(BARCODE_STANDARDS).map(([key, standard]) => (
+                <button
+                  key={key}
+                  className={`type-tab ${bcid === key ? 'active' : ''}`}
+                  style={{ aspectRatio: '1.25 / 1', padding: '6px 2px 26px', position: 'relative', overflow: 'hidden' }}
+                  onClick={() => {
+                    if (bcid !== key) {
+                      setBcid(key);
+                      setText(standard.defaultValue);
+                    }
+                  }}
+                >
+                  {bcid === key && (
+                    <>
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const existingFields = parseValueToFields(text, key);
+                          setModalInitialFields(existingFields);
+                          setPendingBcid(key);
+                          setIsDataModalOpen(true);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: '24px',
+                          background: 'var(--accent-primary)',
+                          color: 'white',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 10,
+                          cursor: 'pointer',
+                          borderBottomLeftRadius: '8px',
+                          borderBottomRightRadius: '8px',
+                          gap: '3px',
+                          fontWeight: 800,
+                          fontSize: '8px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.4px',
+                          boxShadow: '0 -2px 6px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        <Pencil size={8} strokeWidth={3} />
+                        <span>Edit</span>
+                      </div>
+                      <div style={{
+                        position: 'absolute',
+                        top: 2,
+                        left: 2,
+                        background: standard.validate(text) ? '#34C759' : '#FF3B30',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: 14,
+                        height: 14,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                        zIndex: 5
+                      }}>
+                        {standard.validate(text) ? (
+                          <span style={{ fontSize: '8px', fontWeight: 900, lineHeight: 1 }}>✓</span>
+                        ) : (
+                          <span style={{ fontSize: '8px', fontWeight: 900, lineHeight: 1 }}>✗</span>
+                        )}
+                      </div>
+                    </>
+                  )}
+                  <span className="type-tab-icon" style={{ width: '100%', height: '24px', background: '#fff', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
+                    <MiniBarcodePreview type={key} data={standard.defaultValue} />
+                  </span>
+                  <span style={{ fontSize: '8px', fontWeight: 700, width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', marginTop: '2px' }}>
+                    {standard.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* COLOR TAB */}
         {activeTab === 'color' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', maxWidth: 360, padding: '4px 0 20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ flex: 1 }}>
                 <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Bar Color</label>
@@ -485,7 +484,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
         {/* DIMENSIONS TAB */}
         {activeTab === 'size' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', maxWidth: 360, padding: '4px 0 20px' }}>
             {[
               { label: `Bar Thickness (${barWidth}px)`, key: 'barWidth', min: 1, max: 4, step: 1, val: barWidth },
               { label: `Height (${height}px)`, key: 'height', min: 50, max: 180, step: 10, val: height },
@@ -512,7 +511,6 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
           </div>
         )}
       </div>
-      )}
 
       {/* ── Bottom Nav Tabs ── */}
       <nav className="bottom-nav" style={{ zIndex: 100 }}>
