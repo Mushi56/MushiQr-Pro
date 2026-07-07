@@ -2754,7 +2754,7 @@ export default function App() {
   const TABS = [
     { id: 'content', label: 'Content', icon: Pencil },
     { id: 'color', label: 'Color', icon: Palette },
-    { id: 'shapes', label: 'Shapes', icon: Hexagon },
+    { id: 'shapes', label: 'Style', icon: Paintbrush },
     { id: 'logo', label: 'Logo', icon: ImageIcon },
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
     { id: 'text', label: 'Text', icon: Type },
