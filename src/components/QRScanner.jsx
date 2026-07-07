@@ -505,14 +505,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   return (
     <div className="scanner-page scanner-page-enter">
       <div className="qrs">
-        {/* Header */}
-        <header className="qrs-header">
-          <div className="qrs-header-left">
-            <button className="qrs-icon-btn" onClick={safeBack} aria-label="Go back">
-              <ArrowLeft size={20} />
-            </button>
-          </div>
-        </header>
+        {/* Header removed as it overlaps with app upper navbar */}
 
         {/* Body */}
         <div className="qrs-body" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}>
@@ -580,13 +573,13 @@ export default function QRScanner({ onBack, navigateTo }) {
         </div>
 
         {/* Mode Selector Tabs */}
-        <div className="qrs-mode-selector">
-          <div className="qrs-mode-tab active">
+        <div className="qrs-mode-selector" style={{ position: 'relative', justifyContent: 'center' }}>
+          <div className="qrs-mode-tab active" style={{ margin: 0 }}>
             Scan
             <div className="qrs-mode-dot" />
           </div>
           <button
-            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, padding: '4px 8px' }}
+            style={{ position: 'absolute', right: 16, background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, padding: '4px 8px' }}
             onClick={() => setShowFormatsInfo(v => !v)}
           >
             <Info size={14} />
