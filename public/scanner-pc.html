@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mushi QR — PC Scanner Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base: #0a0a0f;
+      --bg-card: #12121a;
+      --bg-elevated: #1a1a26;
+      --bg-hover: #22223a;
+      --border: rgba(255,255,255,0.07);
+      --accent: #d60036;
+      --accent-glow: rgba(214,0,54,0.25);
+      --green: #00d4a0;
+      --green-glow: rgba(0,212,160,0.25);
+      --yellow: #fbbf24;
+      --text-primary: #f0f0ff;
+      --text-secondary: rgba(240,240,255,0.55);
+      --text-muted: rgba(240,240,255,0.3);
+      --radius: 16px;
+      --shadow: 0 4px 32px rgba(0,0,0,0.45);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+
+    /* Header */
+    .header {
+      width: 100%;
+      max-width: 880px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, #a0a0c0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo svg { flex-shrink: 0; }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+    .status-badge.waiting { background: var(--bg-card); color: var(--text-secondary); }
+    .status-badge.connected { background: rgba(0,212,160,0.12); border-color: rgba(0,212,160,0.3); color: var(--green); }
+    .status-badge.error { background: rgba(214,0,54,0.12); border-color: rgba(214,0,54,0.3); color: #ff6b8a; }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .connected .dot { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+
+    /* Grid layout */
+    .grid {
+      width: 100%;
+      max-width: 880px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
+    .col-full { grid-column: 1 / -1; }
+
+    /* Card */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Session Setup */
+    .session-row {
+      display: flex;
+      gap: 10px;
+    }
+    .input-field {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: rgba(214,0,54,0.5); }
+    .input-field::placeholder { color: var(--text-muted); }
+    .btn {
+      padding: 11px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #d60036 0%, #ff6b35 100%);
+      color: #fff;
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+    .btn-ghost {
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .btn:active { transform: translateY(0) scale(0.97); }
+
+    /* Last scan output */
+    .scan-output {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .scan-output.flash {
+      border-color: var(--green);
+      box-shadow: 0 0 0 1px var(--green), 0 0 32px var(--green-glow);
+    }
+    .scan-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-primary);
+      word-break: break-all;
+      flex: 1;
+    }
+    .scan-value.empty { color: var(--text-muted); font-style: italic; font-size: 14px; font-family: inherit; }
+    .copy-btn {
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .copy-btn.copied { color: var(--green); border-color: rgba(0,212,160,0.3); }
+
+    /* Target field */
+    .target-textarea {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #00ff88;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      resize: vertical;
+      min-height: 100px;
+      transition: border-color 0.2s;
+      margin-bottom: 10px;
+    }
+    .target-textarea:focus { border-color: rgba(0,212,160,0.4); }
+    .target-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
+
+    /* Checkboxes */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-secondary);
+      user-select: none;
+    }
+    .toggle-row input[type="checkbox"] {
+      appearance: none;
+      width: 16px; height: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .toggle-row input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .toggle-row input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px; top: 1px;
+      width: 5px; height: 9px;
+      border: 2px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(40deg);
+    }
+
+    /* Scan history */
+    .history-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      gap: 10px;
+      animation: slideIn 0.25s ease;
+      transition: background 0.2s;
+    }
+    .history-item:hover { background: var(--bg-hover); }
+    @keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    .history-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .history-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+    .history-copy {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-size: 12px; padding: 2px 6px;
+      border-radius: 4px; font-family: inherit;
+      transition: color 0.2s;
+    }
+    .history-copy:hover { color: var(--text-primary); }
+    .history-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 24px; }
+
+    /* Counter */
+    .scan-counter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+    .counter-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 8px;
+      border-radius: 100px;
+    }
+
+    /* Python helper */
+    .code-block {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #8be9fd;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 12px 0;
+      line-height: 1.6;
+    }
+    .code-keyword { color: #ff79c6; }
+    .code-string { color: #f1fa8c; }
+    .code-comment { color: #6272a4; }
+    .hint-box {
+      background: rgba(251,191,36,0.08);
+      border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: var(--yellow);
+      line-height: 1.6;
+    }
+
+    /* Scroll */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 3px; }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .stat-pill {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-pill strong { color: var(--text-primary); font-weight: 700; }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .scan-value { font-size: 14px; }
+    }
+
+    /* Clear btn */
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 0;
+      text-decoration: underline;
+      transition: color 0.2s;
+    }
+    .link-btn:hover { color: var(--text-secondary); }
+
+    /* Sound toggle */
+    .toprow { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .toprow .card-title { margin-bottom: 0; }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+    /* Sound wave animation */
+    .scan-wave {
+      display: none;
+      gap: 3px;
+      align-items: flex-end;
+      height: 20px;
+    }
+    .scan-wave.active { display: flex; }
+    .scan-wave span {
+      display: block;
+      width: 3px;
+      background: var(--green);
+      border-radius: 2px;
+      animation: wave 0.8s ease infinite;
+    }
+    .scan-wave span:nth-child(1){height:8px;animation-delay:0s;}
+    .scan-wave span:nth-child(2){height:16px;animation-delay:0.1s;}
+    .scan-wave span:nth-child(3){height:12px;animation-delay:0.2s;}
+    .scan-wave span:nth-child(4){height:20px;animation-delay:0.3s;}
+    .scan-wave span:nth-child(5){height:8px;animation-delay:0.4s;}
+    @keyframes wave { 0%,100%{transform:scaleY(0.4)} 50%{transform:scaleY(1)} }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="8" fill="url(#grd)"/>
+      <defs><linearGradient id="grd" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#d60036"/><stop offset="1" stop-color="#ff6b35"/></linearGradient></defs>
+      <rect x="5" y="8" width="3" height="12" rx="1.5" fill="white"/>
+      <rect x="10" y="6" width="2" height="16" rx="1" fill="white"/>
+      <rect x="14" y="9" width="4" height="10" rx="2" fill="white"/>
+      <rect x="20" y="7" width="3" height="14" rx="1.5" fill="white"/>
+    </svg>
+    Mushi QR &mdash; PC Scanner Companion
+  </div>
+  <div id="status-badge" class="status-badge waiting">
+    <div class="dot"></div>
+    <span id="status-text">Waiting for connection...</span>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- Session Setup -->
+  <div class="card col-full">
+    <div class="card-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Session Connection
+    </div>
+    <div class="session-row">
+      <input class="input-field" type="text" id="session-input" placeholder="Paste session ID from your phone..." />
+      <button class="btn btn-primary" onclick="connectWS()">Connect</button>
+      <button class="btn btn-ghost" onclick="clearHistory()" title="Clear history">Clear</button>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
+      📱 Open <strong style="color:var(--text-secondary)">Mushi QR</strong> app → Scanner Gun Mode → WiFi tab → scan the QR with your PC camera, or copy the Session ID here.
+    </div>
+  </div>
+
+  <!-- Last Scan -->
+  <div class="card">
+    <div class="toprow">
+      <div class="card-title" style="margin:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Last Scanned
+      </div>
+      <div class="scan-wave" id="scan-wave">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="scan-output" id="scan-output">
+      <div class="scan-value empty" id="last-scan-val">No barcode received yet...</div>
+      <button class="copy-btn" id="copy-btn" onclick="copyLast()">⎘ Copy</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-pill">Total scans: <strong id="total-count">0</strong></div>
+      <div class="stat-pill">Session: <strong id="session-display">—</strong></div>
+    </div>
+  </div>
+
+  <!-- Auto Target -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h4"/></svg>
+      Auto-type Target
+    </div>
+    <textarea class="target-textarea" id="target-field" placeholder="Scanned barcodes appear here automatically — click here then scan on your phone..."></textarea>
+    <label class="toggle-row">
+      <input type="checkbox" id="auto-enter" checked>
+      Append Enter (newline) after each scan
+    </label>
+    <label class="toggle-row">
+      <input type="checkbox" id="auto-tab">
+      Append Tab after each scan
+    </label>
+    <label class="toggle-row">
+      <input type="checkbox" id="auto-clipboard">
+      Auto-copy to clipboard
+    </label>
+    <label class="toggle-row">
+      <input type="checkbox" id="play-sound" checked>
+      Play beep sound on scan
+    </label>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" style="flex:1;font-size:12px;" onclick="clearTarget()">Clear Target Field</button>
+      <button class="btn btn-ghost" style="flex:1;font-size:12px;" onclick="downloadTarget()">⬇ Download as TXT</button>
+    </div>
+    <p class="target-hint">💡 Tip: Focus a cell in Excel / Sheets or a field in any web app in another browser tab — each scan auto-copies to clipboard for instant Ctrl+V.</p>
+  </div>
+
+  <!-- Scan History -->
+  <div class="card col-full">
+    <div class="toprow">
+      <div class="card-title" style="margin:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Scan History
+        <span class="counter-badge" id="history-count">0</span>
+      </div>
+      <button class="link-btn" onclick="clearHistory()">Clear all</button>
+    </div>
+    <ul class="history-list" id="history-list">
+      <li class="history-empty" id="history-empty">Scan history will appear here...</li>
+    </ul>
+  </div>
+
+  <!-- Python Helper -->
+  <div class="card col-full">
+    <div class="card-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      True Keyboard Injection — Python Helper (Optional)
+    </div>
+    <div class="hint-box" style="margin-bottom:12px;">
+      ⚡ For true keyboard injection into <strong>any application</strong> (Excel, SAP, POS software, etc.) install this one-time Python script. It types barcodes directly into your active window — just like a physical scanner gun.
+    </div>
+    <div class="code-block" id="python-code"><span class="code-comment"># Install once: pip install websocket-client pyautogui</span>
+<span class="code-keyword">import</span> json, websocket, pyautogui, time
+
+SESSION_ID = <span class="code-string" id="py-session">"paste-your-session-id-here"</span>
+
+<span class="code-keyword">def</span> on_message(ws, message):
+    data = json.loads(message)
+    <span class="code-keyword">if</span> data.get(<span class="code-string">'event'</span>) == <span class="code-string">'message'</span>:
+        barcode = data[<span class="code-string">'message'</span>]
+        time.sleep(0.1)          <span class="code-comment"># brief delay so window stays focused</span>
+        pyautogui.typewrite(barcode, interval=0.02)
+        pyautogui.press(<span class="code-string">'enter'</span>)
+        print(<span class="code-string">f"✓ Typed: {barcode}"</span>)
+
+ws = websocket.WebSocketApp(
+    <span class="code-string">f"wss://ntfy.sh/{SESSION_ID}/ws"</span>,
+    on_message=on_message
+)
+print(<span class="code-string">"🔫 Scanner Gun active — waiting for barcodes..."</span>)
+ws.run_forever()</div>
+    <button class="btn btn-ghost" style="font-size:12px;" onclick="copyPython()">⎘ Copy Python Script</button>
+  </div>
+
+</div>
+
+<!-- Audio for beep -->
+<audio id="beep-audio" preload="auto">
+  <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU..." type="audio/wav">
+</audio>
+
+<script>
+  // ── State ─────────────────────────────────────────────────────────────────
+  let ws = null;
+  let sessionId = '';
+  let totalScans = 0;
+  let history = [];
+  let reconnectTimer = null;
+  let scanCount = 0;
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    const sid = params.get('session') || '';
+    if (sid) {
+      document.getElementById('session-input').value = sid;
+      sessionId = sid;
+      connectWS();
+    }
+  };
+
+  // ── WebSocket Connection ──────────────────────────────────────────────────
+  function connectWS() {
+    const input = document.getElementById('session-input').value.trim();
+    if (!input) { alert('Please enter a Session ID'); return; }
+    sessionId = input;
+
+    // Update URL
+    const url = new URL(window.location);
+    url.searchParams.set('session', sessionId);
+    history.pushState ? history.replaceState({}, '', url) : null;
+
+    document.getElementById('session-display').textContent = sessionId.substring(0, 10) + '...';
+    document.getElementById('py-session').textContent = `"${sessionId}"`;
+
+    if (ws) { ws.close(); ws = null; }
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+
+    setStatus('waiting', 'Connecting...');
+
+    ws = new WebSocket(`wss://ntfy.sh/${sessionId}/ws`);
+
+    ws.onopen = () => {
+      setStatus('connected', `Connected — Session: ${sessionId.substring(0, 8)}...`);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.event === 'message') {
+          receiveScan(msg.message);
+        }
+      } catch (e) {}
+    };
+
+    ws.onclose = () => {
+      setStatus('error', 'Disconnected — Reconnecting in 3s...');
+      reconnectTimer = setTimeout(connectWS, 3000);
+    };
+
+    ws.onerror = () => {
+      setStatus('error', 'Connection error');
+    };
+  }
+
+  function setStatus(type, text) {
+    const badge = document.getElementById('status-badge');
+    badge.className = 'status-badge ' + type;
+    document.getElementById('status-text').textContent = text;
+  }
+
+  // ── Receive Scan ──────────────────────────────────────────────────────────
+  function receiveScan(text) {
+    totalScans++;
+    scanCount++;
+    const time = new Date();
+
+    // Update last scan display
+    const valEl = document.getElementById('last-scan-val');
+    valEl.textContent = text;
+    valEl.classList.remove('empty');
+
+    // Flash animation
+    const output = document.getElementById('scan-output');
+    output.classList.add('flash');
+    setTimeout(() => output.classList.remove('flash'), 600);
+
+    // Sound wave animation
+    const wave = document.getElementById('scan-wave');
+    wave.classList.add('active');
+    setTimeout(() => wave.classList.remove('active'), 1200);
+
+    // Beep
+    if (document.getElementById('play-sound').checked) playBeep();
+
+    // Update counter
+    document.getElementById('total-count').textContent = totalScans;
+
+    // Type into target textarea
+    const targetField = document.getElementById('target-field');
+    const addEnter = document.getElementById('auto-enter').checked;
+    const addTab = document.getElementById('auto-tab').checked;
+    const appendStr = text + (addEnter ? '\n' : '') + (addTab ? '\t' : '');
+    targetField.value += appendStr;
+    targetField.scrollTop = targetField.scrollHeight;
+
+    // Auto clipboard
+    if (document.getElementById('auto-clipboard').checked) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+
+    // History
+    addToHistory(text, time);
+  }
+
+  // ── History ───────────────────────────────────────────────────────────────
+  function addToHistory(text, time) {
+    const historyList = document.getElementById('history-list');
+    const emptyEl = document.getElementById('history-empty');
+    if (emptyEl) emptyEl.remove();
+
+    const li = document.createElement('li');
+    li.className = 'history-item';
+    const timeStr = time.toLocaleTimeString('en-US', { hour12: false });
+    li.innerHTML = `
+      <span class="history-text">${escapeHtml(text)}</span>
+      <span class="history-time">${timeStr}</span>
+      <button class="history-copy" onclick="navigator.clipboard.writeText('${escapeAttr(text)}')">⎘</button>
+    `;
+    historyList.prepend(li);
+
+    // Keep max 100
+    const items = historyList.querySelectorAll('.history-item');
+    if (items.length > 100) items[items.length - 1].remove();
+
+    // Update count badge
+    document.getElementById('history-count').textContent = historyList.querySelectorAll('.history-item').length;
+  }
+
+  function clearHistory() {
+    const list = document.getElementById('history-list');
+    list.innerHTML = '<li class="history-empty" id="history-empty">Scan history will appear here...</li>';
+    document.getElementById('history-count').textContent = '0';
+    totalScans = 0;
+    document.getElementById('total-count').textContent = '0';
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function copyLast() {
+    const val = document.getElementById('last-scan-val').textContent;
+    if (val && !val.includes('No barcode')) {
+      navigator.clipboard.writeText(val);
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = '✓ Copied';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('copied'); }, 1500);
+    }
+  }
+
+  function clearTarget() {
+    document.getElementById('target-field').value = '';
+  }
+
+  function downloadTarget() {
+    const text = document.getElementById('target-field').value;
+    if (!text) return;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `scan-output-${Date.now()}.txt`;
+    a.click();
+  }
+
+  function copyPython() {
+    // Get the text content of the code block without HTML tags
+    const code = `# Install once: pip install websocket-client pyautogui
+import json, websocket, pyautogui, time
+
+SESSION_ID = "${sessionId || 'paste-your-session-id-here'}"
+
+def on_message(ws, message):
+    data = json.loads(message)
+    if data.get('event') == 'message':
+        barcode = data['message']
+        time.sleep(0.1)
+        pyautogui.typewrite(barcode, interval=0.02)
+        pyautogui.press('enter')
+        print(f"✓ Typed: {barcode}")
+
+ws = websocket.WebSocketApp(
+    f"wss://ntfy.sh/{SESSION_ID}/ws",
+    on_message=on_message
+)
+print("🔫 Scanner Gun active — waiting for barcodes...")
+ws.run_forever()`;
+    navigator.clipboard.writeText(code);
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '⎘ Copy Python Script', 1500);
+  }
+
+  function playBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(1800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.12);
+    } catch(e) {}
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function escapeAttr(str) {
+    return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+</script>
+
+</body>
+</html>
