@@ -3688,7 +3688,12 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .bottom-nav-label {
-  display: none;
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 3px;
+  opacity: 0.85;
+  transition: all 0.2s ease;
 }
 
 /* Ã¢â€ â‚¬Ã¢â€ â‚¬ Tab Panel Area Ã¢â€ â‚¬Ã¢â€ â‚¬ */
