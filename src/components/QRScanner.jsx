@@ -518,7 +518,7 @@ export default function QRScanner({ onBack, navigateTo }) {
         {/* Header removed as it overlaps with app upper navbar */}
 
         {/* Body */}
-        <div className="qrs-body" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}>
+        <div className="qrs-body" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} style={{ justifyContent: 'flex-end', paddingBottom: '24px' }}>
           {/* Error - QR Not Found (illustrated) */}
           {status === 'ERROR' && error && error.toLowerCase().includes('no qr') ? (
             <div 
