@@ -70,8 +70,8 @@ export const BARCODE_STANDARDS = {
     placeholder: 'e.g. 01234567890128',
     defaultValue: '01234567890128',
     hint: 'Exactly 13 or 14 digits (GTIN)',
-    validate: (val) => /^\d{13,14}$/.test(val),
-    errorMsg: 'Must be exactly 13 or 14 digits'
+    validate: (val) => /^(?:\(01\))?\d{13,14}$/.test(val),
+    errorMsg: 'Must be exactly 13 or 14 digits (optional (01) prefix)'
   },
   'pdf417': {
     name: 'PDF417',
@@ -318,9 +318,14 @@ export function renderBarcode(canvas, text, options = {}) {
     };
     const targetBcid = bcidMap[bcid] || bcid;
 
+    let renderText = text || ' ';
+    if (bcid === 'gs1databar' && !renderText.startsWith('(01)')) {
+      renderText = `(01)${renderText}`;
+    }
+
     const bwipOptions = {
       bcid: targetBcid,
-      text: text || ' ',
+      text: renderText,
       scale: barWidth,
       height: height / 10, // approximate standard conversion
       includetext: displayValue,

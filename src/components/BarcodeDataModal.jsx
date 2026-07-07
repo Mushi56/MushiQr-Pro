@@ -873,7 +873,7 @@ function RoyalMailForm({ fields, setFields }) {
 
 function GS1DataBarForm({ fields, setFields }) {
   const value = fields.data || '';
-  const isValid = /^\d{13,14}$/.test(value);
+  const isValid = /^(?:\(01\))?\d{13,14}$/.test(value);
 
   return (
     <>
