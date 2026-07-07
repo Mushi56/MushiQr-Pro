@@ -7,15 +7,35 @@ import {
 
 // ─── Styled Sub-components ──────────────────────────────────────────────────
 
-function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, width = 1, monospace = false, inputMode = 'text', Icon }) {
+function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, width = 1, monospace = false, inputMode = 'text', Icon, isValid, errorMsg }) {
   const [focused, setFocused] = useState(false);
+  const hasValue = value && String(value).trim().length > 0;
   return (
     <div style={{ flex: width, display: 'flex', flexDirection: 'column' }} className="form-group">
       {label && (
         <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-            {label}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+              {label}
+            </span>
+            {hasValue && isValid !== undefined && (
+              <span style={{ 
+                fontSize: '9px', 
+                fontWeight: 800, 
+                padding: '2px 6px', 
+                borderRadius: '6px', 
+                background: isValid ? 'rgba(52,199,89,0.12)' : 'rgba(255,59,48,0.12)', 
+                color: isValid ? '#34C759' : '#FF3B30',
+                textTransform: 'uppercase',
+                letterSpacing: '0.3px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                {isValid ? '✓ Valid' : '✗ Invalid'}
+              </span>
+            )}
+          </div>
           {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
         </label>
       )}
@@ -49,7 +69,7 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
           onBlur={() => setFocused(false)}
           style={{
             paddingLeft: Icon ? '36px' : '14px',
-            paddingRight: maxLength ? '48px' : '14px',
+            paddingRight: (maxLength || (hasValue && isValid !== undefined)) ? '48px' : '14px',
             fontFamily: monospace ? '"JetBrains Mono", "Fira Code", "Courier New", monospace' : 'inherit',
             fontWeight: 600,
             fontSize: '13px',
@@ -60,7 +80,7 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
         {maxLength && (
           <span style={{
             position: 'absolute',
-            right: '12px',
+            right: (hasValue && isValid !== undefined) ? '32px' : '12px',
             top: '50%',
             transform: 'translateY(-50%)',
             fontSize: '9px',
@@ -70,20 +90,64 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
             {value.length}/{maxLength}
           </span>
         )}
+        {hasValue && isValid !== undefined && (
+          <div style={{
+            position: 'absolute',
+            right: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '16px',
+            height: '16px',
+            borderRadius: '50%',
+            background: isValid ? 'rgba(52,199,89,0.15)' : 'rgba(255,59,48,0.15)',
+            color: isValid ? '#34C759' : '#FF3B30',
+            zIndex: 5
+          }}>
+            {isValid ? <Check size={10} strokeWidth={3} /> : <X size={10} strokeWidth={3} />}
+          </div>
+        )}
       </div>
+      {hasValue && isValid === false && errorMsg && (
+        <div style={{ color: '#FF3B30', fontSize: '11px', fontWeight: 600, marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span>⚠</span> {errorMsg}
+        </div>
+      )}
     </div>
   );
 }
 
-function SegmentedTextarea({ label, value, onChange, placeholder, hint, maxLength, rows = 4, monospace = true, Icon }) {
+function SegmentedTextarea({ label, value, onChange, placeholder, hint, maxLength, rows = 4, monospace = true, Icon, isValid, errorMsg }) {
   const [focused, setFocused] = useState(false);
+  const hasValue = value && String(value).trim().length > 0;
   return (
     <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
       {label && (
         <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-            {label}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+              {label}
+            </span>
+            {hasValue && isValid !== undefined && (
+              <span style={{ 
+                fontSize: '9px', 
+                fontWeight: 800, 
+                padding: '2px 6px', 
+                borderRadius: '6px', 
+                background: isValid ? 'rgba(52,199,89,0.12)' : 'rgba(255,59,48,0.12)', 
+                color: isValid ? '#34C759' : '#FF3B30',
+                textTransform: 'uppercase',
+                letterSpacing: '0.3px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                {isValid ? '✓ Valid' : '✗ Invalid'}
+              </span>
+            )}
+          </div>
           {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
         </label>
       )}
@@ -114,6 +178,7 @@ function SegmentedTextarea({ label, value, onChange, placeholder, hint, maxLengt
           onBlur={() => setFocused(false)}
           style={{
             paddingLeft: Icon ? '36px' : '14px',
+            paddingRight: (hasValue && isValid !== undefined) ? '36px' : '14px',
             fontFamily: monospace ? '"JetBrains Mono", "Fira Code", "Courier New", monospace' : 'inherit',
             fontWeight: 600,
             fontSize: '13px',
@@ -128,7 +193,30 @@ function SegmentedTextarea({ label, value, onChange, placeholder, hint, maxLengt
             </span>
           </div>
         )}
+        {hasValue && isValid !== undefined && (
+          <div style={{
+            position: 'absolute',
+            right: '12px',
+            top: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '16px',
+            height: '16px',
+            borderRadius: '50%',
+            background: isValid ? 'rgba(52,199,89,0.15)' : 'rgba(255,59,48,0.15)',
+            color: isValid ? '#34C759' : '#FF3B30',
+            zIndex: 5
+          }}>
+            {isValid ? <Check size={10} strokeWidth={3} /> : <X size={10} strokeWidth={3} />}
+          </div>
+        )}
       </div>
+      {hasValue && isValid === false && errorMsg && (
+        <div style={{ color: '#FF3B30', fontSize: '11px', fontWeight: 600, marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span>⚠</span> {errorMsg}
+        </div>
+      )}
     </div>
   );
 }

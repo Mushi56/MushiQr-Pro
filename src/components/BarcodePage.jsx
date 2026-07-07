@@ -394,9 +394,32 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                   }}
                 >
                   {bcid === key && (
-                    <div style={{ position: 'absolute', top: 5, right: 5, background: 'var(--accent-primary)', color: 'white', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(214,0,54,0.3)', zIndex: 5 }}>
-                      <Pencil size={8} strokeWidth={2.5} />
-                    </div>
+                    <>
+                      <div style={{ position: 'absolute', top: 5, right: 5, background: 'var(--accent-primary)', color: 'white', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(214,0,54,0.3)', zIndex: 5 }}>
+                        <Pencil size={8} strokeWidth={2.5} />
+                      </div>
+                      <div style={{
+                        position: 'absolute',
+                        top: 5,
+                        left: 5,
+                        background: standard.validate(text) ? '#34C759' : '#FF3B30',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: 14,
+                        height: 14,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                        zIndex: 5
+                      }}>
+                        {standard.validate(text) ? (
+                          <span style={{ fontSize: '8px', fontWeight: 900, lineHeight: 1 }}>✓</span>
+                        ) : (
+                          <span style={{ fontSize: '8px', fontWeight: 900, lineHeight: 1 }}>✗</span>
+                        )}
+                      </div>
+                    </>
                   )}
                   <span className="type-tab-icon" style={{ width: '100%', height: '32px', background: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
                     <MiniBarcodePreview type={key} data={standard.defaultValue} />
