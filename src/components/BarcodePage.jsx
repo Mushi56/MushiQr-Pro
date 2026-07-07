@@ -77,6 +77,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isUndoRedoActionRef = useRef(false);
+  const [exportQuality, setExportQuality] = useState('High');
 
   const canvasRef = useRef(null);
 
@@ -84,6 +85,20 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
   const [modalInitialFields, setModalInitialFields] = useState({});
   const [pendingBcid, setPendingBcid] = useState(null);
+
+  // Handle click outside menu / dropdowns to close them
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (isMenuOpen && !e.target.closest('.btn-menu-toggle') && !e.target.closest('.app-dropdown-menu')) {
+        setIsMenuOpen(false);
+      }
+      if (formatDropdownOpen && !e.target.closest('.btn-header-save') && !e.target.closest('.save-as-dropdown')) {
+        setFormatDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, [isMenuOpen, formatDropdownOpen]);
 
   // Init history
   useEffect(() => {
@@ -187,11 +202,28 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
     if (!canvasRef.current || !isDataValid) return;
     try {
       const filename = `barcode_${bcid}_${text.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      
+      // Scale based on exportQuality (Low=1x, Medium=2x, High=3x, Ultra=4x)
+      const scaleMap = { 'Low': 1, 'Medium': 2, 'High': 3, 'Ultra': 4 };
+      const scale = scaleMap[exportQuality] || 3;
+      
+      const tempCanvas = document.createElement('canvas');
+      renderBarcode(tempCanvas, text, {
+        bcid,
+        barColor,
+        bgColor,
+        barWidth: barWidth * scale,
+        height: height * scale,
+        margin: margin * scale,
+        displayValue
+      });
+
       let result;
-      if (format === 'PNG') result = await downloadPNG(canvasRef.current, filename);
-      else if (format === 'JPG') result = await downloadJPG(canvasRef.current, filename);
-      else if (format === 'SVG') result = await downloadSVG(canvasRef.current, filename);
-      else if (format === 'PDF') result = await downloadPDF(canvasRef.current, filename);
+      if (format === 'PNG') result = await downloadPNG(tempCanvas, filename);
+      else if (format === 'JPG') result = await downloadJPG(tempCanvas, filename);
+      else if (format === 'SVG') result = await downloadSVG(tempCanvas, filename);
+      else if (format === 'PDF') result = await downloadPDF(tempCanvas, filename);
+      
       if (result === 'gallery') showToast('Saved to Gallery', 'success');
       else if (result === 'share') showToast('Share Sheet Opened', 'success');
       else showToast('Saved successfully', 'success');
@@ -283,15 +315,91 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                 <div style={{ padding: 12 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.5px' }}>Export Format</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                    {[{ label: 'PNG', Icon: FileImage }, { label: 'SVG', Icon: FileCode }, { label: 'PDF', Icon: FileText }, { label: 'JPG', Icon: FileImage }].map(({ label }) => (
-                      <button key={label} className={`format-option ${selectedFormat === label ? 'active' : ''}`}
-                        onClick={(e) => { e.stopPropagation(); setSelectedFormat(label); setFormatDropdownOpen(false); handleDownload(label); }}>
-                        <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>
+                    {[
+                      { label: 'PNG', Icon: FileImage },
+                      { label: 'SVG', Icon: FileCode },
+                      { label: 'PDF', Icon: FileText },
+                      { label: 'JPG', Icon: FileImage }
+                    ].map(({ label, Icon }) => (
+                      <button
+                        key={label}
+                        className={`format-option ${selectedFormat === label ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFormat(label);
+                          setFormatDropdownOpen(false);
+                          handleDownload(label);
+                        }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          aspectRatio: '1 / 1',
+                          padding: '0',
+                          background: selectedFormat === label ? 'var(--accent-soft)' : 'var(--bg-hover)',
+                          border: '1px solid',
+                          borderColor: selectedFormat === label ? 'var(--accent-primary)' : 'transparent',
+                          borderRadius: '12px',
+                          color: selectedFormat === label ? 'var(--accent-primary)' : 'var(--text-primary)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <Icon size={18} />
+                        <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
-                <div style={{ height: 1, background: 'var(--border-color)' }} />
+
+                <div style={{ height: 1, background: 'var(--border-color)', margin: 0 }} />
+
+                <div style={{ padding: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Export Quality</div>
+                    <span style={{ 
+                      fontSize: '10px', 
+                      fontWeight: 800, 
+                      color: 'var(--accent-primary)',
+                      background: 'var(--accent-soft)',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid rgba(214, 0, 54, 0.15)',
+                      letterSpacing: '0.5px'
+                    }}>
+                      {exportQuality === 'Low' && '1x Scale'}
+                      {exportQuality === 'Medium' && '2x Scale'}
+                      {exportQuality === 'High' && '3x Scale'}
+                      {exportQuality === 'Ultra' && '4x Scale'}
+                    </span>
+                  </div>
+                  <div style={{ padding: '0 8px', marginTop: 12, marginBottom: 8 }}>
+                    <input
+                      type="range"
+                      min="0"
+                      max="3"
+                      step="1"
+                      value={['Low', 'Medium', 'High', 'Ultra'].indexOf(exportQuality)}
+                      onChange={(e) => {
+                        const steps = ['Low', 'Medium', 'High', 'Ultra'];
+                        const selected = steps[parseInt(e.target.value)] || 'High';
+                        setExportQuality(selected);
+                      }}
+                      style={{ width: '100%', cursor: 'pointer' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 9, fontWeight: 600, color: 'var(--text-muted)' }}>
+                      <span>Low</span>
+                      <span>Normal</span>
+                      <span>HD</span>
+                      <span>4K</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ height: 1, background: 'var(--border-color)', margin: 0 }} />
+
                 <div style={{ padding: 12 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.5px' }}>Quick Actions</div>
                   <div style={{ display: 'flex', gap: 8 }}>
@@ -318,7 +426,17 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                     const next = theme === 'dark' ? 'light' : theme === 'light' ? 'auto' : 'dark';
                     setTheme(next);
                   }}>
-                    {theme === 'dark' ? <Moon size={16} /> : theme === 'light' ? <Sun size={16} /> : <Layers size={16} />}
+                    {theme === 'dark' ? (
+                      <Moon size={16} />
+                    ) : theme === 'light' ? (
+                      <Sun size={16} />
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v20" />
+                        <path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" />
+                        <circle cx="12" cy="12" r="10" />
+                      </svg>
+                    )}
                     Theme <span style={{ textTransform: 'capitalize', marginLeft: 4, color: 'var(--accent-primary)', fontWeight: 'bold' }}>{theme}</span>
                   </button>
                   <div style={{ height: 1, background: 'var(--border-color)', margin: '4px 8px' }} />
