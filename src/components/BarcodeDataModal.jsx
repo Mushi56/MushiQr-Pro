@@ -7,10 +7,6 @@ import {
 
 // ─── Styled Sub-components ──────────────────────────────────────────────────
 
-function FieldLabel({ children, hint }) {
-  return null; // Handled directly inside standard-compliant form elements below
-}
-
 function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, width = 1, monospace = false, inputMode = 'text', Icon }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -576,6 +572,7 @@ function Code128Form({ fields, setFields }) {
   );
 }
 
+// ─── Categories & Forms mapping ───
 function Code39Form({ fields, setFields }) {
   const value = (fields.data || '').toUpperCase();
   const ALLOWED = /^[A-Z0-9\-\.\ \$\/\+\%]*$/;
@@ -1230,90 +1227,38 @@ export default function BarcodeDataModal({ isOpen, bcid, initialFields, onApply,
   };
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.7)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      display: 'flex',
-      alignItems: 'flex-end',
-      justifyContent: 'center',
-      zIndex: 3000,
-      padding: '0'
-    }} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="fade-in" style={{
-        width: '100%',
-        maxWidth: 520,
-        background: 'var(--bg-elevated)',
-        border: '1px solid var(--border-color)',
-        borderTopLeftRadius: 28,
-        borderTopRightRadius: 28,
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
-        boxShadow: '0 -20px 60px rgba(0,0,0,0.4)',
-        display: 'flex',
-        flexDirection: 'column',
-        maxHeight: '90dvh',
-        overflow: 'hidden'
-      }}>
-        {/* Drag handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0', flexShrink: 0 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border-color)' }} />
-        </div>
-
+    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-container glass-panel" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div style={{ padding: '16px 24px 12px', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="modal-header">
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%' }}>
             <div style={{ width: 44, height: 44, borderRadius: 12, background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <MetaIcon size={22} style={{ color: meta.color }} />
             </div>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>{standard.name}</h3>
-              <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>{standard.desc}</p>
+            <div className="modal-header-title" style={{ flex: 1 }}>
+              <h3 style={{ margin: 0 }}>{standard.name}</h3>
+              <p style={{ margin: 0 }}>{standard.desc}</p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: meta.bg, color: meta.color, textTransform: 'uppercase' }}>{meta.label}</span>
-              <button
-                onClick={onClose}
-                style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--bg-hover)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}
-              >
-                <X size={16} />
-              </button>
-            </div>
+            <button className="modal-close" onClick={onClose}>
+              <X size={20} />
+            </button>
           </div>
         </div>
 
         {/* Scrollable Form Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="modal-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {renderForm()}
         </div>
 
         {/* Footer Actions */}
-        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-color)', flexShrink: 0 }}>
-          <button
-            onClick={() => onApply(getCompiledValue())}
-            style={{
-              width: '100%',
-              padding: '15px',
-              background: 'var(--accent-gradient)',
-              border: 'none',
-              borderRadius: 16,
-              color: '#fff',
-              fontSize: 15,
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              letterSpacing: '0.2px',
-              boxShadow: '0 4px 20px var(--accent-glow)'
-            }}
-          >
-            <Check size={18} />
-            Generate Barcode
-          </button>
-        </div>
+        <button
+          className="modal-done-btn"
+          onClick={() => onApply(getCompiledValue())}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+        >
+          <Check size={18} />
+          Generate Barcode
+        </button>
       </div>
     </div>
   );
