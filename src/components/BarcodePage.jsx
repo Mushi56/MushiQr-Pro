@@ -3,7 +3,7 @@ import {
   Save, Palette, Sliders, Undo2, Redo2, ChevronDown,
   FileImage, FileCode, FileText, Copy, Bookmark, Share2,
   Menu, Home, History, Moon, Sun, Info, Shield,
-  FileText as FileIcon, AlertCircle, Layers, Pencil
+  FileText as FileIcon, AlertCircle, Layers, Pencil, Barcode, Pipette
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
@@ -14,6 +14,7 @@ import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from '../utils/exp
 import AppIcon from './AppIcon';
 import AdvancedColorPicker from './AdvancedColorPicker';
 import BarcodeDataModal from './BarcodeDataModal';
+import ColorPicker from './ColorPicker';
 
 // ─── Color Presets ────────────────────────────────────────────────────────────
 const COLOR_PRESETS = [
@@ -411,32 +412,39 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
         {activeTab === 'color' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', gap: 16 }}>
-              {[
-                { label: 'Bar Color', val: barColor, type: 'bar' },
-                { label: 'Background', val: bgColor, type: 'bg' }
-              ].map(({ label, val, type }) => (
-                <div key={type} style={{ flex: 1 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{label}</label>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <div onClick={() => openAdvancedPicker(type, val)} style={{ width: 36, height: 36, borderRadius: '50%', background: val, border: '2px solid var(--border-color)', cursor: 'pointer', boxShadow: 'var(--shadow-sm)', flexShrink: 0 }} />
-                    <input type="text" value={val} onChange={(e) => updateStateAndHistory(type === 'bar' ? { barColor: e.target.value } : { bgColor: e.target.value })}
-                      style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: 12, fontWeight: 600, outline: 'none', minWidth: 0 }} />
-                  </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Bar Color</label>
+                <div className="swatch-grid-mini">
+                  <ColorPicker isSwatch={true} icon={Pipette} value={barColor} onChange={(c) => updateStateAndHistory({ barColor: c })} onOpenAdvanced={(c) => openAdvancedPicker('bar', c)} />
+                  {['#000000', '#FF3B30', '#007AFF', '#34C759', '#FFCC00', '#AF52DE'].map(color => (
+                    <div key={color} className={`swatch-item${barColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => updateStateAndHistory({ barColor: color })} />
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Background Color</label>
+                <div className="swatch-grid-mini">
+                  <ColorPicker isSwatch={true} icon={Pipette} value={bgColor} onChange={(c) => updateStateAndHistory({ bgColor: c })} onOpenAdvanced={(c) => openAdvancedPicker('bg', c)} />
+                  {['#FFFFFF', '#F2F2F7', '#E5E5EA', '#EFEFF4', '#000000', '#0A0A0F'].map(color => (
+                    <div key={color} className={`swatch-item${bgColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => updateStateAndHistory({ bgColor: color })} />
+                  ))}
+                </div>
+              </div>
             </div>
+
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Presets</label>
-              <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '4px 0 10px', WebkitOverflowScrolling: 'touch' }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Presets</label>
+              <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '4px 0 10px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
                 {COLOR_PRESETS.map(p => {
                   const sel = barColor.toUpperCase() === p.qr.toUpperCase() && bgColor.toUpperCase() === p.bg.toUpperCase();
                   return (
                     <button key={p.name} onClick={() => updateStateAndHistory({ barColor: p.qr, bgColor: p.bg })}
                       style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, background: 'none', border: 'none', padding: 0, cursor: 'pointer', width: 54 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 10, background: p.bg, border: sel ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: sel ? '0 4px 10px rgba(255,59,48,0.2)' : '0 2px 4px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}>
-                        <div style={{ width: 18, height: 18, borderRadius: 3, background: p.qr }} />
+                      <div style={{ width: 44, height: 44, borderRadius: 12, background: p.bg, border: sel ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: sel ? '0 8px 16px rgba(255,59,48,0.25)' : '0 2px 6px rgba(0,0,0,0.06)', transition: 'all 0.2s ease' }}>
+                        <div style={{ width: 20, height: 20, borderRadius: 4, background: p.qr }} />
                       </div>
-                      <span style={{ fontSize: 9, fontWeight: sel ? 700 : 500, color: sel ? 'var(--accent-primary)' : 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', textAlign: 'center' }}>{p.name}</span>
+                      <span style={{ fontSize: 10, fontWeight: sel ? 700 : 500, color: sel ? 'var(--accent-primary)' : 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', textAlign: 'center' }}>{p.name}</span>
                     </button>
                   );
                 })}
@@ -478,7 +486,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       {/* ── Bottom Nav Tabs ── */}
       <nav className="bottom-nav" style={{ zIndex: 100 }}>
         {[
-          { id: 'content', label: 'Barcode', Icon: AlertCircle },
+          { id: 'content', label: 'Barcode', Icon: Barcode },
           { id: 'color', label: 'Colors', Icon: Palette },
           { id: 'size', label: 'Dimensions', Icon: Sliders }
         ].map(tab => (
