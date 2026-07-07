@@ -164,24 +164,34 @@ export default function QRScanner({ onBack, navigateTo }) {
       const videoElement = document.querySelector("#qr-scanner-viewport video");
       const stream = videoElement?.srcObject;
       const track = stream?.getVideoTracks()?.[0];
-      if (track) {
-        const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
-        const minVal = caps.zoom?.min || 1;
-        const maxVal = caps.zoom?.max || 8;
-        const val = Math.min(Math.max(value, minVal), maxVal);
-        try {
+      if (videoElement) {
+        let applied = false;
+        if (track) {
+          const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
           if (caps.zoom) {
-            await track.applyConstraints({ advanced: [{ zoom: val }] });
+            const minVal = caps.zoom.min || 1;
+            const maxVal = caps.zoom.max || 8;
+            const val = Math.min(Math.max(value, minVal), maxVal);
+            try {
+              await track.applyConstraints({ advanced: [{ zoom: val }] });
+              setZoom(val);
+              applied = true;
+            } catch (err) {
+              console.warn('Hardware zoom failed:', err);
+            }
           }
-        } catch { }
-        setZoom(val);
-      } else {
-        const val = Math.min(Math.max(value, 1), 4);
-        setZoom(val);
+        }
+        
+        // CSS scale zoom fallback (works everywhere, including Capacitor Android APK WebViews)
+        if (!applied) {
+          const val = Math.min(Math.max(value, 1), 4);
+          videoElement.style.transform = `translateZ(0) scale(${val})`;
+          videoElement.style.transformOrigin = 'center center';
+          setZoom(val);
+        }
       }
-    } catch {
-      const val = Math.min(Math.max(value, 1), 4);
-      setZoom(val);
+    } catch (err) {
+      console.error('applyZoom error:', err);
     }
   }, []);
 

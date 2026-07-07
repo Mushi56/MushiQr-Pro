@@ -401,7 +401,9 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                   <span className="type-tab-icon" style={{ width: '100%', height: '32px', background: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
                     <MiniBarcodePreview type={key} data={standard.defaultValue} />
                   </span>
-                  {standard.name}
+                  <span style={{ fontSize: '8.5px', fontWeight: 700, width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', marginTop: '4px' }}>
+                    {standard.name}
+                  </span>
                 </button>
               ))}
             </div>

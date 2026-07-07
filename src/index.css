@@ -6209,6 +6209,13 @@ video {
   will-change: transform;
 }
 
+.qrs-viewport > div {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  inset: 0 !important;
+}
+
 .qrs-viewport video {
   width: 100% !important;
   height: 100% !important;
