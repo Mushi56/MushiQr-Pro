@@ -257,36 +257,7 @@ function InfoBox({ text, type = 'info' }) {
 }
 
 function PayloadPreview({ value, isValid, errorMsg }) {
-  return (
-    <div style={{
-      background: 'var(--bg-primary)',
-      border: `1.5px solid ${!isValid && value ? '#FF3B30' : 'var(--border-color)'}`,
-      borderRadius: 12,
-      overflow: 'hidden'
-    }}>
-      <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)' }}>Encoded Payload Preview</span>
-        {isValid && value && <span style={{ fontSize: 10, fontWeight: 700, color: '#34C759', display: 'flex', alignItems: 'center', gap: 4 }}><Check size={10} />Valid</span>}
-        {!isValid && value && <span style={{ fontSize: 10, fontWeight: 700, color: '#FF3B30' }}>Invalid</span>}
-      </div>
-      <div style={{ padding: '12px 14px' }}>
-        <div style={{
-          fontFamily: '"JetBrains Mono", "Fira Code", "Courier New", monospace',
-          fontSize: 13,
-          fontWeight: 600,
-          color: value ? 'var(--text-primary)' : 'var(--text-muted)',
-          wordBreak: 'break-all',
-          lineHeight: 1.5,
-          fontStyle: value ? 'normal' : 'italic'
-        }}>
-          {value || 'Enter data above to see payload…'}
-        </div>
-        {!isValid && value && errorMsg && (
-          <div style={{ marginTop: 8, fontSize: 11, color: '#FF3B30', fontWeight: 600 }}>⚠ {errorMsg}</div>
-        )}
-      </div>
-    </div>
-  );
+  return null;
 }
 
 // ─── Category Badge ──────────────────────────────────────────────────────────
@@ -345,6 +316,8 @@ function EAN13Form({ fields, setFields }) {
           value={prod}
           onChange={v => setFields(f => ({ ...f, productCode: v.replace(/\D/g, '').slice(0, 4) }))}
           maxLength={4} placeholder="3393" inputMode="numeric" width={3} Icon={Tag}
+          isValid={isValid}
+          errorMsg="Need exactly 12 digits total"
         />
       </div>
       {concat.length === 12 && (
@@ -409,6 +382,8 @@ function UPCAForm({ fields, setFields }) {
           value={prod}
           onChange={v => setFields(f => ({ ...f, productCode: v.replace(/\D/g, '').slice(0, 5) }))}
           maxLength={5} placeholder="67890" inputMode="numeric" width={1} Icon={Tag}
+          isValid={isValid}
+          errorMsg="Need 11 total digits"
         />
       </div>
       {concat.length === 11 && (
@@ -455,6 +430,8 @@ function EAN8Form({ fields, setFields }) {
           value={prod}
           onChange={v => setFields(f => ({ ...f, productCode: v.replace(/\D/g, '').slice(0, 4) }))}
           maxLength={4} placeholder="2345" inputMode="numeric" width={1} Icon={Tag}
+          isValid={isValid}
+          errorMsg="Need exactly 7 digits"
         />
       </div>
       {concat.length === 7 && (
@@ -511,6 +488,8 @@ function ITF14Form({ fields, setFields }) {
           value={item}
           onChange={v => setFields(f => ({ ...f, itemRef: v.replace(/\D/g, '').slice(0, 6) }))}
           maxLength={6} placeholder="567890" inputMode="numeric" width={1} Icon={Tag}
+          isValid={isValid}
+          errorMsg="Need exactly 13 digits total"
         />
       </div>
       {concat.length === 13 && (
@@ -544,7 +523,9 @@ function UPCEForm({ fields, setFields }) {
         value={body}
         onChange={v => setFields(f => ({ ...f, body: v.replace(/\D/g, '').slice(0, 6) }))}
         maxLength={6} placeholder="123456" inputMode="numeric" Icon={Hash}
-      />
+          isValid={isValid}
+          errorMsg="Need number system + 6 digits = 7 chars total"
+        />
       <PayloadPreview value={full} isValid={isValid} errorMsg="Need number system + 6 digits = 7 chars total" />
     </>
   );
@@ -566,7 +547,9 @@ function Code128Form({ fields, setFields }) {
         rows={3}
         monospace
         Icon={Barcode}
-      />
+          isValid={isValid}
+          errorMsg="Must contain only ASCII characters"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Must contain only ASCII characters" />
     </>
   );
@@ -590,7 +573,9 @@ function Code39Form({ fields, setFields }) {
         rows={2}
         monospace
         Icon={Barcode}
-      />
+          isValid={isValid}
+          errorMsg="Only A-Z, 0-9, and - . $ / + % SPACE allowed"
+        />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {['A-Z', '0-9', '-', '.', '$', '/', '+', '%', 'SPACE'].map(c => (
           <span key={c} style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', background: 'var(--bg-hover)', borderRadius: 6, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{c}</span>
@@ -618,7 +603,9 @@ function Code93Form({ fields, setFields }) {
         rows={2}
         monospace
         Icon={Barcode}
-      />
+          isValid={isValid}
+          errorMsg="Only A-Z, 0-9, and - . $ / + % SPACE allowed"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Only A-Z, 0-9, and - . $ / + % SPACE allowed" />
     </>
   );
@@ -640,7 +627,9 @@ function DataMatrixForm({ fields, setFields }) {
         rows={4}
         monospace
         Icon={FileText}
-      />
+          isValid={isValid}
+          errorMsg="Cannot be empty or exceed 1000 characters"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty or exceed 1000 characters" />
     </>
   );
@@ -662,7 +651,9 @@ function PDF417Form({ fields, setFields }) {
         rows={5}
         monospace
         Icon={FileText}
-      />
+          isValid={isValid}
+          errorMsg="Cannot be empty or exceed 1500 characters"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty or exceed 1500 characters" />
     </>
   );
@@ -733,7 +724,9 @@ function CodabarForm({ fields, setFields }) {
         placeholder="123456"
         monospace
         Icon={Hash}
-      />
+          isValid={isValid}
+          errorMsg="Start + digits/symbols + Stop required"
+        />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {['0-9', '-', '$', ':', '/', '.', '+'].map(c => (
           <span key={c} style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', background: 'var(--bg-hover)', borderRadius: 6, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{c}</span>
@@ -758,7 +751,9 @@ function Code11Form({ fields, setFields }) {
         placeholder="123-456-789"
         monospace
         Icon={Hash}
-      />
+          isValid={isValid}
+          errorMsg="Digits 0-9 and hyphens only"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Digits 0-9 and hyphens only" />
     </>
   );
@@ -779,7 +774,9 @@ function MSIForm({ fields, setFields }) {
         inputMode="numeric"
         monospace
         Icon={Hash}
-      />
+          isValid={isValid}
+          errorMsg="Digits only"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Digits only" />
     </>
   );
@@ -801,7 +798,9 @@ function I25Form({ fields, setFields }) {
         inputMode="numeric"
         monospace
         Icon={Hash}
-      />
+          isValid={isValid}
+          errorMsg={!isEven ? "Must have even digit count" : "Digits only"}
+        />
       {value.length > 0 && !isEven && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px', background: 'rgba(255,149,0,0.1)', border: '1px solid rgba(255,149,0,0.3)', borderRadius: 10 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#FF9500' }}>⚠ Odd number of digits. Add a leading zero to make it even.</span>
@@ -845,7 +844,9 @@ function PostalForm({ fields, setFields, type }) {
         inputMode="numeric"
         monospace
         Icon={MapPin}
-      />
+          isValid={isValid}
+          errorMsg={`Exactly ${maxLen} digits required`}
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg={`Exactly ${maxLen} digits required`} />
     </>
   );
@@ -865,7 +866,9 @@ function RoyalMailForm({ fields, setFields }) {
         placeholder="SN34RD1A"
         monospace
         Icon={MapPin}
-      />
+          isValid={isValid}
+          errorMsg="Alphanumeric characters only"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Alphanumeric characters only" />
     </>
   );
@@ -887,7 +890,9 @@ function GS1DataBarForm({ fields, setFields }) {
         inputMode="numeric"
         monospace
         Icon={Hash}
-      />
+          isValid={isValid}
+          errorMsg="Must be exactly 13 or 14 digits"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Must be exactly 13 or 14 digits" />
     </>
   );
@@ -909,7 +914,9 @@ function GS1128Form({ fields, setFields }) {
         rows={3}
         monospace
         Icon={Barcode}
-      />
+          isValid={isValid}
+          errorMsg="Must contain ASCII characters only"
+        />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {['(01) GTIN', '(10) Batch', '(11) Prod Date', '(17) Exp Date', '(21) Serial'].map(ai => (
           <span key={ai} style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', background: 'var(--bg-hover)', borderRadius: 6, color: 'var(--text-muted)' }}>{ai}</span>
@@ -936,7 +943,9 @@ function TelepenForm({ fields, setFields }) {
         rows={3}
         monospace
         Icon={Barcode}
-      />
+          isValid={isValid}
+          errorMsg="ASCII characters only"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="ASCII characters only" />
     </>
   );
@@ -958,7 +967,9 @@ function PharmacodeForm({ fields, setFields }) {
         inputMode="numeric"
         monospace
         Icon={Pill}
-      />
+          isValid={isValid}
+          errorMsg="Integer value between 3 and 131,070"
+        />
       {value && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 14px', background: 'var(--bg-primary)', borderRadius: 10, border: '1px solid var(--border-color)' }}>
           <div style={{ flex: 1 }}>
@@ -999,7 +1010,9 @@ function AztecForm({ fields, setFields }) {
         rows={4}
         monospace
         Icon={FileText}
-      />
+          isValid={isValid}
+          errorMsg="Cannot be empty or exceed 1500 characters"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty or exceed 1500 characters" />
     </>
   );
@@ -1021,7 +1034,9 @@ function MaxiCodeForm({ fields, setFields }) {
         rows={3}
         monospace
         Icon={FileText}
-      />
+          isValid={isValid}
+          errorMsg="Cannot exceed 138 characters"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot exceed 138 characters" />
     </>
   );
@@ -1043,7 +1058,9 @@ function QRCodeForm({ fields, setFields }) {
         rows={4}
         monospace
         Icon={FileText}
-      />
+          isValid={isValid}
+          errorMsg="Cannot be empty"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty" />
     </>
   );
@@ -1064,7 +1081,9 @@ function MicroQRForm({ fields, setFields }) {
         placeholder="MICRO-QR-DATA"
         monospace
         Icon={Hash}
-      />
+          isValid={isValid}
+          errorMsg="Cannot exceed 35 characters"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot exceed 35 characters" />
     </>
   );
@@ -1086,7 +1105,9 @@ function HanXinForm({ fields, setFields }) {
         rows={4}
         monospace={false}
         Icon={FileText}
-      />
+          isValid={isValid}
+          errorMsg="Cannot be empty or exceed 1000 characters"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Cannot be empty or exceed 1000 characters" />
     </>
   );
@@ -1108,7 +1129,9 @@ function GenericStackedForm({ fields, setFields, standard }) {
         rows={3}
         monospace
         Icon={Barcode}
-      />
+          isValid={isValid}
+          errorMsg="Must contain ASCII characters"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Must contain ASCII characters" />
     </>
   );
@@ -1131,7 +1154,9 @@ function ChannelCodeForm({ fields, setFields }) {
         inputMode="numeric"
         monospace
         Icon={Hash}
-      />
+          isValid={isValid}
+          errorMsg="Positive integer up to 7 digits only"
+        />
       <PayloadPreview value={value} isValid={isValid} errorMsg="Positive integer up to 7 digits only" />
     </>
   );
