@@ -522,16 +522,51 @@
     </ul>
   </div>
 
-  <!-- Python Helper -->
+  <!-- Keyboard Injection Helper -->
   <div class="card col-full">
     <div class="card-title">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      True Keyboard Injection — Python Helper (Optional)
+      OS Keyboard Wedge — Type into Excel, POS, Retail Software
     </div>
-    <div class="hint-box" style="margin-bottom:12px;">
-      ⚡ For true keyboard injection into <strong>any application</strong> (Excel, SAP, POS software, etc.) install this one-time Python script. It types barcodes directly into your active window — just like a physical scanner gun.
+    <div class="hint-box" style="margin-bottom:16px;">
+      ⚡ To type scanned barcodes directly into <strong>Excel, POS software, Notepad, or any active app</strong> on your computer, use one of the helpers below. They act as a virtual keyboard wedge just like a physical scanner gun.
     </div>
-    <div class="code-block" id="python-code"><span class="code-comment"># Install once: pip install websocket-client pyautogui</span>
+
+    <!-- Tabs header -->
+    <div style="display:flex; gap:8px; margin-bottom:12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+      <button class="btn btn-ghost" id="tab-btn-ps" onclick="switchHelper('ps')" style="padding: 6px 12px; font-size: 12px; background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent);">Windows (Zero-Install PowerShell)</button>
+      <button class="btn btn-ghost" id="tab-btn-py" onclick="switchHelper('py')" style="padding: 6px 12px; font-size: 12px;">Mac / Linux / Python Script</button>
+    </div>
+
+    <!-- PowerShell helper -->
+    <div id="helper-ps-container">
+      <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Run this command in Windows PowerShell to connect and start typing instantly. <strong>No installation required!</strong></p>
+      <div class="code-block" id="ps-code"><span class="code-comment"># Copy & paste this block into Windows PowerShell:</span>
+<span class="code-keyword">$SessionId</span> = <span class="code-string" id="ps-session">"paste-your-session-id-here"</span>
+<span class="code-keyword">$Uri</span> = <span class="code-string">"wss://ntfy.sh/$SessionId/ws"</span>
+Add-Type -AssemblyName System.Windows.Forms
+<span class="code-keyword">$ws</span> = New-Object System.Net.WebSockets.ClientWebSocket
+<span class="code-keyword">$ws</span>.ConnectAsync(<span class="code-keyword">$Uri</span>, [System.Threading.CancellationToken]::None).Wait()
+Write-Host <span class="code-string">"🔫 Mushi Scanner Active! Type in any active window (Excel, POS, etc.)."</span> -ForegroundColor Green
+<span class="code-keyword">$buf</span> = New-Object Byte[] 1024
+while (<span class="code-keyword">$ws</span>.State -eq <span class="code-string">'Open'</span>) {
+  <span class="code-keyword">$seg</span> = New-Object ArraySegment[Byte] -ArgumentList @(,<span class="code-keyword">$buf</span>)
+  <span class="code-keyword">$res</span> = <span class="code-keyword">$ws</span>.ReceiveAsync(<span class="code-keyword">$seg</span>, [System.Threading.CancellationToken]::None).Result
+  <span class="code-keyword">$raw</span> = [Text.Encoding]::UTF8.GetString(<span class="code-keyword">$buf</span>, 0, <span class="code-keyword">$res</span>.Count)
+  if (<span class="code-keyword">$raw</span> -match <span class="code-string">'"event":"message"'</span>) {
+    <span class="code-keyword">$val</span> = (ConvertFrom-Json <span class="code-keyword">$raw</span>).message
+    [System.Windows.Forms.SendKeys]::SendWait(<span class="code-keyword">$val</span>)
+    [System.Windows.Forms.SendKeys]::SendWait(<span class="code-string">"{ENTER}"</span>)
+    Write-Host <span class="code-string">"Typed: $val"</span>
+  }
+}</div>
+      <button class="btn btn-ghost" style="font-size:12px;" onclick="copyPowerShell()">⎘ Copy PowerShell Command</button>
+    </div>
+
+    <!-- Python helper -->
+    <div id="helper-py-container" style="display: none;">
+      <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Install requirements: <code>pip install websocket-client pyautogui</code>, then run this python script.</p>
+      <div class="code-block" id="python-code"><span class="code-comment"># Install once: pip install websocket-client pyautogui</span>
 <span class="code-keyword">import</span> json, websocket, pyautogui, time
 
 SESSION_ID = <span class="code-string" id="py-session">"paste-your-session-id-here"</span>
@@ -551,7 +586,8 @@ ws = websocket.WebSocketApp(
 )
 print(<span class="code-string">"🔫 Scanner Gun active — waiting for barcodes..."</span>)
 ws.run_forever()</div>
-    <button class="btn btn-ghost" style="font-size:12px;" onclick="copyPython()">⎘ Copy Python Script</button>
+      <button class="btn btn-ghost" style="font-size:12px;" onclick="copyPython()">⎘ Copy Python Script</button>
+    </div>
   </div>
 
 </div>
@@ -594,6 +630,7 @@ ws.run_forever()</div>
 
     document.getElementById('session-display').textContent = sessionId.substring(0, 10) + '...';
     document.getElementById('py-session').textContent = `"${sessionId}"`;
+    document.getElementById('ps-session').textContent = `"${sessionId}"`;
 
     if (ws) { ws.close(); ws = null; }
     if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
@@ -731,6 +768,58 @@ ws.run_forever()</div>
     a.href = URL.createObjectURL(blob);
     a.download = `scan-output-${Date.now()}.txt`;
     a.click();
+  }
+
+  function switchHelper(type) {
+    const psBtn = document.getElementById('tab-btn-ps');
+    const pyBtn = document.getElementById('tab-btn-py');
+    const psCont = document.getElementById('helper-ps-container');
+    const pyCont = document.getElementById('helper-py-container');
+    
+    if (type === 'ps') {
+      psBtn.style.background = 'var(--bg-hover)';
+      psBtn.style.color = 'var(--text-primary)';
+      psBtn.style.borderColor = 'var(--accent)';
+      pyBtn.style.background = 'none';
+      pyBtn.style.color = 'var(--text-secondary)';
+      pyBtn.style.borderColor = 'var(--border)';
+      psCont.style.display = 'block';
+      pyCont.style.display = 'none';
+    } else {
+      pyBtn.style.background = 'var(--bg-hover)';
+      pyBtn.style.color = 'var(--text-primary)';
+      pyBtn.style.borderColor = 'var(--accent)';
+      psBtn.style.background = 'none';
+      psBtn.style.color = 'var(--text-secondary)';
+      psBtn.style.borderColor = 'var(--border)';
+      pyCont.style.display = 'block';
+      psCont.style.display = 'none';
+    }
+  }
+
+  function copyPowerShell() {
+    const code = `$SessionId = "${sessionId || 'paste-your-session-id-here'}"
+$Uri = "wss://ntfy.sh/$SessionId/ws"
+Add-Type -AssemblyName System.Windows.Forms
+$ws = New-Object System.Net.WebSockets.ClientWebSocket
+$ws.ConnectAsync($Uri, [System.Threading.CancellationToken]::None).Wait()
+Write-Host "🔫 Mushi Scanner Active! Type in any active window (Excel, POS, etc.)." -ForegroundColor Green
+$buf = New-Object Byte[] 1024
+while ($ws.State -eq 'Open') {
+  $seg = New-Object ArraySegment[Byte] -ArgumentList @(,$buf)
+  $res = $ws.ReceiveAsync($seg, [System.Threading.CancellationToken]::None).Result
+  $raw = [Text.Encoding]::UTF8.GetString($buf, 0, $res.Count)
+  if ($raw -match '"event":"message"') {
+    $val = (ConvertFrom-Json $raw).message
+    [System.Windows.Forms.SendKeys]::SendWait($val)
+    [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+    Write-Host "Typed: $val"
+  }
+}`;
+    navigator.clipboard.writeText(code);
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '⎘ Copy PowerShell Command', 1500);
   }
 
   function copyPython() {
