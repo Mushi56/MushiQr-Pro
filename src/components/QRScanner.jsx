@@ -7,7 +7,7 @@ import {
   ArrowLeft, Zap, ZapOff, Image, CheckCircle2,
   Copy, ExternalLink, Share2, Star, Wifi, Mail,
   Phone, User, Globe, FileText, Minus, Plus, AlertCircle, RefreshCcw, Clock,
-  ScanLine, Info, ShieldAlert, Barcode, X, Monitor, Loader2
+  ScanLine, Info, ShieldAlert, Barcode, X, Monitor, Loader2, ChevronRight
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
@@ -79,10 +79,7 @@ const parseQRData = (text) => {
 };
 
 function genSessionId() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let id = 'mqs-';
-  for (let i = 0; i < 8; i++) id += chars[Math.floor(Math.random() * chars.length)];
-  return id;
+  return Math.floor(10000 + Math.random() * 90000).toString();
 }
 
 export default function QRScanner({ onBack, navigateTo }) {
@@ -112,6 +109,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [prefix, setPrefix] = useState('');
   const [suffix, setSuffix] = useState('');
   const [showPcModal, setShowPcModal] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [pcUrl, setPcUrl] = useState('');
   const qrCanvasRef = useRef(null);
@@ -1029,89 +1027,138 @@ export default function QRScanner({ onBack, navigateTo }) {
                 </div>
               </div>
 
-              <div className="modal-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {/* Connection Status Badge */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  background: 'var(--bg-elevated)',
-                  border: '1px solid var(--border-color)',
-                  padding: '12px 16px',
-                  borderRadius: '12px'
-                }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>PC Connection Status</span>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: pcRelayEnabled ? '#34C759' : 'var(--text-muted)'
-                  }}>
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      background: pcRelayEnabled ? '#34C759' : 'var(--text-muted)',
-                      animation: pcRelayEnabled ? 'pulse 1.5s infinite' : 'none'
-                    }} />
-                    {pcRelayEnabled ? 'Relay Active' : 'Disconnected'}
-                  </div>
-                </div>
-
-                {/* Switch: Connect / Relay scans to PC */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Relay Scans to PC</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Send scanned codes instantly to PC companion</div>
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    checked={pcRelayEnabled}
-                    onChange={(e) => {
-                      triggerHapticFeedback();
-                      setPcRelayEnabled(e.target.checked);
-                    }}
-                    style={{
-                      width: '42px',
-                      height: '24px',
-                      appearance: 'none',
-                      background: 'var(--bg-hover)',
-                      borderRadius: '12px',
-                      position: 'relative',
-                      cursor: 'pointer',
-                      border: '1px solid var(--border-color)',
-                      transition: 'background 0.3s'
-                    }}
-                    className="pc-switch-checkbox"
-                  />
-                </div>
-
-                {pcRelayEnabled && (
-                  <>
-                    {/* QR Code Canvas and URL info */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', background: '#fff', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
-                      <canvas ref={qrCanvasRef} style={{ display: 'block', width: '180px', height: '180px' }} />
-                      <div style={{ textAlign: 'center', color: '#000' }}>
-                        <div style={{ fontSize: '12px', fontWeight: 800 }}>Scan QR to connect PC</div>
-                        <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.5)', marginTop: '2px', wordBreak: 'break-all', fontFamily: 'monospace' }}>
-                          {pcUrl}
-                        </div>
+              <div className="modal-content" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                {/* Visual Step-by-Step Guide */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {/* Step 1 */}
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                    <div style={{
+                      width: '24px', height: '24px', borderRadius: '50%',
+                      background: 'var(--accent-gradient)', color: '#fff',
+                      fontSize: '11px', fontWeight: 800, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px'
+                    }}>1</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Open Companion on PC</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Navigate to:</div>
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                        padding: '6px 10px', borderRadius: '8px', marginTop: '6px'
+                      }}>
+                        <code style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--accent-primary)', wordBreak: 'break-all', flex: 1 }}>
+                          {window.location.host}/scanner-pc.html
+                        </code>
+                        <button
+                          onClick={() => {
+                            triggerHapticFeedback();
+                            navigator.clipboard.writeText(`${window.location.origin}/scanner-pc.html?session=${sessionId}`);
+                            alert('Link copied to clipboard!');
+                          }}
+                          style={{
+                            background: 'none', border: 'none', color: 'var(--text-muted)',
+                            cursor: 'pointer', fontSize: '11px', fontWeight: 700, textDecoration: 'underline', padding: 0
+                          }}
+                        >
+                          Copy
+                        </button>
                       </div>
                     </div>
+                  </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(52, 199, 89, 0.06)', border: '1px solid rgba(52, 199, 89, 0.15)', borderRadius: '12px', padding: '10px 12px' }}>
-                      <Info size={14} style={{ color: '#34C759', flexShrink: 0, marginTop: 1 }} />
-                      <span style={{ fontSize: 11, color: '#34C759', fontWeight: 600, lineHeight: 1.5 }}>
-                        How to connect: Open the link above in your computer's browser or scan the QR code. Once open, click the text area to start typing.
-                      </span>
+                  {/* Step 2 */}
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
+                    <div style={{
+                      width: '24px', height: '24px', borderRadius: '50%',
+                      background: 'var(--accent-gradient)', color: '#fff',
+                      fontSize: '11px', fontWeight: 800, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px'
+                    }}>2</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Enter Pairing Code on PC</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
+                        <div style={{
+                          background: 'linear-gradient(135deg, rgba(214,0,54,0.1) 0%, rgba(255,107,53,0.1) 100%)',
+                          border: '2px dashed var(--accent-primary)',
+                          borderRadius: '12px', padding: '8px 16px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                          <span style={{ fontSize: '24px', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '2px', color: 'var(--accent-primary)' }}>
+                            {sessionId}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                          Type this code in the PC client connection field to link instantly.
+                        </div>
+                      </div>
+
+                      {/* Or Scan QR guide */}
+                      <div style={{ marginTop: '12px' }}>
+                        <button
+                          onClick={() => { triggerHapticFeedback(); setShowAdvanced(p => !p); }}
+                          style={{
+                            background: 'none', border: 'none', color: 'var(--accent-primary)',
+                            fontSize: '11px', fontWeight: 700, cursor: 'pointer', padding: 0,
+                            display: 'flex', alignItems: 'center', gap: '4px'
+                          }}
+                        >
+                          {showAdvanced ? 'Hide QR Code' : 'Or Show Connection QR Code'}
+                        </button>
+                        {showAdvanced && (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', background: '#fff', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', marginTop: '8px', width: 'fit-content', marginInline: 'auto' }}>
+                            <canvas ref={qrCanvasRef} style={{ display: 'block', width: '130px', height: '130px' }} />
+                            <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.5)', textAlign: 'center', fontWeight: 700 }}>Scan with PC webcam to pair</div>
+                          </div>
+                        )}
+                      </div>
                     </div>
+                  </div>
 
-                    {/* Prefix and Suffix configurations */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-color)', paddingTop: '14px' }}>
-                      <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Wedge Configuration</div>
-                      
+                  {/* Step 3 */}
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
+                    <div style={{
+                      width: '24px', height: '24px', borderRadius: '50%',
+                      background: 'var(--accent-gradient)', color: '#fff',
+                      fontSize: '11px', fontWeight: 800, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px'
+                    }}>3</div>
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Relay Scans to PC</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Toggle on to redirect all scans to PC</div>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={pcRelayEnabled}
+                        onChange={(e) => {
+                          triggerHapticFeedback();
+                          setPcRelayEnabled(e.target.checked);
+                        }}
+                        style={{
+                          width: '42px',
+                          height: '24px',
+                          appearance: 'none',
+                          background: 'var(--bg-hover)',
+                          borderRadius: '12px',
+                          position: 'relative',
+                          cursor: 'pointer',
+                          border: '1px solid var(--border-color)',
+                          transition: 'background 0.3s'
+                        }}
+                        className="pc-switch-checkbox"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Advanced Wedging Accordion */}
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '14px', marginTop: '4px' }}>
+                  <details style={{ width: '100%' }}>
+                    <summary style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', listStyle: 'none' }}>
+                      <span>⚙️ Advanced Wedge Settings</span>
+                      <ChevronRight size={14} style={{ transform: 'rotate(90deg)' }} />
+                    </summary>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>Append Enter Key</span>
                         <input 
@@ -1121,7 +1168,6 @@ export default function QRScanner({ onBack, navigateTo }) {
                           style={{ width: '16px', height: '16px' }}
                         />
                       </div>
-
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <div style={{ flex: 1 }}>
                           <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>Prefix</label>
@@ -1145,8 +1191,8 @@ export default function QRScanner({ onBack, navigateTo }) {
                         </div>
                       </div>
                     </div>
-                  </>
-                )}
+                  </details>
+                </div>
               </div>
             </div>
           </div>

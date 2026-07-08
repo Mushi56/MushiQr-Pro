@@ -441,15 +441,15 @@
   <div class="card col-full">
     <div class="card-title">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-      Session Connection
+      Pair with Phone Scanner
     </div>
     <div class="session-row">
-      <input class="input-field" type="text" id="session-input" placeholder="Paste session ID from your phone..." />
-      <button class="btn btn-primary" onclick="connectWS()">Connect</button>
+      <input class="input-field" type="text" id="session-input" placeholder="Enter 5-digit Connection Code..." style="letter-spacing: 1px; font-weight: bold; text-align: center; font-size: 15px;" maxlength="5" />
+      <button class="btn btn-primary" onclick="connectWS()">Connect Phone</button>
       <button class="btn btn-ghost" onclick="clearHistory()" title="Clear history">Clear</button>
     </div>
     <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
-      📱 Open <strong style="color:var(--text-secondary)">Mushi QR</strong> app → Scanner Gun Mode → WiFi tab → scan the QR with your PC camera, or copy the Session ID here.
+      📱 Open <strong style="color:var(--text-secondary)">Mushi QR Pro</strong> on your phone → Tap the **PC Connection (Monitor)** icon in the scanner → Enter the 5-digit code displayed there.
     </div>
   </div>
 
