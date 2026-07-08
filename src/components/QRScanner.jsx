@@ -7,9 +7,11 @@ import {
   ArrowLeft, Zap, ZapOff, Image, CheckCircle2,
   Copy, ExternalLink, Share2, Star, Wifi, Mail,
   Phone, User, Globe, FileText, Minus, Plus, AlertCircle, RefreshCcw, Clock,
-  ScanLine, Info, ShieldAlert, Barcode, X, Monitor, Loader2, ChevronRight
+  ScanLine, Info, ShieldAlert, Barcode, X, Monitor, Loader2, ChevronRight,
+  Sparkles, Pencil, MoreVertical, Check, Calendar, Hash, Package
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
+import { renderBarcode } from '../utils/barcodeEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import qrcode from 'qrcode-generator';
@@ -75,7 +77,61 @@ const parseQRData = (text) => {
   if (/^BEGIN:VCARD/i.test(t)) return { type: 'Contact', icon: User, title: 'Contact Card', action: 'Save Contact', actionIcon: User };
   if (/^https?:\/\//i.test(t) || /^www\./i.test(t) || /^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.[a-z]{2,}(\/.*)?$/i.test(t))
     return { type: 'Website', icon: Globe, title: 'Website', action: 'Open Link', actionIcon: ExternalLink };
+  // Check if it looks like a barcode product code (all digits, 8 to 14 digits)
+  if (/^\d{8,14}$/.test(t))
+    return { type: 'Product', icon: Barcode, title: 'Product Barcode', action: 'Search Product', actionIcon: Globe };
   return { type: 'Text', icon: FileText, title: 'Text Content', action: 'Copy Text', actionIcon: Copy };
+};
+
+const mapFormatNameToBcid = (name) => {
+  if (!name) return 'code128';
+  const n = name.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (n.includes('QRCODE') || n === 'QR') return 'qrcode';
+  if (n.includes('DATAMATRIX')) return 'datamatrix';
+  if (n.includes('PDF417')) return 'pdf417';
+  if (n.includes('AZTEC')) return 'aztec';
+  if (n.includes('EAN13')) return 'ean13';
+  if (n.includes('EAN8')) return 'ean8';
+  if (n.includes('UPCA')) return 'upca';
+  if (n.includes('UPCE')) return 'upce';
+  if (n.includes('CODE128')) return 'code128';
+  if (n.includes('CODE39')) return 'code39';
+  if (n.includes('CODE93')) return 'code93';
+  if (n.includes('ITF') || n.includes('I25')) return 'i25';
+  if (n.includes('CODABAR')) return 'codabar';
+  if (n.includes('MAXICODE')) return 'maxicode';
+  return 'code128';
+};
+
+const MOCK_PRODUCTS = {
+  '8901234567890': {
+    title: 'Oreo Original Biscuit 120g',
+    brand: 'Oreo',
+    category: 'Biscuits',
+    size: '120g',
+    imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>`
+  },
+  '5449000000096': {
+    title: 'Coca-Cola Original Taste 330ml Can',
+    brand: 'Coca-Cola',
+    category: 'Beverages',
+    size: '330ml',
+    imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M6 6h12M6 18h12M10 2v4M14 2v4M8 12c2.5-1 5.5 1 8 0"/></svg>`
+  },
+  '012000042561': {
+    title: 'Pepsi Cola Soda Can 12 fl oz',
+    brand: 'Pepsi',
+    category: 'Beverages',
+    size: '12 fl oz',
+    imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><rect x="6" y="2" width="12" height="20" rx="3"/><circle cx="12" cy="12" r="4"/><path d="M9.5 9.5a4 4 0 0 1 5 5"/></svg>`
+  },
+  '5012345678900': {
+    title: 'Heinz Tomato Ketchup 500g Bottle',
+    brand: 'Heinz',
+    category: 'Condiments',
+    size: '500g',
+    imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><path d="M9 2h6v3H9zM8 5h8v2H8zM7 7l1 15h8l1-15z"/><circle cx="12" cy="14" r="3"/><path d="M12 11v6M9.5 14h5"/></svg>`
+  }
 };
 
 function genSessionId() {
@@ -88,6 +144,21 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [qrTypeData, setQrTypeData] = useState(null);
   const [detectedFormatId, setDetectedFormatId] = useState(null);
   const [detectedFormatName, setDetectedFormatName] = useState(null);
+  const [scanDate, setScanDate] = useState('');
+
+  const formatScanDate = () => {
+    const date = new Date();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const d = date.getDate();
+    const m = months[date.getMonth()];
+    const y = date.getFullYear();
+    let hr = date.getHours();
+    const min = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hr >= 12 ? 'AM' : 'PM';
+    hr = hr % 12;
+    hr = hr ? hr : 12;
+    return `${d} ${m} ${y} • ${hr}:${min} ${ampm}`;
+  };
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [facingBack, setFacingBack] = useState(true);
@@ -113,6 +184,45 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [isSending, setIsSending] = useState(false);
   const [pcUrl, setPcUrl] = useState('');
   const qrCanvasRef = useRef(null);
+  const resultCanvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!resultCanvasRef.current || !result || status !== 'DETECTED') return;
+    const canvas = resultCanvasRef.current;
+    const isQr = !detectedFormatName || detectedFormatName.toUpperCase().includes('QR');
+    if (isQr) {
+      try {
+        const matrixInfo = generateQRMatrix(result, 'M');
+        if (matrixInfo) {
+          renderQR(canvas, {
+            matrix: matrixInfo.matrix,
+            moduleCount: matrixInfo.moduleCount,
+            size: 140,
+            qrColor: '#000000',
+            bgColor: '#ffffff',
+            bgTransparent: false
+          });
+        }
+      } catch (err) {
+        console.error('Failed to render QR Code on result canvas:', err);
+      }
+    } else {
+      try {
+        const bcid = mapFormatNameToBcid(detectedFormatName);
+        renderBarcode(canvas, result, {
+          bcid: bcid,
+          barColor: '#000000',
+          bgColor: '#ffffff',
+          barWidth: 2,
+          height: 80,
+          displayValue: true,
+          margin: 12
+        });
+      } catch (err) {
+        console.error('Failed to render Barcode on result canvas:', err);
+      }
+    }
+  }, [result, detectedFormatName, status]);
 
   useEffect(() => {
     const base = window.location.origin;
@@ -376,6 +486,7 @@ export default function QRScanner({ onBack, navigateTo }) {
       const parsed = parseQRData(decodedText);
       setQrTypeData(parsed);
       setResult(decodedText);
+      setScanDate(formatScanDate());
       let thumbnail = null;
       try {
         const canvas = document.createElement('canvas');
@@ -925,88 +1036,195 @@ export default function QRScanner({ onBack, navigateTo }) {
         </div>
 
         {/* Full-Screen Detection Result */}
-        {status === 'DETECTED' && qrTypeData && (
-          <div className="qrs-result-fullscreen">
-            {/* Header bar */}
-            <div className="qrs-result-header">
-              <button className="qrs-result-back-btn" onClick={resumeScanning} aria-label="Go Back">
-                <ArrowLeft size={20} />
-              </button>
-              <h3>Scan Result</h3>
-              <div className="qrs-result-header-placeholder" />
-            </div>
+        {status === 'DETECTED' && qrTypeData && (() => {
+          const isBarcode = detectedFormatName && !detectedFormatName.toUpperCase().includes('QR');
+          const mockProduct = MOCK_PRODUCTS[result?.trim()];
+          const isProductFormat = detectedFormatName && ['EAN-13', 'EAN-8', 'UPC-A', 'UPC-E'].includes(detectedFormatName);
+          const productInfo = mockProduct || (isProductFormat || /^\d{8,14}$/.test(result || '') ? {
+            title: `Generic Barcode Item (${result})`,
+            brand: 'Unknown Brand',
+            category: 'Retail Goods',
+            size: 'Standard Pack',
+            imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h10"/></svg>`
+          } : null);
 
-            {/* Central content */}
-            <div className="qrs-result-body">
-              <div className="qrs-result-type-label">
-                <TypeIcon size={14} color="var(--accent-primary)" />
-                <span>{qrTypeData.title}</span>
-                {detectedFormatName && (
-                  <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'var(--accent-soft)', color: 'var(--accent-primary)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{detectedFormatName}</span>
-                )}
-              </div>
-              {/* Camera support warning for specialty formats */}
-              {detectedFormatName && CAMERA_UNSUPPORTED_FORMATS.has(detectedFormatName) && (
-                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'rgba(255,149,0,0.1)', border: '1px solid rgba(255,149,0,0.3)', borderRadius: 12, padding: '10px 14px', margin: '4px 0' }}>
-                  <ShieldAlert size={15} style={{ color: '#FF9500', flexShrink: 0, marginTop: 1 }} />
-                  <span style={{ fontSize: 12, color: '#FF9500', fontWeight: 600, lineHeight: 1.5 }}>⚠ This barcode type ({detectedFormatName}) is not supported by standard mobile cameras. A dedicated hardware scanner is required to decode it reliably.</span>
-                </div>
-              )}
-
-              {/* Data Card */}
-              <div className="qrs-result-card">
-                <div className="qrs-result-data-title">Content</div>
-                {qrTypeData.type === 'WiFi' ? (
-                  <div className="qrs-result-wifi-fields">
-                    <div className="qrs-result-wifi-row">
-                      <span className="qrs-result-wifi-label">SSID</span>
-                      <span className="qrs-result-wifi-value">{result.match(/S:(.*?)(?:[;]|$)/i)?.[1] || 'Unknown'}</span>
-                    </div>
-                    <div className="qrs-result-wifi-row">
-                      <span className="qrs-result-wifi-label">Security</span>
-                      <span className="qrs-result-wifi-value">{result.match(/T:(.*?)(?:[;]|$)/i)?.[1] || 'WPA'}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="qrs-result-text-box">
-                    {result}
-                  </div>
-                )}
-              </div>
-
-              {/* Secondary Actions Grid */}
-              <div className="qrs-result-actions-grid">
-                {qrTypeData.action !== 'Copy Text' && qrTypeData.action !== 'Copy Password' && (
-                  <button className="qrs-result-act-btn" onClick={handleCopy}>
-                    {copied ? <CheckCircle2 size={18} color="var(--success)" /> : <Copy size={18} />}
-                    <span>{copied ? 'Copied!' : 'Copy'}</span>
+          return (
+            <div className="qrs-result-fullscreen">
+              {/* Green/Accent Hero Header */}
+              <div className="qrs-result-hero">
+                <div className="qrs-result-hero-header">
+                  <button className="qrs-result-hero-btn" onClick={resumeScanning} aria-label="Go Back">
+                    <ArrowLeft size={20} />
                   </button>
+                  <h3>Scan Result</h3>
+                  <button className="qrs-result-hero-btn" onClick={() => alert('Options')} aria-label="More Options">
+                    <MoreVertical size={20} />
+                  </button>
+                </div>
+
+                <div className="qrs-result-success-badge-container">
+                  <div className="qrs-result-success-circle">
+                    <Check size={32} strokeWidth={3} />
+                  </div>
+                </div>
+
+                <h2 className="qrs-result-success-title">Scan Successful!</h2>
+                <p className="qrs-result-success-subtitle">
+                  {isBarcode ? 'Barcode scanned' : 'QR Code scanned'}
+                </p>
+              </div>
+
+              {/* Scrollable Body Container */}
+              <div className="qrs-result-scrollable-body">
+                {/* Premium Card containing Visual Barcode preview */}
+                <div className="qrs-result-card-premium">
+                  <div className="qrs-result-card-meta">
+                    <span className="qrs-result-badge-tag">{detectedFormatName || 'QR Code'}</span>
+                    <span className="qrs-result-card-time">{scanDate}</span>
+                  </div>
+
+                  <div className="qrs-result-canvas-container">
+                    <canvas ref={resultCanvasRef} />
+                  </div>
+
+                  <div className="qrs-result-value-display">
+                    <span className="qrs-result-value-text">{result}</span>
+                    <button className="qrs-result-copy-btn" onClick={handleCopy} aria-label="Copy code">
+                      {copied ? <CheckCircle2 size={16} color="var(--success)" /> : <Copy size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Info Table */}
+                <div className="qrs-result-info-table">
+                  <div className="qrs-result-table-row">
+                    <div className="qrs-result-table-icon-wrapper">
+                      <Barcode size={16} />
+                    </div>
+                    <span className="qrs-result-table-label">Format</span>
+                    <span className="qrs-result-table-value">{detectedFormatName || 'QR Code'}</span>
+                  </div>
+
+                  <div className="qrs-result-table-row">
+                    <div className="qrs-result-table-icon-wrapper">
+                      <Hash size={16} />
+                    </div>
+                    <span className="qrs-result-table-label">Type</span>
+                    <span className="qrs-result-table-value">{qrTypeData.type}</span>
+                  </div>
+
+                  <div className="qrs-result-table-row">
+                    <div className="qrs-result-table-icon-wrapper">
+                      <Info size={16} />
+                    </div>
+                    <span className="qrs-result-table-label">Value</span>
+                    <span className="qrs-result-table-value" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{result}</span>
+                  </div>
+
+                  <div className="qrs-result-table-row">
+                    <div className="qrs-result-table-icon-wrapper">
+                      <Calendar size={16} />
+                    </div>
+                    <span className="qrs-result-table-label">Date & Time</span>
+                    <span className="qrs-result-table-value">{scanDate}</span>
+                  </div>
+                </div>
+
+                {/* Premium Actions Grid */}
+                <div className="qrs-actions-row-premium">
+                  <div className="qrs-action-card-premium" onClick={handleCopy}>
+                    <div className="qrs-action-card-premium-icon">
+                      {copied ? <CheckCircle2 size={18} color="var(--success)" /> : <Copy size={18} />}
+                    </div>
+                    <span>Copy</span>
+                  </div>
+
+                  <div className="qrs-action-card-premium" onClick={handleShare}>
+                    <div className="qrs-action-card-premium-icon">
+                      <Share2 size={18} />
+                    </div>
+                    <span>Share</span>
+                  </div>
+
+                  <div className="qrs-action-card-premium" onClick={handleSave}>
+                    <div className="qrs-action-card-premium-icon">
+                      <Star size={18} />
+                    </div>
+                    <span>Save</span>
+                  </div>
+
+                  <div className="qrs-action-card-premium" onClick={handlePrimaryAction}>
+                    <div className="qrs-action-card-premium-icon">
+                      <ExternalLink size={18} />
+                    </div>
+                    <span>Open</span>
+                  </div>
+                </div>
+
+                {/* Specialty / Tailored Detail Card Section */}
+                {productInfo && (
+                  <div className="qrs-details-section-premium">
+                    <div className="qrs-details-header-premium">
+                      <Package size={16} />
+                      <span>Product Information</span>
+                    </div>
+                    <div className="qrs-product-card-body" onClick={handlePrimaryAction} style={{ cursor: 'pointer' }}>
+                      <div className="qrs-product-image-container" dangerouslySetInnerHTML={{ __html: productInfo.imageSvg }} />
+                      <div className="qrs-product-details-content">
+                        <div className="qrs-product-title-premium">{productInfo.title}</div>
+                        <div className="qrs-product-meta-row">Brand: <strong>{productInfo.brand}</strong></div>
+                        <div className="qrs-product-meta-row">Category: <strong>{productInfo.category}</strong></div>
+                        <div className="qrs-product-meta-row">Size: <strong>{productInfo.size}</strong></div>
+                      </div>
+                      <div className="qrs-product-arrow-link">
+                        <ChevronRight size={18} />
+                      </div>
+                    </div>
+                  </div>
                 )}
-                <button className="qrs-result-act-btn" onClick={handleShare}>
-                  <Share2 size={18} />
-                  <span>Share</span>
-                </button>
-                <button className="qrs-result-act-btn" onClick={handleSave}>
-                  <Star size={18} />
-                  <span>Save</span>
-                </button>
+
+                {qrTypeData.type === 'WiFi' && (
+                  <div className="qrs-details-section-premium" style={{ width: '100%', maxWidth: '400px' }}>
+                    <div className="qrs-details-header-premium">
+                      <Wifi size={16} />
+                      <span>WiFi Connection Details</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
+                      <div>Network Name (SSID): <strong>{result.match(/S:(.*?)(?:[;]|$)/i)?.[1] || 'Unknown'}</strong></div>
+                      <div>Security: <strong>{result.match(/T:(.*?)(?:[;]|$)/i)?.[1] || 'WPA'}</strong></div>
+                      <button className="qrs-btn-again-premium" onClick={handlePrimaryAction} style={{ marginTop: '10px', padding: '10px' }}>Connect to Network</button>
+                    </div>
+                  </div>
+                )}
+
+                {qrTypeData.type === 'Website' && !productInfo && (
+                  <div className="qrs-details-section-premium" style={{ width: '100%', maxWidth: '400px' }}>
+                    <div className="qrs-details-header-premium">
+                      <Globe size={16} />
+                      <span>Website Link Details</span>
+                    </div>
+                    <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ wordBreak: 'break-all' }}>URL: <strong style={{ color: 'var(--accent-primary)' }}>{result}</strong></div>
+                      <button className="qrs-btn-history-premium" onClick={handlePrimaryAction} style={{ marginTop: '10px', padding: '10px' }}>Open URL Link</button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom Actions */}
+                <div className="qrs-bottom-controls-premium">
+                  <button className="qrs-btn-again-premium" onClick={resumeScanning}>
+                    <RefreshCcw size={16} />
+                    <span>Scan Again</span>
+                  </button>
+                  <button className="qrs-btn-history-premium" onClick={() => { stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }}>
+                    <Clock size={16} />
+                    <span>View History</span>
+                  </button>
+                </div>
               </div>
             </div>
-
-            {/* Bottom action buttons */}
-            <div className="qrs-result-bottom-row">
-              <button className="qrs-result-primary-btn" onClick={handlePrimaryAction}>
-                <ActionIcon size={20} />
-                <span>{qrTypeData.action}</span>
-              </button>
-
-              <button className="qrs-result-secondary-btn" onClick={resumeScanning}>
-                <RefreshCcw size={18} />
-                <span>Scan Again</span>
-              </button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* PC Connection Modal Popup */}
         {showPcModal && (

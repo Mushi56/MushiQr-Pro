@@ -894,6 +894,8 @@ ws.run_forever()`;
   }
 
   function downloadBatchWedge() {
+    const base64Code = 'dXNpbmcgU3lzdGVtOwp1c2luZyBTeXN0ZW0uTmV0LldlYlNvY2tldHM7CnVzaW5nIFN5c3RlbS5UZXh0Owp1c2luZyBTeXN0ZW0uVGhyZWFkaW5nOwp1c2luZyBTeXN0ZW0uVGhyZWFkaW5nLlRhc2tzOwp1c2luZyBTeXN0ZW0uV2luZG93cy5Gb3JtczsKCm5hbWVzcGFjZSBNdXNoaVFSIHsKICBjbGFzcyBQcm9ncmFtIHsKICAgIHN0YXRpYyB2b2lkIE1haW4oc3RyaW5nW10gYXJncykgewogICAgICBSdW5XZWRnZUFzeW5jKGFyZ3MpLkdldEF3YWl0ZXIoKS5HZXRSZXN1bHQoKTsKICAgIH0KCiAgICBzdGF0aWMgYXN5bmMgVGFzayBSdW5XZWRnZUFzeW5jKHN0cmluZ1tdIGFyZ3MpIHsKICAgICAgQ29uc29sZS5UaXRsZSA9ICJNdXNoaSBRUiBQcm8gLSBLZXlib2FyZCBXZWRnZSBBcHAiOwogICAgICBDb25zb2xlLkZvcmVncm91bmRDb2xvciA9IENvbnNvbGVDb2xvci5ZZWxsb3c7CiAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCI9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSIpOwogICAgICBDb25zb2xlLldyaXRlTGluZSgiICAgICAgTXVzaGkgUVIgUHJvIC0gUEMgS2V5Ym9hcmQgV2VkZ2UgQXBwICAgICAgICAgICIpOwogICAgICBDb25zb2xlLldyaXRlTGluZSgiPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSIpOwogICAgICBDb25zb2xlLlJlc2V0Q29sb3IoKTsKICAgICAgc3RyaW5nIGNvZGUgPSAiIjsKICAgICAgaWYgKGFyZ3MuTGVuZ3RoID4gMCkgewogICAgICAgIGNvZGUgPSBhcmdzWzBdLlRyaW0oKTsKICAgICAgfSBlbHNlIHsKICAgICAgICBDb25zb2xlLldyaXRlKCJFbnRlciB0aGUgNS1kaWdpdCBDb25uZWN0aW9uIENvZGUgZnJvbSBwaG9uZTogIik7CiAgICAgICAgY29kZSA9IENvbnNvbGUuUmVhZExpbmUoKS5UcmltKCk7CiAgICAgIH0KICAgICAgaWYgKHN0cmluZy5Jc051bGxPckVtcHR5KGNvZGUpKSB7CiAgICAgICAgQ29uc29sZS5Xcml0ZUxpbmUoIkVycm9yOiBDb2RlIGNhbm5vdCBiZSBlbXB0eS4iKTsKICAgICAgICBDb25zb2xlLlJlYWRLZXkoKTsKICAgICAgICByZXR1cm47CiAgICAgIH0KICAgICAgc3RyaW5nIHVyaSA9ICJ3c3M6Ly9udGZ5LnNoLyIgKyBjb2RlICsgIi93cyI7CiAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCJcbkNvbm5lY3RpbmcgdG8gcGhvbmUgcmVsYXkuLi4iKTsKICAgICAgdXNpbmcgKENsaWVudFdlYlNvY2tldCB3cyA9IG5ldyBDbGllbnRXZWJTb2NrZXQoKSkgewogICAgICAgIHRyeSB7CiAgICAgICAgICBhd2FpdCB3cy5Db25uZWN0QXN5bmMobmV3IFVyaSh1cmkpLCBDYW5jZWxsYXRpb25Ub2tlbi5Ob25lKTsKICAgICAgICAgIENvbnNvbGUuRm9yZWdyb3VuZENvbG9yID0gQ29uc29sZUNvbG9yLkdyZWVuOwogICAgICAgICAgQ29uc29sZS5Xcml0ZUxpbmUoIkNvbm5lY3RlZCBzdWNjZXNzZnVsbHkhIEtlZXAgdGhpcyBhcHAgb3Blbi4iKTsKICAgICAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCJGb2N1cyBFeGNlbCwgTm90ZXBhZCwgb3IgUE9TIHNvZnR3YXJlIGFuZCBzY2FuIGJhcmNvZGVzLiIpOwogICAgICAgICAgQ29uc29sZS5SZXNldENvbG9yKCk7CiAgICAgICAgICBieXRlW10gYnVmID0gbmV3IGJ5dGVbNDA5Nl07CiAgICAgICAgICB3aGlsZSAod3MuU3RhdGUgPT0gV2ViU29ja2V0U3RhdGUuT3BlbikgewogICAgICAgICAgICB2YXIgcmVzID0gYXdhaXQgd3MuUmVjZWl2ZUFzeW5jKG5ldyBBcnJheVNlZ21lbnQ8Ynl0ZT4oYnVmKSwgQ2FuY2VsbGF0aW9uVG9rZW4uTm9uZSk7CiAgICAgICAgICAgIGlmIChyZXMuTWVzc2FnZVR5cGUgPT0gV2ViU29ja2V0TWVzc2FnZVR5cGUuQ2xvc2UpIHsKICAgICAgICAgICAgICBhd2FpdCB3cy5DbG9zZUFzeW5jKFdlYlNvY2tldENsb3NlU3RhdHVzLk5vcm1hbENsb3N1cmUsIHN0cmluZy5FbXB0eSwgQ2FuY2VsbGF0aW9uVG9rZW4uTm9uZSk7CiAgICAgICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgICAgc3RyaW5nIHJhdyA9IEVuY29kaW5nLlVURjguR2V0U3RyaW5nKGJ1ZiwgMCwgcmVzLkNvdW50KTsKICAgICAgICAgICAgICBpZiAocmF3LkNvbnRhaW5zKCJcImV2ZW50XCI6XCJtZXNzYWdlXCIiKSkgewogICAgICAgICAgICAgICAgaW50IG1JZHggPSByYXcuSW5kZXhPZigiXCJtZXNzYWdlXCI6XCIiKTsKICAgICAgICAgICAgICAgIGlmIChtSWR4ICE9IC0xKSB7CiAgICAgICAgICAgICAgICAgIGludCBzdGFydCA9IG1JZHggKyAxMTsKICAgICAgICAgICAgICAgICAgaW50IGVuZCA9IHJhdy5JbmRleE9mKCJcIiIsIHN0YXJ0KTsKICAgICAgICAgICAgICAgICAgaWYgKGVuZCAhPSAtMSkgewogICAgICAgICAgICAgICAgICAgIHN0cmluZyB2YWwgPSByYXcuU3Vic3RyaW5nKHN0YXJ0LCBlbmQgLSBzdGFydCk7CiAgICAgICAgICAgICAgICAgICAgdmFsID0gdmFsLlJlcGxhY2UoIlxcXFwiLCAiXFwiKS5SZXBsYWNlKCJcXFwiIiwgIlwiIik7CiAgICAgICAgICAgICAgICAgICAgQ29uc29sZS5Gb3JlZ3JvdW5kQ29sb3IgPSBDb25zb2xlQ29sb3IuWWVsbG93OwogICAgICAgICAgICAgICAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCJbIiArIERhdGVUaW1lLk5vdy5Ub1N0cmluZygiSEg6bW06c3MiKSArICJdIFNjYW5uZWQ6ICIgKyB2YWkpOwogICAgICAgICAgICAgICAgICAgIENvbnNvbGUuSmVzZXRDb2xvcigpOwogICAgICAgICAgICAgICAgICAgIFNlbmRLZXlzLlNlbmRXYWl0KHZhbCk7CiAgICAgICAgICAgICAgICAgICAgU2VuZEtleXMuU2VuZFdhaXQoIntFTlRFUn0iKTsKICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgICAgfQogICAgICAgIH0gY2F0Y2ggKEV4Y2VwdGlvbiBleCkgewogICAgICAgICAgQ29uc29sZS5Gb3JlZ3JvdW5kQ29sb3IgPSBDb25zb2xlQ29sb3IuUmVkOwogICAgICAgICAgQ29uc29sZS5Xcml0ZUxpbmUoIlxuRXJyb3I6ICIgKyBleC5NZXNzYWdlKTsKICAgICAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCJSZWNvbm5lY3RpbmcgaW4gNSBzZWNvbmRzLi4uIik7CiAgICAgICAg  Q29uc29sZS5SZXNldENvbG9yKCk7CiAgICAgICAgICBUaHJlYWQuU2xlZXAoNTAwMCk7CiAgICAgICAgfQogICAgICB9CiAgICB9CiAgfQp9Cg==';
+
     const code = `@echo off
 title Mushi QR Pro - PC Wedge Installer
 echo ===================================================
@@ -911,97 +913,30 @@ if not exist "%CSC_PATH%" (
     exit /b
 )
 
-:: Create the C# file
-(
-echo using System;
-echo using System.Net.WebSockets;
-echo using System.Text;
-echo using System.Threading;
-echo using System.Threading.Tasks;
-echo using System.Windows.Forms;
-echo namespace MushiQR {
-echo   class Program {
-echo     static async Task Main^(string[] args^) {
-echo       Console.Title = "Mushi QR Pro - Keyboard Wedge App";
-echo       Console.ForegroundColor = ConsoleColor.Cyan;
-echo       Console.WriteLine^("===================================================="^);
-echo       Console.WriteLine^("      Mushi QR Pro - PC Keyboard Wedge App          "^);
-echo       Console.WriteLine^("===================================================="^);
-echo       Console.ResetColor^(^);
-echo       string code = "";
-echo       if ^(args.Length ^> 0^) {
-echo         code = args[0].Trim^(^);
-echo       } else {
-echo         Console.Write^("Enter the 5-digit Connection Code from phone: "^);
-echo         code = Console.ReadLine^(^).Trim^(^);
-echo       }
-echo       if ^(string.IsNullOrEmpty^(code^)^) {
-echo         Console.WriteLine^("Error: Code cannot be empty."^);
-echo         Console.ReadKey^(^);
-echo         return;
-echo       }
-echo       string uri = "wss://ntfy.sh/" + code + "/ws";
-echo       Console.WriteLine^("\\nConnecting to phone relay..."^);
-echo       using ^(ClientWebSocket ws = new ClientWebSocket^(^)^) {
-echo         try {
-echo           await ws.ConnectAsync^(new Uri^(uri^), CancellationToken.None^);
-echo           Console.ForegroundColor = ConsoleColor.Green;
-echo           Console.WriteLine^("Connected successfully! Keep this app open."^);
-echo           Console.WriteLine^("Focus Excel, Notepad, or POS software and scan barcodes."^);
-echo           Console.ResetColor^(^);
-echo           byte[] buf = new byte[4096];
-echo           while ^(ws.State == WebSocketState.Open^) {
-echo             var res = await ws.ReceiveAsync^(new ArraySegment^<byte^>^(buf^), CancellationToken.None^);
-echo             if ^(res.MessageType == WebSocketMessageType.Close^) {
-echo               await ws.CloseAsync^(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None^);
-echo             } else {
-echo               string raw = Encoding.UTF8.GetString^(buf, 0, res.Count^);
-echo               if ^(raw.Contains^("\\"event\\":\\"message\\""^)^) {
-echo                 int mIdx = raw.IndexOf^("\\"message\\":\\""^);
-echo                 if ^(mIdx != -1^) {
-echo                   int start = mIdx + 11;
-echo                   int end = raw.IndexOf^("\\""^, start^);
-echo                   if ^(end != -1^) {
-echo                     string val = raw.Substring^(start, end - start^);
-                      // Decode escape sequence characters if any
-echo                     val = val.Replace^("\\\\\\\\", "\\\\"^).Replace^("\\\\\\"", "\\""^);
-echo                     Console.ForegroundColor = ConsoleColor.Yellow;
-echo                     Console.WriteLine^("[" + DateTime.Now.ToString^("HH:mm:ss"^)^] Scanned: " + val^);
-echo                     Console.ResetColor^(^);
-echo                     SendKeys.SendWait^(val^);
-echo                     SendKeys.SendWait^("{ENTER}"^);
-echo                   }
-echo                 }
-echo               }
-echo             }
-echo           }
-echo         } catch ^(Exception ex^) {
-echo           Console.ForegroundColor = ConsoleColor.Red;
-echo           Console.WriteLine^("\\nError: " + ex.Message^);
-echo           Console.WriteLine^("Reconnecting in 5 seconds..."^);
-echo           Console.ResetColor^(^);
-echo           Thread.Sleep^(5000^);
-echo         }
-echo       }
-echo     }
-echo   }
-echo }
-) > MushiWedge.cs
+:: Write Base64 string to a temporary file in one single line
+echo ${base64Code} > MushiWedge.tmp
 
-:: Compile it
+:: Use powershell to decode base64 file natively
+powershell -NoProfile -Command "[System.IO.File]::WriteAllBytes('MushiWedge.cs', [System.Convert]::FromBase64String((Get-Content MushiWedge.tmp -Raw).Trim()))"
+
+del MushiWedge.tmp
+
+:: Compile the C# file
 "%CSC_PATH%" /r:System.Windows.Forms.dll,System.dll /out:MushiQR-PC-Wedge.exe MushiWedge.cs > nul
 
 :: Clean up C# code
-del MushiWedge.cs
+if exist MushiWedge.cs del MushiWedge.cs
 
-echo.
-echo ===================================================
-echo Success! Compiled to: MushiQR-PC-Wedge.exe
-echo Starting the Keyboard Wedge program...
-echo ===================================================
-echo.
-start MushiQR-PC-Wedge.exe
-exit
+if exist MushiQR-PC-Wedge.exe (
+    echo ===================================================
+    echo Success! Compiled to: MushiQR-PC-Wedge.exe
+    echo Starting the Keyboard Wedge program...
+    echo ===================================================
+    start MushiQR-PC-Wedge.exe
+) else (
+    echo Error: Compilation failed. No executable was produced.
+    pause
+)
 `;
     const blob = new Blob([code], { type: 'application/bat' });
     const a = document.createElement('a');
