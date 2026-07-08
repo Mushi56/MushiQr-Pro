@@ -1039,12 +1039,21 @@ export default function QRScanner({ onBack, navigateTo }) {
                       alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px'
                     }}>1</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Open Companion on PC</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Navigate to:</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Scan QR or Open Link on PC</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Scan the QR code to pair instantly, or navigate to the link below:</div>
+                      
+                      {/* Connection QR Code */}
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: '#fff', padding: '10px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                          <canvas ref={qrCanvasRef} style={{ display: 'block', width: '130px', height: '130px' }} />
+                          <span style={{ fontSize: '9px', color: 'rgba(0,0,0,0.5)', fontWeight: 800 }}>Scan to connect PC automatically</span>
+                        </div>
+                      </div>
+
                       <div style={{
                         display: 'flex', alignItems: 'center', gap: '8px',
                         background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
-                        padding: '6px 10px', borderRadius: '8px', marginTop: '6px'
+                        padding: '6px 10px', borderRadius: '8px'
                       }}>
                         <code style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--accent-primary)', wordBreak: 'break-all', flex: 1 }}>
                           {window.location.host}/scanner-pc.html
@@ -1075,7 +1084,7 @@ export default function QRScanner({ onBack, navigateTo }) {
                       alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px'
                     }}>2</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Enter Pairing Code on PC</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Or Enter Connection Code</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
                         <div style={{
                           background: 'linear-gradient(135deg, rgba(214,0,54,0.1) 0%, rgba(255,107,53,0.1) 100%)',
@@ -1088,28 +1097,8 @@ export default function QRScanner({ onBack, navigateTo }) {
                           </span>
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                          Type this code in the PC client connection field to link instantly.
+                          If you can't scan the QR code, type this code in the PC connection box.
                         </div>
-                      </div>
-
-                      {/* Or Scan QR guide */}
-                      <div style={{ marginTop: '12px' }}>
-                        <button
-                          onClick={() => { triggerHapticFeedback(); setShowAdvanced(p => !p); }}
-                          style={{
-                            background: 'none', border: 'none', color: 'var(--accent-primary)',
-                            fontSize: '11px', fontWeight: 700, cursor: 'pointer', padding: 0,
-                            display: 'flex', alignItems: 'center', gap: '4px'
-                          }}
-                        >
-                          {showAdvanced ? 'Hide QR Code' : 'Or Show Connection QR Code'}
-                        </button>
-                        {showAdvanced && (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', background: '#fff', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', marginTop: '8px', width: 'fit-content', marginInline: 'auto' }}>
-                            <canvas ref={qrCanvasRef} style={{ display: 'block', width: '130px', height: '130px' }} />
-                            <div style={{ fontSize: '10px', color: 'rgba(0,0,0,0.5)', textAlign: 'center', fontWeight: 700 }}>Scan with PC webcam to pair</div>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
