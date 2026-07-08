@@ -94,6 +94,10 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [showFormatsInfo, setShowFormatsInfo] = useState(false);
 
+  const [scanMode, setScanMode] = useState('single'); // 'single' | 'continuous'
+  const [continuousScans, setContinuousScans] = useState([]);
+  const [successFlash, setSuccessFlash] = useState(false);
+
   const qrScannerRef = useRef(null);
   const fileInputRef = useRef(null);
   const mountedRef = useRef(true);
@@ -101,6 +105,7 @@ export default function QRScanner({ onBack, navigateTo }) {
   const touchStateRef = useRef({ distance: 0, initialZoom: 1 });
   const capTimersRef = useRef([]);
   const zoomRafRef = useRef(null);
+  const lastScanRef = useRef({ text: '', time: 0 });
 
   const triggerHapticFeedback = useCallback(() => {
     if (Capacitor.isNativePlatform()) {
@@ -124,6 +129,15 @@ export default function QRScanner({ onBack, navigateTo }) {
       console.warn("Failed to play scan sound:", e);
     }
   }, []);
+
+  const triggerScanFeedback = useCallback(() => {
+    playBeep();
+    if (Capacitor.isNativePlatform()) {
+      Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => { });
+    } else if (navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+  }, [playBeep]);
 
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
@@ -214,27 +228,78 @@ export default function QRScanner({ onBack, navigateTo }) {
 
   const handleScanResult = useCallback((decodedText, decodedResult) => {
     if (!mountedRef.current || busyRef.current) return;
+
+    // Detect format from result metadata
+    const fmtId = decodedResult?.result?.format?.format
+      ?? decodedResult?.decodedResult?.result?.format?.format
+      ?? null;
+    const fmtName = fmtId != null ? (FORMAT_NAME_MAP[fmtId] || 'Unknown') : null;
+
+    if (scanMode === 'continuous') {
+      const now = Date.now();
+      if (decodedText === lastScanRef.current.text && now - lastScanRef.current.time < 1500) {
+        return; // Ignore duplicate scans within 1.5 seconds
+      }
+      lastScanRef.current = { text: decodedText, time: now };
+
+      // Play Beep & Vibrate
+      triggerScanFeedback();
+
+      // Show green flash indicator
+      setSuccessFlash(true);
+      setTimeout(() => {
+        if (mountedRef.current) setSuccessFlash(false);
+      }, 350);
+
+      // Add to recently scanned list
+      const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setContinuousScans(prev => [...prev, { text: decodedText, format: fmtName || 'Barcode', time: timeStr }]);
+
+      // Save to storage history
+      let thumbnail = null;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 120;
+        canvas.height = 120;
+        const matrixInfo = generateQRMatrix(decodedText, 'M');
+        if (matrixInfo) {
+          renderQR(canvas, {
+            matrix: matrixInfo.matrix,
+            moduleCount: matrixInfo.moduleCount,
+            size: 120,
+            qrColor: '#000000',
+            bgColor: '#ffffff',
+            bgTransparent: false
+          });
+          thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+        }
+      } catch (err) {
+        console.error('Failed to generate thumbnail for scanned QR:', err);
+      }
+
+      import('../utils/storage').then(({ saveToHistory }) => {
+        saveToHistory({
+          source: 'scan',
+          qrData: { text: decodedText },
+          type: (fmtName || 'BARCODE').toUpperCase(),
+          displayText: decodedText,
+          thumbnail: thumbnail
+        });
+      });
+
+      return; // Do not pause scanner or change status to DETECTED
+    }
+
+    // Otherwise, handle single scan (standard mode)
     setStatus(prev => {
       if (prev === 'DETECTED') return prev;
-      playBeep();
-      if (Capacitor.isNativePlatform()) { Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => { }); }
-      else if (navigator.vibrate) { navigator.vibrate(200); }
+      triggerScanFeedback();
 
       const scanner = qrScannerRef.current;
       if (scanner) {
         try { scanner.pause(); } catch { }
       }
 
-      // Detect format from result metadata
-      const formatId = decodedResult?.result?.format?.formatName
-        ? null // will use formatId from decodedResult directly
-        : decodedResult?.decodedResult?.result?.format?.formatName
-          ? null
-          : null;
-      const fmtId = decodedResult?.result?.format?.format
-        ?? decodedResult?.decodedResult?.result?.format?.format
-        ?? null;
-      const fmtName = fmtId != null ? (FORMAT_NAME_MAP[fmtId] || 'Unknown') : null;
       if (fmtId != null) setDetectedFormatId(fmtId);
       if (fmtName) setDetectedFormatName(fmtName);
 
@@ -273,7 +338,7 @@ export default function QRScanner({ onBack, navigateTo }) {
       });
       return 'DETECTED';
     });
-  }, []);
+  }, [scanMode, triggerScanFeedback]);
 
   const startScanner = useCallback(async () => {
     if (busyRef.current) return;
@@ -290,7 +355,7 @@ export default function QRScanner({ onBack, navigateTo }) {
       await scanner.start(
         { facingMode: "environment" },
         {
-          fps: 15,
+          fps: 25,
           qrbox: (width, height) => {
             return { width: Math.min(width, height) * 0.85, height: Math.min(width, height) * 0.55 };
           },
@@ -557,6 +622,19 @@ export default function QRScanner({ onBack, navigateTo }) {
           <div className={`qrs-frame ${status === 'DETECTED' ? 'detected' : ''}`}>
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`} />
 
+            {successFlash && (
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                border: '4px solid #34C759',
+                boxShadow: 'inset 0 0 40px rgba(52, 199, 89, 0.4)',
+                backgroundColor: 'rgba(52, 199, 89, 0.08)',
+                zIndex: 10,
+                pointerEvents: 'none',
+                transition: 'all 0.1s ease-in-out'
+              }} />
+            )}
+
 
 
             {/* Flashlight button inside camera */}
@@ -582,18 +660,93 @@ export default function QRScanner({ onBack, navigateTo }) {
           </div>
         </div>
 
+        {/* Recently Scanned Items Overlay (Continuous Scan Mode) */}
+        {scanMode === 'continuous' && continuousScans.length > 0 && (
+          <div style={{
+            position: 'absolute',
+            bottom: '100px',
+            left: '16px',
+            right: '16px',
+            maxHeight: '130px',
+            overflowY: 'auto',
+            background: 'rgba(2, 6, 17, 0.85)',
+            backdropFilter: 'blur(16px)',
+            borderRadius: '16px',
+            padding: '12px 14px',
+            zIndex: 10,
+            border: '1px solid var(--border-color)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
+          }}>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Recently Scanned ({continuousScans.length})</span>
+              <button 
+                onClick={() => setContinuousScans([])}
+                style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '10px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+              >
+                Clear All
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column-reverse', gap: '6px', overflowY: 'auto', flex: 1 }}>
+              {continuousScans.slice(-3).map((item, idx) => (
+                <div key={idx} className="fade-in" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-elevated)', padding: '6px 10px', borderRadius: '8px', borderLeft: '3px solid #34C759', border: '1px solid var(--border-color)', borderLeftWidth: '3px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
+                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontWeight: 600 }}>{item.format} • {item.time}</span>
+                  </div>
+                  <span style={{ color: '#34C759', fontWeight: 800, fontSize: '11px', marginLeft: 8, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34C759', display: 'inline-block' }} /> Scanned
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Mode Selector Tabs */}
-        <div className="qrs-mode-selector" style={{ position: 'relative', justifyContent: 'center' }}>
-          <div className="qrs-mode-tab active" style={{ margin: 0 }}>
-            Scan
-            <div className="qrs-mode-dot" />
+        <div className="qrs-mode-selector" style={{ position: 'relative', justifyContent: 'space-between', padding: '16px 20px' }}>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <button
+              onClick={() => {
+                triggerHapticFeedback();
+                setScanMode('single');
+              }}
+              className={`qrs-mode-tab ${scanMode === 'single' ? 'active' : ''}`}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontSize: '13px', fontWeight: 600 }}
+            >
+              Single Scan
+              {scanMode === 'single' && <div className="qrs-mode-dot" style={{ background: 'var(--accent-primary)' }} />}
+            </button>
+            <button
+              onClick={() => {
+                triggerHapticFeedback();
+                setScanMode('continuous');
+                // Resume camera scanning if we were paused
+                if (status === 'DETECTED') {
+                  setStatus('SCANNING');
+                  const scanner = qrScannerRef.current;
+                  if (scanner) {
+                    try { scanner.start(); } catch { }
+                  } else {
+                    startScanner();
+                  }
+                }
+              }}
+              className={`qrs-mode-tab ${scanMode === 'continuous' ? 'active' : ''}`}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontSize: '13px', fontWeight: 600 }}
+            >
+              Continuous Scan
+              {scanMode === 'continuous' && <div className="qrs-mode-dot" style={{ background: 'var(--accent-primary)' }} />}
+            </button>
           </div>
           <button
-            style={{ position: 'absolute', right: 16, background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, padding: '4px 8px' }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, padding: '4px 8px' }}
             onClick={() => setShowFormatsInfo(v => !v)}
           >
             <Info size={14} />
-            Supported Formats
+            Formats
           </button>
         </div>
 
