@@ -534,12 +534,37 @@
 
     <!-- Tabs header -->
     <div style="display:flex; gap:8px; margin-bottom:12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-      <button class="btn btn-ghost" id="tab-btn-ps" onclick="switchHelper('ps')" style="padding: 6px 12px; font-size: 12px; background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent);">Windows (Zero-Install PowerShell)</button>
-      <button class="btn btn-ghost" id="tab-btn-py" onclick="switchHelper('py')" style="padding: 6px 12px; font-size: 12px;">Mac / Linux / Python Script</button>
+      <button class="btn btn-ghost" id="tab-btn-app" onclick="switchHelper('app')" style="padding: 6px 12px; font-size: 12px; background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent);">💻 Windows App (Recommended)</button>
+      <button class="btn btn-ghost" id="tab-btn-ps" onclick="switchHelper('ps')" style="padding: 6px 12px; font-size: 12px;">Windows PowerShell Wedge</button>
+      <button class="btn btn-ghost" id="tab-btn-py" onclick="switchHelper('py')" style="padding: 6px 12px; font-size: 12px;">Mac / Linux / Python Wedge</button>
+    </div>
+
+    <!-- C# Native Desktop App Helper -->
+    <div id="helper-app-container">
+      <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+        Download and run the installer script. It compiles a native, lightweight Windows keyboard wedge program (<code>MushiQR-PC-Wedge.exe</code>) instantly on your computer.
+      </p>
+      <div style="background: var(--bg-hover); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 36px; height: 36px; borderRadius: 8px; background: rgba(0,212,160,0.1); display: flex; alignItems: center; justifyContent: center; color: var(--accent);">
+            🚀
+          </div>
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Mushi QR Keyboard Wedge App</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Compiles in 1s • runs in background • injects keypresses globally</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="downloadBatchWedge()" style="width: 100%; margin-top: 8px;">
+          ⬇ Download Windows App Installer (.bat)
+        </button>
+      </div>
+      <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.4;">
+        💡 <strong>How it works:</strong> Double-click the downloaded <code>.bat</code> file. It compiles a lightweight native executable binary on your Windows machine automatically. Once running, enter your 5-digit code to pair.
+      </p>
     </div>
 
     <!-- PowerShell helper -->
-    <div id="helper-ps-container">
+    <div id="helper-ps-container" style="display: none;">
       <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Run this command in Windows PowerShell to connect and start typing instantly. <strong>No installation required!</strong></p>
       <div class="code-block" id="ps-code"><span class="code-comment"># Copy & paste this block into Windows PowerShell:</span>
 <span class="code-keyword">$SessionId</span> = <span class="code-string" id="ps-session">"paste-your-session-id-here"</span>
@@ -771,29 +796,47 @@ ws.run_forever()</div>
   }
 
   function switchHelper(type) {
+    const appBtn = document.getElementById('tab-btn-app');
     const psBtn = document.getElementById('tab-btn-ps');
     const pyBtn = document.getElementById('tab-btn-py');
+    const appCont = document.getElementById('helper-app-container');
     const psCont = document.getElementById('helper-ps-container');
     const pyCont = document.getElementById('helper-py-container');
     
-    if (type === 'ps') {
-      psBtn.style.background = 'var(--bg-hover)';
-      psBtn.style.color = 'var(--text-primary)';
-      psBtn.style.borderColor = 'var(--accent)';
-      pyBtn.style.background = 'none';
-      pyBtn.style.color = 'var(--text-secondary)';
-      pyBtn.style.borderColor = 'var(--border)';
-      psCont.style.display = 'block';
-      pyCont.style.display = 'none';
+    // Reset all buttons
+    [appBtn, psBtn, pyBtn].forEach(btn => {
+      if (btn) {
+        btn.style.background = 'none';
+        btn.style.color = 'var(--text-secondary)';
+        btn.style.borderColor = 'var(--border)';
+      }
+    });
+    // Hide all containers
+    if (appCont) appCont.style.display = 'none';
+    if (psCont) psCont.style.display = 'none';
+    if (pyCont) pyCont.style.display = 'none';
+
+    if (type === 'app') {
+      if (appBtn) {
+        appBtn.style.background = 'var(--bg-hover)';
+        appBtn.style.color = 'var(--text-primary)';
+        appBtn.style.borderColor = 'var(--accent)';
+      }
+      if (appCont) appCont.style.display = 'block';
+    } else if (type === 'ps') {
+      if (psBtn) {
+        psBtn.style.background = 'var(--bg-hover)';
+        psBtn.style.color = 'var(--text-primary)';
+        psBtn.style.borderColor = 'var(--accent)';
+      }
+      if (psCont) psCont.style.display = 'block';
     } else {
-      pyBtn.style.background = 'var(--bg-hover)';
-      pyBtn.style.color = 'var(--text-primary)';
-      pyBtn.style.borderColor = 'var(--accent)';
-      psBtn.style.background = 'none';
-      psBtn.style.color = 'var(--text-secondary)';
-      psBtn.style.borderColor = 'var(--border)';
-      pyCont.style.display = 'block';
-      psCont.style.display = 'none';
+      if (pyBtn) {
+        pyBtn.style.background = 'var(--bg-hover)';
+        pyBtn.style.color = 'var(--text-primary)';
+        pyBtn.style.borderColor = 'var(--accent)';
+      }
+      if (pyCont) pyCont.style.display = 'block';
     }
   }
 
@@ -848,6 +891,123 @@ ws.run_forever()`;
     const btn = event.target;
     btn.textContent = '✓ Copied!';
     setTimeout(() => btn.textContent = '⎘ Copy Python Script', 1500);
+  }
+
+  function downloadBatchWedge() {
+    const code = `@echo off
+title Mushi QR Pro - PC Wedge Installer
+echo ===================================================
+echo     Mushi QR Pro - PC Keyboard Wedge Compiler
+echo ===================================================
+echo.
+echo Compiling native C# Keyboard Wedge application...
+
+set CSC_PATH=C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe
+
+if not exist "%CSC_PATH%" (
+    echo Error: C# compiler not found at %CSC_PATH%
+    echo Please make sure .NET Framework 4.5 or higher is installed.
+    pause
+    exit /b
+)
+
+:: Create the C# file
+(
+echo using System;
+echo using System.Net.WebSockets;
+echo using System.Text;
+echo using System.Threading;
+echo using System.Threading.Tasks;
+echo using System.Windows.Forms;
+echo namespace MushiQR {
+echo   class Program {
+echo     static async Task Main^(string[] args^) {
+echo       Console.Title = "Mushi QR Pro - Keyboard Wedge App";
+echo       Console.ForegroundColor = ConsoleColor.Cyan;
+echo       Console.WriteLine^("===================================================="^);
+echo       Console.WriteLine^("      Mushi QR Pro - PC Keyboard Wedge App          "^);
+echo       Console.WriteLine^("===================================================="^);
+echo       Console.ResetColor^(^);
+echo       string code = "";
+echo       if ^(args.Length ^> 0^) {
+echo         code = args[0].Trim^(^);
+echo       } else {
+echo         Console.Write^("Enter the 5-digit Connection Code from phone: "^);
+echo         code = Console.ReadLine^(^).Trim^(^);
+echo       }
+echo       if ^(string.IsNullOrEmpty^(code^)^) {
+echo         Console.WriteLine^("Error: Code cannot be empty."^);
+echo         Console.ReadKey^(^);
+echo         return;
+echo       }
+echo       string uri = "wss://ntfy.sh/" + code + "/ws";
+echo       Console.WriteLine^("\\nConnecting to phone relay..."^);
+echo       using ^(ClientWebSocket ws = new ClientWebSocket^(^)^) {
+echo         try {
+echo           await ws.ConnectAsync^(new Uri^(uri^), CancellationToken.None^);
+echo           Console.ForegroundColor = ConsoleColor.Green;
+echo           Console.WriteLine^("Connected successfully! Keep this app open."^);
+echo           Console.WriteLine^("Focus Excel, Notepad, or POS software and scan barcodes."^);
+echo           Console.ResetColor^(^);
+echo           byte[] buf = new byte[4096];
+echo           while ^(ws.State == WebSocketState.Open^) {
+echo             var res = await ws.ReceiveAsync^(new ArraySegment^<byte^>^(buf^), CancellationToken.None^);
+echo             if ^(res.MessageType == WebSocketMessageType.Close^) {
+echo               await ws.CloseAsync^(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None^);
+echo             } else {
+echo               string raw = Encoding.UTF8.GetString^(buf, 0, res.Count^);
+echo               if ^(raw.Contains^("\\"event\\":\\"message\\""^)^) {
+echo                 int mIdx = raw.IndexOf^("\\"message\\":\\""^);
+echo                 if ^(mIdx != -1^) {
+echo                   int start = mIdx + 11;
+echo                   int end = raw.IndexOf^("\\""^, start^);
+echo                   if ^(end != -1^) {
+echo                     string val = raw.Substring^(start, end - start^);
+                      // Decode escape sequence characters if any
+echo                     val = val.Replace^("\\\\\\\\", "\\\\"^).Replace^("\\\\\\"", "\\""^);
+echo                     Console.ForegroundColor = ConsoleColor.Yellow;
+echo                     Console.WriteLine^("[" + DateTime.Now.ToString^("HH:mm:ss"^)^] Scanned: " + val^);
+echo                     Console.ResetColor^(^);
+echo                     SendKeys.SendWait^(val^);
+echo                     SendKeys.SendWait^("{ENTER}"^);
+echo                   }
+echo                 }
+echo               }
+echo             }
+echo           }
+echo         } catch ^(Exception ex^) {
+echo           Console.ForegroundColor = ConsoleColor.Red;
+echo           Console.WriteLine^("\\nError: " + ex.Message^);
+echo           Console.WriteLine^("Reconnecting in 5 seconds..."^);
+echo           Console.ResetColor^(^);
+echo           Thread.Sleep^(5000^);
+echo         }
+echo       }
+echo     }
+echo   }
+echo }
+) > MushiWedge.cs
+
+:: Compile it
+"%CSC_PATH%" /r:System.Windows.Forms.dll,System.dll /out:MushiQR-PC-Wedge.exe MushiWedge.cs > nul
+
+:: Clean up C# code
+del MushiWedge.cs
+
+echo.
+echo ===================================================
+echo Success! Compiled to: MushiQR-PC-Wedge.exe
+echo Starting the Keyboard Wedge program...
+echo ===================================================
+echo.
+start MushiQR-PC-Wedge.exe
+exit
+`;
+    const blob = new Blob([code], { type: 'application/bat' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'MushiQR-PC-Wedge.bat';
+    a.click();
   }
 
   function playBeep() {
