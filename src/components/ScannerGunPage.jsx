@@ -143,7 +143,7 @@ export default function ScannerGunPage({ onNavigate }) {
       } catch (e) {}
       scannerRef.current = null;
     }
-    const vp = document.getElementById('gun-scanner-viewport');
+    const vp = document.getElementById('qr-scanner-viewport');
     if (vp) vp.innerHTML = '';
     setFlashOn(false);
     setFlashSupported(false);
@@ -200,21 +200,26 @@ export default function ScannerGunPage({ onNavigate }) {
   const startScanner = useCallback(async () => {
     if (scannerRef.current) await stopScanner();
     try {
-      const scanner = new Html5Qrcode('gun-scanner-viewport', {
-        formatsToSupport: ALL_SCAN_FORMATS,
-        verbose: false,
-      });
+      const scanner = new Html5Qrcode('qr-scanner-viewport');
       scannerRef.current = scanner;
       await scanner.start(
         { facingMode: 'environment' },
-        { fps: 15, qrbox: { width: 260, height: 160 }, aspectRatio: 1.7 },
+        { 
+          fps: 15, 
+          qrbox: (width, height) => {
+            return { width: Math.min(width, height) * 0.85, height: Math.min(width, height) * 0.55 };
+          }, 
+          aspectRatio: 1.333333,
+          formatsToSupport: ALL_SCAN_FORMATS,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+        },
         onScanSuccess,
         () => {}
       );
       setIsScanning(true);
       // Check torch support
       try {
-        const videoEl = document.querySelector('#gun-scanner-viewport video');
+        const videoEl = document.querySelector('#qr-scanner-viewport video');
         const track = videoEl?.srcObject?.getVideoTracks?.()[0];
         if (track) {
           const caps = track.getCapabilities?.() || {};
@@ -230,7 +235,7 @@ export default function ScannerGunPage({ onNavigate }) {
   // ── Toggle Flash ──────────────────────────────────────────────────────────
   const toggleFlash = useCallback(async () => {
     try {
-      const videoEl = document.querySelector('#gun-scanner-viewport video');
+      const videoEl = document.querySelector('#qr-scanner-viewport video');
       const track = videoEl?.srcObject?.getVideoTracks?.()[0];
       if (!track) return;
       const newVal = !flashOn;
@@ -701,7 +706,7 @@ export default function ScannerGunPage({ onNavigate }) {
 
           {/* Camera viewport */}
           <div style={{ position: 'relative', background: '#000', minHeight: isScanning ? '200px' : '0px' }}>
-            <div id="gun-scanner-viewport" style={{ width: '100%' }} />
+            <div id="qr-scanner-viewport" className="qrs-viewport" style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }} />
             {isScanning && (
               <div style={{
                 position: 'absolute', inset: 0, pointerEvents: 'none',
@@ -802,11 +807,11 @@ export default function ScannerGunPage({ onNavigate }) {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-        #gun-scanner-viewport video {
+        #qr-scanner-viewport video {
           width: 100% !important;
           height: auto !important;
         }
-        #gun-scanner-viewport > div {
+        #qr-scanner-viewport > div {
           border: none !important;
           padding: 0 !important;
         }
