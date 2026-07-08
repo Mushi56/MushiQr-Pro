@@ -7,11 +7,12 @@ import {
   ArrowLeft, Zap, ZapOff, Image, CheckCircle2,
   Copy, ExternalLink, Share2, Star, Wifi, Mail,
   Phone, User, Globe, FileText, Minus, Plus, AlertCircle, RefreshCcw, Clock,
-  ScanLine, Info, ShieldAlert, Barcode, X
+  ScanLine, Info, ShieldAlert, Barcode, X, Monitor, Loader2
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import qrcode from 'qrcode-generator';
 
 // ─── Barcode format metadata ──────────────────────────────────────────────────
 // Formats supported by html5-qrcode (ZXing) for live camera scanning
@@ -77,6 +78,13 @@ const parseQRData = (text) => {
   return { type: 'Text', icon: FileText, title: 'Text Content', action: 'Copy Text', actionIcon: Copy };
 };
 
+function genSessionId() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let id = 'mqs-';
+  for (let i = 0; i < 8; i++) id += chars[Math.floor(Math.random() * chars.length)];
+  return id;
+}
+
 export default function QRScanner({ onBack, navigateTo }) {
   const [status, setStatus] = useState('SCANNING');
   const [result, setResult] = useState(null);
@@ -97,6 +105,51 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [scanMode, setScanMode] = useState('single'); // 'single' | 'continuous'
   const [continuousScans, setContinuousScans] = useState([]);
   const [successFlash, setSuccessFlash] = useState(false);
+
+  const [sessionId] = useState(() => genSessionId());
+  const [pcRelayEnabled, setPcRelayEnabled] = useState(false);
+  const [appendEnter, setAppendEnter] = useState(true);
+  const [prefix, setPrefix] = useState('');
+  const [suffix, setSuffix] = useState('');
+  const [showPcModal, setShowPcModal] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [pcUrl, setPcUrl] = useState('');
+  const qrCanvasRef = useRef(null);
+
+  useEffect(() => {
+    const base = window.location.origin;
+    const url = `${base}/scanner-pc.html?session=${sessionId}`;
+    setPcUrl(url);
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!pcUrl || !qrCanvasRef.current || !showPcModal) return;
+    try {
+      const qr = qrcode(0, 'M');
+      qr.addData(pcUrl);
+      qr.make();
+      const count = qr.getModuleCount();
+      const size = 180;
+      const cell = Math.floor(size / count);
+      const canvas = qrCanvasRef.current;
+      if (!canvas) return;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#000000';
+      for (let r = 0; r < count; r++) {
+        for (let c = 0; c < count; c++) {
+          if (qr.isDark(r, c)) {
+            ctx.fillRect(c * cell, r * cell, cell, cell);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('QR generation failed:', e);
+    }
+  }, [pcUrl, showPcModal]);
 
   const qrScannerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -229,6 +282,25 @@ export default function QRScanner({ onBack, navigateTo }) {
   const handleScanResult = useCallback((decodedText, decodedResult) => {
     if (!mountedRef.current || busyRef.current) return;
 
+    // Relay to PC if enabled
+    if (pcRelayEnabled) {
+      const toSend = prefix + decodedText + suffix + (appendEnter ? '\n' : '');
+      setIsSending(true);
+      fetch(`https://ntfy.sh/${sessionId}`, {
+        method: 'POST',
+        body: toSend,
+        headers: {
+          'Title': 'barcode',
+          'Priority': '4',
+          'Tags': 'barcode_scan',
+        },
+      }).catch(e => {
+        console.warn('PC Relay POST failed:', e);
+      }).finally(() => {
+        setIsSending(false);
+      });
+    }
+
     // Detect format from result metadata
     const fmtId = decodedResult?.result?.format?.format
       ?? decodedResult?.decodedResult?.result?.format?.format
@@ -338,7 +410,7 @@ export default function QRScanner({ onBack, navigateTo }) {
       });
       return 'DETECTED';
     });
-  }, [scanMode, triggerScanFeedback]);
+  }, [scanMode, triggerScanFeedback, pcRelayEnabled, sessionId, prefix, suffix, appendEnter]);
 
   const startScanner = useCallback(async () => {
     if (busyRef.current) return;
@@ -644,6 +716,26 @@ export default function QRScanner({ onBack, navigateTo }) {
               </button>
             )}
 
+            {/* PC Connection Settings Button (Monitor) */}
+            <button 
+              className={`qrs-flash-viewport-btn ${pcRelayEnabled ? 'on' : ''}`} 
+              onClick={() => { triggerHapticFeedback(); setShowPcModal(true); }}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                left: '16px',
+                right: 'auto',
+                background: pcRelayEnabled ? 'rgba(52, 199, 89, 0.25)' : 'rgba(0,0,0,0.5)',
+                borderColor: pcRelayEnabled ? 'rgba(52, 199, 89, 0.4)' : 'rgba(255,255,255,0.15)',
+                color: pcRelayEnabled ? '#34C759' : '#fff',
+                zIndex: 15
+              }}
+              title="PC Connection Settings"
+              aria-label="PC Connection"
+            >
+              {isSending ? <Loader2 className="animate-spin" size={20} /> : <Monitor size={20} />}
+            </button>
+
             {/* Laser Scanning Line */}
             {status === 'SCANNING' && <div className="qrs-laser" />}
             {status === 'DETECTED' && <div className="qrs-laser frozen" />}
@@ -918,8 +1010,174 @@ export default function QRScanner({ onBack, navigateTo }) {
           </div>
         )}
 
+        {/* PC Connection Modal Popup */}
+        {showPcModal && (
+          <div className="modal-overlay" style={{ zIndex: 11000 }} onClick={() => setShowPcModal(false)}>
+            <div className="modal-container glass-panel" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Monitor size={20} style={{ color: 'var(--accent-primary)' }} />
+                  </div>
+                  <div className="modal-header-title" style={{ flex: 1 }}>
+                    <h3 style={{ margin: 0 }}>PC Connection Setup</h3>
+                    <p style={{ margin: 0 }}>Keyboard wedge scan relay</p>
+                  </div>
+                  <button className="modal-close" onClick={() => setShowPcModal(false)}>
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="modal-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Connection Status Badge */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-color)',
+                  padding: '12px 16px',
+                  borderRadius: '12px'
+                }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>PC Connection Status</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: pcRelayEnabled ? '#34C759' : 'var(--text-muted)'
+                  }}>
+                    <span style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: pcRelayEnabled ? '#34C759' : 'var(--text-muted)',
+                      animation: pcRelayEnabled ? 'pulse 1.5s infinite' : 'none'
+                    }} />
+                    {pcRelayEnabled ? 'Relay Active' : 'Disconnected'}
+                  </div>
+                </div>
+
+                {/* Switch: Connect / Relay scans to PC */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Relay Scans to PC</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Send scanned codes instantly to PC companion</div>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    checked={pcRelayEnabled}
+                    onChange={(e) => {
+                      triggerHapticFeedback();
+                      setPcRelayEnabled(e.target.checked);
+                    }}
+                    style={{
+                      width: '42px',
+                      height: '24px',
+                      appearance: 'none',
+                      background: 'var(--bg-hover)',
+                      borderRadius: '12px',
+                      position: 'relative',
+                      cursor: 'pointer',
+                      border: '1px solid var(--border-color)',
+                      transition: 'background 0.3s'
+                    }}
+                    className="pc-switch-checkbox"
+                  />
+                </div>
+
+                {pcRelayEnabled && (
+                  <>
+                    {/* QR Code Canvas and URL info */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', background: '#fff', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
+                      <canvas ref={qrCanvasRef} style={{ display: 'block', width: '180px', height: '180px' }} />
+                      <div style={{ textAlign: 'center', color: '#000' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 800 }}>Scan QR to connect PC</div>
+                        <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.5)', marginTop: '2px', wordBreak: 'break-all', fontFamily: 'monospace' }}>
+                          {pcUrl}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(52, 199, 89, 0.06)', border: '1px solid rgba(52, 199, 89, 0.15)', borderRadius: '12px', padding: '10px 12px' }}>
+                      <Info size={14} style={{ color: '#34C759', flexShrink: 0, marginTop: 1 }} />
+                      <span style={{ fontSize: 11, color: '#34C759', fontWeight: 600, lineHeight: 1.5 }}>
+                        How to connect: Open the link above in your computer's browser or scan the QR code. Once open, click the text area to start typing.
+                      </span>
+                    </div>
+
+                    {/* Prefix and Suffix configurations */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-color)', paddingTop: '14px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Wedge Configuration</div>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>Append Enter Key</span>
+                        <input 
+                          type="checkbox" 
+                          checked={appendEnter}
+                          onChange={(e) => setAppendEnter(e.target.checked)}
+                          style={{ width: '16px', height: '16px' }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>Prefix</label>
+                          <input 
+                            type="text" 
+                            value={prefix} 
+                            onChange={(e) => setPrefix(e.target.value)} 
+                            placeholder="e.g. ID-"
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: '12px' }}
+                          />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>Suffix</label>
+                          <input 
+                            type="text" 
+                            value={suffix} 
+                            onChange={(e) => setSuffix(e.target.value)} 
+                            placeholder="e.g. -WD"
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: '12px' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <input type="file" ref={fileInputRef} accept="image/*" onChange={e => handleFileUpload(e.target.files?.[0])} style={{ display: 'none' }} />
       </div>
+
+      <style>{`
+        .pc-switch-checkbox:checked {
+          background: #34C759 !important;
+        }
+        .pc-switch-checkbox::after {
+          content: '';
+          position: absolute;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: #fff;
+          top: 2px;
+          left: 2px;
+          transition: transform 0.3s;
+        }
+        .pc-switch-checkbox:checked::after {
+          transform: translateX(18px);
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.2); }
+        }
+      `}</style>
     </div>
   );
 }

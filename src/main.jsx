@@ -20,7 +20,6 @@ createRoot(document.getElementById('root')).render(
         <Route path="/scanner" element={<App />} />
         <Route path="/batch" element={<App />} />
         <Route path="/barcode" element={<App />} />
-        <Route path="/scanner-gun" element={<App />} />
         <Route path="/about" element={<About />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
