@@ -309,6 +309,47 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     }
   }, []);
 
+  const [showZoomSlider, setShowZoomSlider] = useState(false);
+  const zoomTimeoutRef = useRef(null);
+
+  const resetZoomTimeout = useCallback(() => {
+    if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+    zoomTimeoutRef.current = setTimeout(() => {
+      setShowZoomSlider(false);
+    }, 2000);
+  }, []);
+
+  const handleZoomChange = useCallback((newVal) => {
+    let val = newVal;
+    if (zoomCapabilities) {
+      val = Math.min(Math.max(newVal, zoomCapabilities.min), zoomCapabilities.max);
+    } else {
+      val = Math.min(Math.max(newVal, 1), 4);
+    }
+    applyZoom(val);
+    if (Capacitor.isNativePlatform()) {
+      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+    }
+    setShowZoomSlider(true);
+    resetZoomTimeout();
+  }, [applyZoom, resetZoomTimeout, zoomCapabilities]);
+
+  const handleIndicatorTap = () => {
+    triggerHapticFeedback();
+    setShowZoomSlider(true);
+    resetZoomTimeout();
+    
+    let nextZoom = 1.0;
+    if (zoom < 1.8) nextZoom = 2.0;
+    else if (zoom < 3.8) nextZoom = 4.0;
+    else nextZoom = 1.0;
+    
+    if (zoomCapabilities) {
+      nextZoom = Math.min(Math.max(nextZoom, zoomCapabilities.min), zoomCapabilities.max);
+    }
+    applyZoom(nextZoom);
+  };
+
   const toggleFlash = useCallback(async () => {
     triggerHapticFeedback();
     try {
@@ -650,18 +691,18 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   }, [stopScanner, handleScanResult, triggerHapticFeedback]);
 
   const handleTouchStart = (e) => {
-    if (e.touches.length === 2 && zoomCapabilities) {
+    if (e.touches.length === 2) {
       const d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
       touchStateRef.current = { distance: d, initialZoom: zoom };
     }
   };
   const handleTouchMove = (e) => {
-    if (e.touches.length === 2 && zoomCapabilities) {
+    if (e.touches.length === 2) {
       if (zoomRafRef.current) return;
       const d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
       const targetZoom = touchStateRef.current.initialZoom * (d / touchStateRef.current.distance);
       zoomRafRef.current = requestAnimationFrame(() => {
-        applyZoom(targetZoom);
+        handleZoomChange(targetZoom);
         zoomRafRef.current = null;
       });
     }
@@ -753,13 +794,48 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
             {status === 'SCANNING' && <div className="qrs-laser" />}
             {status === 'DETECTED' && <div className="qrs-laser frozen" />}
 
-            {/* Zoom overlay inside viewport frame */}
-            {status === 'SCANNING' && zoomCapabilities && (
-              <div className="qrs-zoom">
-                <button onClick={() => applyZoom(zoom - 0.5)}><Minus size={14} /></button>
-                <input type="range" min={zoomCapabilities.min} max={zoomCapabilities.max} step={zoomCapabilities.step} value={zoom} onChange={e => applyZoom(parseFloat(e.target.value))} />
-                <button onClick={() => applyZoom(zoom + 0.5)}><Plus size={14} /></button>
-                <span>{zoom.toFixed(1)}x</span>
+            {/* Premium Floating Glassmorphic Zoom Control */}
+            {status === 'SCANNING' && (
+              <div className="qrs-zoom-container" onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()}>
+                <button 
+                  className={`qrs-zoom-indicator-btn ${showZoomSlider ? 'hidden' : 'visible'}`}
+                  onClick={handleIndicatorTap}
+                  aria-label="Zoom Preset"
+                >
+                  <span>{zoom.toFixed(1)}×</span>
+                </button>
+
+                <div className={`qrs-zoom-slider-pill ${showZoomSlider ? 'visible' : 'hidden'}`}>
+                  <button 
+                    className="qrs-zoom-pill-btn" 
+                    onClick={() => handleZoomChange(zoom - 0.5)}
+                    aria-label="Decrease Zoom"
+                  >
+                    <Minus size={14} strokeWidth={2.5} />
+                  </button>
+                  
+                  <div className="qrs-zoom-slider-track-container">
+                    <input 
+                      type="range" 
+                      min={zoomCapabilities ? zoomCapabilities.min : 1} 
+                      max={zoomCapabilities ? zoomCapabilities.max : 4} 
+                      step={zoomCapabilities ? zoomCapabilities.step : 0.1} 
+                      value={zoom} 
+                      onChange={e => handleZoomChange(parseFloat(e.target.value))}
+                      className="qrs-zoom-pill-range"
+                    />
+                  </div>
+
+                  <button 
+                    className="qrs-zoom-pill-btn" 
+                    onClick={() => handleZoomChange(zoom + 0.5)}
+                    aria-label="Increase Zoom"
+                  >
+                    <Plus size={14} strokeWidth={2.5} />
+                  </button>
+                  
+                  <span className="qrs-zoom-pill-value">{zoom.toFixed(1)}×</span>
+                </div>
               </div>
             )}
           </div>
