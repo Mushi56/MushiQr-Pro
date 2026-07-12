@@ -213,7 +213,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
         barColor,
         bgColor,
         barWidth: barWidth * scale,
-        height: height * scale,
+        height, // keep base height unscaled as bwip-js scale factor handles overall scaling
         margin: margin * scale,
         displayValue
       });
