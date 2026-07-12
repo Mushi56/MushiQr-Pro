@@ -26,24 +26,26 @@ logo = Image.open(LOGO).convert("RGBA")
 for d, s in DENSITIES.items():
     od = os.path.join(RES_DIR, d)
     os.makedirs(od, exist_ok=True)
-    ps = int(s * 0.85)
+    
+    # 1. Standard launcher icon: Keep transparent corners to preserve squircle shape
+    ps = int(s * 0.90) # Make it look large and premium
     r = logo.resize((ps, ps), Image.LANCZOS)
-    c = Image.new('RGBA', (s, s), (3,3,5,255))
+    c = Image.new('RGBA', (s, s), (0, 0, 0, 0)) # Transparent background
     o = (s - ps) // 2
     c.paste(r, (o, o), r)
-    rgb = Image.new('RGB', (s, s), (3,3,5))
-    rgb.paste(c, (0,0), c)
-    rgb.save(os.path.join(od, "ic_launcher.png"), "PNG")
-    ri = make_round(rgb.copy())
-    rc = Image.new('RGBA', (s, s), (0,0,0,0))
-    rc.paste(ri, (0,0), ri)
+    c.save(os.path.join(od, "ic_launcher.png"), "PNG")
+    
+    # 2. Round launcher icon: Crop to perfect circle
+    ri = make_round(r)
+    rc = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+    rc.paste(ri, (o, o), ri)
     rc.save(os.path.join(od, "ic_launcher_round.png"), "PNG")
     print(f"  ok {d}: {s}x{s}")
 
 for d, s in FG_SIZES.items():
     od = os.path.join(RES_DIR, d)
     os.makedirs(od, exist_ok=True)
-    ls = int(s * 0.55)
+    ls = int(s * 0.65) # Adjusted size for adaptive layout
     r = logo.resize((ls, ls), Image.LANCZOS)
     c = Image.new('RGBA', (s, s), (0,0,0,0))
     o = (s - ls) // 2
