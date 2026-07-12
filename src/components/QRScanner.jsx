@@ -419,11 +419,10 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       await scanner.start(
         { facingMode: "environment" },
         {
-          fps: 15,
+          fps: 25,
           qrbox: (width, height) => {
             return { width: Math.min(width, height) * 0.85, height: Math.min(width, height) * 0.55 };
           },
-          aspectRatio: 1.333333,
           formatsToSupport: ALL_SCANNABLE_IDS,
           experimentalFeatures: { useBarCodeDetectorIfSupported: true }
         },
@@ -490,7 +489,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     }
   }, [stopScanner, handleScanResult]);
 
-  useEffect(() => { const t = setTimeout(() => { if (mountedRef.current) startScanner(); }, 200); return () => clearTimeout(t); }, []); // eslint-disable-line
+  useEffect(() => { const t = setTimeout(() => { if (mountedRef.current) startScanner(); }, 50); return () => clearTimeout(t); }, []); // eslint-disable-line
 
   const handleFileUpload = async (file) => {
     if (!file) return;
