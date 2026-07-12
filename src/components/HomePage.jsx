@@ -786,6 +786,83 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                  </div>
               </div>
             </div>
+
+            {/* Slide 5: Scanner Gun Mode */}
+            <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%)',
+                borderRadius: '18px',
+                padding: '24px 20px',
+                color: '#fff',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 10px 32px rgba(124, 58, 237, 0.35)',
+                gap: '12px',
+                height: '140px'
+              }}>
+                <div style={{
+                  position: 'absolute', top: '-20px', right: '70px',
+                  width: '80px', height: '80px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.07)', pointerEvents: 'none'
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: '-24px', right: '10px',
+                  width: '100px', height: '100px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.06)', pointerEvents: 'none'
+                }} />
+
+                <div style={{ zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
+                      <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.1 }}>Scanner Gun</h2>
+                      <p style={{ fontSize: '13px', margin: 0, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>Connect phone to PC via WiFi, Bluetooth or USB</p>
+                    </div>
+
+                    <button 
+                      onClick={() => onNavigate('scanner-gun')}
+                      style={{
+                        background: 'rgba(255,255,255,0.25)',
+                        border: '1px solid rgba(255,255,255,0.35)',
+                        borderRadius: '12px',
+                        padding: '8px 16px',
+                        color: '#fff',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '7px',
+                        fontFamily: 'inherit',
+                        alignSelf: 'flex-start',
+                        backdropFilter: 'blur(4px)'
+                      }}
+                    >
+                      <ScanLine size={14} /> Connect to PC
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ 
+                   background: 'rgba(255,255,255,0.15)',
+                   backdropFilter: 'blur(8px)',
+                   width: '90px',
+                   height: '90px',
+                   borderRadius: '12px',
+                   border: '1px solid rgba(255,255,255,0.2)',
+                   flexShrink: 0,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   zIndex: 1,
+                   fontSize: '40px'
+                 }}>
+                   🔫
+                 </div>
+              </div>
+            </div>
           </div>
 
           {/* Navigation Controls */}
@@ -796,7 +873,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
             gap: '8px',
             marginTop: '12px'
           }}>
-            {[0, 1, 2, 3].map((index) => (
+            {[0, 1, 2, 3, 4].map((index) => (
               <button
                 key={index}
                 onClick={() => setActiveSlide(index)}

@@ -73,6 +73,7 @@ import SavedPage from './components/SavedPage';
 import SettingsPage from './components/SettingsPage';
 import BatchPage from './components/BatchPage';
 import BarcodePage from './components/BarcodePage';
+import ScannerGunPage from './components/ScannerGunPage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
@@ -608,6 +609,7 @@ export default function App() {
     if (path === '/scanner') return 'scanner';
     if (path === '/batch') return 'batch';
     if (path === '/barcode') return 'barcode';
+    if (path === '/scanner-gun') return 'scanner-gun';
     return 'home';
   };
 
@@ -961,6 +963,7 @@ export default function App() {
     else if (page === 'scanner') path = '/scanner';
     else if (page === 'batch') path = '/batch';
     else if (page === 'barcode') path = '/barcode';
+    else if (page === 'scanner-gun') path = '/scanner-gun';
 
     if (location.pathname !== path) {
       navigate(path);
@@ -4316,6 +4319,8 @@ export default function App() {
             setTheme={setTheme}
             effectiveTheme={effectiveTheme}
           />
+        ) : activePage === 'scanner-gun' ? (
+          <ScannerGunPage onNavigate={navigateTo} />
         ) : activePage === 'settings' ? (
           <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
         ) : (

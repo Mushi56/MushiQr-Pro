@@ -441,15 +441,15 @@
   <div class="card col-full">
     <div class="card-title">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-      Pair with Phone Scanner
+      Session Connection
     </div>
     <div class="session-row">
-      <input class="input-field" type="text" id="session-input" placeholder="Enter 5-digit Connection Code..." style="letter-spacing: 1px; font-weight: bold; text-align: center; font-size: 15px;" maxlength="5" />
-      <button class="btn btn-primary" onclick="connectWS()">Connect Phone</button>
+      <input class="input-field" type="text" id="session-input" placeholder="Paste session ID from your phone..." />
+      <button class="btn btn-primary" onclick="connectWS()">Connect</button>
       <button class="btn btn-ghost" onclick="clearHistory()" title="Clear history">Clear</button>
     </div>
     <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
-      📱 Open <strong style="color:var(--text-secondary)">Mushi QR Pro</strong> on your phone → Tap the **PC Connection (Monitor)** icon in the scanner → Enter the 5-digit code displayed there.
+      📱 Open <strong style="color:var(--text-secondary)">Mushi QR</strong> app → Scanner Gun Mode → WiFi tab → scan the QR with your PC camera, or copy the Session ID here.
     </div>
   </div>
 
@@ -534,37 +534,12 @@
 
     <!-- Tabs header -->
     <div style="display:flex; gap:8px; margin-bottom:12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-      <button class="btn btn-ghost" id="tab-btn-app" onclick="switchHelper('app')" style="padding: 6px 12px; font-size: 12px; background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent);">💻 Windows App (Recommended)</button>
-      <button class="btn btn-ghost" id="tab-btn-ps" onclick="switchHelper('ps')" style="padding: 6px 12px; font-size: 12px;">Windows PowerShell Wedge</button>
-      <button class="btn btn-ghost" id="tab-btn-py" onclick="switchHelper('py')" style="padding: 6px 12px; font-size: 12px;">Mac / Linux / Python Wedge</button>
-    </div>
-
-    <!-- C# Native Desktop App Helper -->
-    <div id="helper-app-container">
-      <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
-        Download and run the installer script. It compiles a native, lightweight Windows keyboard wedge program (<code>MushiQR-PC-Wedge.exe</code>) instantly on your computer.
-      </p>
-      <div style="background: var(--bg-hover); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 36px; height: 36px; borderRadius: 8px; background: rgba(0,212,160,0.1); display: flex; alignItems: center; justifyContent: center; color: var(--accent);">
-            🚀
-          </div>
-          <div>
-            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Mushi QR Keyboard Wedge App</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Compiles in 1s • runs in background • injects keypresses globally</div>
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="downloadBatchWedge()" style="width: 100%; margin-top: 8px;">
-          ⬇ Download Windows App Installer (.bat)
-        </button>
-      </div>
-      <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.4;">
-        💡 <strong>How it works:</strong> Double-click the downloaded <code>.bat</code> file. It compiles a lightweight native executable binary on your Windows machine automatically. Once running, enter your 5-digit code to pair.
-      </p>
+      <button class="btn btn-ghost" id="tab-btn-ps" onclick="switchHelper('ps')" style="padding: 6px 12px; font-size: 12px; background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent);">Windows (Zero-Install PowerShell)</button>
+      <button class="btn btn-ghost" id="tab-btn-py" onclick="switchHelper('py')" style="padding: 6px 12px; font-size: 12px;">Mac / Linux / Python Script</button>
     </div>
 
     <!-- PowerShell helper -->
-    <div id="helper-ps-container" style="display: none;">
+    <div id="helper-ps-container">
       <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Run this command in Windows PowerShell to connect and start typing instantly. <strong>No installation required!</strong></p>
       <div class="code-block" id="ps-code"><span class="code-comment"># Copy & paste this block into Windows PowerShell:</span>
 <span class="code-keyword">$SessionId</span> = <span class="code-string" id="ps-session">"paste-your-session-id-here"</span>
@@ -796,47 +771,29 @@ ws.run_forever()</div>
   }
 
   function switchHelper(type) {
-    const appBtn = document.getElementById('tab-btn-app');
     const psBtn = document.getElementById('tab-btn-ps');
     const pyBtn = document.getElementById('tab-btn-py');
-    const appCont = document.getElementById('helper-app-container');
     const psCont = document.getElementById('helper-ps-container');
     const pyCont = document.getElementById('helper-py-container');
     
-    // Reset all buttons
-    [appBtn, psBtn, pyBtn].forEach(btn => {
-      if (btn) {
-        btn.style.background = 'none';
-        btn.style.color = 'var(--text-secondary)';
-        btn.style.borderColor = 'var(--border)';
-      }
-    });
-    // Hide all containers
-    if (appCont) appCont.style.display = 'none';
-    if (psCont) psCont.style.display = 'none';
-    if (pyCont) pyCont.style.display = 'none';
-
-    if (type === 'app') {
-      if (appBtn) {
-        appBtn.style.background = 'var(--bg-hover)';
-        appBtn.style.color = 'var(--text-primary)';
-        appBtn.style.borderColor = 'var(--accent)';
-      }
-      if (appCont) appCont.style.display = 'block';
-    } else if (type === 'ps') {
-      if (psBtn) {
-        psBtn.style.background = 'var(--bg-hover)';
-        psBtn.style.color = 'var(--text-primary)';
-        psBtn.style.borderColor = 'var(--accent)';
-      }
-      if (psCont) psCont.style.display = 'block';
+    if (type === 'ps') {
+      psBtn.style.background = 'var(--bg-hover)';
+      psBtn.style.color = 'var(--text-primary)';
+      psBtn.style.borderColor = 'var(--accent)';
+      pyBtn.style.background = 'none';
+      pyBtn.style.color = 'var(--text-secondary)';
+      pyBtn.style.borderColor = 'var(--border)';
+      psCont.style.display = 'block';
+      pyCont.style.display = 'none';
     } else {
-      if (pyBtn) {
-        pyBtn.style.background = 'var(--bg-hover)';
-        pyBtn.style.color = 'var(--text-primary)';
-        pyBtn.style.borderColor = 'var(--accent)';
-      }
-      if (pyCont) pyCont.style.display = 'block';
+      pyBtn.style.background = 'var(--bg-hover)';
+      pyBtn.style.color = 'var(--text-primary)';
+      pyBtn.style.borderColor = 'var(--accent)';
+      psBtn.style.background = 'none';
+      psBtn.style.color = 'var(--text-secondary)';
+      psBtn.style.borderColor = 'var(--border)';
+      pyCont.style.display = 'block';
+      psCont.style.display = 'none';
     }
   }
 
@@ -891,58 +848,6 @@ ws.run_forever()`;
     const btn = event.target;
     btn.textContent = '✓ Copied!';
     setTimeout(() => btn.textContent = '⎘ Copy Python Script', 1500);
-  }
-
-  function downloadBatchWedge() {
-    const base64Code = 'dXNpbmcgU3lzdGVtOwp1c2luZyBTeXN0ZW0uTmV0LldlYlNvY2tldHM7CnVzaW5nIFN5c3RlbS5UZXh0Owp1c2luZyBTeXN0ZW0uVGhyZWFkaW5nOwp1c2luZyBTeXN0ZW0uVGhyZWFkaW5nLlRhc2tzOwp1c2luZyBTeXN0ZW0uV2luZG93cy5Gb3JtczsKCm5hbWVzcGFjZSBNdXNoaVFSIHsKICBjbGFzcyBQcm9ncmFtIHsKICAgIHN0YXRpYyB2b2lkIE1haW4oc3RyaW5nW10gYXJncykgewogICAgICBSdW5XZWRnZUFzeW5jKGFyZ3MpLkdldEF3YWl0ZXIoKS5HZXRSZXN1bHQoKTsKICAgIH0KCiAgICBzdGF0aWMgYXN5bmMgVGFzayBSdW5XZWRnZUFzeW5jKHN0cmluZ1tdIGFyZ3MpIHsKICAgICAgQ29uc29sZS5UaXRsZSA9ICJNdXNoaSBRUiBQcm8gLSBLZXlib2FyZCBXZWRnZSBBcHAiOwogICAgICBDb25zb2xlLkZvcmVncm91bmRDb2xvciA9IENvbnNvbGVDb2xvci5ZZWxsb3c7CiAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCI9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSIpOwogICAgICBDb25zb2xlLldyaXRlTGluZSgiICAgICAgTXVzaGkgUVIgUHJvIC0gUEMgS2V5Ym9hcmQgV2VkZ2UgQXBwICAgICAgICAgICIpOwogICAgICBDb25zb2xlLldyaXRlTGluZSgiPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSIpOwogICAgICBDb25zb2xlLlJlc2V0Q29sb3IoKTsKICAgICAgc3RyaW5nIGNvZGUgPSAiIjsKICAgICAgaWYgKGFyZ3MuTGVuZ3RoID4gMCkgewogICAgICAgIGNvZGUgPSBhcmdzWzBdLlRyaW0oKTsKICAgICAgfSBlbHNlIHsKICAgICAgICBDb25zb2xlLldyaXRlKCJFbnRlciB0aGUgNS1kaWdpdCBDb25uZWN0aW9uIENvZGUgZnJvbSBwaG9uZTogIik7CiAgICAgICAgY29kZSA9IENvbnNvbGUuUmVhZExpbmUoKS5UcmltKCk7CiAgICAgIH0KICAgICAgaWYgKHN0cmluZy5Jc051bGxPckVtcHR5KGNvZGUpKSB7CiAgICAgICAgQ29uc29sZS5Xcml0ZUxpbmUoIkVycm9yOiBDb2RlIGNhbm5vdCBiZSBlbXB0eS4iKTsKICAgICAgICBDb25zb2xlLlJlYWRLZXkoKTsKICAgICAgICByZXR1cm47CiAgICAgIH0KICAgICAgc3RyaW5nIHVyaSA9ICJ3c3M6Ly9udGZ5LnNoLyIgKyBjb2RlICsgIi93cyI7CiAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCJcbkNvbm5lY3RpbmcgdG8gcGhvbmUgcmVsYXkuLi4iKTsKICAgICAgdXNpbmcgKENsaWVudFdlYlNvY2tldCB3cyA9IG5ldyBDbGllbnRXZWJTb2NrZXQoKSkgewogICAgICAgIHRyeSB7CiAgICAgICAgICBhd2FpdCB3cy5Db25uZWN0QXN5bmMobmV3IFVyaSh1cmkpLCBDYW5jZWxsYXRpb25Ub2tlbi5Ob25lKTsKICAgICAgICAgIENvbnNvbGUuRm9yZWdyb3VuZENvbG9yID0gQ29uc29sZUNvbG9yLkdyZWVuOwogICAgICAgICAgQ29uc29sZS5Xcml0ZUxpbmUoIkNvbm5lY3RlZCBzdWNjZXNzZnVsbHkhIEtlZXAgdGhpcyBhcHAgb3Blbi4iKTsKICAgICAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCJGb2N1cyBFeGNlbCwgTm90ZXBhZCwgb3IgUE9TIHNvZnR3YXJlIGFuZCBzY2FuIGJhcmNvZGVzLiIpOwogICAgICAgICAgQ29uc29sZS5SZXNldENvbG9yKCk7CiAgICAgICAgICBieXRlW10gYnVmID0gbmV3IGJ5dGVbNDA5Nl07CiAgICAgICAgICB3aGlsZSAod3MuU3RhdGUgPT0gV2ViU29ja2V0U3RhdGUuT3BlbikgewogICAgICAgICAgICB2YXIgcmVzID0gYXdhaXQgd3MuUmVjZWl2ZUFzeW5jKG5ldyBBcnJheVNlZ21lbnQ8Ynl0ZT4oYnVmKSwgQ2FuY2VsbGF0aW9uVG9rZW4uTm9uZSk7CiAgICAgICAgICAgIGlmIChyZXMuTWVzc2FnZVR5cGUgPT0gV2ViU29ja2V0TWVzc2FnZVR5cGUuQ2xvc2UpIHsKICAgICAgICAgICAgICBhd2FpdCB3cy5DbG9zZUFzeW5jKFdlYlNvY2tldENsb3NlU3RhdHVzLk5vcm1hbENsb3N1cmUsIHN0cmluZy5FbXB0eSwgQ2FuY2VsbGF0aW9uVG9rZW4uTm9uZSk7CiAgICAgICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgICAgc3RyaW5nIHJhdyA9IEVuY29kaW5nLlVURjguR2V0U3RyaW5nKGJ1ZiwgMCwgcmVzLkNvdW50KTsKICAgICAgICAgICAgICBpZiAocmF3LkNvbnRhaW5zKCJcImV2ZW50XCI6XCJtZXNzYWdlXCIiKSkgewogICAgICAgICAgICAgICAgaW50IG1JZHggPSByYXcuSW5kZXhPZigiXCJtZXNzYWdlXCI6XCIiKTsKICAgICAgICAgICAgICAgIGlmIChtSWR4ICE9IC0xKSB7CiAgICAgICAgICAgICAgICAgIGludCBzdGFydCA9IG1JZHggKyAxMTsKICAgICAgICAgICAgICAgICAgaW50IGVuZCA9IHJhdy5JbmRleE9mKCJcIiIsIHN0YXJ0KTsKICAgICAgICAgICAgICAgICAgaWYgKGVuZCAhPSAtMSkgewogICAgICAgICAgICAgICAgICAgIHN0cmluZyB2YWwgPSByYXcuU3Vic3RyaW5nKHN0YXJ0LCBlbmQgLSBzdGFydCk7CiAgICAgICAgICAgICAgICAgICAgdmFsID0gdmFsLlJlcGxhY2UoIlxcXFwiLCAiXFwiKS5SZXBsYWNlKCJcXFwiIiwgIlwiIik7CiAgICAgICAgICAgICAgICAgICAgQ29uc29sZS5Gb3JlZ3JvdW5kQ29sb3IgPSBDb25zb2xlQ29sb3IuWWVsbG93OwogICAgICAgICAgICAgICAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCJbIiArIERhdGVUaW1lLk5vdy5Ub1N0cmluZygiSEg6bW06c3MiKSArICJdIFNjYW5uZWQ6ICIgKyB2YWkpOwogICAgICAgICAgICAgICAgICAgIENvbnNvbGUuSmVzZXRDb2xvcigpOwogICAgICAgICAgICAgICAgICAgIFNlbmRLZXlzLlNlbmRXYWl0KHZhbCk7CiAgICAgICAgICAgICAgICAgICAgU2VuZEtleXMuU2VuZFdhaXQoIntFTlRFUn0iKTsKICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgICAgfQogICAgICAgIH0gY2F0Y2ggKEV4Y2VwdGlvbiBleCkgewogICAgICAgICAgQ29uc29sZS5Gb3JlZ3JvdW5kQ29sb3IgPSBDb25zb2xlQ29sb3IuUmVkOwogICAgICAgICAgQ29uc29sZS5Xcml0ZUxpbmUoIlxuRXJyb3I6ICIgKyBleC5NZXNzYWdlKTsKICAgICAgICAgIENvbnNvbGUuV3JpdGVMaW5lKCJSZWNvbm5lY3RpbmcgaW4gNSBzZWNvbmRzLi4uIik7CiAgICAgICAg  Q29uc29sZS5SZXNldENvbG9yKCk7CiAgICAgICAgICBUaHJlYWQuU2xlZXAoNTAwMCk7CiAgICAgICAgfQogICAgICB9CiAgICB9CiAgfQp9Cg==';
-
-    const code = `@echo off
-title Mushi QR Pro - PC Wedge Installer
-echo ===================================================
-echo     Mushi QR Pro - PC Keyboard Wedge Compiler
-echo ===================================================
-echo.
-echo Compiling native C# Keyboard Wedge application...
-
-set CSC_PATH=C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe
-
-if not exist "%CSC_PATH%" (
-    echo Error: C# compiler not found at %CSC_PATH%
-    echo Please make sure .NET Framework 4.5 or higher is installed.
-    pause
-    exit /b
-)
-
-:: Write Base64 string to a temporary file in one single line
-echo ${base64Code} > MushiWedge.tmp
-
-:: Use powershell to decode base64 file natively
-powershell -NoProfile -Command "[System.IO.File]::WriteAllBytes('MushiWedge.cs', [System.Convert]::FromBase64String((Get-Content MushiWedge.tmp -Raw).Trim()))"
-
-del MushiWedge.tmp
-
-:: Compile the C# file
-"%CSC_PATH%" /r:System.Windows.Forms.dll,System.dll /out:MushiQR-PC-Wedge.exe MushiWedge.cs > nul
-
-:: Clean up C# code
-if exist MushiWedge.cs del MushiWedge.cs
-
-if exist MushiQR-PC-Wedge.exe (
-    echo ===================================================
-    echo Success! Compiled to: MushiQR-PC-Wedge.exe
-    echo Starting the Keyboard Wedge program...
-    echo ===================================================
-    start MushiQR-PC-Wedge.exe
-) else (
-    echo Error: Compilation failed. No executable was produced.
-    pause
-)
-`;
-    const blob = new Blob([code], { type: 'application/bat' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'MushiQR-PC-Wedge.bat';
-    a.click();
   }
 
   function playBeep() {

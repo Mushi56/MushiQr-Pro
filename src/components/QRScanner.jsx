@@ -7,14 +7,12 @@ import {
   ArrowLeft, Zap, ZapOff, Image, CheckCircle2,
   Copy, ExternalLink, Share2, Star, Wifi, Mail,
   Phone, User, Globe, FileText, Minus, Plus, AlertCircle, RefreshCcw, Clock,
-  ScanLine, Info, ShieldAlert, Barcode, X, Monitor, Loader2, ChevronRight,
-  Sparkles, Pencil, MoreVertical, Check, Calendar, Hash, Package
+  ScanLine, Info, ShieldAlert, Barcode, X,
+  Pencil, MoreVertical, Tag, Hash, Calendar, ListPlus, Check, Sparkles, ShoppingCart
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
-import { renderBarcode } from '../utils/barcodeEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import qrcode from 'qrcode-generator';
 
 // ─── Barcode format metadata ──────────────────────────────────────────────────
 // Formats supported by html5-qrcode (ZXing) for live camera scanning
@@ -77,66 +75,8 @@ const parseQRData = (text) => {
   if (/^BEGIN:VCARD/i.test(t)) return { type: 'Contact', icon: User, title: 'Contact Card', action: 'Save Contact', actionIcon: User };
   if (/^https?:\/\//i.test(t) || /^www\./i.test(t) || /^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.[a-z]{2,}(\/.*)?$/i.test(t))
     return { type: 'Website', icon: Globe, title: 'Website', action: 'Open Link', actionIcon: ExternalLink };
-  // Check if it looks like a barcode product code (all digits, 8 to 14 digits)
-  if (/^\d{8,14}$/.test(t))
-    return { type: 'Product', icon: Barcode, title: 'Product Barcode', action: 'Search Product', actionIcon: Globe };
   return { type: 'Text', icon: FileText, title: 'Text Content', action: 'Copy Text', actionIcon: Copy };
 };
-
-const mapFormatNameToBcid = (name) => {
-  if (!name) return 'code128';
-  const n = name.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (n.includes('QRCODE') || n === 'QR') return 'qrcode';
-  if (n.includes('DATAMATRIX')) return 'datamatrix';
-  if (n.includes('PDF417')) return 'pdf417';
-  if (n.includes('AZTEC')) return 'aztec';
-  if (n.includes('EAN13')) return 'ean13';
-  if (n.includes('EAN8')) return 'ean8';
-  if (n.includes('UPCA')) return 'upca';
-  if (n.includes('UPCE')) return 'upce';
-  if (n.includes('CODE128')) return 'code128';
-  if (n.includes('CODE39')) return 'code39';
-  if (n.includes('CODE93')) return 'code93';
-  if (n.includes('ITF') || n.includes('I25')) return 'i25';
-  if (n.includes('CODABAR')) return 'codabar';
-  if (n.includes('MAXICODE')) return 'maxicode';
-  return 'code128';
-};
-
-const MOCK_PRODUCTS = {
-  '8901234567890': {
-    title: 'Oreo Original Biscuit 120g',
-    brand: 'Oreo',
-    category: 'Biscuits',
-    size: '120g',
-    imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>`
-  },
-  '5449000000096': {
-    title: 'Coca-Cola Original Taste 330ml Can',
-    brand: 'Coca-Cola',
-    category: 'Beverages',
-    size: '330ml',
-    imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M6 6h12M6 18h12M10 2v4M14 2v4M8 12c2.5-1 5.5 1 8 0"/></svg>`
-  },
-  '012000042561': {
-    title: 'Pepsi Cola Soda Can 12 fl oz',
-    brand: 'Pepsi',
-    category: 'Beverages',
-    size: '12 fl oz',
-    imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><rect x="6" y="2" width="12" height="20" rx="3"/><circle cx="12" cy="12" r="4"/><path d="M9.5 9.5a4 4 0 0 1 5 5"/></svg>`
-  },
-  '5012345678900': {
-    title: 'Heinz Tomato Ketchup 500g Bottle',
-    brand: 'Heinz',
-    category: 'Condiments',
-    size: '500g',
-    imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><path d="M9 2h6v3H9zM8 5h8v2H8zM7 7l1 15h8l1-15z"/><circle cx="12" cy="14" r="3"/><path d="M12 11v6M9.5 14h5"/></svg>`
-  }
-};
-
-function genSessionId() {
-  return Math.floor(10000 + Math.random() * 90000).toString();
-}
 
 export default function QRScanner({ onBack, navigateTo }) {
   const [status, setStatus] = useState('SCANNING');
@@ -144,21 +84,6 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [qrTypeData, setQrTypeData] = useState(null);
   const [detectedFormatId, setDetectedFormatId] = useState(null);
   const [detectedFormatName, setDetectedFormatName] = useState(null);
-  const [scanDate, setScanDate] = useState('');
-
-  const formatScanDate = () => {
-    const date = new Date();
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const d = date.getDate();
-    const m = months[date.getMonth()];
-    const y = date.getFullYear();
-    let hr = date.getHours();
-    const min = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hr >= 12 ? 'AM' : 'PM';
-    hr = hr % 12;
-    hr = hr ? hr : 12;
-    return `${d} ${m} ${y} • ${hr}:${min} ${ampm}`;
-  };
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [facingBack, setFacingBack] = useState(true);
@@ -169,104 +94,90 @@ export default function QRScanner({ onBack, navigateTo }) {
   const [hasHardwareZoom, setHasHardwareZoom] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [showFormatsInfo, setShowFormatsInfo] = useState(false);
-
-  const [scanMode, setScanMode] = useState('single'); // 'single' | 'continuous'
-  const [continuousScans, setContinuousScans] = useState([]);
-  const [successFlash, setSuccessFlash] = useState(false);
-
-  const [sessionId] = useState(() => genSessionId());
-  const [pcRelayEnabled, setPcRelayEnabled] = useState(false);
-  const [appendEnter, setAppendEnter] = useState(true);
-  const [prefix, setPrefix] = useState('');
-  const [suffix, setSuffix] = useState('');
-  const [showPcModal, setShowPcModal] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [pcUrl, setPcUrl] = useState('');
-  const qrCanvasRef = useRef(null);
-  const resultCanvasRef = useRef(null);
-
-  useEffect(() => {
-    if (!resultCanvasRef.current || !result || status !== 'DETECTED') return;
-    const canvas = resultCanvasRef.current;
-    const isQr = !detectedFormatName || detectedFormatName.toUpperCase().includes('QR');
-    if (isQr) {
-      try {
-        const matrixInfo = generateQRMatrix(result, 'M');
-        if (matrixInfo) {
-          renderQR(canvas, {
-            matrix: matrixInfo.matrix,
-            moduleCount: matrixInfo.moduleCount,
-            size: 140,
-            qrColor: '#000000',
-            bgColor: '#ffffff',
-            bgTransparent: false
-          });
-        }
-      } catch (err) {
-        console.error('Failed to render QR Code on result canvas:', err);
-      }
-    } else {
-      try {
-        const bcid = mapFormatNameToBcid(detectedFormatName);
-        renderBarcode(canvas, result, {
-          bcid: bcid,
-          barColor: '#000000',
-          bgColor: '#ffffff',
-          barWidth: 2,
-          height: 80,
-          displayValue: true,
-          margin: 12
-        });
-      } catch (err) {
-        console.error('Failed to render Barcode on result canvas:', err);
-      }
-    }
-  }, [result, detectedFormatName, status]);
-
-  useEffect(() => {
-    const base = window.location.origin;
-    const url = `${base}/scanner-pc.html?session=${sessionId}`;
-    setPcUrl(url);
-  }, [sessionId]);
-
-  useEffect(() => {
-    if (!pcUrl || !qrCanvasRef.current || !showPcModal) return;
-    try {
-      const qr = qrcode(0, 'M');
-      qr.addData(pcUrl);
-      qr.make();
-      const count = qr.getModuleCount();
-      const size = 180;
-      const cell = Math.floor(size / count);
-      const canvas = qrCanvasRef.current;
-      if (!canvas) return;
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, size, size);
-      ctx.fillStyle = '#000000';
-      for (let r = 0; r < count; r++) {
-        for (let c = 0; c < count; c++) {
-          if (qr.isDark(r, c)) {
-            ctx.fillRect(c * cell, r * cell, cell, cell);
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('QR generation failed:', e);
-    }
-  }, [pcUrl, showPcModal]);
+  const [scanDate, setScanDate] = useState('');
 
   const qrScannerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const previewCanvasRef = useRef(null);
   const mountedRef = useRef(true);
   const busyRef = useRef(false);
   const touchStateRef = useRef({ distance: 0, initialZoom: 1 });
   const capTimersRef = useRef([]);
   const zoomRafRef = useRef(null);
-  const lastScanRef = useRef({ text: '', time: 0 });
+
+  const mapFormatToBcid = (formatName) => {
+    if (!formatName) return null;
+    const name = formatName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (name === 'qrcode' || name === 'qr') return 'qrcode';
+    if (name === 'datamatrix') return 'datamatrix';
+    if (name === 'pdf417') return 'pdf417';
+    if (name === 'aztec') return 'aztec';
+    if (name === 'maxicode') return 'maxicode';
+    if (name === 'ean13') return 'ean13';
+    if (name === 'ean8') return 'ean8';
+    if (name === 'upca') return 'upca';
+    if (name === 'upce') return 'upce';
+    if (name === 'code128') return 'code128';
+    if (name === 'code39') return 'code39';
+    if (name === 'code93') return 'code93';
+    if (name === 'codabar') return 'codabar';
+    if (name.includes('itf') || name.includes('i25')) return 'i25';
+    return null;
+  };
+
+  useEffect(() => {
+    if (status === 'DETECTED' && result && previewCanvasRef.current) {
+      const canvas = previewCanvasRef.current;
+      const bcid = mapFormatToBcid(detectedFormatName);
+      
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      if (bcid && bcid !== 'qrcode') {
+        try {
+          renderBarcode(canvas, result, {
+            bcid: bcid,
+            barColor: '#000000',
+            bgColor: '#ffffff',
+            barWidth: 2,
+            height: 80,
+            margin: 10,
+            displayValue: false
+          });
+        } catch (e) {
+          console.error("Failed to render preview barcode:", e);
+          try {
+            renderBarcode(canvas, "1234567890", {
+              bcid: 'code128',
+              barColor: '#000000',
+              bgColor: '#ffffff',
+              barWidth: 2,
+              height: 80,
+              margin: 10,
+              displayValue: false
+            });
+          } catch (err) {}
+        }
+      } else {
+        try {
+          const matrixInfo = generateQRMatrix(result, 'M');
+          renderQR(canvas, {
+            ...matrixInfo,
+            size: 200,
+            bgColor: '#ffffff',
+            qrColor: '#000000',
+            eyeColor: '#000000',
+            eyeOuterColor: '#000000',
+            dotStyle: 'rounded',
+            eyeStyle: 'rounded',
+            quietZone: 0
+          });
+        } catch (e) {
+          console.error("Failed to render preview QR:", e);
+        }
+      }
+    }
+  }, [status, result, detectedFormatName]);
 
   const triggerHapticFeedback = useCallback(() => {
     if (Capacitor.isNativePlatform()) {
@@ -290,15 +201,6 @@ export default function QRScanner({ onBack, navigateTo }) {
       console.warn("Failed to play scan sound:", e);
     }
   }, []);
-
-  const triggerScanFeedback = useCallback(() => {
-    playBeep();
-    if (Capacitor.isNativePlatform()) {
-      Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => { });
-    } else if (navigator.vibrate) {
-      navigator.vibrate(200);
-    }
-  }, [playBeep]);
 
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
@@ -389,104 +291,39 @@ export default function QRScanner({ onBack, navigateTo }) {
 
   const handleScanResult = useCallback((decodedText, decodedResult) => {
     if (!mountedRef.current || busyRef.current) return;
-
-    // Relay to PC if enabled
-    if (pcRelayEnabled) {
-      const toSend = prefix + decodedText + suffix + (appendEnter ? '\n' : '');
-      setIsSending(true);
-      fetch(`https://ntfy.sh/${sessionId}`, {
-        method: 'POST',
-        body: toSend,
-        headers: {
-          'Title': 'barcode',
-          'Priority': '4',
-          'Tags': 'barcode_scan',
-        },
-      }).catch(e => {
-        console.warn('PC Relay POST failed:', e);
-      }).finally(() => {
-        setIsSending(false);
-      });
-    }
-
-    // Detect format from result metadata
-    const fmtId = decodedResult?.result?.format?.format
-      ?? decodedResult?.decodedResult?.result?.format?.format
-      ?? null;
-    const fmtName = fmtId != null ? (FORMAT_NAME_MAP[fmtId] || 'Unknown') : null;
-
-    if (scanMode === 'continuous') {
-      const now = Date.now();
-      if (decodedText === lastScanRef.current.text && now - lastScanRef.current.time < 1500) {
-        return; // Ignore duplicate scans within 1.5 seconds
-      }
-      lastScanRef.current = { text: decodedText, time: now };
-
-      // Play Beep & Vibrate
-      triggerScanFeedback();
-
-      // Show green flash indicator
-      setSuccessFlash(true);
-      setTimeout(() => {
-        if (mountedRef.current) setSuccessFlash(false);
-      }, 350);
-
-      // Add to recently scanned list
-      const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      setContinuousScans(prev => [...prev, { text: decodedText, format: fmtName || 'Barcode', time: timeStr }]);
-
-      // Save to storage history
-      let thumbnail = null;
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 120;
-        canvas.height = 120;
-        const matrixInfo = generateQRMatrix(decodedText, 'M');
-        if (matrixInfo) {
-          renderQR(canvas, {
-            matrix: matrixInfo.matrix,
-            moduleCount: matrixInfo.moduleCount,
-            size: 120,
-            qrColor: '#000000',
-            bgColor: '#ffffff',
-            bgTransparent: false
-          });
-          thumbnail = canvas.toDataURL('image/jpeg', 0.5);
-        }
-      } catch (err) {
-        console.error('Failed to generate thumbnail for scanned QR:', err);
-      }
-
-      import('../utils/storage').then(({ saveToHistory }) => {
-        saveToHistory({
-          source: 'scan',
-          qrData: { text: decodedText },
-          type: (fmtName || 'BARCODE').toUpperCase(),
-          displayText: decodedText,
-          thumbnail: thumbnail
-        });
-      });
-
-      return; // Do not pause scanner or change status to DETECTED
-    }
-
-    // Otherwise, handle single scan (standard mode)
     setStatus(prev => {
       if (prev === 'DETECTED') return prev;
-      triggerScanFeedback();
+      playBeep();
+      if (Capacitor.isNativePlatform()) { Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => { }); }
+      else if (navigator.vibrate) { navigator.vibrate(200); }
 
       const scanner = qrScannerRef.current;
       if (scanner) {
         try { scanner.pause(); } catch { }
       }
 
+      // Detect format from result metadata
+      const formatId = decodedResult?.result?.format?.formatName
+        ? null // will use formatId from decodedResult directly
+        : decodedResult?.decodedResult?.result?.format?.formatName
+          ? null
+          : null;
+      const fmtId = decodedResult?.result?.format?.format
+        ?? decodedResult?.decodedResult?.result?.format?.format
+        ?? null;
+      const fmtName = fmtId != null ? (FORMAT_NAME_MAP[fmtId] || 'Unknown') : null;
       if (fmtId != null) setDetectedFormatId(fmtId);
       if (fmtName) setDetectedFormatName(fmtName);
 
       const parsed = parseQRData(decodedText);
       setQrTypeData(parsed);
       setResult(decodedText);
-      setScanDate(formatScanDate());
+      
+      const d = new Date();
+      const formattedDate = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) + ' • ' + 
+                            d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      setScanDate(formattedDate);
+      
       let thumbnail = null;
       try {
         const canvas = document.createElement('canvas');
@@ -519,7 +356,7 @@ export default function QRScanner({ onBack, navigateTo }) {
       });
       return 'DETECTED';
     });
-  }, [scanMode, triggerScanFeedback, pcRelayEnabled, sessionId, prefix, suffix, appendEnter]);
+  }, []);
 
   const startScanner = useCallback(async () => {
     if (busyRef.current) return;
@@ -536,7 +373,7 @@ export default function QRScanner({ onBack, navigateTo }) {
       await scanner.start(
         { facingMode: "environment" },
         {
-          fps: 25,
+          fps: 15,
           qrbox: (width, height) => {
             return { width: Math.min(width, height) * 0.85, height: Math.min(width, height) * 0.55 };
           },
@@ -803,19 +640,6 @@ export default function QRScanner({ onBack, navigateTo }) {
           <div className={`qrs-frame ${status === 'DETECTED' ? 'detected' : ''}`}>
             <div id="qr-scanner-viewport" className={`qrs-viewport ${status === 'DETECTED' ? 'blur' : ''}`} />
 
-            {successFlash && (
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                border: '4px solid #34C759',
-                boxShadow: 'inset 0 0 40px rgba(52, 199, 89, 0.4)',
-                backgroundColor: 'rgba(52, 199, 89, 0.08)',
-                zIndex: 10,
-                pointerEvents: 'none',
-                transition: 'all 0.1s ease-in-out'
-              }} />
-            )}
-
 
 
             {/* Flashlight button inside camera */}
@@ -824,26 +648,6 @@ export default function QRScanner({ onBack, navigateTo }) {
                 {flashOn ? <Zap size={22} /> : <ZapOff size={22} />}
               </button>
             )}
-
-            {/* PC Connection Settings Button (Monitor) */}
-            <button 
-              className={`qrs-flash-viewport-btn ${pcRelayEnabled ? 'on' : ''}`} 
-              onClick={() => { triggerHapticFeedback(); setShowPcModal(true); }}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                left: '16px',
-                right: 'auto',
-                background: pcRelayEnabled ? 'rgba(52, 199, 89, 0.25)' : 'rgba(0,0,0,0.5)',
-                borderColor: pcRelayEnabled ? 'rgba(52, 199, 89, 0.4)' : 'rgba(255,255,255,0.15)',
-                color: pcRelayEnabled ? '#34C759' : '#fff',
-                zIndex: 15
-              }}
-              title="PC Connection Settings"
-              aria-label="PC Connection"
-            >
-              {isSending ? <Loader2 className="animate-spin" size={20} /> : <Monitor size={20} />}
-            </button>
 
             {/* Laser Scanning Line */}
             {status === 'SCANNING' && <div className="qrs-laser" />}
@@ -861,93 +665,18 @@ export default function QRScanner({ onBack, navigateTo }) {
           </div>
         </div>
 
-        {/* Recently Scanned Items Overlay (Continuous Scan Mode) */}
-        {scanMode === 'continuous' && continuousScans.length > 0 && (
-          <div style={{
-            position: 'absolute',
-            bottom: '100px',
-            left: '16px',
-            right: '16px',
-            maxHeight: '130px',
-            overflowY: 'auto',
-            background: 'rgba(2, 6, 17, 0.85)',
-            backdropFilter: 'blur(16px)',
-            borderRadius: '16px',
-            padding: '12px 14px',
-            zIndex: 10,
-            border: '1px solid var(--border-color)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
-          }}>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Recently Scanned ({continuousScans.length})</span>
-              <button 
-                onClick={() => setContinuousScans([])}
-                style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '10px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
-              >
-                Clear All
-              </button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column-reverse', gap: '6px', overflowY: 'auto', flex: 1 }}>
-              {continuousScans.slice(-3).map((item, idx) => (
-                <div key={idx} className="fade-in" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-elevated)', padding: '6px 10px', borderRadius: '8px', borderLeft: '3px solid #34C759', border: '1px solid var(--border-color)', borderLeftWidth: '3px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
-                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontWeight: 600 }}>{item.format} • {item.time}</span>
-                  </div>
-                  <span style={{ color: '#34C759', fontWeight: 800, fontSize: '11px', marginLeft: 8, display: 'flex', alignItems: 'center', gap: '3px' }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34C759', display: 'inline-block' }} /> Scanned
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Mode Selector Tabs */}
-        <div className="qrs-mode-selector" style={{ position: 'relative', justifyContent: 'space-between', padding: '16px 20px' }}>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <button
-              onClick={() => {
-                triggerHapticFeedback();
-                setScanMode('single');
-              }}
-              className={`qrs-mode-tab ${scanMode === 'single' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontSize: '13px', fontWeight: 600 }}
-            >
-              Single Scan
-              {scanMode === 'single' && <div className="qrs-mode-dot" style={{ background: 'var(--accent-primary)' }} />}
-            </button>
-            <button
-              onClick={() => {
-                triggerHapticFeedback();
-                setScanMode('continuous');
-                // Resume camera scanning if we were paused
-                if (status === 'DETECTED') {
-                  setStatus('SCANNING');
-                  const scanner = qrScannerRef.current;
-                  if (scanner) {
-                    try { scanner.start(); } catch { }
-                  } else {
-                    startScanner();
-                  }
-                }
-              }}
-              className={`qrs-mode-tab ${scanMode === 'continuous' ? 'active' : ''}`}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontSize: '13px', fontWeight: 600 }}
-            >
-              Continuous Scan
-              {scanMode === 'continuous' && <div className="qrs-mode-dot" style={{ background: 'var(--accent-primary)' }} />}
-            </button>
+        <div className="qrs-mode-selector" style={{ position: 'relative', justifyContent: 'center' }}>
+          <div className="qrs-mode-tab active" style={{ margin: 0 }}>
+            Scan
+            <div className="qrs-mode-dot" />
           </div>
           <button
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, padding: '4px 8px' }}
+            style={{ position: 'absolute', right: 16, background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, padding: '4px 8px' }}
             onClick={() => setShowFormatsInfo(v => !v)}
           >
             <Info size={14} />
-            Formats
+            Supported Formats
           </button>
         </div>
 
@@ -1036,370 +765,193 @@ export default function QRScanner({ onBack, navigateTo }) {
         </div>
 
         {/* Full-Screen Detection Result */}
-        {status === 'DETECTED' && qrTypeData && (() => {
-          const isBarcode = detectedFormatName && !detectedFormatName.toUpperCase().includes('QR');
-          const mockProduct = MOCK_PRODUCTS[result?.trim()];
-          const isProductFormat = detectedFormatName && ['EAN-13', 'EAN-8', 'UPC-A', 'UPC-E'].includes(detectedFormatName);
-          const productInfo = mockProduct || (isProductFormat || /^\d{8,14}$/.test(result || '') ? {
-            title: `Generic Barcode Item (${result})`,
-            brand: 'Unknown Brand',
-            category: 'Retail Goods',
-            size: 'Standard Pack',
-            imageSvg: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h10"/></svg>`
-          } : null);
-
-          return (
-            <div className="qrs-result-fullscreen">
-              {/* Green/Accent Hero Header */}
-              <div className="qrs-result-hero">
-                <div className="qrs-result-hero-header">
-                  <button className="qrs-result-hero-btn" onClick={resumeScanning} aria-label="Go Back">
-                    <ArrowLeft size={20} />
-                  </button>
-                  <h3>Scan Result</h3>
-                  <button className="qrs-result-hero-btn" onClick={() => alert('Options')} aria-label="More Options">
-                    <MoreVertical size={20} />
-                  </button>
-                </div>
-
-                <div className="qrs-result-success-badge-container">
-                  <div className="qrs-result-success-circle">
-                    <Check size={32} strokeWidth={3} />
-                  </div>
-                </div>
-
-                <h2 className="qrs-result-success-title">Scan Successful!</h2>
-                <p className="qrs-result-success-subtitle">
-                  {isBarcode ? 'Barcode scanned' : 'QR Code scanned'}
-                </p>
+        {status === 'DETECTED' && qrTypeData && (
+          <div className="qrs-result-fullscreen">
+            {/* Banner Header */}
+            <div className="qrs-result-banner">
+              <div className="qrs-result-banner-header">
+                <button className="qrs-result-banner-btn" onClick={resumeScanning} aria-label="Go Back">
+                  <ArrowLeft size={20} />
+                </button>
+                <h3 className="qrs-result-banner-title">Scan Result</h3>
+                <button className="qrs-result-banner-btn" onClick={handleCopy} aria-label="Quick Copy">
+                  <Pencil size={18} />
+                </button>
               </div>
 
-              {/* Scrollable Body Container */}
-              <div className="qrs-result-scrollable-body">
-                {/* Premium Card containing Visual Barcode preview */}
-                <div className="qrs-result-card-premium">
-                  <div className="qrs-result-card-meta">
-                    <span className="qrs-result-badge-tag">{detectedFormatName || 'QR Code'}</span>
-                    <span className="qrs-result-card-time">{scanDate}</span>
-                  </div>
+              <div className="qrs-result-success-badge-container">
+                <div className="qrs-result-success-badge">
+                  <CheckCircle2 size={36} style={{ color: 'var(--accent-primary)' }} />
+                </div>
+                <div className="qrs-result-success-stars">
+                  <Sparkles size={16} style={{ position: 'absolute', left: '-5px', top: '10px', color: '#ffeb3b' }} />
+                  <Sparkles size={12} style={{ position: 'absolute', right: '-8px', top: '12px', color: '#ffeb3b' }} />
+                  <Sparkles size={14} style={{ position: 'absolute', left: '10px', bottom: '-8px', color: '#ffeb3b' }} />
+                </div>
+              </div>
 
-                  <div className="qrs-result-canvas-container">
-                    <canvas ref={resultCanvasRef} />
-                  </div>
+              <h2>Scan Successful!</h2>
+              <p>{detectedFormatName && detectedFormatName !== 'QR Code' ? 'Barcode scanned' : 'QR Code scanned'}</p>
+            </div>
 
-                  <div className="qrs-result-value-display">
-                    <span className="qrs-result-value-text">{result}</span>
-                    <button className="qrs-result-copy-btn" onClick={handleCopy} aria-label="Copy code">
-                      {copied ? <CheckCircle2 size={16} color="var(--success)" /> : <Copy size={16} />}
-                    </button>
-                  </div>
+            {/* Central Card Body */}
+            <div className="qrs-result-body">
+              {/* Main Card */}
+              <div className="qrs-result-main-card">
+                <div className="qrs-result-card-header">
+                  <span className="qrs-badge">{detectedFormatName || 'QR Code'}</span>
+                  <span className="qrs-card-date">{scanDate}</span>
+                </div>
+                
+                <div className="qrs-result-preview-box">
+                  <canvas ref={previewCanvasRef} width="200" height="120" />
                 </div>
 
-                {/* Info Table */}
-                <div className="qrs-result-info-table">
-                  <div className="qrs-result-table-row">
-                    <div className="qrs-result-table-icon-wrapper">
-                      <Barcode size={16} />
-                    </div>
-                    <span className="qrs-result-table-label">Format</span>
-                    <span className="qrs-result-table-value">{detectedFormatName || 'QR Code'}</span>
-                  </div>
+                <div className="qrs-result-value-row">
+                  <span className="qrs-result-value-text">{result}</span>
+                  <button className="qrs-value-copy-btn" onClick={handleCopy} title="Copy Code">
+                    {copied ? <Check size={18} color="var(--success)" /> : <Copy size={18} />}
+                  </button>
+                </div>
+              </div>
 
-                  <div className="qrs-result-table-row">
-                    <div className="qrs-result-table-icon-wrapper">
-                      <Hash size={16} />
-                    </div>
-                    <span className="qrs-result-table-label">Type</span>
-                    <span className="qrs-result-table-value">{qrTypeData.type}</span>
-                  </div>
+              {/* Camera support warning for specialty formats */}
+              {detectedFormatName && CAMERA_UNSUPPORTED_FORMATS.has(detectedFormatName) && (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'rgba(255,149,0,0.1)', border: '1px solid rgba(255,149,0,0.3)', borderRadius: 12, padding: '10px 14px', margin: '4px 0' }}>
+                  <ShieldAlert size={15} style={{ color: '#FF9500', flexShrink: 0, marginTop: 1 }} />
+                  <span style={{ fontSize: 12, color: '#FF9500', fontWeight: 600, lineHeight: 1.5 }}>⚠ This barcode type ({detectedFormatName}) is not supported by standard mobile cameras. A dedicated hardware scanner is required to decode it reliably.</span>
+                </div>
+              )}
 
-                  <div className="qrs-result-table-row">
-                    <div className="qrs-result-table-icon-wrapper">
-                      <Info size={16} />
-                    </div>
-                    <span className="qrs-result-table-label">Value</span>
-                    <span className="qrs-result-table-value" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{result}</span>
+              {/* Details List Card */}
+              <div className="qrs-details-card">
+                <div className="qrs-detail-row">
+                  <div className="qrs-detail-icon-box">
+                    <Tag size={16} />
                   </div>
-
-                  <div className="qrs-result-table-row">
-                    <div className="qrs-result-table-icon-wrapper">
-                      <Calendar size={16} />
-                    </div>
-                    <span className="qrs-result-table-label">Date & Time</span>
-                    <span className="qrs-result-table-value">{scanDate}</span>
-                  </div>
+                  <span className="qrs-detail-label">Format</span>
+                  <span className="qrs-detail-value">{detectedFormatName || 'QR Code'}</span>
                 </div>
 
-                {/* Premium Actions Grid */}
-                <div className="qrs-actions-row-premium">
-                  <div className="qrs-action-card-premium" onClick={handleCopy}>
-                    <div className="qrs-action-card-premium-icon">
-                      {copied ? <CheckCircle2 size={18} color="var(--success)" /> : <Copy size={18} />}
-                    </div>
-                    <span>Copy</span>
+                <div className="qrs-detail-row">
+                  <div className="qrs-detail-icon-box">
+                    <Hash size={16} />
                   </div>
-
-                  <div className="qrs-action-card-premium" onClick={handleShare}>
-                    <div className="qrs-action-card-premium-icon">
-                      <Share2 size={18} />
-                    </div>
-                    <span>Share</span>
-                  </div>
-
-                  <div className="qrs-action-card-premium" onClick={handleSave}>
-                    <div className="qrs-action-card-premium-icon">
-                      <Star size={18} />
-                    </div>
-                    <span>Save</span>
-                  </div>
-
-                  <div className="qrs-action-card-premium" onClick={handlePrimaryAction}>
-                    <div className="qrs-action-card-premium-icon">
-                      <ExternalLink size={18} />
-                    </div>
-                    <span>Open</span>
-                  </div>
+                  <span className="qrs-detail-label">Type</span>
+                  <span className="qrs-detail-value">{qrTypeData.type}</span>
                 </div>
 
-                {/* Specialty / Tailored Detail Card Section */}
-                {productInfo && (
-                  <div className="qrs-details-section-premium">
-                    <div className="qrs-details-header-premium">
-                      <Package size={16} />
+                <div className="qrs-detail-row">
+                  <div className="qrs-detail-icon-box">
+                    <FileText size={16} />
+                  </div>
+                  <span className="qrs-detail-label">Value</span>
+                  <span className="qrs-detail-value" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{result}</span>
+                </div>
+
+                <div className="qrs-detail-row">
+                  <div className="qrs-detail-icon-box">
+                    <Calendar size={16} />
+                  </div>
+                  <span className="qrs-detail-label">Date & Time</span>
+                  <span className="qrs-detail-value">{scanDate}</span>
+                </div>
+              </div>
+
+              {/* Quick Action Button Grid */}
+              <div className="qrs-result-actions-grid">
+                <button className="qrs-action-box-btn" onClick={handleCopy}>
+                  <div className="qrs-action-icon-circle">
+                    <Copy size={16} />
+                  </div>
+                  <span>Copy</span>
+                </button>
+
+                <button className="qrs-action-box-btn" onClick={handleShare}>
+                  <div className="qrs-action-icon-circle">
+                    <Share2 size={16} />
+                  </div>
+                  <span>Share</span>
+                </button>
+
+                <button className="qrs-action-box-btn" onClick={handleSave}>
+                  <div className="qrs-action-icon-circle">
+                    <Star size={16} />
+                  </div>
+                  <span>Save</span>
+                </button>
+
+                <button className="qrs-action-box-btn" onClick={handleSave}>
+                  <div className="qrs-action-icon-circle">
+                    <ListPlus size={16} />
+                  </div>
+                  <span>Add to List</span>
+                </button>
+              </div>
+
+              {/* Dynamic Product/Website Metadata Card */}
+              <div className="qrs-meta-card">
+                {qrTypeData.type === 'Website' ? (
+                  <>
+                    <div className="qrs-meta-header">
+                      <Globe size={16} />
+                      <span>Website Details</span>
+                    </div>
+                    <div className="qrs-meta-content" onClick={handlePrimaryAction}>
+                      <div className="qrs-meta-icon-wrapper">
+                        <ExternalLink size={20} />
+                      </div>
+                      <div className="qrs-meta-details">
+                        <div className="qrs-meta-title">Open URL in Browser</div>
+                        <div className="qrs-meta-desc">{result}</div>
+                      </div>
+                    </div>
+                  </>
+                ) : (detectedFormatName && ['EAN-13', 'EAN-8', 'UPC-A', 'UPC-E'].includes(detectedFormatName)) || qrTypeData.type === 'Product' ? (
+                  <>
+                    <div className="qrs-meta-header">
+                      <ShoppingCart size={16} />
                       <span>Product Information</span>
                     </div>
-                    <div className="qrs-product-card-body" onClick={handlePrimaryAction} style={{ cursor: 'pointer' }}>
-                      <div className="qrs-product-image-container" dangerouslySetInnerHTML={{ __html: productInfo.imageSvg }} />
-                      <div className="qrs-product-details-content">
-                        <div className="qrs-product-title-premium">{productInfo.title}</div>
-                        <div className="qrs-product-meta-row">Brand: <strong>{productInfo.brand}</strong></div>
-                        <div className="qrs-product-meta-row">Category: <strong>{productInfo.category}</strong></div>
-                        <div className="qrs-product-meta-row">Size: <strong>{productInfo.size}</strong></div>
+                    <div className="qrs-meta-content" onClick={() => Browser.open({ url: 'https://www.google.com/search?q=' + encodeURIComponent(result) })}>
+                      <div className="qrs-meta-icon-wrapper">
+                        <Barcode size={20} />
                       </div>
-                      <div className="qrs-product-arrow-link">
-                        <ChevronRight size={18} />
+                      <div className="qrs-meta-details">
+                        <div className="qrs-meta-title">Search product details online</div>
+                        <div className="qrs-meta-desc">Lookup GTIN standard code: {result}</div>
                       </div>
                     </div>
-                  </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="qrs-meta-header">
+                      <FileText size={16} />
+                      <span>Quick Search Options</span>
+                    </div>
+                    <div className="qrs-meta-content" onClick={() => Browser.open({ url: 'https://www.google.com/search?q=' + encodeURIComponent(result) })}>
+                      <div className="qrs-meta-icon-wrapper">
+                        <Globe size={20} />
+                      </div>
+                      <div className="qrs-meta-details">
+                        <div className="qrs-meta-title">Search content online</div>
+                        <div className="qrs-meta-desc">Google Search lookup: {result}</div>
+                      </div>
+                    </div>
+                  </>
                 )}
-
-                {qrTypeData.type === 'WiFi' && (
-                  <div className="qrs-details-section-premium" style={{ width: '100%', maxWidth: '400px' }}>
-                    <div className="qrs-details-header-premium">
-                      <Wifi size={16} />
-                      <span>WiFi Connection Details</span>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
-                      <div>Network Name (SSID): <strong>{result.match(/S:(.*?)(?:[;]|$)/i)?.[1] || 'Unknown'}</strong></div>
-                      <div>Security: <strong>{result.match(/T:(.*?)(?:[;]|$)/i)?.[1] || 'WPA'}</strong></div>
-                      <button className="qrs-btn-again-premium" onClick={handlePrimaryAction} style={{ marginTop: '10px', padding: '10px' }}>Connect to Network</button>
-                    </div>
-                  </div>
-                )}
-
-                {qrTypeData.type === 'Website' && !productInfo && (
-                  <div className="qrs-details-section-premium" style={{ width: '100%', maxWidth: '400px' }}>
-                    <div className="qrs-details-header-premium">
-                      <Globe size={16} />
-                      <span>Website Link Details</span>
-                    </div>
-                    <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ wordBreak: 'break-all' }}>URL: <strong style={{ color: 'var(--accent-primary)' }}>{result}</strong></div>
-                      <button className="qrs-btn-history-premium" onClick={handlePrimaryAction} style={{ marginTop: '10px', padding: '10px' }}>Open URL Link</button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Bottom Actions */}
-                <div className="qrs-bottom-controls-premium">
-                  <button className="qrs-btn-again-premium" onClick={resumeScanning}>
-                    <RefreshCcw size={16} />
-                    <span>Scan Again</span>
-                  </button>
-                  <button className="qrs-btn-history-premium" onClick={() => { stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }}>
-                    <Clock size={16} />
-                    <span>View History</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* PC Connection Modal Popup */}
-        {showPcModal && (
-          <div className="modal-overlay" style={{ zIndex: 11000 }} onClick={() => setShowPcModal(false)}>
-            <div className="modal-container glass-panel" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Monitor size={20} style={{ color: 'var(--accent-primary)' }} />
-                  </div>
-                  <div className="modal-header-title" style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0 }}>PC Connection Setup</h3>
-                    <p style={{ margin: 0 }}>Keyboard wedge scan relay</p>
-                  </div>
-                  <button className="modal-close" onClick={() => setShowPcModal(false)}>
-                    <X size={20} />
-                  </button>
-                </div>
               </div>
 
-              <div className="modal-content" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                {/* Visual Step-by-Step Guide */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {/* Step 1 */}
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                    <div style={{
-                      width: '24px', height: '24px', borderRadius: '50%',
-                      background: 'var(--accent-gradient)', color: '#fff',
-                      fontSize: '11px', fontWeight: 800, display: 'flex',
-                      alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px'
-                    }}>1</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Scan QR or Open Link on PC</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Scan the QR code to pair instantly, or navigate to the link below:</div>
-                      
-                      {/* Connection QR Code */}
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', marginBottom: '10px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: '#fff', padding: '10px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                          <canvas ref={qrCanvasRef} style={{ display: 'block', width: '130px', height: '130px' }} />
-                          <span style={{ fontSize: '9px', color: 'rgba(0,0,0,0.5)', fontWeight: 800 }}>Scan to connect PC automatically</span>
-                        </div>
-                      </div>
-
-                      <div style={{
-                        display: 'flex', alignItems: 'center', gap: '8px',
-                        background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
-                        padding: '6px 10px', borderRadius: '8px'
-                      }}>
-                        <code style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--accent-primary)', wordBreak: 'break-all', flex: 1 }}>
-                          {window.location.host}/scanner-pc.html
-                        </code>
-                        <button
-                          onClick={() => {
-                            triggerHapticFeedback();
-                            navigator.clipboard.writeText(`${window.location.origin}/scanner-pc.html?session=${sessionId}`);
-                            alert('Link copied to clipboard!');
-                          }}
-                          style={{
-                            background: 'none', border: 'none', color: 'var(--text-muted)',
-                            cursor: 'pointer', fontSize: '11px', fontWeight: 700, textDecoration: 'underline', padding: 0
-                          }}
-                        >
-                          Copy
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Step 2 */}
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
-                    <div style={{
-                      width: '24px', height: '24px', borderRadius: '50%',
-                      background: 'var(--accent-gradient)', color: '#fff',
-                      fontSize: '11px', fontWeight: 800, display: 'flex',
-                      alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px'
-                    }}>2</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Or Enter Connection Code</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                        <div style={{
-                          background: 'linear-gradient(135deg, rgba(214,0,54,0.1) 0%, rgba(255,107,53,0.1) 100%)',
-                          border: '2px dashed var(--accent-primary)',
-                          borderRadius: '12px', padding: '8px 16px',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}>
-                          <span style={{ fontSize: '24px', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '2px', color: 'var(--accent-primary)' }}>
-                            {sessionId}
-                          </span>
-                        </div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                          If you can't scan the QR code, type this code in the PC connection box.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Step 3 */}
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
-                    <div style={{
-                      width: '24px', height: '24px', borderRadius: '50%',
-                      background: 'var(--accent-gradient)', color: '#fff',
-                      fontSize: '11px', fontWeight: 800, display: 'flex',
-                      alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px'
-                    }}>3</div>
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Relay Scans to PC</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Toggle on to redirect all scans to PC</div>
-                      </div>
-                      <input 
-                        type="checkbox" 
-                        checked={pcRelayEnabled}
-                        onChange={(e) => {
-                          triggerHapticFeedback();
-                          setPcRelayEnabled(e.target.checked);
-                        }}
-                        style={{
-                          width: '42px',
-                          height: '24px',
-                          appearance: 'none',
-                          background: 'var(--bg-hover)',
-                          borderRadius: '12px',
-                          position: 'relative',
-                          cursor: 'pointer',
-                          border: '1px solid var(--border-color)',
-                          transition: 'background 0.3s'
-                        }}
-                        className="pc-switch-checkbox"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Advanced Wedging Accordion */}
-                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '14px', marginTop: '4px' }}>
-                  <details style={{ width: '100%' }}>
-                    <summary style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', listStyle: 'none' }}>
-                      <span>⚙️ Advanced Wedge Settings</span>
-                      <ChevronRight size={14} style={{ transform: 'rotate(90deg)' }} />
-                    </summary>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>Append Enter Key</span>
-                        <input 
-                          type="checkbox" 
-                          checked={appendEnter}
-                          onChange={(e) => setAppendEnter(e.target.checked)}
-                          style={{ width: '16px', height: '16px' }}
-                        />
-                      </div>
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <div style={{ flex: 1 }}>
-                          <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>Prefix</label>
-                          <input 
-                            type="text" 
-                            value={prefix} 
-                            onChange={(e) => setPrefix(e.target.value)} 
-                            placeholder="e.g. ID-"
-                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: '12px' }}
-                          />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>Suffix</label>
-                          <input 
-                            type="text" 
-                            value={suffix} 
-                            onChange={(e) => setSuffix(e.target.value)} 
-                            placeholder="e.g. -WD"
-                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: '12px' }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </details>
-                </div>
+              {/* Bottom Actions Outlined/Solid */}
+              <div className="qrs-bottom-row-grid">
+                <button className="qrs-outline-btn" onClick={resumeScanning}>
+                  <RefreshCcw size={16} />
+                  <span>Scan Again</span>
+                </button>
+                <button className="qrs-solid-btn" onClick={() => { stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }}>
+                  <Clock size={16} />
+                  <span>View History</span>
+                </button>
               </div>
             </div>
           </div>
@@ -1407,30 +959,6 @@ export default function QRScanner({ onBack, navigateTo }) {
 
         <input type="file" ref={fileInputRef} accept="image/*" onChange={e => handleFileUpload(e.target.files?.[0])} style={{ display: 'none' }} />
       </div>
-
-      <style>{`
-        .pc-switch-checkbox:checked {
-          background: #34C759 !important;
-        }
-        .pc-switch-checkbox::after {
-          content: '';
-          position: absolute;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: #fff;
-          top: 2px;
-          left: 2px;
-          transition: transform 0.3s;
-        }
-        .pc-switch-checkbox:checked::after {
-          transform: translateX(18px);
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.2); }
-        }
-      `}</style>
     </div>
   );
 }
