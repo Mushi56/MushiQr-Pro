@@ -19,8 +19,11 @@ export default function AppIcon({ size = 42, shadow = false, className = '', sty
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        boxShadow: 'none',
+        background: 'rgba(255, 255, 255, 0.35)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         border: '1px solid var(--border-color)',
+        boxShadow: shadow ? `0 ${size * 0.04}px ${size * 0.08}px rgba(0,0,0,0.06)` : 'none',
         ...style
       }}
     >
@@ -38,6 +41,22 @@ export default function AppIcon({ size = 42, shadow = false, className = '', sty
           e.currentTarget.style.display = 'none';
           e.currentTarget.parentElement.style.background = 'linear-gradient(135deg, #1a1a2e, #0a0a14)';
           e.currentTarget.parentElement.innerHTML = '<span style="color:#D60036;font-weight:900;font-size:' + (size * 0.45) + 'px;font-family:Outfit,sans-serif">M</span>';
+        }}
+      />
+
+      {/* Premium Emboss & Glossy Glare Layer */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: borderRadius,
+          pointerEvents: 'none',
+          boxShadow: `
+            inset 0 ${size * 0.06}px ${size * 0.06}px rgba(255, 255, 255, 0.95), 
+            inset 0 -${size * 0.06}px ${size * 0.06}px rgba(0, 0, 0, 0.22),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+            inset 0 0 0 1.5px rgba(0, 0, 0, 0.06)
+          `
         }}
       />
     </div>
