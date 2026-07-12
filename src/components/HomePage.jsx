@@ -369,7 +369,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
 
   useEffect(() => {
     if (activePage === 'home') {
-      const history = getHistory();
+      const history = getHistory().filter(item => item.source !== 'scan');
       setRecentItems(history.slice(0, 10));
       setSavedIds(new Set(getSaved().map(s => s.id)));
     }
@@ -1074,7 +1074,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     onClick={() => {
                       if (window.confirm('Delete this item from history?')) {
                         const updated = deleteFromHistory(item.id);
-                        setRecentItems(updated.slice(0, 10));
+                        setRecentItems(updated.filter(i => i.source !== 'scan').slice(0, 10));
                       }
                     }}
                     style={{ 

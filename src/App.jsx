@@ -621,6 +621,7 @@ export default function App() {
   const [previousPage, setPreviousPage] = useState('home');
   const [theme, setTheme] = useState('auto');
   const [effectiveTheme, setEffectiveTheme] = useState('dark');
+  const [historyFilter, setHistoryFilter] = useState('All');
 
   useEffect(() => {
     const page = location.state?.activePage || getPageFromPath(location.pathname);
@@ -928,6 +929,9 @@ export default function App() {
   const navigateTo = (page, type = 'QR') => {
     if (page === 'batch') {
       setBatchPageDefaultType(type);
+    }
+    if (page === 'history') {
+      setHistoryFilter(type === 'Scanned' ? 'Scanned' : type === 'Created' ? 'Created' : 'All');
     }
     if (page !== activePage) {
       if (activePage === 'generator' && generatorIsDirtyRef.current) {
@@ -4359,7 +4363,7 @@ export default function App() {
         ) : activePage === 'settings' ? (
           <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
         ) : (
-          <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} />
+          <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} initialFilter={historyFilter} />
         )}
       </main>
 

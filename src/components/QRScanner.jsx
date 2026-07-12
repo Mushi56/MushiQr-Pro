@@ -822,7 +822,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
         {/* Bottom Controls */}
         <div className="qrs-controls">
-          <button className="qrs-side-btn" onClick={() => { triggerHapticFeedback(); stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }} aria-label="History">
+          <button className="qrs-side-btn" onClick={() => { triggerHapticFeedback(); stopScanner(); if (navigateTo) navigateTo('history', 'Scanned'); else if (onBack) onBack(); }} aria-label="History">
             <Clock size={22} />
           </button>
 
@@ -1019,7 +1019,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                   <RefreshCcw size={16} />
                   <span>Scan Again</span>
                 </button>
-                <button className="qrs-solid-btn" onClick={() => { stopScanner(); if (navigateTo) navigateTo('history'); else if (onBack) onBack(); }}>
+                <button className="qrs-solid-btn" onClick={() => { stopScanner(); if (navigateTo) navigateTo('history', 'Scanned'); else if (onBack) onBack(); }}>
                   <Clock size={16} />
                   <span>View History</span>
                 </button>

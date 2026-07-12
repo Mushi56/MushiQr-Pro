@@ -16,13 +16,17 @@ const TYPE_ICONS = {
   [QR_TYPES.TEXT]: <FileCode size={14} />
 };
 
-export default function HistoryPage({ onLoadQR, onNavigate }) {
+export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All' }) {
   const [history, setHistory] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState(initialFilter);
    const [swipedItemId, setSwipedItemId] = useState(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [showRangeMenu, setShowRangeMenu] = useState(false);
   const menuRef = useRef(null);
+
+  useEffect(() => {
+    setActiveFilter(initialFilter);
+  }, [initialFilter]);
   const [toast, setToast] = useState(null);
   const [savedIds, setSavedIds] = useState(new Set());
 
