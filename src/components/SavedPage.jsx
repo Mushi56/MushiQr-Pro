@@ -76,22 +76,11 @@ export default function SavedPage({ onLoadQR }) {
     if (type && barcodeFormats.includes(type.toUpperCase())) {
       return 'Barcode';
     }
-
-    if (type === QR_TYPES.URL) return 'Website';
-    if (type === QR_TYPES.WIFI) return 'WiFi';
-    if (type === QR_TYPES.VCARD) return 'Contact';
-    if (type === QR_TYPES.EMAIL) return 'Email';
-    if (type === QR_TYPES.PHONE) return 'Phone';
-    if (type === QR_TYPES.SMS) return 'SMS';
-    if (type === QR_TYPES.LOCATION) return 'Location';
-    if (type === QR_TYPES.PDF) return 'PDF';
-    if (type === QR_TYPES.IMAGE) return 'Image';
-    if (type === QR_TYPES.TEXT) return 'Text';
     return 'QR Code';
   };
 
-  // Group types for filters based on current data
-  const availableTypes = ['All', ...new Set(saved.map(item => getTypeLabel(item)))];
+  // Group types for filters: All, QR Code, Barcode
+  const availableTypes = ['All', 'QR Code', 'Barcode'];
 
   const filteredItems = saved.filter(item => {
     const matchesSearch = getQRTitle(item).toLowerCase().includes(searchQuery.toLowerCase());
