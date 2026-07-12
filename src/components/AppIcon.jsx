@@ -22,6 +22,7 @@ export default function AppIcon({ size = 42, shadow = false, className = '', sty
         boxShadow: shadow 
           ? `0 ${size * 0.08}px ${size * 0.16}px rgba(0,0,0,0.12), 0 ${size * 0.02}px ${size * 0.04}px rgba(0,0,0,0.08)` 
           : 'none',
+        border: '1px solid var(--border-color)',
         ...style
       }}
     >
