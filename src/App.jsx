@@ -1627,8 +1627,42 @@ export default function App() {
   const handleLoadQR = (item) => {
     if (!item) return;
     
-    if (item.qrType === 'BARCODE') {
-      setLoadedBarcodeItem(item);
+    const typeUpper = (item.type || '').toUpperCase();
+    const barcodeFormats = [
+      'DATA_MATRIX', 'DATA MATRIX', 'PDF417', 'PDF_417', 'AZTEC', 'EAN_13', 'EAN-13', 'EAN_8', 'EAN-8', 
+      'UPC_A', 'UPC-A', 'UPC_E', 'UPC-E', 'CODE_128', 'CODE-128', 'CODE_39', 'CODE-39', 'CODE_93', 'CODE-93', 
+      'ITF', 'ITF / I2OF5', 'ITF (I25)', 'CODABAR', 'MAXICODE'
+    ];
+    const isBarcode = item.qrType === 'BARCODE' || barcodeFormats.includes(typeUpper);
+
+    if (isBarcode) {
+      const getBcid = (fmt) => {
+        if (!fmt) return 'code128';
+        const name = fmt.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (name === 'datamatrix') return 'datamatrix';
+        if (name === 'pdf417') return 'pdf417';
+        if (name === 'aztec') return 'aztec';
+        if (name === 'maxicode') return 'maxicode';
+        if (name === 'ean13') return 'ean13';
+        if (name === 'ean8') return 'ean8';
+        if (name === 'upca') return 'upca';
+        if (name === 'upce') return 'upce';
+        if (name === 'code128') return 'code128';
+        if (name === 'code39') return 'code39';
+        if (name === 'code93') return 'code93';
+        if (name === 'codabar') return 'codabar';
+        if (name.includes('itf') || name.includes('i25')) return 'i25';
+        return 'code128';
+      };
+
+      setLoadedBarcodeItem({
+        id: item.id,
+        displayText: item.displayText || item.qrData?.text || '',
+        qrType: 'BARCODE',
+        bcid: item.style?.bcid || getBcid(item.type),
+        text: item.displayText || item.qrData?.text || '',
+        style: item.style || {}
+      });
       navigateTo('barcode');
       return;
     }
@@ -4215,6 +4249,7 @@ export default function App() {
               }
             }}
             navigateTo={navigateTo}
+            onLoadQR={handleLoadQR}
           />
         ) : activePage === 'home' ? (
           <HomePage 

@@ -13,6 +13,7 @@ import {
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { renderBarcode } from '../utils/barcodeEngine';
 
 // ─── Barcode format metadata ──────────────────────────────────────────────────
 // Formats supported by html5-qrcode (ZXing) for live camera scanning
@@ -78,7 +79,25 @@ const parseQRData = (text) => {
   return { type: 'Text', icon: FileText, title: 'Text Content', action: 'Copy Text', actionIcon: Copy };
 };
 
-export default function QRScanner({ onBack, navigateTo }) {
+const detectFormatFromText = (text) => {
+  if (!text) return 'QR Code';
+  const t = text.trim();
+  if (/^https?:\/\//i.test(t) || /^www\./i.test(t) || /^WIFI:/i.test(t) || /^mailto:/i.test(t) || /^tel:/i.test(t) || /^sms:/i.test(t) || /^BEGIN:VCARD/i.test(t)) {
+    return 'QR Code';
+  }
+  if (/^\d+$/.test(t)) {
+    if (t.length === 8) return 'EAN-8';
+    if (t.length === 12) return 'UPC-A';
+    if (t.length === 13) return 'EAN-13';
+    if (t.length === 6) return 'UPC-E';
+  }
+  if (t.length < 30) {
+    return 'Code 128';
+  }
+  return 'QR Code';
+};
+
+export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   const [status, setStatus] = useState('SCANNING');
   const [result, setResult] = useState(null);
   const [qrTypeData, setQrTypeData] = useState(null);
@@ -104,6 +123,19 @@ export default function QRScanner({ onBack, navigateTo }) {
   const touchStateRef = useRef({ distance: 0, initialZoom: 1 });
   const capTimersRef = useRef([]);
   const zoomRafRef = useRef(null);
+
+  const handleEditResult = () => {
+    triggerHapticFeedback();
+    stopScanner();
+    if (onLoadQR) {
+      onLoadQR({
+        source: 'scan',
+        type: detectedFormatName || 'QR Code',
+        displayText: result,
+        qrData: { text: result }
+      });
+    }
+  };
 
   const mapFormatToBcid = (formatName) => {
     if (!formatName) return null;
@@ -302,18 +334,16 @@ export default function QRScanner({ onBack, navigateTo }) {
         try { scanner.pause(); } catch { }
       }
 
-      // Detect format from result metadata
-      const formatId = decodedResult?.result?.format?.formatName
-        ? null // will use formatId from decodedResult directly
-        : decodedResult?.decodedResult?.result?.format?.formatName
-          ? null
-          : null;
       const fmtId = decodedResult?.result?.format?.format
         ?? decodedResult?.decodedResult?.result?.format?.format
         ?? null;
-      const fmtName = fmtId != null ? (FORMAT_NAME_MAP[fmtId] || 'Unknown') : null;
+      let fmtName = fmtId != null ? (FORMAT_NAME_MAP[fmtId] || 'Unknown') : null;
+      if (!fmtName || fmtName === 'Unknown') {
+        fmtName = detectFormatFromText(decodedText);
+      }
+      const finalBcid = mapFormatToBcid(fmtName);
       if (fmtId != null) setDetectedFormatId(fmtId);
-      if (fmtName) setDetectedFormatName(fmtName);
+      setDetectedFormatName(fmtName);
 
       const parsed = parseQRData(decodedText);
       setQrTypeData(parsed);
@@ -327,19 +357,34 @@ export default function QRScanner({ onBack, navigateTo }) {
       let thumbnail = null;
       try {
         const canvas = document.createElement('canvas');
-        canvas.width = 120;
-        canvas.height = 120;
-        const matrixInfo = generateQRMatrix(decodedText, 'M');
-        if (matrixInfo) {
-          renderQR(canvas, {
-            matrix: matrixInfo.matrix,
-            moduleCount: matrixInfo.moduleCount,
-            size: 120,
-            qrColor: '#000000',
+        if (finalBcid && finalBcid !== 'qrcode') {
+          canvas.width = 200;
+          canvas.height = 120;
+          renderBarcode(canvas, decodedText, {
+            bcid: finalBcid,
+            barColor: '#000000',
             bgColor: '#ffffff',
-            bgTransparent: false
+            barWidth: 2,
+            height: 80,
+            margin: 10,
+            displayValue: false
           });
           thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+        } else {
+          canvas.width = 120;
+          canvas.height = 120;
+          const matrixInfo = generateQRMatrix(decodedText, 'M');
+          if (matrixInfo) {
+            renderQR(canvas, {
+              matrix: matrixInfo.matrix,
+              moduleCount: matrixInfo.moduleCount,
+              size: 120,
+              qrColor: '#000000',
+              bgColor: '#ffffff',
+              bgTransparent: false
+            });
+            thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+          }
         }
       } catch (err) {
         console.error('Failed to generate thumbnail for scanned QR:', err);
@@ -478,19 +523,35 @@ export default function QRScanner({ onBack, navigateTo }) {
     let thumbnail = null;
     try {
       const canvas = document.createElement('canvas');
-      canvas.width = 120;
-      canvas.height = 120;
-      const matrixInfo = generateQRMatrix(result, 'M');
-      if (matrixInfo) {
-        renderQR(canvas, {
-          matrix: matrixInfo.matrix,
-          moduleCount: matrixInfo.moduleCount,
-          size: 120,
-          qrColor: '#000000',
+      const bcid = mapFormatToBcid(detectedFormatName);
+      if (bcid && bcid !== 'qrcode') {
+        canvas.width = 200;
+        canvas.height = 120;
+        renderBarcode(canvas, result, {
+          bcid: bcid,
+          barColor: '#000000',
           bgColor: '#ffffff',
-          bgTransparent: false
+          barWidth: 2,
+          height: 80,
+          margin: 10,
+          displayValue: false
         });
         thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+      } else {
+        canvas.width = 120;
+        canvas.height = 120;
+        const matrixInfo = generateQRMatrix(result, 'M');
+        if (matrixInfo) {
+          renderQR(canvas, {
+            matrix: matrixInfo.matrix,
+            moduleCount: matrixInfo.moduleCount,
+            size: 120,
+            qrColor: '#000000',
+            bgColor: '#ffffff',
+            bgTransparent: false
+          });
+          thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+        }
       }
     } catch (err) {
       console.error('Failed to generate thumbnail for saved scanned QR:', err);
@@ -774,7 +835,7 @@ export default function QRScanner({ onBack, navigateTo }) {
                   <ArrowLeft size={20} />
                 </button>
                 <h3 className="qrs-result-banner-title">Scan Result</h3>
-                <button className="qrs-result-banner-btn" onClick={handleCopy} aria-label="Quick Copy">
+                <button className="qrs-result-banner-btn" onClick={handleEditResult} aria-label="Edit Code">
                   <Pencil size={18} />
                 </button>
               </div>
