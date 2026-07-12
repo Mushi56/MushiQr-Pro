@@ -14,6 +14,7 @@ import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { renderBarcode } from '../utils/barcodeEngine';
+import AppIcon from './AppIcon';
 
 // ─── Barcode format metadata ──────────────────────────────────────────────────
 // Formats supported by html5-qrcode (ZXing) for live camera scanning
@@ -668,9 +669,20 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
   return (
     <div className="scanner-page scanner-page-enter">
-      <div className="qrs">
-        {/* Header removed as it overlaps with app upper navbar */}
+      <div className="scanner-nav-header">
+        <div className="scanner-header-inner">
+          <button className="scanner-back-btn" onClick={safeBack} aria-label="Go Back">
+            <ArrowLeft size={20} />
+          </button>
+          <div className="scanner-nav-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <AppIcon size={44} />
+            <h3>Scan Camera</h3>
+          </div>
+          <div style={{ width: 44 }} />
+        </div>
+      </div>
 
+      <div className="qrs">
         {/* Body */}
         <div className="qrs-body" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} style={{ justifyContent: 'flex-end', paddingBottom: '24px' }}>
           {/* Error - QR Not Found (illustrated) */}
