@@ -496,8 +496,18 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     await stopScanner(); setStatus('LOADING'); setResult(null); setQrTypeData(null); setError(null);
     try {
       const scanner = new Html5Qrcode("qr-scanner-viewport", false);
-      const decodedText = await scanner.scanFile(file, true);
-      if (mountedRef.current) handleScanResult(decodedText);
+      const scanRes = await scanner.scanFile(file, true);
+      
+      let text = '';
+      let rawResult = null;
+      if (scanRes && typeof scanRes === 'object') {
+        text = scanRes.decodedText;
+        rawResult = scanRes;
+      } else {
+        text = scanRes;
+      }
+      
+      if (mountedRef.current) handleScanResult(text, rawResult);
     } catch (err) {
       if (mountedRef.current) { setError('No QR code or barcode found in this image.'); setStatus('ERROR'); }
     }
