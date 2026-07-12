@@ -670,15 +670,8 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   return (
     <div className="scanner-page scanner-page-enter">
       <div className="scanner-nav-header">
-        <div className="scanner-header-inner">
-          <button className="scanner-back-btn" onClick={safeBack} aria-label="Go Back">
-            <ArrowLeft size={20} />
-          </button>
-          <div className="scanner-nav-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <AppIcon size={44} />
-            <h3>Scan Camera</h3>
-          </div>
-          <div style={{ width: 44 }} />
+        <div className="scanner-header-inner" style={{ justifyContent: 'flex-start', paddingLeft: '16px' }}>
+          <AppIcon size={44} />
         </div>
       </div>
 
