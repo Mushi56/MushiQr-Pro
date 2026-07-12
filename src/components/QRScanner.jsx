@@ -669,11 +669,32 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
   return (
     <div className="scanner-page scanner-page-enter">
-      <div className="scanner-nav-header">
-        <div className="scanner-header-inner" style={{ justifyContent: 'flex-start', paddingLeft: '16px' }}>
-          <AppIcon size={44} />
+      <header className="app-header header-home" style={{ position: 'relative', borderBottom: '1px solid var(--border-color)', display: 'flex', width: '100%', flexShrink: 0 }}>
+        <div className="app-logo" style={{ gap: '12px', paddingLeft: '16px' }}>
+          <button 
+            onClick={safeBack}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              padding: '8px',
+              marginRight: '8px',
+              marginLeft: '-8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <AppIcon size={44} shadow />
+          <div className="app-logo-text" style={{ whiteSpace: 'nowrap' }}>Mushi QR <span>Pro</span></div>
         </div>
-      </div>
+      </header>
 
       <div className="qrs">
         {/* Body */}
