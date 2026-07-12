@@ -267,7 +267,11 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     };
   }, [stopScanner]);
 
-  const safeBack = useCallback(() => { triggerHapticFeedback(); stopScanner(); if (onBack) onBack(); }, [stopScanner, onBack, triggerHapticFeedback]);
+  const safeBack = useCallback(async () => {
+    triggerHapticFeedback();
+    await stopScanner();
+    if (onBack) onBack();
+  }, [stopScanner, onBack, triggerHapticFeedback]);
 
   const applyZoom = useCallback(async (value) => {
     try {
