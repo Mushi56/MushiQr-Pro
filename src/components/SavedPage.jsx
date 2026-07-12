@@ -63,7 +63,20 @@ export default function SavedPage({ onLoadQR }) {
     return item.displayText || 'Unnamed QR Code';
   };
 
-  const getTypeLabel = (type) => {
+  const getTypeLabel = (item) => {
+    if (!item) return 'QR Code';
+    const type = item.qrType || item.type;
+    if (type === 'BARCODE') return 'Barcode';
+    
+    const barcodeFormats = [
+      'DATA_MATRIX', 'DATA MATRIX', 'PDF417', 'PDF_417', 'AZTEC', 'EAN_13', 'EAN-13', 'EAN_8', 'EAN-8', 
+      'UPC_A', 'UPC-A', 'UPC_E', 'UPC-E', 'CODE_128', 'CODE-128', 'CODE_39', 'CODE-39', 'CODE_93', 'CODE-93', 
+      'ITF', 'ITF / I2OF5', 'ITF (I25)', 'CODABAR', 'MAXICODE'
+    ];
+    if (type && barcodeFormats.includes(type.toUpperCase())) {
+      return 'Barcode';
+    }
+
     if (type === QR_TYPES.URL) return 'Website';
     if (type === QR_TYPES.WIFI) return 'WiFi';
     if (type === QR_TYPES.VCARD) return 'Contact';
@@ -78,11 +91,11 @@ export default function SavedPage({ onLoadQR }) {
   };
 
   // Group types for filters based on current data
-  const availableTypes = ['All', ...new Set(saved.map(item => getTypeLabel(item.qrType || item.type)))];
+  const availableTypes = ['All', ...new Set(saved.map(item => getTypeLabel(item)))];
 
   const filteredItems = saved.filter(item => {
     const matchesSearch = getQRTitle(item).toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = activeFilter === 'All' || getTypeLabel(item.qrType || item.type) === activeFilter;
+    const matchesFilter = activeFilter === 'All' || getTypeLabel(item) === activeFilter;
     return matchesSearch && matchesFilter;
   });
 
@@ -191,7 +204,7 @@ export default function SavedPage({ onLoadQR }) {
         {/* Filters */}
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' }}>
           {availableTypes.map(type => {
-            const count = type === 'All' ? saved.length : saved.filter(i => getTypeLabel(i.qrType || i.type) === type).length;
+            const count = type === 'All' ? saved.length : saved.filter(i => getTypeLabel(i) === type).length;
             const isActive = activeFilter === type;
             return (
               <button
