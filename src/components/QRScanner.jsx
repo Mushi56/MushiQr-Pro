@@ -672,7 +672,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
   return (
     <div className="scanner-page scanner-page-enter">
-      <header className="app-header header-home" style={{ position: 'relative', borderBottom: '1px solid var(--border-color)', display: 'flex', width: '100%', flexShrink: 0, zIndex: 100 }}>
+      <header className="app-header header-home" style={{ position: 'relative', borderBottom: 'none', display: 'flex', width: '100%', flexShrink: 0, zIndex: 100 }}>
         <div className="app-logo" style={{ gap: '12px', paddingLeft: '16px' }}>
           <button 
             onClick={safeBack}
