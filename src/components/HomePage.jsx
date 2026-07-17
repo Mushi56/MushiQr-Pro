@@ -487,159 +487,303 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
           transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
           width: '100%'
         }}>
-            {/* Slide 1: Single QR */}
+            {/* Slide 1: Custom QR Codes */}
             <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
               <div style={{ 
-                background: 'linear-gradient(135deg, #1E070B 0%, #0A0203 100%)',
                 borderRadius: '18px',
-                padding: '24px 24px',
                 color: '#fff',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
-                gap: '12px',
-                height: '220px'
+                height: '220px',
+                background: 'linear-gradient(135deg, #1E070B 0%, #0A0203 100%)',
               }}>
-                <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                      <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
-                        Custom Qr Codes
-                      </h2>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '20px 24px',
+                  position: 'relative',
+                  flex: 1
+                }}>
+                  <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
+                          Custom Qr Codes
+                        </h2>
+                      </div>
+                      <p style={{ fontSize: '11.5px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '210px' }}>
+                        Design custom QR codes with styles, colors, custom logos, and frames instantly.
+                      </p>
                     </div>
-                    <p style={{ fontSize: '11.5px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '210px' }}>
-                      Design custom QR codes with styles, colors, custom logos, and frames instantly.
-                    </p>
+
+                    <button 
+                      onClick={() => onNavigate('generator')}
+                      style={{
+                        backgroundColor: '#fff',
+                        color: '#D60036',
+                        border: 'none',
+                        borderRadius: '24px',
+                        padding: '8px 20px',
+                        fontSize: '12px',
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        width: 'fit-content',
+                        height: '38px',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Plus size={14} /> Create QR Code
+                      </span>
+                    </button>
                   </div>
 
-                  <button 
-                    onClick={() => onNavigate('generator')}
-                    style={{
-                      backgroundColor: '#fff',
-                      color: '#D60036',
-                      border: 'none',
-                      borderRadius: '24px',
-                      padding: '8px 20px',
-                      fontSize: '12px',
-                      fontWeight: 800,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                      width: 'fit-content',
-                      height: '38px',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Plus size={14} /> Create QR Code
-                    </span>
-                  </button>
+                  {/* Floating QR Mockup */}
+                  <div style={{ 
+                     background: '#fff',
+                     width: '100px',
+                     height: '100px',
+                     borderRadius: '14px',
+                     boxShadow: '0 8px 22px rgba(0,0,0,0.25)',
+                     transform: 'rotate(-8deg) translateY(0px)',
+                     flexShrink: 0,
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     zIndex: 1,
+                     position: 'absolute',
+                     right: '25px',
+                     bottom: '15px',
+                     border: '1px solid rgba(255,255,255,0.1)'
+                   }}>
+                     <HeroQRCanvas />
+                   </div>
                 </div>
 
-                {/* Floating QR Mockup */}
-                <div style={{ 
-                   background: '#fff',
-                   width: '100px',
-                   height: '100px',
-                   borderRadius: '14px',
-                   boxShadow: '0 8px 22px rgba(0,0,0,0.25)',
-                   transform: 'rotate(-8deg) translateY(0px)',
-                   flexShrink: 0,
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   zIndex: 1,
-                   position: 'absolute',
-                   right: '25px',
-                   bottom: '40px',
-                   border: '1px solid rgba(255,255,255,0.1)'
-                 }}>
-                   <HeroQRCanvas />
-                 </div>
+                {/* Features Row inside QR Codes card */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0 8px',
+                  backgroundColor: '#FFFFFF',
+                  borderTop: '1px solid rgba(0,0,0,0.05)',
+                  gap: '2px',
+                  width: '100%',
+                  height: '50px',
+                  boxSizing: 'border-box'
+                }}>
+                  {/* Feature 1: Custom Logos */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#D60036', flexShrink: 0 
+                    }}>
+                      <Image size={11} />
+                    </div>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Custom Logos</span>
+                  </div>
+
+                  {/* Feature 2: HD Quality */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#D60036', flexShrink: 0 
+                    }}>
+                      <Crown size={11} />
+                    </div>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>HD Quality</span>
+                  </div>
+
+                  {/* Feature 3: Templates */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#D60036', flexShrink: 0 
+                    }}>
+                      <Layers size={11} />
+                    </div>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Templates</span>
+                  </div>
+
+                  {/* Feature 4: Secure */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#D60036', flexShrink: 0 
+                    }}>
+                      <Shield size={11} />
+                    </div>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Secure</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Slide 2: Single Barcode */}
+            {/* Slide 2: Standerd Barcodes */}
             <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
               <div style={{ 
-                background: 'linear-gradient(135deg, #051A17 0%, #010A09 100%)',
                 borderRadius: '18px',
-                padding: '24px 24px',
                 color: '#fff',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(13, 148, 136, 0.12)',
-                gap: '12px',
-                height: '220px'
+                height: '220px',
+                background: 'linear-gradient(135deg, #051A17 0%, #010A09 100%)',
               }}>
-                <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                      <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
-                        Standerd Barcodes
-                      </h2>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '20px 24px',
+                  position: 'relative',
+                  flex: 1
+                }}>
+                  <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
+                          Standerd Barcodes
+                        </h2>
+                      </div>
+                      <p style={{ fontSize: '11.5px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '210px' }}>
+                        Generate standard Code 128, EAN, UPC, and other standard barcodes instantly.
+                      </p>
                     </div>
-                    <p style={{ fontSize: '11.5px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '210px' }}>
-                      Generate standard Code 128, EAN, UPC, and other standard barcodes instantly.
-                    </p>
+
+                    <button 
+                      onClick={() => onNavigate('barcode')}
+                      style={{
+                        backgroundColor: '#fff',
+                        color: '#0F766E',
+                        border: 'none',
+                        borderRadius: '24px',
+                        padding: '8px 20px',
+                        fontSize: '12px',
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        width: 'fit-content',
+                        height: '38px',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Barcode size={14} /> Create Barcode
+                      </span>
+                    </button>
                   </div>
 
-                  <button 
-                    onClick={() => onNavigate('barcode')}
-                    style={{
-                      backgroundColor: '#fff',
-                      color: '#0F766E',
-                      border: 'none',
-                      borderRadius: '24px',
-                      padding: '8px 20px',
-                      fontSize: '12px',
-                      fontWeight: 800,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                      width: 'fit-content',
-                      height: '38px',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Barcode size={14} /> Create Barcode
-                    </span>
-                  </button>
+                  {/* Floating Barcode Mockup */}
+                  <div style={{ 
+                     background: '#fff',
+                     width: '115px',
+                     height: '70px',
+                     borderRadius: '12px',
+                     boxShadow: '0 8px 22px rgba(0,0,0,0.25)',
+                     transform: 'rotate(8deg) translateY(0px)',
+                     flexShrink: 0,
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     zIndex: 1,
+                     position: 'absolute',
+                     right: '20px',
+                     bottom: '20px',
+                     border: '1px solid rgba(255,255,255,0.1)',
+                     padding: '6px',
+                     boxSizing: 'border-box'
+                   }}>
+                     <HeroBarcodeCanvas />
+                   </div>
                 </div>
 
-                {/* Floating Barcode Mockup */}
-                <div style={{ 
-                   background: '#fff',
-                   width: '115px',
-                   height: '70px',
-                   borderRadius: '12px',
-                   boxShadow: '0 8px 22px rgba(0,0,0,0.25)',
-                   transform: 'rotate(8deg) translateY(0px)',
-                   flexShrink: 0,
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   zIndex: 1,
-                   position: 'absolute',
-                   right: '20px',
-                   bottom: '50px',
-                   border: '1px solid rgba(255,255,255,0.1)',
-                   padding: '6px',
-                   boxSizing: 'border-box'
-                 }}>
-                   <HeroBarcodeCanvas />
-                 </div>
+                {/* Features Row inside Barcodes card */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0 8px',
+                  backgroundColor: '#FFFFFF',
+                  borderTop: '1px solid rgba(0,0,0,0.05)',
+                  gap: '2px',
+                  width: '100%',
+                  height: '50px',
+                  boxSizing: 'border-box'
+                }}>
+                  {/* Feature 1: Multi-Format */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(15, 118, 110, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#0F766E', flexShrink: 0 
+                    }}>
+                      <Barcode size={11} />
+                    </div>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Multi-Format</span>
+                  </div>
+
+                  {/* Feature 2: Fast Gen */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(15, 118, 110, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#0F766E', flexShrink: 0 
+                    }}>
+                      <Zap size={11} />
+                    </div>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Fast Gen</span>
+                  </div>
+
+                  {/* Feature 3: 100% Accurate */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(15, 118, 110, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#0F766E', flexShrink: 0 
+                    }}>
+                      <Target size={11} />
+                    </div>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>100% Accurate</span>
+                  </div>
+
+                  {/* Feature 4: Standardized */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(15, 118, 110, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#0F766E', flexShrink: 0 
+                    }}>
+                      <Shield size={11} />
+                    </div>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Standardized</span>
+                  </div>
+                </div>
               </div>
             </div>
 
