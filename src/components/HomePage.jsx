@@ -502,7 +502,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 16px 48px rgba(214, 0, 54, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
-                height: '230px',
+                height: '210px',
                 background: 'linear-gradient(135deg, #3D0A12 0%, #160407 55%, #220609 100%)',
               }}>
                 {/* Noise texture overlay */}
@@ -590,14 +590,14 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     <button 
                       onClick={() => onNavigate('generator')}
                       style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.18)',
+                        backgroundColor: 'rgba(255, 77, 109, 0.15)',
                         color: '#fff',
-                        border: '1px solid rgba(255, 255, 255, 0.35)',
+                        border: '1px solid rgba(255, 77, 109, 0.35)',
                         backdropFilter: 'blur(16px)',
                         WebkitBackdropFilter: 'blur(16px)',
                         borderRadius: '24px',
-                        padding: '8px 20px',
-                        fontSize: '12px',
+                        padding: '0 16px',
+                        fontSize: '11px',
                         fontWeight: 800,
                         display: 'flex',
                         alignItems: 'center',
@@ -606,7 +606,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         boxShadow: '0 4px 20px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.2)',
                         textShadow: '0 1px 2px rgba(0,0,0,0.2)',
                         width: 'fit-content',
-                        height: '38px',
+                        height: '32px',
                         boxSizing: 'border-box'
                       }}
                     >
@@ -643,19 +643,18 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   </div>
                 </div>
 
-                {/* Features Row inside QR Codes card */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '0 16px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  backgroundColor: 'rgba(255, 77, 109, 0.08)',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                  borderTop: '1px solid rgba(255, 77, 109, 0.1)',
                   gap: '8px',
                   width: '100%',
-                  height: '54px',
+                  height: '44px',
                   boxSizing: 'border-box',
                   zIndex: 2
                 }}>
@@ -711,7 +710,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 16px 48px rgba(13, 148, 136, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
-                height: '230px',
+                height: '210px',
                 background: 'linear-gradient(135deg, #062E27 0%, #010E0C 55%, #041C18 100%)',
               }}>
                 {/* Noise texture overlay */}
@@ -810,14 +809,14 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     <button 
                       onClick={() => onNavigate('barcode')}
                       style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.18)',
+                        backgroundColor: 'rgba(45, 212, 191, 0.15)',
                         color: '#fff',
-                        border: '1px solid rgba(255, 255, 255, 0.35)',
+                        border: '1px solid rgba(45, 212, 191, 0.35)',
                         backdropFilter: 'blur(16px)',
                         WebkitBackdropFilter: 'blur(16px)',
                         borderRadius: '24px',
-                        padding: '8px 20px',
-                        fontSize: '12px',
+                        padding: '0 16px',
+                        fontSize: '11px',
                         fontWeight: 800,
                         display: 'flex',
                         alignItems: 'center',
@@ -826,7 +825,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         boxShadow: '0 4px 20px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.2)',
                         textShadow: '0 1px 2px rgba(0,0,0,0.2)',
                         width: 'fit-content',
-                        height: '38px',
+                        height: '32px',
                         boxSizing: 'border-box'
                       }}
                     >
@@ -864,19 +863,18 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   </div>
                 </div>
 
-                {/* Features Row inside Barcodes card */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '0 16px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  backgroundColor: 'rgba(45, 212, 191, 0.08)',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                  borderTop: '1px solid rgba(45, 212, 191, 0.1)',
                   gap: '8px',
                   width: '100%',
-                  height: '54px',
+                  height: '44px',
                   boxSizing: 'border-box',
                   zIndex: 2
                 }}>
@@ -931,7 +929,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 16px 48px rgba(0, 102, 255, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
-                height: '230px',
+                height: '210px',
                 background: 'linear-gradient(135deg, #0A1C3A 0%, #030814 55%, #051024 100%)',
               }}>
                 {/* Noise texture overlay */}
@@ -1019,14 +1017,14 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     <button 
                       onClick={() => onNavigate('batch', 'QR')}
                       style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.18)',
+                        backgroundColor: 'rgba(0, 136, 255, 0.15)',
                         color: '#fff',
-                        border: '1px solid rgba(255, 255, 255, 0.35)',
+                        border: '1px solid rgba(0, 136, 255, 0.35)',
                         backdropFilter: 'blur(16px)',
                         WebkitBackdropFilter: 'blur(16px)',
                         borderRadius: '24px',
                         padding: '0 16px',
-                        fontSize: '12px',
+                        fontSize: '11px',
                         fontWeight: 800,
                         display: 'flex',
                         alignItems: 'center',
@@ -1036,7 +1034,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         textShadow: '0 1px 2px rgba(0,0,0,0.2)',
                         width: 'fit-content',
                         gap: '6px',
-                        height: '34px'
+                        height: '32px'
                       }}
                     >
                       <span style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
@@ -1073,19 +1071,18 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   </div>
                 </div>
 
-                {/* Features Row inside Bulk Generation card */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '0 16px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  backgroundColor: 'rgba(0, 136, 255, 0.08)',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                  borderTop: '1px solid rgba(0, 136, 255, 0.1)',
                   gap: '8px',
                   width: '100%',
-                  height: '54px',
+                  height: '44px',
                   boxSizing: 'border-box',
                   zIndex: 2
                 }}>
