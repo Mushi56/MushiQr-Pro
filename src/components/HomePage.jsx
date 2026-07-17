@@ -564,8 +564,17 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
-                          Custom Qr Codes
+                        <h2 style={{ 
+                          fontSize: '14px', 
+                          fontWeight: 800, 
+                          margin: 0, 
+                          backgroundImage: 'linear-gradient(90deg, #FF4D6D 0%, #FFA5A5 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          lineHeight: 1.15,
+                          whiteSpace: 'nowrap'
+                        }}>
+                          Custom QR Codes
                         </h2>
                       </div>
                       <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '140px' }}>
@@ -775,8 +784,17 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
-                          Standerd Barcodes
+                        <h2 style={{ 
+                          fontSize: '14px', 
+                          fontWeight: 800, 
+                          margin: 0, 
+                          backgroundImage: 'linear-gradient(90deg, #2DD4BF 0%, #85F4FF 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          lineHeight: 1.15,
+                          whiteSpace: 'nowrap'
+                        }}>
+                          Standard Barcodes
                         </h2>
                       </div>
                       <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '140px' }}>
@@ -829,7 +847,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         position: 'absolute',
                         right: '-15px',
                         bottom: '-10px',
-                        height: '160px',
+                        height: '190px',
                         width: 'auto',
                         zIndex: 2,
                         pointerEvents: 'none',
@@ -975,8 +993,17 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
-                          Bulk Ganaration
+                        <h2 style={{ 
+                          fontSize: '14px', 
+                          fontWeight: 800, 
+                          margin: 0, 
+                          backgroundImage: 'linear-gradient(90deg, #FF8A00 0%, #FFD600 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          lineHeight: 1.15,
+                          whiteSpace: 'nowrap'
+                        }}>
+                          Bulk Generation
                         </h2>
                       </div>
                       <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '140px' }}>
@@ -1029,7 +1056,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         position: 'absolute',
                         right: '-15px',
                         bottom: '-10px',
-                        height: '160px',
+                        height: '190px',
                         width: 'auto',
                         zIndex: 2,
                         pointerEvents: 'none',
