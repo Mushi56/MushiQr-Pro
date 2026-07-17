@@ -643,6 +643,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   </div>
                 </div>
 
+                {/* Features Row inside QR Codes card */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -651,10 +652,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   backgroundColor: 'rgba(255, 77, 109, 0.08)',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
-                  borderTop: '1px solid rgba(255, 77, 109, 0.1)',
+                  borderTop: '1px solid rgba(255, 77, 109, 0.15)',
                   gap: '8px',
                   width: '100%',
-                  height: '44px',
+                  height: '40px',
                   boxSizing: 'border-box',
                   zIndex: 2
                 }}>
@@ -863,6 +864,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   </div>
                 </div>
 
+                {/* Features Row inside Barcodes card */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -871,10 +873,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   backgroundColor: 'rgba(45, 212, 191, 0.08)',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
-                  borderTop: '1px solid rgba(45, 212, 191, 0.1)',
+                  borderTop: '1px solid rgba(45, 212, 191, 0.15)',
                   gap: '8px',
                   width: '100%',
-                  height: '44px',
+                  height: '40px',
                   boxSizing: 'border-box',
                   zIndex: 2
                 }}>
@@ -1071,6 +1073,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   </div>
                 </div>
 
+                {/* Features Row inside Bulk Generation card */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -1079,10 +1082,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   backgroundColor: 'rgba(0, 136, 255, 0.08)',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
-                  borderTop: '1px solid rgba(0, 136, 255, 0.1)',
+                  borderTop: '1px solid rgba(0, 136, 255, 0.15)',
                   gap: '8px',
                   width: '100%',
-                  height: '44px',
+                  height: '40px',
                   boxSizing: 'border-box',
                   zIndex: 2
                 }}>
