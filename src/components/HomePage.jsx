@@ -916,8 +916,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 </div>
               </div>
             </div>
-
-            {/* Slide 3: Bulk QR & Barcode Creator */}
+            {/* Slide 3: Bulk Generation */}
             <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
               <div style={{ 
                 borderRadius: '18px',
@@ -926,9 +925,9 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
-                boxShadow: '0 16px 48px rgba(214, 0, 54, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
+                boxShadow: '0 16px 48px rgba(0, 102, 255, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
                 height: '230px',
-                background: 'linear-gradient(135deg, #3A0D14 0%, #110406 55%, #1E0608 100%)',
+                background: 'linear-gradient(135deg, #0A1C3A 0%, #030814 55%, #051024 100%)',
               }}>
                 {/* Noise texture overlay */}
                 <div style={{
@@ -940,7 +939,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 {/* CSV/spreadsheet grid texture */}
                 <div style={{
                   position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: 'linear-gradient(rgba(255,77,109,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,77,109,0.07) 1px, transparent 1px)',
+                  backgroundImage: 'linear-gradient(rgba(0,150,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,150,255,0.07) 1px, transparent 1px)',
                   backgroundSize: '20px 20px',
                   opacity: 1, pointerEvents: 'none', zIndex: 1
                 }} />
@@ -958,28 +957,28 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   position: 'absolute', top: '50%', left: '55%',
                   transform: 'translate(-50%, -50%)',
                   width: '220px', height: '220px',
-                  background: 'radial-gradient(circle, rgba(255,77,109,0.14) 0%, transparent 65%)',
+                  background: 'radial-gradient(circle, rgba(0,102,255,0.14) 0%, transparent 65%)',
                   pointerEvents: 'none', zIndex: 1
                 }} />
                 {/* Top-right accent glow */}
                 <div style={{
                   position: 'absolute', top: '-40%', right: '-5%',
                   width: '200px', height: '200px',
-                  background: 'radial-gradient(circle, rgba(255, 77, 109, 0.28) 0%, transparent 65%)',
+                  background: 'radial-gradient(circle, rgba(0, 102, 255, 0.28) 0%, transparent 65%)',
                   filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
                 }} />
                 {/* Bottom-left accent glow */}
                 <div style={{
                   position: 'absolute', bottom: '-20%', left: '-5%',
                   width: '160px', height: '160px',
-                  background: 'radial-gradient(circle, rgba(214, 0, 54, 0.22) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, rgba(0, 77, 214, 0.22) 0%, transparent 70%)',
                   filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
                 }} />
                 {/* Floating particles */}
-                <div style={{ position: 'absolute', top: '22%', left: '30%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,77,109,0.7)', boxShadow: '0 0 6px rgba(255,77,109,0.8)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '60%', left: '20%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(255,150,150,0.5)', boxShadow: '0 0 4px rgba(255,150,150,0.6)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '38%', left: '40%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(255,77,109,0.4)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '75%', left: '35%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,200,200,0.35)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '22%', left: '30%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(0,150,255,0.7)', boxShadow: '0 0 6px rgba(0,150,255,0.8)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '60%', left: '20%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(150,200,255,0.5)', boxShadow: '0 0 4px rgba(150,200,255,0.6)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '38%', left: '40%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(0,150,255,0.4)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '75%', left: '35%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(200,220,255,0.35)', pointerEvents: 'none', zIndex: 2 }} />
 
                 <div style={{
                   display: 'flex',
@@ -998,7 +997,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                           fontSize: '14px', 
                           fontWeight: 800, 
                           margin: 0, 
-                          backgroundImage: 'linear-gradient(90deg, #FF3F60 0%, #FF90A5 100%)',
+                          backgroundImage: 'linear-gradient(90deg, #0088FF 0%, #80C0FF 100%)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                           lineHeight: 1.15,
@@ -1047,7 +1046,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     <div style={{
                       position: 'absolute', right: '5px', top: '50%', transform: 'translateY(-50%)',
                       width: '120px', height: '120px',
-                      background: 'radial-gradient(circle, rgba(255,120,80,0.3) 0%, transparent 70%)',
+                      background: 'radial-gradient(circle, rgba(0,150,255,0.3) 0%, transparent 70%)',
                       filter: 'blur(18px)', zIndex: 1, pointerEvents: 'none'
                     }} />
                     <img 
@@ -1091,7 +1090,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                       width: '20px', height: '20px', borderRadius: '50%', 
                       backgroundColor: 'rgba(255, 255, 255, 0.08)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#FF4D6D', flexShrink: 0 
+                      color: '#00B0FF', flexShrink: 0 
                     }}>
                       <Layers size={11} />
                     </div>
@@ -1104,7 +1103,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                       width: '20px', height: '20px', borderRadius: '50%', 
                       backgroundColor: 'rgba(255, 255, 255, 0.08)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#FF4D6D', flexShrink: 0 
+                      color: '#00B0FF', flexShrink: 0 
                     }}>
                       <Zap size={11} />
                     </div>
@@ -1117,7 +1116,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                       width: '20px', height: '20px', borderRadius: '50%', 
                       backgroundColor: 'rgba(255, 255, 255, 0.08)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#FF4D6D', flexShrink: 0 
+                      color: '#00B0FF', flexShrink: 0 
                     }}>
                       <Shield size={11} />
                     </div>
