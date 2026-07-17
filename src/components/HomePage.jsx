@@ -37,15 +37,15 @@ function HeroQRCanvas() {
   }, []);
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      width="360" 
-      height="360" 
-      style={{ 
-        width: '80px', 
-        height: '80px', 
+    <canvas
+      ref={canvasRef}
+      width="360"
+      height="360"
+      style={{
+        width: '80px',
+        height: '80px',
         display: 'block'
-      }} 
+      }}
     />
   );
 }
@@ -81,15 +81,15 @@ function HeroQRCanvasBatch() {
   }, []);
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      width="360" 
-      height="360" 
-      style={{ 
-        width: '80px', 
-        height: '80px', 
+    <canvas
+      ref={canvasRef}
+      width="360"
+      height="360"
+      style={{
+        width: '80px',
+        height: '80px',
         display: 'block'
-      }} 
+      }}
     />
   );
 }
@@ -110,13 +110,13 @@ function HeroBarcodeCanvas() {
   }, []);
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      style={{ 
-        width: '80px', 
-        height: '60px', 
+    <canvas
+      ref={canvasRef}
+      style={{
+        width: '80px',
+        height: '60px',
         display: 'block'
-      }} 
+      }}
     />
   );
 }
@@ -219,14 +219,14 @@ const getBarcodeIcon = (id) => {
           <rect x="2" y="4" width="20" height="5" rx="1" />
           <rect x="2" y="10" width="20" height="5" rx="1" />
           <rect x="2" y="16" width="20" height="5" rx="1" />
-          
+
           <line x1="5" y1="6" x2="5" y2="8" strokeWidth="1.5" />
           <line x1="12" y1="6" x2="12" y2="8" strokeWidth="2" />
           <line x1="18" y1="6" x2="18" y2="8" />
 
           <line x1="7" y1="12" x2="7" y2="14" strokeWidth="2" />
           <line x1="14" y1="12" x2="14" y2="14" />
-          
+
           <line x1="9" y1="18" x2="9" y2="20" />
           <line x1="16" y1="18" x2="16" y2="20" strokeWidth="2" />
         </svg>
@@ -294,11 +294,11 @@ const getBarcodeIcon = (id) => {
           <rect x="3" y="3" width="6" height="6" rx="1" strokeWidth="2" />
           <rect x="3" y="15" width="6" height="6" rx="1" strokeWidth="2" />
           <rect x="15" y="3" width="6" height="6" rx="1" strokeWidth="2" />
-          
+
           <rect x="5" y="5" width="2" height="2" fill="currentColor" stroke="none" />
           <rect x="5" y="17" width="2" height="2" fill="currentColor" stroke="none" />
           <rect x="17" y="5" width="2" height="2" fill="currentColor" stroke="none" />
-          
+
           <rect x="14" y="14" width="3" height="3" rx="0.5" />
           <line x1="11" y1="3" x2="11" y2="21" strokeDasharray="2 2" opacity="0.5" />
           <line x1="3" y1="11" x2="21" y2="11" strokeDasharray="2 2" opacity="0.5" />
@@ -439,8 +439,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
   const formatDate = (isoString) => {
     if (!isoString) return '';
     const d = new Date(isoString);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' • ' + 
-           d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' • ' +
+      d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   const getQRTitle = (item) => {
@@ -475,20 +475,20 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
     }}>
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up">
         {/* Sliding Hero Cards Section */}
-        <div 
+        <div
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           style={{ position: 'relative', overflow: 'hidden', marginTop: '5px', width: '100%', padding: '15px 0' }}
         >          <div style={{
-            display: 'flex',
-            transform: `translateX(-${activeSlide * 100}%)`,
-            transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-            width: '100%'
-          }}>
+          display: 'flex',
+          transform: `translateX(-${activeSlide * 100}%)`,
+          transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+          width: '100%'
+        }}>
             {/* Slide 1: Single QR */}
             <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
-              <div style={{ 
+              <div style={{
                 background: 'linear-gradient(135deg, #1E070B 0%, #0A0203 100%)',
                 borderRadius: '18px',
                 padding: '16px 20px',
@@ -528,7 +528,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     </p>
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => onNavigate('generator')}
                     style={{
                       backgroundColor: '#fff',
@@ -556,31 +556,31 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 </div>
 
                 {/* Floating QR Mockup */}
-                <div style={{ 
-                   background: '#fff',
-                   width: '95px',
-                   height: '95px',
-                   borderRadius: '12px',
-                   boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
-                   transform: 'rotate(-8deg) translateY(0px)',
-                   flexShrink: 0,
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   zIndex: 1,
-                   position: 'absolute',
-                   right: '20px',
-                   bottom: '40px',
-                   border: '1px solid rgba(255,255,255,0.1)'
-                 }}>
-                   <HeroQRCanvas />
-                 </div>
+                <div style={{
+                  background: '#fff',
+                  width: '95px',
+                  height: '95px',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+                  transform: 'rotate(-8deg) translateY(0px)',
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1,
+                  position: 'absolute',
+                  right: '20px',
+                  bottom: '40px',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                  <HeroQRCanvas />
+                </div>
               </div>
             </div>
 
             {/* Slide 2: Single Barcode */}
             <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
-              <div style={{ 
+              <div style={{
                 background: 'linear-gradient(135deg, #051A17 0%, #010A09 100%)',
                 borderRadius: '18px',
                 padding: '16px 20px',
@@ -620,7 +620,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     </p>
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => onNavigate('barcode')}
                     style={{
                       backgroundColor: '#fff',
@@ -648,33 +648,33 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 </div>
 
                 {/* Floating Barcode Mockup */}
-                <div style={{ 
-                   background: '#fff',
-                   width: '110px',
-                   height: '70px',
-                   borderRadius: '12px',
-                   boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
-                   transform: 'rotate(8deg) translateY(0px)',
-                   flexShrink: 0,
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   zIndex: 1,
-                   position: 'absolute',
-                   right: '15px',
-                   bottom: '50px',
-                   border: '1px solid rgba(255,255,255,0.1)',
-                   padding: '6px',
-                   boxSizing: 'border-box'
-                 }}>
-                   <HeroBarcodeCanvas />
-                 </div>
+                <div style={{
+                  background: '#fff',
+                  width: '110px',
+                  height: '70px',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+                  transform: 'rotate(8deg) translateY(0px)',
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1,
+                  position: 'absolute',
+                  right: '15px',
+                  bottom: '50px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  padding: '6px',
+                  boxSizing: 'border-box'
+                }}>
+                  <HeroBarcodeCanvas />
+                </div>
               </div>
             </div>
 
             {/* Slide 3: Bulk QR & Barcode Creator */}
             <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
-              <div style={{ 
+              <div style={{
                 borderRadius: '18px',
                 color: '#fff',
                 display: 'flex',
@@ -720,7 +720,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                       </p>
                     </div>
 
-                    <button 
+                    <button
                       onClick={() => onNavigate('batch', 'QR')}
                       style={{
                         backgroundColor: '#fff',
@@ -749,9 +749,9 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
 
                   {/* Right Column (60%) Carton Box */}
                   <div style={{ flex: '0 0 55%', height: '100%', position: 'relative' }}>
-                    <img 
-                      src="/box-green-bg-removed.png" 
-                      alt="Bulk Box" 
+                    <img
+                      src="/box-green-bg-removed.png"
+                      alt="Bulk Box"
                       style={{
                         position: 'absolute',
                         right: '-15px',
@@ -781,11 +781,11 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 }}>
                   {/* Feature 1: 10K+ Codes */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1 }}>
-                    <div style={{ 
-                      width: '18px', height: '18px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                    <div style={{
+                      width: '18px', height: '18px', borderRadius: '50%',
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#D60036', flexShrink: 0
                     }}>
                       <Layers size={10} />
                     </div>
@@ -794,11 +794,11 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
 
                   {/* Feature 2: Fast */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1 }}>
-                    <div style={{ 
-                      width: '18px', height: '18px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                    <div style={{
+                      width: '18px', height: '18px', borderRadius: '50%',
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#D60036', flexShrink: 0
                     }}>
                       <Zap size={10} />
                     </div>
@@ -807,11 +807,11 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
 
                   {/* Feature 3: 100% Accurate */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1 }}>
-                    <div style={{ 
-                      width: '18px', height: '18px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                    <div style={{
+                      width: '18px', height: '18px', borderRadius: '50%',
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#D60036', flexShrink: 0
                     }}>
                       <Target size={10} />
                     </div>
@@ -820,11 +820,11 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
 
                   {/* Feature 4: Secure */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1 }}>
-                    <div style={{ 
-                      width: '18px', height: '18px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                    <div style={{
+                      width: '18px', height: '18px', borderRadius: '50%',
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#D60036', flexShrink: 0
                     }}>
                       <Shield size={10} />
                     </div>
@@ -866,7 +866,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
         <div style={{ padding: '24px var(--main-padding-x) 12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Create QR Code</h3>
-            <button 
+            <button
               onClick={() => setShowAllQR(!showAllQR)}
               style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
             >
@@ -884,12 +884,12 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 <div className="quick-option-icon-wrapper" style={{ background: 'rgba(214, 0, 54, 0.08)', color: '#D60036' }}>
                   {React.cloneElement(option.icon, { size: 20 })}
                 </div>
-                <span style={{ 
-                  fontSize: '9px', 
-                  fontWeight: 700, 
-                  textAlign: 'center', 
-                  textTransform: 'uppercase', 
-                  letterSpacing: '0.2px', 
+                <span style={{
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.2px',
                   marginTop: '2px',
                   width: '100%',
                   whiteSpace: 'nowrap',
@@ -908,7 +908,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
         <div style={{ padding: '12px var(--main-padding-x) 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Create Barcode</h3>
-            <button 
+            <button
               onClick={() => setShowAllBarcodes(!showAllBarcodes)}
               style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
             >
@@ -926,12 +926,12 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 <div className="quick-option-icon-wrapper" style={{ background: 'rgba(214, 0, 54, 0.08)', color: '#D60036' }}>
                   {getBarcodeIcon(option.id)}
                 </div>
-                <span style={{ 
-                  fontSize: '9px', 
-                  fontWeight: 700, 
-                  textAlign: 'center', 
-                  textTransform: 'uppercase', 
-                  letterSpacing: '0.2px', 
+                <span style={{
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.2px',
                   marginTop: '2px',
                   width: '100%',
                   whiteSpace: 'nowrap',
@@ -950,13 +950,13 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Recent Projects</h3>
             {recentItems.length > 0 && (
-              <button 
+              <button
                 onClick={() => {
                   clearHistory();
                   setRecentItems([]);
-                }} 
-                style={{ 
-                  background: 'rgba(214, 0, 54, 0.1)', border: 'none', 
+                }}
+                style={{
+                  background: 'rgba(214, 0, 54, 0.1)', border: 'none',
                   color: '#D60036', fontSize: '13px', fontWeight: 600,
                   display: 'flex', alignItems: 'center', gap: '4px',
                   cursor: 'pointer', borderRadius: '8px', padding: '6px 12px'
@@ -966,7 +966,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
               </button>
             )}
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {recentItems.length > 0 ? recentItems.map(item => (
               <div key={item.id} style={{
@@ -982,15 +982,15 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 cursor: 'pointer',
                 transition: 'transform 0.2s, border-color 0.2s'
               }}
-              onClick={() => onLoadQR(item)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.borderColor = 'var(--accent-primary)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = 'var(--border-color)';
-              }}
+                onClick={() => onLoadQR(item)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.borderColor = 'var(--accent-primary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                }}
               >
                 <div style={{
                   width: '56px', height: '56px', borderRadius: '12px',
@@ -1017,10 +1017,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
                   {/* Save/Favorite Star */}
-                  <button 
+                  <button
                     onClick={() => handleSave(item)}
-                    style={{ 
-                      background: 'transparent', border: 'none', 
+                    style={{
+                      background: 'transparent', border: 'none',
                       color: 'var(--text-tertiary)', cursor: 'pointer',
                       padding: '4px', borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center'
@@ -1028,10 +1028,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     onMouseEnter={(e) => e.currentTarget.style.color = '#F39C12'}
                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
                   >
-                    <Star 
-                      size={18} 
+                    <Star
+                      size={18}
                       fill={savedIds.has(item.id) ? '#F39C12' : 'none'}
-                      style={{ 
+                      style={{
                         transition: 'all 0.3s ease',
                         transform: savedIds.has(item.id) ? 'scale(1.2)' : 'scale(1)',
                         color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'
@@ -1040,15 +1040,15 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   </button>
 
                   {/* Delete Item */}
-                  <button 
+                  <button
                     onClick={() => {
                       if (window.confirm('Delete this item from history?')) {
                         const updated = deleteFromHistory(item.id);
                         setRecentItems(updated.filter(i => i.source !== 'scan').slice(0, 10));
                       }
                     }}
-                    style={{ 
-                      background: 'transparent', border: 'none', 
+                    style={{
+                      background: 'transparent', border: 'none',
                       color: 'var(--text-tertiary)', cursor: 'pointer',
                       padding: '4px', borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center'
