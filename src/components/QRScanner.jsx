@@ -326,24 +326,29 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   const dialDragRef = useRef({ startX: 0, startY: 0, startZoom: 1, isDraggingDial: false, hasSwiped: false });
 
   const getPresets = useCallback(() => {
+    const defaultPresets = [1.0, 2.0, 4.0];
     if (zoomCapabilities && zoomCapabilities.max > 1) {
-      const min = zoomCapabilities.min || 1;
       const max = zoomCapabilities.max;
-      const mid = parseFloat(((min + max) / 2).toFixed(1));
-      return [min, mid, max];
+      const presets = defaultPresets.filter(p => p <= max);
+      if (max > presets[presets.length - 1]) {
+        presets.push(parseFloat(max.toFixed(1)));
+      }
+      return presets;
     }
-    return [1.0, 2.0, 4.0];
+    return defaultPresets;
   }, [zoomCapabilities]);
 
   const handleDialTouchStart = (e) => {
     e.stopPropagation();
+    if (dialDragRef.current.timeout) clearTimeout(dialDragRef.current.timeout);
     const touch = e.touches[0];
     dialDragRef.current = {
       startX: touch.clientX,
       startY: touch.clientY,
       startZoom: zoom,
       isDraggingDial: false,
-      hasSwiped: false
+      hasSwiped: false,
+      timeout: null
     };
   };
 
@@ -372,7 +377,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       const min = zoomCapabilities ? zoomCapabilities.min : 1;
       const max = zoomCapabilities ? zoomCapabilities.max : 4;
       const range = max - min;
-      const deltaZoom = (diffX / 180) * range;
+      const deltaZoom = (diffX / 110) * range;
       const targetZoom = Math.min(Math.max(dialDragRef.current.startZoom + deltaZoom, min), max);
       handleZoomChange(targetZoom);
     }
@@ -381,6 +386,12 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   const handleDialTouchEnd = (e) => {
     e.stopPropagation();
     dialDragRef.current.isDraggingDial = false;
+    if (zoomViewMode === 'dial') {
+      if (dialDragRef.current.timeout) clearTimeout(dialDragRef.current.timeout);
+      dialDragRef.current.timeout = setTimeout(() => {
+        setZoomViewMode('presets');
+      }, 600);
+    }
   };
 
   const toggleFlash = useCallback(async () => {
@@ -818,9 +829,17 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                 {zoomViewMode === 'presets' ? (
                   getPresets().map((preset) => {
                     const presets = getPresets();
-                    const isClosest = (preset === presets[0] && zoom < (presets[0] + presets[1]) / 2) ||
-                                      (preset === presets[1] && zoom >= (presets[0] + presets[1]) / 2 && zoom < (presets[1] + presets[2]) / 2) ||
-                                      (preset === presets[2] && zoom >= (presets[1] + presets[2]) / 2);
+                    const idx = presets.indexOf(preset);
+                    let isClosest = false;
+                    if (presets.length === 1) {
+                      isClosest = true;
+                    } else if (idx === 0) {
+                      isClosest = zoom < (presets[0] + presets[1]) / 2;
+                    } else if (idx === presets.length - 1) {
+                      isClosest = zoom >= (presets[idx - 1] + presets[idx]) / 2;
+                    } else {
+                      isClosest = zoom >= (presets[idx - 1] + presets[idx]) / 2 && zoom < (presets[idx] + presets[idx + 1]) / 2;
+                    }
                     
                     let label = `${Math.round(preset)}`;
                     if (isClosest) {
@@ -849,10 +868,10 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                       <div 
                         className="qrs-zoom-wheel-ticks" 
                         style={{ 
-                          transform: `translateX(${-((zoom - (zoomCapabilities ? zoomCapabilities.min : 1)) / ((zoomCapabilities ? zoomCapabilities.max : 4) - (zoomCapabilities ? zoomCapabilities.min : 1))) * 120}px)` 
+                          transform: `translateX(${-((zoom - (zoomCapabilities ? zoomCapabilities.min : 1)) / ((zoomCapabilities ? zoomCapabilities.max : 4) - (zoomCapabilities ? zoomCapabilities.min : 1))) * 200}px)` 
                         }}
                       >
-                        {Array.from({ length: 15 }).map((_, i) => (
+                        {Array.from({ length: 30 }).map((_, i) => (
                           <div key={i} className="qrs-zoom-tick" />
                         ))}
                       </div>
