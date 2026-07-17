@@ -336,12 +336,14 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
   const [activeSlide, setActiveSlide] = useState(0);
   const [showAllBarcodes, setShowAllBarcodes] = useState(false);
   const [showAllQR, setShowAllQR] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const slideCount = 3;
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
   const handleTouchStart = (e) => {
+    setIsPaused(true);
     touchStartX.current = e.targetTouches[0].clientX;
     touchEndX.current = e.targetTouches[0].clientX;
   };
@@ -351,6 +353,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
   };
 
   const handleTouchEnd = () => {
+    setIsPaused(false);
     const diff = touchStartX.current - touchEndX.current;
     if (diff > 50) {
       setActiveSlide(prev => (prev + 1) % slideCount);
@@ -360,12 +363,12 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
   };
 
   useEffect(() => {
-    if (activePage !== 'home') return;
+    if (activePage !== 'home' || isPaused) return;
     const interval = setInterval(() => {
       setActiveSlide(prev => (prev + 1) % slideCount);
     }, 5500);
     return () => clearInterval(interval);
-  }, [activePage]);
+  }, [activePage, isPaused, activeSlide]);
 
   useEffect(() => {
     if (activePage === 'home') {
@@ -479,6 +482,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
           style={{ position: 'relative', overflow: 'hidden', marginTop: '5px', width: '100%', padding: '15px 0' }}
         >
           <div style={{
