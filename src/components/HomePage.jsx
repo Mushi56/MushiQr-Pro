@@ -501,7 +501,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
                 gap: '12px',
-                height: '240px'
+                height: '220px'
               }}>
                 <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
@@ -555,8 +555,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 {/* Floating QR Mockup */}
                 <div style={{ 
                    background: '#fff',
-                   width: '115px',
-                   height: '115px',
+                   width: '100px',
+                   height: '100px',
                    borderRadius: '14px',
                    boxShadow: '0 8px 22px rgba(0,0,0,0.25)',
                    transform: 'rotate(-8deg) translateY(0px)',
@@ -567,7 +567,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                    zIndex: 1,
                    position: 'absolute',
                    right: '25px',
-                   bottom: '48px',
+                   bottom: '40px',
                    border: '1px solid rgba(255,255,255,0.1)'
                  }}>
                    <HeroQRCanvas />
@@ -589,7 +589,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(13, 148, 136, 0.12)',
                 gap: '12px',
-                height: '240px'
+                height: '220px'
               }}>
                 <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
@@ -643,8 +643,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 {/* Floating Barcode Mockup */}
                 <div style={{ 
                    background: '#fff',
-                   width: '130px',
-                   height: '80px',
+                   width: '115px',
+                   height: '70px',
                    borderRadius: '12px',
                    boxShadow: '0 8px 22px rgba(0,0,0,0.25)',
                    transform: 'rotate(8deg) translateY(0px)',
@@ -655,7 +655,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                    zIndex: 1,
                    position: 'absolute',
                    right: '20px',
-                   bottom: '60px',
+                   bottom: '50px',
                    border: '1px solid rgba(255,255,255,0.1)',
                    padding: '6px',
                    boxSizing: 'border-box'
@@ -675,7 +675,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
-                height: '240px',
+                height: '220px',
                 background: 'linear-gradient(135deg, #1A0A0C 0%, #080203 100%)',
               }}>
                 <div style={{
@@ -687,7 +687,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   flex: 1
                 }}>
                   {/* Left Column (40%) */}
-                  <div style={{ zIndex: 2, flex: '0 0 48%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
+                  <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                       <span style={{
                         padding: '3px 8px',
@@ -705,7 +705,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                           Bulk Ganaration
                         </h2>
                       </div>
-                      <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '180px' }}>
+                      <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '140px' }}>
                         Generate thousands of QR codes and barcodes from CSV or Excel files.
                       </p>
                     </div>
@@ -737,7 +737,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   </div>
 
                   {/* Right Column (60%) Carton Box */}
-                  <div style={{ flex: '0 0 52%', height: '100%', position: 'relative' }}>
+                  <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
                     <img 
                       src="/box-green-bg-removed.png" 
                       alt="Bulk Box" 
@@ -745,7 +745,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         position: 'absolute',
                         right: '-15px',
                         bottom: '-15px',
-                        height: '190px',
+                        height: '155px',
                         width: 'auto',
                         zIndex: 1,
                         pointerEvents: 'none',
@@ -760,64 +760,64 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0 16px',
+                  padding: '0 8px',
                   backgroundColor: '#FFFFFF',
                   borderTop: '1px solid rgba(0,0,0,0.05)',
-                  gap: '4px',
+                  gap: '2px',
                   width: '100%',
-                  height: '56px',
+                  height: '50px',
                   boxSizing: 'border-box'
                 }}>
                   {/* Feature 1: 10K+ Codes */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', flex: 1, height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
                     <div style={{ 
-                      width: '26px', height: '26px', borderRadius: '50%', 
+                      width: '20px', height: '20px', borderRadius: '50%', 
                       backgroundColor: 'rgba(214, 0, 54, 0.06)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
                       color: '#D60036', flexShrink: 0 
                     }}>
-                      <Layers size={13} />
+                      <Layers size={11} />
                     </div>
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>10K+ Codes</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>10K+ Codes</span>
                   </div>
 
                   {/* Feature 2: Fast */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', flex: 1, height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
                     <div style={{ 
-                      width: '26px', height: '26px', borderRadius: '50%', 
+                      width: '20px', height: '20px', borderRadius: '50%', 
                       backgroundColor: 'rgba(214, 0, 54, 0.06)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
                       color: '#D60036', flexShrink: 0 
                     }}>
-                      <Zap size={13} />
+                      <Zap size={11} />
                     </div>
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Fast</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Fast</span>
                   </div>
 
                   {/* Feature 3: 100% Accurate */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, justifyContent: 'center', height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
                     <div style={{ 
-                      width: '26px', height: '26px', borderRadius: '50%', 
+                      width: '20px', height: '20px', borderRadius: '50%', 
                       backgroundColor: 'rgba(214, 0, 54, 0.06)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
                       color: '#D60036', flexShrink: 0 
                     }}>
-                      <Target size={13} />
+                      <Target size={11} />
                     </div>
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>100% Accurate</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>100% Accurate</span>
                   </div>
 
                   {/* Feature 4: Secure */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, justifyContent: 'center', height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
                     <div style={{ 
-                      width: '26px', height: '26px', borderRadius: '50%', 
+                      width: '20px', height: '20px', borderRadius: '50%', 
                       backgroundColor: 'rgba(214, 0, 54, 0.06)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
                       color: '#D60036', flexShrink: 0 
                     }}>
-                      <Shield size={13} />
+                      <Shield size={11} />
                     </div>
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Secure</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Secure</span>
                   </div>
                 </div>
               </div>
