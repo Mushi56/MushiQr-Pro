@@ -605,8 +605,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         boxSizing: 'border-box'
                       }}
                     >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Plus size={14} /> Create QR Code
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                        Create QR Code <ChevronRight size={13} />
                       </span>
                     </button>
                   </div>
@@ -825,8 +825,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         boxSizing: 'border-box'
                       }}
                     >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Barcode size={14} /> Create Barcode
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                        Create Barcode <ChevronRight size={13} />
                       </span>
                     </button>
                   </div>
@@ -1034,8 +1034,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         height: '34px'
                       }}
                     >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <FileSpreadsheet size={13} /> Upload CSV
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                        Upload CSV <ChevronRight size={13} />
                       </span>
                     </button>
                   </div>
@@ -1160,9 +1160,20 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
             <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Create QR Code</h3>
             <button
               onClick={() => setShowAllQR(!showAllQR)}
-              style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: 'var(--accent-primary)', 
+                fontSize: '13px', 
+                fontWeight: 600, 
+                cursor: 'pointer', 
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '2px'
+              }}
             >
-              {showAllQR ? 'See Less' : 'See All'}
+              {showAllQR ? 'See Less' : 'Explore'} <ChevronRight size={14} />
             </button>
           </div>
           <div className="quick-options-grid">
@@ -1202,9 +1213,20 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
             <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Create Barcode</h3>
             <button
               onClick={() => setShowAllBarcodes(!showAllBarcodes)}
-              style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: 'var(--accent-primary)', 
+                fontSize: '13px', 
+                fontWeight: 600, 
+                cursor: 'pointer', 
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '2px'
+              }}
             >
-              {showAllBarcodes ? 'See Less' : 'See All'}
+              {showAllBarcodes ? 'See Less' : 'Explore'} <ChevronRight size={14} />
             </button>
           </div>
           <div className="quick-options-grid">
