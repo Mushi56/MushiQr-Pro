@@ -507,8 +507,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
-                  backgroundSize: '16px 16px',
+                  backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.2px, transparent 1.2px), linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
+                  backgroundSize: '16px 16px, 16px 16px, 16px 16px',
                   opacity: 0.85,
                   pointerEvents: 'none',
                   zIndex: 1
@@ -695,8 +695,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
-                  backgroundSize: '16px 16px',
+                  backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.2px, transparent 1.2px), linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
+                  backgroundSize: '16px 16px, 16px 16px, 16px 16px',
                   opacity: 0.85,
                   pointerEvents: 'none',
                   zIndex: 1
@@ -885,8 +885,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
-                  backgroundSize: '16px 16px',
+                  backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.2px, transparent 1.2px), linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
+                  backgroundSize: '16px 16px, 16px 16px, 16px 16px',
                   opacity: 0.85,
                   pointerEvents: 'none',
                   zIndex: 1
