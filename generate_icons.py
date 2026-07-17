@@ -28,7 +28,7 @@ for d, s in DENSITIES.items():
     os.makedirs(od, exist_ok=True)
     
     # 1. Standard launcher icon: Keep transparent corners to preserve squircle shape
-    ps = int(s * 0.90) # Make it look large and premium
+    ps = s # Fully fit the box
     r = logo.resize((ps, ps), Image.LANCZOS)
     c = Image.new('RGBA', (s, s), (0, 0, 0, 0)) # Transparent background
     o = (s - ps) // 2
@@ -45,7 +45,7 @@ for d, s in DENSITIES.items():
 for d, s in FG_SIZES.items():
     od = os.path.join(RES_DIR, d)
     os.makedirs(od, exist_ok=True)
-    ls = int(s * 0.65) # Adjusted size for adaptive layout
+    ls = s # Fully fit the adaptive icon box
     r = logo.resize((ls, ls), Image.LANCZOS)
     c = Image.new('RGBA', (s, s), (0,0,0,0))
     o = (s - ls) // 2
