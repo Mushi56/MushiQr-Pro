@@ -774,8 +774,8 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                                     (preset === 2.0 && zoom >= 1.5 && zoom < 3.0) ||
                                     (preset === 4.0 && zoom >= 3.0);
                   
-                  let label = `${preset.toFixed(1)}x`;
-                  if (isClosest && Math.abs(zoom - preset) > 0.05) {
+                  let label = `${Math.round(preset)}`;
+                  if (isClosest) {
                     label = `${zoom.toFixed(1)}x`;
                   }
 

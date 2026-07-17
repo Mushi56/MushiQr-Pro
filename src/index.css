@@ -7885,49 +7885,51 @@ video::-webkit-media-controls {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  padding: 0;
-  border-radius: 0;
-  border: none;
-  box-shadow: none;
+  background: rgba(10, 10, 15, 0.25);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   pointer-events: auto;
 }
 
 .qrs-zoom-ios-dial {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.5);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transform: scale(0.85);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(5px);
 }
 
 .qrs-zoom-ios-dial span {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   font-family: 'Outfit', sans-serif;
   letter-spacing: -0.2px;
 }
 
 .qrs-zoom-ios-dial.active {
-  width: 38px;
-  height: 38px;
-  background: #ffffff;
-  color: #000000;
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
   transform: scale(1.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.qrs-zoom-ios-dial:active {
-  transform: scale(0.95);
+.qrs-zoom-ios-dial:not(.active):active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 
