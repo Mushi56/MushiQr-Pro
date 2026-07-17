@@ -561,9 +561,11 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     <button 
                       onClick={() => onNavigate('generator')}
                       style={{
-                        backgroundColor: '#fff',
-                        color: '#D60036',
-                        border: 'none',
+                        backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                        color: '#fff',
+                        border: '1px solid rgba(255, 255, 255, 0.22)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
                         borderRadius: '24px',
                         padding: '8px 20px',
                         fontSize: '12px',
@@ -572,7 +574,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
                         width: 'fit-content',
                         height: '38px',
                         boxSizing: 'border-box'
@@ -612,8 +614,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '0 8px',
-                  backgroundColor: '#FFFFFF',
-                  borderTop: '1px solid rgba(0,0,0,0.05)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                   gap: '2px',
                   width: '100%',
                   height: '54px',
@@ -624,52 +628,52 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                      color: '#FF4D6D', flexShrink: 0 
                     }}>
                       <Image size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Custom Logos</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Custom Logos</span>
                   </div>
 
                   {/* Feature 2: HD Quality */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                      color: '#FF4D6D', flexShrink: 0 
                     }}>
                       <Crown size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>HD Quality</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>HD Quality</span>
                   </div>
 
                   {/* Feature 3: Templates */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                      color: '#FF4D6D', flexShrink: 0 
                     }}>
                       <Layers size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Templates</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Templates</span>
                   </div>
 
                   {/* Feature 4: Secure */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                      color: '#FF4D6D', flexShrink: 0 
                     }}>
                       <Shield size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Secure</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Secure</span>
                   </div>
                 </div>
               </div>
@@ -749,9 +753,11 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     <button 
                       onClick={() => onNavigate('barcode')}
                       style={{
-                        backgroundColor: '#fff',
-                        color: '#0F766E',
-                        border: 'none',
+                        backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                        color: '#fff',
+                        border: '1px solid rgba(255, 255, 255, 0.22)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
                         borderRadius: '24px',
                         padding: '8px 20px',
                         fontSize: '12px',
@@ -760,7 +766,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
                         width: 'fit-content',
                         height: '38px',
                         boxSizing: 'border-box'
@@ -802,8 +808,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '0 8px',
-                  backgroundColor: '#FFFFFF',
-                  borderTop: '1px solid rgba(0,0,0,0.05)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                   gap: '2px',
                   width: '100%',
                   height: '54px',
@@ -814,52 +822,52 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(15, 118, 110, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#0F766E', flexShrink: 0 
+                      color: '#2DD4BF', flexShrink: 0 
                     }}>
                       <Barcode size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Multi-Format</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Multi-Format</span>
                   </div>
 
                   {/* Feature 2: Fast Gen */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(15, 118, 110, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#0F766E', flexShrink: 0 
+                      color: '#2DD4BF', flexShrink: 0 
                     }}>
                       <Zap size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Fast Gen</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Fast Gen</span>
                   </div>
 
                   {/* Feature 3: 100% Accurate */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(15, 118, 110, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#0F766E', flexShrink: 0 
+                      color: '#2DD4BF', flexShrink: 0 
                     }}>
                       <Target size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>100% Accurate</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>100% Accurate</span>
                   </div>
 
                   {/* Feature 4: Standardized */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(15, 118, 110, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#0F766E', flexShrink: 0 
+                      color: '#2DD4BF', flexShrink: 0 
                     }}>
                       <Shield size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Standardized</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Standardized</span>
                   </div>
                 </div>
               </div>
@@ -940,9 +948,11 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     <button 
                       onClick={() => onNavigate('batch', 'QR')}
                       style={{
-                        backgroundColor: '#fff',
-                        color: '#D60036',
-                        border: 'none',
+                        backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                        color: '#fff',
+                        border: '1px solid rgba(255, 255, 255, 0.22)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
                         borderRadius: '24px',
                         padding: '0 16px',
                         fontSize: '12px',
@@ -951,7 +961,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
                         width: 'fit-content',
                         gap: '6px',
                         height: '34px'
@@ -988,8 +998,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '0 8px',
-                  backgroundColor: '#FFFFFF',
-                  borderTop: '1px solid rgba(0,0,0,0.05)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                   gap: '2px',
                   width: '100%',
                   height: '54px',
@@ -1000,52 +1012,52 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                      color: '#FF4D6D', flexShrink: 0 
                     }}>
                       <Layers size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>10K+ Codes</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>10K+ Codes</span>
                   </div>
 
                   {/* Feature 2: Fast */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                      color: '#FF4D6D', flexShrink: 0 
                     }}>
                       <Zap size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Fast</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Fast</span>
                   </div>
 
                   {/* Feature 3: 100% Accurate */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                      color: '#FF4D6D', flexShrink: 0 
                     }}>
                       <Target size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>100% Accurate</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>100% Accurate</span>
                   </div>
 
                   {/* Feature 4: Secure */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center', height: '100%' }}>
                     <div style={{ 
                       width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#D60036', flexShrink: 0 
+                      color: '#FF4D6D', flexShrink: 0 
                     }}>
                       <Shield size={11} />
                     </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Secure</span>
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Secure</span>
                   </div>
                 </div>
               </div>
