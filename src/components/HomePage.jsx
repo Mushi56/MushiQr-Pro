@@ -503,19 +503,25 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 gap: '12px',
                 height: '220px'
               }}>
-                <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
+                {/* Absolute Badges */}
+                <span style={{
+                  position: 'absolute',
+                  top: '20px',
+                  left: '24px',
+                  padding: '3px 10px',
+                  backgroundColor: 'rgba(214, 0, 54, 0.15)',
+                  borderRadius: '20px',
+                  color: '#FF4D6D',
+                  fontSize: '10.5px',
+                  fontWeight: 700,
+                  width: 'fit-content',
+                  zIndex: 3
+                }}>
+                  ✨ Smart
+                </span>
+
+                <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px', paddingTop: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                    <span style={{
-                      padding: '3px 10px',
-                      backgroundColor: 'rgba(214, 0, 54, 0.15)',
-                      borderRadius: '20px',
-                      color: '#FF4D6D',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      width: 'fit-content'
-                    }}>
-                      ✨ Smart
-                    </span>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
                       <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
                         Custom Qr Codes
@@ -591,19 +597,25 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 gap: '12px',
                 height: '220px'
               }}>
-                <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
+                {/* Absolute Badges */}
+                <span style={{
+                  position: 'absolute',
+                  top: '20px',
+                  left: '24px',
+                  padding: '3px 10px',
+                  backgroundColor: 'rgba(13, 148, 136, 0.15)',
+                  borderRadius: '20px',
+                  color: '#14B8A6',
+                  fontSize: '10.5px',
+                  fontWeight: 700,
+                  width: 'fit-content',
+                  zIndex: 3
+                }}>
+                  ✨ Fast
+                </span>
+
+                <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px', paddingTop: '15px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                    <span style={{
-                      padding: '3px 10px',
-                      backgroundColor: 'rgba(13, 148, 136, 0.15)',
-                      borderRadius: '20px',
-                      color: '#14B8A6',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      width: 'fit-content'
-                    }}>
-                      ✨ Fast
-                    </span>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
                       <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
                         Standerd Barcodes
@@ -678,28 +690,34 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 height: '220px',
                 background: 'linear-gradient(135deg, #1A0A0C 0%, #080203 100%)',
               }}>
+                {/* Absolute Badges */}
+                <span style={{
+                  position: 'absolute',
+                  top: '20px',
+                  left: '24px',
+                  padding: '3px 10px',
+                  backgroundColor: 'rgba(214, 0, 54, 0.15)',
+                  borderRadius: '20px',
+                  color: '#FF4D6D',
+                  fontSize: '10.5px',
+                  fontWeight: 700,
+                  width: 'fit-content',
+                  zIndex: 3
+                }}>
+                  ✨ New
+                </span>
+
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '20px 24px',
+                  padding: '24px 24px',
                   position: 'relative',
                   flex: 1
                 }}>
                   {/* Left Column (40%) */}
-                  <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
+                  <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px', paddingTop: '15px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                      <span style={{
-                        padding: '3px 8px',
-                        backgroundColor: 'rgba(214, 0, 54, 0.15)',
-                        borderRadius: '20px',
-                        color: '#FF4D6D',
-                        fontSize: '10px',
-                        fontWeight: 700,
-                        width: 'fit-content'
-                      }}>
-                        ✨ New
-                      </span>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
                         <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
                           Bulk Ganaration
