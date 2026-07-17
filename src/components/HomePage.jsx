@@ -497,7 +497,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
-                height: '220px',
+                height: '230px',
                 background: 'linear-gradient(135deg, #1E070B 0%, #0A0203 100%)',
               }}>
                 <div style={{
@@ -511,7 +511,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
                           Custom Qr Codes
                         </h2>
                       </div>
@@ -561,7 +561,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                      zIndex: 1,
                      position: 'absolute',
                      right: '25px',
-                     bottom: '15px',
+                     bottom: '22px',
                      border: '1px solid rgba(255,255,255,0.1)'
                    }}>
                      <HeroQRCanvas />
@@ -578,7 +578,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   borderTop: '1px solid rgba(0,0,0,0.05)',
                   gap: '2px',
                   width: '100%',
-                  height: '50px',
+                  height: '54px',
                   boxSizing: 'border-box'
                 }}>
                   {/* Feature 1: Custom Logos */}
@@ -646,7 +646,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(13, 148, 136, 0.12)',
-                height: '220px',
+                height: '230px',
                 background: 'linear-gradient(135deg, #051A17 0%, #010A09 100%)',
               }}>
                 <div style={{
@@ -660,7 +660,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
                           Standerd Barcodes
                         </h2>
                       </div>
@@ -710,7 +710,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                      zIndex: 1,
                      position: 'absolute',
                      right: '20px',
-                     bottom: '20px',
+                     bottom: '26px',
                      border: '1px solid rgba(255,255,255,0.1)',
                      padding: '6px',
                      boxSizing: 'border-box'
@@ -729,7 +729,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   borderTop: '1px solid rgba(0,0,0,0.05)',
                   gap: '2px',
                   width: '100%',
-                  height: '50px',
+                  height: '54px',
                   boxSizing: 'border-box'
                 }}>
                   {/* Feature 1: Multi-Format */}
@@ -797,7 +797,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
-                height: '220px',
+                height: '230px',
                 background: 'linear-gradient(135deg, #1A0A0C 0%, #080203 100%)',
               }}>
                 <div style={{
@@ -812,7 +812,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
                           Bulk Ganaration
                         </h2>
                       </div>
@@ -855,8 +855,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                       style={{
                         position: 'absolute',
                         right: '-15px',
-                        bottom: '-15px',
-                        height: '155px',
+                        bottom: '-10px',
+                        height: '160px',
                         width: 'auto',
                         zIndex: 1,
                         pointerEvents: 'none',
@@ -876,7 +876,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   borderTop: '1px solid rgba(0,0,0,0.05)',
                   gap: '2px',
                   width: '100%',
-                  height: '50px',
+                  height: '54px',
                   boxSizing: 'border-box'
                 }}>
                   {/* Feature 1: 10K+ Codes */}
