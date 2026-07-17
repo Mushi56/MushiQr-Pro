@@ -7918,10 +7918,10 @@ video::-webkit-media-controls {
 }
 
 .qrs-zoom-ios-dial.active {
-  background: #ff3b30;
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ff3b30;
   transform: scale(1.15);
-  box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   border: none;
 }
 
