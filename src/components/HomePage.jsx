@@ -546,14 +546,15 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   flex: 1,
                   zIndex: 2
                 }}>
-                  <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
+                  {/* Left Column (42%) */}
+                  <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
                         <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
                           Custom Qr Codes
                         </h2>
                       </div>
-                      <p style={{ fontSize: '11.5px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '210px' }}>
+                      <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '140px' }}>
                         Design custom QR codes with styles, colors, custom logos, and frames instantly.
                       </p>
                     </div>
@@ -587,26 +588,23 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     </button>
                   </div>
 
-                  {/* Floating QR Mockup */}
-                  <div style={{ 
-                     background: '#fff',
-                     width: '100px',
-                     height: '100px',
-                     borderRadius: '14px',
-                     boxShadow: '0 8px 22px rgba(0,0,0,0.25)',
-                     transform: 'rotate(-8deg) translateY(0px)',
-                     flexShrink: 0,
-                     display: 'flex',
-                     alignItems: 'center',
-                     justifyContent: 'center',
-                     zIndex: 1,
-                     position: 'absolute',
-                     right: '25px',
-                     bottom: '22px',
-                     border: '1px solid rgba(255,255,255,0.1)'
-                   }}>
-                     <HeroQRCanvas />
-                   </div>
+                  {/* Right Column (58%) Custom QR Mockup */}
+                  <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
+                    <img 
+                      src="/qr-hero.png" 
+                      alt="QR Mockup" 
+                      style={{
+                        position: 'absolute',
+                        right: '-15px',
+                        bottom: '-10px',
+                        height: '160px',
+                        width: 'auto',
+                        zIndex: 1,
+                        pointerEvents: 'none',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* Features Row inside QR Codes card */}
@@ -726,14 +724,15 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   flex: 1,
                   zIndex: 2
                 }}>
-                  <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
+                  {/* Left Column (42%) */}
+                  <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
                         <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.15 }}>
                           Standerd Barcodes
                         </h2>
                       </div>
-                      <p style={{ fontSize: '11.5px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '210px' }}>
+                      <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '140px' }}>
                         Generate standard Code 128, EAN, UPC, and other standard barcodes instantly.
                       </p>
                     </div>
@@ -767,28 +766,23 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     </button>
                   </div>
 
-                  {/* Floating Barcode Mockup */}
-                  <div style={{ 
-                     width: '130px',
-                     height: 'auto',
-                     flexShrink: 0,
-                     zIndex: 1,
-                     position: 'absolute',
-                     right: '20px',
-                     bottom: '24px',
-                     pointerEvents: 'none'
-                   }}>
-                     <img 
-                       src="/barcode-hero.png" 
-                       alt="Barcode Mockup"
-                       style={{
-                         width: '100%',
-                         height: 'auto',
-                         objectFit: 'contain',
-                         display: 'block'
-                       }}
-                     />
-                   </div>
+                  {/* Right Column (58%) Custom Barcode Mockup */}
+                  <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
+                    <img 
+                      src="/barcode-hero.png" 
+                      alt="Barcode Mockup" 
+                      style={{
+                        position: 'absolute',
+                        right: '-15px',
+                        bottom: '-10px',
+                        height: '160px',
+                        width: 'auto',
+                        zIndex: 1,
+                        pointerEvents: 'none',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* Features Row inside Barcodes card */}
