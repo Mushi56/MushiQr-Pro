@@ -358,26 +358,25 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     const diffX = touch.clientX - dialDragRef.current.startX;
     const diffY = touch.clientY - dialDragRef.current.startY;
 
+    let currentMode = zoomViewMode;
+
     if (!dialDragRef.current.hasSwiped && Math.abs(diffY) < 30) {
-      if (zoomViewMode === 'presets' && diffX > 40) {
+      if (zoomViewMode === 'presets' && Math.abs(diffX) > 30) {
         setZoomViewMode('dial');
+        currentMode = 'dial';
         dialDragRef.current.hasSwiped = true;
         triggerHapticFeedback();
-        return;
-      } else if (zoomViewMode === 'dial' && diffX < -40) {
-        setZoomViewMode('presets');
-        dialDragRef.current.hasSwiped = true;
-        triggerHapticFeedback();
-        return;
+        dialDragRef.current.startX = touch.clientX;
       }
     }
 
-    if (zoomViewMode === 'dial') {
+    if (currentMode === 'dial') {
       dialDragRef.current.isDraggingDial = true;
       const min = zoomCapabilities ? zoomCapabilities.min : 1;
       const max = zoomCapabilities ? zoomCapabilities.max : 4;
       const range = max - min;
-      const deltaZoom = (diffX / 110) * range;
+      const currentDiffX = touch.clientX - dialDragRef.current.startX;
+      const deltaZoom = (currentDiffX / 110) * range;
       const targetZoom = Math.min(Math.max(dialDragRef.current.startZoom + deltaZoom, min), max);
       handleZoomChange(targetZoom);
     }
@@ -386,12 +385,8 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   const handleDialTouchEnd = (e) => {
     e.stopPropagation();
     dialDragRef.current.isDraggingDial = false;
-    if (zoomViewMode === 'dial') {
-      if (dialDragRef.current.timeout) clearTimeout(dialDragRef.current.timeout);
-      dialDragRef.current.timeout = setTimeout(() => {
-        setZoomViewMode('presets');
-      }, 600);
-    }
+    if (dialDragRef.current.timeout) clearTimeout(dialDragRef.current.timeout);
+    setZoomViewMode('presets');
   };
 
   const toggleFlash = useCallback(async () => {
