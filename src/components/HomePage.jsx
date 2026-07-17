@@ -498,15 +498,53 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
                 height: '230px',
-                background: 'linear-gradient(135deg, #1E070B 0%, #0A0203 100%)',
+                background: 'linear-gradient(135deg, #2D080D 0%, #0F0305 60%, #1A0408 100%)',
               }}>
+                {/* Tech Grid Texture */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+                  backgroundSize: '16px 16px',
+                  opacity: 0.85,
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} />
+                {/* Glow Effects */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-30%',
+                  right: '-10%',
+                  width: '180px',
+                  height: '180px',
+                  background: 'radial-gradient(circle, rgba(255, 77, 109, 0.22) 0%, transparent 70%)',
+                  filter: 'blur(20px)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-20%',
+                  left: '-10%',
+                  width: '150px',
+                  height: '150px',
+                  background: 'radial-gradient(circle, rgba(214, 0, 54, 0.18) 0%, transparent 70%)',
+                  filter: 'blur(20px)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} />
+
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '20px 24px',
                   position: 'relative',
-                  flex: 1
+                  flex: 1,
+                  zIndex: 2
                 }}>
                   <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
@@ -579,7 +617,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   gap: '2px',
                   width: '100%',
                   height: '54px',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  zIndex: 2
                 }}>
                   {/* Feature 1: Custom Logos */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
@@ -647,15 +686,53 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(13, 148, 136, 0.12)',
                 height: '230px',
-                background: 'linear-gradient(135deg, #051A17 0%, #010A09 100%)',
+                background: 'linear-gradient(135deg, #04241F 0%, #010C0B 60%, #031714 100%)',
               }}>
+                {/* Tech Grid Texture */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+                  backgroundSize: '16px 16px',
+                  opacity: 0.85,
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} />
+                {/* Glow Effects */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-30%',
+                  right: '-10%',
+                  width: '180px',
+                  height: '180px',
+                  background: 'radial-gradient(circle, rgba(20, 184, 166, 0.22) 0%, transparent 70%)',
+                  filter: 'blur(20px)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-20%',
+                  left: '-10%',
+                  width: '150px',
+                  height: '150px',
+                  background: 'radial-gradient(circle, rgba(13, 148, 136, 0.18) 0%, transparent 70%)',
+                  filter: 'blur(20px)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} />
+
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '20px 24px',
                   position: 'relative',
-                  flex: 1
+                  flex: 1,
+                  zIndex: 2
                 }}>
                   <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
@@ -730,7 +807,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   gap: '2px',
                   width: '100%',
                   height: '54px',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  zIndex: 2
                 }}>
                   {/* Feature 1: Multi-Format */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
@@ -798,15 +876,53 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
                 height: '230px',
-                background: 'linear-gradient(135deg, #1A0A0C 0%, #080203 100%)',
+                background: 'linear-gradient(135deg, #270B10 0%, #0A0304 60%, #15050A 100%)',
               }}>
+                {/* Tech Grid Texture */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+                  backgroundSize: '16px 16px',
+                  opacity: 0.85,
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} />
+                {/* Glow Effects */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-30%',
+                  right: '-10%',
+                  width: '180px',
+                  height: '180px',
+                  background: 'radial-gradient(circle, rgba(255, 77, 109, 0.22) 0%, transparent 70%)',
+                  filter: 'blur(20px)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-20%',
+                  left: '-10%',
+                  width: '150px',
+                  height: '150px',
+                  background: 'radial-gradient(circle, rgba(214, 0, 54, 0.18) 0%, transparent 70%)',
+                  filter: 'blur(20px)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} />
+
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '20px 24px',
                   position: 'relative',
-                  flex: 1
+                  flex: 1,
+                  zIndex: 2
                 }}>
                   {/* Left Column (40%) */}
                   <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
@@ -877,7 +993,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   gap: '2px',
                   width: '100%',
                   height: '54px',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  zIndex: 2
                 }}>
                   {/* Feature 1: 10K+ Codes */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1, height: '100%' }}>
