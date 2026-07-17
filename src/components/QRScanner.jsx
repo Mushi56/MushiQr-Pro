@@ -375,8 +375,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       const min = zoomCapabilities ? zoomCapabilities.min : 1;
       const max = zoomCapabilities ? zoomCapabilities.max : 4;
       const range = max - min;
-      const currentDiffX = touch.clientX - dialDragRef.current.startX;
-      const deltaZoom = (currentDiffX / 110) * range;
+      const deltaZoom = -(currentDiffX / 110) * range;
       const targetZoom = Math.min(Math.max(dialDragRef.current.startZoom + deltaZoom, min), max);
       handleZoomChange(targetZoom);
     }
