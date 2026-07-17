@@ -480,7 +480,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           style={{ position: 'relative', overflow: 'hidden', marginTop: '5px', width: '100%', padding: '15px 0' }}
-        >          <div style={{
+        >
+          <div style={{
           display: 'flex',
           transform: `translateX(-${activeSlide * 100}%)`,
           transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -488,10 +489,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
         }}>
             {/* Slide 1: Single QR */}
             <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
-              <div style={{
+              <div style={{ 
                 background: 'linear-gradient(135deg, #1E070B 0%, #0A0203 100%)',
                 borderRadius: '18px',
-                padding: '16px 20px',
+                padding: '20px 20px',
                 color: '#fff',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -500,7 +501,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
                 gap: '12px',
-                height: '180px'
+                height: '200px'
               }}>
                 <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, height: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
@@ -516,19 +517,19 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                       ✨ Smart
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
-                      <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.1 }}>
+                      <h2 style={{ fontSize: '19px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.1 }}>
                         Create. Style.
                       </h2>
-                      <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#FF4D6D', lineHeight: 1.1 }}>
+                      <h2 style={{ fontSize: '19px', fontWeight: 800, margin: 0, color: '#FF4D6D', lineHeight: 1.1 }}>
                         Custom QR Codes.
                       </h2>
                     </div>
-                    <p style={{ fontSize: '10.5px', margin: '2px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.25, maxWidth: '200px' }}>
+                    <p style={{ fontSize: '11px', margin: '2px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.3, maxWidth: '200px' }}>
                       Design custom QR codes with styles, colors, custom logos, and frames instantly.
                     </p>
                   </div>
 
-                  <button
+                  <button 
                     onClick={() => onNavigate('generator')}
                     style={{
                       backgroundColor: '#fff',
@@ -556,34 +557,34 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 </div>
 
                 {/* Floating QR Mockup */}
-                <div style={{
-                  background: '#fff',
-                  width: '95px',
-                  height: '95px',
-                  borderRadius: '12px',
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
-                  transform: 'rotate(-8deg) translateY(0px)',
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 1,
-                  position: 'absolute',
-                  right: '20px',
-                  bottom: '40px',
-                  border: '1px solid rgba(255,255,255,0.1)'
-                }}>
-                  <HeroQRCanvas />
-                </div>
+                <div style={{ 
+                   background: '#fff',
+                   width: '105px',
+                   height: '105px',
+                   borderRadius: '12px',
+                   boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+                   transform: 'rotate(-8deg) translateY(0px)',
+                   flexShrink: 0,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   zIndex: 1,
+                   position: 'absolute',
+                   right: '20px',
+                   bottom: '48px',
+                   border: '1px solid rgba(255,255,255,0.1)'
+                 }}>
+                   <HeroQRCanvas />
+                 </div>
               </div>
             </div>
 
             {/* Slide 2: Single Barcode */}
             <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
-              <div style={{
+              <div style={{ 
                 background: 'linear-gradient(135deg, #051A17 0%, #010A09 100%)',
                 borderRadius: '18px',
-                padding: '16px 20px',
+                padding: '20px 20px',
                 color: '#fff',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -592,7 +593,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(13, 148, 136, 0.12)',
                 gap: '12px',
-                height: '180px'
+                height: '200px'
               }}>
                 <div style={{ zIndex: 2, flex: '0 0 60%', display: 'flex', flexDirection: 'column', minWidth: 0, height: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
@@ -615,12 +616,12 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         Standard Barcodes.
                       </h2>
                     </div>
-                    <p style={{ fontSize: '10.5px', margin: '2px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.25, maxWidth: '200px' }}>
+                    <p style={{ fontSize: '11px', margin: '2px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.3, maxWidth: '200px' }}>
                       Generate standard Code 128, EAN, UPC, and other standard barcodes instantly.
                     </p>
                   </div>
 
-                  <button
+                  <button 
                     onClick={() => onNavigate('barcode')}
                     style={{
                       backgroundColor: '#fff',
@@ -648,33 +649,33 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 </div>
 
                 {/* Floating Barcode Mockup */}
-                <div style={{
-                  background: '#fff',
-                  width: '110px',
-                  height: '70px',
-                  borderRadius: '12px',
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
-                  transform: 'rotate(8deg) translateY(0px)',
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 1,
-                  position: 'absolute',
-                  right: '15px',
-                  bottom: '50px',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  padding: '6px',
-                  boxSizing: 'border-box'
-                }}>
-                  <HeroBarcodeCanvas />
-                </div>
+                <div style={{ 
+                   background: '#fff',
+                   width: '120px',
+                   height: '75px',
+                   borderRadius: '12px',
+                   boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+                   transform: 'rotate(8deg) translateY(0px)',
+                   flexShrink: 0,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   zIndex: 1,
+                   position: 'absolute',
+                   right: '15px',
+                   bottom: '60px',
+                   border: '1px solid rgba(255,255,255,0.1)',
+                   padding: '6px',
+                   boxSizing: 'border-box'
+                 }}>
+                   <HeroBarcodeCanvas />
+                 </div>
               </div>
             </div>
 
             {/* Slide 3: Bulk QR & Barcode Creator */}
             <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
-              <div style={{
+              <div style={{ 
                 borderRadius: '18px',
                 color: '#fff',
                 display: 'flex',
@@ -682,14 +683,14 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
-                height: '180px',
+                height: '200px',
                 background: 'linear-gradient(135deg, #1A0A0C 0%, #080203 100%)',
               }}>
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '12px 16px',
+                  padding: '16px 20px',
                   position: 'relative',
                   flex: 1
                 }}>
@@ -708,19 +709,19 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         ✨ New
                       </span>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.1 }}>
+                        <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: '#fff', lineHeight: 1.1 }}>
                           Create. Upload.
                         </h2>
-                        <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#FF4D6D', lineHeight: 1.1 }}>
+                        <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: '#FF4D6D', lineHeight: 1.1 }}>
                           Generate in Bulk.
                         </h2>
                       </div>
-                      <p style={{ fontSize: '9.5px', margin: '2px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.2, maxWidth: '170px' }}>
+                      <p style={{ fontSize: '10px', margin: '2px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.3, maxWidth: '170px' }}>
                         Generate thousands of QR codes and barcodes from CSV or Excel files.
                       </p>
                     </div>
 
-                    <button
+                    <button 
                       onClick={() => onNavigate('batch', 'QR')}
                       style={{
                         backgroundColor: '#fff',
@@ -749,14 +750,14 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
 
                   {/* Right Column (60%) Carton Box */}
                   <div style={{ flex: '0 0 55%', height: '100%', position: 'relative' }}>
-                    <img
-                      src="/box-green-bg-removed.png"
-                      alt="Bulk Box"
+                    <img 
+                      src="/box-green-bg-removed.png" 
+                      alt="Bulk Box" 
                       style={{
                         position: 'absolute',
                         right: '-15px',
                         bottom: '-15px',
-                        height: '145px',
+                        height: '160px',
                         width: 'auto',
                         zIndex: 1,
                         pointerEvents: 'none',
@@ -776,57 +777,57 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   borderTop: '1px solid rgba(0,0,0,0.05)',
                   gap: '4px',
                   width: '100%',
-                  height: '36px',
+                  height: '40px',
                   boxSizing: 'border-box'
                 }}>
                   {/* Feature 1: 10K+ Codes */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1 }}>
-                    <div style={{
-                      width: '18px', height: '18px', borderRadius: '50%',
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#D60036', flexShrink: 0
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#D60036', flexShrink: 0 
                     }}>
-                      <Layers size={10} />
+                      <Layers size={11} />
                     </div>
                     <span style={{ fontSize: '9px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>10K+ Codes</span>
                   </div>
 
                   {/* Feature 2: Fast */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1 }}>
-                    <div style={{
-                      width: '18px', height: '18px', borderRadius: '50%',
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#D60036', flexShrink: 0
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#D60036', flexShrink: 0 
                     }}>
-                      <Zap size={10} />
+                      <Zap size={11} />
                     </div>
                     <span style={{ fontSize: '9px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Fast</span>
                   </div>
 
                   {/* Feature 3: 100% Accurate */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1 }}>
-                    <div style={{
-                      width: '18px', height: '18px', borderRadius: '50%',
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#D60036', flexShrink: 0
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#D60036', flexShrink: 0 
                     }}>
-                      <Target size={10} />
+                      <Target size={11} />
                     </div>
                     <span style={{ fontSize: '9px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>100% Accurate</span>
                   </div>
 
                   {/* Feature 4: Secure */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flex: 1 }}>
-                    <div style={{
-                      width: '18px', height: '18px', borderRadius: '50%',
-                      backgroundColor: 'rgba(214, 0, 54, 0.06)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#D60036', flexShrink: 0
+                    <div style={{ 
+                      width: '20px', height: '20px', borderRadius: '50%', 
+                      backgroundColor: 'rgba(214, 0, 54, 0.06)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      color: '#D60036', flexShrink: 0 
                     }}>
-                      <Shield size={10} />
+                      <Shield size={11} />
                     </div>
                     <span style={{ fontSize: '9px', fontWeight: 700, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Secure</span>
                   </div>
