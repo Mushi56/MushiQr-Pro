@@ -835,7 +835,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
                     {/* Glow aura behind image */}
                     <div style={{
-                      position: 'absolute', right: '-5px', bottom: '20px',
+                      position: 'absolute', right: '-5px', top: '50%', transform: 'translateY(-50%)',
                       width: '140px', height: '80px',
                       background: 'radial-gradient(ellipse, rgba(45,212,191,0.35) 0%, transparent 70%)',
                       filter: 'blur(16px)', zIndex: 1, pointerEvents: 'none'
@@ -846,7 +846,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                       style={{
                         position: 'absolute',
                         right: '-15px',
-                        bottom: '-10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
                         height: '190px',
                         width: 'auto',
                         zIndex: 2,
@@ -997,7 +998,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                           fontSize: '14px', 
                           fontWeight: 800, 
                           margin: 0, 
-                          backgroundImage: 'linear-gradient(90deg, #FF8A00 0%, #FFD600 100%)',
+                          backgroundImage: 'linear-gradient(90deg, #FF3F60 0%, #FF90A5 100%)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                           lineHeight: 1.15,
@@ -1044,7 +1045,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
                     {/* Glow aura behind image */}
                     <div style={{
-                      position: 'absolute', right: '5px', bottom: '20px',
+                      position: 'absolute', right: '5px', top: '50%', transform: 'translateY(-50%)',
                       width: '120px', height: '120px',
                       background: 'radial-gradient(circle, rgba(255,120,80,0.3) 0%, transparent 70%)',
                       filter: 'blur(18px)', zIndex: 1, pointerEvents: 'none'
@@ -1055,7 +1056,8 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                       style={{
                         position: 'absolute',
                         right: '-15px',
-                        bottom: '-10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
                         height: '190px',
                         width: 'auto',
                         zIndex: 2,
