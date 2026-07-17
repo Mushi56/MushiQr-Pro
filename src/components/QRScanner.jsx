@@ -322,6 +322,67 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     }
   }, [applyZoom, zoomCapabilities]);
 
+  const [zoomViewMode, setZoomViewMode] = useState('presets'); // 'presets' or 'dial'
+  const dialDragRef = useRef({ startX: 0, startY: 0, startZoom: 1, isDraggingDial: false, hasSwiped: false });
+
+  const getPresets = useCallback(() => {
+    if (zoomCapabilities && zoomCapabilities.max > 1) {
+      const min = zoomCapabilities.min || 1;
+      const max = zoomCapabilities.max;
+      const mid = parseFloat(((min + max) / 2).toFixed(1));
+      return [min, mid, max];
+    }
+    return [1.0, 2.0, 4.0];
+  }, [zoomCapabilities]);
+
+  const handleDialTouchStart = (e) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    dialDragRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startZoom: zoom,
+      isDraggingDial: false,
+      hasSwiped: false
+    };
+  };
+
+  const handleDialTouchMove = (e) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    const diffX = touch.clientX - dialDragRef.current.startX;
+    const diffY = touch.clientY - dialDragRef.current.startY;
+
+    if (!dialDragRef.current.hasSwiped && Math.abs(diffY) < 30) {
+      if (zoomViewMode === 'presets' && diffX > 40) {
+        setZoomViewMode('dial');
+        dialDragRef.current.hasSwiped = true;
+        triggerHapticFeedback();
+        return;
+      } else if (zoomViewMode === 'dial' && diffX < -40) {
+        setZoomViewMode('presets');
+        dialDragRef.current.hasSwiped = true;
+        triggerHapticFeedback();
+        return;
+      }
+    }
+
+    if (zoomViewMode === 'dial') {
+      dialDragRef.current.isDraggingDial = true;
+      const min = zoomCapabilities ? zoomCapabilities.min : 1;
+      const max = zoomCapabilities ? zoomCapabilities.max : 4;
+      const range = max - min;
+      const deltaZoom = (diffX / 180) * range;
+      const targetZoom = Math.min(Math.max(dialDragRef.current.startZoom + deltaZoom, min), max);
+      handleZoomChange(targetZoom);
+    }
+  };
+
+  const handleDialTouchEnd = (e) => {
+    e.stopPropagation();
+    dialDragRef.current.isDraggingDial = false;
+  };
+
   const toggleFlash = useCallback(async () => {
     triggerHapticFeedback();
     try {
@@ -746,30 +807,60 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
             {status === 'SCANNING' && <div className="qrs-laser" />}
             {status === 'DETECTED' && <div className="qrs-laser frozen" />}
 
-            {/* iPhone-style Premium Zoom Dials */}
+            {/* iPhone-style Premium Zoom Dials & Jog Wheel */}
             {status === 'SCANNING' && (
-              <div className="qrs-zoom-ios-container" onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()}>
-                {[1.0, 2.0, 4.0].map((preset) => {
-                  const isClosest = (preset === 1.0 && zoom < 1.5) ||
-                                    (preset === 2.0 && zoom >= 1.5 && zoom < 3.0) ||
-                                    (preset === 4.0 && zoom >= 3.0);
-                  
-                  let label = `${Math.round(preset)}`;
-                  if (isClosest) {
-                    label = `${zoom.toFixed(1)}x`;
-                  }
+              <div 
+                className="qrs-zoom-ios-container" 
+                onTouchStart={handleDialTouchStart} 
+                onTouchMove={handleDialTouchMove} 
+                onTouchEnd={handleDialTouchEnd}
+              >
+                {zoomViewMode === 'presets' ? (
+                  getPresets().map((preset) => {
+                    const presets = getPresets();
+                    const isClosest = (preset === presets[0] && zoom < (presets[0] + presets[1]) / 2) ||
+                                      (preset === presets[1] && zoom >= (presets[0] + presets[1]) / 2 && zoom < (presets[1] + presets[2]) / 2) ||
+                                      (preset === presets[2] && zoom >= (presets[1] + presets[2]) / 2);
+                    
+                    let label = `${Math.round(preset)}`;
+                    if (isClosest) {
+                      label = `${zoom.toFixed(1)}x`;
+                    }
 
-                  return (
-                    <button
-                      key={preset}
-                      className={`qrs-zoom-ios-dial ${isClosest ? 'active' : ''}`}
-                      onClick={() => handleZoomChange(preset)}
-                      aria-label={`Zoom ${preset}x`}
-                    >
-                      <span>{label}</span>
+                    return (
+                      <button
+                        key={preset}
+                        className={`qrs-zoom-ios-dial ${isClosest ? 'active' : ''}`}
+                        onClick={() => handleZoomChange(preset)}
+                        aria-label={`Zoom ${preset}x`}
+                      >
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="qrs-zoom-wheel-layout">
+                    <button className="qrs-zoom-wheel-back" onClick={() => { triggerHapticFeedback(); setZoomViewMode('presets'); }}>
+                      Presets
                     </button>
-                  );
-                })}
+                    
+                    <div className="qrs-zoom-wheel-track">
+                      <div className="qrs-zoom-wheel-center-line" />
+                      <div 
+                        className="qrs-zoom-wheel-ticks" 
+                        style={{ 
+                          transform: `translateX(${-((zoom - (zoomCapabilities ? zoomCapabilities.min : 1)) / ((zoomCapabilities ? zoomCapabilities.max : 4) - (zoomCapabilities ? zoomCapabilities.min : 1))) * 120}px)` 
+                        }}
+                      >
+                        {Array.from({ length: 15 }).map((_, i) => (
+                          <div key={i} className="qrs-zoom-tick" />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="qrs-zoom-wheel-val">{zoom.toFixed(1)}x</div>
+                  </div>
+                )}
               </div>
             )}
           </div>

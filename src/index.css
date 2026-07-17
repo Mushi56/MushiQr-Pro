@@ -7878,26 +7878,26 @@ video::-webkit-media-controls {
 /* ── iPhone-style Zoom Dials ── */
 .qrs-zoom-ios-container {
   position: absolute;
-  bottom: 28px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   background: rgba(10, 10, 15, 0.25);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  padding: 6px;
+  padding: 4px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   pointer-events: auto;
 }
 
 .qrs-zoom-ios-dial {
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.05);
@@ -7911,25 +7911,97 @@ video::-webkit-media-controls {
 }
 
 .qrs-zoom-ios-dial span {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
   font-family: 'Outfit', sans-serif;
   letter-spacing: -0.2px;
 }
 
 .qrs-zoom-ios-dial.active {
-  background: rgba(255, 255, 255, 0.25);
+  background: #ff3b30;
   color: #ffffff;
   transform: scale(1.15);
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4);
+  border: none;
 }
 
 .qrs-zoom-ios-dial:not(.active):active {
   transform: scale(0.9);
   background: rgba(255, 255, 255, 0.12);
+}
+
+/* Jog Dial Wheel Mode Layout */
+.qrs-zoom-wheel-layout {
+  display: flex;
+  align-items: center;
+  width: 200px;
+  height: 34px;
+  overflow: hidden;
+  position: relative;
+  gap: 8px;
+}
+
+.qrs-zoom-wheel-back {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.qrs-zoom-wheel-track {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.qrs-zoom-wheel-center-line {
+  position: absolute;
+  width: 2px;
+  height: 16px;
+  background: #ff3b30;
+  z-index: 5;
+  border-radius: 99px;
+}
+
+.qrs-zoom-wheel-ticks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.1s cubic-bezier(0.1, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+.qrs-zoom-tick {
+  width: 1px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+/* Make every 5th tick taller */
+.qrs-zoom-tick:nth-child(5n) {
+  height: 14px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.qrs-zoom-wheel-val {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ff3b30;
+  min-width: 32px;
+  text-align: right;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.2px;
 }
 
 
