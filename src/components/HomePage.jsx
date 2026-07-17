@@ -496,46 +496,60 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
-                boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
+                boxShadow: '0 16px 48px rgba(214, 0, 54, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
                 height: '230px',
-                background: 'linear-gradient(135deg, #2D080D 0%, #0F0305 60%, #1A0408 100%)',
+                background: 'linear-gradient(135deg, #3D0A12 0%, #160407 55%, #220609 100%)',
               }}>
-                {/* Tech Grid Texture */}
+                {/* Noise texture overlay */}
                 <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.2px, transparent 1.2px), linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
-                  backgroundSize: '16px 16px, 16px 16px, 16px 16px',
-                  opacity: 0.85,
-                  pointerEvents: 'none',
-                  zIndex: 1
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
+                  backgroundSize: '200px 200px',
+                  opacity: 1, pointerEvents: 'none', zIndex: 1
                 }} />
-                {/* Glow Effects */}
+                {/* QR dot grid texture */}
                 <div style={{
-                  position: 'absolute',
-                  top: '-30%',
-                  right: '-10%',
-                  width: '180px',
-                  height: '180px',
-                  background: 'radial-gradient(circle, rgba(255, 77, 109, 0.22) 0%, transparent 70%)',
-                  filter: 'blur(20px)',
-                  pointerEvents: 'none',
-                  zIndex: 1
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: 'radial-gradient(circle, rgba(255,77,109,0.12) 1px, transparent 1px)',
+                  backgroundSize: '14px 14px',
+                  opacity: 1, pointerEvents: 'none', zIndex: 1
                 }} />
+                {/* Ghost blurred QR in background */}
                 <div style={{
-                  position: 'absolute',
-                  bottom: '-20%',
-                  left: '-10%',
-                  width: '150px',
-                  height: '150px',
-                  background: 'radial-gradient(circle, rgba(214, 0, 54, 0.18) 0%, transparent 70%)',
-                  filter: 'blur(20px)',
-                  pointerEvents: 'none',
-                  zIndex: 1
+                  position: 'absolute', right: '-10px', top: '10px',
+                  width: '130px', height: '130px',
+                  backgroundImage: `url('/qr-hero.png')`,
+                  backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
+                  opacity: 0.06, filter: 'blur(4px)',
+                  pointerEvents: 'none', zIndex: 1
                 }} />
+                {/* Center radial glow */}
+                <div style={{
+                  position: 'absolute', top: '50%', left: '55%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '220px', height: '220px',
+                  background: 'radial-gradient(circle, rgba(255,77,109,0.14) 0%, transparent 65%)',
+                  pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Top-right accent glow */}
+                <div style={{
+                  position: 'absolute', top: '-40%', right: '-5%',
+                  width: '200px', height: '200px',
+                  background: 'radial-gradient(circle, rgba(255, 77, 109, 0.28) 0%, transparent 65%)',
+                  filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Bottom-left accent glow */}
+                <div style={{
+                  position: 'absolute', bottom: '-20%', left: '-5%',
+                  width: '160px', height: '160px',
+                  background: 'radial-gradient(circle, rgba(214, 0, 54, 0.22) 0%, transparent 70%)',
+                  filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Floating particles */}
+                <div style={{ position: 'absolute', top: '18%', left: '32%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,77,109,0.7)', boxShadow: '0 0 6px rgba(255,77,109,0.8)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '55%', left: '22%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(255,150,150,0.5)', boxShadow: '0 0 4px rgba(255,150,150,0.6)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '30%', left: '45%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(255,77,109,0.4)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '72%', left: '38%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,200,200,0.35)', pointerEvents: 'none', zIndex: 2 }} />
 
                 <div style={{
                   display: 'flex',
@@ -590,6 +604,13 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
 
                   {/* Right Column (58%) Custom QR Mockup */}
                   <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
+                    {/* Glow aura behind image */}
+                    <div style={{
+                      position: 'absolute', right: '-5px', bottom: '10px',
+                      width: '120px', height: '120px',
+                      background: 'radial-gradient(circle, rgba(255,77,109,0.35) 0%, transparent 70%)',
+                      filter: 'blur(18px)', zIndex: 1, pointerEvents: 'none'
+                    }} />
                     <img 
                       src="/qr-hero.png" 
                       alt="QR Mockup" 
@@ -599,9 +620,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         bottom: '-10px',
                         height: '160px',
                         width: 'auto',
-                        zIndex: 1,
+                        zIndex: 2,
                         pointerEvents: 'none',
-                        objectFit: 'contain'
+                        objectFit: 'contain',
+                        filter: 'drop-shadow(0 12px 24px rgba(255,77,109,0.4)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))'
                       }}
                     />
                   </div>
@@ -674,46 +696,71 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
-                boxShadow: '0 10px 32px rgba(13, 148, 136, 0.12)',
+                boxShadow: '0 16px 48px rgba(13, 148, 136, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
                 height: '230px',
-                background: 'linear-gradient(135deg, #04241F 0%, #010C0B 60%, #031714 100%)',
+                background: 'linear-gradient(135deg, #062E27 0%, #010E0C 55%, #041C18 100%)',
               }}>
-                {/* Tech Grid Texture */}
+                {/* Noise texture overlay */}
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
+                  backgroundSize: '200px 200px',
+                  opacity: 1, pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Barcode-stripe texture */}
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: 'repeating-linear-gradient(90deg, rgba(45,212,191,0.04) 0px, rgba(45,212,191,0.04) 2px, transparent 2px, transparent 12px)',
+                  opacity: 1, pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Ghost blurred barcode in background */}
+                <div style={{
+                  position: 'absolute', right: '-10px', top: '12px',
+                  width: '150px', height: '100px',
+                  backgroundImage: `url('/barcode-hero.png')`,
+                  backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
+                  opacity: 0.06, filter: 'blur(4px)',
+                  pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Center radial glow */}
+                <div style={{
+                  position: 'absolute', top: '50%', left: '55%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '220px', height: '220px',
+                  background: 'radial-gradient(circle, rgba(45,212,191,0.12) 0%, transparent 65%)',
+                  pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Top-right accent glow */}
+                <div style={{
+                  position: 'absolute', top: '-40%', right: '-5%',
+                  width: '200px', height: '200px',
+                  background: 'radial-gradient(circle, rgba(20, 184, 166, 0.28) 0%, transparent 65%)',
+                  filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Bottom-left accent glow */}
+                <div style={{
+                  position: 'absolute', bottom: '-20%', left: '-5%',
+                  width: '160px', height: '160px',
+                  background: 'radial-gradient(circle, rgba(13, 148, 136, 0.22) 0%, transparent 70%)',
+                  filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Floating particles */}
+                <div style={{ position: 'absolute', top: '20%', left: '33%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(45,212,191,0.7)', boxShadow: '0 0 6px rgba(45,212,191,0.8)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '58%', left: '24%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(100,240,220,0.5)', boxShadow: '0 0 4px rgba(100,240,220,0.6)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '35%', left: '42%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(45,212,191,0.4)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '68%', left: '36%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(180,255,240,0.35)', pointerEvents: 'none', zIndex: 2 }} />
+                {/* Old glow effects slot kept for compatibility */}
                 <div style={{
                   position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.2px, transparent 1.2px), linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
-                  backgroundSize: '16px 16px, 16px 16px, 16px 16px',
-                  opacity: 0.85,
+                  top: '-40%',
+                  right: '-5%',
+                  width: '200px',
+                  height: '200px',
+                  background: 'transparent',
                   pointerEvents: 'none',
-                  zIndex: 1
+                  zIndex: 0
                 }} />
-                {/* Glow Effects */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-30%',
-                  right: '-10%',
-                  width: '180px',
-                  height: '180px',
-                  background: 'radial-gradient(circle, rgba(20, 184, 166, 0.22) 0%, transparent 70%)',
-                  filter: 'blur(20px)',
-                  pointerEvents: 'none',
-                  zIndex: 1
-                }} />
-                <div style={{
-                  position: 'absolute',
-                  bottom: '-20%',
-                  left: '-10%',
-                  width: '150px',
-                  height: '150px',
-                  background: 'radial-gradient(circle, rgba(13, 148, 136, 0.18) 0%, transparent 70%)',
-                  filter: 'blur(20px)',
-                  pointerEvents: 'none',
-                  zIndex: 1
-                }} />
+                <div style={{ display: 'none' }} />
 
                 <div style={{
                   display: 'flex',
@@ -768,6 +815,13 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
 
                   {/* Right Column (58%) Custom Barcode Mockup */}
                   <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
+                    {/* Glow aura behind image */}
+                    <div style={{
+                      position: 'absolute', right: '-5px', bottom: '20px',
+                      width: '140px', height: '80px',
+                      background: 'radial-gradient(ellipse, rgba(45,212,191,0.35) 0%, transparent 70%)',
+                      filter: 'blur(16px)', zIndex: 1, pointerEvents: 'none'
+                    }} />
                     <img 
                       src="/barcode-hero.png" 
                       alt="Barcode Mockup" 
@@ -777,9 +831,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         bottom: '-10px',
                         height: '160px',
                         width: 'auto',
-                        zIndex: 1,
+                        zIndex: 2,
                         pointerEvents: 'none',
-                        objectFit: 'contain'
+                        objectFit: 'contain',
+                        filter: 'drop-shadow(0 12px 24px rgba(45,212,191,0.4)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))'
                       }}
                     />
                   </div>
@@ -852,46 +907,60 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                 flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
-                boxShadow: '0 10px 32px rgba(214, 0, 54, 0.12)',
+                boxShadow: '0 16px 48px rgba(214, 0, 54, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
                 height: '230px',
-                background: 'linear-gradient(135deg, #270B10 0%, #0A0304 60%, #15050A 100%)',
+                background: 'linear-gradient(135deg, #3A0D14 0%, #110406 55%, #1E0608 100%)',
               }}>
-                {/* Tech Grid Texture */}
+                {/* Noise texture overlay */}
                 <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1.2px, transparent 1.2px), linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
-                  backgroundSize: '16px 16px, 16px 16px, 16px 16px',
-                  opacity: 0.85,
-                  pointerEvents: 'none',
-                  zIndex: 1
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
+                  backgroundSize: '200px 200px',
+                  opacity: 1, pointerEvents: 'none', zIndex: 1
                 }} />
-                {/* Glow Effects */}
+                {/* CSV/spreadsheet grid texture */}
                 <div style={{
-                  position: 'absolute',
-                  top: '-30%',
-                  right: '-10%',
-                  width: '180px',
-                  height: '180px',
-                  background: 'radial-gradient(circle, rgba(255, 77, 109, 0.22) 0%, transparent 70%)',
-                  filter: 'blur(20px)',
-                  pointerEvents: 'none',
-                  zIndex: 1
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: 'linear-gradient(rgba(255,77,109,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,77,109,0.07) 1px, transparent 1px)',
+                  backgroundSize: '20px 20px',
+                  opacity: 1, pointerEvents: 'none', zIndex: 1
                 }} />
+                {/* Ghost blurred QR in background */}
                 <div style={{
-                  position: 'absolute',
-                  bottom: '-20%',
-                  left: '-10%',
-                  width: '150px',
-                  height: '150px',
-                  background: 'radial-gradient(circle, rgba(214, 0, 54, 0.18) 0%, transparent 70%)',
-                  filter: 'blur(20px)',
-                  pointerEvents: 'none',
-                  zIndex: 1
+                  position: 'absolute', right: '-5px', top: '15px',
+                  width: '130px', height: '130px',
+                  backgroundImage: `url('/qr-hero.png')`,
+                  backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
+                  opacity: 0.05, filter: 'blur(4px)',
+                  pointerEvents: 'none', zIndex: 1
                 }} />
+                {/* Center radial glow */}
+                <div style={{
+                  position: 'absolute', top: '50%', left: '55%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '220px', height: '220px',
+                  background: 'radial-gradient(circle, rgba(255,77,109,0.14) 0%, transparent 65%)',
+                  pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Top-right accent glow */}
+                <div style={{
+                  position: 'absolute', top: '-40%', right: '-5%',
+                  width: '200px', height: '200px',
+                  background: 'radial-gradient(circle, rgba(255, 77, 109, 0.28) 0%, transparent 65%)',
+                  filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Bottom-left accent glow */}
+                <div style={{
+                  position: 'absolute', bottom: '-20%', left: '-5%',
+                  width: '160px', height: '160px',
+                  background: 'radial-gradient(circle, rgba(214, 0, 54, 0.22) 0%, transparent 70%)',
+                  filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
+                }} />
+                {/* Floating particles */}
+                <div style={{ position: 'absolute', top: '22%', left: '30%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,77,109,0.7)', boxShadow: '0 0 6px rgba(255,77,109,0.8)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '60%', left: '20%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(255,150,150,0.5)', boxShadow: '0 0 4px rgba(255,150,150,0.6)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '38%', left: '40%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(255,77,109,0.4)', pointerEvents: 'none', zIndex: 2 }} />
+                <div style={{ position: 'absolute', top: '75%', left: '35%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,200,200,0.35)', pointerEvents: 'none', zIndex: 2 }} />
 
                 <div style={{
                   display: 'flex',
@@ -946,6 +1015,13 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
 
                   {/* Right Column (60%) Carton Box */}
                   <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
+                    {/* Glow aura behind image */}
+                    <div style={{
+                      position: 'absolute', right: '5px', bottom: '20px',
+                      width: '120px', height: '120px',
+                      background: 'radial-gradient(circle, rgba(255,120,80,0.3) 0%, transparent 70%)',
+                      filter: 'blur(18px)', zIndex: 1, pointerEvents: 'none'
+                    }} />
                     <img 
                       src="/box-green-bg-removed.png" 
                       alt="Bulk Box" 
@@ -955,9 +1031,10 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                         bottom: '-10px',
                         height: '160px',
                         width: 'auto',
-                        zIndex: 1,
+                        zIndex: 2,
                         pointerEvents: 'none',
-                        objectFit: 'contain'
+                        objectFit: 'contain',
+                        filter: 'drop-shadow(0 16px 28px rgba(0,0,0,0.6)) drop-shadow(0 4px 8px rgba(0,0,0,0.4))'
                       }}
                     />
                   </div>
