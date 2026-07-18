@@ -275,6 +275,61 @@ const SWATCH_PRESETS = [
   '#FF007F', '#00D1FF', '#FFD700', '#8E8E93'
 ];
 
+const renderShapeThumbnail = (shapeId, color = 'currentColor') => {
+  switch (shapeId) {
+    case 'circle':
+      return (
+        <svg width="54" height="54" viewBox="0 0 54 54" style={{ display: 'block', margin: '0 auto' }}>
+          <circle cx="27" cy="27" r="22" fill={color} />
+        </svg>
+      );
+    case 'solid':
+      return (
+        <svg width="54" height="54" viewBox="0 0 54 54" style={{ display: 'block', margin: '0 auto' }}>
+          <rect x="5" y="5" width="44" height="44" fill={color} />
+        </svg>
+      );
+    case 'rounded':
+      return (
+        <svg width="54" height="54" viewBox="0 0 54 54" style={{ display: 'block', margin: '0 auto' }}>
+          <rect x="5" y="5" width="44" height="44" rx="10" fill={color} />
+        </svg>
+      );
+    case 'pill':
+      return (
+        <svg width="54" height="54" viewBox="0 0 54 54" style={{ display: 'block', margin: '0 auto' }}>
+          <rect x="4" y="12" width="46" height="30" rx="15" fill={color} />
+        </svg>
+      );
+    case 'ribbon':
+      return (
+        <svg width="54" height="54" viewBox="0 0 54 54" style={{ display: 'block', margin: '0 auto' }}>
+          <path d="M5,10 L49,10 L43,27 L49,44 L5,44 L11,27 Z" fill={color} />
+        </svg>
+      );
+    case 'glow':
+      return (
+        <svg width="54" height="54" viewBox="0 0 54 54" style={{ display: 'block', margin: '0 auto' }}>
+          <defs>
+            <filter id="glow-thumb" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+          <rect x="8" y="8" width="38" height="38" rx="8" fill={color} filter="url(#glow-thumb)" />
+        </svg>
+      );
+    case 'hexagon':
+      return (
+        <svg width="54" height="54" viewBox="0 0 54 54" style={{ display: 'block', margin: '0 auto' }}>
+          <polygon points="14,6 40,6 50,27 40,48 14,48 4,27" fill={color} />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
 const MockQR = () => {
   const size = 21;
   // Actual "Hello World" (Level M) pattern bits (Simplified representation for clarity)
@@ -3461,10 +3516,16 @@ export default function App() {
                           {logoOutline && (
                             <div className="fade-in" style={{ marginTop: '14px' }}>
                               <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px' }}>Stroke Color</div>
-                              <div className="swatch-grid-mini" style={{ marginBottom: '18px' }}>
+                              <div className="swatch-grid-mini" style={{ marginBottom: '12px' }}>
                                 <ColorPicker isSwatch={true} icon={Pipette} value={logoOutlineColor} onChange={setLogoOutlineColor} onOpenAdvanced={handleOpenAdv} />
                                 {SWATCH_PRESETS.map(color => (
                                   <div key={color} className={`swatch-item${logoOutlineColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => setLogoOutlineColor(color)} />
+                                ))}
+                              </div>
+                              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '12px', marginBottom: '10px' }}>Gradient Presets</div>
+                              <div className="swatch-grid-mini" style={{ marginBottom: '18px' }}>
+                                {LOGO_BG_GRADIENT_PRESETS.map(grad => (
+                                  <div key={grad} className={`swatch-item${logoOutlineColor === grad ? ' active' : ''}`} style={{ background: grad }} onClick={() => setLogoOutlineColor(grad)} />
                                 ))}
                               </div>
                               <Slider label="Stroke Width" value={logoOutlineWidth} min={1} max={10} step={1} onChange={setLogoOutlineWidth} />
@@ -3481,13 +3542,30 @@ export default function App() {
                                 {LOGO_BG_SHAPES.map(shape => {
                                   const isActive = logoBgShape === shape.id;
                                   return (
-                                    <button 
+                                                                    <button 
                                       key={shape.id} 
                                       onClick={() => setLogoBgShape(shape.id)}
                                       className={`font-scroll-btn ${isActive ? 'active' : ''}`} 
-                                      style={{ flex: '0 0 auto', padding: '10px 18px', borderRadius: '12px', background: isActive ? 'var(--accent-primary)' : 'var(--bg-elevated)', color: isActive ? '#fff' : 'var(--text-primary)', border: '1px solid', borderColor: isActive ? 'var(--accent-primary)' : 'var(--border-color)', fontSize: '14px', whiteSpace: 'nowrap', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: isActive ? '0 4px 12px rgba(255,59,48,0.3)' : 'none' }}
+                                      style={{ 
+                                        flex: '0 0 auto', 
+                                        padding: '4px', 
+                                        borderRadius: '14px', 
+                                        background: isActive ? 'var(--accent-primary)' : 'var(--bg-elevated)', 
+                                        color: isActive ? '#fff' : 'var(--text-primary)', 
+                                        border: '2px solid', 
+                                        borderColor: isActive ? 'var(--accent-primary)' : 'var(--border-color)', 
+                                        cursor: 'pointer', 
+                                        transition: 'all 0.2s ease', 
+                                        boxShadow: isActive ? '0 4px 12px rgba(255,59,48,0.3)' : 'none',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: '64px',
+                                        height: '64px'
+                                      }}
+                                      title={shape.label}
                                     >
-                                      {shape.label}
+                                      {renderShapeThumbnail(shape.id, isActive ? '#ffffff' : 'var(--text-primary)')}
                                     </button>
                                   );
                                 })}
@@ -3859,6 +3937,12 @@ export default function App() {
                                 <ColorPicker isSwatch={true} icon={Pipette} value={textEditMode === 'center' ? textCenterStrokeColor : frameStrokeColor} onChange={textEditMode === 'center' ? setTextCenterStrokeColor : setFrameStrokeColor} onOpenAdvanced={handleOpenAdv} />
                                 {SWATCH_PRESETS.map(color => (
                                   <div key={color} className={`swatch-item${(textEditMode === 'center' ? textCenterStrokeColor : frameStrokeColor) === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => textEditMode === 'center' ? setTextCenterStrokeColor(color) : setFrameStrokeColor(color)} />
+                                ))}
+                              </div>
+                              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '12px', marginBottom: '10px' }}>Gradient Presets</div>
+                              <div className="swatch-grid-mini" style={{ marginBottom: '16px' }}>
+                                {LOGO_BG_GRADIENT_PRESETS.map(grad => (
+                                  <div key={grad} className={`swatch-item${(textEditMode === 'center' ? textCenterStrokeColor : frameStrokeColor) === grad ? ' active' : ''}`} style={{ background: grad }} onClick={() => textEditMode === 'center' ? setTextCenterStrokeColor(grad) : setFrameStrokeColor(grad)} />
                                 ))}
                               </div>
                               <Slider label="Stroke Width" min={1} max={textEditMode === 'center' ? 100 : 20} value={textEditMode === 'center' ? textCenterStrokeWidth : frameStrokeWidth} onChange={textEditMode === 'center' ? setTextCenterStrokeWidth : setFrameStrokeWidth} />

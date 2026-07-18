@@ -1099,6 +1099,7 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
  */
 function drawSmartOutline(ctx, logoImg, canvasSize, logoW, logoH, logoX, logoY, options) {
   const { outlineColor, outlineWidth, logoBgShape, logoPadding, hasBackground } = options;
+  const strokeVal = parseColorOrGradient(ctx, logoX - logoPadding, logoY - logoPadding, logoW + logoPadding * 2, logoH + logoPadding * 2, outlineColor);
 
   if (hasBackground) {
     // If there's a background, we outline the background shape instead of the logo pixels
@@ -1107,7 +1108,7 @@ function drawSmartOutline(ctx, logoImg, canvasSize, logoW, logoH, logoX, logoY, 
     const paddedX = logoX - logoPadding;
     const paddedY = logoY - logoPadding;
 
-    ctx.strokeStyle = outlineColor;
+    ctx.strokeStyle = strokeVal;
     ctx.lineWidth = outlineWidth * 2; // Double because stroke is centered
     ctx.lineJoin = 'round';
     
@@ -1134,7 +1135,7 @@ function drawSmartOutline(ctx, logoImg, canvasSize, logoW, logoH, logoX, logoY, 
 
   silCtx.drawImage(logoImg, 0, 0, logoW, logoH);
   silCtx.globalCompositeOperation = 'source-in';
-  silCtx.fillStyle = outlineColor;
+  silCtx.fillStyle = strokeVal;
   silCtx.fillRect(0, 0, logoW, logoH);
 
   const steps = Math.max(16, Math.ceil(outlineWidth * Math.PI)); 
@@ -1216,7 +1217,7 @@ function drawCenterText(ctx, text, canvasSize, options) {
 
   // 4. Draw Stroke (behind fill, no shadow)
   if (textCenterStrokeEnabled) {
-    ctx.strokeStyle = textCenterStrokeColor || '#ffffff';
+    ctx.strokeStyle = parseColorOrGradient(ctx, logoX, logoY, paddedW, paddedH, textCenterStrokeColor || '#ffffff');
     ctx.lineWidth = fontSize * (textCenterStrokeWidth / 100);
     ctx.lineJoin = 'round';
     ctx.miterLimit = 2;
@@ -1593,12 +1594,12 @@ function drawBackgroundShape(ctx, shape, x, y, w, h, color, sizeMultiplier = 1) 
       ctx.stroke();
       break;
     case 'hexagon':
-      ctx.moveTo(x + h * 0.4, y);
-      ctx.lineTo(x + w - h * 0.4, y);
-      ctx.lineTo(x + w, y + h / 2);
-      ctx.lineTo(x + w - h * 0.4, y + h);
-      ctx.lineTo(x + h * 0.4, y + h);
-      ctx.lineTo(x, y + h / 2);
+      ctx.moveTo(x + w * 0.25, y);
+      ctx.lineTo(x + w * 0.75, y);
+      ctx.lineTo(x + w, y + h * 0.5);
+      ctx.lineTo(x + w * 0.75, y + h);
+      ctx.lineTo(x + w * 0.25, y + h);
+      ctx.lineTo(x, y + h * 0.5);
       ctx.fill();
       break;
     case 'dots':
