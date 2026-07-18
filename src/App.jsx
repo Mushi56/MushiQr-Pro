@@ -4442,50 +4442,98 @@ export default function App() {
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                           <Toggle label="Enable Background Image" checked={qrBgImageEnabled} onChange={setQrBgImageEnabled} />
                           
-                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                            <button
-                              className="btn btn-secondary"
-                              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '12px', fontWeight: 600, background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', cursor: 'pointer' }}
-                              onClick={() => {
-                                const input = document.createElement('input');
-                                input.type = 'file';
-                                input.accept = 'image/*';
-                                input.onchange = (e) => {
-                                  const file = e.target.files[0];
-                                  if (file) {
-                                    const reader = new FileReader();
-                                    reader.onload = (re) => {
-                                      const img = new Image();
-                                      img.onload = () => {
-                                        setQrBgImage({ src: re.target.result, image: img, name: file.name });
-                                        setQrBgImageEnabled(true);
-                                        setErrorLevel('H'); // Auto set high error correction for reliability
+                          {qrBgImageEnabled && (
+                            <div className="fade-in" style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                              <div className="logo-presets-grid">
+                                {/* Upload Button */}
+                                <button
+                                  className={`logo-preset-btn upload-tile ${qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? 'active' : ''}`}
+                                  onClick={() => {
+                                    if (qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src)) {
+                                      setQrBgImage(null);
+                                      setQrBgImageEnabled(false);
+                                    } else {
+                                      const input = document.createElement('input');
+                                      input.type = 'file';
+                                      input.accept = 'image/*';
+                                      input.onchange = (e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                          const reader = new FileReader();
+                                          reader.onload = (re) => {
+                                            const img = new Image();
+                                            img.onload = () => {
+                                              setQrBgImage({ src: re.target.result, image: img, name: file.name });
+                                              setQrBgImageEnabled(true);
+                                              setErrorLevel('H'); // Auto set high error correction for reliability
+                                            };
+                                            img.src = re.target.result;
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
                                       };
-                                      img.src = re.target.result;
-                                    };
-                                    reader.readAsDataURL(file);
-                                  }
-                                };
-                                input.click();
-                              }}
-                            >
-                              <UploadCloud size={16} />
-                              {qrBgImage ? 'Change Image' : 'Upload Image'}
-                            </button>
-                            
-                            {qrBgImage && (
-                              <button 
-                                className="btn btn-outline" 
-                                style={{ padding: '12px', borderRadius: '12px', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                onClick={() => {
-                                  setQrBgImage(null);
-                                  setQrBgImageEnabled(false);
-                                }}
-                              >
-                                <X size={16} />
-                              </button>
-                            )}
-                          </div>
+                                      input.click();
+                                    }
+                                  }}
+                                  title="Upload Custom Background"
+                                  style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)' }}
+                                >
+                                  {qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? (
+                                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                      <img src={qrBgImage.src} alt="Custom" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />
+                                      <X size={16} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--error)' }} />
+                                    </div>
+                                  ) : (
+                                    <UploadCloud size={24} color="var(--accent-primary)" />
+                                  )}
+                                </button>
+
+                                {/* Social App Texture Presets */}
+                                {SOCIAL_TEXTURES.map((p) => {
+                                  const isActive = qrBgImage?.src === p.url;
+                                  return (
+                                    <button
+                                      key={p.slug}
+                                      className={`logo-preset-btn ${isActive ? 'active' : ''}`}
+                                      onClick={() => {
+                                        if (isActive) {
+                                          setQrBgImage(null);
+                                          setQrBgImageEnabled(false);
+                                        } else {
+                                          const img = new Image();
+                                          img.onload = () => {
+                                            setQrBgImage({ src: p.url, image: img, name: p.name });
+                                            setQrBgImageEnabled(true);
+                                            setErrorLevel('H'); // Auto set high error correction for reliability
+                                          };
+                                          img.src = p.url;
+                                        }
+                                      }}
+                                      title={p.name}
+                                    >
+                                      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                        <img 
+                                          src={p.url} 
+                                          alt={p.name} 
+                                          loading="lazy" 
+                                          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
+                                        />
+                                        {isActive && (
+                                          <X size={18} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+                                        )}
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {qrBgImage && (
+                                <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>
+                                  Active: <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>{qrBgImage.name}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
 
                           {qrBgImage && qrBgImageEnabled && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '4px' }} className="fade-in">
@@ -4542,7 +4590,7 @@ export default function App() {
                               <div style={{ display: 'flex', gap: '8px', background: 'rgba(52,199,89,0.06)', border: '1px solid rgba(52,199,89,0.15)', borderRadius: '12px', padding: '10px 12px' }}>
                                 <ShieldCheck size={16} style={{ color: 'var(--success)', flexShrink: 0, marginTop: '1px' }} />
                                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                                  <strong>Scan Protection Active:</strong> High error correction level (30%) and white container card ensure the QR code scans instantly even on busy background images.
+                                  <strong>Scan Protection Active:</strong> High error correction level (30%) and container card options ensure perfect scannability.
                                 </span>
                               </div>
                             </div>
