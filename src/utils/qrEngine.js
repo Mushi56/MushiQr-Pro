@@ -273,7 +273,14 @@ export function renderQR(canvas, options) {
     textCenterHeight = null,
     qrTextureEnabled = false,
     qrTexture = null,
-    qrTextureSyncEyes = true
+    qrTextureSyncEyes = true,
+    backgroundImageEnabled = false,
+    backgroundImage = null,
+    backgroundImageOpacity = 0.7,
+    backgroundImageBlur = 0,
+    backgroundImageOverlayOpacity = 0.3,
+    qrBackgroundCardEnabled = true,
+    qrBackgroundCardOpacity = 0.9
   } = options;
 
   if (!matrix || !canvas) return;
@@ -289,6 +296,42 @@ export function renderQR(canvas, options) {
   if (!bgTransparent) {
     ctx.fillStyle = parseColorOrGradient(ctx, 0, 0, size, size, bgColor);
     ctx.fillRect(0, 0, size, size);
+  }
+
+  // Draw Background Image
+  if (backgroundImageEnabled && backgroundImage) {
+    ctx.save();
+    
+    // Blur effect
+    if (backgroundImageBlur > 0) {
+      ctx.filter = `blur(${backgroundImageBlur}px)`;
+    }
+    
+    // Cover calculation
+    const imgRatio = backgroundImage.width / backgroundImage.height;
+    const canvasRatio = size / size; // 1
+    let drawWidth, drawHeight, sx, sy;
+    if (imgRatio > canvasRatio) {
+      drawHeight = backgroundImage.height;
+      drawWidth = backgroundImage.height * canvasRatio;
+      sx = (backgroundImage.width - drawWidth) / 2;
+      sy = 0;
+    } else {
+      drawWidth = backgroundImage.width;
+      drawHeight = backgroundImage.width / canvasRatio;
+      sx = 0;
+      sy = (backgroundImage.height - drawHeight) / 2;
+    }
+    
+    ctx.globalAlpha = backgroundImageOpacity;
+    ctx.drawImage(backgroundImage, sx, sy, drawWidth, drawHeight, 0, 0, size, size);
+    ctx.restore();
+
+    // Dimming overlay
+    if (backgroundImageOverlayOpacity > 0) {
+      ctx.fillStyle = `rgba(255, 255, 255, ${backgroundImageOverlayOpacity})`;
+      ctx.fillRect(0, 0, size, size);
+    }
   }
 
   // Define Content Area for the QR based on Frame Style
@@ -336,6 +379,31 @@ export function renderQR(canvas, options) {
 
   const totalModules = moduleCount + quietZone * 2;
   const cellSize = contentSize / totalModules;
+
+  // Draw high-contrast container card behind the QR code (excluding frame text)
+  if (backgroundImageEnabled && backgroundImage && qrBackgroundCardEnabled) {
+    ctx.save();
+    ctx.fillStyle = `rgba(255, 255, 255, ${qrBackgroundCardOpacity})`;
+    
+    const qrGridSize = moduleCount * cellSize;
+    const qrX = contentX + quietZone * cellSize;
+    const qrY = contentY + quietZone * cellSize;
+    
+    const paddingVal = cellSize * 1.0;
+    const cardX = qrX - paddingVal;
+    const cardY = qrY - paddingVal;
+    const cardSize = qrGridSize + paddingVal * 2;
+    
+    const radius = cellSize * 1.5;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(cardX, cardY, cardSize, cardSize, radius);
+    } else {
+      ctx.rect(cardX, cardY, cardSize, cardSize);
+    }
+    ctx.fill();
+    ctx.restore();
+  }
 
   // Create gradient if enabled
   let fillStyle;

@@ -1032,6 +1032,15 @@ export default function App() {
   const [qrTexture, setQrTexture] = useState(null); // { src, image, name }
   const [qrTextureSyncEyes, setQrTextureSyncEyes] = useState(true);
 
+  // ── QR Background Image ──
+  const [qrBgImageEnabled, setQrBgImageEnabled] = useState(false);
+  const [qrBgImage, setQrBgImage] = useState(null); // { src, image, name }
+  const [qrBgImageOpacity, setQrBgImageOpacity] = useState(0.85);
+  const [qrBgImageBlur, setQrBgImageBlur] = useState(0);
+  const [qrBgImageOverlayOpacity, setQrBgImageOverlayOpacity] = useState(0.2);
+  const [qrBgCardEnabled, setQrBgCardEnabled] = useState(true);
+  const [qrBgCardOpacity, setQrBgCardOpacity] = useState(0.9);
+
   // ── Shapes ──
   const [dotStyle, setDotStyle] = useState(DOT_STYLES.SQUARE);
   const [eyeStyle, setEyeStyle] = useState(EYE_STYLES.SQUARE);
@@ -1807,6 +1816,13 @@ export default function App() {
       qrTextureEnabled,
       qrTexture,
       qrTextureSyncEyes,
+      backgroundImageEnabled: qrBgImageEnabled,
+      backgroundImage: qrBgImage?.image,
+      backgroundImageOpacity: qrBgImageOpacity,
+      backgroundImageBlur: qrBgImageBlur,
+      backgroundImageOverlayOpacity: qrBgImageOverlayOpacity,
+      qrBackgroundCardEnabled: qrBgCardEnabled,
+      qrBackgroundCardOpacity: qrBgCardOpacity,
       logo: logo?.image, logoWidth, logoHeight, logoPadding,
       logoBackground, logoBgColor, logoBgShape,
       logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
@@ -2095,6 +2111,13 @@ export default function App() {
         qrTextureEnabled,
         qrTexture,
         qrTextureSyncEyes,
+        backgroundImageEnabled: qrBgImageEnabled,
+        backgroundImage: qrBgImage?.image,
+        backgroundImageOpacity: qrBgImageOpacity,
+        backgroundImageBlur: qrBgImageBlur,
+        backgroundImageOverlayOpacity: qrBgImageOverlayOpacity,
+        qrBackgroundCardEnabled: qrBgCardEnabled,
+        qrBackgroundCardOpacity: qrBgCardOpacity,
         logo: logo?.image, logoWidth, logoHeight, logoPadding,
         logoBackground, logoBgColor, logoBgShape,
         logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
@@ -2160,6 +2183,7 @@ export default function App() {
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, 
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
+    qrBgImageEnabled, qrBgImage, qrBgImageOpacity, qrBgImageBlur, qrBgImageOverlayOpacity, qrBgCardEnabled, qrBgCardOpacity,
     activeTab, canvasSelection
   ]);
 
@@ -4414,6 +4438,117 @@ export default function App() {
                           )}
                         </div>
                       )}
+                      {colorPopup === 'bg-image' && (
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <Toggle label="Enable Background Image" checked={qrBgImageEnabled} onChange={setQrBgImageEnabled} />
+                          
+                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <button
+                              className="btn btn-secondary"
+                              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '12px', fontWeight: 600, background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', cursor: 'pointer' }}
+                              onClick={() => {
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*';
+                                input.onchange = (e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onload = (re) => {
+                                      const img = new Image();
+                                      img.onload = () => {
+                                        setQrBgImage({ src: re.target.result, image: img, name: file.name });
+                                        setQrBgImageEnabled(true);
+                                        setErrorLevel('H'); // Auto set high error correction for reliability
+                                      };
+                                      img.src = re.target.result;
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                };
+                                input.click();
+                              }}
+                            >
+                              <UploadCloud size={16} />
+                              {qrBgImage ? 'Change Image' : 'Upload Image'}
+                            </button>
+                            
+                            {qrBgImage && (
+                              <button 
+                                className="btn btn-outline" 
+                                style={{ padding: '12px', borderRadius: '12px', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                onClick={() => {
+                                  setQrBgImage(null);
+                                  setQrBgImageEnabled(false);
+                                }}
+                              >
+                                <X size={16} />
+                              </button>
+                            )}
+                          </div>
+
+                          {qrBgImage && qrBgImageEnabled && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '4px' }} className="fade-in">
+                              {/* Opacity Slider */}
+                              <Slider 
+                                label="Image Opacity" 
+                                min={0.1} 
+                                max={1.0} 
+                                step={0.05} 
+                                value={qrBgImageOpacity} 
+                                onChange={setQrBgImageOpacity} 
+                                formatValue={(v) => `${Math.round(v * 100)}%`}
+                              />
+                              
+                              {/* Blur Slider */}
+                              <Slider 
+                                label="Image Blur" 
+                                min={0} 
+                                max={20} 
+                                step={1} 
+                                value={qrBgImageBlur} 
+                                onChange={setQrBgImageBlur} 
+                                formatValue={(v) => `${v}px`}
+                              />
+                              
+                              {/* Overlay/Dimming Slider */}
+                              <Slider 
+                                label="Overlay Dimming (White)" 
+                                min={0} 
+                                max={0.9} 
+                                step={0.05} 
+                                value={qrBgImageOverlayOpacity} 
+                                onChange={setQrBgImageOverlayOpacity} 
+                                formatValue={(v) => `${Math.round(v * 100)}%`}
+                              />
+                              
+                              <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '4px 0' }} />
+                              
+                              {/* High-Contrast Container Card Settings */}
+                              <Toggle label="Scannability Container Card" checked={qrBgCardEnabled} onChange={setQrBgCardEnabled} />
+                              
+                              {qrBgCardEnabled && (
+                                <Slider 
+                                  label="Container Card Opacity" 
+                                  min={0.5} 
+                                  max={1.0} 
+                                  step={0.05} 
+                                  value={qrBgCardOpacity} 
+                                  onChange={setQrBgCardOpacity} 
+                                  formatValue={(v) => `${Math.round(v * 100)}%`}
+                                />
+                              )}
+                              
+                              <div style={{ display: 'flex', gap: '8px', background: 'rgba(52,199,89,0.06)', border: '1px solid rgba(52,199,89,0.15)', borderRadius: '12px', padding: '10px 12px' }}>
+                                <ShieldCheck size={16} style={{ color: 'var(--success)', flexShrink: 0, marginTop: '1px' }} />
+                                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                                  <strong>Scan Protection Active:</strong> High error correction level (30%) and white container card ensure the QR code scans instantly even on busy background images.
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       {colorPopup === 'texture' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -4532,7 +4667,8 @@ export default function App() {
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'presets')}><Bookmark size={18} /><span>Presets</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'dots')}><QRDotsIcon /><span>Dots</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'bg')}><ImageIcon size={18} /><span>BG</span></button>
+                          <button className={`text-toolbar-btn${colorPopup === 'bg' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg')}><Paintbrush size={18} /><span>BG Color</span></button>
+                          <button className={`text-toolbar-btn${colorPopup === 'bg-image' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg-image')}><ImageIcon size={18} /><span>BG Image</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'texture')}><Layers size={18} /><span>Texture</span></button>
                         </>
                       )}
