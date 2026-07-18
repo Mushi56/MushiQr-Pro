@@ -3897,16 +3897,9 @@ input[type="range"]::-moz-range-thumb {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 10px;
-  overflow-y: auto;
-  max-height: 250px;
   padding: 8px 4px;
   margin: 0;
-  scrollbar-width: none;
   align-content: start;
-}
-
-.logo-presets-grid::-webkit-scrollbar {
-  display: none;
 }
 
 .logo-preset-btn {
