@@ -222,15 +222,31 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   const playBeep = useCallback(() => {
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
-      gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.12);
+      
+      // Note 1: Quick initial chirp
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(950, audioCtx.currentTime);
+      gain1.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+      osc1.start(audioCtx.currentTime);
+      osc1.stop(audioCtx.currentTime + 0.06);
+
+      // Note 2: Higher frequency chime following Note 1
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1300, audioCtx.currentTime + 0.05);
+      gain2.gain.setValueAtTime(0, audioCtx.currentTime);
+      gain2.gain.setValueAtTime(0.05, audioCtx.currentTime + 0.05);
+      gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+      osc2.start(audioCtx.currentTime + 0.05);
+      osc2.stop(audioCtx.currentTime + 0.18);
     } catch (e) {
       console.warn("Failed to play scan sound:", e);
     }
