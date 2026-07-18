@@ -3467,7 +3467,7 @@ export default function App() {
               {/* Content Tab */}
               {activeTab === 'content' && (
                 <div className="tab-panel fade-in" id="panel-content">
-                  <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '24px 20px 100px 20px', display: 'flex', flexDirection: 'column' }}>
+                  <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 20px 100px 20px', display: 'flex', flexDirection: 'column' }}>
                     <QRTypeSelector
                       activeType={qrType}
                       onTypeChange={(type) => {
@@ -3485,7 +3485,7 @@ export default function App() {
               {/* Logo Tab */}
               {activeTab === 'logo' && (
                 <div className="tab-panel fade-in" id="panel-logo">
-                  <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '24px 20px 100px 20px' }}>
+                  <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 20px 100px 20px' }}>
                     {/* 1. Presets Section */}
                     <LogoPresets 
                       logo={logo} 

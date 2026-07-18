@@ -7471,7 +7471,7 @@ video {
 }
 
 .toolbar-properties-panel-full {
-  padding: 12px 20px 20px 20px;
+  padding: 16px 20px 20px 20px;
   max-height: 230px;
   overflow-y: auto;
 }
