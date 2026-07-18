@@ -3481,11 +3481,10 @@ input[type="range"]::-moz-range-thumb {
   gap: 12px; /* Reduced gap */
   padding: 16px; /* Reduced vertical and horizontal padding */
   min-height: auto; /* Allow height to fit contents on mobile */
-  background: var(--bg-secondary);
+  background: var(--bg-secondary) !important;
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
   z-index: 100;
-  backdrop-filter: blur(10px);
 }
 
 .qr-preview-wrapper {
