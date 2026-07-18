@@ -7989,5 +7989,13 @@ video::-webkit-media-controls {
   letter-spacing: -0.2px;
 }
 
+/* Premium Swap Button Hover Transitions */
+.swap-btn-premium:hover {
+  transform: scale(1.15) rotate(180deg) !important;
+  border-color: var(--accent-primary) !important;
+  color: var(--accent-primary) !important;
+  box-shadow: 0 6px 14px rgba(255, 59, 48, 0.25) !important;
+}
+
 
 

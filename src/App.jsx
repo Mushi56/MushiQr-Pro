@@ -289,6 +289,19 @@ const GRADIENT_PRESETS = [
   { name: 'Titanium', c1: '#283048', c2: '#859398' },
 ];
 
+const TRENDING_GRADIENT_PRESETS = GRADIENT_PRESETS.map(p => {
+  let bg = '#FFFFFF';
+  const nameLower = p.name.toLowerCase();
+  if (nameLower.includes('midnight') || nameLower.includes('coal') || nameLower.includes('galaxy') || nameLower.includes('space') || nameLower.includes('steel') || nameLower.includes('frost')) {
+    bg = '#111111';
+  }
+  return {
+    name: p.name,
+    qr: `linear-gradient(135deg, ${p.c1}, ${p.c2})`,
+    bg: bg
+  };
+});
+
 const LOGO_BG_GRADIENT_PRESETS = [
   'linear-gradient(135deg, #FF3B30, #FF9500)',
   'linear-gradient(135deg, #007AFF, #00F0FF)',
@@ -305,6 +318,18 @@ const SWATCH_PRESETS = [
   '#007AFF', '#FFCC00', '#AF52DE', '#FF9500',
   '#5856D6', '#FF2D55', '#00F0FF', '#7000FF',
   '#FF007F', '#00D1FF', '#FFD700', '#8E8E93'
+];
+
+const SOCIAL_TEXTURES = [
+  { slug: 'facebook', name: 'Facebook', url: '/textures/facebook_texture.png' },
+  { slug: 'whatsapp', name: 'WhatsApp', url: '/textures/whatsapp_texture.png' },
+  { slug: 'instagram', name: 'Instagram', url: '/textures/instagram_texture.png' },
+  { slug: 'youtube', name: 'YouTube', url: '/textures/youtube_texture.png' },
+  { slug: 'tiktok', name: 'TikTok', url: '/textures/tiktok_texture.png' },
+  { slug: 'snapchat', name: 'Snapchat', url: '/textures/snapchat_texture.png' },
+  { slug: 'twitter', name: 'Twitter / X', url: '/textures/twitter_texture.png' },
+  { slug: 'telegram', name: 'Telegram', url: '/textures/telegram_texture.png' },
+  { slug: 'spotify', name: 'Spotify', url: '/textures/spotify_texture.png' }
 ];
 
 const renderShapeThumbnail = (shapeId, color = 'currentColor') => {
@@ -385,17 +410,17 @@ const renderColorOrGradientPicker = (label, value, onChange, handleOpenAdv) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>{label}</div>
-        <div style={{ display: 'flex', background: 'var(--bg-elevated)', borderRadius: '8px', padding: '2px' }}>
+        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>{label}</div>
+        <div style={{ display: 'flex', background: 'var(--bg-elevated)', borderRadius: '12px', padding: '4px' }}>
           <button 
             onClick={() => onChange(color1)}
-            style={{ border: 'none', background: !isGradient ? 'var(--accent-primary)' : 'transparent', color: !isGradient ? '#fff' : 'var(--text-primary)', fontSize: '10px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s ease' }}
+            style={{ border: 'none', background: !isGradient ? 'var(--accent-primary)' : 'transparent', color: !isGradient ? '#fff' : 'var(--text-primary)', fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s ease' }}
           >
             Solid
           </button>
           <button 
             onClick={() => onChange(`linear-gradient(135deg, ${color1}, ${color2 || '#a78bfa'})`)}
-            style={{ border: 'none', background: isGradient ? 'var(--accent-primary)' : 'transparent', color: isGradient ? '#fff' : 'var(--text-primary)', fontSize: '10px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s ease' }}
+            style={{ border: 'none', background: isGradient ? 'var(--accent-primary)' : 'transparent', color: isGradient ? '#fff' : 'var(--text-primary)', fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s ease' }}
           >
             Gradient
           </button>
@@ -411,21 +436,95 @@ const renderColorOrGradientPicker = (label, value, onChange, handleOpenAdv) => {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }} className="fade-in">
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>Start Color</div>
-              <ColorPicker isSwatch={true} icon={Pipette} value={color1} onChange={(c) => onChange(`linear-gradient(135deg, ${c}, ${color2})`)} onOpenAdvanced={handleOpenAdv} />
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '16px', 
+            background: 'var(--bg-secondary)', 
+            padding: '16px', 
+            borderRadius: '16px',
+            border: '1px solid var(--border-color)',
+            position: 'relative',
+            justifyContent: 'space-between'
+          }}>
+            {/* Start Color Picker */}
+            <ColorPicker isSwatch={true} icon={Pipette} value={color1} onChange={(c) => onChange(`linear-gradient(135deg, ${c}, ${color2})`)} onOpenAdvanced={handleOpenAdv} />
+
+            {/* Photoshop style connecting track & swap button */}
+            <div style={{ 
+              position: 'relative', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              flex: 1,
+              margin: '0 8px',
+              height: '40px'
+            }}>
+              <div style={{ 
+                width: '100%', 
+                height: '8px', 
+                borderRadius: '4px', 
+                background: `linear-gradient(90deg, ${color1}, ${color2})`,
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)'
+              }} />
+              <button 
+                onClick={() => onChange(`linear-gradient(135deg, ${color2}, ${color1})`)}
+                title="Swap Colors"
+                className="swap-btn-premium"
+                style={{ 
+                  position: 'absolute', 
+                  width: '30px', 
+                  height: '30px', 
+                  borderRadius: '50%', 
+                  background: 'var(--bg-elevated)', 
+                  border: '1px solid var(--border-color)', 
+                  color: 'var(--text-primary)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                  transition: 'all 0.2s ease',
+                  padding: 0
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m16 3 4 4-4 4" />
+                  <path d="M20 7H4" />
+                  <path d="m8 21-4-4 4-4" />
+                  <path d="M4 17h16" />
+                </svg>
+              </button>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>End Color</div>
-              <ColorPicker isSwatch={true} icon={Pipette} value={color2} onChange={(c) => onChange(`linear-gradient(135deg, ${color1}, ${c})`)} onOpenAdvanced={handleOpenAdv} />
-            </div>
+
+            {/* End Color Picker */}
+            <ColorPicker isSwatch={true} icon={Pipette} value={color2} onChange={(c) => onChange(`linear-gradient(135deg, ${color1}, ${c})`)} onOpenAdvanced={handleOpenAdv} />
           </div>
           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '-4px' }}>Gradient Presets</div>
-          <div className="swatch-grid-mini">
-            {LOGO_BG_GRADIENT_PRESETS.map(grad => (
-              <div key={grad} className={`swatch-item${value === grad ? ' active' : ''}`} style={{ background: grad }} onClick={() => onChange(grad)} />
-            ))}
+          <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '4px 0 8px 0', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+            {GRADIENT_PRESETS.map(p => {
+              const gradStr = `linear-gradient(135deg, ${p.c1}, ${p.c2})`;
+              const isActive = value === gradStr;
+              return (
+                <button 
+                  key={p.name}
+                  onClick={() => onChange(gradStr)}
+                  title={p.name}
+                  style={{
+                    flex: '0 0 auto',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: gradStr,
+                    border: isActive ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                    boxShadow: isActive ? '0 0 8px var(--accent-primary)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    padding: '0'
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
       )}
@@ -913,6 +1012,9 @@ export default function App() {
   const [eyeOuterColor, setEyeOuterColor] = useState('');
   const [syncEyes, setSyncEyes] = useState(true);
   const [activePreset, setActivePreset] = useState(null);
+  const [presetTab, setPresetTab] = useState('solid');
+  const [eyeColorTab, setEyeColorTab] = useState('inner');
+  const [syncInnerOuterEyes, setSyncInnerOuterEyes] = useState(true);
   const [isPipetteActive, setIsPipetteActive] = useState(false);
   const [pipetteTarget, setPipetteTarget] = useState(null); // { setter }
   const [hoverColor, setHoverColor] = useState(null);
@@ -4108,127 +4210,38 @@ export default function App() {
 
 
                       {colorPopup === 'presets' && (
-                        <div className="fade-in">
-                          <div className="swatch-grid-mini" style={{ padding: '4px 0 16px 0', gap: '10px' }}>
-                            {COLOR_PRESETS.map(p => {
-                              const isSelected = qrColor === p.qr && bgColor === p.bg;
-                              return (
-                                <button 
-                                  key={p.name} 
-                                  onClick={() => { 
-                                    setQrColor(p.qr); 
-                                    setBgColor(p.bg); 
-                                    if (syncEyes) { setEyeColor(p.qr); setEyeOuterColor(p.qr); } 
-                                    setBgTransparent(false);
-                                  }} 
-                                  style={{ 
-                                    flex: '0 0 auto',
-                                    display: 'flex', 
-                                    flexDirection: 'column',
-                                    alignItems: 'center', 
-                                    gap: '6px', 
-                                    background: 'none', 
-                                    border: 'none',
-                                    padding: '0',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    width: '60px'
-                                  }}
-                                >
-                                  <div style={{ 
-                                    width: '44px', 
-                                    height: '44px', 
-                                    borderRadius: '12px', 
-                                    background: p.bg, 
-                                    border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    overflow: 'hidden',
-                                    boxShadow: isSelected ? '0 8px 16px rgba(255,59,48,0.25)' : '0 2px 6px rgba(0,0,0,0.06)',
-                                    transition: 'all 0.2s ease'
-                                  }}>
-                                    <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: p.qr }} />
-                                  </div>
-                                  <span style={{ 
-                                    fontSize: '10px', 
-                                    fontWeight: isSelected ? 700 : 500, 
-                                    color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)', 
-                                    whiteSpace: 'nowrap', 
-                                    overflow: 'hidden', 
-                                    textOverflow: 'ellipsis', 
-                                    width: '100%', 
-                                    textAlign: 'center' 
-                                  }}>{p.name}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                      {colorPopup === 'dots' && (
-                        <div className="fade-in">
-                          <div className="swatch-grid-mini">
-                            <ColorPicker isSwatch={true} icon={Pipette} value={qrColor} onChange={(c) => { setQrColor(c); }} onOpenAdvanced={handleOpenAdv} />
-                            {SWATCH_PRESETS.map(color => (
-                              <div key={color} className={`swatch-item${qrColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => { setQrColor(color); }} />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {colorPopup === 'bg' && (
-                        <div className="fade-in">
-                          <Toggle label="Transparent Background" checked={bgTransparent} onChange={setBgTransparent} />
-                          <div className="swatch-grid-mini" style={{ marginTop: '16px' }}>
-                            <ColorPicker isSwatch={true} icon={Pipette} value={bgColor} onChange={(c) => { setBgColor(c); setLogoBgColor(c); setBgTransparent(false); }} onOpenAdvanced={handleOpenAdv} />
-                            {['#FFFFFF', '#000000', ...SWATCH_PRESETS.slice(2)].map(color => (
-                              <div key={color} className={`swatch-item${!bgTransparent && bgColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => { setBgColor(color); setLogoBgColor(color); setBgTransparent(false); }} />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {colorPopup === 'eyes' && (
-                        <div className="fade-in">
-                          <Toggle label="Sync Eyes with Dots" checked={syncEyes} onChange={setSyncEyes} />
-                          {!syncEyes && (
-                            <div className="fade-in" style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                              <div>
-                                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>Inner Eyes</div>
-                                <div className="swatch-grid-mini">
-                                  <ColorPicker isSwatch={true} icon={Pipette} value={eyeColor || qrColor} onChange={setEyeColor} onOpenAdvanced={handleOpenAdv} />
-                                  {SWATCH_PRESETS.map(color => (
-                                    <div key={color} className={`swatch-item${(eyeColor || qrColor) === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => setEyeColor(color)} />
-                                  ))}
-                                </div>
-                              </div>
-                              <div>
-                                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>Outer Eyes</div>
-                                <div className="swatch-grid-mini">
-                                  <ColorPicker isSwatch={true} icon={Pipette} value={eyeOuterColor || qrColor} onChange={setEyeOuterColor} onOpenAdvanced={handleOpenAdv} />
-                                  {SWATCH_PRESETS.map(color => (
-                                    <div key={color} className={`swatch-item${(eyeOuterColor || qrColor) === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => setEyeOuterColor(color)} />
-                                  ))}
-                                </div>
-                              </div>
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>Presets Style</div>
+                            <div style={{ display: 'flex', background: 'var(--bg-elevated)', borderRadius: '12px', padding: '4px' }}>
+                              <button 
+                                onClick={() => setPresetTab('solid')}
+                                style={{ border: 'none', background: presetTab === 'solid' ? 'var(--accent-primary)' : 'transparent', color: presetTab === 'solid' ? '#fff' : 'var(--text-primary)', fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                              >
+                                Solid
+                              </button>
+                              <button 
+                                onClick={() => setPresetTab('gradient')}
+                                style={{ border: 'none', background: presetTab === 'gradient' ? 'var(--accent-primary)' : 'transparent', color: presetTab === 'gradient' ? '#fff' : 'var(--text-primary)', fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                              >
+                                Gradient
+                              </button>
                             </div>
-                          )}
-                        </div>
-                      )}
-                      {colorPopup === 'gradient' && (
-                        <div className="fade-in">
-                          <Toggle label="Enable Gradient" checked={gradientEnabled} onChange={setGradientEnabled} />
-                          {gradientEnabled && (
-                            <div className="fade-in" style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                              <Toggle label="Sync Eyes with Gradient" checked={syncEyes} onChange={setSyncEyes} />
-                              <div className="swatch-grid-mini" style={{ padding: '0 0 12px 0', gap: '10px' }}>
-                                {GRADIENT_PRESETS.map(p => {
-                                  const isSelected = gradientColor1 === p.c1 && gradientColor2 === p.c2;
+                          </div>
+
+                          {presetTab === 'solid' ? (
+                            <div className="fade-in">
+                              <div className="swatch-grid-mini" style={{ padding: '4px 0 8px 0', gap: '10px' }}>
+                                {COLOR_PRESETS.map(p => {
+                                  const isSelected = qrColor === p.qr && bgColor === p.bg;
                                   return (
                                     <button 
                                       key={p.name} 
                                       onClick={() => { 
-                                        setGradientColor1(p.c1); 
-                                        setGradientColor2(p.c2); 
+                                        setQrColor(p.qr); 
+                                        setBgColor(p.bg); 
+                                        if (syncEyes) { setEyeColor(p.qr); setEyeOuterColor(p.qr); } 
+                                        setBgTransparent(false);
                                       }} 
                                       style={{ 
                                         flex: '0 0 auto',
@@ -4248,11 +4261,17 @@ export default function App() {
                                         width: '44px', 
                                         height: '44px', 
                                         borderRadius: '12px', 
-                                        background: `linear-gradient(135deg, ${p.c1}, ${p.c2})`, 
+                                        background: p.bg, 
                                         border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        overflow: 'hidden',
                                         boxShadow: isSelected ? '0 8px 16px rgba(255,59,48,0.25)' : '0 2px 6px rgba(0,0,0,0.06)',
                                         transition: 'all 0.2s ease'
-                                      }} />
+                                      }}>
+                                        <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: p.qr }} />
+                                      </div>
                                       <span style={{ 
                                         fontSize: '10px', 
                                         fontWeight: isSelected ? 700 : 500, 
@@ -4267,79 +4286,225 @@ export default function App() {
                                   );
                                 })}
                               </div>
-
-                              <div className="seg-control">
-                                <button className={`seg-btn ${gradientType === 'linear' ? 'active' : ''}`} onClick={() => setGradientType('linear')}>Linear</button>
-                                <button className={`seg-btn ${gradientType === 'radial' ? 'active' : ''}`} onClick={() => setGradientType('radial')}>Radial</button>
-                              </div>
-                              <div style={{ display: 'flex', gap: '12px' }}>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>Color 1</div>
-                                  <ColorPicker value={gradientColor1} onChange={setGradientColor1} onOpenAdvanced={handleOpenAdv} />
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>Color 2</div>
-                                  <ColorPicker value={gradientColor2} onChange={setGradientColor2} onOpenAdvanced={handleOpenAdv} />
-                                </div>
+                            </div>
+                          ) : (
+                            <div className="fade-in">
+                              <div className="swatch-grid-mini" style={{ padding: '4px 0 8px 0', gap: '10px' }}>
+                                {TRENDING_GRADIENT_PRESETS.map(p => {
+                                  const isSelected = qrColor === p.qr && bgColor === p.bg;
+                                  return (
+                                    <button 
+                                      key={p.name} 
+                                      onClick={() => { 
+                                        setQrColor(p.qr); 
+                                        setBgColor(p.bg); 
+                                        if (syncEyes) { setEyeColor(p.qr); setEyeOuterColor(p.qr); } 
+                                        setBgTransparent(false);
+                                      }} 
+                                      style={{ 
+                                        flex: '0 0 auto',
+                                        display: 'flex', 
+                                        flexDirection: 'column',
+                                        alignItems: 'center', 
+                                        gap: '6px', 
+                                        background: 'none', 
+                                        border: 'none',
+                                        padding: '0',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        width: '60px'
+                                      }}
+                                    >
+                                      <div style={{ 
+                                        width: '44px', 
+                                        height: '44px', 
+                                        borderRadius: '12px', 
+                                        background: p.bg, 
+                                        border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        overflow: 'hidden',
+                                        boxShadow: isSelected ? '0 8px 16px rgba(255,59,48,0.25)' : '0 2px 6px rgba(0,0,0,0.06)',
+                                        transition: 'all 0.2s ease'
+                                      }}>
+                                        <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: p.qr }} />
+                                      </div>
+                                      <span style={{ 
+                                        fontSize: '10px', 
+                                        fontWeight: isSelected ? 700 : 500, 
+                                        color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)', 
+                                        whiteSpace: 'nowrap', 
+                                        overflow: 'hidden', 
+                                        textOverflow: 'ellipsis', 
+                                        width: '100%', 
+                                        textAlign: 'center' 
+                                      }}>{p.name}</span>
+                                    </button>
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
                         </div>
                       )}
-                      {colorPopup === 'texture' && (
+                      {colorPopup === 'dots' && (
                         <div className="fade-in">
-                          <Toggle label="Enable QR Texture" checked={qrTextureEnabled} onChange={setQrTextureEnabled} />
-                          {qrTextureEnabled && (
-                            <div className="fade-in" style={{ marginTop: '16px' }}>
-                              <Toggle label="Sync Eyes with Texture" checked={qrTextureSyncEyes} onChange={setQrTextureSyncEyes} />
-                              <div style={{ marginTop: '16px', display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Select or Upload Texture</div>
-                                <div className="font-scroll-container" style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '4px 0 8px 0', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
-                                  <button 
-                                    onClick={() => {
-                                      const input = document.createElement('input');
-                                      input.type = 'file';
-                                      input.accept = 'image/*';
-                                      input.onchange = (e) => {
-                                        const file = e.target.files[0];
-                                        if (file) {
-                                          const reader = new FileReader();
-                                          reader.onload = (re) => {
-                                            const img = new Image();
-                                            img.onload = () => setQrTexture({ src: re.target.result, image: img, name: file.name });
-                                            img.src = re.target.result;
-                                          };
-                                          reader.readAsDataURL(file);
-                                        }
-                                      };
-                                      input.click();
-                                    }}
-                                    className="font-scroll-btn"
-                                    style={{ flex: '0 0 auto', padding: '10px 18px', borderRadius: '12px', background: 'var(--bg-elevated)', color: 'var(--accent-primary)', border: '1px dashed var(--accent-primary)', fontSize: '14px' }}
-                                  >
-                                    <Plus size={16} /> Upload
-                                  </button>
-                                  {['glass', 'carbon', 'metal', 'mesh', 'dots', 'gold', 'silver', 'marble'].map(t => {
-                                    const isActive = qrTexture?.name === t;
-                                    return (
+                          {renderColorOrGradientPicker("Dots Color", qrColor, setQrColor, handleOpenAdv)}
+                        </div>
+                      )}
+                      {colorPopup === 'bg' && (
+                        <div className="fade-in">
+                          <Toggle label="Transparent Background" checked={bgTransparent} onChange={setBgTransparent} />
+                          {!bgTransparent && (
+                            <div style={{ marginTop: '16px' }}>
+                              {renderColorOrGradientPicker("Background Color", bgColor, (c) => { setBgColor(c); setLogoBgColor(c); setBgTransparent(false); }, handleOpenAdv)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {colorPopup === 'eyes' && (
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <Toggle label="Sync Eyes with Dots" checked={syncEyes} onChange={setSyncEyes} />
+                          {!syncEyes && (
+                            <>
+                              <Toggle label="Sync Inner & Outer Eye Colors" checked={syncInnerOuterEyes} onChange={(val) => {
+                                setSyncInnerOuterEyes(val);
+                                if (val) {
+                                  setEyeOuterColor(eyeColor || qrColor);
+                                }
+                              }} />
+                              
+                              {syncInnerOuterEyes ? (
+                                <div className="fade-in">
+                                  {renderColorOrGradientPicker("Eyes Color", eyeColor || qrColor, (c) => { setEyeColor(c); setEyeOuterColor(c); }, handleOpenAdv)}
+                                </div>
+                              ) : (
+                                <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>Eyes Section</div>
+                                    <div style={{ display: 'flex', background: 'var(--bg-elevated)', borderRadius: '12px', padding: '4px' }}>
                                       <button 
-                                        key={t} 
-                                        onClick={() => {
-                                          const img = new Image();
-                                          const src = `/textures/${t}.jpg`; 
-                                          img.onload = () => setQrTexture({ src, image: img, name: t });
-                                          img.src = src;
-                                        }}
-                                        className={`font-scroll-btn ${isActive ? 'active' : ''}`} 
-                                        style={{ flex: '0 0 auto', padding: '10px 18px', borderRadius: '12px', background: isActive ? 'var(--accent-primary)' : 'var(--bg-elevated)', color: isActive ? '#fff' : 'var(--text-primary)', border: '1px solid', borderColor: isActive ? 'var(--accent-primary)' : 'var(--border-color)', fontSize: '14px', whiteSpace: 'nowrap', textTransform: 'capitalize' }}
+                                        onClick={() => setEyeColorTab('inner')}
+                                        style={{ border: 'none', background: eyeColorTab === 'inner' ? 'var(--accent-primary)' : 'transparent', color: eyeColorTab === 'inner' ? '#fff' : 'var(--text-primary)', fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s ease' }}
                                       >
-                                        {t}
+                                        Inner
+                                      </button>
+                                      <button 
+                                        onClick={() => setEyeColorTab('outer')}
+                                        style={{ border: 'none', background: eyeColorTab === 'outer' ? 'var(--accent-primary)' : 'transparent', color: eyeColorTab === 'outer' ? '#fff' : 'var(--text-primary)', fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                                      >
+                                        Outer
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {eyeColorTab === 'inner' ? (
+                                    <div className="fade-in">
+                                      {renderColorOrGradientPicker("Inner Eyes Color", eyeColor || qrColor, setEyeColor, handleOpenAdv)}
+                                    </div>
+                                  ) : (
+                                    <div className="fade-in">
+                                      {renderColorOrGradientPicker("Outer Eyes Color", eyeOuterColor || qrColor, setEyeOuterColor, handleOpenAdv)}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {colorPopup === 'texture' && (
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                            <div style={{ flex: 1, minWidth: '150px' }}>
+                              <Toggle label="Enable QR Texture" checked={qrTextureEnabled} onChange={setQrTextureEnabled} />
+                            </div>
+                            {qrTextureEnabled && (
+                              <div style={{ flex: 1, minWidth: '150px' }}>
+                                <Toggle label="Sync Eyes with Dots" checked={qrTextureSyncEyes} onChange={setQrTextureSyncEyes} />
+                              </div>
+                            )}
+                          </div>
+                          
+                          {qrTextureEnabled && (
+                            <div className="fade-in">
+                              <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                                <div className="logo-presets-grid">
+                                  {/* Upload Button */}
+                                  <button
+                                    className={`logo-preset-btn upload-tile ${qrTexture && !SOCIAL_TEXTURES.some(p => p.url === qrTexture.src) ? 'active' : ''}`}
+                                    onClick={() => {
+                                      if (qrTexture && !SOCIAL_TEXTURES.some(p => p.url === qrTexture.src)) {
+                                        setQrTexture(null);
+                                      } else {
+                                        const input = document.createElement('input');
+                                        input.type = 'file';
+                                        input.accept = 'image/*';
+                                        input.onchange = (e) => {
+                                          const file = e.target.files[0];
+                                          if (file) {
+                                            const reader = new FileReader();
+                                            reader.onload = (re) => {
+                                              const img = new Image();
+                                              img.onload = () => setQrTexture({ src: re.target.result, image: img, name: file.name });
+                                              img.src = re.target.result;
+                                            };
+                                            reader.readAsDataURL(file);
+                                          }
+                                        };
+                                        input.click();
+                                      }
+                                    }}
+                                    title="Upload Custom Texture"
+                                    style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)' }}
+                                  >
+                                    {qrTexture && !SOCIAL_TEXTURES.some(p => p.url === qrTexture.src) ? (
+                                      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                        <img src={qrTexture.src} alt="Custom" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />
+                                        <X size={16} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--error)' }} />
+                                      </div>
+                                    ) : (
+                                      <UploadCloud size={24} color="var(--accent-primary)" />
+                                    )}
+                                  </button>
+
+                                  {/* Social App Texture Presets */}
+                                  {SOCIAL_TEXTURES.map((p) => {
+                                    const isActive = qrTexture?.src === p.url;
+                                    return (
+                                      <button
+                                        key={p.slug}
+                                        className={`logo-preset-btn ${isActive ? 'active' : ''}`}
+                                        onClick={() => {
+                                          if (isActive) {
+                                            setQrTexture(null);
+                                          } else {
+                                            const img = new Image();
+                                            img.onload = () => setQrTexture({ src: p.url, image: img, name: p.name });
+                                            img.src = p.url;
+                                          }
+                                        }}
+                                        title={p.name}
+                                      >
+                                        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                          <img 
+                                            src={p.url} 
+                                            alt={p.name} 
+                                            loading="lazy" 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
+                                          />
+                                          {isActive && (
+                                            <X size={18} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+                                          )}
+                                        </div>
                                       </button>
                                     );
                                   })}
                                 </div>
+
                                 {qrTexture && (
-                                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+                                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>
                                     Active: <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>{qrTexture.name}</span>
                                   </div>
                                 )}
@@ -4366,9 +4531,8 @@ export default function App() {
                         <>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'presets')}><Bookmark size={18} /><span>Presets</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'dots')}><QRDotsIcon /><span>Dots</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'bg')}><ImageIcon size={18} /><span>BG</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'gradient')}><QRGradientIcon /><span>Gradient</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'bg')}><ImageIcon size={18} /><span>BG</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'texture')}><Layers size={18} /><span>Texture</span></button>
                         </>
                       )}

@@ -287,7 +287,7 @@ export function renderQR(canvas, options) {
 
   // Background
   if (!bgTransparent) {
-    ctx.fillStyle = bgColor;
+    ctx.fillStyle = parseColorOrGradient(ctx, 0, 0, size, size, bgColor);
     ctx.fillRect(0, 0, size, size);
   }
 
@@ -351,7 +351,7 @@ export function renderQR(canvas, options) {
     fillStyle.addColorStop(0, gradientColor1);
     fillStyle.addColorStop(1, gradientColor2);
   } else {
-    fillStyle = qrColor;
+    fillStyle = parseColorOrGradient(ctx, contentX, contentY, contentSize, contentSize, qrColor);
   }
 
   // --- TEXTURE HANDLING PREP ---
@@ -377,11 +377,14 @@ export function renderQR(canvas, options) {
     const useEyeColor = syncEyes ? fillStyle : (eyeColor || qrColor);
     const useEyeOuterColor = syncEyes ? fillStyle : (eyeOuterColor || useEyeColor);
     
+    const parsedInner = typeof useEyeColor === 'string' ? parseColorOrGradient(ctx, x, y, cellSize * 7, cellSize * 7, useEyeColor) : useEyeColor;
+    const parsedOuter = typeof useEyeOuterColor === 'string' ? parseColorOrGradient(ctx, x, y, cellSize * 7, cellSize * 7, useEyeOuterColor) : useEyeOuterColor;
+    
     // If texture enabled and syncing eyes, draw eye on silhouette
     if (qrTextureEnabled && qrTexture?.image && qrTextureSyncEyes) {
       drawEye(silhouetteCtx, x, y, cellSize * 7, eyeStyle, '#000', '#000');
     } else {
-      drawEye(ctx, x, y, cellSize * 7, eyeStyle, useEyeOuterColor, useEyeColor);
+      drawEye(ctx, x, y, cellSize * 7, eyeStyle, parsedOuter, parsedInner);
     }
   });
   
