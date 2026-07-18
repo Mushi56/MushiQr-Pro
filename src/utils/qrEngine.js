@@ -1233,7 +1233,7 @@ function drawCenterText(ctx, text, canvasSize, options) {
   }
 
   // 6. Draw Fill (on top of stroke)
-  ctx.fillStyle = textCenterColor || '#000000';
+  ctx.fillStyle = parseColorOrGradient(ctx, logoX, logoY, paddedW, paddedH, textCenterColor || '#000000');
   ctx.fillText(text, centerX, centerY + fontSize * 0.045);
   ctx.restore();
   ctx.restore();
@@ -1397,11 +1397,8 @@ function drawFrame(ctx, size, padding, options) {
   }
 
   // Text
-  if (frameStyle === 'text' || frameStyle === 'text-bottom' || frameStyle === 'text-top') {
-    ctx.fillStyle = frameColor;
-  } else {
-    ctx.fillStyle = bgTransparent ? '#ffffff' : bgColor;
-  }
+  const textFillVal = frameStyle === 'text' || frameStyle === 'text-bottom' || frameStyle === 'text-top' ? frameColor : (bgTransparent ? '#ffffff' : bgColor);
+  ctx.fillStyle = parseColorOrGradient(ctx, labelX, textY - 20, labelW, 40, textFillVal);
   ctx.font = `bold ${size * frameSize}px ${frameFont}, Outfit, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -1420,7 +1417,7 @@ function drawFrame(ctx, size, padding, options) {
   ctx.translate(-size / 2, -textY);
 
   if (frameStrokeEnabled) { 
-    ctx.strokeStyle = frameStrokeColor; 
+    ctx.strokeStyle = parseColorOrGradient(ctx, labelX, textY - 20, labelW, 40, frameStrokeColor); 
     ctx.lineWidth = frameStrokeWidth; 
     ctx.strokeText(frameText, size / 2, textY + (size * frameSize) * 0.045); 
   }

@@ -330,6 +330,77 @@ const renderShapeThumbnail = (shapeId, color = 'currentColor') => {
   }
 };
 
+function parseGradientString(gradStr, defaultColor1 = '#FF3B30', defaultColor2 = '#FF9500') {
+  if (gradStr && gradStr.startsWith('linear-gradient(')) {
+    const match = gradStr.match(/linear-gradient\(([^,]+),\s*([^,]+),\s*([^)]+)\)/i);
+    if (match) {
+      return {
+        color1: match[2].trim(),
+        color2: match[3].trim()
+      };
+    }
+  }
+  return {
+    color1: gradStr || defaultColor1,
+    color2: defaultColor2
+  };
+}
+
+const renderColorOrGradientPicker = (label, value, onChange, handleOpenAdv) => {
+  const isGradient = value && value.startsWith('linear-gradient(');
+  const { color1, color2 } = parseGradientString(value);
+  
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>{label}</div>
+        <div style={{ display: 'flex', background: 'var(--bg-elevated)', borderRadius: '8px', padding: '2px' }}>
+          <button 
+            onClick={() => onChange(color1)}
+            style={{ border: 'none', background: !isGradient ? 'var(--accent-primary)' : 'transparent', color: !isGradient ? '#fff' : 'var(--text-primary)', fontSize: '10px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s ease' }}
+          >
+            Solid
+          </button>
+          <button 
+            onClick={() => onChange(`linear-gradient(135deg, ${color1}, ${color2 || '#a78bfa'})`)}
+            style={{ border: 'none', background: isGradient ? 'var(--accent-primary)' : 'transparent', color: isGradient ? '#fff' : 'var(--text-primary)', fontSize: '10px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s ease' }}
+          >
+            Gradient
+          </button>
+        </div>
+      </div>
+
+      {!isGradient ? (
+        <div className="swatch-grid-mini">
+          <ColorPicker isSwatch={true} icon={Pipette} value={value} onChange={onChange} onOpenAdvanced={handleOpenAdv} />
+          {SWATCH_PRESETS.map(color => (
+            <div key={color} className={`swatch-item${value === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => onChange(color)} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }} className="fade-in">
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+              <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>Start Color</div>
+              <ColorPicker isSwatch={true} icon={Pipette} value={color1} onChange={(c) => onChange(`linear-gradient(135deg, ${c}, ${color2})`)} onOpenAdvanced={handleOpenAdv} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+              <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>End Color</div>
+              <ColorPicker isSwatch={true} icon={Pipette} value={color2} onChange={(c) => onChange(`linear-gradient(135deg, ${color1}, ${c})`)} onOpenAdvanced={handleOpenAdv} />
+            </div>
+          </div>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '-4px' }}>Gradient Presets</div>
+          <div className="swatch-grid-mini">
+            {LOGO_BG_GRADIENT_PRESETS.map(grad => (
+              <div key={grad} className={`swatch-item${value === grad ? ' active' : ''}`} style={{ background: grad }} onClick={() => onChange(grad)} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const MockQR = () => {
   const size = 21;
   // Actual "Hello World" (Level M) pattern bits (Simplified representation for clarity)
@@ -3515,19 +3586,7 @@ export default function App() {
                           <Toggle label="Enable Stroke" checked={logoOutline} onChange={setLogoOutline} />
                           {logoOutline && (
                             <div className="fade-in" style={{ marginTop: '14px' }}>
-                              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px' }}>Stroke Color</div>
-                              <div className="swatch-grid-mini" style={{ marginBottom: '12px' }}>
-                                <ColorPicker isSwatch={true} icon={Pipette} value={logoOutlineColor} onChange={setLogoOutlineColor} onOpenAdvanced={handleOpenAdv} />
-                                {SWATCH_PRESETS.map(color => (
-                                  <div key={color} className={`swatch-item${logoOutlineColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => setLogoOutlineColor(color)} />
-                                ))}
-                              </div>
-                              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '12px', marginBottom: '10px' }}>Gradient Presets</div>
-                              <div className="swatch-grid-mini" style={{ marginBottom: '18px' }}>
-                                {LOGO_BG_GRADIENT_PRESETS.map(grad => (
-                                  <div key={grad} className={`swatch-item${logoOutlineColor === grad ? ' active' : ''}`} style={{ background: grad }} onClick={() => setLogoOutlineColor(grad)} />
-                                ))}
-                              </div>
+                               {renderColorOrGradientPicker("Stroke Color", logoOutlineColor, setLogoOutlineColor, handleOpenAdv)}
                               <Slider label="Stroke Width" value={logoOutlineWidth} min={1} max={10} step={1} onChange={setLogoOutlineWidth} />
                             </div>
                           )}
@@ -3570,19 +3629,7 @@ export default function App() {
                                   );
                                 })}
                               </div>
-                              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px' }}>Background Color</div>
-                              <div className="swatch-grid-mini">
-                                <ColorPicker isSwatch={true} icon={Pipette} value={logoBgColor} onChange={setLogoBgColor} onOpenAdvanced={handleOpenAdv} />
-                                {SWATCH_PRESETS.map(color => (
-                                  <div key={color} className={`swatch-item${logoBgColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => setLogoBgColor(color)} />
-                                ))}
-                              </div>
-                              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '12px', marginBottom: '10px' }}>Gradient Presets</div>
-                              <div className="swatch-grid-mini">
-                                {LOGO_BG_GRADIENT_PRESETS.map(grad => (
-                                  <div key={grad} className={`swatch-item${logoBgColor === grad ? ' active' : ''}`} style={{ background: grad }} onClick={() => setLogoBgColor(grad)} />
-                                ))}
-                              </div>
+                               {renderColorOrGradientPicker("Background Color", logoBgColor, setLogoBgColor, handleOpenAdv)}
                             </div>
                           )}
                         </div>
@@ -3919,12 +3966,11 @@ export default function App() {
                       )}
                       {textPopup === 'color' && (
                         <div className="fade-in">
-                          <div className="swatch-grid-mini">
-                            <ColorPicker isSwatch={true} icon={Pipette} value={textEditMode === 'center' ? textCenterColor : frameColor} onChange={textEditMode === 'center' ? setTextCenterColor : setFrameColor} onOpenAdvanced={handleOpenAdv} />
-                            {SWATCH_PRESETS.map(color => (
-                              <div key={color} className={`swatch-item${(textEditMode === 'center' ? textCenterColor : frameColor) === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => textEditMode === 'center' ? setTextCenterColor(color) : setFrameColor(color)} />
-                            ))}
-                          </div>
+                          {textEditMode === 'center' ? (
+                            renderColorOrGradientPicker("Text Color", textCenterColor, setTextCenterColor, handleOpenAdv)
+                          ) : (
+                            renderColorOrGradientPicker("Frame Color", frameColor, setFrameColor, handleOpenAdv)
+                          )}
                         </div>
                       )}
                       {textPopup === 'stroke' && (
@@ -3932,20 +3978,14 @@ export default function App() {
                           <Toggle label="Enable Stroke" checked={textEditMode === 'center' ? textCenterStrokeEnabled : frameStrokeEnabled} onChange={textEditMode === 'center' ? setTextCenterStrokeEnabled : setFrameStrokeEnabled} />
                           {(textEditMode === 'center' ? textCenterStrokeEnabled : frameStrokeEnabled) && (
                             <div className="fade-in" style={{ marginTop: '14px' }}>
-                              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px' }}>Stroke Color</div>
-                              <div className="swatch-grid-mini" style={{ marginBottom: '12px' }}>
-                                <ColorPicker isSwatch={true} icon={Pipette} value={textEditMode === 'center' ? textCenterStrokeColor : frameStrokeColor} onChange={textEditMode === 'center' ? setTextCenterStrokeColor : setFrameStrokeColor} onOpenAdvanced={handleOpenAdv} />
-                                {SWATCH_PRESETS.map(color => (
-                                  <div key={color} className={`swatch-item${(textEditMode === 'center' ? textCenterStrokeColor : frameStrokeColor) === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => textEditMode === 'center' ? setTextCenterStrokeColor(color) : setFrameStrokeColor(color)} />
-                                ))}
+                              {textEditMode === 'center' ? (
+                                renderColorOrGradientPicker("Stroke Color", textCenterStrokeColor, setTextCenterStrokeColor, handleOpenAdv)
+                              ) : (
+                                renderColorOrGradientPicker("Stroke Color", frameStrokeColor, setFrameStrokeColor, handleOpenAdv)
+                              )}
+                              <div style={{ marginTop: '14px' }}>
+                                <Slider label="Stroke Width" min={1} max={textEditMode === 'center' ? 100 : 20} value={textEditMode === 'center' ? textCenterStrokeWidth : frameStrokeWidth} onChange={textEditMode === 'center' ? setTextCenterStrokeWidth : setFrameStrokeWidth} />
                               </div>
-                              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '12px', marginBottom: '10px' }}>Gradient Presets</div>
-                              <div className="swatch-grid-mini" style={{ marginBottom: '16px' }}>
-                                {LOGO_BG_GRADIENT_PRESETS.map(grad => (
-                                  <div key={grad} className={`swatch-item${(textEditMode === 'center' ? textCenterStrokeColor : frameStrokeColor) === grad ? ' active' : ''}`} style={{ background: grad }} onClick={() => textEditMode === 'center' ? setTextCenterStrokeColor(grad) : setFrameStrokeColor(grad)} />
-                                ))}
-                              </div>
-                              <Slider label="Stroke Width" min={1} max={textEditMode === 'center' ? 100 : 20} value={textEditMode === 'center' ? textCenterStrokeWidth : frameStrokeWidth} onChange={textEditMode === 'center' ? setTextCenterStrokeWidth : setFrameStrokeWidth} />
                             </div>
                           )}
                         </div>

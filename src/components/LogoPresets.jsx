@@ -127,7 +127,6 @@ export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
                 src={p.url} 
                 alt={p.name} 
                 loading="lazy" 
-                crossOrigin="anonymous" 
                 style={{ opacity: logo?.src === p.url ? 0.3 : 1, transition: 'opacity 0.2s' }} 
               />
               {logo?.src === p.url && (
