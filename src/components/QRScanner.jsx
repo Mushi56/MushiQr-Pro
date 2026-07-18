@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Share } from '@capacitor/share';
+import { App as CapacitorApp } from '@capacitor/app';
 import {
   ArrowLeft, Zap, ZapOff, Image, CheckCircle2,
   Copy, ExternalLink, Share2, Star, Wifi, Mail,
@@ -267,6 +268,30 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     };
   }, [stopScanner]);
 
+  // Handle app lifecycle for background/foreground camera freeze issues
+  useEffect(() => {
+    let listener;
+    if (Capacitor.isNativePlatform()) {
+      CapacitorApp.addListener('appStateChange', async (state) => {
+        if (!state.isActive) {
+          // App went to background, stop camera
+          await stopScanner();
+        } else {
+          // App returned to foreground, restart camera if we were in scanning state
+          setStatus((currentStatus) => {
+            if (currentStatus === 'SCANNING' && mountedRef.current) {
+              setTimeout(() => startScanner(), 200); // slight delay to ensure view is ready
+            }
+            return currentStatus;
+          });
+        }
+      }).then(l => listener = l);
+    }
+    return () => {
+      if (listener) listener.remove();
+    };
+  }, [stopScanner]); // startScanner is intentionally omitted to avoid circular dependencies
+
   const safeBack = useCallback(async () => {
     triggerHapticFeedback();
     await stopScanner();
@@ -281,18 +306,13 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       if (videoElement) {
         let applied = false;
         if (track) {
-          const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
-          if (caps.zoom) {
-            const minVal = caps.zoom.min || 1;
-            const maxVal = caps.zoom.max || 8;
-            const val = Math.min(Math.max(value, minVal), maxVal);
-            try {
-              await track.applyConstraints({ advanced: [{ zoom: val }] });
-              setZoom(val);
-              applied = true;
-            } catch (err) {
-              console.warn('Hardware zoom failed:', err);
-            }
+          try {
+            await track.applyConstraints({ advanced: [{ zoom: value }] });
+            setZoom(value);
+            applied = true;
+            videoElement.style.transform = 'translateZ(0) scale(1)'; // reset CSS zoom
+          } catch (err) {
+            console.warn('Hardware zoom apply failed:', err);
           }
         }
         
@@ -416,7 +436,11 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
       const scanner = qrScannerRef.current;
       if (scanner) {
-        try { scanner.pause(); } catch { }
+        try { 
+          if (typeof scanner.pause === 'function') {
+            scanner.pause(true); // pause and optionally freeze video
+          }
+        } catch { }
       }
 
       const fmtId = decodedResult?.result?.format?.format
@@ -528,24 +552,38 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
           const track = stream?.getVideoTracks()?.[0];
           if (track) {
             const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
-            if (caps.zoom) {
+            const settings = typeof track.getSettings === 'function' ? track.getSettings() : {};
+            
+            // Hardware zoom support check
+            if (caps.zoom || settings.zoom) {
               setHasHardwareZoom(true);
               setZoomCapabilities({
-                min: caps.zoom.min || 1,
-                max: Math.min(caps.zoom.max || 10, 10),
-                step: caps.zoom.step || 0.1
+                min: caps.zoom?.min || 1,
+                max: Math.min(caps.zoom?.max || 10, 10),
+                step: caps.zoom?.step || 0.1
               });
-              setZoom(prev => prev === 1 ? (caps.zoom.min || 1) : prev);
+              setZoom(prev => prev === 1 ? (caps.zoom?.min || settings.zoom || 1) : prev);
             } else {
-              setHasHardwareZoom(false);
-              setZoomCapabilities({
-                min: 1,
-                max: 4,
-                step: 0.1
-              });
+              // Brute-force test for zoom if capabilities object hides it (common in WebViews)
+              track.applyConstraints({ advanced: [{ zoom: 1 }] })
+                .then(() => {
+                  setHasHardwareZoom(true);
+                  setZoomCapabilities({ min: 1, max: 10, step: 0.1 });
+                })
+                .catch(() => {
+                  setHasHardwareZoom(false);
+                  setZoomCapabilities({ min: 1, max: 4, step: 0.1 });
+                });
             }
-            if (caps.torch) {
+            
+            // Flashlight check
+            if (caps.torch !== undefined || settings.torch !== undefined) {
               setFlashSupported(true);
+            } else {
+              // Try applying torch=false to test if supported
+              track.applyConstraints({ advanced: [{ torch: false }] })
+                .then(() => setFlashSupported(true))
+                .catch(() => {});
             }
           }
         } catch (e) {
@@ -682,11 +720,25 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     triggerHapticFeedback();
     const scanner = qrScannerRef.current;
     if (scanner) {
-      try { scanner.start(); } catch { }
+      try { 
+        if (typeof scanner.resume === 'function') {
+          scanner.resume(); 
+        } else {
+          startScanner();
+        }
+      } catch { 
+        startScanner(); 
+      }
     } else {
       startScanner();
     }
     setResult(null); setQrTypeData(null); setDetectedFormatId(null); setDetectedFormatName(null); setStatus('SCANNING');
+    
+    // Reset CSS zoom if we used it
+    const videoElement = document.querySelector("#qr-scanner-viewport video");
+    if (videoElement && !hasHardwareZoom) {
+       videoElement.style.transform = 'translateZ(0) scale(1)';
+    }
   };
 
   const captureImage = useCallback(async () => {
