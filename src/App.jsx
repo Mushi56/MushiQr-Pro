@@ -4266,6 +4266,10 @@ export default function App() {
                                         setBgColor(p.bg); 
                                         if (syncEyes) { setEyeColor(p.qr); setEyeOuterColor(p.qr); } 
                                         setBgTransparent(false);
+                                        setQrBgImage(null);
+                                        setQrBgImageEnabled(false);
+                                        setQrTexture(null);
+                                        setQrTextureEnabled(false);
                                       }} 
                                       style={{ 
                                         flex: '0 0 auto',
@@ -4324,6 +4328,10 @@ export default function App() {
                                         setBgColor(p.bg); 
                                         if (syncEyes) { setEyeColor(p.qr); setEyeOuterColor(p.qr); } 
                                         setBgTransparent(false);
+                                        setQrBgImage(null);
+                                        setQrBgImageEnabled(false);
+                                        setQrTexture(null);
+                                        setQrTextureEnabled(false);
                                       }} 
                                       style={{ 
                                         flex: '0 0 auto',
@@ -4374,7 +4382,11 @@ export default function App() {
                       )}
                       {colorPopup === 'dots' && (
                         <div className="fade-in">
-                          {renderColorOrGradientPicker("Dots Color", qrColor, setQrColor, handleOpenAdv)}
+                          {renderColorOrGradientPicker("Dots Color", qrColor, (c) => {
+                            setQrColor(c);
+                            setQrTexture(null);
+                            setQrTextureEnabled(false);
+                          }, handleOpenAdv)}
                         </div>
                       )}
                       {colorPopup === 'bg' && (
@@ -4382,7 +4394,13 @@ export default function App() {
                           <Toggle label="Transparent Background" checked={bgTransparent} onChange={setBgTransparent} />
                           {!bgTransparent && (
                             <div style={{ marginTop: '16px' }}>
-                              {renderColorOrGradientPicker("Background Color", bgColor, (c) => { setBgColor(c); setLogoBgColor(c); setBgTransparent(false); }, handleOpenAdv)}
+                              {renderColorOrGradientPicker("Background Color", bgColor, (c) => { 
+                                setBgColor(c); 
+                                setLogoBgColor(c); 
+                                setBgTransparent(false); 
+                                setQrBgImage(null);
+                                setQrBgImageEnabled(false);
+                              }, handleOpenAdv)}
                             </div>
                           )}
                         </div>
