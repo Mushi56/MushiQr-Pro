@@ -1142,17 +1142,10 @@ input[type="range"]::-moz-range-thumb {
 
 .style-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
-  overflow-y: auto;
-  max-height: 240px;
   padding: 10px 4px;
   margin: 0;
-  scrollbar-width: none;
-}
-
-.style-grid::-webkit-scrollbar {
-  display: none;
 }
 
 .style-option {
@@ -1166,7 +1159,7 @@ input[type="range"]::-moz-range-thumb {
   padding: 0;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: var(--transition-fast);
   font-size: 9px;
@@ -1184,7 +1177,7 @@ input[type="range"]::-moz-range-thumb {
 .style-option.active {
   background: var(--accent-soft);
   border: 2px solid var(--accent-primary) !important;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   /* Restored rounded edges */
   color: var(--accent-primary);
 }
@@ -1203,7 +1196,7 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
