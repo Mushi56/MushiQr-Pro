@@ -268,46 +268,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     };
   }, [stopScanner]);
 
-  const isScanningRef = useRef(false);
-  useEffect(() => {
-    isScanningRef.current = (status === 'SCANNING');
-  }, [status]);
 
-  useEffect(() => {
-    let appListener;
-    if (Capacitor.isNativePlatform()) {
-      try {
-        const res = CapApp.addListener('appStateChange', async (state) => {
-          if (!state.isActive) {
-            // App went to background: stop the camera to release Android locks
-            await stopScanner();
-          } else {
-            // App returned to foreground: restart the camera if we were scanning
-            if (isScanningRef.current) {
-              setTimeout(() => {
-                startScanner();
-              }, 300);
-            }
-          }
-        });
-
-        if (res && typeof res.then === 'function') {
-          res.then(l => {
-            appListener = l;
-          });
-        } else {
-          appListener = res;
-        }
-      } catch (err) {
-        console.error('Failed to add app state change listener:', err);
-      }
-    }
-    return () => {
-      if (appListener && typeof appListener.remove === 'function') {
-        appListener.remove();
-      }
-    };
-  }, [stopScanner, startScanner]);
 
   const safeBack = useCallback(async () => {
     triggerHapticFeedback();
@@ -620,6 +581,37 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   }, [stopScanner, handleScanResult]);
 
   useEffect(() => { const t = setTimeout(() => { if (mountedRef.current) startScanner(); }, 50); return () => clearTimeout(t); }, []); // eslint-disable-line
+
+  const isScanningRef = useRef(false);
+  useEffect(() => {
+    isScanningRef.current = (status === 'SCANNING');
+  }, [status]);
+
+  useEffect(() => {
+    let appListener;
+    if (Capacitor.isNativePlatform()) {
+      CapApp.addListener('appStateChange', async (state) => {
+        if (!state.isActive) {
+          // App went to background: stop the camera to release Android locks
+          await stopScanner();
+        } else {
+          // App returned to foreground: restart the camera if we were scanning
+          if (isScanningRef.current) {
+            setTimeout(() => {
+              startScanner();
+            }, 300);
+          }
+        }
+      }).then(l => {
+        appListener = l;
+      });
+    }
+    return () => {
+      if (appListener) {
+        appListener.remove();
+      }
+    };
+  }, [stopScanner, startScanner]);
 
   const handleFileUpload = async (file) => {
     if (!file) return;
