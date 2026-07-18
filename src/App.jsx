@@ -113,24 +113,33 @@ const QREyesIcon = ({ size = 18 }) => (
 
 const QRStyleIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ overflow: 'visible' }}>
-    <rect x="2" y="2" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-    <circle cx="5" cy="5" r="1" fill="currentColor" />
-    <rect x="16" y="2" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-    <circle cx="19" cy="5" r="1" fill="currentColor" />
-    <rect x="2" y="16" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-    <circle cx="5" cy="19" r="1" fill="currentColor" />
-    <rect x="11" y="3" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="11" y="7" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="3" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="7" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    {/* Three Main Position Marker Eyes */}
+    <rect x="2.5" y="2.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+    <rect x="4.5" y="4.5" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+    
+    <rect x="2.5" y="15" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+    <rect x="4.5" y="17" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+    
+    <rect x="15" y="2.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+    <rect x="17" y="4.5" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+    
+    {/* Grid pixels */}
+    <rect x="11" y="4" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="11" y="7.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="4" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="7.5" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
     <rect x="11" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="15" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="19" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="11" y="15" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="15" y="15" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="11" y="19" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="16" y="19" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="19" y="16" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="14.5" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="18" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    
+    <rect x="11" y="14.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="11" y="18" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    
+    {/* Bottom right corner */}
+    <rect x="15.5" y="15.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="18.5" y="15.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="15.5" y="18.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="18.5" y="18.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
   </svg>
 );
 
