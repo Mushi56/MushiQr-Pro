@@ -354,7 +354,7 @@ function EAN13Form({ fields, setFields }) {
   return (
     <>
       <InfoBox text="EAN-13 encodes a 13-digit retail GTIN. Country prefix (3 digits) + Manufacturer (5 digits) + Product (4 digits) = 12 digits. The 13th check digit is auto-calculated." />
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <SegmentedInput
           label="Country Prefix" hint="GS1 region code"
           value={prefix}
@@ -426,7 +426,7 @@ function UPCAForm({ fields, setFields }) {
           { value: '9', label: '9 — Coupon' }
         ]}
       />
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <SegmentedInput
           label="Manufacturer Code"
           value={mfg}
@@ -474,7 +474,7 @@ function EAN8Form({ fields, setFields }) {
   return (
     <>
       <InfoBox text="EAN-8 is a condensed 8-digit retail code for small packages. Country prefix (3 digits) + Product code (4 digits) = 7 digits. Check digit is auto-calculated." />
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <SegmentedInput
           label="Country Prefix" hint="GS1 region"
           value={prefix}
@@ -532,7 +532,7 @@ function ITF14Form({ fields, setFields }) {
           { value: '3', label: '3 — Pallet' }, { value: '4', label: '4 — Container' }, { value: '8', label: '8 — Reserved' }, { value: '9', label: '9 — Assorted' }
         ]}
       />
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <SegmentedInput
           label="GS1 Company Prefix"
           value={gs1}
