@@ -1035,11 +1035,11 @@ export default function App() {
   // ── QR Background Image ──
   const [qrBgImageEnabled, setQrBgImageEnabled] = useState(false);
   const [qrBgImage, setQrBgImage] = useState(null); // { src, image, name }
-  const [qrBgImageOpacity, setQrBgImageOpacity] = useState(0.85);
+  const [qrBgImageOpacity, setQrBgImageOpacity] = useState(1.0);
   const [qrBgImageBlur, setQrBgImageBlur] = useState(0);
-  const [qrBgImageOverlayOpacity, setQrBgImageOverlayOpacity] = useState(0.2);
-  const [qrBgCardEnabled, setQrBgCardEnabled] = useState(true);
-  const [qrBgCardOpacity, setQrBgCardOpacity] = useState(0.9);
+  const [qrBgImageOverlayOpacity, setQrBgImageOverlayOpacity] = useState(0.0);
+  const [qrBgCardEnabled, setQrBgCardEnabled] = useState(false);
+  const [qrBgCardOpacity, setQrBgCardOpacity] = useState(0.6);
 
   // ── Shapes ──
   const [dotStyle, setDotStyle] = useState(DOT_STYLES.SQUARE);
