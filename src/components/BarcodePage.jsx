@@ -58,14 +58,38 @@ function parseValueToFields(val, type) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, setLoadedBarcodeItem, theme, setTheme, effectiveTheme }) {
-  const [text, setText] = useState('7501031311309');
-  const [bcid, setBcid] = useState('ean13');
-  const [barColor, setBarColor] = useState('#000000');
-  const [bgColor, setBgColor] = useState('#ffffff');
-  const [barWidth, setBarWidth] = useState(2);
-  const [height, setHeight] = useState(90);
-  const [margin, setMargin] = useState(16);
-  const [displayValue, setDisplayValue] = useState(true);
+  const [text, setText] = useState(() => {
+    if (loadedBarcodeItem) return loadedBarcodeItem.displayText || loadedBarcodeItem.qrData?.text || '7501031311309';
+    return '7501031311309';
+  });
+  const [bcid, setBcid] = useState(() => {
+    if (loadedBarcodeItem) return loadedBarcodeItem.style?.bcid || 'ean13';
+    return 'ean13';
+  });
+  const [barColor, setBarColor] = useState(() => {
+    if (loadedBarcodeItem) return loadedBarcodeItem.style?.barColor || '#000000';
+    return '#000000';
+  });
+  const [bgColor, setBgColor] = useState(() => {
+    if (loadedBarcodeItem) return loadedBarcodeItem.style?.bgColor || '#ffffff';
+    return '#ffffff';
+  });
+  const [barWidth, setBarWidth] = useState(() => {
+    if (loadedBarcodeItem) return loadedBarcodeItem.style?.barWidth !== undefined ? loadedBarcodeItem.style.barWidth : 2;
+    return 2;
+  });
+  const [height, setHeight] = useState(() => {
+    if (loadedBarcodeItem) return loadedBarcodeItem.style?.height !== undefined ? loadedBarcodeItem.style.height : 90;
+    return 90;
+  });
+  const [margin, setMargin] = useState(() => {
+    if (loadedBarcodeItem) return loadedBarcodeItem.style?.margin !== undefined ? loadedBarcodeItem.style.margin : 16;
+    return 16;
+  });
+  const [displayValue, setDisplayValue] = useState(() => {
+    if (loadedBarcodeItem) return loadedBarcodeItem.style?.displayValue !== undefined ? loadedBarcodeItem.style.displayValue : true;
+    return true;
+  });
 
   const [activeTab, setActiveTab] = useState('content');
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', type: 'bar' });
