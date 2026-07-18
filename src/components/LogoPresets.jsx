@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { UploadCloud, X, CheckCircle2 } from 'lucide-react';
 
 const LOGO_PRESETS = [
+  { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.png' },
   { slug: 'picsart', name: 'Picsart', color: '#00C5FF', url: '/presets/Picsart_26-07-18_11-14-07-816.png' },
   { slug: 'apple', name: 'Apple', color: '#A2AAAD', url: '/presets/apple.png' },
   { slug: 'behance', name: 'Behance', color: '#1769FF', url: '/presets/behance.png' },
