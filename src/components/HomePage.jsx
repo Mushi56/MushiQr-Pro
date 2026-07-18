@@ -616,31 +616,32 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                     </button>
                   </div>
 
-                  {/* Right Column (58%) Custom QR Mockup */}
-                  <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
-                    {/* Glow aura behind image */}
-                    <div style={{
-                      position: 'absolute', right: '-5px', bottom: '10px',
-                      width: '120px', height: '120px',
-                      background: 'radial-gradient(circle, rgba(255,77,109,0.35) 0%, transparent 70%)',
-                      filter: 'blur(18px)', zIndex: 1, pointerEvents: 'none'
-                    }} />
-                    <img 
-                      src="/qr-hero.png" 
-                      alt="QR Mockup" 
-                      style={{
-                        position: 'absolute',
-                        right: '-15px',
-                        bottom: '-10px',
-                        height: '160px',
-                        width: 'auto',
-                        zIndex: 2,
-                        pointerEvents: 'none',
-                        objectFit: 'contain',
-                        filter: 'drop-shadow(0 12px 24px rgba(255,77,109,0.4)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))'
-                      }}
-                    />
-                  </div>
+                   {/* Right Column (58%) Custom QR Mockup */}
+                   <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
+                     {/* Glow aura behind image */}
+                     <div style={{
+                       position: 'absolute', right: '-5px', top: '50%', transform: 'translateY(-50%)',
+                       width: '120px', height: '120px',
+                       background: 'radial-gradient(circle, rgba(255,77,109,0.35) 0%, transparent 70%)',
+                       filter: 'blur(18px)', zIndex: 1, pointerEvents: 'none'
+                     }} />
+                     <img 
+                       src="/qr-hero.png" 
+                       alt="QR Mockup" 
+                       style={{
+                         position: 'absolute',
+                         right: '-15px',
+                         top: '50%',
+                         transform: 'translateY(-50%)',
+                         height: '190px',
+                         width: 'auto',
+                         zIndex: 2,
+                         pointerEvents: 'none',
+                         objectFit: 'contain',
+                         filter: 'drop-shadow(0 12px 24px rgba(255,77,109,0.4)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))'
+                       }}
+                     />
+                   </div>
                 </div>
 
                 {/* Features Row inside QR Codes card */}
