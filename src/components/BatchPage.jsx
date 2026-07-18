@@ -34,7 +34,7 @@ export default function BatchPage({
   initialBatchType
 }) {
   const [batchType, setBatchType] = useState(initialBatchType || 'QR'); // 'QR' | 'BARCODE'
-  const [barcodeType, setBarcodeType] = useState('code128');
+  const [barcodeType, setBarcodeType] = useState('ean13');
   const [fileData, setFileData] = useState(null);
   const [columns, setColumns] = useState([]);
   const [dataCol, setDataCol] = useState('');

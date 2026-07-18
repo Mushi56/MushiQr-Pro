@@ -58,8 +58,8 @@ function parseValueToFields(val, type) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, setLoadedBarcodeItem, theme, setTheme, effectiveTheme }) {
-  const [text, setText] = useState('MushiPro-128');
-  const [bcid, setBcid] = useState('code128');
+  const [text, setText] = useState('7501031311309');
+  const [bcid, setBcid] = useState('ean13');
   const [barColor, setBarColor] = useState('#000000');
   const [bgColor, setBgColor] = useState('#ffffff');
   const [barWidth, setBarWidth] = useState(2);
