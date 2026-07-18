@@ -276,24 +276,34 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   useEffect(() => {
     let appListener;
     if (Capacitor.isNativePlatform()) {
-      CapApp.addListener('appStateChange', async (state) => {
-        if (!state.isActive) {
-          // App went to background: stop the camera to release Android locks
-          await stopScanner();
-        } else {
-          // App returned to foreground: restart the camera if we were scanning
-          if (isScanningRef.current) {
-            setTimeout(() => {
-              startScanner();
-            }, 300);
+      try {
+        const res = CapApp.addListener('appStateChange', async (state) => {
+          if (!state.isActive) {
+            // App went to background: stop the camera to release Android locks
+            await stopScanner();
+          } else {
+            // App returned to foreground: restart the camera if we were scanning
+            if (isScanningRef.current) {
+              setTimeout(() => {
+                startScanner();
+              }, 300);
+            }
           }
+        });
+
+        if (res && typeof res.then === 'function') {
+          res.then(l => {
+            appListener = l;
+          });
+        } else {
+          appListener = res;
         }
-      }).then(l => {
-        appListener = l;
-      });
+      } catch (err) {
+        console.error('Failed to add app state change listener:', err);
+      }
     }
     return () => {
-      if (appListener) {
+      if (appListener && typeof appListener.remove === 'function') {
         appListener.remove();
       }
     };
