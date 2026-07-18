@@ -4440,100 +4440,96 @@ export default function App() {
                       )}
                       {colorPopup === 'bg-image' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          <Toggle label="Enable Background Image" checked={qrBgImageEnabled} onChange={setQrBgImageEnabled} />
-                          
-                          {qrBgImageEnabled && (
-                            <div className="fade-in" style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                              <div className="logo-presets-grid">
-                                {/* Upload Button */}
-                                <button
-                                  className={`logo-preset-btn upload-tile ${qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? 'active' : ''}`}
-                                  onClick={() => {
-                                    if (qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src)) {
-                                      setQrBgImage(null);
-                                      setQrBgImageEnabled(false);
-                                    } else {
-                                      const input = document.createElement('input');
-                                      input.type = 'file';
-                                      input.accept = 'image/*';
-                                      input.onchange = (e) => {
-                                        const file = e.target.files[0];
-                                        if (file) {
-                                          const reader = new FileReader();
-                                          reader.onload = (re) => {
-                                            const img = new Image();
-                                            img.onload = () => {
-                                              setQrBgImage({ src: re.target.result, image: img, name: file.name });
-                                              setQrBgImageEnabled(true);
-                                              setErrorLevel('H'); // Auto set high error correction for reliability
-                                            };
-                                            img.src = re.target.result;
-                                          };
-                                          reader.readAsDataURL(file);
-                                        }
-                                      };
-                                      input.click();
-                                    }
-                                  }}
-                                  title="Upload Custom Background"
-                                  style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)' }}
-                                >
-                                  {qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? (
-                                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                                      <img src={qrBgImage.src} alt="Custom" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />
-                                      <X size={16} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--error)' }} />
-                                    </div>
-                                  ) : (
-                                    <UploadCloud size={24} color="var(--accent-primary)" />
-                                  )}
-                                </button>
-
-                                {/* Social App Texture Presets */}
-                                {SOCIAL_TEXTURES.map((p) => {
-                                  const isActive = qrBgImage?.src === p.url;
-                                  return (
-                                    <button
-                                      key={p.slug}
-                                      className={`logo-preset-btn ${isActive ? 'active' : ''}`}
-                                      onClick={() => {
-                                        if (isActive) {
-                                          setQrBgImage(null);
-                                          setQrBgImageEnabled(false);
-                                        } else {
+                          <div className="fade-in" style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                            <div className="logo-presets-grid">
+                              {/* Upload Button */}
+                              <button
+                                className={`logo-preset-btn upload-tile ${qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? 'active' : ''}`}
+                                onClick={() => {
+                                  if (qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src)) {
+                                    setQrBgImage(null);
+                                    setQrBgImageEnabled(false);
+                                  } else {
+                                    const input = document.createElement('input');
+                                    input.type = 'file';
+                                    input.accept = 'image/*';
+                                    input.onchange = (e) => {
+                                      const file = e.target.files[0];
+                                      if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = (re) => {
                                           const img = new Image();
                                           img.onload = () => {
-                                            setQrBgImage({ src: p.url, image: img, name: p.name });
+                                            setQrBgImage({ src: re.target.result, image: img, name: file.name });
                                             setQrBgImageEnabled(true);
                                             setErrorLevel('H'); // Auto set high error correction for reliability
                                           };
-                                          img.src = p.url;
-                                        }
-                                      }}
-                                      title={p.name}
-                                    >
-                                      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                                        <img 
-                                          src={p.url} 
-                                          alt={p.name} 
-                                          loading="lazy" 
-                                          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
-                                        />
-                                        {isActive && (
-                                          <X size={18} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
-                                        )}
-                                      </div>
-                                    </button>
-                                  );
-                                })}
-                              </div>
+                                          img.src = re.target.result;
+                                        };
+                                        reader.readAsDataURL(file);
+                                      }
+                                    };
+                                    input.click();
+                                  }
+                                }}
+                                title="Upload Custom Background"
+                                style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)' }}
+                              >
+                                {qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? (
+                                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                    <img src={qrBgImage.src} alt="Custom" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />
+                                    <X size={16} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--error)' }} />
+                                  </div>
+                                ) : (
+                                  <UploadCloud size={24} color="var(--accent-primary)" />
+                                )}
+                              </button>
 
-                              {qrBgImage && (
-                                <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>
-                                  Active: <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>{qrBgImage.name}</span>
-                                </div>
-                              )}
+                              {/* Social App Texture Presets */}
+                              {SOCIAL_TEXTURES.map((p) => {
+                                const isActive = qrBgImage?.src === p.url;
+                                return (
+                                  <button
+                                    key={p.slug}
+                                    className={`logo-preset-btn ${isActive ? 'active' : ''}`}
+                                    onClick={() => {
+                                      if (isActive) {
+                                        setQrBgImage(null);
+                                        setQrBgImageEnabled(false);
+                                      } else {
+                                        const img = new Image();
+                                        img.onload = () => {
+                                          setQrBgImage({ src: p.url, image: img, name: p.name });
+                                          setQrBgImageEnabled(true);
+                                          setErrorLevel('H'); // Auto set high error correction for reliability
+                                        };
+                                        img.src = p.url;
+                                      }
+                                    }}
+                                    title={p.name}
+                                  >
+                                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                      <img 
+                                        src={p.url} 
+                                        alt={p.name} 
+                                        loading="lazy" 
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
+                                      />
+                                      {isActive && (
+                                        <X size={18} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+                                      )}
+                                    </div>
+                                  </button>
+                                );
+                              })}
                             </div>
-                          )}
+
+                            {qrBgImage && (
+                              <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>
+                                Active: <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>{qrBgImage.name}</span>
+                              </div>
+                            )}
+                          </div>
 
                           {qrBgImage && qrBgImageEnabled && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '4px' }} className="fade-in">
@@ -4601,99 +4597,100 @@ export default function App() {
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
                             <div style={{ flex: 1, minWidth: '150px' }}>
-                              <Toggle label="Enable QR Texture" checked={qrTextureEnabled} onChange={setQrTextureEnabled} />
+                              <Toggle label="Sync Eyes with Dots" checked={qrTextureSyncEyes} onChange={setQrTextureSyncEyes} />
                             </div>
-                            {qrTextureEnabled && (
-                              <div style={{ flex: 1, minWidth: '150px' }}>
-                                <Toggle label="Sync Eyes with Dots" checked={qrTextureSyncEyes} onChange={setQrTextureSyncEyes} />
-                              </div>
-                            )}
                           </div>
                           
-                          {qrTextureEnabled && (
-                            <div className="fade-in">
-                              <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                                <div className="logo-presets-grid">
-                                  {/* Upload Button */}
-                                  <button
-                                    className={`logo-preset-btn upload-tile ${qrTexture && !SOCIAL_TEXTURES.some(p => p.url === qrTexture.src) ? 'active' : ''}`}
-                                    onClick={() => {
-                                      if (qrTexture && !SOCIAL_TEXTURES.some(p => p.url === qrTexture.src)) {
-                                        setQrTexture(null);
-                                      } else {
-                                        const input = document.createElement('input');
-                                        input.type = 'file';
-                                        input.accept = 'image/*';
-                                        input.onchange = (e) => {
-                                          const file = e.target.files[0];
-                                          if (file) {
-                                            const reader = new FileReader();
-                                            reader.onload = (re) => {
-                                              const img = new Image();
-                                              img.onload = () => setQrTexture({ src: re.target.result, image: img, name: file.name });
-                                              img.src = re.target.result;
-                                            };
-                                            reader.readAsDataURL(file);
-                                          }
-                                        };
-                                        input.click();
-                                      }
-                                    }}
-                                    title="Upload Custom Texture"
-                                    style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)' }}
-                                  >
-                                    {qrTexture && !SOCIAL_TEXTURES.some(p => p.url === qrTexture.src) ? (
-                                      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                                        <img src={qrTexture.src} alt="Custom" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />
-                                        <X size={16} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--error)' }} />
-                                      </div>
-                                    ) : (
-                                      <UploadCloud size={24} color="var(--accent-primary)" />
-                                    )}
-                                  </button>
-
-                                  {/* Social App Texture Presets */}
-                                  {SOCIAL_TEXTURES.map((p) => {
-                                    const isActive = qrTexture?.src === p.url;
-                                    return (
-                                      <button
-                                        key={p.slug}
-                                        className={`logo-preset-btn ${isActive ? 'active' : ''}`}
-                                        onClick={() => {
-                                          if (isActive) {
-                                            setQrTexture(null);
-                                          } else {
+                          <div className="fade-in">
+                            <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                              <div className="logo-presets-grid">
+                                {/* Upload Button */}
+                                <button
+                                  className={`logo-preset-btn upload-tile ${qrTexture && !SOCIAL_TEXTURES.some(p => p.url === qrTexture.src) ? 'active' : ''}`}
+                                  onClick={() => {
+                                    if (qrTexture && !SOCIAL_TEXTURES.some(p => p.url === qrTexture.src)) {
+                                      setQrTexture(null);
+                                      setQrTextureEnabled(false);
+                                    } else {
+                                      const input = document.createElement('input');
+                                      input.type = 'file';
+                                      input.accept = 'image/*';
+                                      input.onchange = (e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                          const reader = new FileReader();
+                                          reader.onload = (re) => {
                                             const img = new Image();
-                                            img.onload = () => setQrTexture({ src: p.url, image: img, name: p.name });
-                                            img.src = p.url;
-                                          }
-                                        }}
-                                        title={p.name}
-                                      >
-                                        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                                          <img 
-                                            src={p.url} 
-                                            alt={p.name} 
-                                            loading="lazy" 
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
-                                          />
-                                          {isActive && (
-                                            <X size={18} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
-                                          )}
-                                        </div>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
+                                            img.onload = () => {
+                                              setQrTexture({ src: re.target.result, image: img, name: file.name });
+                                              setQrTextureEnabled(true);
+                                            };
+                                            img.src = re.target.result;
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
+                                      };
+                                      input.click();
+                                    }
+                                  }}
+                                  title="Upload Custom Texture"
+                                  style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)' }}
+                                >
+                                  {qrTexture && !SOCIAL_TEXTURES.some(p => p.url === qrTexture.src) ? (
+                                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                      <img src={qrTexture.src} alt="Custom" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />
+                                      <X size={16} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--error)' }} />
+                                    </div>
+                                  ) : (
+                                    <UploadCloud size={24} color="var(--accent-primary)" />
+                                  )}
+                                </button>
 
-                                {qrTexture && (
-                                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>
-                                    Active: <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>{qrTexture.name}</span>
-                                  </div>
-                                )}
+                                {/* Social App Texture Presets */}
+                                {SOCIAL_TEXTURES.map((p) => {
+                                  const isActive = qrTexture?.src === p.url;
+                                  return (
+                                    <button
+                                      key={p.slug}
+                                      className={`logo-preset-btn ${isActive ? 'active' : ''}`}
+                                      onClick={() => {
+                                        if (isActive) {
+                                          setQrTexture(null);
+                                          setQrTextureEnabled(false);
+                                        } else {
+                                          const img = new Image();
+                                          img.onload = () => {
+                                            setQrTexture({ src: p.url, image: img, name: p.name });
+                                            setQrTextureEnabled(true);
+                                          };
+                                          img.src = p.url;
+                                        }
+                                      }}
+                                      title={p.name}
+                                    >
+                                      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                        <img 
+                                          src={p.url} 
+                                          alt={p.name} 
+                                          loading="lazy" 
+                                          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
+                                        />
+                                        {isActive && (
+                                          <X size={18} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+                                        )}
+                                      </div>
+                                    </button>
+                                  );
+                                })}
                               </div>
+
+                              {qrTexture && (
+                                <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>
+                                  Active: <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>{qrTexture.name}</span>
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
                         </div>
                       )}
                        {shapePopup === 'dots' && (
