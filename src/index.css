@@ -3895,7 +3895,7 @@ input[type="range"]::-moz-range-thumb {
 /* Ã¢â€ â‚¬Ã¢â€ â‚¬ EC Level Buttons Ã¢â€ â‚¬Ã¢â€ â‚¬ */
 .logo-presets-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
   overflow-y: auto;
   max-height: 250px;
@@ -3924,8 +3924,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .logo-preset-icon {
-  width: 28px;
-  height: 28px;
+  width: 75%;
+  height: 75%;
   display: flex;
   align-items: center;
   justify-content: center;
