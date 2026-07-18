@@ -136,6 +136,16 @@ const TEXT_SHAPES = [
   { id: 'dots', label: 'Dotted Box' }
 ];
 
+const LOGO_BG_SHAPES = [
+  { id: 'circle', label: 'Circle Box' },
+  { id: 'solid', label: 'Solid Box' },
+  { id: 'rounded', label: 'Rounded Box' },
+  { id: 'pill', label: 'Pill Box' },
+  { id: 'ribbon', label: 'Ribbon' },
+  { id: 'glow', label: 'Glow Effect' },
+  { id: 'hexagon', label: 'Hexagon' }
+];
+
 /* ── Color Presets ── */
 /* ── Color Presets (Expanded to 50) ── */
 const COLOR_PRESETS = [
@@ -3468,7 +3478,7 @@ export default function App() {
                           {logoBackground && (
                             <div className="fade-in" style={{ marginTop: '14px' }}>
                               <div className="font-scroll-container" style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '4px 0 8px 0', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', marginBottom: '14px' }}>
-                                {TEXT_SHAPES.map(shape => {
+                                {LOGO_BG_SHAPES.map(shape => {
                                   const isActive = logoBgShape === shape.id;
                                   return (
                                     <button 
