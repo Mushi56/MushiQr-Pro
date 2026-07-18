@@ -18,23 +18,7 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
               {label}
             </span>
-            {hasValue && isValid !== undefined && (
-              <span style={{ 
-                fontSize: '9px', 
-                fontWeight: 800, 
-                padding: '2px 6px', 
-                borderRadius: '6px', 
-                background: isValid ? 'rgba(52,199,89,0.12)' : 'rgba(255,59,48,0.12)', 
-                color: isValid ? '#34C759' : '#FF3B30',
-                textTransform: 'uppercase',
-                letterSpacing: '0.3px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px'
-              }}>
-                {isValid ? '✓ Valid' : '✗ Invalid'}
-              </span>
-            )}
+            {/* Validation badge removed from label as requested */}
           </div>
           {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
         </label>
@@ -73,7 +57,7 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
             fontFamily: monospace ? '"JetBrains Mono", "Fira Code", "Courier New", monospace' : 'inherit',
             fontWeight: 600,
             fontSize: '13px',
-            height: '42px',
+            height: '48px',
             boxSizing: 'border-box'
           }}
         />
@@ -130,23 +114,7 @@ function SegmentedTextarea({ label, value, onChange, placeholder, hint, maxLengt
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
               {label}
             </span>
-            {hasValue && isValid !== undefined && (
-              <span style={{ 
-                fontSize: '9px', 
-                fontWeight: 800, 
-                padding: '2px 6px', 
-                borderRadius: '6px', 
-                background: isValid ? 'rgba(52,199,89,0.12)' : 'rgba(255,59,48,0.12)', 
-                color: isValid ? '#34C759' : '#FF3B30',
-                textTransform: 'uppercase',
-                letterSpacing: '0.3px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px'
-              }}>
-                {isValid ? '✓ Valid' : '✗ Invalid'}
-              </span>
-            )}
+            {/* Validation badge removed from label as requested */}
           </div>
           {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
         </label>
@@ -262,7 +230,7 @@ function SelectField({ label, value, onChange, options, hint, Icon }) {
             paddingRight: '36px',
             fontWeight: 600,
             fontSize: '13px',
-            height: '42px',
+            height: '48px',
             boxSizing: 'border-box'
           }}
         >

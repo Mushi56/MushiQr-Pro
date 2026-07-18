@@ -3,7 +3,8 @@ import {
   Save, Palette, Sliders, Undo2, Redo2, ChevronDown,
   FileImage, FileCode, FileText, Copy, Bookmark, Share2,
   Menu, Home, History, Moon, Sun, Info, Shield,
-  FileText as FileIcon, AlertCircle, Layers, Pencil, Barcode, Pipette
+  FileText as FileIcon, AlertCircle, Layers, Pencil, Barcode, Pipette,
+  Check, X
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
@@ -560,9 +561,9 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                         zIndex: 5
                       }}>
                         {standard.validate(text) ? (
-                          <span style={{ fontSize: '8px', fontWeight: 900, lineHeight: 1 }}>✓</span>
+                          <Check size={8} strokeWidth={4} />
                         ) : (
-                          <span style={{ fontSize: '8px', fontWeight: 900, lineHeight: 1 }}>✗</span>
+                          <X size={8} strokeWidth={4} />
                         )}
                       </div>
                     </>
