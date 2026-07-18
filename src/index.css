@@ -1142,7 +1142,7 @@ input[type="range"]::-moz-range-thumb {
 
 .style-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   padding: 10px 4px;
   margin: 0;
@@ -1159,7 +1159,7 @@ input[type="range"]::-moz-range-thumb {
   padding: 0;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: 6px;
   cursor: pointer;
   transition: var(--transition-fast);
   font-size: 9px;
@@ -1177,7 +1177,7 @@ input[type="range"]::-moz-range-thumb {
 .style-option.active {
   background: var(--accent-soft);
   border: 2px solid var(--accent-primary) !important;
-  border-radius: var(--radius-md);
+  border-radius: 6px;
   /* Restored rounded edges */
   color: var(--accent-primary);
 }
@@ -1196,7 +1196,7 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
+  border-radius: 6px;
   overflow: hidden;
 }
 
@@ -7420,7 +7420,7 @@ video {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 6px 16px;
   background: transparent;
   position: relative;
   z-index: 10;
@@ -7471,8 +7471,8 @@ video {
 }
 
 .toolbar-properties-panel-full {
-  padding: 20px;
-  max-height: 320px;
+  padding: 12px 20px 20px 20px;
+  max-height: 230px;
   overflow-y: auto;
 }
 
