@@ -111,6 +111,22 @@ const QREyesIcon = ({ size = 18 }) => (
   </svg>
 );
 
+const QRStyleIcon = ({ size = 18, strokeWidth = 2 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="7" height="7" rx="1.5" />
+    <rect x="2" y="15" width="7" height="7" rx="1.5" />
+    <rect x="15" y="2" width="7" height="7" rx="1.5" />
+    <rect x="4.5" y="4.5" width="2" height="2" fill="currentColor" stroke="none" />
+    <rect x="4.5" y="17.5" width="2" height="2" fill="currentColor" stroke="none" />
+    <rect x="17.5" y="4.5" width="2" height="2" fill="currentColor" stroke="none" />
+    <rect x="11" y="4" width="2" height="2" fill="currentColor" stroke="none" />
+    <rect x="4" y="11" width="2" height="2" fill="currentColor" stroke="none" />
+    <rect x="11" y="11" width="2" height="2" fill="currentColor" stroke="none" />
+    <path d="M12 22h10" strokeWidth={strokeWidth - 0.2} />
+    <path d="M18.85 11.15a1.77 1.77 0 0 1 2.5 2.5L14.7 20.3a1 1 0 0 1-.5.3l-3.2.8a0.5 0 0 1-.6-.6l.8-3.2a1 1 0 0 1 .3-.5z" fill="var(--accent-primary)" stroke="var(--accent-primary)" strokeWidth="1.2" />
+  </svg>
+);
+
 const QRGradientIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <defs>
@@ -2947,7 +2963,7 @@ export default function App() {
   const TABS = [
     { id: 'content', label: 'Content', icon: Pencil },
     { id: 'color', label: 'Color', icon: Palette },
-    { id: 'shapes', label: 'Style', icon: Paintbrush },
+    { id: 'shapes', label: 'Style', icon: QRStyleIcon },
     { id: 'logo', label: 'Logo', icon: ImageIcon },
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
     { id: 'text', label: 'Text', icon: Type },
