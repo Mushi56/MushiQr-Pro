@@ -4529,7 +4529,7 @@ export default function App() {
             >
               <div className="bottom-nav-highlight" />
               <span className="bottom-nav-icon">
-                <tab.icon size={20} strokeWidth={2} />
+                <tab.icon size={24} strokeWidth={2} />
               </span>
               <span className="bottom-nav-label">{tab.label}</span>
             </button>
@@ -4544,7 +4544,7 @@ export default function App() {
             className={`bottom-nav-tab${activePage === 'home' ? ' active' : ''}`}
             onClick={() => navigateTo('home')}
           >
-            <span className="bottom-nav-icon"><Home size={22} /></span>
+            <span className="bottom-nav-icon"><Home size={24} /></span>
             <span className="bottom-nav-label">Home</span>
           </button>
           
@@ -4552,7 +4552,7 @@ export default function App() {
             className={`bottom-nav-tab${activePage === 'saved' ? ' active' : ''}`}
             onClick={() => navigateTo('saved')}
           >
-            <span className="bottom-nav-icon"><Bookmark size={22} /></span>
+            <span className="bottom-nav-icon"><Bookmark size={24} /></span>
             <span className="bottom-nav-label">Saved</span>
           </button>
           
@@ -4596,7 +4596,7 @@ export default function App() {
             className={`bottom-nav-tab${activePage === 'history' ? ' active' : ''}`}
             onClick={() => navigateTo('history')}
           >
-            <span className="bottom-nav-icon"><History size={22} /></span>
+            <span className="bottom-nav-icon"><History size={24} /></span>
             <span className="bottom-nav-label">History</span>
           </button>
           
@@ -4604,7 +4604,7 @@ export default function App() {
             className={`bottom-nav-tab${activePage === 'settings' ? ' active' : ''}`}
             onClick={() => navigateTo('settings')}
           >
-            <span className="bottom-nav-icon"><Settings size={22} /></span>
+            <span className="bottom-nav-icon"><Settings size={24} /></span>
             <span className="bottom-nav-label">Settings</span>
           </button>
         </nav>

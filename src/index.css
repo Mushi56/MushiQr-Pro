@@ -3679,7 +3679,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .bottom-nav-tab.active .bottom-nav-icon {
-  transform: scale(1.25) translateY(-2px);
+  transform: scale(1.15) translateY(-1px);
 }
 
 .bottom-nav-tab.active {
@@ -3690,7 +3690,7 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 24px;
+  height: 28px;
   line-height: 1;
   transition: transform var(--transition-base);
 }
