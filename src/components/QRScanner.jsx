@@ -504,18 +504,19 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       qrScannerRef.current = scanner;
 
       await scanner.start(
-        { 
-          facingMode: "environment",
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        },
+        { facingMode: "environment" },
         {
           fps: 25,
           qrbox: (width, height) => {
             return { width: Math.min(width, height) * 0.85, height: Math.min(width, height) * 0.55 };
           },
           formatsToSupport: ALL_SCANNABLE_IDS,
-          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+          videoConstraints: {
+            facingMode: "environment",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
         },
         (decodedText, decodedResult) => {
           handleScanResult(decodedText, decodedResult);
