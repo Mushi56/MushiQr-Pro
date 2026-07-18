@@ -124,11 +124,13 @@ const QRStyleIcon = ({ size = 18 }) => (
     <rect x="3" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
     <rect x="7" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
     <rect x="11" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <g transform="translate(13, 13)">
-      <circle cx="1" cy="9" r="2.5" fill="var(--accent-primary)" opacity="0.15" stroke="none" />
-      <path d="M9.5 0.5a1.2 1.2 0 0 1 1.7 1.7L3 10.4l-2.5.6.6-2.5z" fill="var(--accent-primary)" stroke="var(--accent-primary)" strokeWidth="1.2" strokeLinejoin="round" />
-      <path d="M0 5.5a4.5 4.5 0 0 0 4.5 4.5" stroke="var(--accent-primary)" strokeWidth="1.2" strokeDasharray="1.5 1.5" fill="none" />
-    </g>
+    <rect x="15" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="19" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="11" y="15" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="15" y="15" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="11" y="19" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="16" y="19" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="19" y="16" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
   </svg>
 );
 
