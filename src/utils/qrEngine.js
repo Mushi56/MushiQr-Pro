@@ -1495,14 +1495,45 @@ function drawFrame(ctx, size, padding, options) {
   ctx.restore();
 }
 
+function parseColorOrGradient(ctx, x, y, w, h, colorString) {
+  if (!colorString || typeof colorString !== 'string') return colorString;
+  
+  if (colorString.startsWith('linear-gradient(')) {
+    const match = colorString.match(/linear-gradient\(([^,]+),\s*([^,]+),\s*([^)]+)\)/i);
+    if (match) {
+      const color1 = match[2].trim();
+      const color2 = match[3].trim();
+      const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+      grad.addColorStop(0, color1);
+      grad.addColorStop(1, color2);
+      return grad;
+    }
+  } else if (colorString.startsWith('radial-gradient(')) {
+    const match = colorString.match(/radial-gradient\(([^,]+),\s*([^,]+),\s*([^)]+)\)/i);
+    if (match) {
+      const color1 = match[2].trim();
+      const color2 = match[3].trim();
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      const r = Math.max(w, h) / 2;
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      grad.addColorStop(0, color1);
+      grad.addColorStop(1, color2);
+      return grad;
+    }
+  }
+  return colorString;
+}
+
 /**
  * Unified helper to draw background shapes for text or logo
  */
 function drawBackgroundShape(ctx, shape, x, y, w, h, color, sizeMultiplier = 1) {
   ctx.save();
   ctx.beginPath();
-  ctx.fillStyle = color;
-  ctx.strokeStyle = color;
+  const fill = parseColorOrGradient(ctx, x, y, w, h, color);
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = fill;
   
   switch (shape) {
     case 'solid':

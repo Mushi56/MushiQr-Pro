@@ -247,6 +247,17 @@ const GRADIENT_PRESETS = [
   { name: 'Titanium', c1: '#283048', c2: '#859398' },
 ];
 
+const LOGO_BG_GRADIENT_PRESETS = [
+  'linear-gradient(135deg, #FF3B30, #FF9500)',
+  'linear-gradient(135deg, #007AFF, #00F0FF)',
+  'linear-gradient(135deg, #AF52DE, #FF2D55)',
+  'linear-gradient(135deg, #34C759, #00F0FF)',
+  'linear-gradient(135deg, #7000FF, #FF007F)',
+  'linear-gradient(135deg, #FFCC00, #FF9500)',
+  'linear-gradient(135deg, #00C5FF, #25D366)',
+  'linear-gradient(135deg, #111111, #444444)'
+];
+
 const SWATCH_PRESETS = [
   '#000000', '#FFFFFF', '#FF3B30', '#34C759',
   '#007AFF', '#FFCC00', '#AF52DE', '#FF9500',
@@ -3476,6 +3487,12 @@ export default function App() {
                                 <ColorPicker isSwatch={true} icon={Pipette} value={logoBgColor} onChange={setLogoBgColor} onOpenAdvanced={handleOpenAdv} />
                                 {SWATCH_PRESETS.map(color => (
                                   <div key={color} className={`swatch-item${logoBgColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => setLogoBgColor(color)} />
+                                ))}
+                              </div>
+                              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '12px', marginBottom: '10px' }}>Gradient Presets</div>
+                              <div className="swatch-grid-mini">
+                                {LOGO_BG_GRADIENT_PRESETS.map(grad => (
+                                  <div key={grad} className={`swatch-item${logoBgColor === grad ? ' active' : ''}`} style={{ background: grad }} onClick={() => setLogoBgColor(grad)} />
                                 ))}
                               </div>
                             </div>
