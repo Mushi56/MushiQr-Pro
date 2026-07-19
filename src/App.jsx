@@ -5523,6 +5523,14 @@ function TemplatePreviewCanvas({ template, theme }) {
     const qrY = size * template.qrY - qrSize / 2;
     ctx.translate(qrX, qrY);
     
+    // Draw background card if template.preset.bgTransparent is false (matches main canvas)
+    if (template.preset && !template.preset.bgTransparent) {
+      ctx.fillStyle = template.preset.bgColor || '#FFFFFF';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, qrSize, qrSize, qrSize * 0.08);
+      ctx.fill();
+    }
+    
     // Draw 3 fake eyes
     const eyeColor = template.preset.eyeColor || template.preset.qrColor || '#000000';
     const eyeOuterColor = template.preset.eyeOuterColor || template.preset.qrColor || '#000000';
