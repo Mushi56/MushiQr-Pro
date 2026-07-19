@@ -533,54 +533,5 @@ export const QR_TEMPLATES = [
       ctx.font = `700 ${Math.round(size * 0.022)}px "Inter", sans-serif`;
       ctx.fillText('SCAN TO CONNECT INSTANTLY', size * 0.5, size * 0.84);
     }
-  },
-  {
-    id: 'scanme_classic',
-    name: 'Classic Scan Me',
-    category: 'Hot',
-    qrSize: 0.54,
-    qrX: 0.5,
-    qrY: 0.42,
-    preset: {
-      qrColor: '#000000',
-      bgColor: '#FFFFFF',
-      dotStyle: 'square',
-      eyeStyle: 'square',
-      eyeColor: '#000000',
-      eyeOuterColor: '#000000',
-      bgTransparent: true
-    },
-    drawBackground: (ctx, size) => {
-      // Light grey layout
-      ctx.fillStyle = '#F8FAFC';
-      ctx.fillRect(0, 0, size, size);
-
-      // Centered card
-      ctx.fillStyle = '#FFFFFF';
-      ctx.strokeStyle = '#0F172A';
-      ctx.lineWidth = size * 0.01;
-      
-      const cardW = size * 0.74;
-      const cardH = size * 0.82;
-      const cardX = (size - cardW) / 2;
-      const cardY = size * 0.09;
-
-      ctx.beginPath();
-      ctx.roundRect(cardX, cardY, cardW, cardH, size * 0.04);
-      ctx.fill();
-      ctx.stroke();
-
-      // Bottom black tag
-      ctx.fillStyle = '#0F172A';
-      ctx.beginPath();
-      ctx.roundRect(cardX + size * 0.04, cardY + cardH - size * 0.14, cardW - size * 0.08, size * 0.10, size * 0.016);
-      ctx.fill();
-    },
-    drawForeground: (ctx, size) => {
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold ${Math.round(size * 0.045)}px "Inter", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText('SCAN ME', size * 0.5, size * 0.84);
-    }
   }
 ];
