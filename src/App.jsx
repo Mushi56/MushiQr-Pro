@@ -1078,14 +1078,6 @@ export default function App() {
       } else {
         setLogo(null);
       }
-      
-      // Auto-set the QR code data payload if specified (e.g. Hello User)
-      if (tpl.preset.qrData) {
-        setQrData(tpl.preset.qrData);
-      }
-      
-      // Remove central text overlays when templates are applied
-      setTextCenterEnabled(false);
     }
   };
 

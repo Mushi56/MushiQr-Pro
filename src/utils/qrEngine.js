@@ -292,7 +292,7 @@ export function renderQR(canvas, options) {
   // Clear canvas
   ctx.clearRect(0, 0, size, size);
 
-  const effectiveBgTransparent = options.template ? (options.template.preset && options.template.preset.bgTransparent !== undefined ? options.template.preset.bgTransparent : true) : bgTransparent;
+  const effectiveBgTransparent = bgTransparent;
 
   if (options.template) {
     options.template.drawBackground(ctx, size);
@@ -307,13 +307,7 @@ export function renderQR(canvas, options) {
   // Background
   if (!effectiveBgTransparent) {
     ctx.fillStyle = parseColorOrGradient(ctx, 0, 0, size, size, bgColor);
-    if (options.template) {
-      ctx.beginPath();
-      ctx.roundRect(0, 0, size, size, size * 0.08);
-      ctx.fill();
-    } else {
-      ctx.fillRect(0, 0, size, size);
-    }
+    ctx.fillRect(0, 0, size, size);
   }
 
   // Draw Background Image
