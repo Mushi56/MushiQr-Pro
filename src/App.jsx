@@ -1025,12 +1025,6 @@ export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [templateCategory, setTemplateCategory] = useState('Hot');
 
-  useEffect(() => {
-    if (qrBgImage || qrTexture) {
-      setSelectedTemplate(null);
-    }
-  }, [qrBgImage, qrTexture]);
-
   const applyLogoBySlug = (slug) => {
     const LOGO_PRESETS = [
       { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.png' },
@@ -1212,6 +1206,12 @@ export default function App() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isInternalUpdate = useRef(false);
   const preEditSnapshot = useRef(null);
+
+  useEffect(() => {
+    if (qrBgImage || qrTexture) {
+      setSelectedTemplate(null);
+    }
+  }, [qrBgImage, qrTexture]);
 
   const startEditing = (type, val) => {
     if (!preEditSnapshot.current) {
