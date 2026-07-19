@@ -3844,7 +3844,7 @@ export default function App() {
                             key={tpl.id}
                             onClick={() => applyTemplate(tpl)}
                             style={{
-                              aspectRatio: '1 / 1.15',
+                              aspectRatio: '1 / 1',
                               borderRadius: '16px',
                               border: isSelected ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
                               background: 'var(--bg-elevated)',
@@ -3858,27 +3858,6 @@ export default function App() {
                               padding: 0
                             }}
                           >
-                            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', borderTopLeftRadius: '14px', borderTopRightRadius: '14px' }}>
-                              <TemplatePreviewCanvas template={tpl} theme={effectiveTheme} />
-                            </div>
-                            <div style={{
-                              padding: '6px 8px',
-                              background: 'var(--bg-secondary)',
-                              borderTop: '1px solid var(--border-color)',
-                              width: '100%',
-                              boxSizing: 'border-box'
-                            }}>
-                              <span style={{
-                                fontSize: '10px',
-                                fontWeight: 800,
-                                color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)',
-                                display: 'block',
-                                textAlign: 'center',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
-                              }}>
-                                {tpl.name}
                               </span>
                             </div>
                           </button>
@@ -5508,13 +5487,15 @@ function TemplatePreviewCanvas({ template, theme }) {
     if (!ref.current) return;
     const canvas = ref.current;
     const ctx = canvas.getContext('2d');
-    const size = 120; // preview size
+    const size = 240; // High-res preview size
     canvas.width = size;
     canvas.height = size;
     ctx.clearRect(0, 0, size, size);
 
     // Draw background
-    template.drawBackground(ctx, size);
+    if (template.drawBackground) {
+      template.drawBackground(ctx, size);
+    }
 
     // Draw a simplified dummy QR code in the placeholder slot
     ctx.save();
@@ -5531,50 +5512,42 @@ function TemplatePreviewCanvas({ template, theme }) {
       ctx.fill();
     }
     
-    // Draw 3 fake eyes
     const eyeColor = template.preset.eyeColor || template.preset.qrColor || '#000000';
     const eyeOuterColor = template.preset.eyeOuterColor || template.preset.qrColor || '#000000';
     const qrColor = template.preset.qrColor || '#000000';
     
-    ctx.fillStyle = eyeOuterColor;
-    const eyeSize = qrSize * 0.28;
-    
-    // Top-left eye outer
-    ctx.fillRect(0, 0, eyeSize, eyeSize);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(qrSize * 0.04, qrSize * 0.04, eyeSize - qrSize * 0.08, eyeSize - qrSize * 0.08);
-    ctx.fillStyle = eyeColor;
-    ctx.fillRect(qrSize * 0.08, qrSize * 0.08, eyeSize - qrSize * 0.16, eyeSize - qrSize * 0.16);
-
-    // Top-right eye outer
-    ctx.fillStyle = eyeOuterColor;
-    ctx.fillRect(qrSize - eyeSize, 0, eyeSize, eyeSize);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(qrSize - eyeSize + qrSize * 0.04, qrSize * 0.04, eyeSize - qrSize * 0.08, eyeSize - qrSize * 0.08);
-    ctx.fillStyle = eyeColor;
-    ctx.fillRect(qrSize - eyeSize + qrSize * 0.08, qrSize * 0.08, eyeSize - qrSize * 0.16, eyeSize - qrSize * 0.16);
-
-    // Bottom-left eye outer
-    ctx.fillStyle = eyeOuterColor;
-    ctx.fillRect(0, qrSize - eyeSize, eyeSize, eyeSize);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(qrSize * 0.04, qrSize - eyeSize + qrSize * 0.04, eyeSize - qrSize * 0.08, eyeSize - qrSize * 0.08);
-    ctx.fillStyle = eyeColor;
-    ctx.fillRect(qrSize * 0.08, qrSize - eyeSize + qrSize * 0.08, eyeSize - qrSize * 0.16, eyeSize - qrSize * 0.16);
-
-    // Draw some random small fake QR dots
-    ctx.fillStyle = qrColor;
-    const dotGrid = 6;
+    // Draw a realistic 21x21 QR code grid
+    const dotGrid = 21;
     const dotW = qrSize / dotGrid;
+    const eyeSize = dotW * 7;
+    
+    // Helper to draw an eye (7x7 modules)
+    const drawEye = (x, y) => {
+      ctx.fillStyle = eyeOuterColor;
+      ctx.fillRect(x, y, eyeSize, eyeSize);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(x + dotW, y + dotW, eyeSize - dotW * 2, eyeSize - dotW * 2);
+      ctx.fillStyle = eyeColor;
+      ctx.fillRect(x + dotW * 2, y + dotW * 2, eyeSize - dotW * 4, eyeSize - dotW * 4);
+    };
+
+    // Draw 3 eyes
+    drawEye(0, 0); // Top-left
+    drawEye(qrSize - eyeSize, 0); // Top-right
+    drawEye(0, qrSize - eyeSize); // Bottom-left
+
+    // Draw realistic random data dots (avoiding eyes)
+    ctx.fillStyle = qrColor;
     for (let r = 0; r < dotGrid; r++) {
       for (let c = 0; c < dotGrid; c++) {
-        // Skip corners (where eyes are)
-        if (r < 2 && c < 2) continue;
-        if (r < 2 && c >= dotGrid - 2) continue;
-        if (r >= dotGrid - 2 && c < 2) continue;
+        // Skip 7x7 corner areas (eyes)
+        if (r < 7 && c < 7) continue;
+        if (r < 7 && c >= dotGrid - 7) continue;
+        if (r >= dotGrid - 7 && c < 7) continue;
         
-        if (Math.random() > 0.4) {
-          ctx.fillRect(c * dotW + dotW * 0.2, r * dotW + dotW * 0.2, dotW * 0.6, dotW * 0.6);
+        // Consistent pseudo-random pattern
+        if (Math.sin(r * 12.9898 + c * 78.233) * 43758.5453 % 1 > 0.5) {
+          ctx.fillRect(c * dotW, r * dotW, dotW, dotW);
         }
       }
     }
