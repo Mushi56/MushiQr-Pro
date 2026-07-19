@@ -2,6 +2,213 @@
 
 export const QR_TEMPLATES = [
   {
+    id: 'ai_facebook',
+    name: 'Facebook AI',
+    category: 'Hot',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    preset: {
+      qrColor: '#1877F2',
+      bgColor: '#FFFFFF',
+      dotStyle: 'square',
+      eyeStyle: 'square',
+      bgTransparent: true,
+      textCenter: 'Hello User'
+    },
+    imageObj: null,
+    drawBackground: function(ctx, size) {
+      if (!this.imageObj) {
+        this.imageObj = new Image();
+        this.imageObj.src = '/presets/fb_template.png';
+        this.imageObj.onload = () => {
+          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
+        };
+      }
+      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
+        ctx.drawImage(this.imageObj, 0, 0, size, size);
+      } else {
+        const grad = ctx.createLinearGradient(0, 0, size, size);
+        grad.addColorStop(0, '#1877F2');
+        grad.addColorStop(1, '#0b3c80');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, size, size);
+      }
+    },
+    drawForeground: (ctx, size) => {}
+  },
+  {
+    id: 'ai_instagram',
+    name: 'Instagram AI',
+    category: 'Hot',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    preset: {
+      qrColor: '#E4405F',
+      bgColor: '#FFFFFF',
+      dotStyle: 'rounded',
+      eyeStyle: 'rounded',
+      bgTransparent: true,
+      textCenter: 'Hello User'
+    },
+    imageObj: null,
+    drawBackground: function(ctx, size) {
+      if (!this.imageObj) {
+        this.imageObj = new Image();
+        this.imageObj.src = '/presets/ig_template.png';
+        this.imageObj.onload = () => {
+          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
+        };
+      }
+      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
+        ctx.drawImage(this.imageObj, 0, 0, size, size);
+      } else {
+        const grad = ctx.createLinearGradient(0, 0, size, size);
+        grad.addColorStop(0, '#C13584');
+        grad.addColorStop(1, '#F77737');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, size, size);
+      }
+    },
+    drawForeground: (ctx, size) => {}
+  },
+  {
+    id: 'ai_x',
+    name: 'X AI',
+    category: 'Hot',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    preset: {
+      qrColor: '#000000',
+      bgColor: '#FFFFFF',
+      dotStyle: 'square',
+      eyeStyle: 'square',
+      bgTransparent: true,
+      textCenter: 'Hello User'
+    },
+    imageObj: null,
+    drawBackground: function(ctx, size) {
+      if (!this.imageObj) {
+        this.imageObj = new Image();
+        this.imageObj.src = '/presets/x_template.png';
+        this.imageObj.onload = () => {
+          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
+        };
+      }
+      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
+        ctx.drawImage(this.imageObj, 0, 0, size, size);
+      } else {
+        ctx.fillStyle = '#15202B';
+        ctx.fillRect(0, 0, size, size);
+      }
+    },
+    drawForeground: (ctx, size) => {}
+  },
+  {
+    id: 'ai_linkedin',
+    name: 'LinkedIn AI',
+    category: 'Hot',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    preset: {
+      qrColor: '#0A66C2',
+      bgColor: '#FFFFFF',
+      dotStyle: 'square',
+      eyeStyle: 'square',
+      bgTransparent: true,
+      textCenter: 'Hello User'
+    },
+    imageObj: null,
+    drawBackground: function(ctx, size) {
+      if (!this.imageObj) {
+        this.imageObj = new Image();
+        this.imageObj.src = '/presets/linkedin_template.png';
+        this.imageObj.onload = () => {
+          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
+        };
+      }
+      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
+        ctx.drawImage(this.imageObj, 0, 0, size, size);
+      } else {
+        const grad = ctx.createLinearGradient(0, 0, size, size);
+        grad.addColorStop(0, '#0A66C2');
+        grad.addColorStop(1, '#053361');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, size, size);
+      }
+    },
+    drawForeground: (ctx, size) => {}
+  },
+  {
+    id: 'ai_threads',
+    name: 'Threads AI',
+    category: 'Hot',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    preset: {
+      qrColor: '#000000',
+      bgColor: '#FFFFFF',
+      dotStyle: 'rounded',
+      eyeStyle: 'rounded',
+      bgTransparent: true,
+      textCenter: 'Hello User'
+    },
+    imageObj: null,
+    drawBackground: function(ctx, size) {
+      if (!this.imageObj) {
+        this.imageObj = new Image();
+        this.imageObj.src = '/presets/threads_template.png';
+        this.imageObj.onload = () => {
+          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
+        };
+      }
+      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
+        ctx.drawImage(this.imageObj, 0, 0, size, size);
+      } else {
+        ctx.fillStyle = '#101010';
+        ctx.fillRect(0, 0, size, size);
+      }
+    },
+    drawForeground: (ctx, size) => {}
+  },
+  {
+    id: 'ai_google',
+    name: 'Google AI',
+    category: 'Hot',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    preset: {
+      qrColor: '#4285F4',
+      bgColor: '#FFFFFF',
+      dotStyle: 'square',
+      eyeStyle: 'square',
+      bgTransparent: true,
+      textCenter: 'Hello User'
+    },
+    imageObj: null,
+    drawBackground: function(ctx, size) {
+      if (!this.imageObj) {
+        this.imageObj = new Image();
+        this.imageObj.src = '/presets/google_template.png';
+        this.imageObj.onload = () => {
+          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
+        };
+      }
+      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
+        ctx.drawImage(this.imageObj, 0, 0, size, size);
+      } else {
+        ctx.fillStyle = '#F8F9FA';
+        ctx.fillRect(0, 0, size, size);
+      }
+    },
+    drawForeground: (ctx, size) => {}
+  },
+  {
     id: 'instagram',
     name: 'Instagram Card',
     category: 'Social',

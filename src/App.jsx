@@ -1078,6 +1078,19 @@ export default function App() {
       } else {
         setLogo(null);
       }
+      
+      if (tpl.preset.textCenter !== undefined) {
+        setTextCenterEnabled(tpl.preset.textCenter ? true : false);
+        setTextCenterText(tpl.preset.textCenter || '');
+        setTextCenterColor(tpl.preset.qrColor || '#000000');
+        setTextCenterSize(0.08);
+        setTextCenterFont('Inter');
+        setTextCenterStrokeEnabled(true);
+        setTextCenterStrokeWidth(4);
+        setTextCenterStrokeColor('#FFFFFF');
+      } else {
+        setTextCenterEnabled(false);
+      }
     }
   };
 
@@ -2265,7 +2278,16 @@ export default function App() {
       qrTexture.image.onload = renderCanvas;
       qrTexture.image.onerror = () => showToast('Texture failed to load', 'error');
     }
-  }, [renderCanvas, logo, qrTexture, activePage]);
+
+    const handleTemplateLoad = () => {
+      renderCanvas();
+    };
+    window.addEventListener('qr-template-loaded', handleTemplateLoad);
+    return () => {
+      window.removeEventListener('qr-template-loaded', handleTemplateLoad);
+    };
+  }, [renderCanvas, logo, qrTexture, activePage, selectedTemplate]);
+
   const getQRContentArea = useCallback(() => {
     const size = 512;
     const padding = size * 0.03;
