@@ -5,16 +5,16 @@ export const QR_TEMPLATES = [
     id: 'ai_facebook',
     name: 'Facebook AI',
     category: 'Hot',
-    qrSize: 0.44,
-    qrX: 0.5,
-    qrY: 0.58,
+    qrSize: 0.365,
+    qrX: 0.505,
+    qrY: 0.59,
     preset: {
       qrColor: '#1877F2',
       bgColor: '#FFFFFF',
       dotStyle: 'square',
       eyeStyle: 'square',
-      bgTransparent: true,
-      textCenter: 'Hello User'
+      bgTransparent: false,
+      qrData: 'Hello User'
     },
     imageObj: null,
     drawBackground: function(ctx, size) {
@@ -41,16 +41,16 @@ export const QR_TEMPLATES = [
     id: 'ai_instagram',
     name: 'Instagram AI',
     category: 'Hot',
-    qrSize: 0.44,
+    qrSize: 0.365,
     qrX: 0.5,
-    qrY: 0.58,
+    qrY: 0.59,
     preset: {
       qrColor: '#E4405F',
       bgColor: '#FFFFFF',
       dotStyle: 'rounded',
       eyeStyle: 'rounded',
-      bgTransparent: true,
-      textCenter: 'Hello User'
+      bgTransparent: false,
+      qrData: 'Hello User'
     },
     imageObj: null,
     drawBackground: function(ctx, size) {
@@ -77,16 +77,16 @@ export const QR_TEMPLATES = [
     id: 'ai_x',
     name: 'X AI',
     category: 'Hot',
-    qrSize: 0.44,
+    qrSize: 0.365,
     qrX: 0.5,
-    qrY: 0.58,
+    qrY: 0.59,
     preset: {
       qrColor: '#000000',
       bgColor: '#FFFFFF',
       dotStyle: 'square',
       eyeStyle: 'square',
-      bgTransparent: true,
-      textCenter: 'Hello User'
+      bgTransparent: false,
+      qrData: 'Hello User'
     },
     imageObj: null,
     drawBackground: function(ctx, size) {
@@ -110,16 +110,16 @@ export const QR_TEMPLATES = [
     id: 'ai_linkedin',
     name: 'LinkedIn AI',
     category: 'Hot',
-    qrSize: 0.44,
-    qrX: 0.5,
-    qrY: 0.58,
+    qrSize: 0.365,
+    qrX: 0.49,
+    qrY: 0.59,
     preset: {
       qrColor: '#0A66C2',
       bgColor: '#FFFFFF',
       dotStyle: 'square',
       eyeStyle: 'square',
-      bgTransparent: true,
-      textCenter: 'Hello User'
+      bgTransparent: false,
+      qrData: 'Hello User'
     },
     imageObj: null,
     drawBackground: function(ctx, size) {
@@ -146,16 +146,16 @@ export const QR_TEMPLATES = [
     id: 'ai_threads',
     name: 'Threads AI',
     category: 'Hot',
-    qrSize: 0.44,
-    qrX: 0.5,
-    qrY: 0.58,
+    qrSize: 0.365,
+    qrX: 0.49,
+    qrY: 0.59,
     preset: {
       qrColor: '#000000',
       bgColor: '#FFFFFF',
       dotStyle: 'rounded',
       eyeStyle: 'rounded',
-      bgTransparent: true,
-      textCenter: 'Hello User'
+      bgTransparent: false,
+      qrData: 'Hello User'
     },
     imageObj: null,
     drawBackground: function(ctx, size) {
@@ -179,16 +179,16 @@ export const QR_TEMPLATES = [
     id: 'ai_google',
     name: 'Google AI',
     category: 'Hot',
-    qrSize: 0.44,
+    qrSize: 0.365,
     qrX: 0.5,
-    qrY: 0.58,
+    qrY: 0.59,
     preset: {
       qrColor: '#4285F4',
       bgColor: '#FFFFFF',
       dotStyle: 'square',
       eyeStyle: 'square',
-      bgTransparent: true,
-      textCenter: 'Hello User'
+      bgTransparent: false,
+      qrData: 'Hello User'
     },
     imageObj: null,
     drawBackground: function(ctx, size) {

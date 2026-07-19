@@ -1079,18 +1079,13 @@ export default function App() {
         setLogo(null);
       }
       
-      if (tpl.preset.textCenter !== undefined) {
-        setTextCenterEnabled(tpl.preset.textCenter ? true : false);
-        setTextCenterText(tpl.preset.textCenter || '');
-        setTextCenterColor(tpl.preset.qrColor || '#000000');
-        setTextCenterSize(0.08);
-        setTextCenterFont('Inter');
-        setTextCenterStrokeEnabled(true);
-        setTextCenterStrokeWidth(4);
-        setTextCenterStrokeColor('#FFFFFF');
-      } else {
-        setTextCenterEnabled(false);
+      // Auto-set the QR code data payload if specified (e.g. Hello User)
+      if (tpl.preset.qrData) {
+        setQrData(tpl.preset.qrData);
       }
+      
+      // Remove central text overlays when templates are applied
+      setTextCenterEnabled(false);
     }
   };
 
