@@ -292,8 +292,20 @@ export function renderQR(canvas, options) {
   // Clear canvas
   ctx.clearRect(0, 0, size, size);
 
+  const effectiveBgTransparent = options.template ? true : bgTransparent;
+
+  if (options.template) {
+    options.template.drawBackground(ctx, size);
+    ctx.save();
+    const qrSize = size * options.template.qrSize;
+    const qrX = size * options.template.qrX - qrSize / 2;
+    const qrY = size * options.template.qrY - qrSize / 2;
+    ctx.translate(qrX, qrY);
+    ctx.scale(options.template.qrSize, options.template.qrSize);
+  }
+
   // Background
-  if (!bgTransparent) {
+  if (!effectiveBgTransparent) {
     ctx.fillStyle = parseColorOrGradient(ctx, 0, 0, size, size, bgColor);
     ctx.fillRect(0, 0, size, size);
   }
@@ -1679,6 +1691,11 @@ function drawBackgroundShape(ctx, shape, x, y, w, h, color, sizeMultiplier = 1) 
       break;
   }
   ctx.restore();
+
+  if (options.template) {
+    ctx.restore();
+    options.template.drawForeground(ctx, size);
+  }
 }
 
 /**

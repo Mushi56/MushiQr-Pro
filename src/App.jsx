@@ -54,7 +54,8 @@ import {
   Crop,
   Eraser,
   Layers,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from 'lucide-react';
 import ColorPicker from './components/ColorPicker';
 import Slider from './components/Slider';
@@ -66,6 +67,7 @@ import { DotStyleSelector, EyeStyleSelector } from './components/StyleSelectors'
 import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData, constrainToSafeZone } from './utils/qrEngine';
 import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from './utils/exportUtils';
 import { saveToHistory, getSaved, saveToSaved, getPreferences, savePreferences } from './utils/storage';
+import { QR_TEMPLATES } from './utils/qrTemplates';
 import QRScanner from './components/QRScanner';
 import HistoryPage from './components/HistoryPage';
 import HomePage from './components/HomePage';
@@ -1020,6 +1022,70 @@ export default function App() {
   const [hoverColor, setHoverColor] = useState(null);
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
   const [canvasSelection, setCanvasSelection] = useState(null); // 'logo' | 'text' | null
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [templateCategory, setTemplateCategory] = useState('Hot');
+
+  useEffect(() => {
+    if (qrBgImage || qrTexture) {
+      setSelectedTemplate(null);
+    }
+  }, [qrBgImage, qrTexture]);
+
+  const applyLogoBySlug = (slug) => {
+    const LOGO_PRESETS = [
+      { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.png' },
+      { slug: 'facebook', name: 'Facebook', color: '#1877F2', url: '/presets/facebook.png' },
+      { slug: 'whatsapp', name: 'WhatsApp', color: '#25D366', url: '/presets/whatsapp.png' },
+      { slug: 'instagram', name: 'Instagram', color: '#E4405F', url: '/presets/instagram.png' },
+      { slug: 'youtube', name: 'YouTube', color: '#FF0000', url: '/presets/youtube.png' },
+      { slug: 'tiktok', name: 'TikTok', color: '#000000', url: '/presets/tiktok.png' },
+      { slug: 'linkedin', name: 'LinkedIn', color: '#0A66C2', url: '/presets/linkedin.png' },
+      { slug: 'twitter', name: 'Twitter', color: '#1DA1F2', url: '/presets/twitter.png' }
+    ];
+    const found = LOGO_PRESETS.find(item => item.slug === slug);
+    if (found) {
+      const img = new Image();
+      img.onload = () => {
+        setLogo({
+          image: img,
+          slug: found.slug,
+          name: found.name,
+          color: found.color,
+          url: found.url
+        });
+      };
+      img.src = found.url;
+    } else {
+      setLogo(null);
+    }
+  };
+
+  const applyTemplate = (tpl) => {
+    if (!tpl) {
+      setSelectedTemplate(null);
+      return;
+    }
+    setSelectedTemplate(tpl);
+    setQrBgImage(null);
+    setQrBgImageEnabled(false);
+    setQrTexture(null);
+    setQrTextureEnabled(false);
+
+    if (tpl.preset) {
+      if (tpl.preset.qrColor) setQrColor(tpl.preset.qrColor);
+      if (tpl.preset.bgColor) setBgColor(tpl.preset.bgColor);
+      if (tpl.preset.dotStyle) setDotStyle(tpl.preset.dotStyle);
+      if (tpl.preset.eyeStyle) setEyeStyle(tpl.preset.eyeStyle);
+      if (tpl.preset.eyeColor) setEyeColor(tpl.preset.eyeColor);
+      if (tpl.preset.eyeOuterColor) setEyeOuterColor(tpl.preset.eyeOuterColor);
+      if (tpl.preset.bgTransparent !== undefined) setBgTransparent(tpl.preset.bgTransparent);
+      if (tpl.preset.logo) {
+        applyLogoBySlug(tpl.preset.logo);
+      } else {
+        setLogo(null);
+      }
+    }
+  };
 
   // ── Gradient ──
   const [gradientEnabled, setGradientEnabled] = useState(false);
@@ -1804,6 +1870,7 @@ export default function App() {
     renderQR(tempCanvas, {
       ...qrMatrixInfo, 
       size: exportSize,
+      template: selectedTemplate,
       qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
       eyeColor,
       eyeOuterColor,
@@ -2099,6 +2166,7 @@ export default function App() {
       
       renderQR(canvasRef.current, {
         ...qrMatrixInfo, size: 512,
+        template: selectedTemplate,
         qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
         eyeColor,
         eyeOuterColor,
@@ -3107,6 +3175,7 @@ export default function App() {
     { id: 'color', label: 'Color', icon: Palette },
     { id: 'shapes', label: 'Style', icon: QRStyleIcon },
     { id: 'logo', label: 'Logo', icon: ImageIcon },
+    { id: 'template', label: 'Template', icon: Sparkles },
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
     { id: 'text', label: 'Text', icon: Type },
   ];
@@ -3669,8 +3738,147 @@ export default function App() {
                 </div>
               )}
 
+              {/* Template Tab */}
+              {activeTab === 'template' && (
+                <div className="tab-panel fade-in" id="panel-template">
+                  <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 20px 100px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    
+                    {/* Category Selector Bar (Swipeable) */}
+                    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', borderBottom: '1px solid var(--border-color)' }}>
+                      {['Hot', 'Social', 'Wifi', 'Event'].map(cat => {
+                        const isSelected = templateCategory === cat;
+                        const label = cat === 'Hot' ? 'Hot 🔥' : cat;
+                        return (
+                          <button
+                            key={cat}
+                            onClick={() => setTemplateCategory(cat)}
+                            style={{
+                              flex: '0 0 auto',
+                              border: 'none',
+                              background: 'transparent',
+                              color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                              fontSize: '13px',
+                              fontWeight: 700,
+                              padding: '8px 16px',
+                              position: 'relative',
+                              cursor: 'pointer',
+                              transition: 'color 0.2s ease'
+                            }}
+                          >
+                            {label}
+                            {isSelected && (
+                              <div style={{
+                                position: 'absolute',
+                                bottom: 0,
+                                left: '16px',
+                                right: '16px',
+                                height: '3px',
+                                borderRadius: '2px',
+                                background: 'var(--accent-primary)'
+                              }} />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
 
+                    {/* Template Card Grid (3 Columns) */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '12px',
+                      marginTop: '8px'
+                    }}>
+                      {/* Option to clear/reset template */}
+                      <button
+                        onClick={() => applyTemplate(null)}
+                        style={{
+                          aspectRatio: '1 / 1.15',
+                          borderRadius: '16px',
+                          border: !selectedTemplate ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                          background: 'var(--bg-elevated)',
+                          color: 'var(--text-primary)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          cursor: 'pointer',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          boxShadow: !selectedTemplate ? '0 8px 20px rgba(255,59,48,0.15)' : 'none',
+                          transition: 'all 0.2s ease',
+                          padding: '12px'
+                        }}
+                      >
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          background: 'rgba(214,0,54,0.08)',
+                          color: 'var(--accent-primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <X size={16} />
+                        </div>
+                        <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.3px', textAlign: 'center' }}>
+                          Custom / None
+                        </span>
+                      </button>
 
+                      {QR_TEMPLATES.filter(t => t.category === templateCategory).map(tpl => {
+                        const isSelected = selectedTemplate?.id === tpl.id;
+                        return (
+                          <button
+                            key={tpl.id}
+                            onClick={() => applyTemplate(tpl)}
+                            style={{
+                              aspectRatio: '1 / 1.15',
+                              borderRadius: '16px',
+                              border: isSelected ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                              background: 'var(--bg-elevated)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              cursor: 'pointer',
+                              position: 'relative',
+                              overflow: 'hidden',
+                              boxShadow: isSelected ? '0 8px 20px rgba(255,59,48,0.15)' : 'none',
+                              transition: 'all 0.2s ease',
+                              padding: 0
+                            }}
+                          >
+                            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', borderTopLeftRadius: '14px', borderTopRightRadius: '14px' }}>
+                              <TemplatePreviewCanvas template={tpl} theme={effectiveTheme} />
+                            </div>
+                            <div style={{
+                              padding: '6px 8px',
+                              background: 'var(--bg-secondary)',
+                              borderTop: '1px solid var(--border-color)',
+                              width: '100%',
+                              boxSizing: 'border-box'
+                            }}>
+                              <span style={{
+                                fontSize: '10px',
+                                fontWeight: 800,
+                                color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)',
+                                display: 'block',
+                                textAlign: 'center',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                {tpl.name}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
 
             </section>
 
@@ -5282,4 +5490,83 @@ export default function App() {
       )}
     </div>
   );
+}
+
+function TemplatePreviewCanvas({ template, theme }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const canvas = ref.current;
+    const ctx = canvas.getContext('2d');
+    const size = 120; // preview size
+    canvas.width = size;
+    canvas.height = size;
+    ctx.clearRect(0, 0, size, size);
+
+    // Draw background
+    template.drawBackground(ctx, size);
+
+    // Draw a simplified dummy QR code in the placeholder slot
+    ctx.save();
+    const qrSize = size * template.qrSize;
+    const qrX = size * template.qrX - qrSize / 2;
+    const qrY = size * template.qrY - qrSize / 2;
+    ctx.translate(qrX, qrY);
+    
+    // Draw 3 fake eyes
+    const eyeColor = template.preset.eyeColor || template.preset.qrColor || '#000000';
+    const eyeOuterColor = template.preset.eyeOuterColor || template.preset.qrColor || '#000000';
+    const qrColor = template.preset.qrColor || '#000000';
+    
+    ctx.fillStyle = eyeOuterColor;
+    const eyeSize = qrSize * 0.28;
+    
+    // Top-left eye outer
+    ctx.fillRect(0, 0, eyeSize, eyeSize);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(qrSize * 0.04, qrSize * 0.04, eyeSize - qrSize * 0.08, eyeSize - qrSize * 0.08);
+    ctx.fillStyle = eyeColor;
+    ctx.fillRect(qrSize * 0.08, qrSize * 0.08, eyeSize - qrSize * 0.16, eyeSize - qrSize * 0.16);
+
+    // Top-right eye outer
+    ctx.fillStyle = eyeOuterColor;
+    ctx.fillRect(qrSize - eyeSize, 0, eyeSize, eyeSize);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(qrSize - eyeSize + qrSize * 0.04, qrSize * 0.04, eyeSize - qrSize * 0.08, eyeSize - qrSize * 0.08);
+    ctx.fillStyle = eyeColor;
+    ctx.fillRect(qrSize - eyeSize + qrSize * 0.08, qrSize * 0.08, eyeSize - qrSize * 0.16, eyeSize - qrSize * 0.16);
+
+    // Bottom-left eye outer
+    ctx.fillStyle = eyeOuterColor;
+    ctx.fillRect(0, qrSize - eyeSize, eyeSize, eyeSize);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(qrSize * 0.04, qrSize - eyeSize + qrSize * 0.04, eyeSize - qrSize * 0.08, eyeSize - qrSize * 0.08);
+    ctx.fillStyle = eyeColor;
+    ctx.fillRect(qrSize * 0.08, qrSize - eyeSize + qrSize * 0.08, eyeSize - qrSize * 0.16, eyeSize - qrSize * 0.16);
+
+    // Draw some random small fake QR dots
+    ctx.fillStyle = qrColor;
+    const dotGrid = 6;
+    const dotW = qrSize / dotGrid;
+    for (let r = 0; r < dotGrid; r++) {
+      for (let c = 0; c < dotGrid; c++) {
+        // Skip corners (where eyes are)
+        if (r < 2 && c < 2) continue;
+        if (r < 2 && c >= dotGrid - 2) continue;
+        if (r >= dotGrid - 2 && c < 2) continue;
+        
+        if (Math.random() > 0.4) {
+          ctx.fillRect(c * dotW + dotW * 0.2, r * dotW + dotW * 0.2, dotW * 0.6, dotW * 0.6);
+        }
+      }
+    }
+
+    ctx.restore();
+
+    // Draw foreground
+    template.drawForeground(ctx, size);
+  }, [template, theme]);
+
+  return <canvas ref={ref} style={{ width: '100%', height: '100%', borderRadius: '14px', display: 'block' }} />;
 }
