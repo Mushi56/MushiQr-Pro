@@ -1,1598 +1,1981 @@
+// src/components/AdminPanel.jsx
+// Mushi QR Pro — Super Admin Panel (SaaS-grade)
+// ═══════════════════════════════════════════════════════════════════════
+
 import { useState, useEffect, useRef } from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  CreditCard, 
-  TrendingUp, 
-  BarChart3, 
-  Layers, 
-  QrCode, 
-  FolderGit2, 
-  Activity, 
-  Settings, 
-  Globe, 
-  ToggleLeft, 
-  AlertTriangle, 
-  Megaphone, 
-  UserCheck, 
-  ShieldAlert, 
-  FileClock, 
-  Lock, 
-  Database, 
-  ActivitySquare, 
-  Network, 
-  Key, 
-  Search, 
-  Bell, 
-  Sun, 
-  Moon, 
-  MoreVertical, 
-  Menu, 
-  X, 
-  ChevronRight, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Check, 
-  AlertCircle, 
-  Loader2, 
-  HelpCircle, 
-  LogOut, 
-  RefreshCw, 
-  Download, 
-  Upload,
-  ExternalLink,
-  ChevronDown
+import {
+  LayoutDashboard, Users, CreditCard, BarChart3, FileText,
+  Layers, QrCode, Grid, Package, Settings, Palette, Sliders,
+  Flag, Settings2, Megaphone, UserCog, Shield, Activity, Lock,
+  HardDrive, ClipboardList, Heart, Plug, Code, HelpCircle,
+  ChevronDown, ChevronRight, ChevronLeft, Menu, X, Search, Bell,
+  Plus, Trash2, Edit, Check, Copy, Download, Upload, RefreshCw,
+  Eye, EyeOff, Server, Database, BarChart2, TrendingUp, TrendingDown,
+  ArrowUpRight, MoreVertical, Calendar, AlertTriangle, CheckCircle,
+  XCircle, Clock, Info, Star, Zap, Globe, AlertCircle, Save,
+  ExternalLink, Key, ArrowLeft, Mail, Monitor, Cpu,
 } from 'lucide-react';
-import { adminService } from '../utils/adminService';
+
+import * as DS from '../services/adminDataService';
 import { QR_TEMPLATES } from '../utils/qrTemplates';
 
-export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // Data States
-  const [stats, setStats] = useState({
-    totalUsers: 24812,
-    usersGrowth: '+12.5%',
-    premiumUsers: 6853,
-    premiumGrowth: '+8.3%',
-    revenue: 18765,
-    revenueGrowth: '+15.7%',
-    qrsCreated: 98765,
-    qrsGrowth: '+10.2%'
-  });
-  const [users, setUsers] = useState([]);
-  const [admins, setAdmins] = useState([]);
-  const [plans, setPlans] = useState([]);
-  const [payments, setPayments] = useState([]);
-  const [tickets, setTickets] = useState([]);
-  const [appSettings, setAppSettings] = useState({
-    appName: 'Mushi QR Pro',
-    brandColor: '#D60036',
-    welcomeText: 'Create and scan QR codes instantly!',
-    maintenanceMode: false
-  });
-  const [featureFlags, setFeatureFlags] = useState({
-    qr_generator: true,
-    barcode_generator: true,
-    scanner: true,
-    bulk_generation: true,
-    templates: true
-  });
-  const [announcements, setAnnouncements] = useState({
-    title: '',
-    message: '',
-    active: false
-  });
-  const [cloudTemplates, setCloudTemplates] = useState([]);
-  const [auditLogs, setAuditLogs] = useState([]);
-  const [apiKeys, setApiKeys] = useState([]);
-  const [integrations, setIntegrations] = useState([]);
-  
-  // Modal & Form States
-  const [userModal, setUserModal] = useState({ open: false, mode: 'add', data: null });
-  const [adminModal, setAdminModal] = useState({ open: false, data: null });
-  const [planModal, setPlanModal] = useState({ open: false, data: null });
-  const [keyModal, setKeyModal] = useState({ open: false, name: '' });
-  const [integrationModal, setIntegrationModal] = useState({ open: false, name: '', url: '', active: true });
-  
-  // File Import Ref
-  const fileInputRef = useRef(null);
+// ─── Design Tokens ────────────────────────────────────────────────────────
+const T = {
+  bg:        '#09090f',
+  bgEl:      '#10101a',
+  bgCard:    '#14141e',
+  bgHov:     '#1c1c2a',
+  sidebar:   '#0c0c15',
+  sidebarAct:'rgba(214,0,54,0.12)',
+  sidebarHov:'rgba(255,255,255,0.04)',
+  border:    'rgba(255,255,255,0.06)',
+  borderHov: 'rgba(255,255,255,0.12)',
+  accent:    '#D60036',
+  accentLow: 'rgba(214,0,54,0.15)',
+  purple:    '#8b5cf6',
+  green:     '#10b981',
+  orange:    '#f59e0b',
+  blue:      '#3b82f6',
+  red:       '#ef4444',
+  text:      '#f0f0f8',
+  textSec:   '#8b8fa8',
+  textMut:   '#44465a',
+  r:         { xs: 6, sm: 8, md: 12, lg: 16, xl: 20 },
+};
 
-  // Toast System
-  const [toast, setToast] = useState(null);
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
+// ─── Helpers ──────────────────────────────────────────────────────────────
+// Safely convert any qrData value (string, {url}, {text}, {phone}, etc.) to a display string
+function safeStr(val) {
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+  if (typeof val === 'object') {
+    // Common QR data shapes
+    const v = val.url || val.text || val.phone || val.email || val.ssid
+              || val.data || val.content || val.value || val.address || val.name;
+    if (v) return safeStr(v);
+    try { return JSON.stringify(val).slice(0, 60); } catch { return '[Object]'; }
+  }
+  return String(val);
+}
+
+function fmtBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+  return (b / 1048576).toFixed(2) + ' MB';
+}
+function timeAgo(ts) {
+  if (!ts) return '—';
+  const diff = Date.now() - new Date(ts).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return new Date(ts).toLocaleDateString('en', { month: 'short', day: 'numeric' });
+}
+function fmtDate(ts) {
+  if (!ts) return '—';
+  return new Date(ts).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ─── Navigation Config ────────────────────────────────────────────────────
+const LABELS = {
+  dashboard:'Dashboard', users:'Users', subscriptions:'Subscriptions',
+  analytics:'Analytics', reports:'Reports', templates:'Templates',
+  'qr-barcode':'QR & Barcode', categories:'Categories', bulk:'Bulk Operations',
+  'app-settings':'App Settings', branding:'Branding', 'remote-config':'Remote Config',
+  'feature-flags':'Feature Flags', maintenance:'Maintenance', announcements:'Announcements',
+  'admin-users':'Admin Users', roles:'Roles & Permissions', 'activity-logs':'Activity Logs',
+  security:'Security', backups:'Backups', 'audit-logs':'Audit Logs',
+  'system-health':'System Health', integrations:'Integrations',
+  developer:'Developer / API', support:'Support / Tickets',
+};
+
+const NAV = [
+  { section: 'MAIN', items: [
+    { id: 'dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+    { id: 'users',         icon: Users,           label: 'Users' },
+    { id: 'subscriptions', icon: CreditCard,      label: 'Subscriptions' },
+    { id: 'analytics',     icon: BarChart3,       label: 'Analytics' },
+    { id: 'reports',       icon: FileText,        label: 'Reports' },
+  ]},
+  { section: 'CONTENT', items: [
+    { id: 'templates',  icon: Layers,  label: 'Templates' },
+    { id: 'qr-barcode', icon: QrCode,  label: 'QR & Barcode' },
+    { id: 'categories', icon: Grid,    label: 'Categories' },
+    { id: 'bulk',       icon: Package, label: 'Bulk Operations' },
+  ]},
+  { section: 'APP MANAGEMENT', items: [
+    { id: 'app-settings',  icon: Settings,  label: 'App Settings' },
+    { id: 'branding',      icon: Palette,   label: 'Branding' },
+    { id: 'remote-config', icon: Sliders,   label: 'Remote Config' },
+    { id: 'feature-flags', icon: Flag,      label: 'Feature Flags' },
+    { id: 'maintenance',   icon: Settings2, label: 'Maintenance' },
+    { id: 'announcements', icon: Megaphone, label: 'Announcements' },
+  ]},
+  { section: 'SYSTEM', items: [
+    { id: 'admin-users',   icon: UserCog,      label: 'Admin Users' },
+    { id: 'roles',         icon: Shield,       label: 'Roles & Permissions' },
+    { id: 'activity-logs', icon: Activity,     label: 'Activity Logs' },
+    { id: 'security',      icon: Lock,         label: 'Security' },
+    { id: 'backups',       icon: HardDrive,    label: 'Backups' },
+  ]},
+  { section: 'ADVANCED', items: [
+    { id: 'audit-logs',    icon: ClipboardList, label: 'Audit Logs' },
+    { id: 'system-health', icon: Heart,         label: 'System Health' },
+    { id: 'integrations',  icon: Plug,          label: 'Integrations' },
+    { id: 'developer',     icon: Code,          label: 'Developer / API' },
+    { id: 'support',       icon: HelpCircle,    label: 'Support / Tickets' },
+  ]},
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MICRO COMPONENTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function Btn({ children, onClick, variant = 'primary', size = 'md', disabled, icon }) {
+  const base = {
+    display: 'inline-flex', alignItems: 'center', gap: 6,
+    border: 'none', borderRadius: T.r.md, cursor: disabled ? 'not-allowed' : 'pointer',
+    fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.15s',
+    opacity: disabled ? 0.5 : 1, whiteSpace: 'nowrap',
+    ...(size === 'sm' ? { padding: '6px 12px', fontSize: 12 } : { padding: '9px 16px', fontSize: 13 }),
   };
-
-  // Load All Data
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const s = await adminService.getDashboardStats();
-      setStats(s);
-      
-      const u = await adminService.getUsers();
-      setUsers(u);
-      
-      const a = await adminService.getAdmins();
-      setAdmins(a);
-      
-      const p = await adminService.getPlans();
-      setPlans(p);
-      
-      const pay = await adminService.getPayments();
-      setPayments(pay);
-      
-      const t = await adminService.getTickets();
-      setTickets(t);
-      
-      const settings = await adminService.getAppSettings();
-      setAppSettings(settings);
-      
-      const flags = await adminService.getFeatureFlags();
-      setFeatureFlags(flags);
-      
-      const announce = await adminService.getAnnouncements();
-      setAnnouncements(announce);
-      
-      const templates = await adminService.getAppSettings(); // Just reference cloud templates from localStorage
-      const savedTemplates = JSON.parse(localStorage.getItem('qrgen_cloud_templates') || '[]');
-      setCloudTemplates(savedTemplates);
-
-      const logs = await adminService.getAuditLogs();
-      setAuditLogs(logs);
-
-      const keys = await adminService.getApiKeys();
-      setApiKeys(keys);
-
-      const ints = await adminService.getIntegrations();
-      setIntegrations(ints);
-
-    } catch (err) {
-      showToast('Error loading system data', 'error');
-    } finally {
-      setLoading(false);
-    }
+  const variants = {
+    primary: { background: T.accent,  color: '#fff' },
+    ghost:   { background: 'transparent', color: T.textSec, border: `1px solid ${T.border}` },
+    danger:  { background: `${T.red}18`,  color: T.red,  border: `1px solid ${T.red}33` },
+    success: { background: `${T.green}18`, color: T.green, border: `1px solid ${T.green}33` },
   };
+  return (
+    <button onClick={disabled ? undefined : onClick} style={{ ...base, ...variants[variant] }}>
+      {icon}{children}
+    </button>
+  );
+}
 
-  useEffect(() => {
-    loadData();
-  }, []);
+function Badge({ children, color = T.purple }) {
+  return (
+    <span style={{
+      display: 'inline-block', padding: '2px 9px', borderRadius: 100,
+      fontSize: 10, fontWeight: 800, letterSpacing: '0.4px', textTransform: 'uppercase',
+      background: `${color}20`, color,
+    }}>{children}</span>
+  );
+}
 
-  // --- Actions ---
-  const handleSaveUser = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const userData = {
-      id: userModal.data?.id,
-      name: formData.get('name'),
-      email: formData.get('email'),
-      type: formData.get('type'),
-      status: formData.get('status')
-    };
-    try {
-      await adminService.saveUser(userData);
-      showToast('User saved successfully');
-      setUserModal({ open: false, mode: 'add', data: null });
-      loadData();
-    } catch {
-      showToast('Error saving user', 'error');
-    }
-  };
-
-  const handleDeleteUser = async (id) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      await adminService.deleteUser(id);
-      showToast('User account deleted');
-      loadData();
-    }
-  };
-
-  const handleSaveAdmin = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const adminData = {
-      id: adminModal.data?.id,
-      name: formData.get('name'),
-      email: formData.get('email'),
-      role: formData.get('role'),
-      status: formData.get('status')
-    };
-    try {
-      await adminService.saveAdmin(adminData);
-      showToast('Administrator updated');
-      setAdminModal({ open: false, data: null });
-      loadData();
-    } catch {
-      showToast('Error saving administrator', 'error');
-    }
-  };
-
-  const handleDeleteAdmin = async (id) => {
-    if (confirm('Revoke access for this administrator?')) {
-      await adminService.deleteAdmin(id);
-      showToast('Administrator privileges revoked');
-      loadData();
-    }
-  };
-
-  const handleSavePlan = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const planData = {
-      id: planModal.data?.id,
-      name: formData.get('name'),
-      price: parseFloat(formData.get('price')),
-      interval: formData.get('interval'),
-      features: formData.get('features').split(',').map(f => f.trim())
-    };
-    await adminService.savePlan(planData);
-    showToast('Pricing plan updated');
-    setPlanModal({ open: false, data: null });
-    loadData();
-  };
-
-  const handleSaveSettings = async () => {
-    await adminService.saveAppSettings(appSettings);
-    showToast('Global application configurations saved');
-  };
-
-  const handleToggleFlag = async (key) => {
-    const updated = { ...featureFlags, [key]: !featureFlags[key] };
-    setFeatureFlags(updated);
-    await adminService.saveFeatureFlags(updated);
-    showToast(`Feature flag '${key}' updated`);
-  };
-
-  const handleSaveAnnouncement = async () => {
-    await adminService.saveAnnouncements(announcements);
-    showToast('Broadcast banner updated');
-  };
-
-  const handleCreateApiKey = async (e) => {
-    e.preventDefault();
-    await adminService.generateApiKey(keyModal.name);
-    showToast('New developer API Key generated');
-    setKeyModal({ open: false, name: '' });
-    loadData();
-  };
-
-  const handleCreateIntegration = async (e) => {
-    e.preventDefault();
-    await adminService.saveIntegration({
-      name: integrationModal.name,
-      url: integrationModal.url,
-      active: integrationModal.active
-    });
-    showToast('Integration webhook configured');
-    setIntegrationModal({ open: false, name: '', url: '', active: true });
-    loadData();
-  };
-
-  const handleCreateBackup = async () => {
-    try {
-      const dataStr = await adminService.createBackup();
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `mushi_qr_backup_${new Date().toISOString().slice(0, 10)}.json`;
-      link.click();
-      showToast('System configuration backup downloaded');
-    } catch {
-      showToast('Backup creation failed', 'error');
-    }
-  };
-
-  const handleRestoreBackup = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-      try {
-        await adminService.restoreBackup(evt.target.result);
-        showToast('System backup restored successfully');
-        loadData();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  // Sidebar links definition
-  const navigationItems = [
-    {
-      group: 'MAIN',
-      items: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'users', label: 'Users', icon: Users },
-        { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
-        { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-        { id: 'reports', label: 'Reports', icon: BarChart3 }
-      ]
-    },
-    {
-      group: 'CONTENT',
-      items: [
-        { id: 'templates', label: 'Templates', icon: Layers },
-        { id: 'qr_barcode', label: 'QR & Barcode', icon: QrCode },
-        { id: 'categories', label: 'Categories', icon: FolderGit2 },
-        { id: 'bulk_ops', label: 'Bulk Operations', icon: Activity }
-      ]
-    },
-    {
-      group: 'APP MANAGEMENT',
-      items: [
-        { id: 'app_settings', label: 'App Settings', icon: Settings },
-        { id: 'remote_config', label: 'Remote Config', icon: Globe },
-        { id: 'feature_flags', label: 'Feature Flags', icon: ToggleLeft },
-        { id: 'maintenance', label: 'Maintenance', icon: AlertTriangle },
-        { id: 'announcements', label: 'Announcements', icon: Megaphone }
-      ]
-    },
-    {
-      group: 'SYSTEM',
-      items: [
-        { id: 'admin_users', label: 'Admin Users', icon: UserCheck },
-        { id: 'roles_permissions', label: 'Roles & Permissions', icon: ShieldAlert },
-        { id: 'activity_logs', label: 'Activity Logs', icon: FileClock },
-        { id: 'security', label: 'Security', icon: Lock },
-        { id: 'backups', label: 'Backups', icon: Database }
-      ]
-    }
-  ];
-
+function StatCard({ icon: Icon, label, value, color = T.purple, trendLabel }) {
   return (
     <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      backgroundColor: '#030305',
-      color: '#F3F4F6',
-      fontFamily: "'Outfit', 'Inter', sans-serif",
-      position: 'relative'
+      background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.lg,
+      padding: '20px', display: 'flex', gap: 14, alignItems: 'flex-start', flex: 1, minWidth: 0,
     }}>
-      
-      {/* Toast Alert */}
-      {toast && (
+      <div style={{ width: 46, height: 46, borderRadius: T.r.md, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon size={22} color={color} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12, color: T.textSec, marginBottom: 4, fontWeight: 600 }}>{label}</div>
+        <div style={{ fontSize: 28, fontWeight: 900, color: T.text, lineHeight: 1, letterSpacing: '-1px' }}>{value}</div>
+        {trendLabel && (
+          <div style={{ fontSize: 11, color: T.textMut, marginTop: 5 }}>{trendLabel}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ToggleRow({ label, description, checked, onChange }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 0', borderBottom: `1px solid ${T.border}` }}>
+      <div style={{ flex: 1, paddingRight: 16 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{label}</div>
+        {description && <div style={{ fontSize: 12, color: T.textSec, marginTop: 2 }}>{description}</div>}
+      </div>
+      <button onClick={() => onChange(!checked)} style={{
+        width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
+        background: checked ? T.accent : 'rgba(255,255,255,0.1)',
+        position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+      }}>
         <div style={{
-          position: 'fixed',
-          top: '24px',
-          right: '24px',
-          backgroundColor: toast.type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 'rgba(16, 185, 129, 0.95)',
-          color: 'white',
-          padding: '12px 24px',
-          borderRadius: '12px',
-          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.35)',
-          zIndex: 11000,
-          fontWeight: 600,
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          {toast.type === 'error' ? <AlertTriangle size={18} /> : <Check size={18} />}
-          <span>{toast.message}</span>
+          width: 18, height: 18, borderRadius: 9, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+          position: 'absolute', top: 3, left: checked ? 23 : 3, transition: 'left 0.2s',
+        }} />
+      </button>
+    </div>
+  );
+}
+
+function AdminCard({ title, subtitle, right, children, noPadding, style: s }) {
+  return (
+    <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.lg, overflow: 'hidden', ...s }}>
+      {(title || right) && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${T.border}`, gap: 12 }}>
+          <div style={{ minWidth: 0 }}>
+            {title && <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{title}</div>}
+            {subtitle && <div style={{ fontSize: 11, color: T.textSec, marginTop: 2 }}>{subtitle}</div>}
+          </div>
+          {right && <div style={{ flexShrink: 0 }}>{right}</div>}
         </div>
       )}
+      <div style={noPadding ? {} : { padding: 20 }}>{children}</div>
+    </div>
+  );
+}
 
-      {/* Sidebar Navigation */}
-      <aside style={{
-        width: '260px',
-        backgroundColor: '#0B0C10',
-        borderRight: '1px solid rgba(255, 255, 255, 0.05)',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'fixed',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        zIndex: 5000,
-        transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
-        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        '@media (min-width: 1024px)': {
-          transform: 'none'
-        }
-      }} className="admin-sidebar">
-        
-        {/* Sidebar Header Brand */}
-        <div style={{
-          padding: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.04)'
+function EmptyState({ icon: Icon, title, desc, action }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '48px 24px', gap: 14 }}>
+      <div style={{ width: 64, height: 64, borderRadius: T.r.xl, background: `${T.purple}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Icon size={28} color={T.purple} />
+      </div>
+      <div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 6 }}>{title}</div>
+        <div style={{ fontSize: 13, color: T.textSec, maxWidth: 340, lineHeight: 1.6 }}>{desc}</div>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function FormInput({ label, value, onChange, type = 'text', placeholder, disabled }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div>
+      {label && <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>{label}</label>}
+      <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+        disabled={disabled} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        style={{
+          width: '100%', boxSizing: 'border-box', background: T.bgEl,
+          border: `1px solid ${focused ? T.accent : T.border}`,
+          borderRadius: T.r.md, color: T.text, fontSize: 13,
+          padding: '9px 13px', outline: 'none', fontFamily: 'inherit',
+          transition: 'border-color 0.15s', opacity: disabled ? 0.5 : 1,
+        }}
+      />
+    </div>
+  );
+}
+
+function FormTextarea({ label, value, onChange, rows = 4, placeholder }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div>
+      {label && <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>{label}</label>}
+      <textarea rows={rows} value={value} onChange={e => onChange(e.target.value)}
+        placeholder={placeholder} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        style={{
+          width: '100%', boxSizing: 'border-box', background: T.bgEl,
+          border: `1px solid ${focused ? T.accent : T.border}`,
+          borderRadius: T.r.md, color: T.text, fontSize: 13,
+          padding: '9px 13px', outline: 'none', fontFamily: 'inherit',
+          transition: 'border-color 0.15s', resize: 'vertical',
+        }}
+      />
+    </div>
+  );
+}
+
+function FormSelect({ label, value, onChange, options }) {
+  return (
+    <div>
+      {label && <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>{label}</label>}
+      <select value={value} onChange={e => onChange(e.target.value)}
+        style={{
+          width: '100%', boxSizing: 'border-box', background: T.bgEl,
+          border: `1px solid ${T.border}`, borderRadius: T.r.md, color: T.text, fontSize: 13,
+          padding: '9px 13px', outline: 'none', fontFamily: 'inherit', cursor: 'pointer',
         }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, #D60036 0%, #FF007F 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 15px rgba(214, 0, 54, 0.3)'
-          }}>
-            <QrCode size={22} color="white" />
-          </div>
-          <div>
-            <h2 style={{ fontSize: '16px', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>Mushi QR Pro</h2>
-            <span style={{ fontSize: '11px', color: '#D60036', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Super Admin</span>
-          </div>
+        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SVG CHARTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function LineChartSVG({ data = [], series = [], height = 180 }) {
+  if (!data.length) return (
+    <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.textMut, flexDirection: 'column', gap: 8 }}>
+      <BarChart2 size={26} /><span style={{ fontSize: 12 }}>No data yet</span>
+    </div>
+  );
+  const W = 560, H = 160, P = { t: 16, r: 20, b: 32, l: 8 };
+  const cW = W - P.l - P.r, cH = H - P.t - P.b;
+  const allVals = series.flatMap(s => data.map(d => d[s.key] || 0));
+  const max = Math.max(...allVals, 1);
+  const xAt = i => P.l + (data.length <= 1 ? cW / 2 : (i / (data.length - 1)) * cW);
+  const yAt = v => P.t + cH - (v / max) * cH * 0.88;
+  const makePath = key => data.map((d, i) => {
+    const x = xAt(i), y = yAt(d[key] || 0);
+    if (i === 0) return `M${x},${y}`;
+    const px = xAt(i - 1), py = yAt(data[i - 1][key] || 0);
+    const cpx = (px + x) / 2;
+    return `C${cpx},${py} ${cpx},${y} ${x},${y}`;
+  }).join(' ');
+  const makeArea = key => {
+    const base = P.t + cH, last = data.length - 1;
+    return `${makePath(key)} L${xAt(last)},${base} L${xAt(0)},${base} Z`;
+  };
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height }} preserveAspectRatio="xMidYMid meet">
+      <defs>
+        {series.map(s => (
+          <linearGradient key={s.key} id={`lg_${s.key}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={s.color} stopOpacity="0.35" />
+            <stop offset="100%" stopColor={s.color} stopOpacity="0" />
+          </linearGradient>
+        ))}
+      </defs>
+      {[0, 0.25, 0.5, 0.75, 1].map((p, i) => (
+        <line key={i} x1={P.l} y1={P.t + cH * p} x2={P.l + cW} y2={P.t + cH * p}
+          stroke="rgba(255,255,255,0.04)" strokeWidth={1} />
+      ))}
+      {series.map(s => (
+        <g key={s.key}>
+          <path d={makeArea(s.key)} fill={`url(#lg_${s.key})`} />
+          <path d={makePath(s.key)} fill="none" stroke={s.color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      ))}
+      {data.map((d, i) => (
+        <text key={i} x={xAt(i)} y={H - 6} textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize={10}>{d.label}</text>
+      ))}
+      {series.map(s => data.map((d, i) => (
+        <circle key={`${s.key}${i}`} cx={xAt(i)} cy={yAt(d[s.key] || 0)} r={3.5} fill={s.color} />
+      )))}
+    </svg>
+  );
+}
+
+function DonutSVG({ segments = [], size = 160 }) {
+  const total = segments.reduce((s, x) => s + x.value, 0);
+  const r = 52, cx = 80, cy = 80, circ = 2 * Math.PI * r;
+  let cum = 0;
+  return (
+    <svg width={size} height={size} viewBox="0 0 160 160">
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={22} />
+      {total === 0 ? (
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={22} />
+      ) : segments.map((seg, i) => {
+        const pct = seg.value / total;
+        const dash = pct * circ;
+        const offset = -(cum / total * circ);
+        cum += seg.value;
+        return (
+          <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={seg.color} strokeWidth={22}
+            strokeDasharray={`${Math.max(dash - 3, 0)} ${circ - Math.max(dash - 3, 0)}`}
+            strokeDashoffset={offset} transform={`rotate(-90 ${cx} ${cy})`} strokeLinecap="round" />
+        );
+      })}
+      <text x={cx} y={cy - 8} textAnchor="middle" fill={T.text} fontSize={22} fontWeight="900" fontFamily="Outfit, sans-serif">{total}</text>
+      <text x={cx} y={cy + 10} textAnchor="middle" fill={T.textSec} fontSize={11} fontFamily="Outfit, sans-serif">Total</text>
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════════════════════════════════
+
+function Sidebar({ active, setActive, isMobile, open }) {
+  return (
+    <aside style={{
+      width: 240, background: T.sidebar, borderRight: `1px solid ${T.border}`,
+      display: 'flex', flexDirection: 'column',
+      position: 'fixed', left: isMobile ? (open ? 0 : -260) : 0, top: 0, bottom: 0,
+      zIndex: 20, transition: 'left 0.25s ease',
+    }}>
+      {/* Logo */}
+      <div style={{ padding: '18px 16px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
+        <img src="/logo.png" alt="Logo" style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'contain', flexShrink: 0 }} />
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: T.text, lineHeight: 1.2 }}>Mushi QR Pro</div>
+          <div style={{ fontSize: 10, color: T.accent, fontWeight: 700, letterSpacing: '0.5px' }}>⬡ SUPER ADMIN</div>
         </div>
+      </div>
 
-        {/* Navigation Menu */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '20px 16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px'
-        }} className="custom-scrollbar">
-          {navigationItems.map((group, gIdx) => (
-            <div key={gIdx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{
-                fontSize: '10px',
-                fontWeight: 800,
-                color: 'rgba(255, 255, 255, 0.3)',
-                paddingLeft: '12px',
-                marginBottom: '4px',
-                letterSpacing: '1px'
-              }}>{group.group}</span>
-              {group.items.map((item, iIdx) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={iIdx}
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setSidebarOpen(false);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '10px 12px',
-                      border: 'none',
-                      borderRadius: '10px',
-                      backgroundColor: isActive ? 'rgba(214, 0, 54, 0.1)' : 'transparent',
-                      color: isActive ? '#FF3B30' : 'rgba(255, 255, 255, 0.65)',
-                      fontSize: '13.5px',
-                      fontWeight: isActive ? 700 : 600,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.2s ease',
-                      width: '100%'
-                    }}
-                  >
-                    <Icon size={18} style={{ color: isActive ? '#D60036' : 'inherit' }} />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
+      {/* Nav */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 8px', scrollbarWidth: 'none' }}>
+        {NAV.map(({ section, items }) => (
+          <div key={section} style={{ marginBottom: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: T.textMut, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 12px 4px' }}>
+              {section}
             </div>
-          ))}
-        </div>
-
-        {/* Sidebar Footer User Badge */}
-        <div style={{
-          padding: '16px 20px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.04)',
-          backgroundColor: 'rgba(0, 0, 0, 0.15)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ position: 'relative' }}>
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(214, 0, 54, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 700,
-                color: '#FF3B30',
-                fontSize: '13px'
-              }}>MA</div>
-              <div style={{
-                position: 'absolute',
-                bottom: '1px',
-                right: '1px',
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: '#10B981',
-                border: '2px solid #0B0C10'
-              }} />
-            </div>
-            <div>
-              <h4 style={{ fontSize: '13px', margin: 0, fontWeight: 700 }}>Mushtaq Ahmed</h4>
-              <span style={{ fontSize: '10.5px', color: 'rgba(255, 255, 255, 0.45)', fontWeight: 600 }}>Super Admin</span>
-            </div>
-          </div>
-          <button style={{
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255, 255, 255, 0.4)',
-            cursor: 'pointer'
-          }}>
-            <MoreVertical size={16} />
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Panel Content Area */}
-      <div style={{
-        flex: 1,
-        marginLeft: '260px',
-        padding: '32px',
-        boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '32px',
-        minWidth: 0 // Prevents grid overflow issues
-      }} className="admin-main-viewport">
-        
-        {/* Header Control Bar */}
-        <header style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '20px'
-        }}>
-          {/* Mobile Hamburger menu */}
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '8px',
-              color: 'white',
-              cursor: 'pointer',
-              display: 'none'
-            }} className="admin-menu-toggle">
-            <Menu size={20} />
-          </button>
-
-          {/* Search Bar */}
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: '380px'
-          }}>
-            <Search size={16} style={{
-              position: 'absolute',
-              left: '14px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'rgba(255,255,255,0.35)'
-            }} />
-            <input 
-              type="text" 
-              placeholder="Search anything..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 16px 10px 42px',
-                borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(255,255,255,0.04)',
-                color: 'white',
-                fontSize: '13.5px',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-            <span style={{
-              position: 'absolute',
-              right: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              fontSize: '10.5px',
-              color: 'rgba(255,255,255,0.3)',
-              backgroundColor: 'rgba(255,255,255,0.06)',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              fontWeight: 700
-            }}>⌘ K</span>
-          </div>
-
-          {/* Header Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button style={{
-              background: 'none',
-              border: 'none',
-              color: 'rgba(255,255,255,0.6)',
-              cursor: 'pointer',
-              position: 'relative'
-            }}>
-              <Bell size={20} />
-              <span style={{
-                position: 'absolute',
-                top: '-3px',
-                right: '-3px',
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#D60036'
-              }} />
-            </button>
-            
-            <button style={{
-              background: 'none',
-              border: 'none',
-              color: 'rgba(255,255,255,0.6)',
-              cursor: 'pointer'
-            }}>
-              <Moon size={20} />
-            </button>
-
-            <div style={{
-              width: '1px',
-              height: '20px',
-              backgroundColor: 'rgba(255,255,255,0.1)'
-            }} />
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                backgroundColor: '#D60036',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 700,
-                fontSize: '12.5px'
-              }}>MA</div>
-              <span style={{ fontSize: '13px', fontWeight: 600 }} className="admin-header-username">Mushtaq Ahmed</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Loading Overlay */}
-        {loading && (
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: 'rgba(3,3,5,0.7)',
-            zIndex: 4000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(3px)'
-          }}>
-            <Loader2 className="spinner" size={40} style={{ color: '#D60036' }} />
-          </div>
-        )}
-
-        {/* Render Tab Contents */}
-        {activeTab === 'dashboard' && (
-          <>
-            {/* Welcome banner */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <h1 style={{ fontSize: '26px', fontWeight: 800, margin: '0 0 6px 0', letterSpacing: '-0.5px' }}>Welcome back, Super Admin 👋</h1>
-                <p style={{ margin: 0, color: 'rgba(255,255,255,0.45)', fontSize: '14.5px', fontWeight: 500 }}>Here's what's happening with Mushi QR Pro today.</p>
-              </div>
-
-              <div style={{
-                backgroundColor: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                padding: '8px 16px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span>May 12 – May 18, 2025</span>
-                <ChevronDown size={14} />
-              </div>
-            </div>
-
-            {/* Metric Row */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '20px'
-            }}>
-              {[
-                { title: 'Total Users', val: stats.totalUsers.toLocaleString(), growth: stats.usersGrowth, color: '#8884d8', icon: Users },
-                { title: 'Premium Users', val: stats.premiumUsers.toLocaleString(), growth: stats.premiumGrowth, color: '#38bdf8', icon: UserCheck },
-                { title: 'Revenue', val: `$${stats.revenue.toLocaleString()}`, growth: stats.revenueGrowth, color: '#10b981', icon: CreditCard },
-                { title: 'QR Codes Created', val: stats.qrsCreated.toLocaleString(), growth: stats.qrsGrowth, color: '#f59e0b', icon: QrCode }
-              ].map((card, idx) => {
-                const CardIcon = card.icon;
-                return (
-                  <div key={idx} style={{
-                    backgroundColor: '#0B0C10',
-                    border: '1px solid rgba(255, 255, 255, 0.05)',
-                    padding: '24px',
-                    borderRadius: '16px',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: '13.5px', color: 'rgba(255, 255, 255, 0.45)', fontWeight: 700 }}>{card.title}</span>
-                      <div style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '10px',
-                        backgroundColor: `${card.color}15`,
-                        color: card.color,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <CardIcon size={18} />
-                      </div>
-                    </div>
-                    <div>
-                      <h2 style={{ fontSize: '28px', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>{card.val}</h2>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontSize: '12px' }}>
-                        <span style={{ color: '#10B981', fontWeight: 800 }}>{card.growth}</span>
-                        <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontWeight: 600 }}>vs last 7 days</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Charts Row */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '2fr 1fr',
-              gap: '24px',
-              '@media (max-width: 1024px)': {
-                gridTemplateColumns: '1fr'
-              }
-            }} className="admin-charts-row">
-              
-              {/* Line Chart Container */}
-              <div style={{
-                backgroundColor: '#0B0C10',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                borderRadius: '16px',
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>User & Revenue Overview</h3>
-                  <div style={{
-                    backgroundColor: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}>
-                    <span>7 Days</span>
-                    <ChevronDown size={12} />
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '20px', fontSize: '12px', fontWeight: 700 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#8884d8' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>Users</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#38bdf8' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>Premium Users</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>Revenue (USD)</span>
-                  </div>
-                </div>
-
-                {/* SVG Graph Drawing */}
-                <div style={{ width: '100%', height: '240px', position: 'relative', marginTop: '10px' }}>
-                  <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
-                    {/* Grids */}
-                    <line x1="0" y1="40" x2="500" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                    <line x1="0" y1="80" x2="500" y2="80" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                    <line x1="0" y1="120" x2="500" y2="120" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                    <line x1="0" y1="160" x2="500" y2="160" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-
-                    {/* Path 1: Users */}
-                    <path d="M 0 110 L 83 95 L 166 100 L 250 85 L 333 90 L 416 98 L 500 70" fill="none" stroke="#8884d8" strokeWidth="2.5" />
-                    {/* Path 2: Premium Users */}
-                    <path d="M 0 160 L 83 150 L 166 142 L 250 148 L 333 140 L 416 143 L 500 130" fill="none" stroke="#38bdf8" strokeWidth="2.5" />
-                    {/* Path 3: Revenue */}
-                    <path d="M 0 130 L 83 125 L 166 115 L 250 110 L 333 118 L 416 122 L 500 100" fill="none" stroke="#10b981" strokeWidth="2.5" />
-                  </svg>
-                  
-                  {/* Labels */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}>
-                    <span>May 12</span>
-                    <span>May 13</span>
-                    <span>May 14</span>
-                    <span>May 15</span>
-                    <span>May 16</span>
-                    <span>May 17</span>
-                    <span>May 18</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Donut User Distribution */}
-              <div style={{
-                backgroundColor: '#0B0C10',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                borderRadius: '16px',
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-              }}>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>User Distribution</h3>
-                
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '180px', position: 'relative' }}>
-                  <svg width="150" height="150" viewBox="0 0 36 36">
-                    {/* Circular Rings */}
-                    <circle cx="18" cy="18" r="15.91" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="3" />
-                    
-                    {/* Free Users: 72.4% */}
-                    <circle cx="18" cy="18" r="15.91" fill="none" stroke="#8884d8" strokeWidth="3" 
-                      strokeDasharray="72.4 27.6" strokeDashoffset="25" />
-                    
-                    {/* Premium Users: 27.6% */}
-                    <circle cx="18" cy="18" r="15.91" fill="none" stroke="#38bdf8" strokeWidth="3.5" 
-                      strokeDasharray="27.6 72.4" strokeDashoffset="-47.4" />
-                  </svg>
-                  <div style={{
-                    position: 'absolute',
-                    textAlign: 'center',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}>
-                    <span style={{ fontSize: '20px', fontWeight: 800 }}>24,812</span>
-                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Total Users</span>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
-                  {[
-                    { label: 'Free Users', count: '17,959', pct: '72.4%', color: '#8884d8' },
-                    { label: 'Premium Users', count: '6,853', pct: '27.6%', color: '#38bdf8' },
-                    { label: 'Trial Users', count: '1,234', pct: '4.9%', color: '#10b981' }
-                  ].map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: item.color }} />
-                        <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>{item.label}</span>
-                      </div>
-                      <span style={{ fontWeight: 700 }}>{item.count} <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10.5px' }}>({item.pct})</span></span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Details Table & Health Check */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '2fr 1fr',
-              gap: '24px',
-              '@media (max-width: 1024px)': {
-                gridTemplateColumns: '1fr'
-              }
-            }} className="admin-details-row">
-              
-              {/* Recent Users list */}
-              <div style={{
-                backgroundColor: '#0B0C10',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                borderRadius: '16px',
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Recent Users</h3>
-                  <button onClick={() => setActiveTab('users')} style={{
-                    background: 'none', border: 'none', color: '#D60036', fontWeight: 700, fontSize: '13px', cursor: 'pointer'
-                  }}>View All</button>
-                </div>
-
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13.5px' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}>
-                        <th style={{ padding: '12px 8px', fontWeight: 700 }}>User</th>
-                        <th style={{ padding: '12px 8px', fontWeight: 700 }}>Email</th>
-                        <th style={{ padding: '12px 8px', fontWeight: 700 }}>Type</th>
-                        <th style={{ padding: '12px 8px', fontWeight: 700 }}>Status</th>
-                        <th style={{ padding: '12px 8px', fontWeight: 700 }}>Joined</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {users.slice(0, 5).map((u, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                          <td style={{ padding: '12px 8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{
-                              width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)',
-                              display: 'flex', alignItems: 'center', justifyContext: 'center', fontSize: '11px', fontWeight: 700
-                            }}>
-                              {u.name.split(' ').map(n => n[0]).join('')}
-                            </div>
-                            <span>{u.name}</span>
-                          </td>
-                          <td style={{ padding: '12px 8px', color: 'rgba(255,255,255,0.6)' }}>{u.email}</td>
-                          <td style={{ padding: '12px 8px' }}>
-                            <span style={{
-                              backgroundColor: u.type === 'Premium' ? 'rgba(56, 189, 248, 0.15)' : u.type === 'Trial' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255,255,255,0.05)',
-                              color: u.type === 'Premium' ? '#38bdf8' : u.type === 'Trial' ? '#f59e0b' : 'rgba(255,255,255,0.6)',
-                              padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700
-                            }}>{u.type}</span>
-                          </td>
-                          <td style={{ padding: '12px 8px' }}>
-                            <span style={{
-                              color: u.status === 'Active' ? '#10B981' : '#EF4444',
-                              fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px'
-                            }}>
-                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: u.status === 'Active' ? '#10B981' : '#EF4444' }} />
-                              {u.status}
-                            </span>
-                          </td>
-                          <td style={{ padding: '12px 8px', color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>{u.joined}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* System status checks */}
-              <div style={{
-                backgroundColor: '#0B0C10',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                borderRadius: '16px',
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContext: 'space-between' }}>
-                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>System Status</h3>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {[
-                    { name: 'Firestore Database', status: 'Operational' },
-                    { name: 'Firebase Authentication', status: 'Operational' },
-                    { name: 'Firebase Storage', status: 'Operational' },
-                    { name: 'Cloud Functions', status: 'Operational' },
-                    { name: 'Remote Config', status: 'Operational' },
-                    { name: 'App Check', status: 'Operational' }
-                  ].map((service, idx) => (
-                    <div key={idx} style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '10px 12px',
-                      borderRadius: '10px',
-                      backgroundColor: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.03)'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{
-                          width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                          display: 'flex', alignItems: 'center', justifyContext: 'center', color: '#10B981'
-                        }}>
-                          <Check size={12} />
-                        </div>
-                        <span style={{ fontSize: '13px', fontWeight: 600 }}>{service.name}</span>
-                      </div>
-                      <span style={{ fontSize: '11px', color: '#10B981', fontWeight: 800 }}>{service.status}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Action Navigation links */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '20px'
-            }}>
-              {[
-                { title: 'Manage Templates', desc: 'Create, edit and manage QR code templates', tab: 'templates', color: '#a855f7' },
-                { title: 'App Configuration', desc: 'Manage app settings and remote configuration', tab: 'app_settings', color: '#3b82f6' },
-                { title: 'User Management', desc: 'View and manage all registered users', tab: 'users', color: '#10b981' },
-                { title: 'View Reports', desc: 'Detailed analytics and usage reports', tab: 'reports', color: '#f97316' }
-              ].map((action, idx) => (
-                <div 
-                  key={idx}
-                  onClick={() => setActiveTab(action.tab)}
-                  style={{
-                    backgroundColor: '#0B0C10',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    borderRadius: '16px',
-                    padding: '20px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '6px',
-                    position: 'relative',
-                    transition: 'transform 0.2s ease, border-color 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.borderColor = action.color;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
-                  }}
+            {items.map(({ id, icon: Icon, label }) => {
+              const isActive = active === id;
+              return (
+                <button key={id} onClick={() => setActive(id)} style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 9,
+                  padding: '8px 12px', borderRadius: T.r.md, border: 'none', cursor: 'pointer',
+                  background: isActive ? T.sidebarAct : 'transparent',
+                  color: isActive ? T.accent : T.textSec,
+                  fontFamily: 'inherit', fontSize: 13, fontWeight: isActive ? 700 : 500,
+                  transition: 'all 0.12s', textAlign: 'left', position: 'relative',
+                }}
+                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = T.sidebarHov; e.currentTarget.style.color = T.text; } }}
+                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = T.textSec; } }}
                 >
-                  <h4 style={{ margin: 0, fontSize: '14.5px', fontWeight: 800, color: action.color }}>{action.title}</h4>
-                  <p style={{ margin: 0, fontSize: '11.5px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>{action.desc}</p>
-                  <ChevronRight size={16} style={{
-                    position: 'absolute', right: '16px', bottom: '16px', color: 'rgba(255,255,255,0.2)'
-                  }} />
+                  {isActive && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 3, height: 18, background: T.accent, borderRadius: '0 3px 3px 0' }} />}
+                  <Icon size={15} />
+                  <span style={{ flex: 1 }}>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
+        <div style={{ height: 20 }} />
+      </div>
+
+      {/* User profile */}
+      <div style={{ padding: '12px 14px', borderTop: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+        <div style={{ width: 32, height: 32, borderRadius: T.r.sm, background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 12, flexShrink: 0 }}>
+          SA
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Super Admin</div>
+          <div style={{ fontSize: 10, color: T.textSec }}>Local Mode</div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════════════════════════════
+
+function Header({ section, onMenuToggle }) {
+  return (
+    <div style={{
+      height: 58, background: T.bgEl, borderBottom: `1px solid ${T.border}`,
+      display: 'flex', alignItems: 'center', padding: '0 20px', gap: 12,
+      position: 'sticky', top: 0, zIndex: 10, flexShrink: 0,
+    }}>
+      <button onClick={onMenuToggle} style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 5, borderRadius: T.r.sm, display: 'flex' }}
+        onMouseEnter={e => e.currentTarget.style.color = T.text}
+        onMouseLeave={e => e.currentTarget.style.color = T.textSec}>
+        <Menu size={20} />
+      </button>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{LABELS[section] || 'Admin Panel'}</div>
+        <div style={{ fontSize: 11, color: T.textSec }}>Mushi QR Pro · Super Admin</div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: '6px 12px' }}>
+        <Search size={13} color={T.textMut} />
+        <input placeholder="Search..." style={{ background: 'none', border: 'none', outline: 'none', color: T.text, fontSize: 12, fontFamily: 'inherit', width: 160 }} />
+        <span style={{ fontSize: 10, color: T.textMut }}>⌘K</span>
+      </div>
+
+      <button style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 5, borderRadius: T.r.sm, position: 'relative', display: 'flex' }}>
+        <Bell size={18} />
+        <div style={{ position: 'absolute', top: 3, right: 3, width: 7, height: 7, borderRadius: '50%', background: T.accent, border: `2px solid ${T.bgEl}` }} />
+      </button>
+
+      <a href="/#/" style={{
+        display: 'flex', alignItems: 'center', gap: 6,
+        background: T.accentLow, border: `1px solid rgba(214,0,54,0.25)`,
+        color: T.accent, borderRadius: T.r.md, padding: '6px 12px',
+        fontSize: 12, fontWeight: 700, textDecoration: 'none',
+      }}>
+        <ArrowLeft size={13} /> App
+      </a>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DASHBOARD PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function DashboardPanel({ stats, chartData, history, onNavigate }) {
+  const si = DS.getStorageInfo();
+  const qr = stats?.qrCount || 0;
+  const bc = stats?.barcodeCount || 0;
+
+  const sysChecks = [
+    { label: 'localStorage',   ok: typeof localStorage !== 'undefined',            detail: si.used + ' used' },
+    { label: 'Service Worker', ok: 'serviceWorker' in navigator,                   detail: 'serviceWorker' in navigator ? 'Enabled' : 'Disabled' },
+    { label: 'PWA Mode',       ok: window.matchMedia('(display-mode: standalone)').matches, detail: window.matchMedia('(display-mode: standalone)').matches ? 'Installed' : 'Browser' },
+    { label: 'Secure Context', ok: window.isSecureContext,                          detail: window.isSecureContext ? 'HTTPS' : 'HTTP' },
+    { label: 'Canvas API',     ok: !!document.createElement('canvas').getContext,   detail: 'QR rendering' },
+    { label: 'Clipboard API',  ok: !!navigator.clipboard,                           detail: 'Copy feature' },
+  ];
+
+  const allOk = sysChecks.every(c => c.ok);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Stat Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 14 }}>
+        <StatCard icon={QrCode}    label="QR Codes Created" value={qr + bc}                 color={T.purple} trendLabel="all time" />
+        <StatCard icon={Star}      label="Saved Items"       value={stats?.savedCount || 0} color={T.blue}   trendLabel="all time" />
+        <StatCard icon={Layers}    label="Templates Total"   value={(QR_TEMPLATES?.length || 0) + (stats?.cloudTemplates || 0)} color={T.orange} trendLabel="built-in + cloud" />
+        <StatCard icon={HardDrive} label="Storage Used"      value={si.used}                color={T.green}  trendLabel="localStorage" />
+      </div>
+
+      {/* Charts Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 16 }}>
+        <AdminCard title="Activity Overview" subtitle="Daily QR & barcode creations (last 7 days)"
+          right={
+            <div style={{ display: 'flex', gap: 14, fontSize: 11, color: T.textSec }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 12, height: 3, background: T.purple, borderRadius: 2, display: 'inline-block' }} />QR
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 12, height: 3, background: T.green, borderRadius: 2, display: 'inline-block' }} />Barcode
+              </span>
+            </div>
+          }
+        >
+          <LineChartSVG data={chartData} series={[{ key: 'qr', color: T.purple }, { key: 'barcode', color: T.green }]} height={190} />
+        </AdminCard>
+
+        <AdminCard title="Type Distribution">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <DonutSVG segments={[{ label: 'QR', value: qr, color: T.purple }, { label: 'Barcode', value: bc, color: T.green }]} size={155} />
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[{ l: 'QR Codes', v: qr, c: T.purple }, { l: 'Barcodes', v: bc, c: T.green }].map(s => (
+                <div key={s.l} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <div style={{ width: 9, height: 9, borderRadius: '50%', background: s.c }} />
+                    <span style={{ fontSize: 12, color: T.textSec }}>{s.l}</span>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{s.v}</span>
                 </div>
               ))}
             </div>
-          </>
-        )}
+          </div>
+        </AdminCard>
+      </div>
 
-        {/* Users Tab */}
-        {activeTab === 'users' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>Registered Users</h1>
-                <p style={{ margin: '4px 0 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>Overview of client accounts, tiers, and login status.</p>
-              </div>
-              <button 
-                onClick={() => setUserModal({ open: true, mode: 'add', data: null })}
-                style={{
-                  backgroundColor: '#D60036', color: 'white', border: 'none', borderRadius: '10px',
-                  padding: '10px 18px', fontWeight: 700, fontSize: '13px', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 15px rgba(214, 0, 54, 0.25)'
-                }}
-              >
-                <Plus size={16} />
-                <span>Create User</span>
-              </button>
-            </div>
-
-            <div style={{ backgroundColor: '#0B0C10', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', padding: '20px', overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13.5px' }}>
+      {/* Recent Activity + System Status */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 16 }}>
+        <AdminCard title="Recent Activity" subtitle="Last 10 items"
+          right={<Btn variant="ghost" size="sm" onClick={() => onNavigate('activity-logs')}>View All</Btn>}
+          noPadding
+        >
+          {!(history || []).length ? (
+            <EmptyState icon={Activity} title="No activity yet" desc="QR codes and barcodes you create will appear here." />
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400 }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}>
-                    <th style={{ padding: '12px 8px', fontWeight: 700 }}>Name</th>
-                    <th style={{ padding: '12px 8px', fontWeight: 700 }}>Email</th>
-                    <th style={{ padding: '12px 8px', fontWeight: 700 }}>Tier</th>
-                    <th style={{ padding: '12px 8px', fontWeight: 700 }}>Status</th>
-                    <th style={{ padding: '12px 8px', fontWeight: 700 }}>Joined</th>
-                    <th style={{ padding: '12px 8px', fontWeight: 700, textOrigin: 'right' }}>Actions</th>
+                  <tr style={{ borderBottom: `1px solid ${T.border}` }}>
+                    {['Type', 'Content', 'Format', 'When'].map(h => (
+                      <th key={h} style={{ textAlign: 'left', padding: '9px 20px', fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => (
-                    <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                      <td style={{ padding: '12px 8px', fontWeight: 700 }}>{u.name}</td>
-                      <td style={{ padding: '12px 8px', color: 'rgba(255,255,255,0.6)' }}>{u.email}</td>
-                      <td style={{ padding: '12px 8px' }}>
-                        <span style={{
-                          backgroundColor: u.type === 'Premium' ? 'rgba(56, 189, 248, 0.15)' : u.type === 'Trial' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255,255,255,0.05)',
-                          color: u.type === 'Premium' ? '#38bdf8' : u.type === 'Trial' ? '#f59e0b' : 'rgba(255,255,255,0.6)',
-                          padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700
-                        }}>{u.type}</span>
+                  {(history || []).slice(0, 10).map((item, i) => (
+                    <tr key={i} style={{ borderBottom: `1px solid ${T.border}`, transition: 'background 0.1s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = T.bgHov}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <td style={{ padding: '10px 20px' }}>
+                        <Badge color={item.barcodeType ? T.green : T.purple}>{item.barcodeType ? 'Barcode' : 'QR'}</Badge>
                       </td>
-                      <td style={{ padding: '12px 8px' }}>
-                        <span style={{ color: u.status === 'Active' ? '#10B981' : '#EF4444', fontWeight: 700 }}>{u.status}</span>
-                      </td>
-                      <td style={{ padding: '12px 8px', color: 'rgba(255,255,255,0.45)' }}>{u.joined}</td>
-                      <td style={{ padding: '12px 8px' }}>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button 
-                            onClick={() => setUserModal({ open: true, mode: 'edit', data: u })}
-                            style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer' }}
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteUser(u.id)}
-                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                      <td style={{ padding: '10px 20px', fontSize: 12, color: T.text, maxWidth: 180 }}>
+                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {safeStr(item.qrData) || safeStr(item.data) || item.qrType || '—'}
                         </div>
                       </td>
+                      <td style={{ padding: '10px 20px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>{item.qrType || item.barcodeType || '—'}</td>
+                      <td style={{ padding: '10px 20px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>{timeAgo(item.timestamp)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
+          )}
+        </AdminCard>
 
-        {/* Templates Tab */}
-        {activeTab === 'templates' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>Vector Layout Templates</h1>
-                <p style={{ margin: '4px 0 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>System-wide templates accessible to all users.</p>
-              </div>
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-              gap: '20px'
-            }}>
-              {QR_TEMPLATES.map((tpl) => (
-                <div key={tpl.id} style={{
-                  backgroundColor: '#0B0C10', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)',
-                  overflow: 'hidden', display: 'flex', flexDirection: 'column'
-                }}>
-                  <div style={{
-                    height: '180px', backgroundColor: 'rgba(255,255,255,0.02)', position: 'relative',
-                    backgroundImage: tpl.bgImage ? `url(${tpl.bgImage})` : 'none',
-                    backgroundSize: 'cover', backgroundPosition: 'center'
-                  }}>
-                    <div style={{
-                      position: 'absolute', top: '12px', right: '12px',
-                      backgroundColor: 'rgba(0,0,0,0.6)', padding: '4px 8px', borderRadius: '6px',
-                      fontSize: '11px', fontWeight: 700
-                    }}>{tpl.category}</div>
-                  </div>
-                  <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800 }}>{tpl.name}</h3>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>
-                      <span>Size: {Math.round(tpl.qrSize * 100)}%</span>
-                      <span>Pos: ({Math.round(tpl.qrX * 100)}%, {Math.round(tpl.qrY * 100)}%)</span>
-                    </div>
-                  </div>
+        <AdminCard title="System Status" right={<Badge color={allOk ? T.green : T.orange}>{allOk ? 'All OK' : 'Issues'}</Badge>}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {sysChecks.map(c => (
+              <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: c.ok ? T.green : T.red, flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, color: T.text, fontWeight: 600 }}>{c.label}</div>
+                  <div style={{ fontSize: 10, color: T.textSec }}>{c.detail}</div>
                 </div>
-              ))}
-            </div>
+                <span style={{ fontSize: 10, color: c.ok ? T.green : T.red, fontWeight: 800 }}>{c.ok ? 'OK' : 'N/A'}</span>
+              </div>
+            ))}
           </div>
-        )}
-
-        {/* App Settings Tab */}
-        {activeTab === 'app_settings' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div>
-              <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>Application Settings</h1>
-              <p style={{ margin: '4px 0 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>Customize branding colors, titles, and global states.</p>
-            </div>
-
-            <div style={{
-              backgroundColor: '#0B0C10', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)',
-              padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '600px'
-            }}>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>App Name</label>
-                <input 
-                  type="text" 
-                  value={appSettings.appName} 
-                  onChange={(e) => setAppSettings({ ...appSettings, appName: e.target.value })}
-                  style={{
-                    width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '14px', outline: 'none'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Brand Accent Color</label>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <input 
-                    type="color" 
-                    value={appSettings.brandColor} 
-                    onChange={(e) => setAppSettings({ ...appSettings, brandColor: e.target.value })}
-                    style={{
-                      width: '42px', height: '42px', border: 'none', borderRadius: '8px', cursor: 'pointer', background: 'none'
-                    }}
-                  />
-                  <input 
-                    type="text" 
-                    value={appSettings.brandColor} 
-                    onChange={(e) => setAppSettings({ ...appSettings, brandColor: e.target.value })}
-                    style={{
-                      flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)',
-                      background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '14px', outline: 'none'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Homepage Welcome Banner Text</label>
-                <textarea 
-                  value={appSettings.welcomeText} 
-                  onChange={(e) => setAppSettings({ ...appSettings, welcomeText: e.target.value })}
-                  rows="3"
-                  style={{
-                    width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '14px', outline: 'none', resize: 'vertical'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                <div>
-                  <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 700 }}>Maintenance Outage Mode</h4>
-                  <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>Lock all front-end services and display system notice.</p>
-                </div>
-                <button 
-                  onClick={() => setAppSettings({ ...appSettings, maintenanceMode: !appSettings.maintenanceMode })}
-                  style={{
-                    backgroundColor: appSettings.maintenanceMode ? '#D60036' : 'rgba(255,255,255,0.05)',
-                    color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer'
-                  }}
-                >
-                  {appSettings.maintenanceMode ? 'ACTIVE' : 'INACTIVE'}
-                </button>
-              </div>
-
-              <button 
-                onClick={handleSaveSettings}
-                style={{
-                  backgroundColor: '#D60036', color: 'white', border: 'none', borderRadius: '10px',
-                  padding: '12px', fontWeight: 700, fontSize: '14px', cursor: 'pointer', width: '100%',
-                  boxShadow: '0 4px 15px rgba(214, 0, 54, 0.25)'
-                }}
-              >
-                Save Configurations
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Feature Flags Tab */}
-        {activeTab === 'feature_flags' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div>
-              <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>System Feature Toggles</h1>
-              <p style={{ margin: '4px 0 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>Toggle feature accessibility live without redeploying code.</p>
-            </div>
-
-            <div style={{
-              backgroundColor: '#0B0C10', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)',
-              padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '600px'
-            }}>
-              {Object.entries(featureFlags).map(([key, value]) => (
-                <div key={key} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '12px 16px', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.03)'
-                }}>
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: '13.5px', textTransform: 'capitalize', fontWeight: 700 }}>{key.replace('_', ' ')}</h4>
-                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>ID: {key}</span>
-                  </div>
-                  <button 
-                    onClick={() => handleToggleFlag(key)}
-                    style={{
-                      backgroundColor: value ? '#10B981' : 'rgba(255,255,255,0.05)',
-                      color: value ? 'white' : 'rgba(255,255,255,0.3)',
-                      border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 800, fontSize: '11px', cursor: 'pointer'
-                    }}
-                  >
-                    {value ? 'ENABLED' : 'DISABLED'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Backups Tab */}
-        {activeTab === 'backups' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div>
-              <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>Backups & System Restoration</h1>
-              <p style={{ margin: '4px 0 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>Export or restore all database records, templates, configurations, and user logs.</p>
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '24px',
-              maxWidth: '800px'
-            }}>
-              {/* Export Panel */}
-              <div style={{
-                backgroundColor: '#0B0C10', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)',
-                padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
-                    <Download size={20} />
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800 }}>Database Export</h3>
-                    <span style={{ fontSize: '11.5px', color: 'rgba(255,255,255,0.4)' }}>Download state as JSON</span>
-                  </div>
-                </div>
-                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.4 }}>Create a complete backup snapshot of settings, feature flags, announcements, admin accounts, integration webhooks, and analytics metrics.</p>
-                <button 
-                  onClick={handleCreateBackup}
-                  style={{
-                    backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px',
-                    padding: '10px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', marginTop: 'auto',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                  }}
-                >
-                  <Download size={14} />
-                  <span>Download JSON Backup</span>
-                </button>
-              </div>
-
-              {/* Import Panel */}
-              <div style={{
-                backgroundColor: '#0B0C10', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)',
-                padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
-                    <Upload size={20} />
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800 }}>Database Restoration</h3>
-                    <span style={{ fontSize: '11.5px', color: 'rgba(255,255,255,0.4)' }}>Restore settings from JSON</span>
-                  </div>
-                </div>
-                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.4 }}>Select a previously exported Mushi QR backup file to restore system configurations. Existing local variables will be overwritten.</p>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleRestoreBackup} 
-                  accept=".json" 
-                  style={{ display: 'none' }}
-                />
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{
-                    backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '8px',
-                    padding: '10px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', marginTop: 'auto',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                  }}
-                >
-                  <Upload size={14} />
-                  <span>Upload & Restore Backup</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Announcements Tab */}
-        {activeTab === 'announcements' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div>
-              <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>System Broadcast Announcements</h1>
-              <p style={{ margin: '4px 0 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>Configure notification alerts displayed on user dashboard banners.</p>
-            </div>
-
-            <div style={{
-              backgroundColor: '#0B0C10', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)',
-              padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '600px'
-            }}>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Broadcast Title</label>
-                <input 
-                  type="text" 
-                  value={announcements.title} 
-                  onChange={(e) => setAnnouncements({ ...announcements, title: e.target.value })}
-                  style={{
-                    width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '14px', outline: 'none'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Alert Description Message</label>
-                <textarea 
-                  value={announcements.message} 
-                  onChange={(e) => setAnnouncements({ ...announcements, message: e.target.value })}
-                  rows="3"
-                  style={{
-                    width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '14px', outline: 'none', resize: 'vertical'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                <div>
-                  <h4 style={{ margin: '0 0 2px 0', fontSize: '13.5px', fontWeight: 700 }}>Show Broadcast Banner</h4>
-                  <p style={{ margin: 0, fontSize: '11.5px', color: 'rgba(255,255,255,0.4)' }}>Toggle displaying this banner live on client interfaces.</p>
-                </div>
-                <button 
-                  onClick={() => setAnnouncements({ ...announcements, active: !announcements.active })}
-                  style={{
-                    backgroundColor: announcements.active ? '#10B981' : 'rgba(255,255,255,0.05)',
-                    color: 'white', border: 'none', padding: '6px 14px', borderRadius: '6px', fontWeight: 800, fontSize: '11px', cursor: 'pointer'
-                  }}
-                >
-                  {announcements.active ? 'ACTIVE' : 'INACTIVE'}
-                </button>
-              </div>
-
-              <button 
-                onClick={handleSaveAnnouncement}
-                style={{
-                  backgroundColor: '#D60036', color: 'white', border: 'none', borderRadius: '10px',
-                  padding: '12px', fontWeight: 700, fontSize: '14px', cursor: 'pointer', width: '100%',
-                  boxShadow: '0 4px 15px rgba(214, 0, 54, 0.25)'
-                }}
-              >
-                Publish Announcement
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Fallback View for Non-Implemented Tabs */}
-        {!['dashboard', 'users', 'templates', 'app_settings', 'feature_flags', 'backups', 'announcements'].includes(activeTab) && (
-          <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            height: '60vh', textAlign: 'center', gap: '16px'
-          }}>
-            <div style={{
-              width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.02)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed rgba(255,255,255,0.08)',
-              color: 'rgba(255,255,255,0.2)'
-            }}>
-              <HelpCircle size={40} />
-            </div>
-            <div>
-              <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px 0' }}>{activeTab.replace('_', ' ').toUpperCase()} Module Empty State</h2>
-              <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '13.5px', maxWidth: '380px', lineHeight: 1.4 }}>
-                This section is configured to be local-first. Seed sample data or restore from a backup to display records.
-              </p>
-            </div>
-            <button 
-              onClick={loadData}
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.08)',
-                padding: '8px 16px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '8px'
-              }}
-            >
-              <RefreshCw size={14} />
-              <span>Retry Reloading Data</span>
-            </button>
-          </div>
-        )}
-
+        </AdminCard>
       </div>
 
-      {/* Add/Edit User Modal */}
-      {userModal.open && (
-        <div style={{
-          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 10000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
-          backdropFilter: 'blur(4px)'
-        }}>
-          <div style={{
-            backgroundColor: '#0B0C10', border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '420px',
-            display: 'flex', flexDirection: 'column', gap: '20px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>
-                {userModal.mode === 'add' ? 'Create User' : 'Edit User'}
-              </h3>
-              <button 
-                onClick={() => setUserModal({ open: false, mode: 'add', data: null })}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}
-              >
-                <X size={18} />
-              </button>
+      {/* Quick Actions */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+        {[
+          { icon: Layers,   label: 'Manage Templates',  desc: 'Create and edit QR templates',  color: T.blue,   id: 'templates' },
+          { icon: Settings, label: 'App Configuration', desc: 'App name, colors, messages',     color: T.orange, id: 'app-settings' },
+          { icon: Flag,     label: 'Feature Flags',     desc: 'Toggle features on / off',       color: T.purple, id: 'feature-flags' },
+          { icon: BarChart2,label: 'View Analytics',    desc: 'Usage charts and breakdowns',    color: T.green,  id: 'analytics' },
+        ].map(qa => (
+          <button key={qa.id} onClick={() => onNavigate(qa.id)} style={{
+            background: `${qa.color}0c`, border: `1px solid ${qa.color}2a`, borderRadius: T.r.lg,
+            padding: '16px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center',
+            gap: 12, textAlign: 'left', transition: 'all 0.15s', fontFamily: 'inherit',
+          }}
+            onMouseEnter={e => e.currentTarget.style.background = `${qa.color}1a`}
+            onMouseLeave={e => e.currentTarget.style.background = `${qa.color}0c`}
+          >
+            <div style={{ width: 42, height: 42, borderRadius: T.r.md, background: `${qa.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <qa.icon size={19} color={qa.color} />
             </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 2 }}>{qa.label}</div>
+              <div style={{ fontSize: 11, color: T.textSec }}>{qa.desc}</div>
+            </div>
+            <ArrowUpRight size={15} color={qa.color} style={{ flexShrink: 0 }} />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-            <form onSubmit={handleSaveUser} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Full Name</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  required
-                  defaultValue={userModal.data?.name || ''}
-                  style={{
-                    width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '13.5px', outline: 'none', boxSizing: 'border-box'
-                  }}
-                />
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATES PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function TemplatesPanel({ cloudTemplates, onRefresh }) {
+  const [tab, setTab] = useState('builtin');
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ name: '', category: 'Social', qrSize: 0.5, qrX: 0.5, qrY: 0.5 });
+  const [saving, setSaving] = useState(false);
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const openAdd = () => { setForm({ name: '', category: 'Social', qrSize: 0.5, qrX: 0.5, qrY: 0.5 }); setEditId(null); setShowForm(true); };
+  const openEdit = (t) => { setForm({ name: t.name, category: t.category, qrSize: t.qrSize, qrX: t.qrX, qrY: t.qrY }); setEditId(t.id); setShowForm(true); };
+  const closeForm = () => { setShowForm(false); setEditId(null); };
+
+  const handleSave = async () => {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    try {
+      await DS.saveCloudTemplate({ ...form, id: editId || ('cloud_' + Date.now().toString(36)), updatedAt: new Date().toISOString() });
+      closeForm(); onRefresh();
+    } finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Delete this template?')) return;
+    await DS.deleteCloudTemplate(id);
+    onRefresh();
+  };
+
+  const cats = ['Social', 'Business', 'Hot', 'Creative', 'Minimal', 'Event', 'Retail'];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', gap: 0, background: T.bgCard, borderRadius: T.r.md, padding: 4, border: `1px solid ${T.border}`, width: 'fit-content' }}>
+        {[{ id: 'builtin', label: `Built-in (${QR_TEMPLATES.length})` }, { id: 'cloud', label: `Cloud (${cloudTemplates.length})` }].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{
+            padding: '7px 18px', borderRadius: T.r.sm, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+            background: tab === t.id ? T.accent : 'transparent',
+            color: tab === t.id ? '#fff' : T.textSec, fontWeight: 700, fontSize: 12, transition: 'all 0.15s',
+          }}>{t.label}</button>
+        ))}
+      </div>
+
+      {tab === 'builtin' && (
+        <AdminCard title="Built-in Templates" subtitle="Pre-installed AI-designed templates (read-only)">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+            {QR_TEMPLATES.map(tpl => (
+              <div key={tpl.id} style={{ background: T.bgEl, borderRadius: T.r.md, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+                <div style={{ aspectRatio: '1', background: `linear-gradient(135deg, ${T.purple}18, ${T.blue}18)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <QrCode size={36} color={`${T.purple}88`} />
+                </div>
+                <div style={{ padding: '10px 12px' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tpl.name}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Badge color={T.orange}>{tpl.category}</Badge>
+                    <span style={{ fontSize: 9, color: T.textMut }}>Read-only</span>
+                  </div>
+                </div>
               </div>
-
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Email Address</label>
-                <input 
-                  type="email" 
-                  name="email" 
-                  required
-                  defaultValue={userModal.data?.email || ''}
-                  style={{
-                    width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.03)', color: 'white', fontSize: '13.5px', outline: 'none', boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Membership Tier</label>
-                <select 
-                  name="type"
-                  defaultValue={userModal.data?.type || 'Free'}
-                  style={{
-                    width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: '13.5px', outline: 'none', boxSizing: 'border-box'
-                  }}
-                >
-                  <option value="Free">Free</option>
-                  <option value="Premium">Premium</option>
-                  <option value="Trial">Trial</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Account Status</label>
-                <select 
-                  name="status"
-                  defaultValue={userModal.data?.status || 'Active'}
-                  style={{
-                    width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.05)', color: 'white', fontSize: '13.5px', outline: 'none', boxSizing: 'border-box'
-                  }}
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
-
-              <button 
-                type="submit"
-                style={{
-                  backgroundColor: '#D60036', color: 'white', border: 'none', borderRadius: '8px',
-                  padding: '12px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', marginTop: '10px'
-                }}
-              >
-                Confirm Changes
-              </button>
-            </form>
+            ))}
           </div>
+        </AdminCard>
+      )}
+
+      {tab === 'cloud' && (
+        <AdminCard title="Cloud Templates" subtitle="Custom templates stored locally"
+          right={<Btn icon={<Plus size={13} />} onClick={openAdd}>Add Template</Btn>}
+        >
+          {showForm && (
+            <div style={{ background: T.bgEl, borderRadius: T.r.md, padding: 18, border: `1px solid ${T.accent}44`, marginBottom: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{editId ? 'Edit Template' : 'New Template'}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <FormInput label="Template Name" value={form.name} onChange={v => set('name', v)} placeholder="e.g. Facebook Dark" />
+                <FormSelect label="Category" value={form.category} onChange={v => set('category', v)} options={cats.map(c => ({ value: c, label: c }))} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                <FormInput label="QR Size (0–1)" type="number" value={form.qrSize} onChange={v => set('qrSize', parseFloat(v) || 0.5)} />
+                <FormInput label="Center X (0–1)" type="number" value={form.qrX}   onChange={v => set('qrX',   parseFloat(v) || 0.5)} />
+                <FormInput label="Center Y (0–1)" type="number" value={form.qrY}   onChange={v => set('qrY',   parseFloat(v) || 0.5)} />
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <Btn variant="ghost" onClick={closeForm}>Cancel</Btn>
+                <Btn onClick={handleSave} disabled={saving || !form.name.trim()} icon={<Check size={13} />}>{saving ? 'Saving...' : 'Save'}</Btn>
+              </div>
+            </div>
+          )}
+          {cloudTemplates.length === 0 && !showForm ? (
+            <EmptyState icon={Layers} title="No cloud templates yet" desc="Create custom templates that users can apply to their QR codes."
+              action={<Btn icon={<Plus size={13} />} onClick={openAdd}>Create First Template</Btn>}
+            />
+          ) : (
+            <div>
+              {cloudTemplates.map(tpl => (
+                <div key={tpl.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: `1px solid ${T.border}` }}>
+                  <div style={{ width: 38, height: 38, borderRadius: T.r.sm, background: `${T.purple}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Layers size={16} color={T.purple} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{tpl.name}</div>
+                    <div style={{ fontSize: 11, color: T.textSec }}>Size {tpl.qrSize} · X {tpl.qrX} · Y {tpl.qrY}</div>
+                  </div>
+                  <Badge color={T.orange}>{tpl.category}</Badge>
+                  <Btn variant="ghost" size="sm" icon={<Edit size={11} />} onClick={() => openEdit(tpl)}>Edit</Btn>
+                  <Btn variant="danger" size="sm" icon={<Trash2 size={11} />} onClick={() => handleDelete(tpl.id)}>Delete</Btn>
+                </div>
+              ))}
+            </div>
+          )}
+        </AdminCard>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// APP SETTINGS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function AppSettingsPanel({ settings, onSave }) {
+  const [form, setForm] = useState(settings || {});
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { if (settings) setForm(settings); }, [settings]);
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const handleSave = async () => { await onSave(form); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <AdminCard title="General Settings" subtitle="Core app configuration stored locally">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <FormInput label="App Name" value={form.appName || ''} onChange={v => set('appName', v)} />
+          <FormInput label="Welcome Message" value={form.welcomeText || ''} onChange={v => set('welcomeText', v)} />
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>Brand Color</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input type="color" value={form.brandColor || '#D60036'} onChange={e => set('brandColor', e.target.value)}
+                style={{ width: 46, height: 38, borderRadius: T.r.md, border: `1px solid ${T.border}`, cursor: 'pointer', background: 'none', padding: 4 }} />
+              <FormInput value={form.brandColor || '#D60036'} onChange={v => set('brandColor', v)} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 8 }}>
+            <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saved ? 'Saved!' : 'Save Settings'}
+            </Btn>
+          </div>
+        </div>
+      </AdminCard>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BRANDING PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function BrandingPanel({ settings, onSave }) {
+  const [form, setForm] = useState(settings || {});
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { if (settings) setForm(settings); }, [settings]);
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const handleSave = async () => { await onSave(form); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <AdminCard title="Brand Identity" subtitle="Customize your app's visual identity">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <img src="/logo.png" alt="Logo" style={{ width: 72, height: 72, borderRadius: 18, objectFit: 'contain', background: T.bgEl, padding: 6, border: `1px solid ${T.border}` }} />
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: T.text, marginBottom: 4 }}>App Logo</div>
+              <div style={{ fontSize: 12, color: T.textSec, marginBottom: 8 }}>Served from /logo.png</div>
+              <Badge color={T.blue}>Build Asset</Badge>
+            </div>
+          </div>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 8 }}>Brand Color</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <input type="color" value={form.brandColor || '#D60036'} onChange={e => set('brandColor', e.target.value)}
+                style={{ width: 56, height: 56, borderRadius: T.r.md, border: `1px solid ${T.border}`, cursor: 'pointer', background: 'none', padding: 6 }} />
+              <div>
+                <div style={{ fontSize: 11, color: T.textSec, marginBottom: 2 }}>Hex Value</div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: form.brandColor || '#D60036', fontFamily: 'monospace' }}>{form.brandColor || '#D60036'}</div>
+              </div>
+            </div>
+          </div>
+          <FormInput label="App Display Name" value={form.appName || 'Mushi QR Pro'} onChange={v => set('appName', v)} />
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saved ? 'Saved!' : 'Save Branding'}
+            </Btn>
+          </div>
+        </div>
+      </AdminCard>
+
+      <AdminCard title="Color System Preview">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 10 }}>
+          {[
+            { label: 'Brand', color: form.brandColor || '#D60036' },
+            { label: 'Dark BG', color: '#09090f' },
+            { label: 'Card', color: '#14141e' },
+            { label: 'Purple', color: T.purple },
+            { label: 'Green', color: T.green },
+            { label: 'Orange', color: T.orange },
+          ].map(c => (
+            <div key={c.label} style={{ textAlign: 'center' }}>
+              <div style={{ width: '100%', height: 44, background: c.color, borderRadius: T.r.md, border: `1px solid ${T.border}`, marginBottom: 5 }} />
+              <div style={{ fontSize: 10, color: T.textSec }}>{c.label}</div>
+              <div style={{ fontSize: 9, color: T.textMut, fontFamily: 'monospace' }}>{c.color}</div>
+            </div>
+          ))}
+        </div>
+      </AdminCard>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FEATURE FLAGS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function FeatureFlagsPanel({ flags, onSave }) {
+  const [f, setF] = useState(flags || {});
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { if (flags) setF(flags); }, [flags]);
+
+  const toggle = k => setF(p => ({ ...p, [k]: !p[k] }));
+  const handleSave = async () => { await onSave(f); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+
+  const enabled = Object.values(f).filter(Boolean).length;
+  const total   = Object.keys(f).length;
+
+  const groups = [
+    { title: 'Core Features', items: [
+      { key: 'qr_generator',      label: 'QR Code Generator',      desc: 'Allow users to create QR codes' },
+      { key: 'barcode_generator', label: 'Barcode Generator',       desc: 'Allow users to create barcodes' },
+      { key: 'scanner',           label: 'QR & Barcode Scanner',    desc: 'Camera-based scanner feature' },
+      { key: 'bulk_generation',   label: 'Bulk Generation',         desc: 'Create multiple codes at once' },
+      { key: 'templates',         label: 'Templates',               desc: 'Pre-designed QR templates' },
+    ]},
+    { title: 'Data & History', items: [
+      { key: 'history', label: 'History',     desc: 'Save creation history locally' },
+      { key: 'saved',   label: 'Saved Items', desc: 'Allow bookmarking QR codes' },
+    ]},
+    { title: 'Export Options', items: [
+      { key: 'export_png', label: 'Export PNG', desc: 'Download as PNG image' },
+      { key: 'export_svg', label: 'Export SVG', desc: 'Download as SVG vector' },
+      { key: 'export_pdf', label: 'Export PDF', desc: 'Download as PDF document' },
+    ]},
+    { title: 'App Features', items: [
+      { key: 'dark_mode',   label: 'Dark Mode',          desc: 'Dark/light theme toggle' },
+      { key: 'pwa_install', label: 'PWA Install Prompt', desc: 'Show browser install prompt' },
+    ]},
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ fontSize: 13, color: T.textSec }}>{enabled} of {total} features enabled</div>
+          <div style={{ width: 100, height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
+            <div style={{ height: '100%', background: T.green, borderRadius: 2, width: `${total ? (enabled / total) * 100 : 0}%`, transition: 'width 0.3s' }} />
+          </div>
+        </div>
+        <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+          {saved ? 'Saved!' : 'Save Flags'}
+        </Btn>
+      </div>
+      {groups.map(g => (
+        <AdminCard key={g.title} title={g.title}>
+          {g.items.map((item, i, arr) => (
+            <div key={item.key} style={{ borderBottom: i < arr.length - 1 ? `1px solid ${T.border}` : 'none' }}>
+              <ToggleRow label={item.label} description={item.desc} checked={!!f[item.key]} onChange={() => toggle(item.key)} />
+            </div>
+          ))}
+        </AdminCard>
+      ))}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAINTENANCE PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function MaintenancePanel({ settings, onSave }) {
+  const [form, setForm] = useState(settings || {});
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { if (settings) setForm(settings); }, [settings]);
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const handleSave = async () => { await onSave(form); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {form.maintenanceMode && (
+        <div style={{ background: `${T.red}0d`, border: `1px solid ${T.red}33`, borderRadius: T.r.md, padding: '12px 16px', display: 'flex', gap: 10, alignItems: 'center' }}>
+          <AlertTriangle size={15} color={T.red} />
+          <span style={{ fontSize: 13, color: T.red, fontWeight: 600 }}>Maintenance mode is ACTIVE — users will see the maintenance screen.</span>
+        </div>
+      )}
+      <AdminCard title="Maintenance Mode" subtitle="Take the app offline for scheduled maintenance">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <ToggleRow label="Enable Maintenance Mode" description="Displays a maintenance page to all users" checked={!!form.maintenanceMode} onChange={v => set('maintenanceMode', v)} />
+          <FormTextarea label="Maintenance Message" rows={3} value={form.maintenanceMessage || ''} onChange={v => set('maintenanceMessage', v)}
+            placeholder="We are performing scheduled maintenance. Please check back soon." />
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saved ? 'Saved!' : 'Save Settings'}
+            </Btn>
+          </div>
+        </div>
+      </AdminCard>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANNOUNCEMENTS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function AnnouncementsPanel({ announcement, onSave }) {
+  const [form, setForm] = useState(announcement || { title: '', message: '', active: false, type: 'info' });
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { if (announcement) setForm(announcement); }, [announcement]);
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const handleSave = async () => { await onSave(form); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+
+  const types = [
+    { value: 'info',    label: '💬 Info',     color: T.blue },
+    { value: 'success', label: '✅ Success',  color: T.green },
+    { value: 'warning', label: '⚠️ Warning',  color: T.orange },
+    { value: 'error',   label: '🚨 Critical', color: T.red },
+  ];
+  const curType = types.find(t => t.value === form.type) || types[0];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <AdminCard title="Announcement Banner" subtitle="Shown to all users at the top of the app">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <ToggleRow label="Active" description="Show banner to all users right now" checked={!!form.active} onChange={v => set('active', v)} />
+          <FormInput label="Title" value={form.title || ''} onChange={v => set('title', v)} placeholder="e.g. New features available!" />
+          <FormTextarea label="Message" value={form.message || ''} rows={3} onChange={v => set('message', v)} placeholder="Tell users what's new or important..." />
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 8 }}>Type</label>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {types.map(t => (
+                <button key={t.value} onClick={() => set('type', t.value)} style={{
+                  padding: '6px 14px', borderRadius: T.r.md, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700,
+                  background: form.type === t.value ? `${t.color}20` : T.bgEl,
+                  border: `1px solid ${form.type === t.value ? t.color : T.border}`,
+                  color: form.type === t.value ? t.color : T.textSec, transition: 'all 0.12s',
+                }}>{t.label}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saved ? 'Published!' : 'Publish Announcement'}
+            </Btn>
+          </div>
+        </div>
+      </AdminCard>
+
+      {form.title && (
+        <AdminCard title="Preview">
+          <div style={{ padding: '12px 16px', borderRadius: T.r.md, background: `${curType.color}12`, border: `1px solid ${curType.color}30`, display: 'flex', gap: 10 }}>
+            <Info size={15} color={curType.color} style={{ flexShrink: 0, marginTop: 1 }} />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{form.title}</div>
+              {form.message && <div style={{ fontSize: 12, color: T.textSec, marginTop: 2 }}>{form.message}</div>}
+            </div>
+          </div>
+        </AdminCard>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REMOTE CONFIG PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function RemoteConfigPanel({ config, onSave }) {
+  const [pairs, setPairs] = useState([]);
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { if (config) setPairs(Object.entries(config).map(([k, v]) => ({ k, v }))); }, [config]);
+
+  const update = (i, field, val) => setPairs(p => p.map((x, j) => j === i ? { ...x, [field]: val } : x));
+  const remove  = i => setPairs(p => p.filter((_, j) => j !== i));
+
+  const handleSave = async () => {
+    const cfg = Object.fromEntries(pairs.filter(p => p.k.trim()).map(p => [p.k.trim(), p.v]));
+    await onSave(cfg); setSaved(true); setTimeout(() => setSaved(false), 2500);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <AdminCard title="Remote Configuration" subtitle="Key-value pairs pushed to the app at runtime"
+        right={
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Btn variant="ghost" size="sm" icon={<Plus size={12} />} onClick={() => setPairs(p => [...p, { k: '', v: '' }])}>Add Key</Btn>
+            <Btn size="sm" onClick={handleSave} icon={saved ? <Check size={12} /> : <Save size={12} />} variant={saved ? 'success' : 'primary'}>{saved ? 'Saved!' : 'Save'}</Btn>
+          </div>
+        }
+      >
+        {pairs.length === 0 ? (
+          <EmptyState icon={Sliders} title="No config keys yet" desc="Add key-value pairs to configure app behavior remotely." />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 32px', gap: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.4px' }}>KEY</span>
+              <span style={{ fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.4px' }}>VALUE</span>
+              <span />
+            </div>
+            {pairs.map((pair, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 32px', gap: 8, alignItems: 'center' }}>
+                <FormInput value={pair.k} onChange={v => update(i, 'k', v)} placeholder="config_key" />
+                <FormInput value={pair.v} onChange={v => update(i, 'v', v)} placeholder="value" />
+                <button onClick={() => remove(i)} style={{ height: 36, borderRadius: T.r.sm, background: `${T.red}12`, border: `1px solid ${T.red}25`, color: T.red, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </AdminCard>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANALYTICS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function AnalyticsPanel({ chartData, stats }) {
+  const si = DS.getStorageInfo();
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+        <StatCard icon={QrCode}    label="QR Codes"   value={stats?.qrCount || 0}      color={T.purple} />
+        <StatCard icon={BarChart2} label="Barcodes"   value={stats?.barcodeCount || 0} color={T.green}  />
+        <StatCard icon={Package}   label="Batch Jobs" value={stats?.batchCount || 0}   color={T.orange} />
+        <StatCard icon={Star}      label="Saved"      value={stats?.savedCount || 0}   color={T.blue}   />
+      </div>
+
+      <AdminCard title="7-Day Activity" subtitle="Creations per day"
+        right={
+          <div style={{ display: 'flex', gap: 14, fontSize: 11, color: T.textSec }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: T.purple, borderRadius: 2, display: 'inline-block' }} />QR</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: T.green, borderRadius: 2, display: 'inline-block' }} />Barcode</span>
+          </div>
+        }
+      >
+        <LineChartSVG data={chartData} series={[{ key: 'qr', color: T.purple }, { key: 'barcode', color: T.green }]} height={220} />
+      </AdminCard>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <AdminCard title="Type Distribution">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            <DonutSVG segments={[{ value: stats?.qrCount || 0, color: T.purple }, { value: stats?.barcodeCount || 0, color: T.green }]} size={130} />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[{ l: 'QR Codes', v: stats?.qrCount || 0, c: T.purple }, { l: 'Barcodes', v: stats?.barcodeCount || 0, c: T.green }].map(s => {
+                const tot = (stats?.qrCount || 0) + (stats?.barcodeCount || 0);
+                return (
+                  <div key={s.l}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <span style={{ fontSize: 12, color: T.textSec }}>{s.l}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{s.v}</span>
+                    </div>
+                    <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                      <div style={{ height: '100%', background: s.c, borderRadius: 2, width: `${tot ? (s.v / tot) * 100 : 0}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </AdminCard>
+
+        <AdminCard title="Storage Breakdown">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {Object.entries(si.breakdown).filter(([k]) => k.startsWith('qrgen_')).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([key, bytes]) => (
+              <div key={key}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                  <span style={{ fontSize: 11, color: T.textSec, fontFamily: 'monospace' }}>{key.replace('qrgen_', '')}</span>
+                  <span style={{ fontSize: 11, color: T.text, fontWeight: 600 }}>{fmtBytes(bytes)}</span>
+                </div>
+                <div style={{ height: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                  <div style={{ height: '100%', background: T.purple, borderRadius: 2, width: `${si.totalBytes ? (bytes / si.totalBytes) * 100 : 0}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </AdminCard>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REPORTS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function ReportsPanel({ history }) {
+  const [exporting, setExporting] = useState(false);
+
+  const exportCSV = () => {
+    const rows = [['Type', 'Content', 'Format', 'Created At']];
+    (history || []).forEach(h => rows.push([
+      h.barcodeType ? 'Barcode' : 'QR',
+      h.qrData ? safeStr(h.qrData) : safeStr(h.data) || '',
+      h.qrType || h.barcodeType || '',
+      h.timestamp || '',
+    ]));
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    Object.assign(document.createElement('a'), { href: url, download: `mushi-qr-report-${new Date().toISOString().slice(0,10)}.csv` }).click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportJSON = async () => {
+    setExporting(true);
+    try {
+      const backup = await DS.exportBackup();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      Object.assign(document.createElement('a'), { href: url, download: `mushi-qr-export-${new Date().toISOString().slice(0,10)}.json` }).click();
+      URL.revokeObjectURL(url);
+    } finally { setExporting(false); }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+        {[
+          { icon: FileText, label: 'History CSV', desc: 'Export all creation history as CSV', color: T.green, action: exportCSV, btn: 'Export CSV' },
+          { icon: Download,  label: 'Full Data Export', desc: 'All app data as JSON backup', color: T.blue, action: exportJSON, btn: exporting ? 'Exporting...' : 'Export JSON' },
+        ].map(r => (
+          <AdminCard key={r.label}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 12 }}>
+              <div style={{ width: 52, height: 52, borderRadius: T.r.lg, background: `${r.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <r.icon size={22} color={r.color} />
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: T.text, marginBottom: 4 }}>{r.label}</div>
+                <div style={{ fontSize: 12, color: T.textSec }}>{r.desc}</div>
+              </div>
+              <Btn variant="ghost" icon={<Download size={13} />} onClick={r.action}>{r.btn}</Btn>
+            </div>
+          </AdminCard>
+        ))}
+      </div>
+
+      <AdminCard title={`History (${(history || []).length} items)`} subtitle="Full creation log" noPadding>
+        {!(history || []).length ? (
+          <EmptyState icon={FileText} title="No history yet" desc="QR codes and barcodes you create will appear here." />
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${T.border}` }}>
+                  {['Type', 'Content', 'Format', 'Created'].map(h => (
+                    <th key={h} style={{ textAlign: 'left', padding: '9px 20px', fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.4px', whiteSpace: 'nowrap' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(history || []).slice(0, 50).map((item, i) => (
+                  <tr key={i} style={{ borderBottom: `1px solid ${T.border}` }}>
+                    <td style={{ padding: '9px 20px' }}><Badge color={item.barcodeType ? T.green : T.purple}>{item.barcodeType ? 'Barcode' : 'QR'}</Badge></td>
+                    <td style={{ padding: '9px 20px', fontSize: 12, color: T.text, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{safeStr(item.qrData) || safeStr(item.data) || '—'}</td>
+                    <td style={{ padding: '9px 20px', fontSize: 11, color: T.textSec }}>{item.qrType || item.barcodeType || '—'}</td>
+                    <td style={{ padding: '9px 20px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>{fmtDate(item.timestamp)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </AdminCard>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ACTIVITY LOGS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function ActivityLogsPanel({ history }) {
+  const [search, setSearch] = useState('');
+  const filtered = (history || []).filter(h =>
+    !search || safeStr(h.qrData || h.data || '').toLowerCase().includes(search.toLowerCase()) ||
+    (h.qrType || h.barcodeType || '').toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <AdminCard title={`Activity Log (${(history || []).length})`} subtitle="All creation events"
+      right={
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: '6px 12px' }}>
+          <Search size={13} color={T.textMut} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..."
+            style={{ background: 'none', border: 'none', outline: 'none', color: T.text, fontSize: 12, fontFamily: 'inherit', width: 140 }} />
+        </div>
+      }
+      noPadding
+    >
+      {filtered.length === 0 ? (
+        <EmptyState icon={Activity} title="No activity found" desc={search ? 'Try a different term.' : 'Activity will appear here as you use the app.'} />
+      ) : (
+        <div>
+          {filtered.slice(0, 100).map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', borderBottom: `1px solid ${T.border}`, transition: 'background 0.1s' }}
+              onMouseEnter={e => e.currentTarget.style.background = T.bgHov}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+              <div style={{ width: 34, height: 34, borderRadius: T.r.sm, background: item.barcodeType ? `${T.green}18` : `${T.purple}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {item.barcodeType ? <BarChart2 size={15} color={T.green} /> : <QrCode size={15} color={T.purple} />}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {safeStr(item.qrData) || safeStr(item.data) || item.qrType || 'Unknown'}
+                </div>
+                <div style={{ fontSize: 11, color: T.textSec, marginTop: 2 }}>
+                  {item.qrType || item.barcodeType || 'General'} · {timeAgo(item.timestamp)}
+                </div>
+              </div>
+              <Badge color={item.barcodeType ? T.green : T.purple}>{item.barcodeType ? 'Barcode' : 'QR'}</Badge>
+            </div>
+          ))}
+        </div>
+      )}
+    </AdminCard>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BACKUPS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function BackupsPanel() {
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const fileRef = useRef();
+  const si = DS.getStorageInfo();
+
+  const showMsg = (type, text) => { setMsg({ type, text }); setTimeout(() => setMsg(null), 4000); };
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const backup = await DS.exportBackup();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      Object.assign(document.createElement('a'), { href: url, download: `mushi-qr-backup-${new Date().toISOString().slice(0,10)}.json` }).click();
+      URL.revokeObjectURL(url);
+      showMsg('success', 'Backup exported successfully!');
+    } catch (e) { showMsg('error', 'Export failed: ' + e.message); }
+    finally { setExporting(false); }
+  };
+
+  const handleImport = async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!confirm(`Restore from "${file.name}"? This will OVERWRITE all current data.`)) return;
+    setImporting(true);
+    try {
+      const backup = JSON.parse(await file.text());
+      await DS.importBackup(backup);
+      showMsg('success', 'Backup restored! Reload the page to see changes.');
+    } catch (e) { showMsg('error', 'Import failed: ' + e.message); }
+    finally { setImporting(false); e.target.value = ''; }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {msg && (
+        <div style={{ padding: '12px 16px', borderRadius: T.r.md, display: 'flex', gap: 10, alignItems: 'center', background: msg.type === 'success' ? `${T.green}12` : `${T.red}0d`, border: `1px solid ${msg.type === 'success' ? T.green : T.red}33` }}>
+          {msg.type === 'success' ? <CheckCircle size={15} color={T.green} /> : <AlertCircle size={15} color={T.red} />}
+          <span style={{ fontSize: 13, color: msg.type === 'success' ? T.green : T.red, fontWeight: 600 }}>{msg.text}</span>
         </div>
       )}
 
+      <AdminCard title="Storage Overview">
+        <div>
+          <div style={{ fontSize: 32, fontWeight: 900, color: T.text, marginBottom: 4 }}>{si.used}</div>
+          <div style={{ fontSize: 12, color: T.textSec, marginBottom: 12 }}>of ~5 MB localStorage quota</div>
+          <div style={{ height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3 }}>
+            <div style={{ height: '100%', background: T.accent, borderRadius: 3, width: `${Math.min((si.totalBytes / (5 * 1024 * 1024)) * 100, 100)}%`, transition: 'width 0.4s' }} />
+          </div>
+        </div>
+      </AdminCard>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <AdminCard title="Export Backup" subtitle="Download all data as JSON">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <p style={{ fontSize: 13, color: T.textSec, margin: 0, lineHeight: 1.6 }}>
+              Creates a complete snapshot of your QR history, settings, templates, feature flags, and remote config.
+            </p>
+            <Btn onClick={handleExport} disabled={exporting} icon={<Download size={13} />}>
+              {exporting ? 'Exporting...' : 'Download Backup'}
+            </Btn>
+          </div>
+        </AdminCard>
+
+        <AdminCard title="Restore Backup" subtitle="Import data from a backup file">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <p style={{ fontSize: 13, color: T.textSec, margin: 0, lineHeight: 1.6 }}>
+              Restores all data from a previous backup. <strong style={{ color: T.red }}>Warning: overwrites current data.</strong>
+            </p>
+            <input ref={fileRef} type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
+            <Btn variant="ghost" onClick={() => fileRef.current?.click()} disabled={importing} icon={<Upload size={13} />}>
+              {importing ? 'Restoring...' : 'Choose File'}
+            </Btn>
+          </div>
+        </AdminCard>
+      </div>
+
+      <AdminCard title="Storage Breakdown" subtitle="Size per data category">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {Object.entries(si.breakdown).filter(([k]) => k.startsWith('qrgen_')).sort((a, b) => b[1] - a[1]).map(([key, bytes]) => (
+            <div key={key} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 11, color: T.text, fontFamily: 'monospace', marginBottom: 2 }}>{key}</div>
+                <div style={{ height: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                  <div style={{ height: '100%', background: T.purple, borderRadius: 2, width: `${si.totalBytes ? (bytes / si.totalBytes) * 100 : 0}%` }} />
+                </div>
+              </div>
+              <span style={{ fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>{fmtBytes(bytes)}</span>
+            </div>
+          ))}
+        </div>
+      </AdminCard>
     </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SYSTEM HEALTH PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function SystemHealthPanel({ stats }) {
+  const si = DS.getStorageInfo();
+  const checks = [
+    { label: 'localStorage Available', pass: typeof localStorage !== 'undefined',               detail: `${si.used} used` },
+    { label: 'Service Worker',         pass: 'serviceWorker' in navigator,                      detail: 'PWA & offline support' },
+    { label: 'Secure Context',         pass: window.isSecureContext,                            detail: window.isSecureContext ? 'HTTPS confirmed' : 'HTTP — insecure' },
+    { label: 'PWA Manifest',           pass: !!document.querySelector('link[rel="manifest"]'), detail: 'manifest.json linked' },
+    { label: 'Canvas API',             pass: !!document.createElement('canvas').getContext,     detail: 'Required for QR generation' },
+    { label: 'Clipboard API',          pass: !!navigator.clipboard,                             detail: 'Required for copy feature' },
+    { label: 'Online Status',          pass: navigator.onLine,                                  detail: navigator.onLine ? 'Connected' : 'Offline' },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+        <StatCard icon={Database} label="Storage"   value={si.used}                color={T.green}  />
+        <StatCard icon={QrCode}   label="QR Items"  value={stats?.historyCount || 0} color={T.purple} />
+        <StatCard icon={Server}   label="Config Keys" value={Object.keys(si.breakdown).filter(k => k.startsWith('qrgen_')).length} color={T.blue} />
+      </div>
+
+      <AdminCard title="Health Checks" subtitle="Component diagnostics">
+        {checks.map((c, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: i < checks.length - 1 ? `1px solid ${T.border}` : 'none' }}>
+            <div style={{ width: 26, height: 26, borderRadius: '50%', background: c.pass ? `${T.green}18` : `${T.red}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {c.pass ? <Check size={13} color={T.green} /> : <X size={13} color={T.red} />}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{c.label}</div>
+              <div style={{ fontSize: 11, color: T.textSec }}>{c.detail}</div>
+            </div>
+            <Badge color={c.pass ? T.green : T.red}>{c.pass ? 'Pass' : 'Fail'}</Badge>
+          </div>
+        ))}
+      </AdminCard>
+
+      <AdminCard title="Environment">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          {[
+            { label: 'Display Mode', value: window.matchMedia('(display-mode: standalone)').matches ? 'PWA App' : 'Browser' },
+            { label: 'Language', value: navigator.language },
+            { label: 'Screen', value: `${window.screen.width}×${window.screen.height}` },
+            { label: 'Viewport', value: `${window.innerWidth}×${window.innerHeight}` },
+            { label: 'Platform', value: navigator.platform || 'Unknown' },
+            { label: 'Online', value: navigator.onLine ? 'Yes' : 'No' },
+          ].map(({ label, value }) => (
+            <div key={label} style={{ background: T.bgEl, borderRadius: T.r.md, padding: '10px 12px', border: `1px solid ${T.border}` }}>
+              <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase', marginBottom: 3 }}>{label}</div>
+              <div style={{ fontSize: 12, color: T.text, wordBreak: 'break-all' }}>{value}</div>
+            </div>
+          ))}
+        </div>
+      </AdminCard>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUDIT LOGS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function AuditLogsPanel({ log }) {
+  const actionColors = {
+    APP_SETTINGS_UPDATED: T.blue, FEATURE_FLAGS_UPDATED: T.purple,
+    TEMPLATE_SAVED: T.green, TEMPLATE_DELETED: T.red,
+    ANNOUNCEMENT_UPDATED: T.orange, REMOTE_CONFIG_UPDATED: T.blue,
+    BACKUP_RESTORED: T.green,
+  };
+  return (
+    <AdminCard title={`Audit Log (${(log || []).length})`} subtitle="All admin actions are automatically tracked" noPadding>
+      {!(log || []).length ? (
+        <EmptyState icon={ClipboardList} title="No audit events yet" desc="Save settings, update flags, or manage templates to see audit entries." />
+      ) : (
+        <div>
+          {(log || []).map((entry, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '11px 20px', borderBottom: `1px solid ${T.border}` }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: actionColors[entry.action] || T.textSec, flexShrink: 0, marginTop: 6 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: T.text, fontFamily: 'monospace' }}>{entry.action}</div>
+                <div style={{ fontSize: 11, color: T.textSec, marginTop: 1 }}>By {entry.actor} · {timeAgo(entry.ts)}</div>
+              </div>
+              <span style={{ fontSize: 10, color: T.textMut, whiteSpace: 'nowrap' }}>{fmtDate(entry.ts)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </AdminCard>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// QR & BARCODE PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function QRBarcodePanel({ stats, history }) {
+  const byType = (arr, key) => {
+    const map = {};
+    arr.forEach(h => { const k = h[key] || 'Unknown'; map[k] = (map[k] || 0) + 1; });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  };
+
+  const qrItems  = (history || []).filter(h => !h.barcodeType);
+  const bcItems  = (history || []).filter(h =>  h.barcodeType);
+  const qrTypes  = byType(qrItems, 'qrType');
+  const bcTypes  = byType(bcItems, 'barcodeType');
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+        <StatCard icon={QrCode}    label="QR Codes"   value={stats?.qrCount || 0}      color={T.purple} />
+        <StatCard icon={BarChart2} label="Barcodes"   value={stats?.barcodeCount || 0} color={T.green}  />
+        <StatCard icon={Package}   label="Batch Jobs" value={stats?.batchCount || 0}   color={T.orange} />
+        <StatCard icon={Star}      label="Saved"      value={stats?.savedCount || 0}   color={T.blue}   />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <AdminCard title="QR Code Types" subtitle="Breakdown by content type">
+          {qrTypes.length === 0 ? <EmptyState icon={QrCode} title="No QR codes yet" desc="Create QR codes to see breakdown." /> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {qrTypes.map(([type, count]) => (
+                <div key={type}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <span style={{ fontSize: 12, color: T.textSec }}>{type}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{count}</span>
+                  </div>
+                  <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                    <div style={{ height: '100%', background: T.purple, borderRadius: 2, width: `${(count / qrItems.length) * 100}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </AdminCard>
+
+        <AdminCard title="Barcode Formats" subtitle="Breakdown by format">
+          {bcTypes.length === 0 ? <EmptyState icon={BarChart2} title="No barcodes yet" desc="Create barcodes to see format breakdown." /> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {bcTypes.map(([type, count]) => (
+                <div key={type}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <span style={{ fontSize: 12, color: T.textSec }}>{type}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{count}</span>
+                  </div>
+                  <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                    <div style={{ height: '100%', background: T.green, borderRadius: 2, width: `${(count / bcItems.length) * 100}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </AdminCard>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN USERS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function AdminUsersPanel() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <AdminCard title="Admin Users" subtitle="Users with administrative access" noPadding>
+        <div style={{ padding: '0 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 0', borderBottom: `1px solid ${T.border}` }}>
+            <div style={{ width: 38, height: 38, borderRadius: T.r.sm, background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 13, flexShrink: 0 }}>SA</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Super Admin</div>
+              <div style={{ fontSize: 11, color: T.textSec }}>Local Mode — No email required</div>
+            </div>
+            <Badge color={T.accent}>Super Admin</Badge>
+            <Badge color={T.green}>Active</Badge>
+          </div>
+        </div>
+        <EmptyState icon={UserCog} title="Connect Firebase to manage admin users" desc="Multi-admin support with role-based access, email invites, and permission scopes will be available after Firebase integration." />
+      </AdminCard>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROLES & PERMISSIONS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function RolesPanel() {
+  const roles = [
+    { name: 'Super Admin', color: T.accent, perms: ['Full system access', 'User management', 'Billing & plans', 'System config', 'Developer API', 'Backups'] },
+    { name: 'Admin', color: T.purple, perms: ['App settings', 'Templates', 'Feature flags', 'Announcements', 'View logs'] },
+    { name: 'Moderator', color: T.blue, perms: ['View templates', 'View logs', 'View reports'] },
+    { name: 'Viewer', color: T.textSec, perms: ['Read-only dashboard'] },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ background: `${T.blue}0c`, border: `1px solid ${T.blue}2a`, borderRadius: T.r.md, padding: '11px 15px', display: 'flex', gap: 10, alignItems: 'center' }}>
+        <Info size={14} color={T.blue} />
+        <span style={{ fontSize: 12, color: T.textSec }}>Roles are pre-defined for local mode. Dynamic role assignment and custom permissions require Firebase integration.</span>
+      </div>
+      {roles.map(role => (
+        <AdminCard key={role.name} title={role.name} right={<Badge color={role.color}>{role.name}</Badge>}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {role.perms.map(p => (
+              <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 11px', background: `${role.color}10`, borderRadius: 100, border: `1px solid ${role.color}28` }}>
+                <Check size={10} color={role.color} />
+                <span style={{ fontSize: 11, color: role.color }}>{p}</span>
+              </div>
+            ))}
+          </div>
+        </AdminCard>
+      ))}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECURITY PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function SecurityPanel() {
+  const checks = [
+    { label: 'HTTPS Connection',    value: window.isSecureContext ? 'Secure' : 'Insecure',         ok: window.isSecureContext,  warn: false },
+    { label: 'Authentication',      value: 'No auth (local mode)',                                  ok: false,                  warn: true },
+    { label: 'Data Encryption',     value: 'localStorage (plaintext)',                              ok: false,                  warn: true },
+    { label: 'Service Worker',      value: 'serviceWorker' in navigator ? 'Enabled' : 'Disabled',  ok: 'serviceWorker' in navigator, warn: false },
+    { label: 'Manifest / PWA',      value: document.querySelector('link[rel="manifest"]') ? 'Linked' : 'Missing', ok: !!document.querySelector('link[rel="manifest"]'), warn: false },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <AdminCard title="Security Overview">
+        {checks.map((item, i, arr) => (
+          <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: i < arr.length - 1 ? `1px solid ${T.border}` : 'none' }}>
+            <span style={{ fontSize: 13, color: T.text }}>{item.label}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, color: T.textSec }}>{item.value}</span>
+              <Badge color={item.ok ? T.green : item.warn ? T.orange : T.red}>{item.ok ? 'OK' : item.warn ? 'Warn' : 'None'}</Badge>
+            </div>
+          </div>
+        ))}
+      </AdminCard>
+      <AdminCard>
+        <EmptyState icon={Shield} title="Upgrade security with Firebase" desc="Enable Firebase Authentication, Firestore rules, and App Check to protect your admin panel with enterprise-grade security." />
+      </AdminCard>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INTEGRATIONS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function IntegrationsPanel() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <AdminCard title="Firebase" subtitle="Connected Firebase project" right={<Badge color={T.orange}>Partial</Badge>}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {[
+            { label: 'Project ID', value: 'mushi-qr-pro', ok: true, warn: false },
+            { label: 'Authentication', value: 'Configured (inactive)', ok: false, warn: true },
+            { label: 'Firestore', value: 'Not enabled', ok: false, warn: true },
+            { label: 'Cloud Storage', value: 'Not configured', ok: false, warn: true },
+            { label: 'Analytics', value: 'Not configured', ok: false, warn: true },
+          ].map((item, i, arr) => (
+            <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 0', borderBottom: i < arr.length - 1 ? `1px solid ${T.border}` : 'none' }}>
+              <span style={{ fontSize: 13, color: T.text }}>{item.label}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 11, color: T.textSec }}>{item.value}</span>
+                <Badge color={item.ok ? T.green : item.warn ? T.orange : T.textMut}>{item.ok ? 'Ready' : item.warn ? 'Pending' : 'Off'}</Badge>
+              </div>
+            </div>
+          ))}
+          <div style={{ paddingTop: 14 }}>
+            <a href="https://console.firebase.google.com/project/mushi-qr-pro" target="_blank" rel="noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: T.blue, textDecoration: 'none', fontWeight: 600 }}>
+              Open Firebase Console <ExternalLink size={12} />
+            </a>
+          </div>
+        </div>
+      </AdminCard>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 14 }}>
+        {[
+          { name: 'Firestore', icon: Database, desc: 'Cloud data storage', color: T.orange, status: 'Pending' },
+          { name: 'Firebase Auth', icon: Lock, desc: 'User authentication', color: T.blue, status: 'Configured' },
+          { name: 'Firebase Storage', icon: HardDrive, desc: 'File & image storage', color: T.purple, status: 'Pending' },
+          { name: 'Analytics', icon: BarChart3, desc: 'Usage insights', color: T.green, status: 'Pending' },
+        ].map(int => (
+          <AdminCard key={int.name}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ width: 42, height: 42, borderRadius: T.r.md, background: `${int.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <int.icon size={19} color={int.color} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 2 }}>{int.name}</div>
+                <div style={{ fontSize: 11, color: T.textSec }}>{int.desc}</div>
+              </div>
+              <Badge color={int.status === 'Configured' ? T.green : T.orange}>{int.status}</Badge>
+            </div>
+          </AdminCard>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DEVELOPER PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function DeveloperPanel() {
+  const [copied, setCopied] = useState('');
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('qrgen_'));
+
+  const copyVal = key => {
+    navigator.clipboard?.writeText(localStorage.getItem(key) || '');
+    setCopied(key); setTimeout(() => setCopied(''), 2000);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 14 }}>
+        {[
+          { label: 'App Version',  value: '1.1.0' },
+          { label: 'Build Mode',   value: (typeof import.meta !== 'undefined' && import.meta.env && typeof import.meta.env.MODE === 'string') ? import.meta.env.MODE : 'production' },
+          { label: 'Storage Keys', value: keys.length.toString() },
+          { label: 'Base URL',     value: String(location.origin) },
+        ].map(item => (
+          <AdminCard key={item.label}>
+            <div style={{ fontSize: 10, color: T.textMut, textTransform: 'uppercase', fontWeight: 800, marginBottom: 6, letterSpacing: '0.5px' }}>{item.label}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: T.text, wordBreak: 'break-all', fontFamily: 'monospace' }}>{item.value}</div>
+          </AdminCard>
+        ))}
+      </div>
+
+      <AdminCard title="localStorage Keys" subtitle={`${keys.length} app data keys`} noPadding>
+        {keys.length === 0 ? (
+          <EmptyState icon={Database} title="No data keys" desc="Keys appear here as you use the app." />
+        ) : (
+          <div>
+            {keys.map(key => {
+              const size = ((localStorage.getItem(key) || '').length + key.length) * 2;
+              return (
+                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderBottom: `1px solid ${T.border}` }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, color: T.text, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{key}</div>
+                    <div style={{ fontSize: 10, color: T.textMut }}>{fmtBytes(size)}</div>
+                  </div>
+                  <button onClick={() => copyVal(key)} style={{ background: 'none', border: 'none', color: copied === key ? T.green : T.textSec, cursor: 'pointer', padding: 4, display: 'flex' }}>
+                    {copied === key ? <Check size={13} /> : <Copy size={13} />}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </AdminCard>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SIMPLE EMPTY-STATE PANELS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function UsersPanel() {
+  return (
+    <AdminCard>
+      <EmptyState icon={Users} title="User Management" desc="Connect Firebase Authentication to view registered users, manage accounts, send email invites, and assign roles. All user data syncs from Firestore in real-time."
+        action={
+          <a href="https://console.firebase.google.com/project/mushi-qr-pro/authentication" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+            <Btn variant="ghost" icon={<ExternalLink size={13} />}>Open Firebase Auth Console</Btn>
+          </a>
+        }
+      />
+    </AdminCard>
+  );
+}
+
+function SubscriptionsPanel() {
+  const plans = [
+    { name: 'Free',    price: '$0',   color: T.textSec, features: ['5 QR codes / day', 'Basic templates', 'PNG export'] },
+    { name: 'Pro',     price: '$4.99', color: T.purple,  features: ['Unlimited QR codes', 'All templates', 'SVG & PDF export', 'Batch generation'] },
+    { name: 'Business',price: '$12.99',color: T.accent,  features: ['Everything in Pro', 'Team collaboration', 'Analytics', 'Priority support', 'API access'] },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ background: `${T.orange}0c`, border: `1px solid ${T.orange}2a`, borderRadius: T.r.md, padding: '11px 15px', display: 'flex', gap: 10, alignItems: 'center' }}>
+        <Info size={14} color={T.orange} />
+        <span style={{ fontSize: 12, color: T.textSec }}>Subscription management is a plan scaffold. Live billing requires Stripe + Firebase integration.</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+        {plans.map(plan => (
+          <AdminCard key={plan.name} style={{ border: `1px solid ${plan.color}33` }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <Badge color={plan.color}>{plan.name}</Badge>
+                <div style={{ fontSize: 26, fontWeight: 900, color: plan.color, marginTop: 8 }}>{plan.price}<span style={{ fontSize: 12, color: T.textSec, fontWeight: 500 }}>/mo</span></div>
+              </div>
+              {plan.features.map(f => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <Check size={12} color={plan.color} />
+                  <span style={{ fontSize: 12, color: T.textSec }}>{f}</span>
+                </div>
+              ))}
+            </div>
+          </AdminCard>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CategoriesPanel() {
+  const cats = [...new Set((QR_TEMPLATES || []).map(t => t.category))];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <AdminCard title="Built-in Categories" subtitle="Derived from QR_TEMPLATES array">
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {cats.map(c => (
+            <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: T.purple }} />
+              <span style={{ fontSize: 12, color: T.text, fontWeight: 600 }}>{c}</span>
+              <Badge color={T.textSec}>{(QR_TEMPLATES || []).filter(t => t.category === c).length}</Badge>
+            </div>
+          ))}
+        </div>
+      </AdminCard>
+      <AdminCard>
+        <EmptyState icon={Grid} title="Custom Category Manager" desc="Create and reorder categories with icons and color labels. Drag-and-drop ordering and Firestore persistence coming with backend integration." />
+      </AdminCard>
+    </div>
+  );
+}
+
+function BulkPanel({ history }) {
+  const batches = (history || []).filter(h => h.isBatch);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <StatCard icon={Package} label="Batch Operations Logged" value={batches.length} color={T.orange} trendLabel="all time" />
+      <AdminCard title="Batch History" noPadding>
+        {batches.length === 0 ? (
+          <EmptyState icon={Package} title="No batch operations yet" desc="Bulk QR generation sessions will be tracked here automatically." />
+        ) : (
+          <div>
+            {batches.slice(0, 20).map((b, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', borderBottom: `1px solid ${T.border}` }}>
+                <div style={{ width: 34, height: 34, borderRadius: T.r.sm, background: `${T.orange}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Package size={15} color={T.orange} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Batch Job</div>
+                  <div style={{ fontSize: 11, color: T.textSec }}>{timeAgo(b.timestamp)}</div>
+                </div>
+                <Badge color={T.orange}>Batch</Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </AdminCard>
+    </div>
+  );
+}
+
+function SupportPanel() {
+  return (
+    <AdminCard>
+      <EmptyState icon={HelpCircle} title="Support & Tickets" desc="A built-in ticketing system for user support, bug reports, and feature requests. Requires backend integration with your preferred help desk provider."
+        action={
+          <a href="mailto:support@mushiqr.pro" style={{ textDecoration: 'none' }}>
+            <Btn variant="ghost" icon={<Mail size={13} />}>Email Support</Btn>
+          </a>
+        }
+      />
+    </AdminCard>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN ADMIN PANEL — ROOT COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+export default function AdminPanel() {
+  const [section, setSection]     = useState('dashboard');
+  const [isMobile, setIsMobile]   = useState(window.innerWidth < 900);
+  const [sidebarOpen, setSidebar] = useState(false);
+
+  const [stats, setStats]                   = useState(null);
+  const [chartData, setChartData]           = useState([]);
+  const [history, setHistory]               = useState([]);
+  const [appSettings, setAppSettings]       = useState(null);
+  const [featureFlags, setFeatureFlags]     = useState(null);
+  const [cloudTemplates, setCloudTemplates] = useState([]);
+  const [announcement, setAnnouncement]     = useState(null);
+  const [remoteConfig, setRemoteConfig]     = useState({});
+  const [auditLog, setAuditLog]             = useState([]);
+  const [loading, setLoading]               = useState(true);
+
+  useEffect(() => {
+    async function init() {
+      try {
+        const [s, c, h, as_, ff, ct, ann, rc, al] = await Promise.all([
+          DS.getAppStats(), DS.getActivityChartData(7), DS.getHistory(100),
+          DS.getAppSettings(), DS.getFeatureFlags(), DS.getCloudTemplates(),
+          DS.getAnnouncement(), DS.getRemoteConfig(), DS.getAuditLog(100),
+        ]);
+        setStats(s); setChartData(c); setHistory(h);
+        setAppSettings(as_); setFeatureFlags(ff); setCloudTemplates(ct);
+        setAnnouncement(ann); setRemoteConfig(rc); setAuditLog(al);
+      } finally { setLoading(false); }
+    }
+    init();
+    const onResize = () => setIsMobile(window.innerWidth < 900);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const refreshTemplates = async () => setCloudTemplates(await DS.getCloudTemplates());
+  const refreshAudit     = async () => setAuditLog(await DS.getAuditLog(100));
+
+  const saveSetting = async updater => {
+    const next = updater(appSettings);
+    await DS.saveAppSettings(next);
+    setAppSettings(next);
+    await refreshAudit();
+  };
+
+  const PANELS = {
+    dashboard:       <DashboardPanel stats={stats} chartData={chartData} history={history} onNavigate={setSection} />,
+    users:           <UsersPanel />,
+    subscriptions:   <SubscriptionsPanel />,
+    analytics:       <AnalyticsPanel chartData={chartData} stats={stats} />,
+    reports:         <ReportsPanel history={history} />,
+    templates:       <TemplatesPanel cloudTemplates={cloudTemplates} onRefresh={refreshTemplates} />,
+    'qr-barcode':    <QRBarcodePanel stats={stats} history={history} />,
+    categories:      <CategoriesPanel />,
+    bulk:            <BulkPanel history={history} />,
+    'app-settings':  <AppSettingsPanel settings={appSettings} onSave={async s => { await DS.saveAppSettings(s); setAppSettings(s); await refreshAudit(); }} />,
+    branding:        <BrandingPanel settings={appSettings} onSave={async s => { await DS.saveAppSettings(s); setAppSettings(s); await refreshAudit(); }} />,
+    'remote-config': <RemoteConfigPanel config={remoteConfig} onSave={async c => { await DS.saveRemoteConfig(c); setRemoteConfig(c); await refreshAudit(); }} />,
+    'feature-flags': <FeatureFlagsPanel flags={featureFlags} onSave={async f => { await DS.saveFeatureFlags(f); setFeatureFlags(f); await refreshAudit(); }} />,
+    maintenance:     <MaintenancePanel settings={appSettings} onSave={async s => { await DS.saveAppSettings(s); setAppSettings(s); await refreshAudit(); }} />,
+    announcements:   <AnnouncementsPanel announcement={announcement} onSave={async a => { await DS.saveAnnouncement(a); setAnnouncement(a); await refreshAudit(); }} />,
+    'admin-users':   <AdminUsersPanel />,
+    roles:           <RolesPanel />,
+    'activity-logs': <ActivityLogsPanel history={history} />,
+    security:        <SecurityPanel />,
+    backups:         <BackupsPanel />,
+    'audit-logs':    <AuditLogsPanel log={auditLog} />,
+    'system-health': <SystemHealthPanel stats={stats} />,
+    integrations:    <IntegrationsPanel />,
+    developer:       <DeveloperPanel />,
+    support:         <SupportPanel />,
+  };
+
+  return (
+    <>
+      <style>{`
+        @keyframes adSpin { to { transform: rotate(360deg); } }
+        .ad-scroll::-webkit-scrollbar { width: 4px; }
+        .ad-scroll::-webkit-scrollbar-track { background: transparent; }
+        .ad-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+        .ad-sidebar::-webkit-scrollbar { display: none; }
+      `}</style>
+
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        display: 'flex', background: T.bg, overflow: 'hidden',
+        fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif",
+        color: T.text, fontSize: 14,
+      }}>
+        {/* Mobile overlay */}
+        {isMobile && sidebarOpen && (
+          <div onClick={() => setSidebar(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 15, backdropFilter: 'blur(4px)' }} />
+        )}
+
+        <Sidebar active={section} setActive={s => { setSection(s); if (isMobile) setSidebar(false); }} isMobile={isMobile} open={isMobile ? sidebarOpen : true} />
+
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginLeft: isMobile ? 0 : 240 }}>
+          <Header section={section} onMenuToggle={() => setSidebar(o => !o)} />
+
+          <main className="ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '14px 12px' : '24px 28px' }}>
+            {loading ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 14 }}>
+                <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
+                <span style={{ fontSize: 14, color: T.textSec }}>Loading admin data...</span>
+              </div>
+            ) : (
+              PANELS[section] || PANELS.dashboard
+            )}
+          </main>
+        </div>
+      </div>
+    </>
   );
 }

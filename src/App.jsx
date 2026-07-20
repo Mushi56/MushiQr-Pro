@@ -78,7 +78,6 @@ import BarcodePage from './components/BarcodePage';
 import ScannerGunPage from './components/ScannerGunPage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
-import AdminPanel from './components/AdminPanel';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -891,7 +890,6 @@ export default function App() {
     if (path === '/batch') return 'batch';
     if (path === '/barcode') return 'barcode';
     if (path === '/scanner-gun') return 'scanner-gun';
-    if (path === '/admin') return 'admin';
     return 'home';
   };
 
@@ -3285,7 +3283,7 @@ export default function App() {
       {/* ── Header ── */}
       <header 
         className={`app-header ${['home', 'saved', 'history', 'settings'].includes(activePage) ? 'header-home' : ''}`}
-        style={{ display: ['barcode', 'admin'].includes(activePage) ? 'none' : 'flex' }}
+        style={{ display: activePage === 'barcode' ? 'none' : 'flex' }}
       >
         <div className="app-logo">
           {activePage === 'scanner' && (
@@ -3652,6 +3650,10 @@ export default function App() {
                       </button>
                       <button className="menu-link-btn" onClick={() => window.location.hash = '#/terms'}>
                         <FileIcon size={16} /> Terms of Service
+                      </button>
+                      <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
+                      <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/admin'; }} style={{ color: '#D60036', fontWeight: 700 }}>
+                        <Settings size={16} /> Super Admin Panel
                       </button>
                     </div>
                   </div>
@@ -5167,8 +5169,6 @@ export default function App() {
           <ScannerGunPage onNavigate={navigateTo} />
         ) : activePage === 'settings' ? (
           <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
-        ) : activePage === 'admin' ? (
-          <AdminPanel />
         ) : (
           <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} initialFilter={historyFilter} />
         )}

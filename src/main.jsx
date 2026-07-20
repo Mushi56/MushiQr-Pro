@@ -6,6 +6,7 @@ import About from './About.jsx';
 import PrivacyPolicy from './PrivacyPolicy.jsx';
 import Terms from './Terms.jsx';
 import Footer from './Footer.jsx';
+import AdminPanel from './components/AdminPanel.jsx';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(
@@ -21,10 +22,11 @@ createRoot(document.getElementById('root')).render(
         <Route path="/batch" element={<App />} />
         <Route path="/barcode" element={<App />} />
         <Route path="/scanner-gun" element={<App />} />
-        <Route path="/admin" element={<App />} />
         <Route path="/about" element={<About />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/admin/*" element={<AdminPanel />} />
       </Routes>
     </HashRouter>
   </StrictMode>,
