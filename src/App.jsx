@@ -67,7 +67,7 @@ import { DotStyleSelector, EyeStyleSelector } from './components/StyleSelectors'
 import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData, constrainToSafeZone } from './utils/qrEngine';
 import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from './utils/exportUtils';
 import { saveToHistory, getSaved, saveToSaved, getPreferences, savePreferences } from './utils/storage';
-import { QR_TEMPLATES } from './utils/qrTemplates';
+import { QR_TEMPLATES, getAllTemplates, getUserTemplates } from './utils/qrTemplates';
 import QRScanner from './components/QRScanner';
 import HistoryPage from './components/HistoryPage';
 import HomePage from './components/HomePage';
@@ -990,6 +990,40 @@ export default function App() {
   }, [theme]);
 
 
+  // ── Admin Settings (read from Super Admin Panel) ──────────────────────────
+  const [adminSettings, setAdminSettings]   = useState(null);
+  const [adminAnnouncement, setAdminAnnouncement] = useState(null);
+  const [featureFlags, setFeatureFlags]     = useState(null);
+  const [customTemplates, setCustomTemplates] = useState(() => getUserTemplates());
+
+  useEffect(() => {
+    // Load admin settings on mount
+    const _read = (key) => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
+    const settings   = _read('qrgen_app_settings');
+    const announce   = _read('qrgen_announcement');
+    const flags      = _read('qrgen_feature_flags');
+    if (settings)  setAdminSettings(settings);
+    if (announce)  setAdminAnnouncement(announce);
+    if (flags)     setFeatureFlags(flags);
+    setCustomTemplates(getUserTemplates());
+    // Update document title from admin settings
+    if (settings?.appName) document.title = settings.appName;
+    // Listen for admin changes (in case admin panel is open in another tab)
+    const onStorage = (e) => {
+      if (e.key === 'qrgen_app_settings')  { const v = _read('qrgen_app_settings'); if (v) { setAdminSettings(v); if (v.appName) document.title = v.appName; } }
+      if (e.key === 'qrgen_announcement')  { setAdminAnnouncement(_read('qrgen_announcement')); }
+      if (e.key === 'qrgen_feature_flags') { setFeatureFlags(_read('qrgen_feature_flags')); }
+      if (e.key === 'qrgen_cloud_templates') { setCustomTemplates(getUserTemplates()); }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  // Maintenance mode flag (used in render)
+  const isMaintenanceMode = !!adminSettings?.maintenanceMode;
+
+  // ─── All templates (built-in + custom) ─────────────────────────────────────
+  const ALL_TEMPLATES = [...QR_TEMPLATES, ...customTemplates];
 
   // ── QR Content ──
   const [qrType, setQrType] = useState(() => location.state?.qrType || QR_TYPES.URL);
@@ -3280,6 +3314,38 @@ export default function App() {
 
   return (
     <div className="app redesigned">
+      {/* ── Maintenance Mode Overlay ── */}
+      {isMaintenanceMode && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          background: 'linear-gradient(135deg, #0a0a0f 0%, #12121c 100%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24,
+          fontFamily: "'Outfit','Inter',sans-serif", color: '#fff', textAlign: 'center', padding: 32,
+        }}>
+          <div style={{ fontSize: 56 }}>🔧</div>
+          <div style={{ fontSize: 22, fontWeight: 800 }}>Under Maintenance</div>
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', maxWidth: 380, lineHeight: 1.7 }}>
+            {adminSettings?.maintenanceMessage || 'We are performing scheduled maintenance. Please check back soon.'}
+          </div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Mushi QR Pro</div>
+        </div>
+      )}
+      {/* ── Admin Announcement Banner ── */}
+      {adminAnnouncement?.active && adminAnnouncement?.message && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9000,
+          background: adminAnnouncement.type === 'error' ? '#D60036' :
+                      adminAnnouncement.type === 'warning' ? '#f59e0b' :
+                      adminAnnouncement.type === 'success' ? '#10b981' : '#3b82f6',
+          color: '#fff', padding: '10px 20px', fontSize: 13, fontWeight: 600,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+          fontFamily: "'Outfit','Inter',sans-serif",
+        }}>
+          <span>{adminAnnouncement.title && <strong>{adminAnnouncement.title}: </strong>}{adminAnnouncement.message}</span>
+          <button onClick={() => setAdminAnnouncement(null)}
+            style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: '0 4px' }}>✕</button>
+        </div>
+      )}
       {/* ── Header ── */}
       <header 
         className={`app-header ${['home', 'saved', 'history', 'settings'].includes(activePage) ? 'header-home' : ''}`}
@@ -3758,7 +3824,8 @@ export default function App() {
                     
                     {/* Category Selector Bar (Swipeable) */}
                     <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', borderBottom: '1px solid var(--border-color)' }}>
-                      {['Hot', 'Social', 'Wifi', 'Event'].map(cat => {
+                      {/* Category tabs — include 'Custom' if user has custom templates */}
+                      {[...['Hot', 'Social', 'Wifi', 'Event'], ...(customTemplates.length > 0 ? ['Custom'] : [])].map(cat => {
                         const isSelected = templateCategory === cat;
                         const label = cat === 'Hot' ? 'Hot 🔥' : cat;
                         return (
@@ -3841,7 +3908,7 @@ export default function App() {
                         </span>
                       </button>
 
-                      {QR_TEMPLATES.filter(t => t.category === templateCategory).map(tpl => {
+                      {ALL_TEMPLATES.filter(t => t.category === templateCategory).map(tpl => {
                         const isSelected = selectedTemplate?.id === tpl.id;
                         return (
                           <button

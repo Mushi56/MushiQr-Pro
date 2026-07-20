@@ -648,65 +648,454 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE EDITOR — CANVAS PREVIEW
+// ═══════════════════════════════════════════════════════════════════════════
+
+const DEFAULT_TPL = {
+  name: '', category: 'Social',
+  bgType: 'gradient', bgColor1: '#1a1a2e', bgColor2: '#e94560',
+  gradientDir: 'diagonal', cornerRadius: 0,
+  qrX: 0.5, qrY: 0.5, qrSize: 0.5,
+  qrColor: '#ffffff', bgQrColor: '#000000', bgTransparent: false,
+  eyeColor: '#ffffff', syncEyes: true,
+  dotStyle: 'square', eyeStyle: 'square',
+};
+
+function TemplateCanvas({ form, size = 280 }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const c = ref.current; if (!c) return;
+    const ctx = c.getContext('2d');
+    const s = size;
+    ctx.clearRect(0, 0, s, s);
+
+    // ── Background ──
+    const cr = Math.min(form.cornerRadius || 0, s / 2);
+    const fillPath = () => { ctx.beginPath(); ctx.roundRect(0, 0, s, s, cr); };
+
+    if (form.bgType === 'transparent') {
+      const cs = 12;
+      for (let x = 0; x < s; x += cs)
+        for (let y = 0; y < s; y += cs) {
+          ctx.fillStyle = (Math.floor(x/cs) + Math.floor(y/cs)) % 2 === 0 ? '#2a2a3a' : '#1a1a2a';
+          ctx.fillRect(x, y, cs, cs);
+        }
+    } else if (form.bgType === 'gradient') {
+      let g;
+      const c1 = form.bgColor1 || '#1a1a2e', c2 = form.bgColor2 || '#e94560';
+      if (form.gradientDir === 'radial') g = ctx.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+      else if (form.gradientDir === 'horizontal') g = ctx.createLinearGradient(0,0,s,0);
+      else if (form.gradientDir === 'vertical') g = ctx.createLinearGradient(0,0,0,s);
+      else g = ctx.createLinearGradient(0,0,s,s);
+      g.addColorStop(0, c1); g.addColorStop(1, c2);
+      ctx.fillStyle = g;
+      if (cr > 0) { fillPath(); ctx.fill(); } else ctx.fillRect(0,0,s,s);
+    } else {
+      ctx.fillStyle = form.bgColor1 || '#ffffff';
+      if (cr > 0) { fillPath(); ctx.fill(); } else ctx.fillRect(0,0,s,s);
+    }
+
+    // ── QR area ──
+    const qsz = Math.max(0.1, Math.min(0.92, form.qrSize || 0.5)) * s;
+    const qx  = Math.max(0, Math.min(s - qsz, (form.qrX || 0.5) * s - qsz / 2));
+    const qy  = Math.max(0, Math.min(s - qsz, (form.qrY || 0.5) * s - qsz / 2));
+    const bgQ = form.bgTransparent ? null : (form.bgQrColor || '#000000');
+    if (bgQ) { ctx.fillStyle = bgQ; ctx.fillRect(qx, qy, qsz, qsz); }
+
+    // QR dot grid (7×7 simplified)
+    const cells = 9;
+    const cs2 = qsz / cells;
+    const qc  = form.qrColor || '#ffffff';
+    const PATTERN = [
+      [1,1,1,1,1,1,1,0,1],[1,0,0,0,0,0,1,1,0],[1,0,1,1,1,0,1,0,1],
+      [1,0,1,1,1,0,1,0,0],[1,0,1,1,1,0,1,1,1],[1,0,0,0,0,0,1,0,1],
+      [1,1,1,1,1,1,1,0,0],[0,1,0,1,0,1,0,0,1],[1,0,1,0,1,0,1,1,0],
+    ];
+    ctx.fillStyle = qc;
+    PATTERN.forEach((row, r) => row.forEach((cell, c) => {
+      if (!cell) return;
+      const px = qx + c * cs2, py = qy + r * cs2;
+      if (form.dotStyle === 'dots') {
+        ctx.beginPath(); ctx.arc(px+cs2/2, py+cs2/2, cs2*0.38, 0, Math.PI*2); ctx.fill();
+      } else if (form.dotStyle === 'rounded' || form.dotStyle === 'extra-rounded') {
+        ctx.beginPath(); ctx.roundRect(px+0.5, py+0.5, cs2-1, cs2-1, cs2*0.35); ctx.fill();
+      } else {
+        ctx.fillRect(px+0.5, py+0.5, cs2-1, cs2-1);
+      }
+    }));
+
+    // Eye markers (3×3 corners)
+    const ec = form.syncEyes ? qc : (form.eyeColor || qc);
+    const drawEye = (ex, ey) => {
+      const ew = cs2 * 3;
+      ctx.fillStyle = bgQ || 'transparent';
+      if (bgQ) ctx.fillRect(ex, ey, ew, ew);
+      ctx.strokeStyle = ec; ctx.lineWidth = cs2 * 0.6;
+      if (form.eyeStyle === 'circle') {
+        ctx.beginPath(); ctx.arc(ex+ew/2, ey+ew/2, ew/2-cs2*0.3, 0, Math.PI*2); ctx.stroke();
+      } else if (form.eyeStyle === 'rounded') {
+        ctx.beginPath(); ctx.roundRect(ex+cs2*0.3, ey+cs2*0.3, ew-cs2*0.6, ew-cs2*0.6, cs2*0.6); ctx.stroke();
+      } else {
+        ctx.strokeRect(ex+cs2*0.3, ey+cs2*0.3, ew-cs2*0.6, ew-cs2*0.6);
+      }
+      ctx.fillStyle = ec;
+      const id = cs2 * 1.1, io = (ew - id) / 2;
+      if (form.eyeStyle === 'circle') {
+        ctx.beginPath(); ctx.arc(ex+ew/2, ey+ew/2, id/2, 0, Math.PI*2); ctx.fill();
+      } else {
+        ctx.fillRect(ex+io, ey+io, id, id);
+      }
+    };
+    drawEye(qx, qy);
+    drawEye(qx + qsz - cs2*3, qy);
+    drawEye(qx, qy + qsz - cs2*3);
+
+    // Position indicator
+    ctx.strokeStyle = 'rgba(214,0,54,0.7)'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+    ctx.strokeRect(qx, qy, qsz, qsz); ctx.setLineDash([]);
+
+    // Center dot
+    ctx.fillStyle = '#D60036'; ctx.beginPath();
+    ctx.arc((form.qrX||0.5)*s, (form.qrY||0.5)*s, 3, 0, Math.PI*2); ctx.fill();
+
+  }, [form, size]);
+
+  return <canvas ref={ref} width={size} height={size} style={{ borderRadius: 10, display: 'block', width: '100%', aspectRatio: '1' }} />;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEMPLATE EDITOR MODAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+const DOT_STYLES   = ['square','rounded','dots','extra-rounded','classy','classy-rounded'];
+const EYE_STYLES   = ['square','rounded','circle','leaf','extra-rounded'];
+const GRAD_DIRS    = [{ v:'diagonal', l:'↘ Diagonal' },{ v:'horizontal', l:'→ Horizontal' },{ v:'vertical', l:'↓ Vertical' },{ v:'radial', l:'◎ Radial' }];
+const TPL_CATS     = ['Social','Business','Hot','Creative','Minimal','Event','Retail','Custom'];
+
+function ColorRow({ label, value, onChange }) {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+      <label style={{ fontSize:11, fontWeight:700, color:T.textSec, minWidth:90, flexShrink:0 }}>{label}</label>
+      <div style={{ display:'flex', alignItems:'center', gap:8, flex:1 }}>
+        <input type="color" value={value || '#ffffff'} onChange={e => onChange(e.target.value)}
+          style={{ width:34, height:28, border:`1px solid ${T.border}`, borderRadius:6, cursor:'pointer', background:'none', padding:2, flexShrink:0 }} />
+        <input type="text" value={value || ''} onChange={e => onChange(e.target.value)}
+          style={{ flex:1, minWidth:0, background:T.bgEl, border:`1px solid ${T.border}`, borderRadius:6, color:T.text, fontSize:12, padding:'5px 8px', outline:'none', fontFamily:'monospace' }} />
+      </div>
+    </div>
+  );
+}
+
+function SliderRow({ label, value, min, max, step=0.01, onChange, fmt }) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+      <label style={{ fontSize:11, fontWeight:700, color:T.textSec, minWidth:90, flexShrink:0 }}>{label}</label>
+      <input type="range" min={min} max={max} step={step} value={value}
+        onChange={e => onChange(parseFloat(e.target.value))}
+        style={{ flex:1, accentColor:T.accent, cursor:'pointer' }} />
+      <span style={{ fontSize:11, fontWeight:700, color:T.text, minWidth:40, textAlign:'right', fontFamily:'monospace' }}>
+        {fmt ? fmt(value) : value.toFixed(2)}
+      </span>
+    </div>
+  );
+}
+
+function BtnGroup({ options, value, onChange }) {
+  return (
+    <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
+      {options.map(o => {
+        const v = typeof o === 'string' ? o : o.v;
+        const l = typeof o === 'string' ? o : o.l;
+        const active = value === v;
+        return (
+          <button key={v} onClick={() => onChange(v)} style={{
+            padding:'5px 10px', fontSize:11, borderRadius:6, border:`1px solid ${active ? T.accent : T.border}`,
+            background: active ? T.accentLow : 'transparent',
+            color: active ? T.accent : T.textSec, cursor:'pointer', fontFamily:'inherit', fontWeight: active ? 700 : 500,
+            transition:'all 0.12s',
+          }}>{l}</button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TemplateEditorModal({ form, setForm, editId, onSave, onClose, saving }) {
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(6px)', display:'flex', alignItems:'stretch' }}>
+      {/* Modal box */}
+      <div style={{ margin:'auto', width:'100%', maxWidth:900, maxHeight:'96vh', background:T.bgCard, borderRadius:16, border:`1px solid ${T.border}`, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+
+        {/* Header */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', borderBottom:`1px solid ${T.border}`, flexShrink:0 }}>
+          <div style={{ fontSize:15, fontWeight:800, color:T.text }}>{editId ? '✏️ Edit Template' : '✨ New Template'}</div>
+          <div style={{ display:'flex', gap:8 }}>
+            <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
+            <Btn onClick={onSave} disabled={saving || !form.name?.trim()} icon={<Check size={13} />}>
+              {saving ? 'Saving…' : 'Save Template'}
+            </Btn>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ display:'flex', flex:1, overflow:'hidden' }}>
+
+          {/* Left: Preview */}
+          <div style={{ width:300, minWidth:280, borderRight:`1px solid ${T.border}`, padding:20, display:'flex', flexDirection:'column', gap:16, flexShrink:0, background:T.bgEl }}>
+            <div style={{ fontSize:11, fontWeight:800, color:T.textMut, textTransform:'uppercase', letterSpacing:'0.6px' }}>Live Preview</div>
+            <div style={{ borderRadius:12, overflow:'hidden', border:`1px solid ${T.border}` }}>
+              <TemplateCanvas form={form} size={260} />
+            </div>
+            <div style={{ fontSize:10, color:T.textMut, textAlign:'center', lineHeight:1.5 }}>
+              Red dashes = QR bounds · Red dot = center point
+            </div>
+            {/* Quick info */}
+            <div style={{ background:T.bgCard, borderRadius:8, padding:12, border:`1px solid ${T.border}` }}>
+              <div style={{ fontSize:11, fontWeight:700, color:T.text, marginBottom:8 }}>{form.name || 'Untitled Template'}</div>
+              {[
+                ['Category', form.category],
+                ['Position', `X ${(form.qrX*100).toFixed(0)}% · Y ${(form.qrY*100).toFixed(0)}%`],
+                ['QR Size', `${(form.qrSize*100).toFixed(0)}%`],
+                ['Dot Style', form.dotStyle],
+                ['Eye Style', form.eyeStyle],
+              ].map(([k,v]) => (
+                <div key={k} style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+                  <span style={{ fontSize:10, color:T.textMut }}>{k}</span>
+                  <span style={{ fontSize:10, color:T.textSec, textTransform:'capitalize' }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: Controls */}
+          <div className="ad-scroll" style={{ flex:1, overflowY:'auto', padding:'20px', display:'flex', flexDirection:'column', gap:20 }}>
+
+            {/* Basic Info */}
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              <div style={{ fontSize:12, fontWeight:800, color:T.textMut, textTransform:'uppercase', letterSpacing:'0.5px' }}>Basic Info</div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                <FormInput label="Template Name" value={form.name} onChange={v => set('name', v)} placeholder="e.g. Dark Blue Gradient" />
+                <FormSelect label="Category" value={form.category} onChange={v => set('category', v)} options={TPL_CATS.map(c => ({ value:c, label:c }))} />
+              </div>
+            </div>
+
+            {/* Background */}
+            <div style={{ display:'flex', flexDirection:'column', gap:12, paddingTop:16, borderTop:`1px solid ${T.border}` }}>
+              <div style={{ fontSize:12, fontWeight:800, color:T.textMut, textTransform:'uppercase', letterSpacing:'0.5px' }}>Background</div>
+              <div style={{ display:'flex', gap:0, background:T.bgEl, borderRadius:8, padding:3, border:`1px solid ${T.border}`, width:'fit-content' }}>
+                {[['solid','■ Solid'],['gradient','⬛ Gradient'],['transparent','▢ Transparent']].map(([v,l]) => (
+                  <button key={v} onClick={() => set('bgType', v)} style={{
+                    padding:'6px 14px', borderRadius:6, border:'none', cursor:'pointer', fontFamily:'inherit',
+                    background: form.bgType === v ? T.accent : 'transparent',
+                    color: form.bgType === v ? '#fff' : T.textSec, fontWeight:700, fontSize:11, transition:'all 0.12s',
+                  }}>{l}</button>
+                ))}
+              </div>
+
+              {form.bgType !== 'transparent' && (
+                <ColorRow label={form.bgType === 'gradient' ? 'Color 1' : 'Background'} value={form.bgColor1} onChange={v => set('bgColor1', v)} />
+              )}
+              {form.bgType === 'gradient' && (
+                <>
+                  <ColorRow label="Color 2" value={form.bgColor2} onChange={v => set('bgColor2', v)} />
+                  <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                    <label style={{ fontSize:11, fontWeight:700, color:T.textSec, minWidth:90, flexShrink:0 }}>Direction</label>
+                    <BtnGroup options={GRAD_DIRS} value={form.gradientDir} onChange={v => set('gradientDir', v)} />
+                  </div>
+                </>
+              )}
+              <SliderRow label="Corner Radius" value={form.cornerRadius||0} min={0} max={80} step={1} onChange={v => set('cornerRadius', v)} fmt={v => `${v}px`} />
+            </div>
+
+            {/* QR Position */}
+            <div style={{ display:'flex', flexDirection:'column', gap:12, paddingTop:16, borderTop:`1px solid ${T.border}` }}>
+              <div style={{ fontSize:12, fontWeight:800, color:T.textMut, textTransform:'uppercase', letterSpacing:'0.5px' }}>QR Position &amp; Size</div>
+              <SliderRow label="Center X" value={form.qrX} min={0.05} max={0.95} onChange={v => set('qrX', v)} fmt={v => `${(v*100).toFixed(0)}%`} />
+              <SliderRow label="Center Y" value={form.qrY} min={0.05} max={0.95} onChange={v => set('qrY', v)} fmt={v => `${(v*100).toFixed(0)}%`} />
+              <SliderRow label="QR Size" value={form.qrSize} min={0.1} max={0.92} onChange={v => set('qrSize', v)} fmt={v => `${(v*100).toFixed(0)}%`} />
+            </div>
+
+            {/* QR Colors */}
+            <div style={{ display:'flex', flexDirection:'column', gap:12, paddingTop:16, borderTop:`1px solid ${T.border}` }}>
+              <div style={{ fontSize:12, fontWeight:800, color:T.textMut, textTransform:'uppercase', letterSpacing:'0.5px' }}>QR Colors</div>
+              <ColorRow label="QR Color" value={form.qrColor} onChange={v => set('qrColor', v)} />
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <label style={{ fontSize:11, fontWeight:700, color:T.textSec, minWidth:90, flexShrink:0 }}>QR Background</label>
+                <button onClick={() => set('bgTransparent', !form.bgTransparent)} style={{
+                  display:'flex', alignItems:'center', gap:6, background:'none', border:`1px solid ${T.border}`,
+                  borderRadius:6, color: form.bgTransparent ? T.accent : T.textSec, cursor:'pointer', padding:'5px 10px', fontSize:11, fontWeight:700, fontFamily:'inherit',
+                }}>
+                  {form.bgTransparent ? '✓ Transparent' : '□ Transparent'}
+                </button>
+              </div>
+              {!form.bgTransparent && (
+                <ColorRow label="QR BG Color" value={form.bgQrColor} onChange={v => set('bgQrColor', v)} />
+              )}
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <label style={{ fontSize:11, fontWeight:700, color:T.textSec, minWidth:90, flexShrink:0 }}>Eye Color</label>
+                <button onClick={() => set('syncEyes', !form.syncEyes)} style={{
+                  display:'flex', alignItems:'center', gap:6, background:'none', border:`1px solid ${T.border}`,
+                  borderRadius:6, color: form.syncEyes ? T.green : T.textSec, cursor:'pointer', padding:'5px 10px', fontSize:11, fontWeight:700, fontFamily:'inherit',
+                }}>
+                  {form.syncEyes ? '⟳ Same as QR' : '⊙ Custom'}
+                </button>
+              </div>
+              {!form.syncEyes && (
+                <ColorRow label="Eye Color" value={form.eyeColor} onChange={v => set('eyeColor', v)} />
+              )}
+            </div>
+
+            {/* QR Style */}
+            <div style={{ display:'flex', flexDirection:'column', gap:12, paddingTop:16, borderTop:`1px solid ${T.border}` }}>
+              <div style={{ fontSize:12, fontWeight:800, color:T.textMut, textTransform:'uppercase', letterSpacing:'0.5px' }}>QR Style</div>
+              <div>
+                <div style={{ fontSize:11, fontWeight:700, color:T.textSec, marginBottom:8 }}>Dot Style</div>
+                <BtnGroup options={DOT_STYLES} value={form.dotStyle} onChange={v => set('dotStyle', v)} />
+              </div>
+              <div>
+                <div style={{ fontSize:11, fontWeight:700, color:T.textSec, marginBottom:8 }}>Eye Style</div>
+                <BtnGroup options={EYE_STYLES} value={form.eyeStyle} onChange={v => set('eyeStyle', v)} />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // TEMPLATES PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
 function TemplatesPanel({ cloudTemplates, onRefresh }) {
-  const [tab, setTab] = useState('builtin');
-  const [showForm, setShowForm] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ name: '', category: 'Social', qrSize: 0.5, qrX: 0.5, qrY: 0.5 });
-  const [saving, setSaving] = useState(false);
+  const [tab, setTab]           = useState('builtin');
+  const [editorOpen, setEditor] = useState(false);
+  const [editId, setEditId]     = useState(null);
+  const [form, setForm]         = useState({ ...DEFAULT_TPL });
+  const [saving, setSaving]     = useState(false);
 
-  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
-
-  const openAdd = () => { setForm({ name: '', category: 'Social', qrSize: 0.5, qrX: 0.5, qrY: 0.5 }); setEditId(null); setShowForm(true); };
-  const openEdit = (t) => { setForm({ name: t.name, category: t.category, qrSize: t.qrSize, qrX: t.qrX, qrY: t.qrY }); setEditId(t.id); setShowForm(true); };
-  const closeForm = () => { setShowForm(false); setEditId(null); };
-
+  const openNew = () => { setForm({ ...DEFAULT_TPL }); setEditId(null); setEditor(true); };
+  const openEdit = tpl => {
+    setForm({
+      ...DEFAULT_TPL,
+      name: tpl.name, category: tpl.category,
+      bgType: tpl.bgType || 'gradient',
+      bgColor1: tpl.bgColor1 || '#1a1a2e', bgColor2: tpl.bgColor2 || '#e94560',
+      gradientDir: tpl.gradientDir || 'diagonal', cornerRadius: tpl.cornerRadius || 0,
+      qrX: tpl.qrX || 0.5, qrY: tpl.qrY || 0.5, qrSize: tpl.qrSize || 0.5,
+      qrColor: tpl.preset?.qrColor || '#ffffff',
+      bgQrColor: tpl.preset?.bgColor || '#000000',
+      bgTransparent: !!tpl.preset?.bgTransparent,
+      eyeColor: tpl.preset?.eyeColor || '#ffffff',
+      syncEyes: tpl.preset?.syncEyes !== false,
+      dotStyle: tpl.preset?.dotStyle || 'square',
+      eyeStyle: tpl.preset?.eyeStyle || 'square',
+    });
+    setEditId(tpl.id); setEditor(true);
+  };
+  const cloneBuiltin = tpl => {
+    setForm({
+      ...DEFAULT_TPL,
+      name: tpl.name + ' (Custom)', category: tpl.category,
+      qrX: tpl.qrX, qrY: tpl.qrY, qrSize: tpl.qrSize,
+      qrColor: tpl.preset?.qrColor || '#ffffff',
+      bgQrColor: tpl.preset?.bgColor || '#ffffff',
+      bgTransparent: !!tpl.preset?.bgTransparent,
+      dotStyle: tpl.preset?.dotStyle || 'square',
+      eyeStyle: tpl.preset?.eyeStyle || 'square',
+    });
+    setEditId(null); setEditor(true); setTab('custom');
+  };
   const handleSave = async () => {
-    if (!form.name.trim()) return;
+    if (!form.name?.trim()) return;
     setSaving(true);
     try {
-      await DS.saveCloudTemplate({ ...form, id: editId || ('cloud_' + Date.now().toString(36)), updatedAt: new Date().toISOString() });
-      closeForm(); onRefresh();
+      const t = {
+        id: editId || ('custom_' + Date.now().toString(36)),
+        name: form.name.trim(), category: form.category,
+        bgType: form.bgType, bgColor1: form.bgColor1, bgColor2: form.bgColor2,
+        gradientDir: form.gradientDir, cornerRadius: form.cornerRadius,
+        qrX: form.qrX, qrY: form.qrY, qrSize: form.qrSize,
+        preset: {
+          qrColor: form.qrColor, bgColor: form.bgQrColor || '#ffffff',
+          bgTransparent: form.bgTransparent,
+          eyeColor: form.eyeColor, eyeOuterColor: form.eyeColor,
+          syncEyes: form.syncEyes,
+          dotStyle: form.dotStyle, eyeStyle: form.eyeStyle,
+        },
+        updatedAt: new Date().toISOString(),
+      };
+      await DS.saveCloudTemplate(t);
+      setEditor(false); onRefresh();
     } finally { setSaving(false); }
   };
-
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     if (!confirm('Delete this template?')) return;
     await DS.deleteCloudTemplate(id);
     onRefresh();
   };
 
-  const cats = ['Social', 'Business', 'Hot', 'Creative', 'Minimal', 'Event', 'Retail'];
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'flex', gap: 0, background: T.bgCard, borderRadius: T.r.md, padding: 4, border: `1px solid ${T.border}`, width: 'fit-content' }}>
-        {[{ id: 'builtin', label: `Built-in (${QR_TEMPLATES.length})` }, { id: 'cloud', label: `Cloud (${cloudTemplates.length})` }].map(t => (
+    <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+      {editorOpen && (
+        <TemplateEditorModal form={form} setForm={setForm} editId={editId}
+          onSave={handleSave} onClose={() => setEditor(false)} saving={saving} />
+      )}
+
+      {/* Tab bar */}
+      <div style={{ display:'flex', gap:0, background:T.bgCard, borderRadius:T.r.md, padding:4, border:`1px solid ${T.border}`, width:'fit-content' }}>
+        {[{ id:'builtin', label:`Built-in (${QR_TEMPLATES.length})` },{ id:'custom', label:`Custom (${cloudTemplates.length})` }].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            padding: '7px 18px', borderRadius: T.r.sm, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+            padding:'7px 18px', borderRadius:T.r.sm, border:'none', cursor:'pointer', fontFamily:'inherit',
             background: tab === t.id ? T.accent : 'transparent',
-            color: tab === t.id ? '#fff' : T.textSec, fontWeight: 700, fontSize: 12, transition: 'all 0.15s',
+            color: tab === t.id ? '#fff' : T.textSec, fontWeight:700, fontSize:12, transition:'all 0.15s',
           }}>{t.label}</button>
         ))}
       </div>
 
+      {/* Built-in tab */}
       {tab === 'builtin' && (
-        <AdminCard title="Built-in Templates" subtitle="Pre-installed AI-designed templates (read-only)">
+        <AdminCard title="Built-in Templates" subtitle="Pre-installed templates — view only. Clone to create an editable copy.">
           <div className="ad-template-grid">
             {QR_TEMPLATES.map(tpl => (
-              <div key={tpl.id} style={{ background: T.bgEl, borderRadius: T.r.md, overflow: 'hidden', border: `1px solid ${T.border}` }}>
-                <div style={{ aspectRatio: '1', background: `linear-gradient(135deg, ${T.purple}18, ${T.blue}18)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <QrCode size={36} color={`${T.purple}88`} />
+              <div key={tpl.id} style={{ background:T.bgEl, borderRadius:T.r.md, overflow:'hidden', border:`1px solid ${T.border}`, display:'flex', flexDirection:'column' }}>
+                {/* Color swatch preview */}
+                <div style={{
+                  aspectRatio:'1', display:'flex', alignItems:'center', justifyContent:'center', position:'relative',
+                  background: `linear-gradient(135deg, ${tpl.preset?.qrColor || T.purple}22, ${T.blue}22)`,
+                }}>
+                  <QrCode size={32} color={tpl.preset?.qrColor || T.purple} />
+                  {/* Position indicator dot */}
+                  <div style={{
+                    position:'absolute',
+                    left: `${(tpl.qrX||0.5)*100}%`, top: `${(tpl.qrY||0.5)*100}%`,
+                    transform:'translate(-50%,-50%)', width:8, height:8, borderRadius:'50%',
+                    background:T.accent, border:'2px solid #fff', boxShadow:'0 1px 4px rgba(0,0,0,0.5)',
+                  }} />
                 </div>
-                <div style={{ padding: '10px 12px' }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tpl.name}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ padding:'10px 12px', flex:1, display:'flex', flexDirection:'column', gap:6 }}>
+                  <div style={{ fontSize:11, fontWeight:700, color:T.text, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{tpl.name}</div>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:4 }}>
                     <Badge color={T.orange}>{tpl.category}</Badge>
-                    <span style={{ fontSize: 9, color: T.textMut }}>Read-only</span>
+                    <span style={{ fontSize:9, color:T.textMut }}>Size {(tpl.qrSize*100).toFixed(0)}%</span>
                   </div>
+                  {/* Preset color dots */}
+                  <div style={{ display:'flex', gap:4, marginTop:2 }}>
+                    {[tpl.preset?.qrColor, tpl.preset?.bgColor].filter(Boolean).map((col,i) => (
+                      <div key={i} title={col} style={{ width:14, height:14, borderRadius:'50%', background:col, border:`1px solid ${T.border}` }} />
+                    ))}
+                    <span style={{ fontSize:9, color:T.textMut, marginLeft:2 }}>{tpl.preset?.dotStyle}</span>
+                  </div>
+                  <button onClick={() => cloneBuiltin(tpl)} style={{
+                    marginTop:4, background:T.accentLow, border:`1px solid rgba(214,0,54,0.2)`,
+                    borderRadius:6, color:T.accent, cursor:'pointer', padding:'5px 0', fontSize:10,
+                    fontWeight:700, fontFamily:'inherit', transition:'all 0.12s',
+                  }}>Clone &amp; Customize →</button>
                 </div>
               </div>
             ))}
@@ -714,46 +1103,47 @@ function TemplatesPanel({ cloudTemplates, onRefresh }) {
         </AdminCard>
       )}
 
-      {tab === 'cloud' && (
-        <AdminCard title="Cloud Templates" subtitle="Custom templates stored locally"
-          right={<Btn icon={<Plus size={13} />} onClick={openAdd}>Add Template</Btn>}
-        >
-          {showForm && (
-            <div style={{ background: T.bgEl, borderRadius: T.r.md, padding: 18, border: `1px solid ${T.accent}44`, marginBottom: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{editId ? 'Edit Template' : 'New Template'}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <FormInput label="Template Name" value={form.name} onChange={v => set('name', v)} placeholder="e.g. Facebook Dark" />
-                <FormSelect label="Category" value={form.category} onChange={v => set('category', v)} options={cats.map(c => ({ value: c, label: c }))} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-                <FormInput label="QR Size (0–1)" type="number" value={form.qrSize} onChange={v => set('qrSize', parseFloat(v) || 0.5)} />
-                <FormInput label="Center X (0–1)" type="number" value={form.qrX}   onChange={v => set('qrX',   parseFloat(v) || 0.5)} />
-                <FormInput label="Center Y (0–1)" type="number" value={form.qrY}   onChange={v => set('qrY',   parseFloat(v) || 0.5)} />
-              </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <Btn variant="ghost" onClick={closeForm}>Cancel</Btn>
-                <Btn onClick={handleSave} disabled={saving || !form.name.trim()} icon={<Check size={13} />}>{saving ? 'Saving...' : 'Save'}</Btn>
-              </div>
-            </div>
-          )}
-          {cloudTemplates.length === 0 && !showForm ? (
-            <EmptyState icon={Layers} title="No cloud templates yet" desc="Create custom templates that users can apply to their QR codes."
-              action={<Btn icon={<Plus size={13} />} onClick={openAdd}>Create First Template</Btn>}
-            />
+      {/* Custom tab */}
+      {tab === 'custom' && (
+        <AdminCard title="Custom Templates" subtitle="Create and manage your own QR templates"
+          right={<Btn icon={<Plus size={13} />} onClick={openNew}>New Template</Btn>}>
+          {cloudTemplates.length === 0 ? (
+            <EmptyState icon={Layers} title="No custom templates yet"
+              desc="Create templates with custom backgrounds, colors, QR position and styles."
+              action={<Btn icon={<Plus size={13} />} onClick={openNew}>Create First Template</Btn>} />
           ) : (
-            <div>
+            <div className="ad-template-grid">
               {cloudTemplates.map(tpl => (
-                <div key={tpl.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: `1px solid ${T.border}` }}>
-                  <div style={{ width: 38, height: 38, borderRadius: T.r.sm, background: `${T.purple}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Layers size={16} color={T.purple} />
+                <div key={tpl.id} style={{ background:T.bgEl, borderRadius:T.r.md, overflow:'hidden', border:`1px solid ${T.border}`, display:'flex', flexDirection:'column' }}>
+                  {/* Mini canvas preview */}
+                  <div style={{ aspectRatio:'1', overflow:'hidden' }}>
+                    <TemplateCanvas form={{
+                      bgType: tpl.bgType||'gradient', bgColor1:tpl.bgColor1||'#1a1a2e', bgColor2:tpl.bgColor2||'#e94560',
+                      gradientDir:tpl.gradientDir||'diagonal', cornerRadius:tpl.cornerRadius||0,
+                      qrX:tpl.qrX||0.5, qrY:tpl.qrY||0.5, qrSize:tpl.qrSize||0.5,
+                      qrColor:tpl.preset?.qrColor||'#fff', bgQrColor:tpl.preset?.bgColor||'#000',
+                      bgTransparent:!!tpl.preset?.bgTransparent,
+                      eyeColor:tpl.preset?.eyeColor||'#fff', syncEyes:tpl.preset?.syncEyes!==false,
+                      dotStyle:tpl.preset?.dotStyle||'square', eyeStyle:tpl.preset?.eyeStyle||'square',
+                    }} size={200} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{tpl.name}</div>
-                    <div style={{ fontSize: 11, color: T.textSec }}>Size {tpl.qrSize} · X {tpl.qrX} · Y {tpl.qrY}</div>
+                  <div style={{ padding:'10px 12px', flex:1, display:'flex', flexDirection:'column', gap:6 }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:T.text, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{tpl.name}</div>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                      <Badge color={T.purple}>{tpl.category}</Badge>
+                      <span style={{ fontSize:9, color:T.textMut }}>{tpl.preset?.dotStyle}</span>
+                    </div>
+                    <div style={{ display:'flex', gap:5, marginTop:4 }}>
+                      <button onClick={() => openEdit(tpl)} style={{
+                        flex:1, background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:6,
+                        color:T.text, cursor:'pointer', padding:'5px 0', fontSize:10, fontWeight:700, fontFamily:'inherit',
+                      }}>✏️ Edit</button>
+                      <button onClick={() => handleDelete(tpl.id)} style={{
+                        background:`${T.red}10`, border:`1px solid ${T.red}30`, borderRadius:6,
+                        color:T.red, cursor:'pointer', padding:'5px 8px', fontSize:10, fontWeight:700, fontFamily:'inherit',
+                      }}>🗑</button>
+                    </div>
                   </div>
-                  <Badge color={T.orange}>{tpl.category}</Badge>
-                  <Btn variant="ghost" size="sm" icon={<Edit size={11} />} onClick={() => openEdit(tpl)}>Edit</Btn>
-                  <Btn variant="danger" size="sm" icon={<Trash2 size={11} />} onClick={() => handleDelete(tpl.id)}>Delete</Btn>
                 </div>
               ))}
             </div>
