@@ -379,14 +379,20 @@ function DonutSVG({ segments = [], size = 160 }) {
 // SIDEBAR
 // ═══════════════════════════════════════════════════════════════════════════
 
-function Sidebar({ active, setActive, isMobile, open }) {
+function Sidebar({ active, setActive, isMobile, open, onClose }) {
   return (
     <aside style={{
       width: 240, background: T.sidebar, borderRight: `1px solid ${T.border}`,
       display: 'flex', flexDirection: 'column',
-      position: 'fixed', left: isMobile ? (open ? 0 : -260) : 0, top: 0, bottom: 0,
-      zIndex: 20, transition: 'left 0.25s ease',
+      position: 'fixed', left: open ? 0 : -260, top: 0, bottom: 0,
+      zIndex: 25, transition: 'left 0.27s cubic-bezier(0.4,0,0.2,1)',
+      boxShadow: isMobile && open ? '4px 0 32px rgba(0,0,0,0.7)' : 'none',
     }}>
+      {/* Close btn (mobile only) */}
+      <button className="ad-sidebar-close" onClick={onClose}>
+        <X size={16} />
+      </button>
+
       {/* Logo */}
       <div style={{ padding: '18px 16px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
         <img src="/logo.png" alt="Logo" style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'contain', flexShrink: 0 }} />
@@ -397,7 +403,7 @@ function Sidebar({ active, setActive, isMobile, open }) {
       </div>
 
       {/* Nav */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 8px', scrollbarWidth: 'none' }}>
+      <div className="ad-sidebar-nav" style={{ flex: 1, overflowY: 'auto', padding: '10px 8px' }}>
         {NAV.map(({ section, items }) => (
           <div key={section} style={{ marginBottom: 6 }}>
             <div style={{ fontSize: 10, fontWeight: 800, color: T.textMut, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 12px 4px' }}>
@@ -446,42 +452,43 @@ function Sidebar({ active, setActive, isMobile, open }) {
 // HEADER
 // ═══════════════════════════════════════════════════════════════════════════
 
-function Header({ section, onMenuToggle }) {
+function Header({ section, onMenuToggle, isMobile }) {
   return (
     <div style={{
       height: 58, background: T.bgEl, borderBottom: `1px solid ${T.border}`,
-      display: 'flex', alignItems: 'center', padding: '0 20px', gap: 12,
+      display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10,
       position: 'sticky', top: 0, zIndex: 10, flexShrink: 0,
     }}>
-      <button onClick={onMenuToggle} style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 5, borderRadius: T.r.sm, display: 'flex' }}
+      <button onClick={onMenuToggle} style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 6, borderRadius: T.r.sm, display: 'flex', flexShrink: 0 }}
         onMouseEnter={e => e.currentTarget.style.color = T.text}
         onMouseLeave={e => e.currentTarget.style.color = T.textSec}>
         <Menu size={20} />
       </button>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{LABELS[section] || 'Admin Panel'}</div>
-        <div style={{ fontSize: 11, color: T.textSec }}>Mushi QR Pro · Super Admin</div>
+        <div style={{ fontSize: isMobile ? 14 : 15, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{LABELS[section] || 'Admin Panel'}</div>
+        <div className="ad-header-subtitle" style={{ fontSize: 11, color: T.textSec }}>Mushi QR Pro · Super Admin</div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: '6px 12px' }}>
+      <div className="ad-header-search">
         <Search size={13} color={T.textMut} />
         <input placeholder="Search..." style={{ background: 'none', border: 'none', outline: 'none', color: T.text, fontSize: 12, fontFamily: 'inherit', width: 160 }} />
         <span style={{ fontSize: 10, color: T.textMut }}>⌘K</span>
       </div>
 
-      <button style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 5, borderRadius: T.r.sm, position: 'relative', display: 'flex' }}>
+      <button style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 6, borderRadius: T.r.sm, position: 'relative', display: 'flex', flexShrink: 0 }}>
         <Bell size={18} />
-        <div style={{ position: 'absolute', top: 3, right: 3, width: 7, height: 7, borderRadius: '50%', background: T.accent, border: `2px solid ${T.bgEl}` }} />
+        <div style={{ position: 'absolute', top: 4, right: 4, width: 7, height: 7, borderRadius: '50%', background: T.accent, border: `2px solid ${T.bgEl}` }} />
       </button>
 
       <a href="/#/" style={{
-        display: 'flex', alignItems: 'center', gap: 6,
+        display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
         background: T.accentLow, border: `1px solid rgba(214,0,54,0.25)`,
         color: T.accent, borderRadius: T.r.md, padding: '6px 12px',
         fontSize: 12, fontWeight: 700, textDecoration: 'none',
       }}>
-        <ArrowLeft size={13} /> App
+        <ArrowLeft size={13} />
+        <span className="ad-header-app-btn">App</span>
       </a>
     </div>
   );
@@ -510,7 +517,7 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 14 }}>
+      <div className="ad-stat-grid">
         <StatCard icon={QrCode}    label="QR Codes Created" value={qr + bc}                 color={T.purple} trendLabel="all time" />
         <StatCard icon={Star}      label="Saved Items"       value={stats?.savedCount || 0} color={T.blue}   trendLabel="all time" />
         <StatCard icon={Layers}    label="Templates Total"   value={(QR_TEMPLATES?.length || 0) + (stats?.cloudTemplates || 0)} color={T.orange} trendLabel="built-in + cloud" />
@@ -518,7 +525,7 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
       </div>
 
       {/* Charts Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 16 }}>
+      <div className="ad-chart-row">
         <AdminCard title="Activity Overview" subtitle="Daily QR & barcode creations (last 7 days)"
           right={
             <div style={{ display: 'flex', gap: 14, fontSize: 11, color: T.textSec }}>
@@ -553,7 +560,7 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
       </div>
 
       {/* Recent Activity + System Status */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 16 }}>
+      <div className="ad-activity-row">
         <AdminCard title="Recent Activity" subtitle="Last 10 items"
           right={<Btn variant="ghost" size="sm" onClick={() => onNavigate('activity-logs')}>View All</Btn>}
           noPadding
@@ -610,7 +617,7 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
       </div>
 
       {/* Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+      <div className="ad-quick-grid">
         {[
           { icon: Layers,   label: 'Manage Templates',  desc: 'Create and edit QR templates',  color: T.blue,   id: 'templates' },
           { icon: Settings, label: 'App Configuration', desc: 'App name, colors, messages',     color: T.orange, id: 'app-settings' },
@@ -688,7 +695,7 @@ function TemplatesPanel({ cloudTemplates, onRefresh }) {
 
       {tab === 'builtin' && (
         <AdminCard title="Built-in Templates" subtitle="Pre-installed AI-designed templates (read-only)">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+          <div className="ad-template-grid">
             {QR_TEMPLATES.map(tpl => (
               <div key={tpl.id} style={{ background: T.bgEl, borderRadius: T.r.md, overflow: 'hidden', border: `1px solid ${T.border}` }}>
                 <div style={{ aspectRatio: '1', background: `linear-gradient(135deg, ${T.purple}18, ${T.blue}18)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1083,7 +1090,7 @@ function AnalyticsPanel({ chartData, stats }) {
   const si = DS.getStorageInfo();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+      <div className="ad-auto-grid-sm">
         <StatCard icon={QrCode}    label="QR Codes"   value={stats?.qrCount || 0}      color={T.purple} />
         <StatCard icon={BarChart2} label="Barcodes"   value={stats?.barcodeCount || 0} color={T.green}  />
         <StatCard icon={Package}   label="Batch Jobs" value={stats?.batchCount || 0}   color={T.orange} />
@@ -1101,7 +1108,7 @@ function AnalyticsPanel({ chartData, stats }) {
         <LineChartSVG data={chartData} series={[{ key: 'qr', color: T.purple }, { key: 'barcode', color: T.green }]} height={220} />
       </AdminCard>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="ad-two-col">
         <AdminCard title="Type Distribution">
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
             <DonutSVG segments={[{ value: stats?.qrCount || 0, color: T.purple }, { value: stats?.barcodeCount || 0, color: T.green }]} size={130} />
@@ -1179,7 +1186,7 @@ function ReportsPanel({ history }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+      <div className="ad-auto-grid">
         {[
           { icon: FileText, label: 'History CSV', desc: 'Export all creation history as CSV', color: T.green, action: exportCSV, btn: 'Export CSV' },
           { icon: Download,  label: 'Full Data Export', desc: 'All app data as JSON backup', color: T.blue, action: exportJSON, btn: exporting ? 'Exporting...' : 'Export JSON' },
@@ -1338,7 +1345,7 @@ function BackupsPanel() {
         </div>
       </AdminCard>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="ad-two-col">
         <AdminCard title="Export Backup" subtitle="Download all data as JSON">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <p style={{ fontSize: 13, color: T.textSec, margin: 0, lineHeight: 1.6 }}>
@@ -1400,7 +1407,7 @@ function SystemHealthPanel({ stats }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+      <div className="ad-auto-grid-sm">
         <StatCard icon={Database} label="Storage"   value={si.used}                color={T.green}  />
         <StatCard icon={QrCode}   label="QR Items"  value={stats?.historyCount || 0} color={T.purple} />
         <StatCard icon={Server}   label="Config Keys" value={Object.keys(si.breakdown).filter(k => k.startsWith('qrgen_')).length} color={T.blue} />
@@ -1493,14 +1500,14 @@ function QRBarcodePanel({ stats, history }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+      <div className="ad-auto-grid-sm">
         <StatCard icon={QrCode}    label="QR Codes"   value={stats?.qrCount || 0}      color={T.purple} />
         <StatCard icon={BarChart2} label="Barcodes"   value={stats?.barcodeCount || 0} color={T.green}  />
         <StatCard icon={Package}   label="Batch Jobs" value={stats?.batchCount || 0}   color={T.orange} />
         <StatCard icon={Star}      label="Saved"      value={stats?.savedCount || 0}   color={T.blue}   />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="ad-two-col">
         <AdminCard title="QR Code Types" subtitle="Breakdown by content type">
           {qrTypes.length === 0 ? <EmptyState icon={QrCode} title="No QR codes yet" desc="Create QR codes to see breakdown." /> : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -1664,7 +1671,7 @@ function IntegrationsPanel() {
         </div>
       </AdminCard>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 14 }}>
+      <div className="ad-auto-grid">
         {[
           { name: 'Firestore', icon: Database, desc: 'Cloud data storage', color: T.orange, status: 'Pending' },
           { name: 'Firebase Auth', icon: Lock, desc: 'User authentication', color: T.blue, status: 'Configured' },
@@ -1704,7 +1711,7 @@ function DeveloperPanel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 14 }}>
+      <div className="ad-auto-grid">
         {[
           { label: 'App Version',  value: '1.1.0' },
           { label: 'Build Mode',   value: (typeof import.meta !== 'undefined' && import.meta.env && typeof import.meta.env.MODE === 'string') ? import.meta.env.MODE : 'production' },
@@ -1774,7 +1781,7 @@ function SubscriptionsPanel() {
         <Info size={14} color={T.orange} />
         <span style={{ fontSize: 12, color: T.textSec }}>Subscription management is a plan scaffold. Live billing requires Stripe + Firebase integration.</span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+      <div className="ad-auto-grid">
         {plans.map(plan => (
           <AdminCard key={plan.name} style={{ border: `1px solid ${plan.color}33` }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -1941,11 +1948,184 @@ export default function AdminPanel() {
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
         @keyframes adSpin { to { transform: rotate(360deg); } }
+        @keyframes adSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+        /* Scrollbar */
         .ad-scroll::-webkit-scrollbar { width: 4px; }
         .ad-scroll::-webkit-scrollbar-track { background: transparent; }
         .ad-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
-        .ad-sidebar::-webkit-scrollbar { display: none; }
+        .ad-sidebar-nav::-webkit-scrollbar { display: none; }
+
+        /* Base responsive grid utilities */
+        .ad-stat-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 14px;
+        }
+        .ad-chart-row {
+          display: grid;
+          grid-template-columns: 1fr 320px;
+          gap: 16px;
+        }
+        .ad-activity-row {
+          display: grid;
+          grid-template-columns: 1fr 280px;
+          gap: 16px;
+        }
+        .ad-quick-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+        .ad-two-col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+        .ad-three-col {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 14px;
+        }
+        .ad-auto-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+          gap: 14px;
+        }
+        .ad-auto-grid-sm {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 14px;
+        }
+        .ad-template-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+          gap: 12px;
+        }
+        .ad-main-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          margin-left: 240px;
+          transition: margin-left 0.25s;
+        }
+        .ad-main-content.mobile {
+          margin-left: 0;
+        }
+        .ad-header-search {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(20,20,30,1);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 8px;
+          padding: 6px 12px;
+        }
+        .ad-header-search input { width: 160px; }
+        .ad-header-subtitle { display: block; }
+        .ad-header-app-btn span { display: inline; }
+        .ad-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .ad-table-wrap table { min-width: 520px; }
+        .ad-main-pad { padding: 24px 28px; }
+        .ad-section-anim { animation: adSlideIn 0.18s ease both; }
+
+        /* Tablet — 1024px */
+        @media (max-width: 1024px) {
+          .ad-stat-grid { grid-template-columns: repeat(2, 1fr); }
+          .ad-chart-row { grid-template-columns: 1fr; }
+          .ad-activity-row { grid-template-columns: 1fr; }
+          .ad-quick-grid { grid-template-columns: repeat(2, 1fr); }
+          .ad-three-col { grid-template-columns: repeat(2, 1fr); }
+          .ad-main-pad { padding: 20px 20px; }
+        }
+
+        /* Mobile — 768px */
+        @media (max-width: 768px) {
+          .ad-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          .ad-chart-row { grid-template-columns: 1fr; }
+          .ad-activity-row { grid-template-columns: 1fr; }
+          .ad-quick-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          .ad-two-col { grid-template-columns: 1fr; }
+          .ad-three-col { grid-template-columns: 1fr 1fr; }
+          .ad-auto-grid { grid-template-columns: repeat(2, 1fr); }
+          .ad-auto-grid-sm { grid-template-columns: repeat(2, 1fr); }
+          .ad-template-grid { grid-template-columns: repeat(2, 1fr); }
+          .ad-header-search { display: none; }
+          .ad-header-subtitle { display: none; }
+          .ad-main-pad { padding: 14px 12px 80px; }
+        }
+
+        /* Small mobile — 480px */
+        @media (max-width: 480px) {
+          .ad-stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+          .ad-quick-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+          .ad-two-col { grid-template-columns: 1fr; }
+          .ad-three-col { grid-template-columns: 1fr; }
+          .ad-auto-grid { grid-template-columns: 1fr 1fr; }
+          .ad-template-grid { grid-template-columns: repeat(2, 1fr); }
+          .ad-main-pad { padding: 12px 10px 80px; }
+        }
+
+        /* Mobile bottom nav */
+        .ad-bottom-nav {
+          display: none;
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          height: 60px;
+          background: rgba(12,12,21,0.97);
+          border-top: 1px solid rgba(255,255,255,0.06);
+          z-index: 30;
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          align-items: center;
+          justify-content: space-around;
+          padding: 0 4px;
+          gap: 2px;
+        }
+        .ad-bottom-nav-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 3px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 8px 10px;
+          border-radius: 10px;
+          transition: background 0.12s;
+          min-width: 48px;
+          flex: 1;
+        }
+        .ad-bottom-nav-btn span {
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.2px;
+          font-family: 'Outfit', sans-serif;
+          text-transform: uppercase;
+        }
+        @media (max-width: 768px) {
+          .ad-bottom-nav { display: flex; }
+        }
+
+        /* Sidebar close btn (mobile) */
+        .ad-sidebar-close {
+          display: none;
+          position: absolute;
+          top: 12px; right: 12px;
+          background: rgba(255,255,255,0.05);
+          border: none;
+          border-radius: 8px;
+          color: rgba(255,255,255,0.4);
+          cursor: pointer;
+          padding: 6px;
+          line-height: 0;
+        }
+        @media (max-width: 768px) {
+          .ad-sidebar-close { display: flex; align-items: center; justify-content: center; }
+        }
       `}</style>
 
       <div style={{
@@ -1959,21 +2139,45 @@ export default function AdminPanel() {
           <div onClick={() => setSidebar(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 15, backdropFilter: 'blur(4px)' }} />
         )}
 
-        <Sidebar active={section} setActive={s => { setSection(s); if (isMobile) setSidebar(false); }} isMobile={isMobile} open={isMobile ? sidebarOpen : true} />
+        <Sidebar active={section} setActive={s => { setSection(s); if (isMobile) setSidebar(false); }} isMobile={isMobile} open={isMobile ? sidebarOpen : true} onClose={() => setSidebar(false)} />
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginLeft: isMobile ? 0 : 240 }}>
-          <Header section={section} onMenuToggle={() => setSidebar(o => !o)} />
+        <div className={`ad-main-content${isMobile ? ' mobile' : ''}`}>
+          <Header section={section} onMenuToggle={() => setSidebar(o => !o)} isMobile={isMobile} />
 
-          <main className="ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '14px 12px' : '24px 28px' }}>
-            {loading ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 14 }}>
-                <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
-                <span style={{ fontSize: 14, color: T.textSec }}>Loading admin data...</span>
-              </div>
-            ) : (
-              PANELS[section] || PANELS.dashboard
-            )}
+          <main className="ad-scroll" style={{ flex: 1, overflowY: 'auto' }}>
+            <div className="ad-main-pad ad-section-anim" key={section}>
+              {loading ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 14 }}>
+                  <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
+                  <span style={{ fontSize: 14, color: T.textSec }}>Loading admin data...</span>
+                </div>
+              ) : (
+                PANELS[section] || PANELS.dashboard
+              )}
+            </div>
           </main>
+
+          {/* Mobile Bottom Nav */}
+          <nav className="ad-bottom-nav">
+            {[
+              { id: 'dashboard',    icon: LayoutDashboard, label: 'Home' },
+              { id: 'analytics',    icon: BarChart3,        label: 'Stats' },
+              { id: 'templates',    icon: Layers,           label: 'Templates' },
+              { id: 'feature-flags',icon: Flag,             label: 'Flags' },
+              { id: 'app-settings', icon: Settings,         label: 'Settings' },
+            ].map(({ id, icon: Icon, label }) => {
+              const active = section === id;
+              return (
+                <button key={id} className="ad-bottom-nav-btn"
+                  onClick={() => setSection(id)}
+                  style={{ color: active ? T.accent : T.textSec, background: active ? T.sidebarAct : 'transparent' }}
+                >
+                  <Icon size={19} />
+                  <span style={{ color: active ? T.accent : T.textMut }}>{label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
       </div>
     </>
