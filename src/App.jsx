@@ -78,6 +78,7 @@ import BarcodePage from './components/BarcodePage';
 import ScannerGunPage from './components/ScannerGunPage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
+import AdminPanel from './components/AdminPanel';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -890,6 +891,7 @@ export default function App() {
     if (path === '/batch') return 'batch';
     if (path === '/barcode') return 'barcode';
     if (path === '/scanner-gun') return 'scanner-gun';
+    if (path === '/admin') return 'admin';
     return 'home';
   };
 
@@ -3283,7 +3285,7 @@ export default function App() {
       {/* ── Header ── */}
       <header 
         className={`app-header ${['home', 'saved', 'history', 'settings'].includes(activePage) ? 'header-home' : ''}`}
-        style={{ display: activePage === 'barcode' ? 'none' : 'flex' }}
+        style={{ display: ['barcode', 'admin'].includes(activePage) ? 'none' : 'flex' }}
       >
         <div className="app-logo">
           {activePage === 'scanner' && (
@@ -5165,6 +5167,8 @@ export default function App() {
           <ScannerGunPage onNavigate={navigateTo} />
         ) : activePage === 'settings' ? (
           <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
+        ) : activePage === 'admin' ? (
+          <AdminPanel />
         ) : (
           <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} initialFilter={historyFilter} />
         )}
