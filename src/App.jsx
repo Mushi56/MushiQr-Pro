@@ -3858,8 +3858,69 @@ export default function App() {
                               padding: 0
                             }}
                           >
-                              </span>
-                            </div>
+                            <canvas
+                              width={180}
+                              height={180}
+                              style={{ width: '100%', height: '100%', display: 'block' }}
+                              ref={el => {
+                                if (!el || !tpl.bgImage) return;
+                                const ctx = el.getContext('2d');
+                                const img = new Image();
+                                img.onload = () => {
+                                  ctx.clearRect(0, 0, 180, 180);
+                                  ctx.drawImage(img, 0, 0, 180, 180);
+                                  // Draw placeholder QR grid
+                                  const qrSize = Math.round(180 * tpl.qrSize);
+                                  const qrX = Math.round(180 * tpl.qrX - qrSize / 2);
+                                  const qrY = Math.round(180 * tpl.qrY - qrSize / 2);
+                                  const cell = Math.floor(qrSize / 21);
+                                  const pattern = [
+                                    [1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+                                    [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+                                    [1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1],
+                                    [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,0,1],
+                                    [1,0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,1,1,1,0,1],
+                                    [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,1],
+                                    [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
+                                    [0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0],
+                                    [0,0,1,0,1,0,1,1,0,0,1,0,1,1,0,1,0,1,0,0,1],
+                                    [0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,0,0],
+                                    [1,0,1,0,0,1,1,0,1,0,1,0,0,1,1,0,0,1,0,1,0],
+                                    [0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0],
+                                    [0,0,1,0,1,1,1,0,0,0,1,0,1,1,0,1,0,0,1,0,1],
+                                    [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,1,0],
+                                    [1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0],
+                                    [1,0,0,0,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1],
+                                    [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,0,1,0],
+                                    [1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,1],
+                                    [1,0,1,1,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1,0],
+                                    [1,0,0,0,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1],
+                                    [1,1,1,1,1,1,1,0,0,1,0,0,1,1,0,1,0,0,1,0,0],
+                                  ];
+                                  ctx.fillStyle = tpl.preset?.qrColor || '#000000';
+                                  for (let r = 0; r < 21; r++) {
+                                    for (let c = 0; c < 21; c++) {
+                                      if (pattern[r][c]) {
+                                        ctx.fillRect(qrX + c * cell, qrY + r * cell, cell, cell);
+                                      }
+                                    }
+                                  }
+                                };
+                                img.src = tpl.bgImage;
+                              }}
+                            />
+                            {isSelected && (
+                              <div style={{
+                                position: 'absolute', top: '6px', right: '6px',
+                                width: '18px', height: '18px', borderRadius: '50%',
+                                background: 'var(--accent-primary)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                              }}>
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                  <path d="M2 5l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                            )}
                           </button>
                         );
                       })}
