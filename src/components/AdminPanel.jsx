@@ -2,7 +2,7 @@
 // Mushi QR Pro — Super Admin Panel (SaaS-grade)
 // ═══════════════════════════════════════════════════════════════════════
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
 import {
   LayoutDashboard, Users, CreditCard, BarChart3, FileText,
   Layers, QrCode, Grid, Package, Settings, Palette, Sliders,
@@ -44,6 +44,49 @@ const T = {
   textMut:   '#44465a',
   r:         { xs: 6, sm: 8, md: 12, lg: 16, xl: 20 },
 };
+
+// ─── Toast Notification System ───────────────────────────────────────────
+const ToastCtx = createContext(null);
+
+function ToastProvider({ children }) {
+  const [toasts, setToasts] = useState([]);
+  const add = useCallback((msg, type = 'success', duration = 4000) => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, msg, type }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration);
+  }, []);
+  const COLORS = { success: '#10b981', error: '#ef4444', info: '#3b82f6', warning: '#f59e0b' };
+  return (
+    <ToastCtx.Provider value={add}>
+      {children}
+      <div style={{
+        position: 'fixed', bottom: 24, right: 24, zIndex: 9999,
+        display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none',
+      }}>
+        {toasts.map(t => (
+          <div key={t.id} style={{
+            background: '#1a1a2e', border: `1px solid ${COLORS[t.type] || COLORS.success}55`,
+            borderLeft: `4px solid ${COLORS[t.type] || COLORS.success}`,
+            borderRadius: 10, padding: '12px 18px', maxWidth: 360,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            color: '#f0f0f8', fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, sans-serif',
+            animation: 'adSlideIn 0.25s ease',
+            pointerEvents: 'auto',
+          }}>
+            <span style={{ marginRight: 8 }}>
+              {t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : t.type === 'warning' ? '⚠️' : 'ℹ️'}
+            </span>
+            {t.msg}
+          </div>
+        ))}
+      </div>
+    </ToastCtx.Provider>
+  );
+}
+
+function useToast() {
+  return useContext(ToastCtx);
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 // Safely convert any qrData value (string, {url}, {text}, {phone}, etc.) to a display string
@@ -952,6 +995,7 @@ function TemplatesPanel({ cloudTemplates, onRefresh }) {
   const [editId, setEditId]     = useState(null);
   const [form, setForm]         = useState({ ...DEFAULT_TPL });
   const [saving, setSaving]     = useState(false);
+  const toast = useToast();
 
   const openNew = () => { setForm({ ...DEFAULT_TPL }); setEditId(null); setEditor(true); };
   const openEdit = tpl => {
@@ -1005,13 +1049,21 @@ function TemplatesPanel({ cloudTemplates, onRefresh }) {
         updatedAt: new Date().toISOString(),
       };
       await DS.saveCloudTemplate(t);
+      toast((editId ? 'Template updated!' : 'Template created!') + ' "' + t.name + '" is now live.', 'success');
       setEditor(false); onRefresh();
+    } catch (e) {
+      toast('Failed to save template: ' + (e.message || 'Unknown error'), 'error', 6000);
     } finally { setSaving(false); }
   };
   const handleDelete = async id => {
     if (!confirm('Delete this template?')) return;
-    await DS.deleteCloudTemplate(id);
-    onRefresh();
+    try {
+      await DS.deleteCloudTemplate(id);
+      toast('Template deleted.', 'info');
+      onRefresh();
+    } catch (e) {
+      toast('Failed to delete: ' + (e.message || 'Unknown error'), 'error', 6000);
+    }
   };
 
   return (
@@ -1135,10 +1187,24 @@ function TemplatesPanel({ cloudTemplates, onRefresh }) {
 function AppSettingsPanel({ settings, onSave }) {
   const [form, setForm] = useState(settings || {});
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
   useEffect(() => { if (settings) setForm(settings); }, [settings]);
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
-  const handleSave = async () => { await onSave(form); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave(form);
+      setSaved(true);
+      toast('App settings saved successfully!', 'success');
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e) {
+      toast('Failed to save: ' + (e.message || 'Unknown error'), 'error', 6000);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -1155,8 +1221,8 @@ function AppSettingsPanel({ settings, onSave }) {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 8 }}>
-            <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saved ? 'Saved!' : 'Save Settings'}
+            <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Settings'}
             </Btn>
           </div>
         </div>
@@ -1172,10 +1238,24 @@ function AppSettingsPanel({ settings, onSave }) {
 function BrandingPanel({ settings, onSave }) {
   const [form, setForm] = useState(settings || {});
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
   useEffect(() => { if (settings) setForm(settings); }, [settings]);
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
-  const handleSave = async () => { await onSave(form); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave(form);
+      setSaved(true);
+      toast('Branding saved successfully!', 'success');
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e) {
+      toast('Failed to save branding: ' + (e.message || 'Unknown error'), 'error', 6000);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -1202,8 +1282,8 @@ function BrandingPanel({ settings, onSave }) {
           </div>
           <FormInput label="App Display Name" value={form.appName || 'Mushi QR Pro'} onChange={v => set('appName', v)} />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saved ? 'Saved!' : 'Save Branding'}
+            <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Branding'}
             </Btn>
           </div>
         </div>
@@ -1238,10 +1318,24 @@ function BrandingPanel({ settings, onSave }) {
 function FeatureFlagsPanel({ flags, onSave }) {
   const [f, setF] = useState(flags || {});
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
   useEffect(() => { if (flags) setF(flags); }, [flags]);
 
   const toggle = k => setF(p => ({ ...p, [k]: !p[k] }));
-  const handleSave = async () => { await onSave(f); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave(f);
+      setSaved(true);
+      toast('Feature flags saved! Changes are now live for all users.', 'success');
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e) {
+      toast('Failed to save flags: ' + (e.message || 'Unknown error'), 'error', 6000);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const enabled = Object.values(f).filter(Boolean).length;
   const total   = Object.keys(f).length;
@@ -1278,8 +1372,8 @@ function FeatureFlagsPanel({ flags, onSave }) {
             <div style={{ height: '100%', background: T.green, borderRadius: 2, width: `${total ? (enabled / total) * 100 : 0}%`, transition: 'width 0.3s' }} />
           </div>
         </div>
-        <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-          {saved ? 'Saved!' : 'Save Flags'}
+        <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+          {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Flags'}
         </Btn>
       </div>
       {groups.map(g => (
@@ -1302,10 +1396,24 @@ function FeatureFlagsPanel({ flags, onSave }) {
 function MaintenancePanel({ settings, onSave }) {
   const [form, setForm] = useState(settings || {});
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
   useEffect(() => { if (settings) setForm(settings); }, [settings]);
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
-  const handleSave = async () => { await onSave(form); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave(form);
+      setSaved(true);
+      toast(form.maintenanceMode ? '⚠️ Maintenance mode is now ACTIVE!' : 'Maintenance settings saved.', form.maintenanceMode ? 'warning' : 'success');
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e) {
+      toast('Failed to save: ' + (e.message || 'Unknown error'), 'error', 6000);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -1321,8 +1429,8 @@ function MaintenancePanel({ settings, onSave }) {
           <FormTextarea label="Maintenance Message" rows={3} value={form.maintenanceMessage || ''} onChange={v => set('maintenanceMessage', v)}
             placeholder="We are performing scheduled maintenance. Please check back soon." />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saved ? 'Saved!' : 'Save Settings'}
+            <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Settings'}
             </Btn>
           </div>
         </div>
@@ -1338,10 +1446,24 @@ function MaintenancePanel({ settings, onSave }) {
 function AnnouncementsPanel({ announcement, onSave }) {
   const [form, setForm] = useState(announcement || { title: '', message: '', active: false, type: 'info' });
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
   useEffect(() => { if (announcement) setForm(announcement); }, [announcement]);
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
-  const handleSave = async () => { await onSave(form); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave(form);
+      setSaved(true);
+      toast(form.active ? '📢 Announcement published to all users!' : 'Announcement saved (not active).', 'success');
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e) {
+      toast('Failed to publish: ' + (e.message || 'Unknown error'), 'error', 6000);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const types = [
     { value: 'info',    label: '💬 Info',     color: T.blue },
@@ -1372,8 +1494,8 @@ function AnnouncementsPanel({ announcement, onSave }) {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Btn onClick={handleSave} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saved ? 'Published!' : 'Publish Announcement'}
+            <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saving ? 'Publishing…' : saved ? 'Published!' : 'Publish Announcement'}
             </Btn>
           </div>
         </div>
@@ -1401,14 +1523,26 @@ function AnnouncementsPanel({ announcement, onSave }) {
 function RemoteConfigPanel({ config, onSave }) {
   const [pairs, setPairs] = useState([]);
   const [saved, setSaved] = useState(false);
-  useEffect(() => { if (config) setPairs(Object.entries(config).map(([k, v]) => ({ k, v }))); }, [config]);
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
+  useEffect(() => { if (config) setPairs(Object.entries(config).filter(([k]) => !k.startsWith('_')).map(([k, v]) => ({ k, v }))); }, [config]);
 
   const update = (i, field, val) => setPairs(p => p.map((x, j) => j === i ? { ...x, [field]: val } : x));
   const remove  = i => setPairs(p => p.filter((_, j) => j !== i));
 
   const handleSave = async () => {
-    const cfg = Object.fromEntries(pairs.filter(p => p.k.trim()).map(p => [p.k.trim(), p.v]));
-    await onSave(cfg); setSaved(true); setTimeout(() => setSaved(false), 2500);
+    setSaving(true);
+    try {
+      const cfg = Object.fromEntries(pairs.filter(p => p.k.trim()).map(p => [p.k.trim(), p.v]));
+      await onSave(cfg);
+      setSaved(true);
+      toast('Remote config saved! ' + Object.keys(cfg).length + ' keys pushed to all users.', 'success');
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e) {
+      toast('Failed to save config: ' + (e.message || 'Unknown error'), 'error', 6000);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -1417,7 +1551,7 @@ function RemoteConfigPanel({ config, onSave }) {
         right={
           <div style={{ display: 'flex', gap: 8 }}>
             <Btn variant="ghost" size="sm" icon={<Plus size={12} />} onClick={() => setPairs(p => [...p, { k: '', v: '' }])}>Add Key</Btn>
-            <Btn size="sm" onClick={handleSave} icon={saved ? <Check size={12} /> : <Save size={12} />} variant={saved ? 'success' : 'primary'}>{saved ? 'Saved!' : 'Save'}</Btn>
+            <Btn size="sm" onClick={handleSave} disabled={saving} icon={saved ? <Check size={12} /> : <Save size={12} />} variant={saved ? 'success' : 'primary'}>{saving ? 'Saving…' : saved ? 'Saved!' : 'Save'}</Btn>
           </div>
         }
       >
@@ -2236,7 +2370,8 @@ function SupportPanel() {
 // MAIN ADMIN PANEL — ROOT COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════
 
-export default function AdminPanel() {
+// ─── Wrap the entire AdminPanel in the ToastProvider ──────────────────────
+function AdminPanelInner() {
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -2325,12 +2460,36 @@ export default function AdminPanel() {
     'qr-barcode':    <QRBarcodePanel stats={stats} history={history} />,
     categories:      <CategoriesPanel />,
     bulk:            <BulkPanel history={history} />,
-    'app-settings':  <AppSettingsPanel settings={appSettings} onSave={async s => { await DS.saveAppSettings(s); setAppSettings(s); await refreshAudit(); }} />,
-    branding:        <BrandingPanel settings={appSettings} onSave={async s => { await DS.saveAppSettings(s); setAppSettings(s); await refreshAudit(); }} />,
-    'remote-config': <RemoteConfigPanel config={remoteConfig} onSave={async c => { await DS.saveRemoteConfig(c); setRemoteConfig(c); await refreshAudit(); }} />,
-    'feature-flags': <FeatureFlagsPanel flags={featureFlags} onSave={async f => { await DS.saveFeatureFlags(f); setFeatureFlags(f); await refreshAudit(); }} />,
-    maintenance:     <MaintenancePanel settings={appSettings} onSave={async s => { await DS.saveAppSettings(s); setAppSettings(s); await refreshAudit(); }} />,
-    announcements:   <AnnouncementsPanel announcement={announcement} onSave={async a => { await DS.saveAnnouncement(a); setAnnouncement(a); await refreshAudit(); }} />,
+    'app-settings':  <AppSettingsPanel settings={appSettings} onSave={async s => {
+      await DS.saveAppSettings(s);
+      setAppSettings(s);
+      refreshAudit(); // non-blocking
+    }} />,
+    branding:        <BrandingPanel settings={appSettings} onSave={async s => {
+      await DS.saveAppSettings(s);
+      setAppSettings(s);
+      refreshAudit();
+    }} />,
+    'remote-config': <RemoteConfigPanel config={remoteConfig} onSave={async c => {
+      await DS.saveRemoteConfig(c);
+      setRemoteConfig(c);
+      refreshAudit();
+    }} />,
+    'feature-flags': <FeatureFlagsPanel flags={featureFlags} onSave={async f => {
+      await DS.saveFeatureFlags(f);
+      setFeatureFlags(f);
+      refreshAudit();
+    }} />,
+    maintenance:     <MaintenancePanel settings={appSettings} onSave={async s => {
+      await DS.saveAppSettings(s);
+      setAppSettings(s);
+      refreshAudit();
+    }} />,
+    announcements:   <AnnouncementsPanel announcement={announcement} onSave={async a => {
+      await DS.saveAnnouncement(a);
+      setAnnouncement(a);
+      refreshAudit();
+    }} />,
     'admin-users':   <AdminUsersPanel />,
     roles:           <RolesPanel />,
     'activity-logs': <ActivityLogsPanel history={history} />,
@@ -2579,5 +2738,14 @@ export default function AdminPanel() {
         </div>
       </div>
     </>
+  );
+}
+
+// ─── Default export wraps everything in the ToastProvider ────────────────────
+export default function AdminPanel() {
+  return (
+    <ToastProvider>
+      <AdminPanelInner />
+    </ToastProvider>
   );
 }

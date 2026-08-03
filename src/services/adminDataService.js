@@ -1,10 +1,24 @@
 // src/services/adminDataService.js
 // ─── Firebase-Ready Data Abstraction Layer ─────────────────────────────────
-// All methods read and write globally in Firestore so that any config changes
-// apply to all users in real-time.
+// All global config is stored in Firestore so any changes apply to all users.
+// Super-admin email: mabuneri143@gmail.com
 
 import { db } from './firebase';
-import { doc, getDoc, setDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, limit as firestoreLimit } from 'firebase/firestore';
+import {
+  doc, getDoc, setDoc, deleteDoc,
+  collection, getDocs, addDoc,
+  query, orderBy, limit as firestoreLimit,
+} from 'firebase/firestore';
+
+// ── Helper: format Firestore errors into readable messages ─────────────────
+function friendlyError(e) {
+  const code = e?.code || '';
+  if (code === 'permission-denied') return 'Permission denied — make sure Firestore rules allow superadmin writes.';
+  if (code === 'unavailable')       return 'Firebase is unavailable. Check your internet connection.';
+  if (code === 'not-found')         return 'Document not found in Firestore.';
+  if (code.includes('network'))     return 'Network error — please check your connection.';
+  return e?.message || 'Unknown Firestore error';
+}
 
 // Helper to audit actions in Firestore
 async function _audit(action, meta = {}) {
@@ -14,15 +28,16 @@ async function _audit(action, meta = {}) {
       action,
       meta,
       actor: 'super_admin',
-      ts: new Date().toISOString()
+      ts: new Date().toISOString(),
     });
   } catch (e) {
-    console.error('[adminDataService] audit log failed:', e);
+    // Audit failures are non-fatal — just log them
+    console.warn('[audit] Failed to write audit log:', e?.code, e?.message);
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// APP STATS
+// APP STATS (from localStorage — local per-device stats)
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getAppStats() {
   const _read = (key) => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
@@ -68,148 +83,188 @@ export async function getHistory(limitVal = 100) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// APP SETTINGS
+// APP SETTINGS  —  global_config/appSettings
 // ═══════════════════════════════════════════════════════════════════════════
+const DEFAULT_APP_SETTINGS = {
+  appName:            'Mushi QR Pro',
+  brandColor:         '#D60036',
+  welcomeText:        'Create and scan QR codes instantly!',
+  maintenanceMode:    false,
+  maintenanceMessage: 'We are performing scheduled maintenance. Please check back soon.',
+  showWelcomeBanner:  true,
+};
+
 export async function getAppSettings() {
   try {
-    const docRef = doc(db, 'global_config', 'appSettings');
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data();
-    }
+    const snap = await getDoc(doc(db, 'global_config', 'appSettings'));
+    if (snap.exists()) return { ...DEFAULT_APP_SETTINGS, ...snap.data() };
   } catch (e) {
-    console.error('getAppSettings error:', e);
+    console.error('[DS] getAppSettings:', e?.code, e?.message);
   }
-  return {
-    appName:            'Mushi QR Pro',
-    brandColor:         '#D60036',
-    welcomeText:        'Create and scan QR codes instantly!',
-    maintenanceMode:    false,
-    maintenanceMessage: 'We are performing scheduled maintenance. Please check back soon.',
-    showWelcomeBanner:  true,
-  };
+  return { ...DEFAULT_APP_SETTINGS };
 }
+
 export async function saveAppSettings(s) {
-  const docRef = doc(db, 'global_config', 'appSettings');
-  await setDoc(docRef, s);
-  _audit('APP_SETTINGS_UPDATED');
-  return s;
+  try {
+    await setDoc(doc(db, 'global_config', 'appSettings'), {
+      ...s,
+      _updatedAt: new Date().toISOString(),
+    });
+    await _audit('APP_SETTINGS_UPDATED', { keys: Object.keys(s) });
+    return s;
+  } catch (e) {
+    console.error('[DS] saveAppSettings:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FEATURE FLAGS
+// FEATURE FLAGS  —  global_config/featureFlags
 // ═══════════════════════════════════════════════════════════════════════════
+const DEFAULT_FLAGS = {
+  qr_generator:      true,
+  barcode_generator: true,
+  scanner:           true,
+  bulk_generation:   true,
+  templates:         true,
+  history:           true,
+  saved:             true,
+  export_png:        true,
+  export_svg:        true,
+  export_pdf:        true,
+  dark_mode:         true,
+  pwa_install:       true,
+};
+
 export async function getFeatureFlags() {
   try {
-    const docRef = doc(db, 'global_config', 'featureFlags');
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data();
-    }
+    const snap = await getDoc(doc(db, 'global_config', 'featureFlags'));
+    if (snap.exists()) return { ...DEFAULT_FLAGS, ...snap.data() };
   } catch (e) {
-    console.error('getFeatureFlags error:', e);
+    console.error('[DS] getFeatureFlags:', e?.code, e?.message);
   }
-  return {
-    qr_generator:      true,
-    barcode_generator: true,
-    scanner:           true,
-    bulk_generation:   true,
-    templates:         true,
-    history:           true,
-    saved:             true,
-    export_png:        true,
-    export_svg:        true,
-    export_pdf:        true,
-    dark_mode:         true,
-    pwa_install:       true,
-  };
+  return { ...DEFAULT_FLAGS };
 }
+
 export async function saveFeatureFlags(f) {
-  const docRef = doc(db, 'global_config', 'featureFlags');
-  await setDoc(docRef, f);
-  _audit('FEATURE_FLAGS_UPDATED');
-  return f;
+  try {
+    await setDoc(doc(db, 'global_config', 'featureFlags'), {
+      ...f,
+      _updatedAt: new Date().toISOString(),
+    });
+    await _audit('FEATURE_FLAGS_UPDATED', { flags: Object.keys(f) });
+    return f;
+  } catch (e) {
+    console.error('[DS] saveFeatureFlags:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CLOUD TEMPLATES
+// CLOUD TEMPLATES  —  global_templates/{id}
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getCloudTemplates() {
   try {
-    const colRef = collection(db, 'global_templates');
-    const snap = await getDocs(colRef);
+    const snap = await getDocs(collection(db, 'global_templates'));
     const list = [];
     snap.forEach(d => list.push({ ...d.data(), id: d.id }));
     return list;
   } catch (e) {
-    console.error('getCloudTemplates error:', e);
+    console.error('[DS] getCloudTemplates:', e?.code, e?.message);
     return [];
   }
 }
+
 export async function saveCloudTemplate(t) {
-  const docRef = doc(db, 'global_templates', t.id);
-  await setDoc(docRef, t);
-  _audit('TEMPLATE_SAVED', { id: t.id, name: t.name });
-  return t;
+  try {
+    await setDoc(doc(db, 'global_templates', t.id), {
+      ...t,
+      _updatedAt: new Date().toISOString(),
+    });
+    await _audit('TEMPLATE_SAVED', { id: t.id, name: t.name });
+    return t;
+  } catch (e) {
+    console.error('[DS] saveCloudTemplate:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
 }
+
 export async function deleteCloudTemplate(id) {
-  const docRef = doc(db, 'global_templates', id);
-  await deleteDoc(docRef);
-  _audit('TEMPLATE_DELETED', { id });
+  try {
+    await deleteDoc(doc(db, 'global_templates', id));
+    await _audit('TEMPLATE_DELETED', { id });
+  } catch (e) {
+    console.error('[DS] deleteCloudTemplate:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ANNOUNCEMENT
+// ANNOUNCEMENT  —  global_config/announcement
 // ═══════════════════════════════════════════════════════════════════════════
+const DEFAULT_ANNOUNCEMENT = { title: '', message: '', active: false, type: 'info' };
+
 export async function getAnnouncement() {
   try {
-    const docRef = doc(db, 'global_config', 'announcement');
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data();
-    }
+    const snap = await getDoc(doc(db, 'global_config', 'announcement'));
+    if (snap.exists()) return { ...DEFAULT_ANNOUNCEMENT, ...snap.data() };
   } catch (e) {
-    console.error('getAnnouncement error:', e);
+    console.error('[DS] getAnnouncement:', e?.code, e?.message);
   }
-  return { title: '', message: '', active: false, type: 'info' };
+  return { ...DEFAULT_ANNOUNCEMENT };
 }
+
 export async function saveAnnouncement(a) {
-  const docRef = doc(db, 'global_config', 'announcement');
-  await setDoc(docRef, { ...a, updatedAt: new Date().toISOString() });
-  _audit('ANNOUNCEMENT_UPDATED');
-  return a;
+  try {
+    await setDoc(doc(db, 'global_config', 'announcement'), {
+      ...a,
+      _updatedAt: new Date().toISOString(),
+    });
+    await _audit('ANNOUNCEMENT_UPDATED', { active: a.active, title: a.title });
+    return a;
+  } catch (e) {
+    console.error('[DS] saveAnnouncement:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// REMOTE CONFIG
+// REMOTE CONFIG  —  global_config/remoteConfig
 // ═══════════════════════════════════════════════════════════════════════════
+const DEFAULT_REMOTE = {
+  max_qr_size:      '2048',
+  error_correction: 'H',
+  support_email:    'support@mushiqr.pro',
+  privacy_url:      'https://mushiqr.pro/privacy',
+  terms_url:        'https://mushiqr.pro/terms',
+};
+
 export async function getRemoteConfig() {
   try {
-    const docRef = doc(db, 'global_config', 'remoteConfig');
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data();
-    }
+    const snap = await getDoc(doc(db, 'global_config', 'remoteConfig'));
+    if (snap.exists()) return { ...DEFAULT_REMOTE, ...snap.data() };
   } catch (e) {
-    console.error('getRemoteConfig error:', e);
+    console.error('[DS] getRemoteConfig:', e?.code, e?.message);
   }
-  return {
-    max_qr_size:       '2048',
-    error_correction:  'H',
-    support_email:     'support@mushiqr.pro',
-    privacy_url:       'https://mushiqr.pro/privacy',
-    terms_url:         'https://mushiqr.pro/terms',
-  };
+  return { ...DEFAULT_REMOTE };
 }
+
 export async function saveRemoteConfig(c) {
-  const docRef = doc(db, 'global_config', 'remoteConfig');
-  await setDoc(docRef, c);
-  _audit('REMOTE_CONFIG_UPDATED');
-  return c;
+  try {
+    await setDoc(doc(db, 'global_config', 'remoteConfig'), {
+      ...c,
+      _updatedAt: new Date().toISOString(),
+    });
+    await _audit('REMOTE_CONFIG_UPDATED', { keys: Object.keys(c) });
+    return c;
+  } catch (e) {
+    console.error('[DS] saveRemoteConfig:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// AUDIT LOG
+// AUDIT LOG  —  global_audit_logs (collection)
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getAuditLog(limitVal = 100) {
   try {
@@ -220,7 +275,7 @@ export async function getAuditLog(limitVal = 100) {
     snap.forEach(d => list.push({ ...d.data(), id: d.id }));
     return list;
   } catch (e) {
-    console.error('getAuditLog error:', e);
+    console.error('[DS] getAuditLog:', e?.code, e?.message);
     return [];
   }
 }
@@ -229,38 +284,38 @@ export async function getAuditLog(limitVal = 100) {
 // BACKUP & RESTORE
 // ═══════════════════════════════════════════════════════════════════════════
 export async function exportBackup() {
-  const appSettings = await getAppSettings();
-  const featureFlags = await getFeatureFlags();
-  const announcement = await getAnnouncement();
-  const remoteConfig = await getRemoteConfig();
-  const cloudTemplates = await getCloudTemplates();
-  const auditLog = await getAuditLog();
-  
+  const [appSettings, featureFlags, announcement, remoteConfig, cloudTemplates, auditLog] =
+    await Promise.all([
+      getAppSettings(), getFeatureFlags(), getAnnouncement(),
+      getRemoteConfig(), getCloudTemplates(), getAuditLog(),
+    ]);
   return {
-    version: '1.0',
-    app: 'mushi-qr-pro',
+    version:    '2.0',
+    app:        'mushi-qr-pro',
     exportedAt: new Date().toISOString(),
-    data: { appSettings, featureFlags, announcement, remoteConfig, cloudTemplates, auditLog }
+    data:       { appSettings, featureFlags, announcement, remoteConfig, cloudTemplates, auditLog },
   };
 }
 
 export async function importBackup(backup) {
-  if (!backup?.data) throw new Error('Invalid backup format');
+  if (!backup?.data) throw new Error('Invalid backup format — missing data key.');
   const d = backup.data;
-  if (d.appSettings) await saveAppSettings(d.appSettings);
-  if (d.featureFlags) await saveFeatureFlags(d.featureFlags);
-  if (d.announcement) await saveAnnouncement(d.announcement);
-  if (d.remoteConfig) await saveRemoteConfig(d.remoteConfig);
+  const errors = [];
+  if (d.appSettings)  await saveAppSettings(d.appSettings).catch(e => errors.push(e.message));
+  if (d.featureFlags) await saveFeatureFlags(d.featureFlags).catch(e => errors.push(e.message));
+  if (d.announcement) await saveAnnouncement(d.announcement).catch(e => errors.push(e.message));
+  if (d.remoteConfig) await saveRemoteConfig(d.remoteConfig).catch(e => errors.push(e.message));
   if (d.cloudTemplates && Array.isArray(d.cloudTemplates)) {
     for (const t of d.cloudTemplates) {
-      await saveCloudTemplate(t);
+      await saveCloudTemplate(t).catch(e => errors.push(e.message));
     }
   }
-  _audit('BACKUP_RESTORED', { exportedAt: backup.exportedAt });
+  await _audit('BACKUP_RESTORED', { exportedAt: backup.exportedAt });
+  if (errors.length > 0) throw new Error('Partial restore — some items failed: ' + errors.join('; '));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// STORAGE INFO
+// STORAGE INFO (localStorage)
 // ═══════════════════════════════════════════════════════════════════════════
 export function getStorageInfo() {
   let total = 0;
