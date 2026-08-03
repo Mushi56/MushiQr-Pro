@@ -617,34 +617,6 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
           </div>
         </AdminCard>
       </div>
-
-      {/* Quick Actions */}
-      <div className="ad-quick-grid">
-        {[
-          { icon: Layers,   label: 'Manage Templates',  desc: 'Create and edit QR templates',  color: T.blue,   id: 'templates' },
-          { icon: Settings, label: 'App Configuration', desc: 'App name, colors, messages',     color: T.orange, id: 'app-settings' },
-          { icon: Flag,     label: 'Feature Flags',     desc: 'Toggle features on / off',       color: T.purple, id: 'feature-flags' },
-          { icon: BarChart2,label: 'View Analytics',    desc: 'Usage charts and breakdowns',    color: T.green,  id: 'analytics' },
-        ].map(qa => (
-          <button key={qa.id} onClick={() => onNavigate(qa.id)} style={{
-            background: `${qa.color}0c`, border: `1px solid ${qa.color}2a`, borderRadius: T.r.lg,
-            padding: '16px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center',
-            gap: 12, textAlign: 'left', transition: 'all 0.15s', fontFamily: 'inherit',
-          }}
-            onMouseEnter={e => e.currentTarget.style.background = `${qa.color}1a`}
-            onMouseLeave={e => e.currentTarget.style.background = `${qa.color}0c`}
-          >
-            <div style={{ width: 42, height: 42, borderRadius: T.r.md, background: `${qa.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <qa.icon size={19} color={qa.color} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 2 }}>{qa.label}</div>
-              <div style={{ fontSize: 11, color: T.textSec }}>{qa.desc}</div>
-            </div>
-            <ArrowUpRight size={15} color={qa.color} style={{ flexShrink: 0 }} />
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

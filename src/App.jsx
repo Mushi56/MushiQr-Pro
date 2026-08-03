@@ -76,8 +76,9 @@ import HomePage from './components/HomePage';
 import SavedPage from './components/SavedPage';
 import SettingsPage from './components/SettingsPage';
 import YouPage from './components/YouPage';
-import { auth } from './services/firebase';
+import { auth, db } from './services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { doc, onSnapshot, collection } from 'firebase/firestore';
 import BatchPage from './components/BatchPage';
 import BarcodePage from './components/BarcodePage';
 import ScannerGunPage from './components/ScannerGunPage';
@@ -1017,26 +1018,60 @@ export default function App() {
   const [customTemplates, setCustomTemplates] = useState(() => getUserTemplates());
 
   useEffect(() => {
-    // Load admin settings on mount
+    // Set local storage fallback/defaults initially
     const _read = (key) => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
-    const settings   = _read('qrgen_app_settings');
-    const announce   = _read('qrgen_announcement');
-    const flags      = _read('qrgen_feature_flags');
-    if (settings)  setAdminSettings(settings);
-    if (announce)  setAdminAnnouncement(announce);
-    if (flags)     setFeatureFlags(flags);
-    setCustomTemplates(getUserTemplates());
-    // Update document title from admin settings
-    if (settings?.appName) document.title = settings.appName;
-    // Listen for admin changes (in case admin panel is open in another tab)
-    const onStorage = (e) => {
-      if (e.key === 'qrgen_app_settings')  { const v = _read('qrgen_app_settings'); if (v) { setAdminSettings(v); if (v.appName) document.title = v.appName; } }
-      if (e.key === 'qrgen_announcement')  { setAdminAnnouncement(_read('qrgen_announcement')); }
-      if (e.key === 'qrgen_feature_flags') { setFeatureFlags(_read('qrgen_feature_flags')); }
-      if (e.key === 'qrgen_cloud_templates') { setCustomTemplates(getUserTemplates()); }
+    const settings = _read('qrgen_app_settings');
+    const announce = _read('qrgen_announcement');
+    const flags = _read('qrgen_feature_flags');
+    const cacheTemplates = _read('qrgen_cloud_templates');
+
+    if (settings) {
+      setAdminSettings(settings);
+      if (settings.appName) document.title = settings.appName;
+    }
+    if (announce) setAdminAnnouncement(announce);
+    if (flags) setFeatureFlags(flags);
+    if (cacheTemplates) setCustomTemplates(cacheTemplates);
+
+    // Setup real-time subscribers from Firestore
+    const unsubSettings = onSnapshot(doc(db, 'global_config', 'appSettings'), (snap) => {
+      if (snap.exists()) {
+        const val = snap.data();
+        setAdminSettings(val);
+        localStorage.setItem('qrgen_app_settings', JSON.stringify(val));
+        if (val.appName) document.title = val.appName;
+      }
+    });
+
+    const unsubAnnounce = onSnapshot(doc(db, 'global_config', 'announcement'), (snap) => {
+      if (snap.exists()) {
+        const val = snap.data();
+        setAdminAnnouncement(val);
+        localStorage.setItem('qrgen_announcement', JSON.stringify(val));
+      }
+    });
+
+    const unsubFlags = onSnapshot(doc(db, 'global_config', 'featureFlags'), (snap) => {
+      if (snap.exists()) {
+        const val = snap.data();
+        setFeatureFlags(val);
+        localStorage.setItem('qrgen_feature_flags', JSON.stringify(val));
+      }
+    });
+
+    const unsubTemplates = onSnapshot(collection(db, 'global_templates'), (snap) => {
+      const list = [];
+      snap.forEach(d => list.push({ ...d.data(), id: d.id }));
+      setCustomTemplates(list);
+      localStorage.setItem('qrgen_cloud_templates', JSON.stringify(list));
+    });
+
+    return () => {
+      unsubSettings();
+      unsubAnnounce();
+      unsubFlags();
+      unsubTemplates();
     };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   // Maintenance mode flag (used in render)

@@ -1,55 +1,34 @@
 // src/services/adminDataService.js
 // ─── Firebase-Ready Data Abstraction Layer ─────────────────────────────────
-// All methods return Promises so swapping localStorage → Firestore
-// requires ZERO UI changes — just replace this file.
+// All methods read and write globally in Firestore so that any config changes
+// apply to all users in real-time.
 
-// ── Storage Keys ──────────────────────────────────────────────────────────
-const KEYS = {
-  history:        'qrgen_history',
-  saved:          'qrgen_saved',
-  drafts:         'qrgen_drafts',
-  cloudTemplates: 'qrgen_cloud_templates',
-  appSettings:    'qrgen_app_settings',
-  featureFlags:   'qrgen_feature_flags',
-  announcement:   'qrgen_announcement',
-  remoteConfig:   'qrgen_remote_config',
-  auditLog:       'qrgen_audit_log',
-  preferences:    'qrgen_preferences',
-};
+import { db } from './firebase';
+import { doc, getDoc, setDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, limit as firestoreLimit } from 'firebase/firestore';
 
-// ── Core helpers ──────────────────────────────────────────────────────────
-function _read(key) {
-  try { return JSON.parse(localStorage.getItem(key) || 'null'); }
-  catch { return null; }
-}
-function _write(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); }
-  catch (e) { console.warn('[adminDataService] write failed:', key, e); }
-}
-
-// ── Internal Audit Logger ─────────────────────────────────────────────────
-function _audit(action, meta = {}) {
+// Helper to audit actions in Firestore
+async function _audit(action, meta = {}) {
   try {
-    const log = _read(KEYS.auditLog) || [];
-    log.unshift({
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    const logsRef = collection(db, 'global_audit_logs');
+    await addDoc(logsRef, {
       action,
       meta,
       actor: 'super_admin',
-      ts: new Date().toISOString(),
+      ts: new Date().toISOString()
     });
-    if (log.length > 500) log.pop();
-    _write(KEYS.auditLog, log);
-  } catch {}
+  } catch (e) {
+    console.error('[adminDataService] audit log failed:', e);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // APP STATS
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getAppStats() {
-  const history = _read(KEYS.history) || [];
-  const saved   = _read(KEYS.saved)   || [];
-  const cloud   = _read(KEYS.cloudTemplates) || [];
+  const _read = (key) => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
+  const history = _read('qrgen_history') || [];
+  const saved   = _read('qrgen_saved')   || [];
+  const cloud   = await getCloudTemplates();
 
   return {
     historyCount:   history.length,
@@ -65,7 +44,8 @@ export async function getAppStats() {
 // ACTIVITY CHART (last N days)
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getActivityChartData(days = 7) {
-  const history = _read(KEYS.history) || [];
+  const _read = (key) => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
+  const history = _read('qrgen_history') || [];
   const result  = [];
   for (let i = days - 1; i >= 0; i--) {
     const d  = new Date();
@@ -82,15 +62,25 @@ export async function getActivityChartData(days = 7) {
 // ═══════════════════════════════════════════════════════════════════════════
 // HISTORY
 // ═══════════════════════════════════════════════════════════════════════════
-export async function getHistory(limit = 100) {
-  return (_read(KEYS.history) || []).slice(0, limit);
+export async function getHistory(limitVal = 100) {
+  const _read = (key) => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
+  return (_read('qrgen_history') || []).slice(0, limitVal);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // APP SETTINGS
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getAppSettings() {
-  return _read(KEYS.appSettings) || {
+  try {
+    const docRef = doc(db, 'global_config', 'appSettings');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+  } catch (e) {
+    console.error('getAppSettings error:', e);
+  }
+  return {
     appName:            'Mushi QR Pro',
     brandColor:         '#D60036',
     welcomeText:        'Create and scan QR codes instantly!',
@@ -100,7 +90,8 @@ export async function getAppSettings() {
   };
 }
 export async function saveAppSettings(s) {
-  _write(KEYS.appSettings, s);
+  const docRef = doc(db, 'global_config', 'appSettings');
+  await setDoc(docRef, s);
   _audit('APP_SETTINGS_UPDATED');
   return s;
 }
@@ -109,7 +100,16 @@ export async function saveAppSettings(s) {
 // FEATURE FLAGS
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getFeatureFlags() {
-  return _read(KEYS.featureFlags) || {
+  try {
+    const docRef = doc(db, 'global_config', 'featureFlags');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+  } catch (e) {
+    console.error('getFeatureFlags error:', e);
+  }
+  return {
     qr_generator:      true,
     barcode_generator: true,
     scanner:           true,
@@ -125,7 +125,8 @@ export async function getFeatureFlags() {
   };
 }
 export async function saveFeatureFlags(f) {
-  _write(KEYS.featureFlags, f);
+  const docRef = doc(db, 'global_config', 'featureFlags');
+  await setDoc(docRef, f);
   _audit('FEATURE_FLAGS_UPDATED');
   return f;
 }
@@ -134,19 +135,26 @@ export async function saveFeatureFlags(f) {
 // CLOUD TEMPLATES
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getCloudTemplates() {
-  return _read(KEYS.cloudTemplates) || [];
+  try {
+    const colRef = collection(db, 'global_templates');
+    const snap = await getDocs(colRef);
+    const list = [];
+    snap.forEach(d => list.push({ ...d.data(), id: d.id }));
+    return list;
+  } catch (e) {
+    console.error('getCloudTemplates error:', e);
+    return [];
+  }
 }
 export async function saveCloudTemplate(t) {
-  const all = _read(KEYS.cloudTemplates) || [];
-  const idx = all.findIndex(x => x.id === t.id);
-  if (idx >= 0) all[idx] = t; else all.push(t);
-  _write(KEYS.cloudTemplates, all);
+  const docRef = doc(db, 'global_templates', t.id);
+  await setDoc(docRef, t);
   _audit('TEMPLATE_SAVED', { id: t.id, name: t.name });
   return t;
 }
 export async function deleteCloudTemplate(id) {
-  const all = (_read(KEYS.cloudTemplates) || []).filter(t => t.id !== id);
-  _write(KEYS.cloudTemplates, all);
+  const docRef = doc(db, 'global_templates', id);
+  await deleteDoc(docRef);
   _audit('TEMPLATE_DELETED', { id });
 }
 
@@ -154,10 +162,20 @@ export async function deleteCloudTemplate(id) {
 // ANNOUNCEMENT
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getAnnouncement() {
-  return _read(KEYS.announcement) || { title: '', message: '', active: false, type: 'info' };
+  try {
+    const docRef = doc(db, 'global_config', 'announcement');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+  } catch (e) {
+    console.error('getAnnouncement error:', e);
+  }
+  return { title: '', message: '', active: false, type: 'info' };
 }
 export async function saveAnnouncement(a) {
-  _write(KEYS.announcement, { ...a, updatedAt: new Date().toISOString() });
+  const docRef = doc(db, 'global_config', 'announcement');
+  await setDoc(docRef, { ...a, updatedAt: new Date().toISOString() });
   _audit('ANNOUNCEMENT_UPDATED');
   return a;
 }
@@ -166,7 +184,16 @@ export async function saveAnnouncement(a) {
 // REMOTE CONFIG
 // ═══════════════════════════════════════════════════════════════════════════
 export async function getRemoteConfig() {
-  return _read(KEYS.remoteConfig) || {
+  try {
+    const docRef = doc(db, 'global_config', 'remoteConfig');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+  } catch (e) {
+    console.error('getRemoteConfig error:', e);
+  }
+  return {
     max_qr_size:       '2048',
     error_correction:  'H',
     support_email:     'support@mushiqr.pro',
@@ -175,7 +202,8 @@ export async function getRemoteConfig() {
   };
 }
 export async function saveRemoteConfig(c) {
-  _write(KEYS.remoteConfig, c);
+  const docRef = doc(db, 'global_config', 'remoteConfig');
+  await setDoc(docRef, c);
   _audit('REMOTE_CONFIG_UPDATED');
   return c;
 }
@@ -183,32 +211,56 @@ export async function saveRemoteConfig(c) {
 // ═══════════════════════════════════════════════════════════════════════════
 // AUDIT LOG
 // ═══════════════════════════════════════════════════════════════════════════
-export async function getAuditLog(limit = 100) {
-  return (_read(KEYS.auditLog) || []).slice(0, limit);
+export async function getAuditLog(limitVal = 100) {
+  try {
+    const colRef = collection(db, 'global_audit_logs');
+    const q = query(colRef, orderBy('ts', 'desc'), firestoreLimit(limitVal));
+    const snap = await getDocs(q);
+    const list = [];
+    snap.forEach(d => list.push({ ...d.data(), id: d.id }));
+    return list;
+  } catch (e) {
+    console.error('getAuditLog error:', e);
+    return [];
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // BACKUP & RESTORE
 // ═══════════════════════════════════════════════════════════════════════════
 export async function exportBackup() {
-  const data = {};
-  for (const [name, key] of Object.entries(KEYS)) {
-    data[name] = _read(key);
-  }
-  return { version: '1.0', app: 'mushi-qr-pro', exportedAt: new Date().toISOString(), data };
+  const appSettings = await getAppSettings();
+  const featureFlags = await getFeatureFlags();
+  const announcement = await getAnnouncement();
+  const remoteConfig = await getRemoteConfig();
+  const cloudTemplates = await getCloudTemplates();
+  const auditLog = await getAuditLog();
+  
+  return {
+    version: '1.0',
+    app: 'mushi-qr-pro',
+    exportedAt: new Date().toISOString(),
+    data: { appSettings, featureFlags, announcement, remoteConfig, cloudTemplates, auditLog }
+  };
 }
+
 export async function importBackup(backup) {
   if (!backup?.data) throw new Error('Invalid backup format');
-  for (const [name, key] of Object.entries(KEYS)) {
-    if (Object.prototype.hasOwnProperty.call(backup.data, name)) {
-      _write(key, backup.data[name]);
+  const d = backup.data;
+  if (d.appSettings) await saveAppSettings(d.appSettings);
+  if (d.featureFlags) await saveFeatureFlags(d.featureFlags);
+  if (d.announcement) await saveAnnouncement(d.announcement);
+  if (d.remoteConfig) await saveRemoteConfig(d.remoteConfig);
+  if (d.cloudTemplates && Array.isArray(d.cloudTemplates)) {
+    for (const t of d.cloudTemplates) {
+      await saveCloudTemplate(t);
     }
   }
   _audit('BACKUP_RESTORED', { exportedAt: backup.exportedAt });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// STORAGE INFO (synchronous utility)
+// STORAGE INFO
 // ═══════════════════════════════════════════════════════════════════════════
 export function getStorageInfo() {
   let total = 0;
