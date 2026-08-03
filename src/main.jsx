@@ -16,6 +16,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<App />} />
         <Route path="/generator" element={<App />} />
         <Route path="/settings" element={<App />} />
+        <Route path="/you" element={<App />} />
         <Route path="/saved" element={<App />} />
         <Route path="/history" element={<App />} />
         <Route path="/scanner" element={<App />} />

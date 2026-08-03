@@ -542,7 +542,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <ChevronRight size={15} color="#FF4D6D" />
                 </div>
                 <p style={{ fontSize: '10px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.72)', fontWeight: 500, lineHeight: 1.4 }}>
-                  Design custom QR codes with styles, logos &amp; colors.
+                  Colors, logos, styles &amp; textures.
                 </p>
               </div>
 
@@ -563,17 +563,12 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
               }}>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                   <Image size={9} color="#FF4D6D" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Logos</span>
+                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Logo</span>
                 </div>
                 <div style={{ width: '1px', height: '12px', background: 'rgba(255,77,109,0.25)' }} />
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                   <Crown size={9} color="#FF4D6D" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>HD</span>
-                </div>
-                <div style={{ width: '1px', height: '12px', background: 'rgba(255,77,109,0.25)' }} />
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                  <Shield size={9} color="#FF4D6D" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Secure</span>
+                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Customize</span>
                 </div>
               </div>
             </div>
@@ -637,7 +632,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   <ChevronRight size={15} color="#2DD4BF" />
                 </div>
                 <p style={{ fontSize: '10px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.72)', fontWeight: 500, lineHeight: 1.4 }}>
-                  Generate Code 128, EAN, UPC &amp; standard formats.
+                  30+ barcode formats supported.
                 </p>
               </div>
 
@@ -658,17 +653,12 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
               }}>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                   <Barcode size={9} color="#2DD4BF" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Formats</span>
+                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>30+ Formats</span>
                 </div>
                 <div style={{ width: '1px', height: '12px', background: 'rgba(45,212,191,0.25)' }} />
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                  <Zap size={9} color="#2DD4BF" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Fast</span>
-                </div>
-                <div style={{ width: '1px', height: '12px', background: 'rgba(45,212,191,0.25)' }} />
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                  <Shield size={9} color="#2DD4BF" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>1D/2D</span>
+                  <Layers size={9} color="#2DD4BF" />
+                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>1D &amp; 2D</span>
                 </div>
               </div>
             </div>
@@ -733,7 +723,7 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
                   Bulk Batch Generator
                 </h3>
                 <p style={{ fontSize: '10.5px', margin: 0, color: 'rgba(255,255,255,0.65)', fontWeight: 500, lineHeight: 1.3 }}>
-                  QR &amp; barcodes from CSV / Excel
+                  Create 10K+ QR codes &amp; barcodes from CSV / Excel
                 </p>
               </div>
             </div>

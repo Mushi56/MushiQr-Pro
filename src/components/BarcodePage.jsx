@@ -102,7 +102,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isUndoRedoActionRef = useRef(false);
-  const [exportQuality, setExportQuality] = useState('High');
+  const [exportQuality, setExportQuality] = useState('Medium');
 
   const canvasRef = useRef(null);
 
@@ -324,17 +324,75 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
         </div>
 
         <div className="app-header-actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {/* Export Dropdown */}
+          {/* Export Split Button */}
           <div style={{ position: 'relative' }}>
-            <button
-              className={`btn-header-action btn-header-save ${formatDropdownOpen ? 'active' : ''}`}
-              onClick={() => { if (!isDataValid) { showToast(currentStandard.errorMsg, 'error'); return; } setFormatDropdownOpen(!formatDropdownOpen); }}
-              style={{ opacity: isDataValid ? 1 : 0.5 }}
-              title="Export"
+            <div
+              className={`save-split-header-btn ${!isDataValid ? 'disabled' : ''} ${formatDropdownOpen ? 'active' : ''}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: 'var(--accent-gradient)',
+                borderRadius: '12px',
+                padding: '2px',
+                boxShadow: '0 4px 14px rgba(214, 0, 54, 0.25)',
+                height: '38px',
+                opacity: !isDataValid ? 0.5 : 1,
+                pointerEvents: !isDataValid ? 'none' : 'auto'
+              }}
             >
-              <Save size={20} />
-              <ChevronDown size={14} style={{ marginLeft: 2, opacity: 0.8 }} />
-            </button>
+              {/* Main Button: Default PNG Normal Quality Save */}
+              <button
+                onClick={() => {
+                  if (!isDataValid) { showToast(currentStandard.errorMsg, 'error'); return; }
+                  handleDownload('PNG');
+                }}
+                disabled={!isDataValid}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#FFFFFF',
+                  padding: '0 12px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  height: '100%'
+                }}
+                title="Save as PNG (Normal Quality)"
+              >
+                <Save size={16} color="#FFFFFF" />
+                <span>Save</span>
+              </button>
+
+              {/* Vertical Separation Line */}
+              <div style={{ width: '1px', height: '18px', background: 'rgba(255, 255, 255, 0.35)', flexShrink: 0 }} />
+
+              {/* Chevron Dropdown Arrow */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!isDataValid) { showToast(currentStandard.errorMsg, 'error'); return; }
+                  setFormatDropdownOpen(!formatDropdownOpen);
+                }}
+                disabled={!isDataValid}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#FFFFFF',
+                  padding: '0 8px',
+                  cursor: 'pointer',
+                  height: '100%'
+                }}
+                title="Export Options"
+              >
+                <ChevronDown size={14} style={{ transform: formatDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+            </div>
             {formatDropdownOpen && isDataValid && (
               <div className="app-dropdown-menu save-as-dropdown fade-in" style={{ top: 'calc(100% + 12px)', right: 0, width: 280 }}>
                 <div style={{ padding: 12 }}>

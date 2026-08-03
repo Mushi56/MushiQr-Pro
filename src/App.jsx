@@ -20,6 +20,7 @@ import {
   FileImage,
   FileCode,
   FileText,
+  Folder,
   Pencil,
   Palette,
   Pipette,
@@ -37,6 +38,7 @@ import {
   Home,
   Bookmark,
   Settings,
+  User,
   Type,
   ALargeSmall,
   Paintbrush,
@@ -66,13 +68,16 @@ import QRDataInput from './components/QRDataInput';
 import { DotStyleSelector, EyeStyleSelector } from './components/StyleSelectors';
 import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData, constrainToSafeZone } from './utils/qrEngine';
 import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from './utils/exportUtils';
-import { saveToHistory, getSaved, saveToSaved, getPreferences, savePreferences } from './utils/storage';
+import { saveToHistory, getSaved, saveToSaved, getPreferences, savePreferences, syncUserFirestoreData, handleLogoutClear } from './utils/storage';
 import { QR_TEMPLATES, getAllTemplates, getUserTemplates } from './utils/qrTemplates';
 import QRScanner from './components/QRScanner';
 import HistoryPage from './components/HistoryPage';
 import HomePage from './components/HomePage';
 import SavedPage from './components/SavedPage';
 import SettingsPage from './components/SettingsPage';
+import YouPage from './components/YouPage';
+import { auth } from './services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import BatchPage from './components/BatchPage';
 import BarcodePage from './components/BarcodePage';
 import ScannerGunPage from './components/ScannerGunPage';
@@ -884,6 +889,7 @@ export default function App() {
   const getPageFromPath = (path) => {
     if (path === '/generator') return 'generator';
     if (path === '/settings') return 'settings';
+    if (path === '/you') return 'you';
     if (path === '/saved') return 'saved';
     if (path === '/history') return 'history';
     if (path === '/scanner') return 'scanner';
@@ -894,6 +900,20 @@ export default function App() {
   };
 
   const [activeTab, setActiveTab] = useState('content');
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      if (user) {
+        syncUserFirestoreData();
+      } else {
+        handleLogoutClear();
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   const [tabHistory, setTabHistory] = useState([]);
   const [activePage, setActivePage] = useState(() => {
     return location.state?.activePage || getPageFromPath(location.pathname);
@@ -1226,7 +1246,7 @@ export default function App() {
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', setter: null });
   const handleOpenAdv = (color, setter) => setAdvPicker({ open: true, color, setter });
   const [selectedFormat, setSelectedFormat] = useState('PNG');
-  const [exportQuality, setExportQuality] = useState('High'); // Default to High (2048px)
+  const [exportQuality, setExportQuality] = useState('Medium'); // Default to Medium (1024px)
   const [isDataModalOpen, setIsDataModalOpen] = useState(() => location.state?.isDataModalOpen || false);
   const [unsavedChangesModal, setUnsavedChangesModal] = useState({ isOpen: false, nextPage: null });
   const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
@@ -1352,6 +1372,7 @@ export default function App() {
     let path = '/';
     if (page === 'generator') path = '/generator';
     else if (page === 'settings') path = '/settings';
+    else if (page === 'you') path = '/you';
     else if (page === 'saved') path = '/saved';
     else if (page === 'history') path = '/history';
     else if (page === 'scanner') path = '/scanner';
@@ -1681,19 +1702,20 @@ export default function App() {
 
   // ── Auto Theme Logic ──
   useEffect(() => {
-    const prefs = getPreferences();
-    if (prefs.theme) {
-      setTheme(prefs.theme);
-    } else {
-      // Auto-detect system preference if no user preference is saved
-      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(systemDark ? 'dark' : 'light');
-    }
+    const applyTheme = () => {
+      const prefs = getPreferences();
+      if (prefs.theme) {
+        setTheme(prefs.theme);
+      } else {
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(systemDark ? 'dark' : 'light');
+      }
+    };
 
-    // Listen for system theme changes
+    applyTheme();
+
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e) => {
-      // Only auto-update if the user hasn't explicitly set a preference
       const currentPrefs = getPreferences();
       if (!currentPrefs.theme) {
         setTheme(e.matches ? 'dark' : 'light');
@@ -1701,7 +1723,12 @@ export default function App() {
     };
 
     mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    window.addEventListener('preferences-sync', applyTheme);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+      window.removeEventListener('preferences-sync', applyTheme);
+    };
   }, []);
 
 
@@ -3348,7 +3375,7 @@ export default function App() {
       )}
       {/* ── Header ── */}
       <header 
-        className={`app-header ${['home', 'saved', 'history', 'settings'].includes(activePage) ? 'header-home' : ''}`}
+        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''}`}
         style={{ display: activePage === 'barcode' ? 'none' : 'flex' }}
       >
         <div className="app-logo">
@@ -3477,15 +3504,69 @@ export default function App() {
                 </div>
               ) : (
                 <div className="header-save-container" ref={downloadBtnRef} style={{ position: 'relative' }}>
-                  <button
-                    className={`btn-header-action btn-header-save ${!qrMatrixInfo ? 'disabled' : ''} ${formatDropdownOpen ? 'active' : ''}`}
-                    onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
-                    disabled={!qrMatrixInfo}
-                    title="Save As..."
+                  <div
+                    className={`save-split-header-btn ${!qrMatrixInfo ? 'disabled' : ''} ${formatDropdownOpen ? 'active' : ''}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      background: 'var(--accent-gradient)',
+                      borderRadius: '12px',
+                      padding: '2px',
+                      boxShadow: '0 4px 14px rgba(214, 0, 54, 0.25)',
+                      height: '38px',
+                      opacity: !qrMatrixInfo ? 0.5 : 1,
+                      pointerEvents: !qrMatrixInfo ? 'none' : 'auto'
+                    }}
                   >
-                    <Save size={20} />
-                    <ChevronDown size={14} style={{ marginLeft: 2, opacity: 0.8 }} />
-                  </button>
+                    {/* Main Button: Default PNG Normal Quality Save */}
+                    <button
+                      onClick={() => handleDownload('PNG', FORMAT_MAP['PNG'])}
+                      disabled={!qrMatrixInfo}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#FFFFFF',
+                        padding: '0 12px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        height: '100%'
+                      }}
+                      title="Save as PNG (Normal Quality)"
+                    >
+                      <Save size={16} color="#FFFFFF" />
+                      <span>Save</span>
+                    </button>
+
+                    {/* Vertical Separation Line */}
+                    <div style={{ width: '1px', height: '18px', background: 'rgba(255, 255, 255, 0.35)', flexShrink: 0 }} />
+
+                    {/* Chevron Dropdown Arrow */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFormatDropdownOpen(!formatDropdownOpen);
+                      }}
+                      disabled={!qrMatrixInfo}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#FFFFFF',
+                        padding: '0 8px',
+                        cursor: 'pointer',
+                        height: '100%'
+                      }}
+                      title="Export Options"
+                    >
+                      <ChevronDown size={14} style={{ transform: formatDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                    </button>
+                  </div>
 
                 {formatDropdownOpen && (
                   <div className="app-dropdown-menu save-as-dropdown fade-in" style={{ top: 'calc(100% + 12px)', right: 0, width: '280px' }}>
@@ -3718,9 +3799,42 @@ export default function App() {
                         <FileIcon size={16} /> Terms of Service
                       </button>
                       <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
-                      <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/admin'; }} style={{ color: '#D60036', fontWeight: 700 }}>
-                        <Settings size={16} /> Super Admin Panel
+                      <button
+                        className="menu-link-btn"
+                        onClick={async () => {
+                          const prefs = getPreferences();
+                          let currentLoc = prefs.saveLocation || 'Mushi QR Pro';
+                          try {
+                            if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
+                              const handle = await window.showDirectoryPicker();
+                              if (handle && handle.name) {
+                                const newLoc = handle.name;
+                                savePreferences({ ...prefs, saveLocation: newLoc });
+                                showToast(`Save location updated: ${newLoc}`);
+                                return;
+                              }
+                            }
+                          } catch (e) {
+                            console.log('Directory picker unsupported', e);
+                          }
+                          const custom = window.prompt('Enter custom save folder / path:', currentLoc);
+                          if (custom !== null && custom.trim() !== '') {
+                            const clean = custom.trim();
+                            savePreferences({ ...prefs, saveLocation: clean });
+                            showToast(`Save location updated: ${clean}`);
+                          }
+                        }}
+                      >
+                        <Folder size={16} /> Save Location
                       </button>
+                      {currentUser?.email === 'mabuneri143@gmail.com' && (
+                        <>
+                          <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
+                          <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/admin'; }} style={{ color: '#D60036', fontWeight: 700 }}>
+                            <Settings size={16} /> Super Admin Panel
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
@@ -5236,6 +5350,15 @@ export default function App() {
           <ScannerGunPage onNavigate={navigateTo} />
         ) : activePage === 'settings' ? (
           <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
+        ) : activePage === 'you' ? (
+          <YouPage 
+            onNavigate={navigateTo} 
+            theme={theme} 
+            setTheme={setTheme} 
+            effectiveTheme={effectiveTheme} 
+            currentUser={currentUser}
+            showToast={showToast}
+          />
         ) : (
           <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} initialFilter={historyFilter} />
         )}
@@ -5261,7 +5384,7 @@ export default function App() {
       )}
 
       {/* ── Main App Navigation ── */}
-      {(['home', 'saved', 'history', 'settings'].includes(activePage)) && (
+      {(['home', 'saved', 'history', 'you', 'settings'].includes(activePage)) && (
         <nav className="bottom-nav">
           <button 
             className={`bottom-nav-tab${activePage === 'home' ? ' active' : ''}`}
@@ -5324,11 +5447,44 @@ export default function App() {
           </button>
           
           <button 
-            className={`bottom-nav-tab${activePage === 'settings' ? ' active' : ''}`}
-            onClick={() => navigateTo('settings')}
+            className={`bottom-nav-tab${(activePage === 'you' || activePage === 'settings') ? ' active' : ''}`}
+            onClick={() => navigateTo('you')}
           >
-            <span className="bottom-nav-icon"><Settings size={24} /></span>
-            <span className="bottom-nav-label">Settings</span>
+            <span className="bottom-nav-icon">
+              {currentUser ? (
+                currentUser.photoURL ? (
+                  <img 
+                    src={currentUser.photoURL} 
+                    alt="You" 
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: (activePage === 'you' || activePage === 'settings') ? '2px solid var(--accent-primary)' : '1px solid var(--text-muted)'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: 'var(--accent-gradient)',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '10px',
+                    fontWeight: 700
+                  }}>
+                    {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
+                  </div>
+                )
+              ) : (
+                <User size={24} />
+              )}
+            </span>
+            <span className="bottom-nav-label">You</span>
           </button>
         </nav>
       )}

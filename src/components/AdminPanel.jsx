@@ -18,6 +18,8 @@ import {
 
 import * as DS from '../services/adminDataService';
 import { QR_TEMPLATES } from '../utils/qrTemplates';
+import { auth } from '../services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────
 const T = {
@@ -2263,6 +2265,9 @@ function SupportPanel() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function AdminPanel() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
   const [section, setSection]     = useState('dashboard');
   const [isMobile, setIsMobile]   = useState(window.innerWidth < 900);
   const [sidebarOpen, setSidebar] = useState(false);
@@ -2279,6 +2284,16 @@ export default function AdminPanel() {
   const [loading, setLoading]               = useState(true);
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (authLoading || !currentUser || currentUser.email !== 'mabuneri143@gmail.com') return;
+
     async function init() {
       try {
         const [s, c, h, as_, ff, ct, ann, rc, al] = await Promise.all([
@@ -2295,7 +2310,28 @@ export default function AdminPanel() {
     const onResize = () => setIsMobile(window.innerWidth < 900);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, []);
+  }, [authLoading, currentUser]);
+
+  if (authLoading) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: T.bg, color: T.text }}>
+        <RefreshCw className="animate-spin" size={32} color={T.accent} />
+      </div>
+    );
+  }
+
+  if (!currentUser || currentUser.email !== 'mabuneri143@gmail.com') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: T.bg, color: T.text, padding: 24, textAlign: 'center', fontFamily: "sans-serif" }}>
+        <Shield size={64} color={T.accent} style={{ marginBottom: 24 }} />
+        <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>Access Denied</h1>
+        <p style={{ color: T.textSec, maxWidth: 360, marginBottom: 24 }}>You must be logged in as the superadmin to access this panel.</p>
+        <button onClick={() => window.location.hash = '#/'} style={{ background: T.accent, color: '#fff', border: 'none', padding: '12px 24px', borderRadius: T.r.md, cursor: 'pointer', fontWeight: 700 }}>
+          Go to Home
+        </button>
+      </div>
+    );
+  }
 
   const refreshTemplates = async () => setCloudTemplates(await DS.getCloudTemplates());
   const refreshAudit     = async () => setAuditLog(await DS.getAuditLog(100));

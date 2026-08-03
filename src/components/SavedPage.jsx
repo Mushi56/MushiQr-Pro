@@ -36,6 +36,12 @@ export default function SavedPage({ onLoadQR }) {
 
   useEffect(() => {
     setSaved(getSaved());
+
+    const handleSync = () => {
+      setSaved(getSaved());
+    };
+    window.addEventListener('storage-sync', handleSync);
+    return () => window.removeEventListener('storage-sync', handleSync);
   }, []);
 
   const handleDelete = (e, id) => {

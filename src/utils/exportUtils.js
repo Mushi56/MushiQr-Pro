@@ -52,10 +52,10 @@ async function saveToGallery(base64Data, filename) {
       albums = result.albums || [];
     } catch {}
 
-    let albumId = albums.find(a => a.name === 'Mushi Qr')?.identifier;
+    let albumId = albums.find(a => a.name === 'Mushi QR Pro')?.identifier;
     if (!albumId) {
       try {
-        albumId = (await Media.createAlbum({ name: 'Mushi Qr' })).id;
+        albumId = (await Media.createAlbum({ name: 'Mushi QR Pro' })).id;
       } catch {
         // Some devices don't support creating albums, save to default
       }
@@ -80,7 +80,7 @@ async function saveToGallery(base64Data, filename) {
       directory: Directory.Documents,
     });
     await Share.share({
-      title: 'Mushi Qr Pro - Save QR Code',
+      title: 'Mushi QR Pro - Save QR Code',
       url: docFile.uri,
       dialogTitle: 'Save or Share your QR Code',
     });
@@ -88,7 +88,7 @@ async function saveToGallery(base64Data, filename) {
   } catch {
     // Last resort: try sharing the cache file
     await Share.share({
-      title: 'Mushi Qr Pro - Save QR Code',
+      title: 'Mushi QR Pro - Save QR Code',
       url: tempFile.uri,
       dialogTitle: 'Save or Share your QR Code',
     });
@@ -115,7 +115,7 @@ async function saveFileViaShare(base64Data, filename) {
 
   // Open share sheet so user can save / send the file
   await Share.share({
-    title: 'Mushi Qr Pro',
+    title: 'Mushi QR Pro',
     url: fileUri,
     dialogTitle: 'Save or Share your QR Code',
   });

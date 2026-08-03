@@ -46,8 +46,15 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
   }, []);
 
   useEffect(() => {
-    setHistory(getHistory());
-    setSavedIds(new Set(getSaved().map(s => s.id)));
+    const loadData = () => {
+      setHistory(getHistory());
+      setSavedIds(new Set(getSaved().map(s => s.id)));
+    };
+
+    loadData();
+
+    window.addEventListener('storage-sync', loadData);
+    return () => window.removeEventListener('storage-sync', loadData);
   }, []);
 
   const handleDelete = (id) => {

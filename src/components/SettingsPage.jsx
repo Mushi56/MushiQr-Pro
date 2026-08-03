@@ -1,8 +1,11 @@
-import { Moon, Sun, Info, Shield, FileText, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Moon, Sun, Info, Shield, FileText, ChevronRight, Folder, Settings as SettingsIcon } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import AppIcon from './AppIcon';
 
 export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
+  const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
+
   const handleThemeChange = () => {
     let next;
     if (theme === 'dark') next = 'light';
@@ -11,6 +14,28 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
     
     setTheme(next);
     savePreferences({ ...getPreferences(), theme: next });
+  };
+
+  const handleChooseFolder = async () => {
+    try {
+      if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
+        const handle = await window.showDirectoryPicker();
+        if (handle && handle.name) {
+          const newLoc = handle.name;
+          setSaveLocation(newLoc);
+          savePreferences({ ...getPreferences(), saveLocation: newLoc });
+          return;
+        }
+      }
+    } catch (e) {
+      console.log('Directory picker cancelled or unsupported', e);
+    }
+    const custom = window.prompt('Enter custom save folder / path:', saveLocation);
+    if (custom !== null && custom.trim() !== '') {
+      const clean = custom.trim();
+      setSaveLocation(clean);
+      savePreferences({ ...getPreferences(), saveLocation: clean });
+    }
   };
 
   const menuItems = [
@@ -30,6 +55,13 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
         fontWeight: 'bold'
       }}>{theme}</span>,
       onClick: handleThemeChange
+    },
+    {
+      id: 'saveLocation',
+      label: 'Save Location',
+      icon: <Folder size={20} />,
+      value: <span style={{ color: 'var(--accent-primary)', fontWeight: 'bold' }}>{saveLocation}</span>,
+      onClick: handleChooseFolder
     },
     {
       id: 'about',
@@ -62,7 +94,14 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
       overflow: 'hidden'
     }}>
       {/* Header */}
-      <div style={{ padding: '24px var(--main-padding-x) 16px', background: 'var(--bg-primary)', zIndex: 10 }}>
+      <div style={{ 
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 24px)', 
+        paddingLeft: 'var(--main-padding-x)', 
+        paddingRight: 'var(--main-padding-x)', 
+        paddingBottom: '16px', 
+        background: 'var(--bg-primary)', 
+        zIndex: 10 
+      }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
