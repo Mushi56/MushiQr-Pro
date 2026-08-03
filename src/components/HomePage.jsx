@@ -477,686 +477,285 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
       position: 'relative'
     }}>
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up">
-        {/* Sliding Hero Cards Section */}
-        <div
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          style={{ position: 'relative', overflow: 'hidden', marginTop: '5px', width: '100%', padding: '15px 0' }}
-        >
-          <div style={{
-          display: 'flex',
-          transform: `translateX(-${activeSlide * 100}%)`,
-          transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-          width: '100%'
-        }}>
-            {/* Slide 1: Custom QR Codes */}
-            <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
-              <div style={{ 
-                borderRadius: '18px',
-                color: '#fff',
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'relative',
-                overflow: 'hidden',
-                boxShadow: '0 16px 48px rgba(214, 0, 54, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
-                height: '210px',
-                background: 'linear-gradient(135deg, #3D0A12 0%, #160407 55%, #220609 100%)',
-              }}>
-                {/* Noise texture overlay */}
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
-                  backgroundSize: '200px 200px',
-                  opacity: 1, pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* QR dot grid texture */}
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: 'radial-gradient(circle, rgba(255,77,109,0.12) 1px, transparent 1px)',
-                  backgroundSize: '14px 14px',
-                  opacity: 1, pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Ghost blurred QR in background */}
-                <div style={{
-                  position: 'absolute', right: '-10px', top: '10px',
-                  width: '130px', height: '130px',
-                  backgroundImage: `url('/qr-hero.png')`,
-                  backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
-                  opacity: 0.06, filter: 'blur(4px)',
-                  pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Center radial glow */}
-                <div style={{
-                  position: 'absolute', top: '50%', left: '55%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '220px', height: '220px',
-                  background: 'radial-gradient(circle, rgba(255,77,109,0.14) 0%, transparent 65%)',
-                  pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Top-right accent glow */}
-                <div style={{
-                  position: 'absolute', top: '-40%', right: '-5%',
-                  width: '200px', height: '200px',
-                  background: 'radial-gradient(circle, rgba(255, 77, 109, 0.28) 0%, transparent 65%)',
-                  filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Bottom-left accent glow */}
-                <div style={{
-                  position: 'absolute', bottom: '-20%', left: '-5%',
-                  width: '160px', height: '160px',
-                  background: 'radial-gradient(circle, rgba(214, 0, 54, 0.22) 0%, transparent 70%)',
-                  filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Floating particles */}
-                <div style={{ position: 'absolute', top: '18%', left: '32%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,77,109,0.7)', boxShadow: '0 0 6px rgba(255,77,109,0.8)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '55%', left: '22%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(255,150,150,0.5)', boxShadow: '0 0 4px rgba(255,150,150,0.6)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '30%', left: '45%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(255,77,109,0.4)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '72%', left: '38%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,200,200,0.35)', pointerEvents: 'none', zIndex: 2 }} />
+        {/* Static Hero Section with Glassmorphism */}
+        <div style={{ marginTop: '10px', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          
+          {/* Top Row: Create QR Code & Create Barcode side-by-side */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', width: '100%' }}>
+            
+            {/* Card 1: Create QR Code */}
+            <div style={{
+              borderRadius: '20px',
+              color: '#fff',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              position: 'relative',
+              overflow: 'hidden',
+              padding: '20px',
+              boxSizing: 'border-box',
+              minHeight: '170px',
+              background: 'linear-gradient(135deg, rgba(61, 10, 18, 0.85) 0%, rgba(22, 4, 7, 0.92) 100%)',
+              backdropFilter: 'blur(20px) saturate(140%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+              border: '1px solid rgba(255, 77, 109, 0.3)',
+              boxShadow: '0 12px 32px rgba(214, 0, 54, 0.2), 0 4px 12px rgba(0,0,0,0.3)',
+              transition: 'transform 0.25s ease, boxShadow 0.25s ease'
+            }}>
+              {/* Background ambient glows & textures */}
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                backgroundImage: 'radial-gradient(circle, rgba(255,77,109,0.12) 1px, transparent 1px)',
+                backgroundSize: '14px 14px', pointerEvents: 'none', zIndex: 1
+              }} />
+              <div style={{
+                position: 'absolute', top: '-30%', right: '-10%',
+                width: '160px', height: '160px',
+                background: 'radial-gradient(circle, rgba(255, 77, 109, 0.35) 0%, transparent 70%)',
+                filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
+              }} />
 
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '20px 24px',
-                  position: 'relative',
-                  flex: 1,
-                  zIndex: 2
-                }}>
-                  {/* Left Column (42%) */}
-                  <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <h2 style={{ 
-                          fontSize: '14px', 
-                          fontWeight: 800, 
-                          margin: 0, 
-                          backgroundImage: 'linear-gradient(90deg, #FF4D6D 0%, #FFA5A5 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          lineHeight: 1.15,
-                          whiteSpace: 'nowrap'
-                        }}>
-                          Custom QR Codes
-                        </h2>
-                      </div>
-                      <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '140px' }}>
-                        Design custom QR codes with styles, colors, custom logos, and frames instantly.
-                      </p>
-                    </div>
-
-                    <button 
-                      onClick={() => onNavigate('generator')}
-                      style={{
-                        backgroundColor: 'rgba(255, 77, 109, 0.15)',
-                        color: '#fff',
-                        border: '1px solid rgba(255, 77, 109, 0.35)',
-                        backdropFilter: 'blur(16px)',
-                        WebkitBackdropFilter: 'blur(16px)',
-                        borderRadius: '24px',
-                        padding: '0 16px',
-                        fontSize: '11px',
-                        fontWeight: 800,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.2)',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                        width: 'fit-content',
-                        height: '32px',
-                        boxSizing: 'border-box'
-                      }}
-                    >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                        Create QR Code <ChevronRight size={13} />
-                      </span>
-                    </button>
+              {/* Card Header & Content */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2, gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '10px',
+                    background: 'rgba(255, 77, 109, 0.18)',
+                    border: '1px solid rgba(255, 77, 109, 0.35)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#FF4D6D'
+                  }}>
+                    <QrCode size={18} />
                   </div>
-
-                   {/* Right Column (58%) Custom QR Mockup */}
-                   <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
-                     {/* Glow aura behind image */}
-                     <div style={{
-                       position: 'absolute', right: '-5px', top: '50%', transform: 'translateY(-50%)',
-                       width: '120px', height: '120px',
-                       background: 'radial-gradient(circle, rgba(255,77,109,0.35) 0%, transparent 70%)',
-                       filter: 'blur(18px)', zIndex: 1, pointerEvents: 'none'
-                     }} />
-                     <img 
-                       src="/qr-hero.png" 
-                       alt="QR Mockup" 
-                       style={{
-                         position: 'absolute',
-                         right: '-15px',
-                         top: '50%',
-                         transform: 'translateY(-50%)',
-                         height: '190px',
-                         width: 'auto',
-                         zIndex: 2,
-                         pointerEvents: 'none',
-                         objectFit: 'contain',
-                         filter: 'drop-shadow(0 12px 24px rgba(255,77,109,0.4)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))'
-                       }}
-                     />
-                   </div>
+                  <h2 style={{
+                    fontSize: '16px',
+                    fontWeight: 800,
+                    margin: '6px 0 0 0',
+                    backgroundImage: 'linear-gradient(90deg, #FF4D6D 0%, #FFA5A5 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    lineHeight: 1.2
+                  }}>
+                    Custom QR Codes
+                  </h2>
+                  <p style={{ fontSize: '11px', margin: 0, color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.35, maxWidth: '180px' }}>
+                    Design custom QR codes with styles, logos & colors.
+                  </p>
                 </div>
 
-                {/* Features Row inside QR Codes card */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0 16px',
-                  backgroundColor: 'rgba(255, 77, 109, 0.08)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  borderTop: '1px solid rgba(255, 77, 109, 0.15)',
-                  gap: '8px',
-                  width: '100%',
-                  height: '40px',
-                  boxSizing: 'border-box',
-                  zIndex: 2
-                }}>
-                  {/* Feature 1: Custom Logos */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', flex: 1, height: '100%' }}>
-                    <div style={{ 
-                      width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#FF4D6D', flexShrink: 0 
-                    }}>
-                      <Image size={11} />
-                    </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>Custom Logos</span>
-                  </div>
+                {/* Hero Icon Canvas */}
+                <div style={{ flexShrink: 0, opacity: 0.9, filter: 'drop-shadow(0 6px 12px rgba(255,77,109,0.3))' }}>
+                  <HeroQRCanvas />
+                </div>
+              </div>
 
-                  {/* Feature 2: HD Quality */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', flex: 1, height: '100%' }}>
-                    <div style={{ 
-                      width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#FF4D6D', flexShrink: 0 
-                    }}>
-                      <Crown size={11} />
-                    </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>HD Quality</span>
-                  </div>
+              {/* Action Button */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', zIndex: 2 }}>
+                <button
+                  onClick={() => onNavigate('generator')}
+                  style={{
+                    backgroundColor: 'rgba(255, 77, 109, 0.2)',
+                    color: '#fff',
+                    border: '1px solid rgba(255, 77, 109, 0.45)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    borderRadius: '20px',
+                    padding: '8px 16px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Create QR Code <ChevronRight size={13} />
+                </button>
 
-                  {/* Feature 3: Secure */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flex: 1, justifyContent: 'center', height: '100%' }}>
-                    <div style={{ 
-                      width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#FF4D6D', flexShrink: 0 
-                    }}>
-                      <Shield size={11} />
-                    </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>Secure</span>
-                  </div>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Custom Logos</span>
                 </div>
               </div>
             </div>
 
-            {/* Slide 2: Standerd Barcodes */}
-            <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
-              <div style={{ 
-                borderRadius: '18px',
-                color: '#fff',
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'relative',
-                overflow: 'hidden',
-                boxShadow: '0 16px 48px rgba(13, 148, 136, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
-                height: '210px',
-                background: 'linear-gradient(135deg, #062E27 0%, #010E0C 55%, #041C18 100%)',
-              }}>
-                {/* Noise texture overlay */}
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
-                  backgroundSize: '200px 200px',
-                  opacity: 1, pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Barcode-stripe texture */}
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: 'repeating-linear-gradient(90deg, rgba(45,212,191,0.04) 0px, rgba(45,212,191,0.04) 2px, transparent 2px, transparent 12px)',
-                  opacity: 1, pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Ghost blurred barcode in background */}
-                <div style={{
-                  position: 'absolute', right: '-10px', top: '12px',
-                  width: '150px', height: '100px',
-                  backgroundImage: `url('/barcode-hero.png')`,
-                  backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
-                  opacity: 0.06, filter: 'blur(4px)',
-                  pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Center radial glow */}
-                <div style={{
-                  position: 'absolute', top: '50%', left: '55%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '220px', height: '220px',
-                  background: 'radial-gradient(circle, rgba(45,212,191,0.12) 0%, transparent 65%)',
-                  pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Top-right accent glow */}
-                <div style={{
-                  position: 'absolute', top: '-40%', right: '-5%',
-                  width: '200px', height: '200px',
-                  background: 'radial-gradient(circle, rgba(20, 184, 166, 0.28) 0%, transparent 65%)',
-                  filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Bottom-left accent glow */}
-                <div style={{
-                  position: 'absolute', bottom: '-20%', left: '-5%',
-                  width: '160px', height: '160px',
-                  background: 'radial-gradient(circle, rgba(13, 148, 136, 0.22) 0%, transparent 70%)',
-                  filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Floating particles */}
-                <div style={{ position: 'absolute', top: '20%', left: '33%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(45,212,191,0.7)', boxShadow: '0 0 6px rgba(45,212,191,0.8)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '58%', left: '24%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(100,240,220,0.5)', boxShadow: '0 0 4px rgba(100,240,220,0.6)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '35%', left: '42%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(45,212,191,0.4)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '68%', left: '36%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(180,255,240,0.35)', pointerEvents: 'none', zIndex: 2 }} />
-                {/* Old glow effects slot kept for compatibility */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-40%',
-                  right: '-5%',
-                  width: '200px',
-                  height: '200px',
-                  background: 'transparent',
-                  pointerEvents: 'none',
-                  zIndex: 0
-                }} />
-                <div style={{ display: 'none' }} />
+            {/* Card 2: Create Barcode */}
+            <div style={{
+              borderRadius: '20px',
+              color: '#fff',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              position: 'relative',
+              overflow: 'hidden',
+              padding: '20px',
+              boxSizing: 'border-box',
+              minHeight: '170px',
+              background: 'linear-gradient(135deg, rgba(6, 46, 39, 0.85) 0%, rgba(1, 14, 12, 0.92) 100%)',
+              backdropFilter: 'blur(20px) saturate(140%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+              border: '1px solid rgba(45, 212, 191, 0.3)',
+              boxShadow: '0 12px 32px rgba(13, 148, 136, 0.2), 0 4px 12px rgba(0,0,0,0.3)',
+              transition: 'transform 0.25s ease, boxShadow 0.25s ease'
+            }}>
+              {/* Background ambient glows & textures */}
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                backgroundImage: 'repeating-linear-gradient(90deg, rgba(45,212,191,0.04) 0px, rgba(45,212,191,0.04) 2px, transparent 2px, transparent 12px)',
+                pointerEvents: 'none', zIndex: 1
+              }} />
+              <div style={{
+                position: 'absolute', top: '-30%', right: '-10%',
+                width: '160px', height: '160px',
+                background: 'radial-gradient(circle, rgba(45, 212, 191, 0.35) 0%, transparent 70%)',
+                filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
+              }} />
 
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '20px 24px',
-                  position: 'relative',
-                  flex: 1,
-                  zIndex: 2
-                }}>
-                  {/* Left Column (42%) */}
-                  <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <h2 style={{ 
-                          fontSize: '14px', 
-                          fontWeight: 800, 
-                          margin: 0, 
-                          backgroundImage: 'linear-gradient(90deg, #2DD4BF 0%, #85F4FF 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          lineHeight: 1.15,
-                          whiteSpace: 'nowrap'
-                        }}>
-                          Standard Barcodes
-                        </h2>
-                      </div>
-                      <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '140px' }}>
-                        Generate standard Code 128, EAN, UPC, and other standard barcodes instantly.
-                      </p>
-                    </div>
-
-                    <button 
-                      onClick={() => onNavigate('barcode')}
-                      style={{
-                        backgroundColor: 'rgba(45, 212, 191, 0.15)',
-                        color: '#fff',
-                        border: '1px solid rgba(45, 212, 191, 0.35)',
-                        backdropFilter: 'blur(16px)',
-                        WebkitBackdropFilter: 'blur(16px)',
-                        borderRadius: '24px',
-                        padding: '0 16px',
-                        fontSize: '11px',
-                        fontWeight: 800,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.2)',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                        width: 'fit-content',
-                        height: '32px',
-                        boxSizing: 'border-box'
-                      }}
-                    >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                        Create Barcode <ChevronRight size={13} />
-                      </span>
-                    </button>
+              {/* Card Header & Content */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2, gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '10px',
+                    background: 'rgba(45, 212, 191, 0.18)',
+                    border: '1px solid rgba(45, 212, 191, 0.35)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#2DD4BF'
+                  }}>
+                    <Barcode size={18} />
                   </div>
-
-                  {/* Right Column (58%) Custom Barcode Mockup */}
-                  <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
-                    {/* Glow aura behind image */}
-                    <div style={{
-                      position: 'absolute', right: '-5px', top: '50%', transform: 'translateY(-50%)',
-                      width: '140px', height: '80px',
-                      background: 'radial-gradient(ellipse, rgba(45,212,191,0.35) 0%, transparent 70%)',
-                      filter: 'blur(16px)', zIndex: 1, pointerEvents: 'none'
-                    }} />
-                    <img 
-                      src="/barcode-hero.png" 
-                      alt="Barcode Mockup" 
-                      style={{
-                        position: 'absolute',
-                        right: '-15px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        height: '190px',
-                        width: 'auto',
-                        zIndex: 2,
-                        pointerEvents: 'none',
-                        objectFit: 'contain',
-                        filter: 'drop-shadow(0 12px 24px rgba(45,212,191,0.4)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))'
-                      }}
-                    />
-                  </div>
+                  <h2 style={{
+                    fontSize: '16px',
+                    fontWeight: 800,
+                    margin: '6px 0 0 0',
+                    backgroundImage: 'linear-gradient(90deg, #2DD4BF 0%, #85F4FF 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    lineHeight: 1.2
+                  }}>
+                    Standard Barcodes
+                  </h2>
+                  <p style={{ fontSize: '11px', margin: 0, color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.35, maxWidth: '180px' }}>
+                    Generate Code 128, EAN, UPC & standard barcodes.
+                  </p>
                 </div>
 
-                {/* Features Row inside Barcodes card */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0 16px',
-                  backgroundColor: 'rgba(45, 212, 191, 0.08)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  borderTop: '1px solid rgba(45, 212, 191, 0.15)',
-                  gap: '8px',
-                  width: '100%',
-                  height: '40px',
-                  boxSizing: 'border-box',
-                  zIndex: 2
-                }}>
-                  {/* Feature 1: Multi-Format */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', flex: 1, height: '100%' }}>
-                    <div style={{ 
-                      width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#2DD4BF', flexShrink: 0 
-                    }}>
-                      <Barcode size={11} />
-                    </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>Multi-Format</span>
-                  </div>
+                {/* Hero Icon Canvas */}
+                <div style={{ flexShrink: 0, opacity: 0.9, filter: 'drop-shadow(0 6px 12px rgba(45,212,191,0.3))' }}>
+                  <HeroBarcodeCanvas />
+                </div>
+              </div>
 
-                  {/* Feature 2: Fast Gen */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', flex: 1, height: '100%' }}>
-                    <div style={{ 
-                      width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#2DD4BF', flexShrink: 0 
-                    }}>
-                      <Zap size={11} />
-                    </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Fast Gen</span>
-                  </div>
+              {/* Action Button */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', zIndex: 2 }}>
+                <button
+                  onClick={() => onNavigate('barcode')}
+                  style={{
+                    backgroundColor: 'rgba(45, 212, 191, 0.2)',
+                    color: '#fff',
+                    border: '1px solid rgba(45, 212, 191, 0.45)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    borderRadius: '20px',
+                    padding: '8px 16px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Create Barcode <ChevronRight size={13} />
+                </button>
 
-                  {/* Feature 3: Standardized */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flex: 1, justifyContent: 'center', height: '100%' }}>
-                    <div style={{ 
-                      width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#2DD4BF', flexShrink: 0 
-                    }}>
-                      <Shield size={11} />
-                    </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.95)', whiteSpace: 'nowrap' }}>Standardized</span>
-                  </div>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Multi-Format</span>
                 </div>
               </div>
             </div>
-            {/* Slide 3: Bulk Generation */}
-            <div style={{ flex: '0 0 100%', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box' }}>
-              <div style={{ 
-                borderRadius: '18px',
-                color: '#fff',
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'relative',
-                overflow: 'hidden',
-                boxShadow: '0 16px 48px rgba(0, 102, 255, 0.28), 0 4px 16px rgba(0,0,0,0.5)',
-                height: '210px',
-                background: 'linear-gradient(135deg, #0A1C3A 0%, #030814 55%, #051024 100%)',
-              }}>
-                {/* Noise texture overlay */}
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
-                  backgroundSize: '200px 200px',
-                  opacity: 1, pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* CSV/spreadsheet grid texture */}
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: 'linear-gradient(rgba(0,150,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,150,255,0.07) 1px, transparent 1px)',
-                  backgroundSize: '20px 20px',
-                  opacity: 1, pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Ghost blurred QR in background */}
-                <div style={{
-                  position: 'absolute', right: '-5px', top: '15px',
-                  width: '130px', height: '130px',
-                  backgroundImage: `url('/qr-hero.png')`,
-                  backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
-                  opacity: 0.05, filter: 'blur(4px)',
-                  pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Center radial glow */}
-                <div style={{
-                  position: 'absolute', top: '50%', left: '55%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '220px', height: '220px',
-                  background: 'radial-gradient(circle, rgba(0,102,255,0.14) 0%, transparent 65%)',
-                  pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Top-right accent glow */}
-                <div style={{
-                  position: 'absolute', top: '-40%', right: '-5%',
-                  width: '200px', height: '200px',
-                  background: 'radial-gradient(circle, rgba(0, 102, 255, 0.28) 0%, transparent 65%)',
-                  filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Bottom-left accent glow */}
-                <div style={{
-                  position: 'absolute', bottom: '-20%', left: '-5%',
-                  width: '160px', height: '160px',
-                  background: 'radial-gradient(circle, rgba(0, 77, 214, 0.22) 0%, transparent 70%)',
-                  filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
-                }} />
-                {/* Floating particles */}
-                <div style={{ position: 'absolute', top: '22%', left: '30%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(0,150,255,0.7)', boxShadow: '0 0 6px rgba(0,150,255,0.8)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '60%', left: '20%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(150,200,255,0.5)', boxShadow: '0 0 4px rgba(150,200,255,0.6)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '38%', left: '40%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(0,150,255,0.4)', pointerEvents: 'none', zIndex: 2 }} />
-                <div style={{ position: 'absolute', top: '75%', left: '35%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(200,220,255,0.35)', pointerEvents: 'none', zIndex: 2 }} />
 
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '20px 24px',
-                  position: 'relative',
-                  flex: 1,
-                  zIndex: 2
-                }}>
-                  {/* Left Column (40%) */}
-                  <div style={{ zIndex: 2, flex: '0 0 42%', display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center', alignItems: 'flex-start', gap: '14px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                        <h2 style={{ 
-                          fontSize: '14px', 
-                          fontWeight: 800, 
-                          margin: 0, 
-                          backgroundImage: 'linear-gradient(90deg, #0088FF 0%, #80C0FF 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          lineHeight: 1.15,
-                          whiteSpace: 'nowrap'
-                        }}>
-                          Bulk Generation
-                        </h2>
-                      </div>
-                      <p style={{ fontSize: '11px', margin: '4px 0 0 0', color: 'rgba(255,255,255,0.7)', fontWeight: 500, lineHeight: 1.35, maxWidth: '140px' }}>
-                        Generate thousands of QR codes and barcodes from CSV or Excel files.
-                      </p>
-                    </div>
-
-                    <button 
-                      onClick={() => onNavigate('batch', 'QR')}
-                      style={{
-                        backgroundColor: 'rgba(0, 136, 255, 0.15)',
-                        color: '#fff',
-                        border: '1px solid rgba(0, 136, 255, 0.35)',
-                        backdropFilter: 'blur(16px)',
-                        WebkitBackdropFilter: 'blur(16px)',
-                        borderRadius: '24px',
-                        padding: '0 16px',
-                        fontSize: '11px',
-                        fontWeight: 800,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.2)',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                        width: 'fit-content',
-                        gap: '6px',
-                        height: '32px'
-                      }}
-                    >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                        Upload CSV <ChevronRight size={13} />
-                      </span>
-                    </button>
-                  </div>
-
-                  {/* Right Column (60%) Carton Box */}
-                  <div style={{ flex: '0 0 58%', height: '100%', position: 'relative' }}>
-                    {/* Glow aura behind image */}
-                    <div style={{
-                      position: 'absolute', right: '5px', top: '50%', transform: 'translateY(-50%)',
-                      width: '120px', height: '120px',
-                      background: 'radial-gradient(circle, rgba(0,150,255,0.3) 0%, transparent 70%)',
-                      filter: 'blur(18px)', zIndex: 1, pointerEvents: 'none'
-                    }} />
-                    <img 
-                      src="/box-green-bg-removed.png" 
-                      alt="Bulk Box" 
-                      style={{
-                        position: 'absolute',
-                        right: '-15px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        height: '190px',
-                        width: 'auto',
-                        zIndex: 2,
-                        pointerEvents: 'none',
-                        objectFit: 'contain',
-                        filter: 'drop-shadow(0 16px 28px rgba(0,0,0,0.6)) drop-shadow(0 4px 8px rgba(0,0,0,0.4))'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Features Row inside Bulk Generation card */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0 16px',
-                  backgroundColor: 'rgba(0, 136, 255, 0.08)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  borderTop: '1px solid rgba(0, 136, 255, 0.15)',
-                  gap: '8px',
-                  width: '100%',
-                  height: '40px',
-                  boxSizing: 'border-box',
-                  zIndex: 2
-                }}>
-                  {/* Feature 1: 10K+ Codes */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', flex: 1, height: '100%' }}>
-                    <div style={{ 
-                      width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#00B0FF', flexShrink: 0 
-                    }}>
-                      <Layers size={11} />
-                    </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>10K+ Codes</span>
-                  </div>
-
-                  {/* Feature 2: Fast */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', flex: 1, height: '100%' }}>
-                    <div style={{ 
-                      width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#00B0FF', flexShrink: 0 
-                    }}>
-                      <Zap size={11} />
-                    </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>Fast</span>
-                  </div>
-
-                  {/* Feature 3: Secure */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flex: 1, justifyContent: 'center', height: '100%' }}>
-                    <div style={{ 
-                      width: '20px', height: '20px', borderRadius: '50%', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      color: '#00B0FF', flexShrink: 0 
-                    }}>
-                      <Shield size={11} />
-                    </div>
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>Secure</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Navigation Controls */}
+          {/* Bottom Full-Width Compact Card: Batch Creator */}
           <div style={{
+            borderRadius: '16px',
+            color: '#fff',
             display: 'flex',
-            justifyContent: 'center',
             alignItems: 'center',
-            gap: '8px',
-            marginTop: '12px'
+            justifyContent: 'space-between',
+            position: 'relative',
+            overflow: 'hidden',
+            padding: '14px 20px',
+            boxSizing: 'border-box',
+            background: 'linear-gradient(135deg, rgba(10, 28, 58, 0.85) 0%, rgba(3, 8, 20, 0.92) 100%)',
+            backdropFilter: 'blur(20px) saturate(140%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+            border: '1px solid rgba(0, 136, 255, 0.3)',
+            boxShadow: '0 8px 24px rgba(0, 102, 255, 0.18), 0 2px 8px rgba(0,0,0,0.25)',
+            width: '100%'
           }}>
-            {[0, 1, 2].map((index) => (
-              <button
-                key={index}
-                onClick={() => setActiveSlide(index)}
-                style={{
-                  width: activeSlide === index ? '20px' : '8px',
-                  height: '8px',
-                  borderRadius: '4px',
-                  background: activeSlide === index ? 'var(--accent-primary)' : 'var(--border-color)',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              />
-            ))}
+            {/* Background ambient glow */}
+            <div style={{
+              position: 'absolute', top: '-50%', right: '20%',
+              width: '180px', height: '180px',
+              background: 'radial-gradient(circle, rgba(0, 136, 255, 0.25) 0%, transparent 70%)',
+              filter: 'blur(20px)', pointerEvents: 'none', zIndex: 1
+            }} />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', zIndex: 2 }}>
+              <div style={{
+                width: '38px', height: '38px', borderRadius: '10px',
+                background: 'rgba(0, 136, 255, 0.18)',
+                border: '1px solid rgba(0, 136, 255, 0.35)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#0088FF', flexShrink: 0
+              }}>
+                <Layers size={20} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <h3 style={{
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  margin: 0,
+                  backgroundImage: 'linear-gradient(90deg, #0088FF 0%, #80C0FF 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  lineHeight: 1.2
+                }}>
+                  Bulk Batch Generator
+                </h3>
+                <p style={{ fontSize: '11px', margin: 0, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
+                  Generate 1,000s of QR codes & barcodes from CSV or Excel files.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => onNavigate('batch', 'QR')}
+              style={{
+                backgroundColor: 'rgba(0, 136, 255, 0.2)',
+                color: '#fff',
+                border: '1px solid rgba(0, 136, 255, 0.45)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                borderRadius: '20px',
+                padding: '8px 18px',
+                fontSize: '11px',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                flexShrink: 0,
+                zIndex: 2
+              }}
+            >
+              Upload CSV <ChevronRight size={13} />
+            </button>
           </div>
         </div>
 

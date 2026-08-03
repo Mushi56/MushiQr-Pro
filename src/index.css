@@ -3,49 +3,48 @@
 
 
 /* ========================================
-   DESIGN SYSTEM Ã¢â‚¬â€ QR Code Generator Pro
+   DESIGN SYSTEM — QR Code Generator Pro
    ======================================== */
 
 :root {
-  /* Colors Ã¢â‚¬â€ Dark Theme (Ultra-Premium, Sleek Dark Mode) */
+  /* Colors — Dark Theme (Ultra-Premium, Sleek Dark Glass Mode) */
   --bg-primary: #030305;
   --bg-secondary: #0A0A0F;
   --bg-tertiary: #12121A;
-  --bg-card: rgba(20, 20, 30, 0.4);
-  --bg-elevated: rgba(30, 30, 45, 0.6);
-  --bg-input: rgba(10, 10, 15, 0.8);
-  --bg-hover: rgba(255, 255, 255, 0.04);
-  --bg-glass: rgba(5, 5, 8, 0.7);
-  --bg-glass-light: rgba(5, 5, 8, 0.7);
-  --nav-bg: #13131D;
-  /* Gray color matching elevated cards in dark mode */
+  --bg-card: rgba(20, 20, 32, 0.55);
+  --bg-elevated: rgba(30, 30, 48, 0.65);
+  --bg-input: rgba(14, 14, 22, 0.75);
+  --bg-hover: rgba(255, 255, 255, 0.07);
+  --bg-glass: rgba(12, 12, 20, 0.7);
+  --bg-glass-light: rgba(255, 255, 255, 0.08);
+  --nav-bg: rgba(12, 12, 20, 0.82);
 
   --text-primary: #FFFFFF;
-  --text-secondary: #A1A1AA;
-  --text-tertiary: #71717A;
-  --text-muted: #52525B;
+  --text-secondary: #CBD5E1;
+  --text-tertiary: #94A3B8;
+  --text-muted: #64748B;
 
-  /* 60-30-10 Red Accent Palette for Dark Mode */
+  /* Accent Palette */
   --accent-primary: #D60036;
   --accent-secondary: #B5002D;
   --accent-gradient: linear-gradient(135deg, #D60036 0%, #B5002D 100%);
   --accent-gradient-animated: linear-gradient(270deg, #D60036, #B5002D, #FF007F, #D60036);
-  --accent-glow: rgba(214, 0, 54, 0.3);
-  --accent-soft: rgba(214, 0, 54, 0.15);
+  --accent-glow: rgba(214, 0, 54, 0.35);
+  --accent-soft: rgba(214, 0, 54, 0.18);
 
   --success: #00E676;
   --warning: #FFD54F;
   --error: #FF1744;
   --info: #29B6F6;
 
-  --border-color: rgba(255, 255, 255, 0.05);
-  --border-light: rgba(255, 255, 255, 0.1);
-  --border-accent: rgba(214, 0, 54, 0.25);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --border-light: rgba(255, 255, 255, 0.18);
+  --border-accent: rgba(214, 0, 54, 0.35);
 
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.8);
-  --shadow-glow: 0 0 40px rgba(214, 0, 54, 0.2);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 40px rgba(214, 0, 54, 0.25);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -58,69 +57,85 @@
   --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 
-
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Outfit', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-  /* Widened from 340px — gives controls room to breathe */
   --sidebar-width: 400px;
-  --header-height: calc(56px + env(safe-area-inset-top, 0px)); /* Dynamically adjusts for native status bars or defaults to a compact 56px on web */
+  --header-height: calc(56px + env(safe-area-inset-top, 0px));
 
-  --bg-dropdown: rgba(10, 10, 15, 0.85);
+  --bg-dropdown: rgba(15, 15, 25, 0.85);
   --bg-dropdown-solid: #0D0D12;
 
-  /* Horizontal Padding System */
   --main-padding-x: 24px;
+
+  /* Glassmorphism Presets */
+  --glass-bg: rgba(18, 18, 28, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-blur: blur(20px) saturate(140%);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
 }
 
-/* Light Theme — High-end clean aesthetic */
+/* Light Theme — Rich Glassmorphism Aesthetic */
 [data-theme="light"] {
-  --bg-primary: #FAFAFA;
-  --bg-secondary: #212427;
-  /* Clean light secondary surfaces */
-  --bg-tertiary: #F5F5F5;
-  --bg-card: rgba(255, 255, 255, 0.95);
-  --bg-elevated: #FFFFFF;
-  --bg-input: #FFFFFF;
-  --bg-hover: rgba(33, 36, 39, 0.05);
-  --bg-glass: rgba(33, 36, 39, 0.98);
-  --bg-glass-light: rgba(255, 255, 255, 0.85);
-  --nav-bg: #FFFFFF;
-  /* Clean white navbar in light mode */
-  --bg-dropdown: rgba(255, 255, 255, 0.95);
+  --bg-primary: #F1F5F9;
+  --bg-secondary: #E2E8F0;
+  --bg-tertiary: #CBD5E1;
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-elevated: rgba(255, 255, 255, 0.85);
+  --bg-input: rgba(255, 255, 255, 0.9);
+  --bg-hover: rgba(15, 23, 42, 0.06);
+  --bg-glass: rgba(255, 255, 255, 0.8);
+  --bg-glass-light: rgba(255, 255, 255, 0.6);
+  --nav-bg: rgba(255, 255, 255, 0.82);
+  --bg-dropdown: rgba(255, 255, 255, 0.9);
   --bg-dropdown-solid: #FFFFFF;
 
-  --text-primary: #212427;
-  --text-secondary: #4A4D50;
-  --text-tertiary: #707376;
-  --text-muted: #A0A3A6;
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-tertiary: #64748B;
+  --text-muted: #94A3B8;
 
-  /* Custom variable for light text on dark secondary surfaces (like header) */
   --text-inverse: #FAFAFA;
 
   --accent-primary: #D60036;
   --accent-secondary: #B5002D;
   --accent-gradient: linear-gradient(135deg, #D60036 0%, #B5002D 100%);
-  --accent-glow: rgba(214, 0, 54, 0.3);
-  --accent-soft: rgba(214, 0, 54, 0.08);
+  --accent-glow: rgba(214, 0, 54, 0.25);
+  --accent-soft: rgba(214, 0, 54, 0.1);
 
-  --border-color: rgba(33, 36, 39, 0.1);
-  --border-light: rgba(33, 36, 39, 0.06);
-  --border-accent: rgba(214, 0, 54, 0.25);
+  --border-color: rgba(15, 23, 42, 0.12);
+  --border-light: rgba(15, 23, 42, 0.08);
+  --border-accent: rgba(214, 0, 54, 0.3);
 
-  --shadow-sm: 0 2px 4px rgba(33, 36, 39, 0.04);
-  --shadow-md: 0 6px 16px rgba(33, 36, 39, 0.08);
-  --shadow-lg: 0 16px 32px rgba(33, 36, 39, 0.12);
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.09);
+  --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.12);
 
   --accent-gradient-animated: linear-gradient(270deg, #D60036, #B5002D, #FF4D7D, #D60036);
 
+  /* Glassmorphism Light Presets */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-blur: blur(20px) saturate(150%);
+  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+}
+
+/* Glass Utility Classes */
+.glass-panel {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
 }
 
 /* Light Mode Header Scoping */
 [data-theme="light"] .app-header:not(.header-home) {
   background: var(--nav-bg);
   color: var(--text-primary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 [data-theme="light"] .app-header:not(.header-home) .app-logo-text {
