@@ -480,125 +480,125 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
         {/* Static Hero Section with Glassmorphism */}
         <div style={{ marginTop: '10px', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '14px' }}>
           
-          {/* Top Row: Create QR Code & Create Barcode side-by-side */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', width: '100%' }}>
+          {/* Top Row: Create QR Code & Create Barcode 50-50 side-by-side in 1 line */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%' }}>
             
-            {/* Card 1: Create QR Code */}
-            <div style={{
-              borderRadius: '20px',
-              color: '#fff',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              position: 'relative',
-              overflow: 'hidden',
-              padding: '20px',
-              boxSizing: 'border-box',
-              minHeight: '170px',
-              background: 'linear-gradient(135deg, rgba(61, 10, 18, 0.85) 0%, rgba(22, 4, 7, 0.92) 100%)',
-              backdropFilter: 'blur(20px) saturate(140%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(140%)',
-              border: '1px solid rgba(255, 77, 109, 0.3)',
-              boxShadow: '0 12px 32px rgba(214, 0, 54, 0.2), 0 4px 12px rgba(0,0,0,0.3)',
-              transition: 'transform 0.25s ease, boxShadow 0.25s ease'
-            }}>
+            {/* Card 1: Create QR Code (Entire Card Interactive) */}
+            <div 
+              onClick={() => onNavigate('generator')}
+              role="button"
+              tabIndex={0}
+              style={{
+                borderRadius: '18px',
+                color: '#fff',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative',
+                overflow: 'hidden',
+                padding: '16px',
+                boxSizing: 'border-box',
+                minHeight: '160px',
+                background: 'linear-gradient(135deg, rgba(61, 10, 18, 0.88) 0%, rgba(22, 4, 7, 0.95) 100%)',
+                backdropFilter: 'blur(20px) saturate(140%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+                border: '1px solid rgba(255, 77, 109, 0.35)',
+                boxShadow: '0 12px 32px rgba(214, 0, 54, 0.22), 0 4px 12px rgba(0,0,0,0.3)',
+                cursor: 'pointer',
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
               {/* Background ambient glows & textures */}
               <div style={{
                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                 backgroundImage: 'radial-gradient(circle, rgba(255,77,109,0.12) 1px, transparent 1px)',
-                backgroundSize: '14px 14px', pointerEvents: 'none', zIndex: 1
+                backgroundSize: '12px 12px', pointerEvents: 'none', zIndex: 1
               }} />
               <div style={{
                 position: 'absolute', top: '-30%', right: '-10%',
-                width: '160px', height: '160px',
+                width: '140px', height: '140px',
                 background: 'radial-gradient(circle, rgba(255, 77, 109, 0.35) 0%, transparent 70%)',
-                filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
+                filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
               }} />
 
-              {/* Card Header & Content */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2, gap: '12px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div style={{
-                    width: '36px', height: '36px', borderRadius: '10px',
-                    background: 'rgba(255, 77, 109, 0.18)',
-                    border: '1px solid rgba(255, 77, 109, 0.35)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#FF4D6D'
-                  }}>
-                    <QrCode size={18} />
-                  </div>
+              {/* Top Title & Description (No QrCode icon) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', zIndex: 2 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <h2 style={{
-                    fontSize: '16px',
+                    fontSize: '15px',
                     fontWeight: 800,
-                    margin: '6px 0 0 0',
+                    margin: 0,
                     backgroundImage: 'linear-gradient(90deg, #FF4D6D 0%, #FFA5A5 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     lineHeight: 1.2
                   }}>
-                    Custom QR Codes
+                    Custom QR
                   </h2>
-                  <p style={{ fontSize: '11px', margin: 0, color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.35, maxWidth: '180px' }}>
-                    Design custom QR codes with styles, logos & colors.
-                  </p>
+                  <ChevronRight size={15} color="#FF4D6D" />
                 </div>
-
-                {/* Hero Icon Canvas */}
-                <div style={{ flexShrink: 0, opacity: 0.9, filter: 'drop-shadow(0 6px 12px rgba(255,77,109,0.3))' }}>
-                  <HeroQRCanvas />
-                </div>
+                <p style={{ fontSize: '10.5px', margin: '2px 0 0 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3 }}>
+                  Design custom QR codes with styles, logos & colors.
+                </p>
               </div>
 
-              {/* Action Button */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', zIndex: 2 }}>
-                <button
-                  onClick={() => onNavigate('generator')}
-                  style={{
-                    backgroundColor: 'rgba(255, 77, 109, 0.2)',
-                    color: '#fff',
-                    border: '1px solid rgba(255, 77, 109, 0.45)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                    borderRadius: '20px',
-                    padding: '8px 16px',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Create QR Code <ChevronRight size={13} />
-                </button>
-
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Custom Logos</span>
+              {/* Restored 3 Feature Pills at Bottom */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '6px 8px',
+                backgroundColor: 'rgba(255, 77, 109, 0.1)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255, 77, 109, 0.2)',
+                borderRadius: '12px',
+                gap: '4px',
+                width: '100%',
+                boxSizing: 'border-box',
+                marginTop: '12px',
+                zIndex: 2
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Image size={10} color="#FF4D6D" />
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>Logos</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Crown size={10} color="#FF4D6D" />
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>HD</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Shield size={10} color="#FF4D6D" />
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>Secure</span>
                 </div>
               </div>
             </div>
 
-            {/* Card 2: Create Barcode */}
-            <div style={{
-              borderRadius: '20px',
-              color: '#fff',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              position: 'relative',
-              overflow: 'hidden',
-              padding: '20px',
-              boxSizing: 'border-box',
-              minHeight: '170px',
-              background: 'linear-gradient(135deg, rgba(6, 46, 39, 0.85) 0%, rgba(1, 14, 12, 0.92) 100%)',
-              backdropFilter: 'blur(20px) saturate(140%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(140%)',
-              border: '1px solid rgba(45, 212, 191, 0.3)',
-              boxShadow: '0 12px 32px rgba(13, 148, 136, 0.2), 0 4px 12px rgba(0,0,0,0.3)',
-              transition: 'transform 0.25s ease, boxShadow 0.25s ease'
-            }}>
+            {/* Card 2: Create Barcode (Entire Card Interactive) */}
+            <div 
+              onClick={() => onNavigate('barcode')}
+              role="button"
+              tabIndex={0}
+              style={{
+                borderRadius: '18px',
+                color: '#fff',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative',
+                overflow: 'hidden',
+                padding: '16px',
+                boxSizing: 'border-box',
+                minHeight: '160px',
+                background: 'linear-gradient(135deg, rgba(6, 46, 39, 0.88) 0%, rgba(1, 14, 12, 0.95) 100%)',
+                backdropFilter: 'blur(20px) saturate(140%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+                border: '1px solid rgba(45, 212, 191, 0.35)',
+                boxShadow: '0 12px 32px rgba(13, 148, 136, 0.22), 0 4px 12px rgba(0,0,0,0.3)',
+                cursor: 'pointer',
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
               {/* Background ambient glows & textures */}
               <div style={{
                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
@@ -607,72 +607,60 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
               }} />
               <div style={{
                 position: 'absolute', top: '-30%', right: '-10%',
-                width: '160px', height: '160px',
+                width: '140px', height: '140px',
                 background: 'radial-gradient(circle, rgba(45, 212, 191, 0.35) 0%, transparent 70%)',
-                filter: 'blur(25px)', pointerEvents: 'none', zIndex: 1
+                filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
               }} />
 
-              {/* Card Header & Content */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2, gap: '12px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div style={{
-                    width: '36px', height: '36px', borderRadius: '10px',
-                    background: 'rgba(45, 212, 191, 0.18)',
-                    border: '1px solid rgba(45, 212, 191, 0.35)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#2DD4BF'
-                  }}>
-                    <Barcode size={18} />
-                  </div>
+              {/* Top Title & Description (No Barcode icon) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', zIndex: 2 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <h2 style={{
-                    fontSize: '16px',
+                    fontSize: '15px',
                     fontWeight: 800,
-                    margin: '6px 0 0 0',
+                    margin: 0,
                     backgroundImage: 'linear-gradient(90deg, #2DD4BF 0%, #85F4FF 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     lineHeight: 1.2
                   }}>
-                    Standard Barcodes
+                    Barcodes
                   </h2>
-                  <p style={{ fontSize: '11px', margin: 0, color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.35, maxWidth: '180px' }}>
-                    Generate Code 128, EAN, UPC & standard barcodes.
-                  </p>
+                  <ChevronRight size={15} color="#2DD4BF" />
                 </div>
-
-                {/* Hero Icon Canvas */}
-                <div style={{ flexShrink: 0, opacity: 0.9, filter: 'drop-shadow(0 6px 12px rgba(45,212,191,0.3))' }}>
-                  <HeroBarcodeCanvas />
-                </div>
+                <p style={{ fontSize: '10.5px', margin: '2px 0 0 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3 }}>
+                  Generate Code 128, EAN, UPC & standard formats.
+                </p>
               </div>
 
-              {/* Action Button */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', zIndex: 2 }}>
-                <button
-                  onClick={() => onNavigate('barcode')}
-                  style={{
-                    backgroundColor: 'rgba(45, 212, 191, 0.2)',
-                    color: '#fff',
-                    border: '1px solid rgba(45, 212, 191, 0.45)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                    borderRadius: '20px',
-                    padding: '8px 16px',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Create Barcode <ChevronRight size={13} />
-                </button>
-
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Multi-Format</span>
+              {/* Restored 3 Feature Pills at Bottom */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '6px 8px',
+                backgroundColor: 'rgba(45, 212, 191, 0.1)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                border: '1px solid rgba(45, 212, 191, 0.2)',
+                borderRadius: '12px',
+                gap: '4px',
+                width: '100%',
+                boxSizing: 'border-box',
+                marginTop: '12px',
+                zIndex: 2
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Barcode size={10} color="#2DD4BF" />
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>Formats</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Zap size={10} color="#2DD4BF" />
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>Fast</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Shield size={10} color="#2DD4BF" />
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.9)', whiteSpace: 'nowrap' }}>1D/2D</span>
                 </div>
               </div>
             </div>
