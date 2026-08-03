@@ -182,29 +182,10 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '16px',
+          justifyContent: 'flex-end',
           position: 'relative'
         }}>
-          <div className="page-header-icon-box" style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            background: 'var(--accent-gradient)',
-            color: '#FFFFFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(214, 0, 54, 0.2)',
-            flexShrink: 0
-          }}>
-            <HistoryIcon size={20} color="#FFFFFF" />
-          </div>
-          <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '22px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', lineHeight: '1.2' }}>History</h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0 0', lineHeight: '1.4' }}>
-              Your scan and creation history
-            </p>
-          </div>
+
           {history.length > 0 && (
              <div style={{ position: 'relative' }} ref={menuRef}>
                <button 
@@ -271,14 +252,48 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '8px var(--main-padding-x) 100px' }} className="fade-in-up">
         {history.length === 0 ? (
-          <div className="premium-empty-state">
-             <div className="premium-empty-icon-wrapper">
-              <Clock size={40} color="var(--accent-primary)" />
+          <div style={{
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '16px',
+            padding: '20px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="68" height="52" viewBox="0 0 68 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Back document sheet */}
+                <rect x="22" y="4" width="28" height="34" rx="3" fill="#FFF2F5" stroke="#FFE0E6" strokeWidth="1.5" />
+                <line x1="28" y1="12" x2="44" y2="12" stroke="#FFCCD5" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="28" y1="18" x2="40" y2="18" stroke="#FFCCD5" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="28" y1="24" x2="36" y2="24" stroke="#FFCCD5" strokeWidth="1.5" strokeLinecap="round" />
+
+                {/* Front document sheet */}
+                <rect x="14" y="10" width="28" height="34" rx="3" fill="#FFFFFF" stroke="#FFE0E6" strokeWidth="1.5" />
+                <line x1="20" y1="18" x2="36" y2="18" stroke="#FFA3B1" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="20" y1="24" x2="32" y2="24" stroke="#FFA3B1" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="20" y1="30" x2="28" y2="30" stroke="#FFA3B1" strokeWidth="1.5" strokeLinecap="round" />
+
+                {/* Main Pink Folder Back */}
+                <path d="M4 14C4 11.7909 5.79086 10 8 10H18.5858C19.6467 10 20.6641 10.4214 21.4142 11.1716L24.5858 14.3431C25.3359 15.0933 26.3533 15.5147 27.4142 15.5147H56C58.2091 15.5147 60 17.3239 60 19.533V44C60 46.2091 58.2091 48 56 48H8C5.79086 48 4 46.2091 4 44V14Z" fill="#FFAEC9" />
+                {/* Main Pink Folder Front flap */}
+                <path d="M4 18.533C4 16.3239 5.79086 14.5147 8 14.5147H56C58.2091 14.5147 60 16.3239 60 18.533V44C60 46.2091 58.2091 48 56 48H8C5.79086 48 4 46.2091 4 44V18.533Z" fill="#FFC2D6" />
+
+                {/* Glow/Heart circle icon at bottom right */}
+                <circle cx="52" cy="40" r="11" fill="#FFFFFF" filter="drop-shadow(0px 2px 4px rgba(255, 77, 109, 0.2))" />
+                <circle cx="52" cy="40" r="9" fill="#FFF0F3" stroke="#FF85A1" strokeWidth="1" />
+                {/* Heart path */}
+                <path d="M52 43C52 43 48.5 41.2 48.5 39.2C48.5 38 49.3 37.2 50.3 37.2C51.1 37.2 51.7 37.7 52 38.3C52.3 37.7 52.9 37.2 53.7 37.2C54.7 37.2 55.5 38 55.5 39.2C55.5 41.2 52 43 52 43Z" fill="#FF4D6D" />
+              </svg>
             </div>
-            <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px 0', fontFamily: 'var(--font-display)' }}>No History Yet</h3>
-              <p style={{ fontSize: '14px', maxWidth: '240px', lineHeight: 1.5 }}>
-                Your scanned and created QR codes will appear here automatically.
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                No history yet.
+              </h4>
+              <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500, lineHeight: 1.3 }}>
+                Your scanned and created items will appear here automatically.
               </p>
             </div>
           </div>
