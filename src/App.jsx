@@ -77,7 +77,7 @@ import HomePage from './components/HomePage';
 import SavedPage from './components/SavedPage';
 import SettingsPage from './components/SettingsPage';
 import YouPage from './components/YouPage';
-import AuthModal from './components/AuthModal';
+import AuthDropdownPanel from './components/AuthDropdownPanel';
 import { auth, db } from './services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
@@ -884,34 +884,7 @@ function parseRawQRText(text) {
   };
 }
 
-
-// ── Reusable dropdown menu item ──────────────────────────────────────────
-function DropdownItem({ icon, label, onClick, color, hoverBg }) {
-  const [hovered, setHovered] = React.useState(false);
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-        padding: '10px 12px',
-        background: hovered ? (hoverBg || 'var(--bg-hover)') : 'transparent',
-        border: 'none',
-        color: color || 'var(--text-primary)',
-        fontSize: '13px', fontWeight: 600,
-        borderRadius: '10px', cursor: 'pointer',
-        textAlign: 'left', transition: 'background 0.15s ease',
-      }}
-    >
-      <span style={{ color: color || 'var(--text-secondary)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>{icon}</span>
-      {label}
-    </button>
-  );
-}
-
 export default function App() {
-
   // ── Tab & Theme ──
   const location = useLocation();
   const navigate = useNavigate();
@@ -932,10 +905,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('content');
   const [currentUser, setCurrentUser] = useState(null);
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isChangingName, setIsChangingName] = useState(false);
-  const [newDisplayName, setNewDisplayName] = useState('');
-  const [changingNameLoading, setChangingNameLoading] = useState(false);
   const authDropdownRef = useRef(null);
 
   // Close auth dropdown on outside click
@@ -944,7 +913,6 @@ export default function App() {
     const handler = (e) => {
       if (authDropdownRef.current && !authDropdownRef.current.contains(e.target)) {
         setAuthDropdownOpen(false);
-        setIsChangingName(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -3922,212 +3890,116 @@ export default function App() {
               </div>
             </>
           )}
-          {/* ── Auth Avatar Button (all pages except generator) ── */}
-          {activePage !== 'generator' && (
+          {/* ── Auth Avatar / Sign-In Button (always visible in header) ── */}
+          {!['generator'].includes(activePage) && (
             <div style={{ position: 'relative' }} ref={authDropdownRef}>
-
-              {/* The button — avatar only when logged in, icon+text when logged out */}
               <button
-                onClick={() => {
-                  if (!currentUser) {
-                    setShowAuthModal(true);
-                  } else {
-                    setAuthDropdownOpen(prev => !prev);
-                    setIsChangingName(false);
-                  }
-                }}
+                onClick={() => setAuthDropdownOpen(prev => !prev)}
                 style={{
-                  width: currentUser ? '38px' : 'auto',
-                  height: '38px',
-                  borderRadius: currentUser ? '50%' : '20px',
-                  padding: currentUser ? '0' : '0 14px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   background: currentUser ? 'transparent' : 'var(--accent-gradient)',
-                  border: currentUser ? '2px solid var(--accent-primary)' : 'none',
+                  border: 'none',
+                  borderRadius: '50%',
+                  padding: '0',
                   cursor: 'pointer',
-                  color: '#fff',
-                  fontWeight: 700, fontSize: '13px',
-                  boxShadow: currentUser ? '0 0 0 0' : '0 4px 14px rgba(214,0,54,0.3)',
+                  width: '36px',
+                  height: '36px',
                   transition: 'all 0.2s ease',
-                  overflow: 'hidden',
+                  boxShadow: currentUser ? 'none' : '0 4px 14px rgba(214,0,54,0.3)',
                   flexShrink: 0,
                 }}
-                aria-label={currentUser ? 'My account' : 'Sign in'}
-                onMouseEnter={e => { if (!currentUser) return; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(214,0,54,0.2)'; }}
-                onMouseLeave={e => { if (!currentUser) return; e.currentTarget.style.boxShadow = '0 0 0 0'; }}
+                aria-label={currentUser ? 'Account' : 'Sign In'}
               >
                 {currentUser ? (
                   currentUser.photoURL ? (
                     <img
                       src={currentUser.photoURL}
                       alt="Profile"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', display: 'block' }}
                     />
                   ) : (
-                    <span style={{ fontSize: '14px', fontWeight: 800, color: '#fff', userSelect: 'none' }}>
-                      {currentUser.displayName
-                        ? currentUser.displayName[0].toUpperCase()
-                        : currentUser.email
-                          ? currentUser.email[0].toUpperCase()
-                          : 'U'}
-                    </span>
+                    <div style={{
+                      width: '36px', height: '36px', borderRadius: '50%',
+                      background: 'var(--accent-gradient)', color: '#fff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '13px', fontWeight: 800,
+                    }}>
+                      {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
+                    </div>
                   )
                 ) : (
-                  <>
-                    <User size={15} />
-                    <span>Sign In</span>
-                  </>
+                  <User size={18} color="#fff" />
                 )}
               </button>
 
-              {/* Dropdown — only when logged in */}
-              {authDropdownOpen && currentUser && (
+              {authDropdownOpen && (
                 <div
-                  onClick={e => e.stopPropagation()}
                   style={{
                     position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                    background: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '18px',
-                    minWidth: '240px',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-                    zIndex: 999,
+                    background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                    borderRadius: '18px', width: '300px',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.25)', zIndex: 999,
                     overflow: 'hidden',
-                    animation: 'dropdownFadeIn 0.18s cubic-bezier(0.34,1.3,0.64,1)',
+                    animation: 'dropdownFadeIn 0.18s ease'
                   }}
+                  onClick={e => e.stopPropagation()}
                 >
-                  {/* Profile header */}
-                  <div style={{
-                    padding: '16px',
-                    background: 'linear-gradient(135deg, rgba(214,0,54,0.07), rgba(214,0,54,0.02))',
-                    borderBottom: '1px solid var(--border-color)'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      {/* Avatar */}
-                      <div style={{
-                        width: '44px', height: '44px', borderRadius: '50%',
-                        overflow: 'hidden', flexShrink: 0,
-                        border: '2px solid var(--accent-primary)',
-                        boxShadow: '0 4px 12px rgba(214,0,54,0.2)'
-                      }}>
-                        {currentUser.photoURL ? (
-                          <img src={currentUser.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <div style={{ width: '100%', height: '100%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 800 }}>
-                            {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : currentUser.email?.[0].toUpperCase() || 'U'}
+                  {currentUser ? (
+                    <>
+                      {/* Profile header */}
+                      <div style={{ padding: '18px 18px 14px', background: 'linear-gradient(135deg, rgba(214,0,54,0.08), rgba(214,0,54,0.02))', borderBottom: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {currentUser.photoURL ? (
+                            <img src={currentUser.photoURL} alt="Profile" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', flexShrink: 0 }} />
+                          ) : (
+                            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 800, flexShrink: 0 }}>
+                              {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
+                            </div>
+                          )}
+                          <div style={{ flex: 1, overflow: 'hidden' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Mushi User'}</div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
+                          </div>
+                        </div>
+                        {currentUser.email === 'mabuneri143@gmail.com' && (
+                          <div style={{ marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '20px', background: 'rgba(255,0,127,0.1)', border: '1px solid rgba(255,0,127,0.25)', color: '#FF007F', fontSize: '10px', fontWeight: 700 }}>
+                            <Shield size={10} color="#FF007F" /> Super Admin
                           </div>
                         )}
                       </div>
-                      <div style={{ flex: 1, overflow: 'hidden' }}>
-                        <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {currentUser.displayName || 'Mushi User'}
-                        </div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
-                          {currentUser.email}
-                        </div>
-                        {/* Verified badge */}
-                        <div style={{ marginTop: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '20px', background: currentUser.emailVerified ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)', border: `1px solid ${currentUser.emailVerified ? 'rgba(16,185,129,0.25)' : 'rgba(245,158,11,0.25)'}`, color: currentUser.emailVerified ? '#10B981' : '#F59E0B', fontSize: '10px', fontWeight: 700 }}>
-                          {currentUser.emailVerified ? '✓ Verified' : '⚠ Unverified'}
-                        </div>
-                      </div>
-                    </div>
-                    {/* Super Admin badge */}
-                    {currentUser.email === 'mabuneri143@gmail.com' && (
-                      <div style={{ marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '20px', background: 'rgba(255,0,127,0.12)', border: '1px solid rgba(255,0,127,0.25)', color: '#FF007F', fontSize: '10px', fontWeight: 800 }}>
-                        <Shield size={10} color="#FF007F" /> SUPER ADMIN
-                      </div>
-                    )}
-                  </div>
 
-                  {/* Menu items */}
-                  <div style={{ padding: '8px' }}>
-
-                    {/* Change Name — inline */}
-                    {isChangingName ? (
-                      <div style={{ padding: '8px 12px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <input
-                          autoFocus
-                          type="text"
-                          value={newDisplayName}
-                          onChange={e => setNewDisplayName(e.target.value)}
-                          onKeyDown={async e => {
-                            if (e.key === 'Enter') {
-                              if (!newDisplayName.trim()) return;
-                              setChangingNameLoading(true);
-                              try {
-                                const { updateProfile } = await import('firebase/auth');
-                                await updateProfile(auth.currentUser, { displayName: newDisplayName.trim() });
-                                setIsChangingName(false);
-                                showToast('Display name updated!');
-                              } catch {}
-                              setChangingNameLoading(false);
-                            }
-                            if (e.key === 'Escape') setIsChangingName(false);
-                          }}
-                          placeholder="Enter new name…"
-                          style={{
-                            flex: 1, padding: '8px 12px', borderRadius: '10px',
-                            border: '1px solid var(--accent-primary)',
-                            background: 'var(--bg-primary)', color: 'var(--text-primary)',
-                            fontSize: '13px', outline: 'none'
-                          }}
-                        />
+                      {/* Menu Items */}
+                      <div style={{ padding: '8px' }}>
+                        <button onClick={() => { setAuthDropdownOpen(false); navigateTo('you'); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <Settings size={15} color="var(--text-secondary)" /> Settings
+                        </button>
+                        {currentUser.email === 'mabuneri143@gmail.com' && (
+                          <button onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#FF007F', fontSize: '13px', fontWeight: 700, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                            <Shield size={15} color="#FF007F" /> Super Admin Panel
+                          </button>
+                        )}
+                        <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 0' }} />
                         <button
                           onClick={async () => {
-                            if (!newDisplayName.trim()) return;
-                            setChangingNameLoading(true);
-                            try {
-                              const { updateProfile } = await import('firebase/auth');
-                              await updateProfile(auth.currentUser, { displayName: newDisplayName.trim() });
-                              setIsChangingName(false);
-                              showToast('Display name updated!');
-                            } catch {}
-                            setChangingNameLoading(false);
+                            setAuthDropdownOpen(false);
+                            const { signOut: fbSignOut } = await import('firebase/auth');
+                            const { handleLogoutClear: clearData } = await import('./utils/storage');
+                            await fbSignOut(auth);
+                            clearData();
                           }}
-                          style={{ background: 'var(--accent-gradient)', border: 'none', borderRadius: '8px', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', flexShrink: 0 }}
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#EF4444', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
-                          {changingNameLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                          <LogOut size={15} color="#EF4444" /> Sign Out
                         </button>
                       </div>
-                    ) : (
-                      <DropdownItem
-                        icon={<User size={15} />}
-                        label="Change Name"
-                        onClick={() => { setNewDisplayName(currentUser.displayName || ''); setIsChangingName(true); }}
-                      />
-                    )}
-
-                    <DropdownItem
-                      icon={<Settings size={15} />}
-                      label="Settings"
-                      onClick={() => { setAuthDropdownOpen(false); navigateTo('you'); }}
-                    />
-
-                    {currentUser.email === 'mabuneri143@gmail.com' && (
-                      <DropdownItem
-                        icon={<Shield size={15} />}
-                        label="Super Admin Panel"
-                        color="#FF007F"
-                        hoverBg="rgba(255,0,127,0.07)"
-                        onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }}
-                      />
-                    )}
-
-                    <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 0' }} />
-
-                    <DropdownItem
-                      icon={<LogOut size={15} />}
-                      label="Sign Out"
-                      color="#EF4444"
-                      hoverBg="rgba(239,68,68,0.08)"
-                      onClick={async () => {
-                        setAuthDropdownOpen(false);
-                        const { signOut: fbSignOut } = await import('firebase/auth');
-                        await fbSignOut(auth);
-                        handleLogoutClear();
-                      }}
-                    />
-                  </div>
+                    </>
+                  ) : (
+                    <AuthDropdownPanel onClose={() => setAuthDropdownOpen(false)} />
+                  )}
                 </div>
               )}
             </div>
@@ -4135,8 +4007,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── Auth Modal ── */}
-      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       {/* ── Main Content Area ── */}
       <main className="app-main-redesigned">
         {activePage === 'generator' ? (

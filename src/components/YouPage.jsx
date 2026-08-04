@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Moon, Sun, Info, Shield, FileText, Folder,
-  ChevronRight, Bookmark, History, Settings as SettingsIcon
+  Settings, ChevronRight, Moon, Sun, Info, Shield, FileText, Folder
 } from 'lucide-react';
-import { getHistory, getSaved, getPreferences, savePreferences } from '../utils/storage';
+import { getPreferences, savePreferences } from '../utils/storage';
 
 export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, currentUser, showToast }) {
   const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
-  const [stats, setStats] = useState({ saved: 0, history: 0 });
 
   useEffect(() => {
-    setStats({ saved: getSaved().length, history: getHistory().length });
-  }, [currentUser]);
-
-  useEffect(() => {
-    const handler = () => setSaveLocation(getPreferences().saveLocation || 'Mushi QR Pro');
-    window.addEventListener('preferences-sync', handler);
-    return () => window.removeEventListener('preferences-sync', handler);
+    const handlePrefSync = () => {
+      setSaveLocation(getPreferences().saveLocation || 'Mushi QR Pro');
+    };
+    window.addEventListener('preferences-sync', handlePrefSync);
+    return () => window.removeEventListener('preferences-sync', handlePrefSync);
   }, []);
 
   const handleThemeChange = () => {
-    const next = theme === 'dark' ? 'light' : theme === 'light' ? 'auto' : 'dark';
+    let next;
+    if (theme === 'dark') next = 'light';
+    else if (theme === 'light') next = 'auto';
+    else next = 'dark';
     setTheme(next);
     savePreferences({ ...getPreferences(), theme: next });
   };
@@ -29,56 +28,37 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
     try {
       if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
         const handle = await window.showDirectoryPicker();
-        if (handle?.name) {
-          setSaveLocation(handle.name);
-          savePreferences({ ...getPreferences(), saveLocation: handle.name });
-          if (showToast) showToast(`Save location: ${handle.name}`);
+        if (handle && handle.name) {
+          const newLoc = handle.name;
+          setSaveLocation(newLoc);
+          savePreferences({ ...getPreferences(), saveLocation: newLoc });
+          if (showToast) showToast(`Save location updated: ${newLoc}`);
           return;
         }
       }
-    } catch (e) { /* user cancelled or unsupported */ }
+    } catch (e) {
+      console.log('Directory picker cancelled or unsupported', e);
+    }
     const custom = window.prompt('Enter custom save folder / path:', saveLocation);
     if (custom !== null && custom.trim() !== '') {
       const clean = custom.trim();
       setSaveLocation(clean);
       savePreferences({ ...getPreferences(), saveLocation: clean });
-      if (showToast) showToast(`Save location: ${clean}`);
+      if (showToast) showToast(`Save location updated: ${clean}`);
     }
   };
 
   return (
-    <div style={{
-      width: '100%', height: '100%',
-      display: 'flex', flexDirection: 'column',
+    <div className="you-page fade-in" style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
       backgroundColor: 'var(--bg-primary)',
       color: 'var(--text-primary)',
       overflow: 'hidden'
     }}>
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px var(--main-padding-x) 100px' }}>
-
-        {/* Stats (only when logged in) */}
-        {currentUser && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-            <div
-              onClick={() => onNavigate('saved')}
-              className="settings-group-container"
-              style={{ padding: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', borderRadius: '16px' }}
-            >
-              <Bookmark size={24} color="var(--accent-primary)" />
-              <span style={{ fontSize: '22px', fontWeight: 800 }}>{stats.saved}</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Saved QRs</span>
-            </div>
-            <div
-              onClick={() => onNavigate('history')}
-              className="settings-group-container"
-              style={{ padding: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', borderRadius: '16px' }}
-            >
-              <History size={24} color="#00F0FF" />
-              <span style={{ fontSize: '22px', fontWeight: 800 }}>{stats.history}</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Scan History</span>
-            </div>
-          </div>
-        )}
 
         {/* Settings List */}
         <div className="settings-group-container" style={{ borderRadius: '16px', overflow: 'hidden' }}>
@@ -87,17 +67,21 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
           <div className="settings-row-item" onClick={handleThemeChange} style={{ padding: '16px' }}>
             <div className="icon-container-gradient" style={{
               background: theme === 'dark'
-                ? 'linear-gradient(135deg, #0284c7, #0369a1)'
-                : 'linear-gradient(135deg, #eab308, #ca8a04)'
+                ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
+                : 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)'
             }}>
               {theme === 'dark' ? <Moon size={18} /> : theme === 'light' ? <Sun size={18} /> : (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2v20" /><path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" /><circle cx="12" cy="12" r="10" />
+                  <path d="M12 2v20" />
+                  <path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" />
+                  <circle cx="12" cy="12" r="10" />
                 </svg>
               )}
             </div>
             <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Theme</div>
-            <div style={{ marginRight: '12px', fontSize: '13px', textTransform: 'capitalize', color: 'var(--accent-primary)', fontWeight: 700 }}>{theme}</div>
+            <div style={{ marginRight: '12px', fontSize: '13px', textTransform: 'capitalize', color: 'var(--accent-primary)', fontWeight: 'bold' }}>
+              {theme}
+            </div>
             <ChevronRight size={16} color="var(--text-muted)" />
           </div>
 
@@ -105,11 +89,11 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
 
           {/* Save Location */}
           <div className="settings-row-item" onClick={handleChooseFolder} style={{ padding: '16px' }}>
-            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)' }}>
+            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}>
               <Folder size={18} />
             </div>
             <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Save Location</div>
-            <div style={{ marginRight: '12px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600, maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ marginRight: '12px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 'bold', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {saveLocation}
             </div>
             <ChevronRight size={16} color="var(--text-muted)" />
@@ -119,7 +103,7 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
 
           {/* About */}
           <div className="settings-row-item" onClick={() => window.location.hash = '#/about'} style={{ padding: '16px' }}>
-            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #f97316, #ef4444)' }}>
+            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)' }}>
               <Info size={18} />
             </div>
             <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>About Mushi QR Pro</div>
@@ -130,7 +114,7 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
 
           {/* Privacy Policy */}
           <div className="settings-row-item" onClick={() => window.location.hash = '#/privacy-policy'} style={{ padding: '16px' }}>
-            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #0d9488, #10b981)' }}>
+            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #0d9488 0%, #10b981 100%)' }}>
               <Shield size={18} />
             </div>
             <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Privacy Policy</div>
@@ -139,16 +123,16 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
 
           <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
 
-          {/* Terms */}
+          {/* Terms of Service */}
           <div className="settings-row-item" onClick={() => window.location.hash = '#/terms'} style={{ padding: '16px' }}>
-            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #06b6d4, #6366f1)' }}>
+            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)' }}>
               <FileText size={18} />
             </div>
             <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Terms of Service</div>
             <ChevronRight size={16} color="var(--text-muted)" />
           </div>
 
-          {/* Super Admin Panel link */}
+          {/* Super Admin Panel — only for superadmin */}
           {currentUser?.email === 'mabuneri143@gmail.com' && (
             <>
               <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
@@ -157,16 +141,16 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
                 onClick={() => window.location.hash = '#/admin'}
                 style={{ padding: '16px', color: '#FF007F' }}
               >
-                <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #db2777, #c026d3)' }}>
-                  <SettingsIcon size={18} />
+                <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #db2777 0%, #c026d3 100%)' }}>
+                  <Settings size={18} color="#FF007F" />
                 </div>
                 <div style={{ flex: 1, fontSize: '14px', fontWeight: 700 }}>Super Admin Panel</div>
                 <ChevronRight size={16} color="var(--text-muted)" />
               </div>
             </>
           )}
-        </div>
 
+        </div>
       </div>
     </div>
   );
