@@ -69,11 +69,16 @@
 
   --main-padding-x: 24px;
 
-  /* Glassmorphism Presets */
-  --glass-bg: rgba(18, 18, 28, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.16);
-  --glass-blur: blur(28px) saturate(140%);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  /* ════ GLASSMORPHISM SYSTEM — Dark Mode ════ */
+  /* Key: keep bg semi-transparent so backdrop-filter blur is VISIBLE */
+  --glass-bg: rgba(16, 16, 26, 0.62);
+  --glass-bg-nav: rgba(10, 10, 18, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-border-top: rgba(255, 255, 255, 0.18);
+  --glass-blur: blur(40px) saturate(180%) brightness(1.05);
+  --glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --glass-shadow-nav: 0 4px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --glass-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.15);
 }
 
 /* Light Theme — Rich Glassmorphism Aesthetic */
@@ -114,40 +119,62 @@
 
   --accent-gradient-animated: linear-gradient(270deg, #D60036, #B5002D, #FF4D7D, #D60036);
 
-  /* Glassmorphism Light Presets */
-  --glass-bg: rgba(255, 255, 255, 0.88);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-blur: blur(28px) saturate(150%);
-  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+  /* ════ GLASSMORPHISM SYSTEM — Light Mode ════ */
+  --glass-bg: rgba(255, 255, 255, 0.60);
+  --glass-bg-nav: rgba(248, 250, 252, 0.70);
+  --glass-border: rgba(255, 255, 255, 0.70);
+  --glass-border-top: rgba(255, 255, 255, 0.90);
+  --glass-blur: blur(40px) saturate(200%) brightness(1.02);
+  --glass-shadow: 0 8px 40px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.80);
+  --glass-shadow-nav: 0 4px 24px rgba(15, 23, 42, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  --glass-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.90), inset 0 -1px 0 rgba(15, 23, 42, 0.05);
 }
 
-/* Glass Utility Classes */
+/* ════ GLASS UTILITY CLASSES ════ */
 .glass-panel {
   background: var(--glass-bg) !important;
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
   border: 1px solid var(--glass-border) !important;
   box-shadow: var(--glass-shadow) !important;
+  transform: translateZ(0); /* Force GPU layer for blur */
+  will-change: backdrop-filter;
+}
+
+/* Depth card variant — slightly more opaque for layered content */
+.glass-card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+  transform: translateZ(0);
+}
+
+/* Nav variant — uses nav-specific variable for tuned opacity */
+.glass-nav {
+  background: var(--glass-bg-nav) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  box-shadow: var(--glass-shadow-nav) !important;
+  transform: translateZ(0);
 }
 
 /* Light Mode Header Scoping */
-[data-theme="light"] .app-header:not(.header-home) {
-  background: var(--nav-bg);
+[data-theme="light"] .app-header {
+  background: var(--glass-bg-nav) !important;
   color: var(--text-primary);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow-nav) !important;
 }
 
-[data-theme="light"] .app-header:not(.header-home) .app-logo-text {
-  color: var(--text-primary);
-}
-
-[data-theme="light"] .app-header:not(.header-home) .btn-header-action:not(.active) {
+[data-theme="light"] .app-header .app-logo-text {
   color: var(--text-primary);
 }
 
-[data-theme="light"] .app-header.header-home {
-  background: var(--nav-bg);
+[data-theme="light"] .app-header .btn-header-action:not(.active) {
   color: var(--text-primary);
 }
 
@@ -241,21 +268,23 @@ body {
 
 .app-header {
   height: var(--header-height);
-  padding-top: env(safe-area-inset-top, 0px); /* Dynamically uses the native safe area padding, or 0px on web */
+  padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-left: var(--main-padding-x);
   padding-right: var(--main-padding-x);
-  background: var(--bg-glass) !important;
+  /* Premium frosted glass navbar */
+  background: var(--glass-bg-nav) !important;
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
   border-bottom: 1px solid var(--glass-border) !important;
   position: sticky;
   top: 0;
   z-index: 2000;
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--glass-shadow-nav) !important;
+  transform: translateZ(0); /* GPU layer — ensures blur renders */
 }
 
 .app-logo-icon {
@@ -1310,16 +1339,19 @@ input[type="range"]::-moz-range-thumb {
   bottom: calc(100% + 12px);
   left: 0;
   right: 0;
-  background: var(--bg-dropdown-solid);
-  border: none;
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
   border-radius: var(--radius-lg);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
+  box-shadow: var(--glass-shadow) !important;
   z-index: 1000;
   padding: 16px;
   animation: dropdownSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   gap: 14px;
+  transform: translateZ(0);
 }
 
 @keyframes dropdownSlideUp {
@@ -3640,21 +3672,23 @@ input[type="range"]::-moz-range-thumb {
   height: calc(64px + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   flex-shrink: 0;
-  background: var(--bg-glass) !important;
+  /* Premium frosted glass bottom navbar */
+  background: var(--glass-bg-nav) !important;
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
-  border-top: 1px solid var(--glass-border) !important;
+  border-top: 1px solid var(--glass-border-top) !important;
   z-index: 2000;
   padding: 0 4px;
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--glass-shadow-nav) !important;
+  transform: translateZ(0); /* GPU layer — ensures blur renders */
 }
 
 [data-theme="light"] .bottom-nav {
-  background: var(--bg-glass) !important;
+  background: var(--glass-bg-nav) !important;
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
-  border-top: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-shadow);
+  border-top: 1px solid var(--glass-border-top) !important;
+  box-shadow: var(--glass-shadow-nav) !important;
 }
 
 .bottom-nav-tab {
@@ -4236,9 +4270,10 @@ input[type="range"]::-moz-range-thumb {
   -webkit-backdrop-filter: var(--glass-blur) !important;
   border: 1px solid var(--glass-border) !important;
   border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--glass-shadow) !important;
   z-index: 3000;
   overflow: hidden;
+  transform: translateZ(0);
   animation: dropdownSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -5416,6 +5451,7 @@ input[type="range"]::-moz-range-thumb {
   animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
+  transform: translateZ(0); /* GPU layer — ensures backdrop blur renders */
 }
 
 @keyframes modalScaleIn {
