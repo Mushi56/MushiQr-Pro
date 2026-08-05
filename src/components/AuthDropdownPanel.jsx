@@ -109,9 +109,9 @@ export default function AuthDropdownPanel({ onClose }) {
           width: '44px', height: '44px', borderRadius: '50%',
           background: 'var(--accent-gradient)', color: '#fff',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '20px', margin: '0 auto 10px', boxShadow: '0 4px 14px rgba(214,0,54,0.25)'
+          margin: '0 auto 10px', boxShadow: '0 4px 14px rgba(214,0,54,0.25)'
         }}>
-          🔐
+          <User size={22} color="#fff" strokeWidth={2.5} />
         </div>
         <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '3px' }}>
           {isSignUp ? 'Create Account' : 'Welcome Back'}

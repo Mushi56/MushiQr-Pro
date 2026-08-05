@@ -3935,72 +3935,91 @@ export default function App() {
               </button>
 
               {authDropdownOpen && (
-                <div
-                  style={{
-                    position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                    background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
-                    borderRadius: '18px', width: '300px',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.25)', zIndex: 999,
-                    overflow: 'hidden',
-                    animation: 'dropdownFadeIn 0.18s ease'
-                  }}
-                  onClick={e => e.stopPropagation()}
-                >
-                  {currentUser ? (
-                    <>
-                      {/* Profile header */}
-                      <div style={{ padding: '18px 18px 14px', background: 'linear-gradient(135deg, rgba(214,0,54,0.08), rgba(214,0,54,0.02))', borderBottom: '1px solid var(--border-color)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          {currentUser.photoURL ? (
-                            <img src={currentUser.photoURL} alt="Profile" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', flexShrink: 0 }} />
-                          ) : (
-                            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 800, flexShrink: 0 }}>
-                              {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
-                            </div>
-                          )}
-                          <div style={{ flex: 1, overflow: 'hidden' }}>
-                            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Mushi User'}</div>
-                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
+                currentUser ? (
+                  <div
+                    style={{
+                      position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                      background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                      borderRadius: '18px', width: '300px',
+                      boxShadow: '0 20px 60px rgba(0,0,0,0.25)', zIndex: 999,
+                      overflow: 'hidden',
+                      animation: 'dropdownFadeIn 0.18s ease'
+                    }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    {/* Profile header */}
+                    <div style={{ padding: '18px 18px 14px', background: 'linear-gradient(135deg, rgba(214,0,54,0.08), rgba(214,0,54,0.02))', borderBottom: '1px solid var(--border-color)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {currentUser.photoURL ? (
+                          <img src={currentUser.photoURL} alt="Profile" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', flexShrink: 0 }} />
+                        ) : (
+                          <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 800, flexShrink: 0 }}>
+                            {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
                           </div>
+                        )}
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Mushi User'}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
                         </div>
-                        {currentUser.email === 'mabuneri143@gmail.com' && (
-                          <div style={{ marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '20px', background: 'rgba(255,0,127,0.1)', border: '1px solid rgba(255,0,127,0.25)', color: '#FF007F', fontSize: '10px', fontWeight: 700 }}>
-                            <Shield size={10} color="#FF007F" /> Super Admin
-                          </div>
-                        )}
                       </div>
+                      {currentUser.email === 'mabuneri143@gmail.com' && (
+                        <div style={{ marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '20px', background: 'rgba(255,0,127,0.1)', border: '1px solid rgba(255,0,127,0.25)', color: '#FF007F', fontSize: '10px', fontWeight: 700 }}>
+                          <Shield size={10} color="#FF007F" /> Super Admin
+                        </div>
+                      )}
+                    </div>
 
-                      {/* Menu Items */}
-                      <div style={{ padding: '8px' }}>
-                        <button onClick={() => { setAuthDropdownOpen(false); navigateTo('you'); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <Settings size={15} color="var(--text-secondary)" /> Settings
+                    {/* Menu Items */}
+                    <div style={{ padding: '8px' }}>
+                      <button onClick={() => { setAuthDropdownOpen(false); navigateTo('you'); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <Settings size={15} color="var(--text-secondary)" /> Settings
+                      </button>
+                      {currentUser.email === 'mabuneri143@gmail.com' && (
+                        <button onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#FF007F', fontSize: '13px', fontWeight: 700, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <Shield size={15} color="#FF007F" /> Super Admin Panel
                         </button>
-                        {currentUser.email === 'mabuneri143@gmail.com' && (
-                          <button onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#FF007F', fontSize: '13px', fontWeight: 700, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                            <Shield size={15} color="#FF007F" /> Super Admin Panel
-                          </button>
-                        )}
-                        <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 0' }} />
-                        <button
-                          onClick={async () => {
-                            setAuthDropdownOpen(false);
-                            const { signOut: fbSignOut } = await import('firebase/auth');
-                            const { handleLogoutClear: clearData } = await import('./utils/storage');
-                            await fbSignOut(auth);
-                            clearData();
-                          }}
-                          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#EF4444', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }}
-                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                        >
-                          <LogOut size={15} color="#EF4444" /> Sign Out
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <AuthDropdownPanel onClose={() => setAuthDropdownOpen(false)} />
-                  )}
-                </div>
+                      )}
+                      <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 0' }} />
+                      <button
+                        onClick={async () => {
+                          setAuthDropdownOpen(false);
+                          const { signOut: fbSignOut } = await import('firebase/auth');
+                          const { handleLogoutClear: clearData } = await import('./utils/storage');
+                          await fbSignOut(auth);
+                          clearData();
+                        }}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#EF4444', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <LogOut size={15} color="#EF4444" /> Sign Out
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                      background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      zIndex: 9999,
+                      animation: 'dropdownFadeIn 0.2s ease'
+                    }}
+                    onClick={() => setAuthDropdownOpen(false)}
+                  >
+                    <div
+                      style={{
+                        background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                        borderRadius: '24px', width: '90%', maxWidth: '420px',
+                        boxShadow: '0 24px 80px rgba(0,0,0,0.4)',
+                        overflow: 'hidden',
+                      }}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <AuthDropdownPanel onClose={() => setAuthDropdownOpen(false)} />
+                    </div>
+                  </div>
+                )
               )}
             </div>
           )}
