@@ -571,46 +571,70 @@ export default function BatchPage({
         {!fileData && batchItems.length === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div 
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => !isProcessing && fileInputRef.current?.click()}
               className="glass-panel"
               style={{
                 border: '2px dashed var(--border-color)',
                 borderRadius: '24px',
                 padding: '40px 20px',
                 textAlign: 'center',
-                cursor: 'pointer',
+                cursor: isProcessing ? 'default' : 'pointer',
                 transition: 'border-color 0.2s',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '12px'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent-primary)'}
-              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+              onMouseEnter={(e) => !isProcessing && (e.currentTarget.style.borderColor = 'var(--accent-primary)')}
+              onMouseLeave={(e) => !isProcessing && (e.currentTarget.style.borderColor = 'var(--border-color)')}
             >
-              <div style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '20px',
-                background: 'rgba(214, 0, 54, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--accent-primary)'
-              }}>
-                <Upload size={32} />
-              </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Upload CSV or Excel</h3>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 max(20px, 10%)', lineHeight: '1.4' }}>
-                Select a `.csv`, `.xlsx`, or `.xls` file containing your {batchType === 'BARCODE' ? 'barcode' : 'QR code'} values.
-              </p>
-              <input 
-                ref={fileInputRef}
-                type="file" 
-                accept=".csv, .xlsx, .xls" 
-                onChange={handleFileUpload} 
-                style={{ display: 'none' }} 
-              />
+              {isProcessing ? (
+                <>
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    background: 'rgba(214, 0, 54, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--accent-primary)'
+                  }}>
+                    <RefreshCw size={28} className="animate-spin text-accent" />
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Reading & Parsing File...</h3>
+                  <div style={{ width: '80%', height: '8px', background: 'var(--bg-hover)', borderRadius: '4px', overflow: 'hidden', margin: '8px 0', border: '1px solid var(--border-color)' }}>
+                    <div style={{ width: `${processingProgress}%`, height: '100%', background: 'var(--accent-gradient)', transition: 'width 0.15s ease-out' }} />
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--accent-primary)' }}>{processingProgress}%</span>
+                </>
+              ) : (
+                <>
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '20px',
+                    background: 'rgba(214, 0, 54, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--accent-primary)'
+                  }}>
+                    <Upload size={32} />
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Upload CSV or Excel</h3>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 max(20px, 10%)', lineHeight: '1.4' }}>
+                    Select a `.csv`, `.xlsx`, or `.xls` file containing your {batchType === 'BARCODE' ? 'barcode' : 'QR code'} values.
+                  </p>
+                  <input 
+                    ref={fileInputRef}
+                    type="file" 
+                    accept=".csv, .xlsx, .xls" 
+                    onChange={handleFileUpload} 
+                    style={{ display: 'none' }} 
+                  />
+                </>
+              )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -706,23 +730,58 @@ export default function BatchPage({
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
-              <button 
-                onClick={handleImport}
-                style={{
+              {isProcessing ? (
+                <div style={{
                   flex: 1,
-                  background: 'var(--accent-gradient)',
-                  color: '#fff',
-                  border: 'none',
+                  height: '48px',
+                  background: 'var(--bg-hover)',
                   borderRadius: '16px',
-                  padding: '14px',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                Import Entries
-              </button>
+                  position: 'relative',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid var(--border-color)'
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: `${processingProgress}%`,
+                    background: 'var(--accent-gradient)',
+                    transition: 'width 0.1s ease-out'
+                  }} />
+                  <span style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    color: processingProgress > 50 ? '#FFFFFF' : 'var(--text-primary)'
+                  }}>
+                    Importing Entries... {processingProgress}%
+                  </span>
+                </div>
+              ) : (
+                <button 
+                  onClick={handleImport}
+                  style={{
+                    flex: 1,
+                    background: 'var(--accent-gradient)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '14px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Import Entries
+                </button>
+              )}
               <button 
                 onClick={() => setFileData(null)}
+                disabled={isProcessing}
                 style={{
                   background: 'var(--bg-hover)',
                   color: 'var(--text-secondary)',
@@ -730,7 +789,8 @@ export default function BatchPage({
                   borderRadius: '16px',
                   padding: '14px 20px',
                   fontWeight: 600,
-                  cursor: 'pointer'
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  opacity: isProcessing ? 0.5 : 1
                 }}
               >
                 Cancel
@@ -1157,82 +1217,6 @@ export default function BatchPage({
           </div>
         )}
       </div>
-
-      {/* ── Progress Loading Overlay Modal ── */}
-      {(isProcessing || isExporting) && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 10000,
-          background: 'rgba(9, 9, 15, 0.88)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '24px',
-          color: '#ffffff'
-        }}>
-          <div style={{
-            background: 'var(--bg-elevated, #14141e)',
-            border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-            borderRadius: '24px',
-            padding: '32px 28px',
-            maxWidth: '360px',
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
-          }}>
-            <div style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              background: 'rgba(214,0,54,0.15)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px'
-            }}>
-              <RefreshCw size={28} className="animate-spin text-accent" style={{ color: 'var(--accent-primary, #D60036)' }} />
-            </div>
-
-            <h4 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px 0', color: '#ffffff' }}>
-              {isExporting ? 'Packaging Export' : 'Processing Batch'}
-            </h4>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary, #8b8fa8)', margin: '0 0 20px 0', minHeight: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isExporting ? `Exporting files into ZIP archive (${exportProgress}%)...` : processingMessage}
-            </p>
-
-            {/* Progress Bar Container */}
-            <div style={{
-              width: '100%',
-              height: '10px',
-              background: 'rgba(255,255,255,0.08)',
-              borderRadius: '5px',
-              overflow: 'hidden',
-              position: 'relative',
-              marginBottom: '12px'
-            }}>
-              <div style={{
-                height: '100%',
-                width: `${isExporting ? exportProgress : processingProgress}%`,
-                background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
-                borderRadius: '5px',
-                transition: 'width 0.15s ease-out'
-              }} />
-            </div>
-
-            {/* Percentage Text */}
-            <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--accent-primary, #D60036)' }}>
-              {isExporting ? `${exportProgress}%` : `${processingProgress}%`}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
