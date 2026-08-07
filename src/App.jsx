@@ -923,6 +923,19 @@ export default function App() {
   }, [authDropdownOpen]);
 
   useEffect(() => {
+    const checkRedirect = async () => {
+      try {
+        const { getRedirectResult } = await import('firebase/auth');
+        const res = await getRedirectResult(auth);
+        if (res && res.user) {
+          setCurrentUser(res.user);
+        }
+      } catch (err) {
+        console.error('Error getting redirect result:', err);
+      }
+    };
+    checkRedirect();
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       if (user) {

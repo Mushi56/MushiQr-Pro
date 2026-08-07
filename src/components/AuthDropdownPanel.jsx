@@ -75,11 +75,16 @@ export default function AuthDropdownPanel({ onClose }) {
   const handleGoogle = async () => {
     setError(''); setMessage(''); setLoading(true);
     try {
-      if (Capacitor.isNativePlatform()) {
-        await signInWithRedirect(auth, googleProvider);
-      } else {
+      try {
         await signInWithPopup(auth, googleProvider);
+        setMessage('Signed in with Google!');
         setTimeout(onClose, 600);
+      } catch (popupErr) {
+        if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
+          throw popupErr;
+        }
+        console.warn('Popup login failed, attempting redirect fallback:', popupErr);
+        await signInWithRedirect(auth, googleProvider);
       }
     } catch (err) {
       setError(handleAuthError(err));
