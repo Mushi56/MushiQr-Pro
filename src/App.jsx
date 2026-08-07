@@ -92,6 +92,7 @@ import BarcodePage from './components/BarcodePage';
 import ScannerGunPage from './components/ScannerGunPage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
+import SaveLocationModal from './components/SaveLocationModal';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -915,6 +916,7 @@ export default function App() {
   const [editProfileNameText, setEditProfileNameText] = useState('');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [newProfilePicUrl, setNewProfilePicUrl] = useState('');
   const [profileNameInput, setProfileNameInput] = useState('');
@@ -3880,31 +3882,10 @@ export default function App() {
                       <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
                       <button
                         className="menu-link-btn"
-                        onClick={async () => {
-                          const prefs = getPreferences();
-                          let currentLoc = prefs.saveLocation || 'Mushi QR Pro';
-                          try {
-                            if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
-                              const handle = await window.showDirectoryPicker();
-                              if (handle && handle.name) {
-                                const newLoc = handle.name;
-                                savePreferences({ ...prefs, saveLocation: newLoc });
-                                showToast(`Save location updated: ${newLoc}`);
-                                return;
-                              }
-                            }
-                          } catch (e) {
-                            console.log('Directory picker unsupported', e);
-                          }
-                          const custom = window.prompt(
-                            'Set Save Location folder in Internal Storage:\n(Default: Mushi QR Pro)\n\nAutomatic folder structure created inside:\n📁 Mushi QR Pro/\n ├── 📁 QR Codes/ (PNG, JPG, SVG, PDF)\n ├── 📁 Barcodes/ (PNG, JPG, SVG, PDF)\n └── 📁 Bulk Batch Generation/ (ZIP, PNG, JPG, SVG, PDF)',
-                            currentLoc
-                          );
-                          if (custom !== null && custom.trim() !== '') {
-                            const clean = custom.trim();
-                            savePreferences({ ...prefs, saveLocation: clean });
-                            showToast(`Save location updated: Internal Storage/${clean}`);
-                          }
+                        onClick={() => {
+                          setIsFolderModalOpen(true);
+                          setIsMenuOpen(false);
+                          setAuthDropdownOpen(false);
                         }}
                       >
                         <Folder size={16} /> Save Location
@@ -6328,8 +6309,11 @@ export default function App() {
               </div>
             )}
           </div>
-        </div>
-      )}
+      <SaveLocationModal
+        isOpen={isFolderModalOpen}
+        onClose={() => setIsFolderModalOpen(false)}
+        showToast={showToast}
+      />
     </div>
   );
 }

@@ -4,8 +4,11 @@ import {
 } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 
+import SaveLocationModal from './SaveLocationModal';
+
 export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, currentUser, showToast }) {
   const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
 
   useEffect(() => {
     const handlePrefSync = () => {
@@ -24,31 +27,8 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
     savePreferences({ ...getPreferences(), theme: next });
   };
 
-  const handleChooseFolder = async () => {
-    try {
-      if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
-        const handle = await window.showDirectoryPicker();
-        if (handle && handle.name) {
-          const newLoc = handle.name;
-          setSaveLocation(newLoc);
-          savePreferences({ ...getPreferences(), saveLocation: newLoc });
-          if (showToast) showToast(`Save location updated: Internal Storage/${newLoc}`);
-          return;
-        }
-      }
-    } catch (e) {
-      console.log('Directory picker cancelled or unsupported', e);
-    }
-    const custom = window.prompt(
-      'Set Save Location folder in Internal Storage:\n(Default: Mushi QR Pro)\n\nAutomatic folder structure created inside:\n📁 Mushi QR Pro/\n ├── 📁 QR Codes/ (PNG, JPG, SVG, PDF)\n ├── 📁 Barcodes/ (PNG, JPG, SVG, PDF)\n └── 📁 Bulk Batch Generation/ (ZIP, PNG, JPG, SVG, PDF)',
-      saveLocation
-    );
-    if (custom !== null && custom.trim() !== '') {
-      const clean = custom.trim();
-      setSaveLocation(clean);
-      savePreferences({ ...getPreferences(), saveLocation: clean });
-      if (showToast) showToast(`Save location updated: Internal Storage/${clean}`);
-    }
+  const handleChooseFolder = () => {
+    setIsFolderModalOpen(true);
   };
 
   return (
@@ -139,6 +119,13 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
 
         </div>
       </div>
+
+      <SaveLocationModal
+        isOpen={isFolderModalOpen}
+        onClose={() => setIsFolderModalOpen(false)}
+        onSave={(newLoc) => setSaveLocation(newLoc)}
+        showToast={showToast}
+      />
     </div>
   );
 }

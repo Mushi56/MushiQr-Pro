@@ -3,8 +3,11 @@ import { Moon, Sun, Info, Shield, FileText, ChevronRight, Folder, Settings as Se
 import { getPreferences, savePreferences } from '../utils/storage';
 import AppIcon from './AppIcon';
 
+import SaveLocationModal from './SaveLocationModal';
+
 export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
   const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
 
   const handleThemeChange = () => {
     let next;
@@ -16,29 +19,8 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
     savePreferences({ ...getPreferences(), theme: next });
   };
 
-  const handleChooseFolder = async () => {
-    try {
-      if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
-        const handle = await window.showDirectoryPicker();
-        if (handle && handle.name) {
-          const newLoc = handle.name;
-          setSaveLocation(newLoc);
-          savePreferences({ ...getPreferences(), saveLocation: newLoc });
-          return;
-        }
-      }
-    } catch (e) {
-      console.log('Directory picker cancelled or unsupported', e);
-    }
-    const custom = window.prompt(
-      'Set Save Location folder in Internal Storage:\n(Default: Mushi QR Pro)\n\nAutomatic folder structure created inside:\n📁 Mushi QR Pro/\n ├── 📁 QR Codes/ (PNG, JPG, SVG, PDF)\n ├── 📁 Barcodes/ (PNG, JPG, SVG, PDF)\n └── 📁 Bulk Batch Generation/ (ZIP, PNG, JPG, SVG, PDF)',
-      saveLocation
-    );
-    if (custom !== null && custom.trim() !== '') {
-      const clean = custom.trim();
-      setSaveLocation(clean);
-      savePreferences({ ...getPreferences(), saveLocation: clean });
-    }
+  const handleChooseFolder = () => {
+    setIsFolderModalOpen(true);
   };
 
   const menuItems = [
@@ -179,6 +161,12 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
           <p style={{ margin: 0, fontSize: '12px', opacity: 0.6 }}>Version 1.1.0</p>
         </div>
       </div>
+
+      <SaveLocationModal
+        isOpen={isFolderModalOpen}
+        onClose={() => setIsFolderModalOpen(false)}
+        onSave={(newLoc) => setSaveLocation(newLoc)}
+      />
     </div>
   );
 }
