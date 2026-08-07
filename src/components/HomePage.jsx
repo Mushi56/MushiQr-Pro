@@ -636,7 +636,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '5px 6px',
+                padding: '5px 0 0 0',
                 backgroundColor: 'rgba(255, 77, 109, 0.1)',
                 border: '1px solid rgba(255, 77, 109, 0.2)',
                 borderRadius: '10px',
@@ -722,7 +722,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '5px 6px',
+                padding: '5px 0 0 0',
                 backgroundColor: 'rgba(45, 212, 191, 0.1)',
                 border: '1px solid rgba(45, 212, 191, 0.2)',
                 borderRadius: '10px',
