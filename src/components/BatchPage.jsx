@@ -447,62 +447,73 @@ export default function BatchPage({
       flexDirection: 'column',
       overflow: 'hidden'
     }}>
-      {/* Header matching modal styling */}
-      <div className="modal-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
-        <div className="modal-header-title">
-          <h3 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>
-            {batchType === 'BARCODE' ? 'Bulk Barcode Generator' : 'Bulk QR Generator'}
-          </h3>
-          <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', margin: 0 }}>
-            {batchType === 'BARCODE' ? 'Generate multiple barcodes at once' : 'Generate multiple branded QR codes at once'}
-          </p>
-        </div>
-        <button className="modal-close" onClick={() => onNavigate('home')}>
-          <X size={20} />
-        </button>
-      </div>
-
-      <div className="modal-content" style={{ flex: 1, padding: '20px var(--main-padding-x) 100px' }}>
+      <div style={{ flex: 1, padding: '16px var(--main-padding-x) 140px', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
         
-        {/* Toggle Selector for Batch Mode */}
-        {!fileData && batchItems.length === 0 && (
-          <div style={{ display: 'flex', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '12px', marginBottom: '20px' }}>
-            <button 
-              onClick={() => setBatchType('QR')}
-              style={{
-                flex: 1,
-                padding: '10px',
-                borderRadius: '8px',
-                border: 'none',
-                background: batchType === 'QR' ? 'var(--bg-elevated)' : 'transparent',
-                color: batchType === 'QR' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                fontWeight: 700,
-                fontSize: '13px',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              Bulk QR
-            </button>
-            <button 
-              onClick={() => setBatchType('BARCODE')}
-              style={{
-                flex: 1,
-                padding: '10px',
-                borderRadius: '8px',
-                border: 'none',
-                background: batchType === 'BARCODE' ? 'var(--bg-elevated)' : 'transparent',
-                color: batchType === 'BARCODE' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                fontWeight: 700,
-                fontSize: '13px',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              Bulk Barcode
-            </button>
-          </div>
-        )}
+        {/* Toggle Selector for Batch Mode (Always Accessible) */}
+        <div style={{ display: 'flex', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '14px', marginBottom: '20px' }}>
+          <button 
+            onClick={() => {
+              setBatchType('QR');
+              if (batchItems.length > 0) {
+                setBatchItems(prev => prev.map(item => ({
+                  ...item,
+                  type: 'QR',
+                  style: { ...activeGeneratorStyle }
+                })));
+              }
+            }}
+            style={{
+              flex: 1,
+              padding: '12px',
+              borderRadius: '10px',
+              border: 'none',
+              background: batchType === 'QR' ? 'var(--accent-primary)' : 'transparent',
+              color: batchType === 'QR' ? '#FFFFFF' : 'var(--text-secondary)',
+              fontWeight: 800,
+              fontSize: '14px',
+              cursor: 'pointer',
+              boxShadow: batchType === 'QR' ? '0 4px 14px rgba(214, 0, 54, 0.35)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            Bulk QR
+          </button>
+          <button 
+            onClick={() => {
+              setBatchType('BARCODE');
+              if (batchItems.length > 0) {
+                setBatchItems(prev => prev.map(item => ({
+                  ...item,
+                  type: 'BARCODE',
+                  style: {
+                    bcid: barcodeType || 'code128',
+                    barColor: '#000000',
+                    bgColor: '#ffffff',
+                    barWidth: 2,
+                    height: 90,
+                    margin: 16,
+                    displayValue: true
+                  }
+                })));
+              }
+            }}
+            style={{
+              flex: 1,
+              padding: '12px',
+              borderRadius: '10px',
+              border: 'none',
+              background: batchType === 'BARCODE' ? 'var(--accent-primary)' : 'transparent',
+              color: batchType === 'BARCODE' ? '#FFFFFF' : 'var(--text-secondary)',
+              fontWeight: 800,
+              fontSize: '14px',
+              cursor: 'pointer',
+              boxShadow: batchType === 'BARCODE' ? '0 4px 14px rgba(214, 0, 54, 0.35)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            Bulk Barcode
+          </button>
+        </div>
 
         {/* Step 1: Upload or Import */}
         {!fileData && batchItems.length === 0 && (
