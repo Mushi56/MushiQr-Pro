@@ -79,7 +79,9 @@ export default function AuthDropdownPanel({ onClose }) {
       if (Capacitor.isNativePlatform()) {
         try {
           setMessage('Requesting native credential...');
-          const result = await FirebaseAuthentication.signInWithGoogle();
+          const result = await FirebaseAuthentication.signInWithGoogle({
+            useCredentialManager: false,
+          });
           setMessage('Received native result, checking token...');
           if (result.credential?.idToken) {
             setMessage('Authenticating with Firebase...');
