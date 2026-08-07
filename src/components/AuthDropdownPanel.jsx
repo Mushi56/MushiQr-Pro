@@ -7,10 +7,11 @@ import {
   signInWithPopup,
   signInWithRedirect,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  GoogleAuthProvider
 } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
-
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 function handleAuthError(err) {
   switch (err.code) {
     case 'auth/invalid-email': return 'Invalid email address format.';
@@ -75,16 +76,33 @@ export default function AuthDropdownPanel({ onClose }) {
   const handleGoogle = async () => {
     setError(''); setMessage(''); setLoading(true);
     try {
-      try {
-        await signInWithPopup(auth, googleProvider);
-        setMessage('Signed in with Google!');
-        setTimeout(onClose, 600);
-      } catch (popupErr) {
-        if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
-          throw popupErr;
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const result = await FirebaseAuthentication.signInWithGoogle();
+          if (result.credential?.idToken) {
+            const credential = GoogleAuthProvider.credential(result.credential.idToken);
+            await signInWithCredential(auth, credential);
+            setMessage('Signed in with Google (Native)!');
+            setTimeout(onClose, 600);
+          } else {
+            throw new Error('No idToken received from native Google Sign-In');
+          }
+        } catch (nativeErr) {
+          console.error('Native Google Sign-In failed:', nativeErr);
+          throw nativeErr;
         }
-        console.warn('Popup login failed, attempting redirect fallback:', popupErr);
-        await signInWithRedirect(auth, googleProvider);
+      } else {
+        try {
+          await signInWithPopup(auth, googleProvider);
+          setMessage('Signed in with Google!');
+          setTimeout(onClose, 600);
+        } catch (popupErr) {
+          if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
+            throw popupErr;
+          }
+          console.warn('Popup login failed, attempting redirect fallback:', popupErr);
+          await signInWithRedirect(auth, googleProvider);
+        }
       }
     } catch (err) {
       setError(handleAuthError(err));
