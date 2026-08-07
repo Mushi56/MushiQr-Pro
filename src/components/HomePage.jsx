@@ -636,13 +636,12 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '5px 0 0 0',
+                padding: '8px 16px',
                 backgroundColor: 'rgba(255, 77, 109, 0.1)',
-                border: '1px solid rgba(255, 77, 109, 0.2)',
-                borderRadius: '10px',
-                width: '100%',
+                borderTop: '1px solid rgba(255, 77, 109, 0.2)',
+                width: 'calc(100% + 32px)',
                 boxSizing: 'border-box',
-                marginTop: '0px',
+                margin: 'auto -16px -16px -16px',
                 zIndex: 2
               }}>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
@@ -722,13 +721,12 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '5px 0 0 0',
+                padding: '8px 16px',
                 backgroundColor: 'rgba(45, 212, 191, 0.1)',
-                border: '1px solid rgba(45, 212, 191, 0.2)',
-                borderRadius: '10px',
-                width: '100%',
+                borderTop: '1px solid rgba(45, 212, 191, 0.2)',
+                width: 'calc(100% + 32px)',
                 boxSizing: 'border-box',
-                marginTop: '0px',
+                margin: 'auto -16px -16px -16px',
                 zIndex: 2
               }}>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
