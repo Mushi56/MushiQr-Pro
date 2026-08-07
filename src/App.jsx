@@ -4075,19 +4075,6 @@ export default function App() {
                               <span style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {currentUser.displayName || 'Mushi User'}
                               </span>
-                              <button
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  setEditProfileNameText(currentUser.displayName || '');
-                                  setIsEditingProfileName(true);
-                                }}
-                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6, flexShrink: 0 }}
-                                onMouseEnter={e => e.currentTarget.style.opacity = 1}
-                                onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
-                                title="Edit Name"
-                              >
-                                <Pencil size={13} color="#64748B" />
-                              </button>
                               {currentUser.email === 'mabuneri143@gmail.com' && (
                                 <GoldenAdminBadge size={15} />
                               )}
