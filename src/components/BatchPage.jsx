@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles, CheckCircle, FileArchive } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -50,12 +50,7 @@ async function saveZipNative(base64Data, filename) {
     }
   }
 
-  // 3. Notify user of file location
-  if (savedToDocuments) {
-    alert(`Bulk Export Complete! 🎉\n\nYour ZIP file has been saved to your device's Documents folder:\n\n📄 ${filename}`);
-  }
-
-  // 4. Open native Share sheet so user can also send/save via Files app, Drive, etc.
+  // 3. Open native Share sheet so user can also send/save via Files app, Drive, etc.
   if (savedFileUri) {
     try {
       await Share.share({
@@ -88,6 +83,8 @@ export default function BatchPage({
   const [selectedFormat, setSelectedFormat] = useState('PNG');
   const [exportQuality, setExportQuality] = useState('Normal');
   const [customZipFileName, setCustomZipFileName] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [exportSuccessInfo, setExportSuccessInfo] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -502,11 +499,21 @@ export default function BatchPage({
           const base64Data = reader.result.split(',')[1];
           await saveZipNative(base64Data, archiveName);
           setIsExporting(false);
+          setExportSuccessInfo({
+            filename: archiveName,
+            count: batchItems.length,
+            isNative: true
+          });
         };
         reader.readAsDataURL(content);
       } else {
         saveAs(content, archiveName);
         setIsExporting(false);
+        setExportSuccessInfo({
+          filename: archiveName,
+          count: batchItems.length,
+          isNative: false
+        });
       }
     } catch (err) {
       console.error(err);
@@ -921,7 +928,7 @@ export default function BatchPage({
                 )}
                 
                 <button 
-                  onClick={handleClearBatch}
+                  onClick={() => setShowClearConfirm(true)}
                   style={{
                     flex: batchType === 'BARCODE' ? 1 : '0 0 auto',
                     background: 'rgba(239, 68, 68, 0.1)',
@@ -1216,6 +1223,200 @@ export default function BatchPage({
           </div>
         )}
       </div>
+
+      {/* ── 1. Clear All Confirmation Modal ── */}
+      {showClearConfirm && (
+        <div 
+          onClick={() => setShowClearConfirm(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            background: 'rgba(9, 9, 15, 0.85)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-elevated, #14141e)',
+              border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
+              borderRadius: '24px',
+              padding: '28px 24px',
+              maxWidth: '380px',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)'
+            }}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'rgba(239, 68, 68, 0.12)',
+              color: '#EF4444',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px'
+            }}>
+              <Trash2 size={26} />
+            </div>
+
+            <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+              Clear Batch Entries?
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+              Are you sure you want to remove all <strong style={{ color: 'var(--text-primary)' }}>{batchItems.length}</strong> items from this batch? This action cannot be undone.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                style={{
+                  flex: 1,
+                  padding: '13px',
+                  borderRadius: '14px',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-hover)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setBatchItems([]);
+                  setShowClearConfirm(false);
+                }}
+                style={{
+                  flex: 1,
+                  padding: '13px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: '#EF4444',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(239, 68, 68, 0.35)'
+                }}
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 2. Export Success Modal Box ── */}
+      {exportSuccessInfo && (
+        <div 
+          onClick={() => setExportSuccessInfo(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            background: 'rgba(9, 9, 15, 0.85)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-elevated, #14141e)',
+              border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
+              borderRadius: '24px',
+              padding: '32px 24px',
+              maxWidth: '380px',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)'
+            }}
+          >
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              background: 'rgba(34, 197, 94, 0.15)',
+              color: '#22C55E',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px',
+              border: '1px solid rgba(34, 197, 94, 0.3)'
+            }}>
+              <CheckCircle size={32} />
+            </div>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+              Export Complete! 🎉
+            </h3>
+
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+              {exportSuccessInfo.isNative
+                ? `Your batch ZIP file containing ${exportSuccessInfo.count} items has been saved to your device's Documents folder:`
+                : `Your batch ZIP file containing ${exportSuccessInfo.count} items has been generated and downloaded:`
+              }
+            </p>
+
+            <div style={{
+              width: '100%',
+              background: 'var(--bg-hover, rgba(255,255,255,0.05))',
+              border: '1px solid var(--border-color, rgba(255,255,255,0.1))',
+              borderRadius: '14px',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '24px',
+              boxSizing: 'border-box'
+            }}>
+              <FileArchive size={20} color="var(--accent-primary, #D60036)" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>
+                {exportSuccessInfo.filename}
+              </span>
+            </div>
+
+            <button
+              onClick={() => setExportSuccessInfo(null)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '14px',
+                border: 'none',
+                background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
+                color: '#FFFFFF',
+                fontWeight: 800,
+                fontSize: '15px',
+                cursor: 'pointer',
+                boxShadow: '0 8px 20px rgba(214, 0, 54, 0.35)'
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
