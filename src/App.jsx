@@ -3892,14 +3892,7 @@ export default function App() {
                       >
                         <Folder size={16} /> Save Location
                       </button>
-                      {currentUser?.email === 'mabuneri143@gmail.com' && (
-                        <>
-                          <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
-                          <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/admin'; }} style={{ color: '#D60036', fontWeight: 700 }}>
-                            <Settings size={16} /> Super Admin Panel
-                          </button>
-                        </>
-                      )}
+
                     </div>
                   </div>
                 )}
@@ -4041,11 +4034,7 @@ export default function App() {
                       >
                         <Edit2 size={15} color="var(--text-secondary)" /> Edit Profile Name
                       </button>
-                      {currentUser.email === 'mabuneri143@gmail.com' && (
-                        <button onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#FF007F', fontSize: '13px', fontWeight: 700, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <Shield size={15} color="#FF007F" /> Super Admin Panel
-                        </button>
-                      )}
+
                       <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 0' }} />
                       <button
                         onClick={async () => {

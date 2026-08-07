@@ -132,23 +132,7 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
             <ChevronRight size={16} color="var(--text-muted)" />
           </div>
 
-          {/* Super Admin Panel — only for superadmin */}
-          {currentUser?.email === 'mabuneri143@gmail.com' && (
-            <>
-              <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
-              <div
-                className="settings-row-item"
-                onClick={() => window.location.hash = '#/admin'}
-                style={{ padding: '16px', color: '#FF007F' }}
-              >
-                <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #db2777 0%, #c026d3 100%)' }}>
-                  <Settings size={18} color="#FF007F" />
-                </div>
-                <div style={{ flex: 1, fontSize: '14px', fontWeight: 700 }}>Super Admin Panel</div>
-                <ChevronRight size={16} color="var(--text-muted)" />
-              </div>
-            </>
-          )}
+
 
         </div>
       </div>
