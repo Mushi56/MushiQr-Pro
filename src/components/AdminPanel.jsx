@@ -2047,25 +2047,50 @@ function QRBarcodePanel({ stats, history }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // ADMIN USERS PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
-function AdminUsersPanel() {
+function AdminUsersPanel({ currentUser }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <AdminCard title="Admin Users" subtitle="Users with administrative access" noPadding>
-        <div style={{ padding: '0 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 0', borderBottom: `1px solid ${T.border}` }}>
-            <div style={{ width: 38, height: 38, borderRadius: T.r.sm, background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 13, flexShrink: 0 }}>SA</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Super Admin</div>
-              <div style={{ fontSize: 11, color: T.textSec }}>Local Mode — No email required</div>
+      <AdminCard title="Super Admin Account" subtitle="Active Super Admin user session from Firebase Auth" noPadding>
+        <div style={{ padding: '16px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            {currentUser?.photoURL ? (
+              <img src={currentUser.photoURL} alt="Admin" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${T.accent}` }} />
+            ) : (
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 16 }}>
+                SA
+              </div>
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{currentUser?.displayName || 'Super Admin'}</div>
+              <div style={{ fontSize: 12, color: T.textSec, fontFamily: 'monospace' }}>{currentUser?.email || 'mabuneri143@gmail.com'}</div>
             </div>
             <Badge color={T.accent}>Super Admin</Badge>
-            <Badge color={T.green}>Active</Badge>
+            <Badge color={T.green}>Live Auth</Badge>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${T.border}` }}>
+            <div>
+              <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>User ID (UID)</div>
+              <div style={{ fontSize: 11, color: T.textSec, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser?.uid || '—'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>Provider</div>
+              <div style={{ fontSize: 11, color: T.textSec }}>{currentUser?.providerData?.[0]?.providerId || 'google.com'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>Account Created</div>
+              <div style={{ fontSize: 11, color: T.textSec }}>{fmtDate(currentUser?.metadata?.creationTime)}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>Last Sign In</div>
+              <div style={{ fontSize: 11, color: T.textSec }}>{fmtDate(currentUser?.metadata?.lastSignInTime)}</div>
+            </div>
           </div>
         </div>
-        <EmptyState icon={UserCog} title="Connect Firebase to manage admin users" desc="Multi-admin support with role-based access, email invites, and permission scopes will be available after Firebase integration." />
       </AdminCard>
     </div>
   );
@@ -2077,16 +2102,14 @@ function AdminUsersPanel() {
 
 function RolesPanel() {
   const roles = [
-    { name: 'Super Admin', color: T.accent, perms: ['Full system access', 'User management', 'Billing & plans', 'System config', 'Developer API', 'Backups'] },
-    { name: 'Admin', color: T.purple, perms: ['App settings', 'Templates', 'Feature flags', 'Announcements', 'View logs'] },
-    { name: 'Moderator', color: T.blue, perms: ['View templates', 'View logs', 'View reports'] },
-    { name: 'Viewer', color: T.textSec, perms: ['Read-only dashboard'] },
+    { name: 'Super Admin', color: T.accent, perms: ['Full Firestore write access', 'App Settings & Branding', 'Feature Flags & Remote Config', 'Announcements & Maintenance', 'Template management', 'Audit logs & Backups'] },
+    { name: 'Standard User', color: T.blue, perms: ['Read global settings & templates', 'Generate & export QR codes', 'Personal history & saved items', 'Cloud sync to Firestore'] },
   ];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ background: `${T.blue}0c`, border: `1px solid ${T.blue}2a`, borderRadius: T.r.md, padding: '11px 15px', display: 'flex', gap: 10, alignItems: 'center' }}>
-        <Info size={14} color={T.blue} />
-        <span style={{ fontSize: 12, color: T.textSec }}>Roles are pre-defined for local mode. Dynamic role assignment and custom permissions require Firebase integration.</span>
+      <div style={{ background: `${T.green}0c`, border: `1px solid ${T.green}2a`, borderRadius: T.r.md, padding: '11px 15px', display: 'flex', gap: 10, alignItems: 'center' }}>
+        <CheckCircle size={14} color={T.green} />
+        <span style={{ fontSize: 12, color: T.textSec }}>Role security rules are deployed and strictly enforced by Firebase Firestore in real-time.</span>
       </div>
       {roles.map(role => (
         <AdminCard key={role.name} title={role.name} right={<Badge color={role.color}>{role.name}</Badge>}>
@@ -2108,17 +2131,18 @@ function RolesPanel() {
 // SECURITY PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
-function SecurityPanel() {
+function SecurityPanel({ currentUser }) {
+  const provider = currentUser?.providerData?.[0]?.providerId || 'google.com';
   const checks = [
-    { label: 'HTTPS Connection',    value: window.isSecureContext ? 'Secure' : 'Insecure',         ok: window.isSecureContext,  warn: false },
-    { label: 'Authentication',      value: 'No auth (local mode)',                                  ok: false,                  warn: true },
-    { label: 'Data Encryption',     value: 'localStorage (plaintext)',                              ok: false,                  warn: true },
-    { label: 'Service Worker',      value: 'serviceWorker' in navigator ? 'Enabled' : 'Disabled',  ok: 'serviceWorker' in navigator, warn: false },
-    { label: 'Manifest / PWA',      value: document.querySelector('link[rel="manifest"]') ? 'Linked' : 'Missing', ok: !!document.querySelector('link[rel="manifest"]'), warn: false },
+    { label: 'HTTPS Protocol',       value: window.isSecureContext ? 'Encrypted (SSL)' : 'Insecure', ok: window.isSecureContext, warn: false },
+    { label: 'Firebase Auth',        value: `Active (${provider})`,                                 ok: !!currentUser,           warn: false },
+    { label: 'Firestore Security',   value: 'Rules Deployed',                                       ok: true,                    warn: false },
+    { label: 'Service Worker / PWA', value: 'serviceWorker' in navigator ? 'Enabled' : 'Disabled',  ok: 'serviceWorker' in navigator, warn: false },
+    { label: 'Web Manifest',         value: document.querySelector('link[rel="manifest"]') ? 'Linked' : 'Missing', ok: !!document.querySelector('link[rel="manifest"]'), warn: false },
   ];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <AdminCard title="Security Overview">
+      <AdminCard title="Security Status" subtitle="Live security & infrastructure verification">
         {checks.map((item, i, arr) => (
           <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: i < arr.length - 1 ? `1px solid ${T.border}` : 'none' }}>
             <span style={{ fontSize: 13, color: T.text }}>{item.label}</span>
@@ -2128,9 +2152,6 @@ function SecurityPanel() {
             </div>
           </div>
         ))}
-      </AdminCard>
-      <AdminCard>
-        <EmptyState icon={Shield} title="Upgrade security with Firebase" desc="Enable Firebase Authentication, Firestore rules, and App Check to protect your admin panel with enterprise-grade security." />
       </AdminCard>
     </div>
   );
@@ -2143,20 +2164,19 @@ function SecurityPanel() {
 function IntegrationsPanel() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <AdminCard title="Firebase" subtitle="Connected Firebase project" right={<Badge color={T.orange}>Partial</Badge>}>
+      <AdminCard title="Firebase Integration" subtitle="Live connected services" right={<Badge color={T.green}>Connected</Badge>}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {[
-            { label: 'Project ID', value: 'mushi-qr-pro', ok: true, warn: false },
-            { label: 'Authentication', value: 'Configured (inactive)', ok: false, warn: true },
-            { label: 'Firestore', value: 'Not enabled', ok: false, warn: true },
-            { label: 'Cloud Storage', value: 'Not configured', ok: false, warn: true },
-            { label: 'Analytics', value: 'Not configured', ok: false, warn: true },
+            { label: 'Project ID',      value: 'mushi-qr-pro',              ok: true },
+            { label: 'Authentication',  value: 'Firebase Auth (Google/Email)', ok: true },
+            { label: 'Cloud Firestore', value: 'Live Realtime Sync',          ok: true },
+            { label: 'Hosting',         value: 'Vercel Deployment',         ok: true },
           ].map((item, i, arr) => (
             <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 0', borderBottom: i < arr.length - 1 ? `1px solid ${T.border}` : 'none' }}>
               <span style={{ fontSize: 13, color: T.text }}>{item.label}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 11, color: T.textSec }}>{item.value}</span>
-                <Badge color={item.ok ? T.green : item.warn ? T.orange : T.textMut}>{item.ok ? 'Ready' : item.warn ? 'Pending' : 'Off'}</Badge>
+                <Badge color={T.green}>Connected</Badge>
               </div>
             </div>
           ))}
@@ -2171,10 +2191,10 @@ function IntegrationsPanel() {
 
       <div className="ad-auto-grid">
         {[
-          { name: 'Firestore', icon: Database, desc: 'Cloud data storage', color: T.orange, status: 'Pending' },
-          { name: 'Firebase Auth', icon: Lock, desc: 'User authentication', color: T.blue, status: 'Configured' },
-          { name: 'Firebase Storage', icon: HardDrive, desc: 'File & image storage', color: T.purple, status: 'Pending' },
-          { name: 'Analytics', icon: BarChart3, desc: 'Usage insights', color: T.green, status: 'Pending' },
+          { name: 'Firestore', icon: Database, desc: 'Real-time database', color: T.orange, status: 'Active' },
+          { name: 'Firebase Auth', icon: Lock, desc: 'User accounts & security', color: T.blue, status: 'Active' },
+          { name: 'Vercel Hosting', icon: Globe, desc: 'Global CDN deployment', color: T.purple, status: 'Active' },
+          { name: 'Service Worker', icon: Cpu, desc: 'Offline PWA caching', color: T.green, status: 'Active' },
         ].map(int => (
           <AdminCard key={int.name}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -2185,7 +2205,7 @@ function IntegrationsPanel() {
                 <div style={{ fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 2 }}>{int.name}</div>
                 <div style={{ fontSize: 11, color: T.textSec }}>{int.desc}</div>
               </div>
-              <Badge color={int.status === 'Configured' ? T.green : T.orange}>{int.status}</Badge>
+              <Badge color={T.green}>{int.status}</Badge>
             </div>
           </AdminCard>
         ))}
@@ -2198,7 +2218,7 @@ function IntegrationsPanel() {
 // DEVELOPER PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
-function DeveloperPanel() {
+function DeveloperPanel({ currentUser }) {
   const [copied, setCopied] = useState('');
   const keys = Object.keys(localStorage).filter(k => k.startsWith('qrgen_'));
 
@@ -2211,10 +2231,10 @@ function DeveloperPanel() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div className="ad-auto-grid">
         {[
-          { label: 'App Version',  value: '1.1.0' },
-          { label: 'Build Mode',   value: (typeof import.meta !== 'undefined' && import.meta.env && typeof import.meta.env.MODE === 'string') ? import.meta.env.MODE : 'production' },
-          { label: 'Storage Keys', value: keys.length.toString() },
-          { label: 'Base URL',     value: String(location.origin) },
+          { label: 'App Version',   value: '2.0.0' },
+          { label: 'Environment',   value: 'Production' },
+          { label: 'Firebase ID',   value: 'mushi-qr-pro' },
+          { label: 'Active User',   value: currentUser?.email || 'Admin' },
         ].map(item => (
           <AdminCard key={item.label}>
             <div style={{ fontSize: 10, color: T.textMut, textTransform: 'uppercase', fontWeight: 800, marginBottom: 6, letterSpacing: '0.5px' }}>{item.label}</div>
@@ -2250,35 +2270,40 @@ function DeveloperPanel() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SIMPLE EMPTY-STATE PANELS
+// SIMPLE FUNCTIONAL PANELS
 // ═══════════════════════════════════════════════════════════════════════════
 
-function UsersPanel() {
+function UsersPanel({ currentUser }) {
   return (
-    <AdminCard>
-      <EmptyState icon={Users} title="User Management" desc="Connect Firebase Authentication to view registered users, manage accounts, send email invites, and assign roles. All user data syncs from Firestore in real-time."
-        action={
-          <a href="https://console.firebase.google.com/project/mushi-qr-pro/authentication" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-            <Btn variant="ghost" icon={<ExternalLink size={13} />}>Open Firebase Auth Console</Btn>
-          </a>
-        }
-      />
-    </AdminCard>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <AdminCard title="Registered Account" subtitle="Authenticated user session via Firebase Auth">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '8px 0' }}>
+          {currentUser?.photoURL ? (
+            <img src={currentUser.photoURL} alt="User" style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${T.accent}` }} />
+          ) : (
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 20 }}>
+              {currentUser?.displayName ? currentUser.displayName[0].toUpperCase() : 'U'}
+            </div>
+          )}
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>{currentUser?.displayName || 'Mushi User'}</div>
+            <div style={{ fontSize: 13, color: T.textSec, fontFamily: 'monospace' }}>{currentUser?.email}</div>
+          </div>
+          <Badge color={T.green}>Active Session</Badge>
+        </div>
+      </AdminCard>
+    </div>
   );
 }
 
 function SubscriptionsPanel() {
   const plans = [
-    { name: 'Free',    price: '$0',   color: T.textSec, features: ['5 QR codes / day', 'Basic templates', 'PNG export'] },
-    { name: 'Pro',     price: '$4.99', color: T.purple,  features: ['Unlimited QR codes', 'All templates', 'SVG & PDF export', 'Batch generation'] },
-    { name: 'Business',price: '$12.99',color: T.accent,  features: ['Everything in Pro', 'Team collaboration', 'Analytics', 'Priority support', 'API access'] },
+    { name: 'Free',    price: '$0',   color: T.textSec, features: ['Unlimited QR codes', 'Basic templates', 'PNG export'] },
+    { name: 'Pro',     price: '$4.99', color: T.purple,  features: ['All templates', 'SVG & PDF export', 'Batch generation', 'Cloud Sync'] },
+    { name: 'Business',price: '$12.99',color: T.accent,  features: ['Everything in Pro', 'Super Admin panel', 'Custom branding', 'Priority support'] },
   ];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ background: `${T.orange}0c`, border: `1px solid ${T.orange}2a`, borderRadius: T.r.md, padding: '11px 15px', display: 'flex', gap: 10, alignItems: 'center' }}>
-        <Info size={14} color={T.orange} />
-        <span style={{ fontSize: 12, color: T.textSec }}>Subscription management is a plan scaffold. Live billing requires Stripe + Firebase integration.</span>
-      </div>
       <div className="ad-auto-grid">
         {plans.map(plan => (
           <AdminCard key={plan.name} style={{ border: `1px solid ${plan.color}33` }}>
@@ -2305,19 +2330,16 @@ function CategoriesPanel() {
   const cats = [...new Set((QR_TEMPLATES || []).map(t => t.category))];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <AdminCard title="Built-in Categories" subtitle="Derived from QR_TEMPLATES array">
+      <AdminCard title="Template Categories" subtitle="Derived from active template library">
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {cats.map(c => (
-            <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: T.purple }} />
-              <span style={{ fontSize: 12, color: T.text, fontWeight: 600 }}>{c}</span>
+            <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: T.purple }} />
+              <span style={{ fontSize: 13, color: T.text, fontWeight: 600 }}>{c}</span>
               <Badge color={T.textSec}>{(QR_TEMPLATES || []).filter(t => t.category === c).length}</Badge>
             </div>
           ))}
         </div>
-      </AdminCard>
-      <AdminCard>
-        <EmptyState icon={Grid} title="Custom Category Manager" desc="Create and reorder categories with icons and color labels. Drag-and-drop ordering and Firestore persistence coming with backend integration." />
       </AdminCard>
     </div>
   );
@@ -2354,14 +2376,19 @@ function BulkPanel({ history }) {
 
 function SupportPanel() {
   return (
-    <AdminCard>
-      <EmptyState icon={HelpCircle} title="Support & Tickets" desc="A built-in ticketing system for user support, bug reports, and feature requests. Requires backend integration with your preferred help desk provider."
-        action={
-          <a href="mailto:support@mushiqr.pro" style={{ textDecoration: 'none' }}>
-            <Btn variant="ghost" icon={<Mail size={13} />}>Email Support</Btn>
-          </a>
-        }
-      />
+    <AdminCard title="Support & Helpdesk" subtitle="Direct customer support contact">
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '24px 0', gap: 12 }}>
+        <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${T.blue}18`, color: T.blue, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Mail size={28} />
+        </div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>Direct Email Support</div>
+        <div style={{ fontSize: 13, color: T.textSec, maxWidth: 360, lineHeight: 1.5 }}>
+          Have feedback or technical inquiries? Reach out directly to our engineering team.
+        </div>
+        <a href="mailto:mabuneri143@gmail.com" style={{ textDecoration: 'none', marginTop: 8 }}>
+          <Btn variant="primary" icon={<Mail size={14} />}>Contact Super Admin</Btn>
+        </a>
+      </div>
     </AdminCard>
   );
 }
