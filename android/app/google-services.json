@@ -1,13 +1,14 @@
 {
   "project_info": {
     "project_number": "1068457009199",
+    "firebase_url": "https://mushi-qr-pro-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "mushi-qr-pro",
     "storage_bucket": "mushi-qr-pro.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1068457009199:android:5b09d6a86f7ecd448966da",
+        "mobilesdk_app_id": "1:1068457009199:android:20b09e8d6963c6288966da",
         "android_client_info": {
           "package_name": "com.mushiqr.pro"
         }
@@ -20,12 +21,17 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyABHD4nD7iZJSRll6oClWInbFJuMxgg_KQ"
+          "current_key": "AIzaSyBiPYCHNzlAfLoC60P8sMgKkY9bH8DNzG0"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1068457009199-eo7h1ni9ps5sre8bfg742c3eol2alslb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
