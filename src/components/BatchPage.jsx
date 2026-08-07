@@ -85,7 +85,7 @@ export default function BatchPage({
   const [dataCol, setDataCol] = useState('');
   const [nameCol, setNameCol] = useState('');
   const [hasHeader, setHasHeader] = useState(true);
-  const [selectedFormat, setSelectedFormat] = useState('ALL');
+  const [selectedFormat, setSelectedFormat] = useState('PNG');
   const [exportQuality, setExportQuality] = useState('Normal');
   const [customZipFileName, setCustomZipFileName] = useState('');
   const [isExporting, setIsExporting] = useState(false);
@@ -946,9 +946,8 @@ export default function BatchPage({
                 {/* Export Format Section */}
                 <div>
                   <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Export Format</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                     {[
-                      { label: 'ALL', Icon: Layers },
                       { label: 'PNG', Icon: FileImage },
                       { label: 'SVG', Icon: FileCode },
                       { label: 'PDF', Icon: FileText },
