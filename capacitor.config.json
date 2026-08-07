@@ -11,6 +11,10 @@
     },
     "Camera": {
       "presentationStyle": "fullscreen"
+    },
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": ["google.com"]
     }
   },
   "android": {
