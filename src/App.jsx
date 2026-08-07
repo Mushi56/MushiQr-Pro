@@ -4053,6 +4053,15 @@ export default function App() {
                           const { signOut: fbSignOut } = await import('firebase/auth');
                           const { handleLogoutClear: clearData } = await import('./utils/storage');
                           await fbSignOut(auth);
+                          try {
+                            const { Capacitor } = await import('@capacitor/core');
+                            if (Capacitor.isNativePlatform()) {
+                              const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
+                              await FirebaseAuthentication.signOut();
+                            }
+                          } catch (e) {
+                            console.warn('Native sign out error:', e);
+                          }
                           clearData();
                         }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#EF4444', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }}
