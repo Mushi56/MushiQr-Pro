@@ -79,6 +79,7 @@ import SavedPage from './components/SavedPage';
 import SettingsPage from './components/SettingsPage';
 import YouPage from './components/YouPage';
 import AuthDropdownPanel from './components/AuthDropdownPanel';
+import GoldenAdminBadge from './components/GoldenAdminBadge';
 import { auth, db } from './services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
@@ -3915,22 +3916,41 @@ export default function App() {
                 aria-label={currentUser ? 'Account' : 'Sign In'}
               >
                 {currentUser ? (
-                  currentUser.photoURL ? (
-                    <img
-                      src={currentUser.photoURL}
-                      alt="Profile"
-                      style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', display: 'block' }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '36px', height: '36px', borderRadius: '50%',
-                      background: 'var(--accent-gradient)', color: '#fff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '13px', fontWeight: 800,
-                    }}>
-                      {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
-                    </div>
-                  )
+                  <div style={{ position: 'relative', display: 'inline-flex' }}>
+                    {currentUser.photoURL ? (
+                      <img
+                        src={currentUser.photoURL}
+                        alt="Profile"
+                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', display: 'block' }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '36px', height: '36px', borderRadius: '50%',
+                        background: 'var(--accent-gradient)', color: '#fff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '13px', fontWeight: 800,
+                      }}>
+                        {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
+                      </div>
+                    )}
+                    {currentUser.email === 'mabuneri143@gmail.com' && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '-2px',
+                        right: '-2px',
+                        zIndex: 3,
+                        background: '#0F0F12',
+                        borderRadius: '50%',
+                        padding: '1px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.4)'
+                      }}>
+                        <GoldenAdminBadge size={13} />
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <User size={18} color="#fff" />
                 )}
@@ -3952,23 +3972,43 @@ export default function App() {
                     {/* Profile header (solid elevated bg, no glassmorphism gradient) */}
                     <div style={{ padding: '18px 18px 14px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        {currentUser.photoURL ? (
-                          <img src={currentUser.photoURL} alt="Profile" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', flexShrink: 0 }} />
-                        ) : (
-                          <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 800, flexShrink: 0 }}>
-                            {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
-                          </div>
-                        )}
+                        <div style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
+                          {currentUser.photoURL ? (
+                            <img src={currentUser.photoURL} alt="Profile" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', flexShrink: 0 }} />
+                          ) : (
+                            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 800, flexShrink: 0 }}>
+                              {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
+                            </div>
+                          )}
+                          {currentUser.email === 'mabuneri143@gmail.com' && (
+                            <div style={{
+                              position: 'absolute',
+                              bottom: '-2px',
+                              right: '-2px',
+                              zIndex: 3,
+                              background: '#0F0F12',
+                              borderRadius: '50%',
+                              padding: '1px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <GoldenAdminBadge size={15} />
+                            </div>
+                          )}
+                        </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Mushi User'}</div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {currentUser.displayName || 'Mushi User'}
+                            </span>
+                            {currentUser.email === 'mabuneri143@gmail.com' && (
+                              <GoldenAdminBadge size={16} />
+                            )}
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{currentUser.email}</div>
                         </div>
                       </div>
-                      {currentUser.email === 'mabuneri143@gmail.com' && (
-                        <div style={{ marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '20px', background: 'rgba(255,0,127,0.1)', border: '1px solid rgba(255,0,127,0.25)', color: '#FF007F', fontSize: '10px', fontWeight: 700 }}>
-                          <Shield size={10} color="#FF007F" /> Super Admin
-                        </div>
-                      )}
                     </div>
 
                     {/* Menu Items */}

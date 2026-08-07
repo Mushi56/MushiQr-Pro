@@ -5,6 +5,7 @@ import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
 import { renderBarcode } from '../utils/barcodeEngine';
 import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved } from '../utils/storage';
 import AppIcon from './AppIcon';
+import GoldenAdminBadge from './GoldenAdminBadge';
 
 function HeroQRCanvas() {
   const canvasRef = useRef(null);
@@ -537,7 +538,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     color: 'rgba(255, 255, 255, 0.78)',
                     marginBottom: '4px'
                   }}>
-                    {currentUser.email === 'mabuneri143@gmail.com' ? 'ADMIN DASHBOARD' : 'WELCOME BACK'}
+                    WELCOME BACK
                   </div>
                   <div style={{
                     fontSize: '22px',
@@ -548,13 +549,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     gap: '8px',
                     lineHeight: 1.2
                   }}>
-                    {currentUser.email === 'mabuneri143@gmail.com' ? (
-                      <>
-                        <span>Super Admin</span>
-                        <span style={{ fontSize: '18px' }}>🛡️</span>
-                      </>
-                    ) : (
-                      <span>{currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}</span>
+                    <span>{currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}</span>
+                    {currentUser.email === 'mabuneri143@gmail.com' && (
+                      <GoldenAdminBadge size={20} />
                     )}
                   </div>
                 </>
