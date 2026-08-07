@@ -3939,13 +3939,9 @@ export default function App() {
                         bottom: '-2px',
                         right: '-2px',
                         zIndex: 3,
-                        background: '#0F0F12',
-                        borderRadius: '50%',
-                        padding: '1px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.4)'
+                        justifyContent: 'center'
                       }}>
                         <GoldenAdminBadge size={13} />
                       </div>
@@ -3986,9 +3982,6 @@ export default function App() {
                               bottom: '-2px',
                               right: '-2px',
                               zIndex: 3,
-                              background: '#0F0F12',
-                              borderRadius: '50%',
-                              padding: '1px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center'

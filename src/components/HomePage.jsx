@@ -498,7 +498,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           width: '100%',
           background: 'linear-gradient(135deg, #D60036 0%, #9E0028 100%)',
           borderRadius: '0 0 28px 28px',
-          padding: '14px var(--main-padding-x) 22px var(--main-padding-x)',
+          padding: '14px var(--main-padding-x) 48px var(--main-padding-x)',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
@@ -506,8 +506,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           color: '#FFFFFF',
           boxShadow: '0 12px 30px rgba(214, 0, 54, 0.22)',
           position: 'relative',
-          overflow: 'hidden',
-          marginBottom: '10px'
+          overflow: 'hidden'
         }}>
           {/* Subtle background ambient blur circle */}
           <div style={{
@@ -753,8 +752,10 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             </div>
 
           </div>
+        </div>
 
-          {/* Bottom Full-Width Card: Batch Creator (whole card is the button) */}
+        {/* Bottom Full-Width Card: Batch Creator (Overlapping bottom of red rectangle by 50%) */}
+        <div style={{ padding: '0 var(--main-padding-x)', marginTop: '-36px', position: 'relative', zIndex: 10, marginBottom: '10px' }}>
           <div
             onClick={() => onNavigate('batch', 'QR')}
             role="button"
