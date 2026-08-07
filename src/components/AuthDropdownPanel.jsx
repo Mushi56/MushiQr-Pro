@@ -8,7 +8,8 @@ import {
   signInWithRedirect,
   sendPasswordResetEmail,
   updateProfile,
-  GoogleAuthProvider
+  GoogleAuthProvider,
+  signInWithCredential
 } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
