@@ -87,6 +87,7 @@ export default function BatchPage({
   const [hasHeader, setHasHeader] = useState(true);
   const [selectedFormat, setSelectedFormat] = useState('ALL');
   const [exportQuality, setExportQuality] = useState('Normal');
+  const [customZipFileName, setCustomZipFileName] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
 
@@ -109,11 +110,18 @@ export default function BatchPage({
   useEffect(() => {
     setFileData(null);
     setColumns([]);
+    setCustomZipFileName('');
   }, [batchType]);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Set default output ZIP filename to uploaded XLS/CSV file name without extension
+    const baseFileName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9-_]/g, '_');
+    if (baseFileName) {
+      setCustomZipFileName(baseFileName);
+    }
 
     const reader = new FileReader();
     const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
@@ -407,7 +415,9 @@ export default function BatchPage({
 
     try {
       const content = await zip.generateAsync({ type: 'blob' });
-      const archiveName = `mushi-${batchType.toLowerCase()}-batch.zip`;
+      const defaultName = `mushi-${batchType.toLowerCase()}-batch`;
+      const cleanBaseName = customZipFileName.trim().replace(/[^a-zA-Z0-9-_]/g, '_') || defaultName;
+      const archiveName = `${cleanBaseName}.zip`;
       if (Capacitor.isNativePlatform()) {
         const reader = new FileReader();
         reader.onloadend = async () => {
@@ -891,6 +901,36 @@ export default function BatchPage({
                       <span>HD</span>
                       <span>4K</span>
                     </div>
+                  </div>
+                </div>
+
+                {/* ZIP Filename Input */}
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>
+                    Output Filename
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={customZipFileName}
+                      onChange={(e) => setCustomZipFileName(e.target.value)}
+                      placeholder={`mushi-${batchType.toLowerCase()}-batch`}
+                      style={{
+                        flex: 1,
+                        padding: '10px 14px',
+                        borderRadius: '12px',
+                        background: 'var(--bg-hover)',
+                        border: '1px solid var(--border-color)',
+                        color: 'var(--text-primary)',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        outline: 'none',
+                        fontFamily: 'inherit'
+                      }}
+                    />
+                    <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--accent-primary)', background: 'var(--accent-soft)', padding: '8px 12px', borderRadius: '10px', border: '1px solid rgba(214,0,54,0.15)', flexShrink: 0 }}>
+                      .zip
+                    </span>
                   </div>
                 </div>
 
