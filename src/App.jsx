@@ -913,6 +913,14 @@ export default function App() {
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
   const [isEditingProfileName, setIsEditingProfileName] = useState(false);
   const [editProfileNameText, setEditProfileNameText] = useState('');
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [newProfilePicUrl, setNewProfilePicUrl] = useState('');
+  const [profileNameInput, setProfileNameInput] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
   const authDropdownRef = useRef(null);
 
@@ -4094,7 +4102,7 @@ export default function App() {
                     <div style={{ padding: '10px' }}>
                       {/* My Profile */}
                       <button 
-                        onClick={() => { setActivePage('you'); setAuthDropdownOpen(false); }}
+                        onClick={() => { setProfileNameInput(currentUser.displayName || ''); setNewProfilePicUrl(currentUser.photoURL || ''); setIsProfileModalOpen(true); setAuthDropdownOpen(false); }}
                         style={{
                           width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
                           background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
@@ -4115,20 +4123,34 @@ export default function App() {
 
                       {/* Cloud Sync */}
                       <button 
-                        onClick={() => { showToast('Cloud sync is fully active!'); setAuthDropdownOpen(false); }}
+                        onClick={async () => {
+                          if (isSyncing) return;
+                          setIsSyncing(true);
+                          try {
+                            await syncUserFirestoreData();
+                            showToast('Successfully synced all QR templates, history, and settings to the cloud!');
+                          } catch (err) {
+                            console.error(err);
+                            showToast('Failed to sync. Please try again.');
+                          } finally {
+                            setIsSyncing(false);
+                            setAuthDropdownOpen(false);
+                          }
+                        }}
+                        disabled={isSyncing}
                         style={{
                           width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
-                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
-                          transition: 'background 0.2s ease'
+                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: isSyncing ? 'default' : 'pointer', textAlign: 'left',
+                          transition: 'background 0.2s ease', opacity: isSyncing ? 0.7 : 1
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseEnter={e => !isSyncing && (e.currentTarget.style.background = '#F8FAFC')}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <Cloud size={18} color="#3B82F6" />
+                          {isSyncing ? <Loader2 size={18} color="#3B82F6" className="spin" /> : <Cloud size={18} color="#3B82F6" />}
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>Cloud Sync</div>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>{isSyncing ? 'Syncing...' : 'Cloud Sync'}</div>
                           <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>Sync your projects across devices</div>
                         </div>
                         <ChevronRight size={15} color="#94A3B8" />
@@ -4136,7 +4158,7 @@ export default function App() {
 
                       {/* Security & Login */}
                       <button 
-                        onClick={() => { setActivePage('you'); setAuthDropdownOpen(false); }}
+                        onClick={() => { setNewPassword(''); setConfirmPassword(''); setIsSecurityModalOpen(true); setAuthDropdownOpen(false); }}
                         style={{
                           width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
                           background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
@@ -4151,27 +4173,6 @@ export default function App() {
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>Security &amp; Login</div>
                           <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>Manage login, password &amp; 2FA</div>
-                        </div>
-                        <ChevronRight size={15} color="#94A3B8" />
-                      </button>
-
-                      {/* Devices */}
-                      <button 
-                        onClick={() => { showToast('Active Device: Mushi Mobile App'); setAuthDropdownOpen(false); }}
-                        style={{
-                          width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
-                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
-                          transition: 'background 0.2s ease'
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <Smartphone size={18} color="#10B981" />
-                        </div>
-                        <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>Devices</div>
-                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>1 device connected</div>
                         </div>
                         <ChevronRight size={15} color="#94A3B8" />
                       </button>
@@ -6157,6 +6158,185 @@ export default function App() {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── My Profile Modal ── */}
+      {isProfileModalOpen && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }} onClick={() => setIsProfileModalOpen(false)}>
+          <div className="modal-container" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '24px', width: '90%', maxWidth: '400px', padding: '24px', color: '#0F172A', boxShadow: '0 20px 50px rgba(0,0,0,0.15)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#0F172A' }}>My Profile</h3>
+              <button onClick={() => setIsProfileModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: '20px' }}>&times;</button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ position: 'relative' }}>
+                {newProfilePicUrl ? (
+                  <img src={newProfilePicUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #E2E8F0' }} />
+                ) : (
+                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 800 }}>
+                    {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : 'U'}
+                  </div>
+                )}
+              </div>
+              
+              <div style={{ width: '100%' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>PROFILE IMAGE URL</label>
+                <input 
+                  type="text" 
+                  value={newProfilePicUrl} 
+                  onChange={e => setNewProfilePicUrl(e.target.value)} 
+                  placeholder="https://example.com/avatar.jpg"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ width: '100%' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>DISPLAY NAME</label>
+                <input 
+                  type="text" 
+                  value={profileNameInput} 
+                  onChange={e => setProfileNameInput(e.target.value)} 
+                  placeholder="Your Name"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ width: '100%' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>EMAIL ADDRESS</label>
+                <input 
+                  type="text" 
+                  value={currentUser.email} 
+                  disabled
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #E2E8F0', background: '#F1F5F9', color: '#64748B', fontSize: '14px', boxSizing: 'border-box', cursor: 'not-allowed' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                onClick={() => setIsProfileModalOpen(false)}
+                style={{ flex: 1, padding: '12px', border: '1px solid #CBD5E1', background: 'transparent', borderRadius: '12px', fontWeight: 600, color: '#64748B', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  try {
+                    const { updateProfile: fbUpdateProfile } = await import('firebase/auth');
+                    await fbUpdateProfile(auth.currentUser, { 
+                      displayName: profileNameInput.trim(),
+                      photoURL: newProfilePicUrl.trim()
+                    });
+                    showToast('Profile updated successfully!');
+                    setIsProfileModalOpen(false);
+                  } catch (err) {
+                    console.error(err);
+                    showToast('Failed to update profile.');
+                  }
+                }}
+                style={{ flex: 1, padding: '12px', border: 'none', background: 'var(--accent-gradient)', color: '#fff', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(214,0,54,0.2)' }}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Security & Login Modal ── */}
+      {isSecurityModalOpen && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }} onClick={() => setIsSecurityModalOpen(false)}>
+          <div className="modal-container" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '24px', width: '90%', maxWidth: '400px', padding: '24px', color: '#0F172A', boxShadow: '0 20px 50px rgba(0,0,0,0.15)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#0F172A' }}>Security &amp; Login</h3>
+              <button onClick={() => setIsSecurityModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: '20px' }}>&times;</button>
+            </div>
+
+            {currentUser.providerData[0]?.providerId === 'google.com' ? (
+              <div style={{ textAlign: 'center', padding: '12px 0 20px' }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                  <Shield size={24} />
+                </div>
+                <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 6px' }}>Google Auth Secure Connection</h4>
+                <p style={{ fontSize: '13px', color: '#64748B', lineHeight: 1.4, margin: '0 0 20px' }}>
+                  Your account is secured via Google Authentication. Password updates and Two-Factor settings are safely managed by your Google Account.
+                </p>
+                <button 
+                  onClick={() => setIsSecurityModalOpen(false)}
+                  style={{ width: '100%', padding: '12px', border: 'none', background: 'var(--accent-gradient)', color: '#fff', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Close Settings
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.4 }}>
+                  Update your account password. Must be at least 6 characters long.
+                </p>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>NEW PASSWORD</label>
+                  <input 
+                    type="password" 
+                    value={newPassword} 
+                    onChange={e => setNewPassword(e.target.value)} 
+                    placeholder="••••••••"
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>CONFIRM PASSWORD</label>
+                  <input 
+                    type="password" 
+                    value={confirmPassword} 
+                    onChange={e => setConfirmPassword(e.target.value)} 
+                    placeholder="••••••••"
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                  <button 
+                    onClick={() => setIsSecurityModalOpen(false)}
+                    style={{ flex: 1, padding: '12px', border: '1px solid #CBD5E1', background: 'transparent', borderRadius: '12px', fontWeight: 600, color: '#64748B', cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      if (newPassword.length < 6) {
+                        showToast('Password must be at least 6 characters long.');
+                        return;
+                      }
+                      if (newPassword !== confirmPassword) {
+                        showToast('Passwords do not match.');
+                        return;
+                      }
+                      setIsChangingPassword(true);
+                      try {
+                        const { updatePassword: fbUpdatePassword } = await import('firebase/auth');
+                        await fbUpdatePassword(auth.currentUser, newPassword);
+                        showToast('Password updated successfully!');
+                        setIsSecurityModalOpen(false);
+                      } catch (err) {
+                        console.error(err);
+                        showToast('Failed to update password. Try logging in again.');
+                      } finally {
+                        setIsChangingPassword(false);
+                      }
+                    }}
+                    disabled={isChangingPassword}
+                    style={{ flex: 1, padding: '12px', border: 'none', background: 'var(--accent-gradient)', color: '#fff', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', opacity: isChangingPassword ? 0.7 : 1 }}
+                  >
+                    {isChangingPassword ? 'Updating...' : 'Update'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
