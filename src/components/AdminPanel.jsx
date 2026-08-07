@@ -842,7 +842,7 @@ function TemplateEditorModal({ form, setForm, editId, onSave, onClose, saving })
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(6px)', display:'flex', alignItems:'stretch' }}>
+    <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,0.85)',  display:'flex', alignItems:'stretch' }}>
       {/* Modal box */}
       <div style={{ margin:'auto', width:'100%', maxWidth:900, maxHeight:'96vh', background:T.bgCard, borderRadius:16, border:`1px solid ${T.border}`, display:'flex', flexDirection:'column', overflow:'hidden' }}>
 
@@ -2688,10 +2688,12 @@ function AdminPanelInner() {
         display: 'flex', background: T.bg, overflow: 'hidden',
         fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif",
         color: T.text, fontSize: 14,
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
       }}>
         {/* Mobile overlay */}
         {isMobile && sidebarOpen && (
-          <div onClick={() => setSidebar(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 15, backdropFilter: 'blur(4px)' }} />
+          <div onClick={() => setSidebar(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 15 }} />
         )}
 
         <Sidebar active={section} setActive={s => { setSection(s); if (isMobile) setSidebar(false); }} isMobile={isMobile} open={isMobile ? sidebarOpen : true} onClose={() => setSidebar(false)} />

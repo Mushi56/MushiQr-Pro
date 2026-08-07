@@ -77,7 +77,7 @@ const styles = {
     maxWidth: "800px",
     margin: "0 auto",
     background: "var(--bg-card)",
-    backdropFilter: "blur(12px)",
+    
     borderRadius: "24px",
     padding: "50px",
     border: "1px solid var(--border-color)",

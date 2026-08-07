@@ -3429,7 +3429,7 @@ export default function App() {
           background: adminAnnouncement.type === 'error' ? '#D60036' :
                       adminAnnouncement.type === 'warning' ? '#f59e0b' :
                       adminAnnouncement.type === 'success' ? '#10b981' : '#3b82f6',
-          color: '#fff', padding: '10px 20px', fontSize: 13, fontWeight: 600,
+          color: '#fff', padding: 'calc(10px + env(safe-area-inset-top)) 20px 10px', fontSize: 13, fontWeight: 600,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
           fontFamily: "'Outfit','Inter',sans-serif",
         }}>
@@ -4076,7 +4076,7 @@ export default function App() {
                   <div
                     style={{
                       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                      background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                      background: 'rgba(0,0,0,0.4)',  Webkit
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       zIndex: 9999,
                       animation: 'dropdownFadeIn 0.2s ease'
@@ -5894,7 +5894,7 @@ export default function App() {
           <div style={{
             marginTop: '8px',
             backgroundColor: 'rgba(0,0,0,0.85)',
-            backdropFilter: 'blur(4px)',
+            
             color: 'white',
             padding: '2px 8px',
             borderRadius: '6px',
