@@ -588,8 +588,6 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 boxSizing: 'border-box',
                 minHeight: '150px',
                 background: 'linear-gradient(145deg, rgba(70, 8, 22, 0.92) 0%, rgba(18, 3, 8, 0.96) 100%)',
-                
-                Webkit
                 border: '1px solid rgba(255, 77, 109, 0.28)',
                 boxShadow: '0 8px 28px rgba(214, 0, 54, 0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
                 cursor: 'pointer',
@@ -640,8 +638,6 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alignItems: 'center',
                 padding: '5px 6px',
                 backgroundColor: 'rgba(255, 77, 109, 0.1)',
-                
-                Webkit
                 border: '1px solid rgba(255, 77, 109, 0.2)',
                 borderRadius: '10px',
                 width: '100%',
@@ -678,8 +674,6 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 boxSizing: 'border-box',
                 minHeight: '150px',
                 background: 'linear-gradient(145deg, rgba(4, 42, 35, 0.92) 0%, rgba(1, 12, 10, 0.96) 100%)',
-                
-                Webkit
                 border: '1px solid rgba(45, 212, 191, 0.25)',
                 boxShadow: '0 8px 28px rgba(13, 148, 136, 0.16), inset 0 1px 0 rgba(255,255,255,0.06)',
                 cursor: 'pointer',
@@ -730,8 +724,6 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alignItems: 'center',
                 padding: '5px 6px',
                 backgroundColor: 'rgba(45, 212, 191, 0.1)',
-                
-                Webkit
                 border: '1px solid rgba(45, 212, 191, 0.2)',
                 borderRadius: '10px',
                 width: '100%',
@@ -772,8 +764,6 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               padding: '14px 16px',
               boxSizing: 'border-box',
               background: 'linear-gradient(145deg, rgba(8, 24, 54, 0.92) 0%, rgba(2, 6, 18, 0.96) 100%)',
-              
-              Webkit
               border: '1px solid rgba(0, 136, 255, 0.25)',
               boxShadow: '0 8px 24px rgba(0, 102, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.06)',
               width: '100%',
