@@ -70,7 +70,7 @@
   --main-padding-x: 24px;
 
   /* Glassmorphism Presets */
-  --glass-bg: rgba(18, 18, 28, 0.65);
+  --glass-bg: #12121C;
   --glass-border: rgba(255, 255, 255, 0.14);
   --glass-blur: blur(20px) saturate(140%);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
@@ -81,13 +81,13 @@
   --bg-primary: #F1F5F9;
   --bg-secondary: #E2E8F0;
   --bg-tertiary: #CBD5E1;
-  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-card: #FFFFFF;
   --bg-elevated: rgba(255, 255, 255, 0.85);
   --bg-input: rgba(255, 255, 255, 0.9);
   --bg-hover: rgba(15, 23, 42, 0.06);
-  --bg-glass: rgba(255, 255, 255, 0.8);
+  --bg-glass: #FFFFFF;
   --bg-glass-light: rgba(255, 255, 255, 0.6);
-  --nav-bg: rgba(255, 255, 255, 0.82);
+  --nav-bg: #FFFFFF;
   --bg-dropdown: rgba(255, 255, 255, 0.9);
   --bg-dropdown-solid: #FFFFFF;
 
@@ -115,7 +115,7 @@
   --accent-gradient-animated: linear-gradient(270deg, #D60036, #B5002D, #FF4D7D, #D60036);
 
   /* Glassmorphism Light Presets */
-  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg: #FFFFFF;
   --glass-border: rgba(255, 255, 255, 0.6);
   --glass-blur: blur(20px) saturate(150%);
   --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
