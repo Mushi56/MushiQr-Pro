@@ -907,6 +907,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('content');
   const [currentUser, setCurrentUser] = useState(null);
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
+  const [isEditingProfileName, setIsEditingProfileName] = useState(false);
+  const [editProfileNameText, setEditProfileNameText] = useState('');
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
   const authDropdownRef = useRef(null);
 
@@ -3892,7 +3894,14 @@ export default function App() {
                       >
                         <Folder size={16} /> Save Location
                       </button>
-
+                      {currentUser?.email === 'mabuneri143@gmail.com' && (
+                        <>
+                          <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
+                          <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/admin'; }} style={{ color: '#D60036', fontWeight: 700 }}>
+                            <Settings size={16} /> Super Admin Panel
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
@@ -3997,14 +4006,79 @@ export default function App() {
                           )}
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {currentUser.displayName || 'Mushi User'}
-                            </span>
-                            {currentUser.email === 'mabuneri143@gmail.com' && (
-                              <GoldenAdminBadge size={16} />
-                            )}
-                          </div>
+                          {isEditingProfileName ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <input 
+                                autoFocus
+                                value={editProfileNameText}
+                                onChange={e => setEditProfileNameText(e.target.value)}
+                                onKeyDown={async e => {
+                                  if (e.key === 'Enter') {
+                                    if (editProfileNameText.trim() !== '') {
+                                      try {
+                                        const { updateProfile: fbUpdateProfile } = await import('firebase/auth');
+                                        await fbUpdateProfile(auth.currentUser, { displayName: editProfileNameText.trim() });
+                                        setIsEditingProfileName(false);
+                                        showToast('Profile name updated successfully!');
+                                      } catch (err) {
+                                        console.error('Failed to update profile name', err);
+                                        showToast('Failed to update profile name.');
+                                      }
+                                    }
+                                  } else if (e.key === 'Escape') {
+                                    setIsEditingProfileName(false);
+                                  }
+                                }}
+                                style={{
+                                  flex: 1, background: 'var(--bg-input)', border: '1px solid var(--border-accent)',
+                                  borderRadius: '6px', color: 'var(--text-primary)', padding: '4px 8px',
+                                  fontSize: '13px', outline: 'none', minWidth: 0
+                                }}
+                              />
+                              <button
+                                onClick={async e => {
+                                  e.stopPropagation();
+                                  if (editProfileNameText.trim() !== '') {
+                                    try {
+                                      const { updateProfile: fbUpdateProfile } = await import('firebase/auth');
+                                      await fbUpdateProfile(auth.currentUser, { displayName: editProfileNameText.trim() });
+                                      setIsEditingProfileName(false);
+                                      showToast('Profile name updated successfully!');
+                                    } catch (err) {
+                                      console.error('Failed to update profile name', err);
+                                      showToast('Failed to update profile name.');
+                                    }
+                                  }
+                                }}
+                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                                title="Save Name"
+                              >
+                                <Check size={16} color="#00E676" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {currentUser.displayName || 'Mushi User'}
+                              </span>
+                              <button
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setEditProfileNameText(currentUser.displayName || '');
+                                  setIsEditingProfileName(true);
+                                }}
+                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6, flexShrink: 0 }}
+                                onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                                onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
+                                title="Edit Name"
+                              >
+                                <Edit2 size={13} color="var(--text-secondary)" />
+                              </button>
+                              {currentUser.email === 'mabuneri143@gmail.com' && (
+                                <GoldenAdminBadge size={16} />
+                              )}
+                            </div>
+                          )}
                           <div style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{currentUser.email}</div>
                         </div>
                       </div>
@@ -4012,29 +4086,11 @@ export default function App() {
 
                     {/* Menu Items */}
                     <div style={{ padding: '8px' }}>
-                      <button 
-                        onClick={async () => {
-                          setAuthDropdownOpen(false);
-                          const currentName = currentUser.displayName || '';
-                          const newName = window.prompt('Enter new profile display name:', currentName);
-                          if (newName !== null && newName.trim() !== '') {
-                            try {
-                              const { updateProfile: fbUpdateProfile } = await import('firebase/auth');
-                              await fbUpdateProfile(auth.currentUser, { displayName: newName.trim() });
-                              showToast('Profile name updated successfully!');
-                            } catch (err) {
-                              console.error('Failed to update profile name', err);
-                              showToast('Failed to update profile name.');
-                            }
-                          }
-                        }} 
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} 
-                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'} 
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                      >
-                        <Edit2 size={15} color="var(--text-secondary)" /> Edit Profile Name
-                      </button>
-
+                      {currentUser.email === 'mabuneri143@gmail.com' && (
+                        <button onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#FF007F', fontSize: '13px', fontWeight: 700, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <Shield size={15} color="#FF007F" /> Super Admin Panel
+                        </button>
+                      )}
                       <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 0' }} />
                       <button
                         onClick={async () => {
