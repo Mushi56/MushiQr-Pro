@@ -906,6 +906,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('content');
   const [currentUser, setCurrentUser] = useState(null);
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
+  const [isHomeScrolled, setIsHomeScrolled] = useState(false);
   const authDropdownRef = useRef(null);
 
   // Close auth dropdown on outside click
@@ -3425,7 +3426,7 @@ export default function App() {
       )}
       {/* ── Header ── */}
       <header 
-        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' ? 'header-home-banner' : ''}`}
+        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' && !isHomeScrolled ? 'header-home-banner' : ''}`}
         style={{ display: activePage === 'barcode' ? 'none' : 'flex' }}
       >
         <div className="app-logo">
@@ -5448,6 +5449,7 @@ export default function App() {
         ) : activePage === 'home' ? (
           <HomePage 
             currentUser={currentUser}
+            onScrollChange={(scrolled) => setIsHomeScrolled(scrolled)}
             onNavigate={(page) => {
               if (page === 'generator') resetGenerator();
               navigateTo(page);

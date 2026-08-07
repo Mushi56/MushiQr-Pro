@@ -330,14 +330,29 @@ const getBarcodeIcon = (id) => {
   }
 };
 
-export default function HomePage({ currentUser, onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
+export default function HomePage({ currentUser, onScrollChange, onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
   const [recentItems, setRecentItems] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
   const [activeSlide, setActiveSlide] = useState(0);
   const [showAllBarcodes, setShowAllBarcodes] = useState(false);
   const [showAllQR, setShowAllQR] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const slideCount = 3;
+
+  const handleScroll = (e) => {
+    const scrolled = e.currentTarget.scrollTop > 20;
+    if (scrolled !== isScrolled) {
+      setIsScrolled(scrolled);
+      if (onScrollChange) onScrollChange(scrolled);
+    }
+  };
+
+  useEffect(() => {
+    if (activePage === 'home' && onScrollChange) {
+      onScrollChange(false);
+    }
+  }, [activePage]);
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
@@ -476,19 +491,19 @@ export default function HomePage({ currentUser, onNavigate, onQuickCreate, onQui
       flexDirection: 'column',
       position: 'relative'
     }}>
-      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up">
-        {/* Static Hero Section with Purple Rounded Rectangle Container inspired by UI/UX */}
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up" onScroll={handleScroll}>
+        {/* Static Hero Section with Red Rounded Rectangle Container */}
         <div style={{
           width: '100%',
-          background: 'linear-gradient(135deg, #4F46E5 0%, #3730A3 100%)',
+          background: 'linear-gradient(135deg, #D60036 0%, #9E0028 100%)',
           borderRadius: '0 0 28px 28px',
-          padding: '12px var(--main-padding-x) 22px var(--main-padding-x)',
+          padding: '14px var(--main-padding-x) 22px var(--main-padding-x)',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
           gap: '14px',
           color: '#FFFFFF',
-          boxShadow: '0 12px 30px rgba(79, 70, 229, 0.22)',
+          boxShadow: '0 12px 30px rgba(214, 0, 54, 0.22)',
           position: 'relative',
           overflow: 'hidden',
           marginBottom: '10px'
@@ -512,74 +527,49 @@ export default function HomePage({ currentUser, onNavigate, onQuickCreate, onQui
             paddingBottom: '2px'
           }}>
             <div>
-              <div style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                letterSpacing: '0.8px',
-                textTransform: 'uppercase',
-                color: 'rgba(255, 255, 255, 0.75)',
-                marginBottom: '4px'
-              }}>
-                {currentUser?.email === 'mabuneri143@gmail.com' ? 'ADMIN DASHBOARD' : (currentUser ? 'WELCOME BACK' : 'MUSHI QR PRO')}
-              </div>
-              <div style={{
-                fontSize: '22px',
-                fontWeight: 800,
-                color: '#FFFFFF',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                lineHeight: 1.2
-              }}>
-                {currentUser?.email === 'mabuneri143@gmail.com' ? (
-                  <>
-                    <span>Super Admin</span>
-                    <span style={{ fontSize: '18px' }}>🛡️</span>
-                  </>
-                ) : currentUser ? (
-                  <span>{currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}</span>
-                ) : (
-                  <span>Welcome Guest</span>
-                )}
-              </div>
-            </div>
-
-            {/* Profile Avatar Image in Top Right of Banner */}
-            {currentUser && (
-              <div style={{ flexShrink: 0 }}>
-                {currentUser.photoURL ? (
-                  <img
-                    src={currentUser.photoURL}
-                    alt="Profile"
-                    style={{
-                      width: '46px',
-                      height: '46px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '2px solid rgba(255, 255, 255, 0.8)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                    }}
-                  />
-                ) : (
+              {currentUser ? (
+                <>
                   <div style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '50%',
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    border: '2px solid rgba(255, 255, 255, 0.6)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.8px',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255, 255, 255, 0.78)',
+                    marginBottom: '4px'
+                  }}>
+                    {currentUser.email === 'mabuneri143@gmail.com' ? 'ADMIN DASHBOARD' : 'WELCOME BACK'}
+                  </div>
+                  <div style={{
+                    fontSize: '22px',
+                    fontWeight: 800,
                     color: '#FFFFFF',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '18px',
-                    fontWeight: 800,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                    gap: '8px',
+                    lineHeight: 1.2
                   }}>
-                    {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
+                    {currentUser.email === 'mabuneri143@gmail.com' ? (
+                      <>
+                        <span>Super Admin</span>
+                        <span style={{ fontSize: '18px' }}>🛡️</span>
+                      </>
+                    ) : (
+                      <span>{currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}</span>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
+                </>
+              ) : (
+                <div style={{
+                  fontSize: '22px',
+                  fontWeight: 800,
+                  color: '#FFFFFF',
+                  lineHeight: 1.2,
+                  padding: '2px 0'
+                }}>
+                  Welcome to Mushi QR Pro
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Top Row: Create QR Code & Create Barcode 50-50 side-by-side in 1 line */}

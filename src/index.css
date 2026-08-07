@@ -151,9 +151,13 @@
   color: var(--text-primary);
 }
 
-/* Home Page Purple Upper Navbar Banner Styling */
+.app-header {
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Home Page Red Upper Navbar Banner Styling */
 .app-header.header-home-banner {
-  background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%) !important;
+  background: linear-gradient(135deg, #D60036 0%, #9E0028 100%) !important;
   color: #FFFFFF !important;
   border-bottom: none !important;
   box-shadow: none !important;
