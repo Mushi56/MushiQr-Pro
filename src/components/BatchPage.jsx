@@ -12,17 +12,62 @@ import { jsPDF } from 'jspdf';
 
 // Helper for mobile ZIP saving
 async function saveZipNative(base64Data, filename) {
-  try { await Filesystem.requestPermissions(); } catch {}
-  const savedFile = await Filesystem.writeFile({
-    path: filename,
-    data: base64Data,
-    directory: Directory.Cache,
-  });
-  await Share.share({
-    title: 'Mushi Qr Pro - Batch Export',
-    url: savedFile.uri,
-    dialogTitle: 'Save or Share your Bulk ZIP file',
-  });
+  try {
+    await Filesystem.requestPermissions();
+  } catch (e) {
+    console.warn('Filesystem permissions warning:', e);
+  }
+
+  let savedFileUri = null;
+  let savedToDocuments = false;
+
+  // 1. Primary: Save to device Documents directory so it appears in Files / File Manager
+  try {
+    const docFile = await Filesystem.writeFile({
+      path: filename,
+      data: base64Data,
+      directory: Directory.Documents,
+      recursive: true,
+    });
+    savedFileUri = docFile.uri;
+    savedToDocuments = true;
+  } catch (docErr) {
+    console.warn('Could not write to Documents directory, falling back to Cache:', docErr);
+  }
+
+  // 2. Fallback to Cache if Documents write failed
+  if (!savedFileUri) {
+    try {
+      const cacheFile = await Filesystem.writeFile({
+        path: filename,
+        data: base64Data,
+        directory: Directory.Cache,
+        recursive: true,
+      });
+      savedFileUri = cacheFile.uri;
+    } catch (cacheErr) {
+      console.error('Failed to write ZIP to cache:', cacheErr);
+    }
+  }
+
+  // 3. Notify user of file location
+  if (savedToDocuments) {
+    alert(`Bulk Export Complete! 🎉\n\nYour ZIP file has been saved to your device's Documents folder:\n\n📄 ${filename}`);
+  }
+
+  // 4. Open native Share sheet so user can also send/save via Files app, Drive, etc.
+  if (savedFileUri) {
+    try {
+      await Share.share({
+        title: 'Mushi QR Pro - Bulk Export',
+        text: `Bulk exported ${filename}`,
+        url: savedFileUri,
+        dialogTitle: 'Save or Share your Bulk ZIP File',
+      });
+    } catch (shareErr) {
+      console.warn('Share sheet closed or unhandled:', shareErr);
+    }
+  }
 }
 
 export default function BatchPage({ 

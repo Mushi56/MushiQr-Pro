@@ -103,22 +103,42 @@ async function saveToGallery(base64Data, filename) {
 async function saveFileViaShare(base64Data, filename) {
   try { await Filesystem.requestPermissions(); } catch {}
 
-  // Write file to cache directory
-  const savedFile = await Filesystem.writeFile({
-    path: filename,
-    data: base64Data,
-    directory: Directory.Cache,
-  });
+  let fileUri = null;
+  // Write to Documents directory first so file persists on device
+  try {
+    const docFile = await Filesystem.writeFile({
+      path: filename,
+      data: base64Data,
+      directory: Directory.Documents,
+      recursive: true,
+    });
+    fileUri = docFile.uri;
+  } catch (e) {
+    console.warn('Writing to Documents failed, using Cache fallback:', e);
+  }
 
-  // Get the full file URI that Android can resolve
-  const fileUri = savedFile.uri;
+  if (!fileUri) {
+    const cacheFile = await Filesystem.writeFile({
+      path: filename,
+      data: base64Data,
+      directory: Directory.Cache,
+      recursive: true,
+    });
+    fileUri = cacheFile.uri;
+  }
 
   // Open share sheet so user can save / send the file
-  await Share.share({
-    title: 'Mushi QR Pro',
-    url: fileUri,
-    dialogTitle: 'Save or Share your QR Code',
-  });
+  if (fileUri) {
+    try {
+      await Share.share({
+        title: 'Mushi QR Pro',
+        url: fileUri,
+        dialogTitle: 'Save or Share your File',
+      });
+    } catch (shareErr) {
+      console.warn('Share sheet closed:', shareErr);
+    }
+  }
   return 'share';
 }
 
