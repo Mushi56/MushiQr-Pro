@@ -9,6 +9,7 @@ import { Share } from '@capacitor/share';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
 import { jsPDF } from 'jspdf';
+import { getOrganizedFilePath } from '../utils/exportUtils';
 
 // Helper for mobile ZIP saving
 async function saveZipNative(base64Data, filename) {
@@ -18,13 +19,14 @@ async function saveZipNative(base64Data, filename) {
     console.warn('Filesystem permissions warning:', e);
   }
 
+  const organizedPath = getOrganizedFilePath(filename, 'Bulk Batch Generation');
   let savedFileUri = null;
   let savedToDocuments = false;
 
-  // 1. Primary: Save to device Documents directory so it appears in Files / File Manager
+  // 1. Primary: Save to device Documents directory under organized Bulk Batch Generation/ZIP path
   try {
     const docFile = await Filesystem.writeFile({
-      path: filename,
+      path: organizedPath,
       data: base64Data,
       directory: Directory.Documents,
       recursive: true,
@@ -32,7 +34,17 @@ async function saveZipNative(base64Data, filename) {
     savedFileUri = docFile.uri;
     savedToDocuments = true;
   } catch (docErr) {
-    console.warn('Could not write to Documents directory, falling back to Cache:', docErr);
+    console.warn('Could not write organized path, falling back to root Documents:', docErr);
+    try {
+      const docFile = await Filesystem.writeFile({
+        path: filename,
+        data: base64Data,
+        directory: Directory.Documents,
+        recursive: true,
+      });
+      savedFileUri = docFile.uri;
+      savedToDocuments = true;
+    } catch (fallbackErr) {}
   }
 
   // 2. Fallback to Cache if Documents write failed

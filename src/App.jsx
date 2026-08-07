@@ -2067,7 +2067,7 @@ export default function App() {
       const exportSize = QUALITY_SIZES[exportQuality] || 2048;
       const exportCanvas = generateExportCanvas(exportSize);
       
-      const result = await downloadFn(exportCanvas);
+      const result = await downloadFn(exportCanvas, 'qrcode', 'QR Codes');
       if (result === 'gallery') {
         showToast('Saved to Gallery');
       } else if (result === 'share') {
@@ -3896,11 +3896,14 @@ export default function App() {
                           } catch (e) {
                             console.log('Directory picker unsupported', e);
                           }
-                          const custom = window.prompt('Enter custom save folder / path:', currentLoc);
+                          const custom = window.prompt(
+                            'Set Save Location folder in Internal Storage:\n(Default: Mushi QR Pro)\n\nAutomatic folder structure created inside:\n📁 Mushi QR Pro/\n ├── 📁 QR Codes/ (PNG, JPG, SVG, PDF)\n ├── 📁 Barcodes/ (PNG, JPG, SVG, PDF)\n └── 📁 Bulk Batch Generation/ (ZIP, PNG, JPG, SVG, PDF)',
+                            currentLoc
+                          );
                           if (custom !== null && custom.trim() !== '') {
                             const clean = custom.trim();
                             savePreferences({ ...prefs, saveLocation: clean });
-                            showToast(`Save location updated: ${clean}`);
+                            showToast(`Save location updated: Internal Storage/${clean}`);
                           }
                         }}
                       >

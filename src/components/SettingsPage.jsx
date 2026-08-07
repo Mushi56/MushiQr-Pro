@@ -30,7 +30,10 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
     } catch (e) {
       console.log('Directory picker cancelled or unsupported', e);
     }
-    const custom = window.prompt('Enter custom save folder / path:', saveLocation);
+    const custom = window.prompt(
+      'Set Save Location folder in Internal Storage:\n(Default: Mushi QR Pro)\n\nAutomatic folder structure created inside:\n📁 Mushi QR Pro/\n ├── 📁 QR Codes/ (PNG, JPG, SVG, PDF)\n ├── 📁 Barcodes/ (PNG, JPG, SVG, PDF)\n └── 📁 Bulk Batch Generation/ (ZIP, PNG, JPG, SVG, PDF)',
+      saveLocation
+    );
     if (custom !== null && custom.trim() !== '') {
       const clean = custom.trim();
       setSaveLocation(clean);

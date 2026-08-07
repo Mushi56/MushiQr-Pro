@@ -244,10 +244,10 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       });
 
       let result;
-      if (format === 'PNG') result = await downloadPNG(tempCanvas, filename);
-      else if (format === 'JPG') result = await downloadJPG(tempCanvas, filename);
-      else if (format === 'SVG') result = await downloadSVG(tempCanvas, filename);
-      else if (format === 'PDF') result = await downloadPDF(tempCanvas, filename);
+      if (format === 'PNG') result = await downloadPNG(tempCanvas, filename, 'Barcodes');
+      else if (format === 'JPG') result = await downloadJPG(tempCanvas, filename, 'Barcodes');
+      else if (format === 'SVG') result = await downloadSVG(tempCanvas, filename, 'Barcodes');
+      else if (format === 'PDF') result = await downloadPDF(tempCanvas, filename, 'Barcodes');
       
       if (result === 'gallery') showToast('Saved to Gallery', 'success');
       else if (result === 'share') showToast('Share Sheet Opened', 'success');

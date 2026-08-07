@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Media } from '@capacitor-community/media';
+import { getPreferences } from './storage';
 
 /**
  * Convert an ArrayBuffer to a base64 string (binary-safe, no btoa size limits).
@@ -28,126 +29,111 @@ function stringToBase64(str) {
 }
 
 /**
- * Save an image to the device gallery on Android.
- * Handles permissions for Android 10-14+.
+ * Construct organized path: {RootFolder}/{Category}/{Format}/{Filename}
+ * E.g.: "Mushi QR Pro/QR Codes/PNG/qrcode_123.png"
+ * E.g.: "Mushi QR Pro/Barcodes/PDF/barcode_123.pdf"
+ * E.g.: "Mushi QR Pro/Bulk Batch Generation/ZIP/batch.zip"
  */
-async function saveToGallery(base64Data, filename) {
-  // Request all relevant permissions
-  try { await Filesystem.requestPermissions(); } catch {}
-  try { await Media.requestPermissions(); } catch {}
+export function getOrganizedFilePath(filename, category = 'QR Codes') {
+  let prefs = {};
+  try { prefs = getPreferences() || {}; } catch {}
+  const rootFolder = prefs.saveLocation || 'Mushi QR Pro';
 
-  // Write to cache first
-  const tempFile = await Filesystem.writeFile({
-    path: filename,
-    data: base64Data,
-    directory: Directory.Cache,
-  });
-
-  // Try saving to gallery via Media plugin
-  try {
-    // Ensure album exists
-    let albums = [];
-    try {
-      const result = await Media.getAlbums();
-      albums = result.albums || [];
-    } catch {}
-
-    let albumId = albums.find(a => a.name === 'Mushi QR Pro')?.identifier;
-    if (!albumId) {
-      try {
-        albumId = (await Media.createAlbum({ name: 'Mushi QR Pro' })).id;
-      } catch {
-        // Some devices don't support creating albums, save to default
-      }
-    }
-
-    const saveOpts = { path: tempFile.uri };
-    if (albumId) saveOpts.albumIdentifier = albumId;
-
-    await Media.savePhoto(saveOpts);
-    // Cleanup temp cache file
-    try { await Filesystem.deleteFile({ path: tempFile.path, directory: Directory.Cache }); } catch {}
-    return 'gallery';
-  } catch (mediaErr) {
-    console.warn('Media.savePhoto failed, trying fallback:', mediaErr);
+  // Standardize category: 'QR Codes' | 'Barcodes' | 'Bulk Batch Generation'
+  let categoryDir = 'QR Codes';
+  const catLower = (category || '').toLowerCase();
+  if (catLower.includes('barcode')) {
+    categoryDir = 'Barcodes';
+  } else if (catLower.includes('batch') || catLower.includes('bulk')) {
+    categoryDir = 'Bulk Batch Generation';
+  } else {
+    categoryDir = 'QR Codes';
   }
 
-  // Fallback: Save to Documents and share
-  try {
-    const docFile = await Filesystem.writeFile({
-      path: filename,
-      data: base64Data,
-      directory: Directory.Documents,
-    });
-    await Share.share({
-      title: 'Mushi QR Pro - Save QR Code',
-      url: docFile.uri,
-      dialogTitle: 'Save or Share your QR Code',
-    });
-    return 'share';
-  } catch {
-    // Last resort: try sharing the cache file
-    await Share.share({
-      title: 'Mushi QR Pro - Save QR Code',
-      url: tempFile.uri,
-      dialogTitle: 'Save or Share your QR Code',
-    });
-    return 'share';
+  // Standardize format folder: PNG | JPG | SVG | PDF | ZIP
+  let formatDir = 'PNG';
+  const ext = filename.split('.').pop().toUpperCase();
+  if (['PNG', 'JPG', 'JPEG', 'SVG', 'PDF', 'ZIP'].includes(ext)) {
+    formatDir = ext === 'JPEG' ? 'JPG' : ext;
   }
+
+  return `${rootFolder}/${categoryDir}/${formatDir}/${filename}`;
 }
 
 /**
- * Save non-image files (PDF, SVG) to cache and open the native share sheet.
- * Uses proper base64 encoding that Capacitor's Filesystem expects.
+ * Save file natively into internal storage under organized directory structure.
  */
-async function saveFileViaShare(base64Data, filename) {
+async function saveFileNative(base64Data, filename, category = 'QR Codes') {
   try { await Filesystem.requestPermissions(); } catch {}
 
+  const organizedPath = getOrganizedFilePath(filename, category);
   let fileUri = null;
-  // Write to Documents directory first so file persists on device
+  let isSavedToDocs = false;
+
+  // 1. Save directly into organized Documents directory
   try {
     const docFile = await Filesystem.writeFile({
-      path: filename,
+      path: organizedPath,
       data: base64Data,
       directory: Directory.Documents,
       recursive: true,
     });
     fileUri = docFile.uri;
-  } catch (e) {
-    console.warn('Writing to Documents failed, using Cache fallback:', e);
+    isSavedToDocs = true;
+  } catch (docErr) {
+    console.warn('Writing organized path failed, trying root Documents:', docErr);
+    try {
+      const fallbackFile = await Filesystem.writeFile({
+        path: filename,
+        data: base64Data,
+        directory: Directory.Documents,
+        recursive: true,
+      });
+      fileUri = fallbackFile.uri;
+      isSavedToDocs = true;
+    } catch (fallbackErr) {
+      console.error('Writing to Documents failed:', fallbackErr);
+    }
   }
 
+  // 2. Cache fallback if Documents write failed
   if (!fileUri) {
-    const cacheFile = await Filesystem.writeFile({
-      path: filename,
-      data: base64Data,
-      directory: Directory.Cache,
-      recursive: true,
-    });
-    fileUri = cacheFile.uri;
+    try {
+      const cacheFile = await Filesystem.writeFile({
+        path: filename,
+        data: base64Data,
+        directory: Directory.Cache,
+        recursive: true,
+      });
+      fileUri = cacheFile.uri;
+    } catch {}
   }
 
-  // Open share sheet so user can save / send the file
+  // 3. For image formats (PNG/JPG), attempt to copy to Media gallery
+  if (filename.endsWith('.png') || filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
+    try {
+      await Media.requestPermissions();
+      if (fileUri) {
+        await Media.savePhoto({ path: fileUri, albumIdentifier: 'Mushi QR Pro' });
+      }
+    } catch (mediaErr) {
+      console.warn('Media photo save notice:', mediaErr);
+    }
+  }
+
+  // 4. Open native Share sheet so user can share or inspect file
   if (fileUri) {
     try {
       await Share.share({
         title: 'Mushi QR Pro',
+        text: `Saved to ${organizedPath}`,
         url: fileUri,
         dialogTitle: 'Save or Share your File',
       });
-    } catch (shareErr) {
-      console.warn('Share sheet closed:', shareErr);
-    }
+    } catch (shareErr) {}
   }
-  return 'share';
-}
 
-async function saveFileNative(base64Data, filename) {
-  if (filename.endsWith('.png') || filename.endsWith('.jpg')) {
-    return await saveToGallery(base64Data, filename);
-  } else {
-    return await saveFileViaShare(base64Data, filename);
-  }
+  return isSavedToDocs ? 'saved' : 'share';
 }
 
 function triggerDownload(url, filename) {
@@ -157,17 +143,17 @@ function triggerDownload(url, filename) {
   link.click();
 }
 
-export async function downloadPNG(canvas, filename = 'qrcode') {
+export async function downloadPNG(canvas, filename = 'qrcode', category = 'QR Codes') {
   const dataUrl = canvas.toDataURL('image/png');
   if (Capacitor.isNativePlatform()) {
-    return await saveFileNative(dataUrl.split(',')[1], `${filename}.png`);
+    return await saveFileNative(dataUrl.split(',')[1], `${filename}.png`, category);
   } else {
     triggerDownload(dataUrl, `${filename}.png`);
     return 'download';
   }
 }
 
-export async function downloadJPG(canvas, filename = 'qrcode') {
+export async function downloadJPG(canvas, filename = 'qrcode', category = 'QR Codes') {
   const tempCanvas = document.createElement('canvas');
   tempCanvas.width = canvas.width;
   tempCanvas.height = canvas.height;
@@ -178,15 +164,14 @@ export async function downloadJPG(canvas, filename = 'qrcode') {
   
   const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.95);
   if (Capacitor.isNativePlatform()) {
-    return await saveFileNative(dataUrl.split(',')[1], `${filename}.jpg`);
+    return await saveFileNative(dataUrl.split(',')[1], `${filename}.jpg`, category);
   } else {
     triggerDownload(dataUrl, `${filename}.jpg`);
     return 'download';
   }
 }
 
-export async function downloadSVG(canvas, filename = 'qrcode') {
-  // Get the PNG base64 (without the data:image/png;base64, prefix)
+export async function downloadSVG(canvas, filename = 'qrcode', category = 'QR Codes') {
   const pngBase64 = canvas.toDataURL('image/png').split(',')[1];
 
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -197,9 +182,8 @@ export async function downloadSVG(canvas, filename = 'qrcode') {
 </svg>`;
 
   if (Capacitor.isNativePlatform()) {
-    // Use chunked base64 conversion to avoid call-stack overflow on large SVGs
     const base64Data = stringToBase64(svgContent);
-    return await saveFileNative(base64Data, `${filename}.svg`);
+    return await saveFileNative(base64Data, `${filename}.svg`, category);
   } else {
     const blob = new Blob([svgContent], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
@@ -209,7 +193,7 @@ export async function downloadSVG(canvas, filename = 'qrcode') {
   }
 }
 
-export async function downloadPDF(canvas, filename = 'qrcode') {
+export async function downloadPDF(canvas, filename = 'qrcode', category = 'QR Codes') {
   const imgData = canvas.toDataURL('image/png');
   const size = 210;
   const margin = 20;
@@ -224,10 +208,9 @@ export async function downloadPDF(canvas, filename = 'qrcode') {
   pdf.addImage(imgData, 'PNG', margin, margin, qrSize, qrSize);
   
   if (Capacitor.isNativePlatform()) {
-    // Use arraybuffer output → binary-safe base64 (avoids datauristring issues)
     const pdfArrayBuffer = pdf.output('arraybuffer');
     const base64Data = arrayBufferToBase64(pdfArrayBuffer);
-    return await saveFileNative(base64Data, `${filename}.pdf`);
+    return await saveFileNative(base64Data, `${filename}.pdf`, category);
   } else {
     pdf.save(`${filename}.pdf`);
     return 'download';
