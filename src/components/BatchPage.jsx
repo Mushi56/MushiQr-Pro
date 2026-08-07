@@ -107,10 +107,11 @@ export default function BatchPage({
   };
 
   const handleModeSwitch = async (newType) => {
-    if (batchType === newType) return;
+    if (batchType === newType || isProcessing) return;
 
     if (batchItems.length > 0) {
       setIsProcessing(true);
+      setBatchType(newType);
       setProcessingMessage(`Converting items to Bulk ${newType === 'QR' ? 'QR Code' : 'Barcode'}...`);
       setProcessingProgress(5);
       await new Promise(r => setTimeout(r, 60));
@@ -140,12 +141,11 @@ export default function BatchPage({
           const pct = Math.round(((idx + 1) / total) * 100);
           setProcessingProgress(pct);
           setProcessingMessage(`Converting to ${newType === 'QR' ? 'QR' : 'Barcode'} (${pct}%)...`);
-          await new Promise(r => setTimeout(r, 0));
+          await new Promise(r => setTimeout(r, 10));
         }
       }
 
       setBatchItems(updated);
-      setBatchType(newType);
       setIsProcessing(false);
     } else {
       setBatchType(newType);
@@ -538,6 +538,7 @@ export default function BatchPage({
         <div style={{ display: 'flex', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '14px', marginBottom: '20px' }}>
           <button 
             onClick={() => handleModeSwitch('QR')}
+            disabled={isProcessing}
             style={{
               flex: 1,
               padding: '12px',
@@ -547,15 +548,39 @@ export default function BatchPage({
               color: batchType === 'QR' ? '#FFFFFF' : 'var(--text-secondary)',
               fontWeight: 800,
               fontSize: '14px',
-              cursor: 'pointer',
+              cursor: isProcessing ? 'default' : 'pointer',
               boxShadow: batchType === 'QR' ? '0 4px 14px rgba(214, 0, 54, 0.35)' : 'none',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              position: 'relative',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
             }}
           >
-            Bulk QR
+            {isProcessing && batchType === 'QR' ? (
+              <>
+                <div style={{
+                  position: 'absolute',
+                  left: 0, top: 0, bottom: 0,
+                  width: `${processingProgress}%`,
+                  background: 'var(--accent-gradient)',
+                  transition: 'width 0.15s ease-out',
+                  zIndex: 0
+                }} />
+                <RefreshCw size={15} className="animate-spin" style={{ position: 'relative', zIndex: 1 }} />
+                <span style={{ position: 'relative', zIndex: 1 }}>
+                  Converting... {processingProgress}%
+                </span>
+              </>
+            ) : (
+              'Bulk QR'
+            )}
           </button>
           <button 
             onClick={() => handleModeSwitch('BARCODE')}
+            disabled={isProcessing}
             style={{
               flex: 1,
               padding: '12px',
@@ -565,12 +590,35 @@ export default function BatchPage({
               color: batchType === 'BARCODE' ? '#FFFFFF' : 'var(--text-secondary)',
               fontWeight: 800,
               fontSize: '14px',
-              cursor: 'pointer',
+              cursor: isProcessing ? 'default' : 'pointer',
               boxShadow: batchType === 'BARCODE' ? '0 4px 14px rgba(214, 0, 54, 0.35)' : 'none',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              position: 'relative',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
             }}
           >
-            Bulk Barcode
+            {isProcessing && batchType === 'BARCODE' ? (
+              <>
+                <div style={{
+                  position: 'absolute',
+                  left: 0, top: 0, bottom: 0,
+                  width: `${processingProgress}%`,
+                  background: 'var(--accent-gradient)',
+                  transition: 'width 0.15s ease-out',
+                  zIndex: 0
+                }} />
+                <RefreshCw size={15} className="animate-spin" style={{ position: 'relative', zIndex: 1 }} />
+                <span style={{ position: 'relative', zIndex: 1 }}>
+                  Converting... {processingProgress}%
+                </span>
+              </>
+            ) : (
+              'Bulk Barcode'
+            )}
           </button>
         </div>
 
