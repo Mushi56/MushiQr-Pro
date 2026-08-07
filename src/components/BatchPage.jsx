@@ -90,6 +90,9 @@ export default function BatchPage({
   const [customZipFileName, setCustomZipFileName] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0);
+  const [processingMessage, setProcessingMessage] = useState('Processing...');
 
   useEffect(() => {
     if (initialBatchType) {
@@ -106,12 +109,51 @@ export default function BatchPage({
     'HQ': 4096
   };
 
-  // Reset file upload when batch type changes
-  useEffect(() => {
-    setFileData(null);
-    setColumns([]);
-    setCustomZipFileName('');
-  }, [batchType]);
+  const handleModeSwitch = async (newType) => {
+    if (batchType === newType) return;
+
+    if (batchItems.length > 0) {
+      setIsProcessing(true);
+      setProcessingMessage(`Converting items to Bulk ${newType === 'QR' ? 'QR Code' : 'Barcode'}...`);
+      setProcessingProgress(5);
+      await new Promise(r => setTimeout(r, 60));
+
+      const updated = [];
+      const total = batchItems.length;
+      const defaultStyle = newType === 'BARCODE' ? {
+        bcid: barcodeType || 'code128',
+        barColor: '#000000',
+        bgColor: '#ffffff',
+        barWidth: 2,
+        height: 90,
+        margin: 16,
+        displayValue: true
+      } : { ...activeGeneratorStyle };
+
+      const stepSize = Math.max(1, Math.floor(total / 20));
+      for (let idx = 0; idx < total; idx++) {
+        const item = batchItems[idx];
+        updated.push({
+          ...item,
+          type: newType,
+          style: defaultStyle
+        });
+
+        if (idx % stepSize === 0 || idx === total - 1) {
+          const pct = Math.round(((idx + 1) / total) * 100);
+          setProcessingProgress(pct);
+          setProcessingMessage(`Converting to ${newType === 'QR' ? 'QR' : 'Barcode'} (${pct}%)...`);
+          await new Promise(r => setTimeout(r, 0));
+        }
+      }
+
+      setBatchItems(updated);
+      setBatchType(newType);
+      setIsProcessing(false);
+    } else {
+      setBatchType(newType);
+    }
+  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -123,11 +165,26 @@ export default function BatchPage({
       setCustomZipFileName(baseFileName);
     }
 
+    setIsProcessing(true);
+    setProcessingMessage('Reading uploaded file...');
+    setProcessingProgress(15);
+
     const reader = new FileReader();
     const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
 
-    reader.onload = (e) => {
+    reader.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 50);
+        setProcessingProgress(percent);
+      }
+    };
+
+    reader.onload = async (e) => {
       try {
+        setProcessingMessage('Parsing file rows...');
+        setProcessingProgress(65);
+        await new Promise(r => setTimeout(r, 50));
+
         let rows = [];
         if (isExcel) {
           const data = new Uint8Array(e.target.result);
@@ -140,8 +197,11 @@ export default function BatchPage({
           rows = parseCSV(text);
         }
 
+        setProcessingProgress(90);
+
         if (rows.length === 0) {
           alert('The file appears to be empty.');
+          setIsProcessing(false);
           return;
         }
 
@@ -162,9 +222,12 @@ export default function BatchPage({
             setNameCol('none');
           }
         }
+        setProcessingProgress(100);
       } catch (err) {
         console.error(err);
         alert('Failed to parse file. Please verify the format.');
+      } finally {
+        setTimeout(() => setIsProcessing(false), 200);
       }
     };
 
@@ -209,11 +272,17 @@ export default function BatchPage({
     return lines;
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!fileData || dataCol === '') return;
+
+    setIsProcessing(true);
+    setProcessingMessage('Generating batch entries...');
+    setProcessingProgress(5);
+    await new Promise(r => setTimeout(r, 60));
 
     const startIndex = hasHeader ? 1 : 0;
     const imported = [];
+    const totalRows = fileData.length - startIndex;
 
     // Base default style configurations depending on QR vs BARCODE
     const defaultStyle = batchType === 'BARCODE' ? {
@@ -226,29 +295,38 @@ export default function BatchPage({
       displayValue: true
     } : { ...activeGeneratorStyle };
 
+    const stepSize = Math.max(1, Math.floor(totalRows / 25));
     for (let i = startIndex; i < fileData.length; i++) {
       const row = fileData[i];
-      if (!row || row.length === 0) continue;
+      if (row && row.length > 0) {
+        const codeData = row[parseInt(dataCol)];
+        if (codeData && codeData.toString().trim() !== '') {
+          const fileNameVal = nameCol !== 'none' && nameCol !== '' ? row[parseInt(nameCol)] : null;
+          const cleanFileName = fileNameVal 
+            ? fileNameVal.toString().trim().replace(/[^a-zA-Z0-9-_]/g, '_') 
+            : `${batchType.toLowerCase()}_code_${i - startIndex + 1}`;
 
-      const codeData = row[parseInt(dataCol)];
-      if (!codeData || codeData.toString().trim() === '') continue;
+          imported.push({
+            id: `batch-${Date.now()}-${i}`,
+            data: codeData.toString().trim(),
+            filename: cleanFileName,
+            type: batchType,
+            style: defaultStyle
+          });
+        }
+      }
 
-      const fileNameVal = nameCol !== 'none' && nameCol !== '' ? row[parseInt(nameCol)] : null;
-      const cleanFileName = fileNameVal 
-        ? fileNameVal.toString().trim().replace(/[^a-zA-Z0-9-_]/g, '_') 
-        : `${batchType.toLowerCase()}_code_${i - startIndex + 1}`;
-
-      imported.push({
-        id: `batch-${Date.now()}-${i}`,
-        data: codeData.toString().trim(),
-        filename: cleanFileName,
-        type: batchType,
-        style: defaultStyle
-      });
+      if ((i - startIndex) % stepSize === 0 || i === fileData.length - 1) {
+        const pct = Math.round(((i - startIndex + 1) / totalRows) * 100);
+        setProcessingProgress(pct);
+        setProcessingMessage(`Imported ${imported.length} items (${pct}%)...`);
+        await new Promise(r => setTimeout(r, 0));
+      }
     }
 
     setBatchItems(imported);
     setFileData(null);
+    setIsProcessing(false);
   };
 
   const applyGlobalStyle = () => {
@@ -452,16 +530,7 @@ export default function BatchPage({
         {/* Toggle Selector for Batch Mode (Always Accessible) */}
         <div style={{ display: 'flex', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '14px', marginBottom: '20px' }}>
           <button 
-            onClick={() => {
-              setBatchType('QR');
-              if (batchItems.length > 0) {
-                setBatchItems(prev => prev.map(item => ({
-                  ...item,
-                  type: 'QR',
-                  style: { ...activeGeneratorStyle }
-                })));
-              }
-            }}
+            onClick={() => handleModeSwitch('QR')}
             style={{
               flex: 1,
               padding: '12px',
@@ -479,24 +548,7 @@ export default function BatchPage({
             Bulk QR
           </button>
           <button 
-            onClick={() => {
-              setBatchType('BARCODE');
-              if (batchItems.length > 0) {
-                setBatchItems(prev => prev.map(item => ({
-                  ...item,
-                  type: 'BARCODE',
-                  style: {
-                    bcid: barcodeType || 'code128',
-                    barColor: '#000000',
-                    bgColor: '#ffffff',
-                    barWidth: 2,
-                    height: 90,
-                    margin: 16,
-                    displayValue: true
-                  }
-                })));
-              }
-            }}
+            onClick={() => handleModeSwitch('BARCODE')}
             style={{
               flex: 1,
               padding: '12px',
@@ -1105,6 +1157,82 @@ export default function BatchPage({
           </div>
         )}
       </div>
+
+      {/* ── Progress Loading Overlay Modal ── */}
+      {(isProcessing || isExporting) && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 10000,
+          background: 'rgba(9, 9, 15, 0.88)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+          color: '#ffffff'
+        }}>
+          <div style={{
+            background: 'var(--bg-elevated, #14141e)',
+            border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
+            borderRadius: '24px',
+            padding: '32px 28px',
+            maxWidth: '360px',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+          }}>
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'rgba(214,0,54,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px'
+            }}>
+              <RefreshCw size={28} className="animate-spin text-accent" style={{ color: 'var(--accent-primary, #D60036)' }} />
+            </div>
+
+            <h4 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px 0', color: '#ffffff' }}>
+              {isExporting ? 'Packaging Export' : 'Processing Batch'}
+            </h4>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary, #8b8fa8)', margin: '0 0 20px 0', minHeight: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {isExporting ? `Exporting files into ZIP archive (${exportProgress}%)...` : processingMessage}
+            </p>
+
+            {/* Progress Bar Container */}
+            <div style={{
+              width: '100%',
+              height: '10px',
+              background: 'rgba(255,255,255,0.08)',
+              borderRadius: '5px',
+              overflow: 'hidden',
+              position: 'relative',
+              marginBottom: '12px'
+            }}>
+              <div style={{
+                height: '100%',
+                width: `${isExporting ? exportProgress : processingProgress}%`,
+                background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
+                borderRadius: '5px',
+                transition: 'width 0.15s ease-out'
+              }} />
+            </div>
+
+            {/* Percentage Text */}
+            <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--accent-primary, #D60036)' }}>
+              {isExporting ? `${exportProgress}%` : `${processingProgress}%`}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
