@@ -59,7 +59,11 @@ import {
   AlertCircle,
   Sparkles,
   LogOut,
-  Edit2
+  Edit2,
+  ChevronRight,
+  Cloud,
+  Lock,
+  Smartphone
 } from 'lucide-react';
 import ColorPicker from './components/ColorPicker';
 import Slider from './components/Slider';
@@ -3972,22 +3976,24 @@ export default function App() {
                   <div
                     style={{
                       position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                      background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
-                      borderRadius: '18px', width: '300px',
-                      boxShadow: '0 20px 60px rgba(0,0,0,0.25)', zIndex: 999,
+                      background: '#FFFFFF', border: '1px solid #E2E8F0',
+                      borderRadius: '28px', width: '335px',
+                      boxShadow: '0 20px 50px rgba(0,0,0,0.12)', zIndex: 999,
                       overflow: 'hidden',
-                      animation: 'dropdownFadeIn 0.18s ease'
+                      animation: 'dropdownFadeIn 0.18s ease',
+                      fontFamily: 'var(--font-sans)',
+                      color: '#0F172A'
                     }}
                     onClick={e => e.stopPropagation()}
                   >
-                    {/* Profile header (solid elevated bg, no glassmorphism gradient) */}
-                    <div style={{ padding: '18px 18px 14px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-color)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Profile Header */}
+                    <div style={{ padding: '24px 20px 18px', background: '#FFFFFF', borderBottom: '1px solid #F1F5F9' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                         <div style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
                           {currentUser.photoURL ? (
-                            <img src={currentUser.photoURL} alt="Profile" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', flexShrink: 0 }} />
+                            <img src={currentUser.photoURL} alt="Profile" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #F1F5F9', flexShrink: 0 }} />
                           ) : (
-                            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 800, flexShrink: 0 }}>
+                            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 800, flexShrink: 0 }}>
                               {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
                             </div>
                           )}
@@ -4001,7 +4007,7 @@ export default function App() {
                               alignItems: 'center',
                               justifyContent: 'center'
                             }}>
-                              <GoldenAdminBadge size={15} />
+                              <GoldenAdminBadge size={18} />
                             </div>
                           )}
                         </div>
@@ -4030,8 +4036,8 @@ export default function App() {
                                   }
                                 }}
                                 style={{
-                                  flex: 1, background: 'var(--bg-input)', border: '1px solid var(--border-accent)',
-                                  borderRadius: '6px', color: 'var(--text-primary)', padding: '4px 8px',
+                                  flex: 1, background: '#F8FAFC', border: '1px solid #CBD5E1',
+                                  borderRadius: '8px', color: '#0F172A', padding: '4px 8px',
                                   fontSize: '13px', outline: 'none', minWidth: 0
                                 }}
                               />
@@ -4053,12 +4059,12 @@ export default function App() {
                                 style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                                 title="Save Name"
                               >
-                                <Check size={16} color="#00E676" />
+                                <Check size={16} color="#10B981" />
                               </button>
                             </div>
                           ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {currentUser.displayName || 'Mushi User'}
                               </span>
                               <button
@@ -4072,26 +4078,132 @@ export default function App() {
                                 onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
                                 title="Edit Name"
                               >
-                                <Edit2 size={13} color="var(--text-secondary)" />
+                                <Pencil size={13} color="#64748B" />
                               </button>
                               {currentUser.email === 'mabuneri143@gmail.com' && (
-                                <GoldenAdminBadge size={16} />
+                                <GoldenAdminBadge size={15} />
                               )}
                             </div>
                           )}
-                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{currentUser.email}</div>
+                          <div style={{ fontSize: '12px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '3px' }}>{currentUser.email}</div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Menu Items */}
-                    <div style={{ padding: '8px' }}>
+                    {/* Menu Options */}
+                    <div style={{ padding: '10px' }}>
+                      {/* My Profile */}
+                      <button 
+                        onClick={() => { setActivePage('you'); setAuthDropdownOpen(false); }}
+                        style={{
+                          width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
+                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                          transition: 'background 0.2s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(236, 72, 153, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <User size={18} color="#EC4899" />
+                        </div>
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>My Profile</div>
+                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>View and edit your profile</div>
+                        </div>
+                        <ChevronRight size={15} color="#94A3B8" />
+                      </button>
+
+                      {/* Cloud Sync */}
+                      <button 
+                        onClick={() => { showToast('Cloud sync is fully active!'); setAuthDropdownOpen(false); }}
+                        style={{
+                          width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
+                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                          transition: 'background 0.2s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Cloud size={18} color="#3B82F6" />
+                        </div>
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>Cloud Sync</div>
+                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>Sync your projects across devices</div>
+                        </div>
+                        <ChevronRight size={15} color="#94A3B8" />
+                      </button>
+
+                      {/* Security & Login */}
+                      <button 
+                        onClick={() => { setActivePage('you'); setAuthDropdownOpen(false); }}
+                        style={{
+                          width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
+                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                          transition: 'background 0.2s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(139, 92, 246, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Lock size={18} color="#8B5CF6" />
+                        </div>
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>Security &amp; Login</div>
+                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>Manage login, password &amp; 2FA</div>
+                        </div>
+                        <ChevronRight size={15} color="#94A3B8" />
+                      </button>
+
+                      {/* Devices */}
+                      <button 
+                        onClick={() => { showToast('Active Device: Mushi Mobile App'); setAuthDropdownOpen(false); }}
+                        style={{
+                          width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
+                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                          transition: 'background 0.2s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Smartphone size={18} color="#10B981" />
+                        </div>
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>Devices</div>
+                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>1 device connected</div>
+                        </div>
+                        <ChevronRight size={15} color="#94A3B8" />
+                      </button>
+
+                      {/* Super Admin Panel */}
                       {currentUser.email === 'mabuneri143@gmail.com' && (
-                        <button onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#FF007F', fontSize: '13px', fontWeight: 700, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <Shield size={15} color="#FF007F" /> Super Admin Panel
-                        </button>
+                        <>
+                          <div style={{ height: '1px', background: '#F1F5F9', margin: '6px 12px' }} />
+                          <button 
+                            onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }}
+                            style={{
+                              width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
+                              background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                              transition: 'background 0.2s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <Shield size={18} color="#F59E0B" />
+                            </div>
+                            <div style={{ flex: 1, overflow: 'hidden' }}>
+                              <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#FF007F' }}>Super Admin Panel</div>
+                              <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>Access admin dashboard</div>
+                            </div>
+                            <ChevronRight size={15} color="#94A3B8" />
+                          </button>
+                        </>
                       )}
-                      <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 0' }} />
+
+                      {/* Sign Out */}
+                      <div style={{ height: '1px', background: '#F1F5F9', margin: '6px 12px' }} />
                       <button
                         onClick={async () => {
                           setAuthDropdownOpen(false);
@@ -4109,11 +4221,21 @@ export default function App() {
                           }
                           clearData();
                         }}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#EF4444', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}
+                        style={{
+                          width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
+                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                          transition: 'background 0.2s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
-                        <LogOut size={15} color="#EF4444" /> Sign Out
+                        <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <LogOut size={18} color="#EF4444" />
+                        </div>
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#EF4444' }}>Sign Out</div>
+                          <div style={{ fontSize: '10.5px', color: '#94A3B8', marginTop: '2px' }}>Sign out from your account</div>
+                        </div>
                       </button>
                     </div>
                   </div>
