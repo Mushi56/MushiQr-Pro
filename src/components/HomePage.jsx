@@ -330,7 +330,7 @@ const getBarcodeIcon = (id) => {
   }
 };
 
-export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
+export default function HomePage({ currentUser, onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
   const [recentItems, setRecentItems] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
   const [activeSlide, setActiveSlide] = useState(0);
@@ -477,11 +477,113 @@ export default function HomePage({ onNavigate, onQuickCreate, onQuickCreateBarco
       position: 'relative'
     }}>
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up">
-        {/* Static Hero Section with Glassmorphism */}
-        <div style={{ marginTop: '10px', width: '100%', padding: '0 var(--main-padding-x)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          
+        {/* Static Hero Section with Purple Rounded Rectangle Container inspired by UI/UX */}
+        <div style={{
+          width: '100%',
+          background: 'linear-gradient(135deg, #4F46E5 0%, #3730A3 100%)',
+          borderRadius: '0 0 28px 28px',
+          padding: '12px var(--main-padding-x) 22px var(--main-padding-x)',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '14px',
+          color: '#FFFFFF',
+          boxShadow: '0 12px 30px rgba(79, 70, 229, 0.22)',
+          position: 'relative',
+          overflow: 'hidden',
+          marginBottom: '10px'
+        }}>
+          {/* Subtle background ambient blur circle */}
+          <div style={{
+            position: 'absolute', top: '-40%', right: '-15%',
+            width: '220px', height: '220px',
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%)',
+            filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
+          }} />
+
+          {/* Welcome Message / Admin Dashboard Header Block */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            position: 'relative',
+            zIndex: 2,
+            paddingTop: '2px',
+            paddingBottom: '2px'
+          }}>
+            <div>
+              <div style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.8px',
+                textTransform: 'uppercase',
+                color: 'rgba(255, 255, 255, 0.75)',
+                marginBottom: '4px'
+              }}>
+                {currentUser?.email === 'mabuneri143@gmail.com' ? 'ADMIN DASHBOARD' : (currentUser ? 'WELCOME BACK' : 'MUSHI QR PRO')}
+              </div>
+              <div style={{
+                fontSize: '22px',
+                fontWeight: 800,
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                lineHeight: 1.2
+              }}>
+                {currentUser?.email === 'mabuneri143@gmail.com' ? (
+                  <>
+                    <span>Super Admin</span>
+                    <span style={{ fontSize: '18px' }}>🛡️</span>
+                  </>
+                ) : currentUser ? (
+                  <span>{currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}</span>
+                ) : (
+                  <span>Welcome Guest</span>
+                )}
+              </div>
+            </div>
+
+            {/* Profile Avatar Image in Top Right of Banner */}
+            {currentUser && (
+              <div style={{ flexShrink: 0 }}>
+                {currentUser.photoURL ? (
+                  <img
+                    src={currentUser.photoURL}
+                    alt="Profile"
+                    style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '2px solid rgba(255, 255, 255, 0.8)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    border: '2px solid rgba(255, 255, 255, 0.6)',
+                    color: '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px',
+                    fontWeight: 800,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                  }}>
+                    {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Top Row: Create QR Code & Create Barcode 50-50 side-by-side in 1 line */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%', position: 'relative', zIndex: 2 }}>
             
             {/* Card 1: Create QR Code (Entire Card Interactive) */}
             <div 

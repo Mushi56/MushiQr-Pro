@@ -58,7 +58,8 @@ import {
   Layers,
   AlertCircle,
   Sparkles,
-  LogOut
+  LogOut,
+  Edit2
 } from 'lucide-react';
 import ColorPicker from './components/ColorPicker';
 import Slider from './components/Slider';
@@ -3424,7 +3425,7 @@ export default function App() {
       )}
       {/* ── Header ── */}
       <header 
-        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''}`}
+        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' ? 'header-home-banner' : ''}`}
         style={{ display: activePage === 'barcode' ? 'none' : 'flex' }}
       >
         <div className="app-logo">
@@ -3947,8 +3948,8 @@ export default function App() {
                     }}
                     onClick={e => e.stopPropagation()}
                   >
-                    {/* Profile header */}
-                    <div style={{ padding: '18px 18px 14px', background: 'linear-gradient(135deg, rgba(214,0,54,0.08), rgba(214,0,54,0.02))', borderBottom: '1px solid var(--border-color)' }}>
+                    {/* Profile header (solid elevated bg, no glassmorphism gradient) */}
+                    <div style={{ padding: '18px 18px 14px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {currentUser.photoURL ? (
                           <img src={currentUser.photoURL} alt="Profile" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', flexShrink: 0 }} />
@@ -3971,8 +3972,27 @@ export default function App() {
 
                     {/* Menu Items */}
                     <div style={{ padding: '8px' }}>
-                      <button onClick={() => { setAuthDropdownOpen(false); navigateTo('you'); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                        <Settings size={15} color="var(--text-secondary)" /> Settings
+                      <button 
+                        onClick={async () => {
+                          setAuthDropdownOpen(false);
+                          const currentName = currentUser.displayName || '';
+                          const newName = window.prompt('Enter new profile display name:', currentName);
+                          if (newName !== null && newName.trim() !== '') {
+                            try {
+                              const { updateProfile: fbUpdateProfile } = await import('firebase/auth');
+                              await fbUpdateProfile(auth.currentUser, { displayName: newName.trim() });
+                              showToast('Profile name updated successfully!');
+                            } catch (err) {
+                              console.error('Failed to update profile name', err);
+                              showToast('Failed to update profile name.');
+                            }
+                          }
+                        }} 
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} 
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'} 
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <Edit2 size={15} color="var(--text-secondary)" /> Edit Profile Name
                       </button>
                       {currentUser.email === 'mabuneri143@gmail.com' && (
                         <button onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent', border: 'none', color: '#FF007F', fontSize: '13px', fontWeight: 700, borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,127,0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
@@ -5427,6 +5447,7 @@ export default function App() {
           />
         ) : activePage === 'home' ? (
           <HomePage 
+            currentUser={currentUser}
             onNavigate={(page) => {
               if (page === 'generator') resetGenerator();
               navigateTo(page);

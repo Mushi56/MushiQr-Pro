@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Mail, Lock, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Loader2, X } from 'lucide-react';
 import { auth, googleProvider } from '../services/firebase';
 import {
   signInWithEmailAndPassword,
@@ -36,12 +36,12 @@ export default function AuthDropdownPanel({ onClose }) {
 
   const inputStyle = {
     width: '100%',
-    padding: '10px 14px 10px 38px',
-    borderRadius: '10px',
+    padding: '12px 14px 12px 42px',
+    borderRadius: '12px',
     border: '1px solid var(--border-color)',
     background: 'var(--bg-primary)',
     color: 'var(--text-primary)',
-    fontSize: '13px',
+    fontSize: '15px',
     outline: 'none',
     boxSizing: 'border-box',
     transition: 'border-color 0.2s',
@@ -102,91 +102,102 @@ export default function AuthDropdownPanel({ onClose }) {
   };
 
   return (
-    <div style={{ padding: '18px' }}>
+    <div style={{ padding: '32px' }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+      <div style={{ position: 'relative', textAlign: 'center', marginBottom: '24px' }}>
+        <button onClick={onClose} style={{
+          position: 'absolute', top: '-16px', right: '-16px',
+          background: 'var(--bg-hover)', border: 'none', color: 'var(--text-muted)',
+          width: '32px', height: '32px', borderRadius: '50%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', transition: 'all 0.2s'
+        }}>
+          <X size={18} />
+        </button>
+
         <div style={{
-          width: '44px', height: '44px', borderRadius: '50%',
+          width: '56px', height: '56px', borderRadius: '50%',
           background: 'var(--accent-gradient)', color: '#fff',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 10px', boxShadow: '0 4px 14px rgba(214,0,54,0.25)'
+          margin: '0 auto 12px', boxShadow: '0 4px 14px rgba(214,0,54,0.25)'
         }}>
-          <User size={22} color="#fff" strokeWidth={2.5} />
+          <User size={26} color="#fff" strokeWidth={2.5} />
         </div>
-        <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '3px' }}>
+        <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px' }}>
           {isSignUp ? 'Create Account' : 'Welcome Back'}
         </div>
-        <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+        <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
           {isSignUp ? 'Sign up to sync your QR codes' : 'Sign in to access your saved codes'}
         </div>
       </div>
 
       {/* Alerts */}
       {error && (
-        <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '8px 12px', color: '#EF4444', fontSize: '12px', marginBottom: '12px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+        <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '10px 14px', color: '#EF4444', fontSize: '13px', marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
           ⚠️ {error}
         </div>
       )}
       {message && (
-        <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '8px', padding: '8px 12px', color: '#10B981', fontSize: '12px', marginBottom: '12px' }}>
+        <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '8px', padding: '10px 14px', color: '#10B981', fontSize: '13px', marginBottom: '16px' }}>
           ✓ {message}
         </div>
       )}
 
       {/* Form */}
-      <form onSubmit={handleEmailAuth} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <form onSubmit={handleEmailAuth} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {isSignUp && (
           <div style={{ position: 'relative' }}>
-            <User size={14} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--text-muted)' }} />
+            <User size={18} style={{ position: 'absolute', left: '14px', top: '12px', color: 'var(--text-muted)' }} />
             <input type="text" placeholder="Full Name" value={displayName} onChange={e => setDisplayName(e.target.value)} style={inputStyle} />
           </div>
         )}
         <div style={{ position: 'relative' }}>
-          <Mail size={14} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--text-muted)' }} />
+          <Mail size={18} style={{ position: 'absolute', left: '14px', top: '12px', color: 'var(--text-muted)' }} />
           <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
         </div>
         <div style={{ position: 'relative' }}>
-          <Lock size={14} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--text-muted)' }} />
+          <Lock size={18} style={{ position: 'absolute', left: '14px', top: '12px', color: 'var(--text-muted)' }} />
           <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={inputStyle} />
         </div>
 
         {!isSignUp && (
           <div style={{ textAlign: 'right', marginTop: '-4px' }}>
-            <button type="button" onClick={handleReset} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer', padding: 0 }}>
+            <button type="button" onClick={handleReset} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', padding: 0 }}>
               Forgot password?
             </button>
           </div>
         )}
 
+
         <button type="submit" disabled={loading} style={{
-          width: '100%', height: '40px', borderRadius: '10px',
+          width: '100%', height: '48px', borderRadius: '12px',
           background: 'var(--accent-gradient)', border: 'none', color: '#fff',
-          fontWeight: 700, fontSize: '14px', cursor: 'pointer',
+          fontWeight: 700, fontSize: '15px', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
           boxShadow: '0 4px 14px rgba(214,0,54,0.25)',
           opacity: loading ? 0.7 : 1, transition: 'opacity 0.2s',
           fontFamily: 'inherit'
         }}>
-          {loading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : (isSignUp ? 'Create Account' : 'Sign In')}
+          {loading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : (isSignUp ? 'Create Account' : 'Sign In')}
         </button>
       </form>
 
       {/* Divider */}
-      <div style={{ display: 'flex', alignItems: 'center', margin: '12px 0', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', margin: '16px 0', gap: '12px' }}>
         <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
-        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>OR</span>
+        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 700 }}>OR</span>
         <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
       </div>
 
       {/* Google */}
       <button onClick={handleGoogle} disabled={loading} style={{
-        width: '100%', height: '40px', borderRadius: '10px',
+        width: '100%', height: '48px', borderRadius: '12px',
         border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
-        color: 'var(--text-primary)', fontWeight: 600, fontSize: '13px',
-        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+        color: 'var(--text-primary)', fontWeight: 700, fontSize: '14px',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
         transition: 'all 0.2s', fontFamily: 'inherit'
       }}>
-        <svg width="16" height="16" viewBox="0 0 24 24">
+        <svg width="18" height="18" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-1.14 2.77-2.4 3.61v3h3.86c2.26-2.09 3.59-5.17 3.59-8.46z"/>
           <path fill="#34A853" d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.86-3c-1.08.72-2.45 1.16-4.1 1.16-3.15 0-5.81-2.13-6.76-5.01H1.31v3.1A12 12 0 0 0 12 24z"/>
           <path fill="#FBBC05" d="M5.24 14.24a7.19 7.19 0 0 1 0-4.48V6.66H1.31a12 12 0 0 0 0 10.68l3.93-3.1z"/>
@@ -196,9 +207,9 @@ export default function AuthDropdownPanel({ onClose }) {
       </button>
 
       {/* Toggle */}
-      <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px' }}>
+      <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px' }}>
         <span style={{ color: 'var(--text-secondary)' }}>{isSignUp ? 'Already have an account? ' : "Don't have an account? "}</span>
-        <button onClick={() => { setIsSignUp(!isSignUp); setError(''); setMessage(''); }} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '12px' }}>
+        <button onClick={() => { setIsSignUp(!isSignUp); setError(''); setMessage(''); }} style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontWeight: 800, cursor: 'pointer', padding: 0, fontSize: '13px' }}>
           {isSignUp ? 'Sign In' : 'Sign Up'}
         </button>
       </div>

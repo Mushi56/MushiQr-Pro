@@ -151,6 +151,23 @@
   color: var(--text-primary);
 }
 
+/* Home Page Purple Upper Navbar Banner Styling */
+.app-header.header-home-banner {
+  background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%) !important;
+  color: #FFFFFF !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+.app-header.header-home-banner .app-logo-text {
+  color: #FFFFFF !important;
+}
+
+.app-header.header-home-banner .btn-menu-toggle,
+.app-header.header-home-banner .btn-header-action {
+  color: #FFFFFF !important;
+}
+
 
 
 
