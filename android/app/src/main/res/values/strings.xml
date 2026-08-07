@@ -5,4 +5,5 @@
     <string name="package_name">com.mushiqr.pro</string>
     <string name="custom_url_scheme">com.mushiqr.pro</string>
     <string name="server_client_id">1068457009199-eo7h1ni9ps5sre8bfg742c3eol2alslb.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">1068457009199-eo7h1ni9ps5sre8bfg742c3eol2alslb.apps.googleusercontent.com</string>
 </resources>
