@@ -22,24 +22,25 @@ async function saveZipNative(base64Data, filename) {
   const organizedPath = getOrganizedFilePath(filename, 'Bulk Batch Generation');
   let savedFileUri = null;
   let savedToDocuments = false;
+  const targetDir = Capacitor.getPlatform() === 'android' ? Directory.ExternalStorage : Directory.Documents;
 
-  // 1. Primary: Save to device Documents directory under organized Bulk Batch Generation/ZIP path
+  // 1. Primary: Save to device target directory under organized Bulk Batch Generation/ZIP path
   try {
     const docFile = await Filesystem.writeFile({
       path: organizedPath,
       data: base64Data,
-      directory: Directory.Documents,
+      directory: targetDir,
       recursive: true,
     });
     savedFileUri = docFile.uri;
     savedToDocuments = true;
   } catch (docErr) {
-    console.warn('Could not write organized path, falling back to root Documents:', docErr);
+    console.warn('Could not write organized path, falling back to root target:', docErr);
     try {
       const docFile = await Filesystem.writeFile({
         path: filename,
         data: base64Data,
-        directory: Directory.Documents,
+        directory: targetDir,
         recursive: true,
       });
       savedFileUri = docFile.uri;

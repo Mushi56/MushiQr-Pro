@@ -958,7 +958,50 @@ export default function App() {
         syncUserFirestoreData();
       }
     });
-    return unsubscribe;
+  }, []);
+
+  // Pre-create organized folder structure on startup
+  useEffect(() => {
+    const createDefaultDirectories = async () => {
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const targetDir = Capacitor.getPlatform() === 'android' ? Directory.ExternalStorage : Directory.Documents;
+          const prefs = getPreferences() || {};
+          const rootFolder = prefs.saveLocation || 'Mushi QR Pro';
+          
+          const dirs = [
+            `${rootFolder}/QR Codes/PNG`,
+            `${rootFolder}/QR Codes/JPG`,
+            `${rootFolder}/QR Codes/SVG`,
+            `${rootFolder}/QR Codes/PDF`,
+            `${rootFolder}/Barcodes/PNG`,
+            `${rootFolder}/Barcodes/JPG`,
+            `${rootFolder}/Barcodes/SVG`,
+            `${rootFolder}/Barcodes/PDF`,
+            `${rootFolder}/Bulk Batch Generation/ZIP`,
+            `${rootFolder}/Bulk Batch Generation/PNG`,
+            `${rootFolder}/Bulk Batch Generation/JPG`,
+            `${rootFolder}/Bulk Batch Generation/SVG`,
+            `${rootFolder}/Bulk Batch Generation/PDF`,
+          ];
+          
+          for (const dir of dirs) {
+            try {
+              await Filesystem.mkdir({
+                path: dir,
+                directory: targetDir,
+                recursive: true
+              });
+            } catch (err) {
+              console.warn(`Failed to pre-create dir: ${dir}`, err);
+            }
+          }
+        } catch (e) {
+          console.warn('Directory pre-creation failed', e);
+        }
+      }
+    };
+    createDefaultDirectories();
   }, []);
 
   const [tabHistory, setTabHistory] = useState([]);
