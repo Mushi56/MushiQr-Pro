@@ -22,7 +22,6 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
       frameStyle: 'none',          // Remove outer frames
       quietZone: 1,                // Add a very small quiet zone to maximize visual size
       size: 384,                   // Render size
-      dotPadding: 0,               // Zero gap between modules by default
       ...overrideParams
     };
 

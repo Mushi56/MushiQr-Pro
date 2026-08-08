@@ -576,7 +576,7 @@ export function renderQR(canvas, options) {
  * Draw a single dot module
  */
 function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
-  const dotPadding = options.dotPadding !== undefined ? options.dotPadding : 0;
+  const dotPadding = options.dotPadding !== undefined ? options.dotPadding : 5;
   const padding = (size * dotPadding) / 100;
   const s = size - padding * 2;
   const { top, bottom, left, right } = neighbors;
@@ -587,8 +587,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
       break;
     case DOT_STYLES.DOTS:
       ctx.beginPath();
-      const dotRadius = Math.max(0, (s / 2) + (dotPadding === 0 ? 0.25 : 0));
-      ctx.arc(x + size / 2, y + size / 2, dotRadius, 0, Math.PI * 2);
+      ctx.arc(x + size / 2, y + size / 2, s / 2, 0, Math.PI * 2);
       ctx.fill();
       break;
     case DOT_STYLES.DIAMOND:
@@ -667,18 +666,23 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
       break;
     case DOT_STYLES.FLUID: {
       const r = size * 0.45;
+      const xL = left ? x - 0.6 : x;
+      const xR = right ? x + size + 0.6 : x + size;
+      const yT = top ? y - 0.6 : y;
+      const yB = bottom ? y + size + 0.6 : y + size;
+
       ctx.beginPath();
       // TL corner
-      if (top || left) ctx.moveTo(x, y);
+      if (top || left) ctx.moveTo(xL, yT);
       else { ctx.moveTo(x + r, y); ctx.arcTo(x, y, x, y + r, r); }
       // BL corner
-      if (bottom || left) ctx.lineTo(x, y + size);
+      if (bottom || left) ctx.lineTo(xL, yB);
       else { ctx.lineTo(x, y + size - r); ctx.arcTo(x, y + size, x + r, y + size, r); }
       // BR corner
-      if (bottom || right) ctx.lineTo(x + size, y + size);
+      if (bottom || right) ctx.lineTo(xR, yB);
       else { ctx.lineTo(x + size - r, y + size); ctx.arcTo(x + size, y + size, x + size, y + size - r, r); }
       // TR corner
-      if (top || right) ctx.lineTo(x + size, y);
+      if (top || right) ctx.lineTo(xR, yT);
       else { ctx.lineTo(x + size, y + r); ctx.arcTo(x + size, y, x + size - r, y, r); }
       ctx.closePath(); ctx.fill();
       break;
