@@ -155,9 +155,9 @@
   transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Home Page Red Upper Navbar Banner Styling */
+/* Home Page Dark Crimson Upper Navbar Banner Styling (blends seamlessly with hero container) */
 .app-header.header-home-banner {
-  background: linear-gradient(135deg, #D60036 0%, #9E0028 100%) !important;
+  background: #6B0014 !important;
   color: #FFFFFF !important;
   border-bottom: none !important;
   box-shadow: none !important;
