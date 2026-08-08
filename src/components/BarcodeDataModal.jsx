@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X, Check, ChevronRight, Info, Package, ShoppingCart, Truck,
   BookOpen, Syringe, Mail, Globe, Hash, AlignLeft, Layers, Zap,
@@ -10,7 +10,38 @@ import { Clipboard as CapacitorClipboard } from '@capacitor/clipboard';
 
 function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, width = 1, monospace = false, inputMode = 'text', Icon, isValid, errorMsg }) {
   const [focused, setFocused] = useState(false);
+  const inputRef = useRef(null);
   const hasValue = value && String(value).trim().length > 0;
+
+  // Sync external value into DOM only when it truly differs (e.g. Paste button, reset)
+  useEffect(() => {
+    if (inputRef.current && inputRef.current.value !== (value || '')) {
+      inputRef.current.value = value || '';
+    }
+  }, [value]);
+
+  const handleChange = (e) => {
+    let v = e.target.value;
+    if (maxLength) v = v.slice(0, maxLength);
+    onChange(v);
+  };
+
+  const pasteFromClipboard = async () => {
+    let text = '';
+    try {
+      const res = await CapacitorClipboard.read();
+      text = res?.value || '';
+    } catch (_) {}
+    if (!text) {
+      try { text = await navigator.clipboard?.readText() || ''; } catch (_) {}
+    }
+    if (text) {
+      const finalVal = maxLength ? text.slice(0, maxLength) : text;
+      if (inputRef.current) inputRef.current.value = finalVal;
+      onChange(finalVal);
+    }
+  };
+
   return (
     <div style={{ flex: width, display: 'flex', flexDirection: 'column' }} className="form-group">
       {label && (
@@ -24,29 +55,7 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
             {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
             <button
               type="button"
-              onClick={async () => {
-                try {
-                  const res = await CapacitorClipboard.read();
-                  if (res && res.value) {
-                    const finalVal = maxLength ? res.value.slice(0, maxLength) : res.value;
-                    onChange(finalVal);
-                    return;
-                  }
-                } catch (e) {
-                  console.warn('Capacitor Clipboard.read failed:', e);
-                }
-                try {
-                  if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
-                    const text = await navigator.clipboard.readText();
-                    if (text) {
-                      const finalVal = maxLength ? text.slice(0, maxLength) : text;
-                      onChange(finalVal);
-                    }
-                  }
-                } catch (err) {
-                  console.warn('Clipboard read error:', err);
-                }
-              }}
+              onClick={pasteFromClipboard}
               style={{ background: 'rgba(255, 77, 109, 0.1)', border: 'none', color: 'var(--accent-primary)', fontSize: '10px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px', padding: '2px 6px', borderRadius: '4px' }}
             >
               <Clipboard size={11} /> Paste
@@ -73,23 +82,12 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
           </div>
         )}
         <input
+          ref={inputRef}
           type="text"
           className="form-input"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onInput={(e) => onChange(e.target.value)}
-          onPaste={(e) => {
-            const text = e.clipboardData?.getData('text/plain') || e.clipboardData?.getData('text');
-            if (text) {
-              const start = e.target.selectionStart ?? 0;
-              const end = e.target.selectionEnd ?? 0;
-              const current = value || '';
-              const updated = current.slice(0, start) + text + current.slice(end);
-              const finalVal = maxLength ? updated.slice(0, maxLength) : updated;
-              onChange(finalVal);
-              // DO NOT call e.preventDefault() so native Android insertion completes smoothly
-            }
-          }}
+          defaultValue={value}
+          onChange={handleChange}
+          onInput={handleChange}
           maxLength={maxLength}
           placeholder={placeholder}
           inputMode={inputMode}
