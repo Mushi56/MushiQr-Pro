@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Info, Clipboard } from 'lucide-react';
+import { Clipboard as CapacitorClipboard } from '@capacitor/clipboard';
 import { QR_TYPES } from '../utils/qrEngine';
 
 export default function QRDataInput({ type, data, onChange }) {
@@ -34,11 +35,21 @@ export default function QRDataInput({ type, data, onChange }) {
       const val = target.value || '';
       const newVal = val.slice(0, start) + text + val.slice(end);
       updateField(field, newVal);
-      e.preventDefault();
+      // DO NOT call e.preventDefault() so Android Gboard commitText & native paste finish smoothly!
     }
   };
 
   const pasteFromClipboard = async (field) => {
+    try {
+      const res = await CapacitorClipboard.read();
+      if (res && res.value) {
+        updateField(field, res.value);
+        return;
+      }
+    } catch (e) {
+      console.warn('Capacitor Clipboard.read failed, falling back:', e);
+    }
+
     try {
       if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
         const text = await navigator.clipboard.readText();
@@ -74,6 +85,7 @@ export default function QRDataInput({ type, data, onChange }) {
             placeholder="https://example.com"
             value={data.url || ''}
             onChange={(e) => updateField('url', e.target.value)}
+            onInput={(e) => updateField('url', e.target.value)}
             onPaste={(e) => handlePaste('url', e)}
             onFocus={(e) => {
               if (data.url === 'https://example.com') {
@@ -104,6 +116,7 @@ export default function QRDataInput({ type, data, onChange }) {
               placeholder="Enter your text..."
               value={data.text || ''}
               onChange={(e) => updateField('text', e.target.value)}
+              onInput={(e) => updateField('text', e.target.value)}
               onPaste={(e) => handlePaste('text', e)}
               style={{ paddingBottom: '30px' }}
             />

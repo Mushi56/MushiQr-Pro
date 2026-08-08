@@ -4,6 +4,7 @@ import {
   BookOpen, Syringe, Mail, Globe, Hash, AlignLeft, Layers, Zap,
   Building2, Tag, Key, MapPin, Pill, FileText, Barcode, Clipboard
 } from 'lucide-react';
+import { Clipboard as CapacitorClipboard } from '@capacitor/clipboard';
 
 // ─── Styled Sub-components ──────────────────────────────────────────────────
 
@@ -24,6 +25,16 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
             <button
               type="button"
               onClick={async () => {
+                try {
+                  const res = await CapacitorClipboard.read();
+                  if (res && res.value) {
+                    const finalVal = maxLength ? res.value.slice(0, maxLength) : res.value;
+                    onChange(finalVal);
+                    return;
+                  }
+                } catch (e) {
+                  console.warn('Capacitor Clipboard.read failed:', e);
+                }
                 try {
                   if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
                     const text = await navigator.clipboard.readText();
@@ -66,6 +77,7 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
           className="form-input"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onInput={(e) => onChange(e.target.value)}
           onPaste={(e) => {
             const text = e.clipboardData?.getData('text/plain') || e.clipboardData?.getData('text');
             if (text) {
@@ -75,7 +87,7 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
               const updated = current.slice(0, start) + text + current.slice(end);
               const finalVal = maxLength ? updated.slice(0, maxLength) : updated;
               onChange(finalVal);
-              e.preventDefault();
+              // DO NOT call e.preventDefault() so native Android insertion completes smoothly
             }
           }}
           maxLength={maxLength}
