@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Info } from 'lucide-react';
+import { Info, Clipboard } from 'lucide-react';
 import { QR_TYPES } from '../utils/qrEngine';
 
 export default function QRDataInput({ type, data, onChange }) {
@@ -25,6 +25,32 @@ export default function QRDataInput({ type, data, onChange }) {
     onChange({ ...data, [field]: value });
   };
 
+  const handlePaste = (field, e) => {
+    const text = e.clipboardData?.getData('text/plain') || e.clipboardData?.getData('text');
+    if (text) {
+      const target = e.target;
+      const start = target.selectionStart ?? 0;
+      const end = target.selectionEnd ?? 0;
+      const val = target.value || '';
+      const newVal = val.slice(0, start) + text + val.slice(end);
+      updateField(field, newVal);
+      e.preventDefault();
+    }
+  };
+
+  const pasteFromClipboard = async (field) => {
+    try {
+      if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          updateField(field, text);
+        }
+      }
+    } catch (err) {
+      console.warn('Clipboard read error:', err);
+    }
+  };
+
   return (
     <div ref={containerRef}>
       {(() => {
@@ -32,13 +58,23 @@ export default function QRDataInput({ type, data, onChange }) {
     case QR_TYPES.URL:
       return (
         <div className="form-group">
-          <label className="form-label">URL</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <label className="form-label" style={{ margin: 0 }}>URL</label>
+            <button
+              type="button"
+              onClick={() => pasteFromClipboard('url')}
+              style={{ background: 'rgba(255, 77, 109, 0.1)', border: 'none', color: 'var(--accent-primary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '4px' }}
+            >
+              <Clipboard size={12} /> Paste
+            </button>
+          </div>
           <input
             className="form-input"
             type="url"
             placeholder="https://example.com"
             value={data.url || ''}
             onChange={(e) => updateField('url', e.target.value)}
+            onPaste={(e) => handlePaste('url', e)}
             onFocus={(e) => {
               if (data.url === 'https://example.com') {
                 updateField('url', '');
@@ -52,13 +88,23 @@ export default function QRDataInput({ type, data, onChange }) {
       const charCount = (data.text || '').length;
       return (
         <div className="form-group">
-          <label className="form-label">Text</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <label className="form-label" style={{ margin: 0 }}>Text</label>
+            <button
+              type="button"
+              onClick={() => pasteFromClipboard('text')}
+              style={{ background: 'rgba(255, 77, 109, 0.1)', border: 'none', color: 'var(--accent-primary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '4px' }}
+            >
+              <Clipboard size={12} /> Paste
+            </button>
+          </div>
           <div className="input-wrapper-with-counter">
             <textarea
               className="form-textarea"
               placeholder="Enter your text..."
               value={data.text || ''}
               onChange={(e) => updateField('text', e.target.value)}
+              onPaste={(e) => handlePaste('text', e)}
               style={{ paddingBottom: '30px' }}
             />
             <span className={`input-inner-counter ${charCount > 300 ? 'limit-reached' : ''}`}>

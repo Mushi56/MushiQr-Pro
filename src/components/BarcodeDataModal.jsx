@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   X, Check, ChevronRight, Info, Package, ShoppingCart, Truck,
   BookOpen, Syringe, Mail, Globe, Hash, AlignLeft, Layers, Zap,
-  Building2, Tag, Key, MapPin, Pill, FileText, Barcode
+  Building2, Tag, Key, MapPin, Pill, FileText, Barcode, Clipboard
 } from 'lucide-react';
 
 // ─── Styled Sub-components ──────────────────────────────────────────────────
@@ -18,9 +18,29 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
               {label}
             </span>
-            {/* Validation badge removed from label as requested */}
           </div>
-          {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {hint && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500 }}>{hint}</span>}
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+                    const text = await navigator.clipboard.readText();
+                    if (text) {
+                      const finalVal = maxLength ? text.slice(0, maxLength) : text;
+                      onChange(finalVal);
+                    }
+                  }
+                } catch (err) {
+                  console.warn('Clipboard read error:', err);
+                }
+              }}
+              style={{ background: 'rgba(255, 77, 109, 0.1)', border: 'none', color: 'var(--accent-primary)', fontSize: '10px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px', padding: '2px 6px', borderRadius: '4px' }}
+            >
+              <Clipboard size={11} /> Paste
+            </button>
+          </div>
         </label>
       )}
       <div style={{ position: 'relative', width: '100%' }}>
@@ -46,6 +66,18 @@ function SegmentedInput({ label, value, onChange, maxLength, placeholder, hint, 
           className="form-input"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onPaste={(e) => {
+            const text = e.clipboardData?.getData('text/plain') || e.clipboardData?.getData('text');
+            if (text) {
+              const start = e.target.selectionStart ?? 0;
+              const end = e.target.selectionEnd ?? 0;
+              const current = value || '';
+              const updated = current.slice(0, start) + text + current.slice(end);
+              const finalVal = maxLength ? updated.slice(0, maxLength) : updated;
+              onChange(finalVal);
+              e.preventDefault();
+            }
+          }}
           maxLength={maxLength}
           placeholder={placeholder}
           inputMode={inputMode}

@@ -681,8 +681,9 @@ body {
   outline: none;
   transition: var(--transition-fast);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
-  -webkit-user-select: auto;
-  user-select: auto;
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
 }
 
 [data-theme="light"] .form-input,
