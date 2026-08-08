@@ -5748,7 +5748,7 @@ export default function App() {
         ) : activePage === 'scanner-gun' ? (
           <ScannerGunPage onNavigate={navigateTo} />
         ) : activePage === 'settings' ? (
-          <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} showToast={showToast} />
+          <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
         ) : activePage === 'you' ? (
           <YouPage 
             onNavigate={navigateTo} 
@@ -6311,7 +6311,6 @@ export default function App() {
           </div>
         </div>
       )}
-
       <SaveLocationModal
         isOpen={isFolderModalOpen}
         onClose={() => setIsFolderModalOpen(false)}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Folder, Check, X, HardDrive, Sparkles } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 
@@ -7,13 +7,6 @@ export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }
     const prefs = getPreferences();
     return prefs.saveLocation || 'Mushi QR Pro';
   });
-
-  useEffect(() => {
-    if (isOpen) {
-      const prefs = getPreferences();
-      setFolderName(prefs.saveLocation || 'Mushi QR Pro');
-    }
-  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -43,8 +36,8 @@ export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 100000,
-        background: 'rgba(9, 9, 15, 0.88)',
+        zIndex: 10000,
+        background: 'rgba(9, 9, 15, 0.85)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         display: 'flex',
