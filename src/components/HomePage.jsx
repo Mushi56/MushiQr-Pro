@@ -790,7 +790,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 </h3>
               </div>
               <p style={{ fontSize: '10.5px', margin: 0, color: 'rgba(255,255,255,0.65)', fontWeight: 500, lineHeight: 1.3 }}>
-                Create 10K+ QR codes &amp; barcodes from CSV / Excel files seamlessly.
+                Create 10K+ QR codes &amp; barcodes from CSV / Excel
               </p>
             </div>
 
