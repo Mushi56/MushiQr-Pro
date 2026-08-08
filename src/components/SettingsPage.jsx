@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Moon, Sun, Info, Shield, FileText, ChevronRight, Folder, Settings as SettingsIcon } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import AppIcon from './AppIcon';
 
 import SaveLocationModal from './SaveLocationModal';
 
-export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
+export default function SettingsPage({ theme, setTheme, effectiveTheme, showToast }) {
   const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handlePrefSync = () => {
+      setSaveLocation(getPreferences().saveLocation || 'Mushi QR Pro');
+    };
+    window.addEventListener('preferences-sync', handlePrefSync);
+    return () => window.removeEventListener('preferences-sync', handlePrefSync);
+  }, []);
 
   const handleThemeChange = () => {
     let next;
@@ -166,6 +174,7 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
         isOpen={isFolderModalOpen}
         onClose={() => setIsFolderModalOpen(false)}
         onSave={(newLoc) => setSaveLocation(newLoc)}
+        showToast={showToast}
       />
     </div>
   );

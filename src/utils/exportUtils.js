@@ -70,22 +70,21 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
   let fileUri = null;
   let isSavedToDocs = false;
 
-  // 1. Primary: Save directly into root Internal Storage (/storage/emulated/0/{organizedPath})
-  const targetDirectory = Directory.ExternalStorage || Directory.External || Directory.Documents;
+  // 1. Save directly into organized Documents directory
   try {
-    const rootFile = await Filesystem.writeFile({
+    const docFile = await Filesystem.writeFile({
       path: organizedPath,
       data: base64Data,
-      directory: targetDirectory,
+      directory: Directory.Documents,
       recursive: true,
     });
-    fileUri = rootFile.uri;
+    fileUri = docFile.uri;
     isSavedToDocs = true;
-  } catch (extErr) {
-    console.warn('Writing to ExternalStorage failed, trying Documents fallback:', extErr);
+  } catch (docErr) {
+    console.warn('Writing organized path failed, trying root Documents:', docErr);
     try {
       const fallbackFile = await Filesystem.writeFile({
-        path: organizedPath,
+        path: filename,
         data: base64Data,
         directory: Directory.Documents,
         recursive: true,
@@ -93,7 +92,7 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
       fileUri = fallbackFile.uri;
       isSavedToDocs = true;
     } catch (fallbackErr) {
-      console.error('Writing file to storage failed:', fallbackErr);
+      console.error('Writing to Documents failed:', fallbackErr);
     }
   }
 

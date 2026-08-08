@@ -23,22 +23,21 @@ async function saveZipNative(base64Data, filename) {
   let savedFileUri = null;
   let savedToDocuments = false;
 
-  // 1. Primary: Save directly into root Internal Storage (/storage/emulated/0/{organizedPath})
-  const targetDirectory = Directory.ExternalStorage || Directory.External || Directory.Documents;
+  // 1. Primary: Save to device Documents directory under organized Bulk Batch Generation/ZIP path
   try {
     const docFile = await Filesystem.writeFile({
       path: organizedPath,
       data: base64Data,
-      directory: targetDirectory,
+      directory: Directory.Documents,
       recursive: true,
     });
     savedFileUri = docFile.uri;
     savedToDocuments = true;
   } catch (docErr) {
-    console.warn('Could not write organized path to ExternalStorage, falling back to Documents:', docErr);
+    console.warn('Could not write organized path, falling back to root Documents:', docErr);
     try {
       const docFile = await Filesystem.writeFile({
-        path: organizedPath,
+        path: filename,
         data: base64Data,
         directory: Directory.Documents,
         recursive: true,
@@ -1435,7 +1434,7 @@ export default function BatchPage({
 
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
               {exportSuccessInfo.isNative
-                ? `Your batch ZIP file containing ${exportSuccessInfo.count} items has been saved directly to your device's Internal Storage:`
+                ? `Your batch ZIP file containing ${exportSuccessInfo.count} items has been saved to your device's Documents folder:`
                 : `Your batch ZIP file containing ${exportSuccessInfo.count} items has been generated and downloaded:`
               }
             </p>

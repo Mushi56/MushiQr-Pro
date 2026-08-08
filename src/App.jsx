@@ -5748,7 +5748,7 @@ export default function App() {
         ) : activePage === 'scanner-gun' ? (
           <ScannerGunPage onNavigate={navigateTo} />
         ) : activePage === 'settings' ? (
-          <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
+          <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} showToast={showToast} />
         ) : activePage === 'you' ? (
           <YouPage 
             onNavigate={navigateTo} 
