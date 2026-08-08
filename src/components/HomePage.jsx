@@ -627,7 +627,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                     <div style={{
                       height: '24px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.35)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
                       borderRadius: '0 6px 6px 0',
                       padding: '0 10px 0 8px',
                       display: 'flex',
@@ -736,7 +736,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                     <div style={{
                       height: '24px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.35)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
                       borderRadius: '0 6px 6px 0',
                       padding: '0 10px 0 8px',
                       display: 'flex',
@@ -844,7 +844,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                   <div style={{
                     height: '24px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
                     borderRadius: '0 6px 6px 0',
                     padding: '0 10px 0 8px',
                     display: 'flex',
