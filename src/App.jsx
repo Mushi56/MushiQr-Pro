@@ -3469,7 +3469,7 @@ export default function App() {
       {isMaintenanceMode && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 99999,
-          background: 'linear-gradient(135deg, #0a0a0f 0%, #12121c 100%)',
+          background: 'linear-gradient(135deg, #0a0a0f 0%, #0C0C14 100%)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24,
           fontFamily: "'Outfit','Inter',sans-serif", color: '#fff', textAlign: 'center', padding: 32,
         }}>
@@ -4011,22 +4011,22 @@ export default function App() {
                   <div
                     style={{
                       position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                      background: '#FFFFFF', border: '1px solid #E2E8F0',
+                      background: 'var(--bg-elevated, #0C0C14)', border: '1px solid var(--border-color)',
                       borderRadius: '28px', width: '335px',
-                      boxShadow: '0 20px 50px rgba(0,0,0,0.12)', zIndex: 999,
+                      boxShadow: '0 20px 50px rgba(0,0,0,0.4)', zIndex: 999,
                       overflow: 'hidden',
                       animation: 'dropdownFadeIn 0.18s ease',
                       fontFamily: 'var(--font-sans)',
-                      color: '#0F172A'
+                      color: 'var(--text-primary)'
                     }}
                     onClick={e => e.stopPropagation()}
                   >
                     {/* Profile Header */}
-                    <div style={{ padding: '24px 20px 18px', background: '#FFFFFF', borderBottom: '1px solid #F1F5F9' }}>
+                    <div style={{ padding: '24px 20px 18px', background: 'var(--bg-elevated, #0C0C14)', borderBottom: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                         <div style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
                           {currentUser.photoURL ? (
-                            <img src={currentUser.photoURL} alt="Profile" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #F1F5F9', flexShrink: 0 }} />
+                            <img src={currentUser.photoURL} alt="Profile" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border-color)', flexShrink: 0 }} />
                           ) : (
                             <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 800, flexShrink: 0 }}>
                               {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
@@ -4071,8 +4071,8 @@ export default function App() {
                                   }
                                 }}
                                 style={{
-                                  flex: 1, background: '#F8FAFC', border: '1px solid #CBD5E1',
-                                  borderRadius: '8px', color: '#0F172A', padding: '4px 8px',
+                                  flex: 1, background: 'var(--bg-primary)', border: '1px solid var(--border-color)',
+                                  borderRadius: '8px', color: 'var(--text-primary)', padding: '4px 8px',
                                   fontSize: '13px', outline: 'none', minWidth: 0
                                 }}
                               />
@@ -4099,7 +4099,7 @@ export default function App() {
                             </div>
                           ) : (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {currentUser.displayName || 'Mushi User'}
                               </span>
                               {currentUser.email === 'mabuneri143@gmail.com' && (
@@ -4107,7 +4107,7 @@ export default function App() {
                               )}
                             </div>
                           )}
-                          <div style={{ fontSize: '12px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '3px' }}>{currentUser.email}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '3px' }}>{currentUser.email}</div>
                         </div>
                       </div>
                     </div>
@@ -4122,17 +4122,17 @@ export default function App() {
                           background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
                           transition: 'background 0.2s ease'
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(236, 72, 153, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <User size={18} color="#EC4899" />
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>My Profile</div>
-                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>View and edit your profile</div>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>My Profile</div>
+                          <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>View and edit your profile</div>
                         </div>
-                        <ChevronRight size={15} color="#94A3B8" />
+                        <ChevronRight size={15} color="var(--text-muted)" />
                       </button>
 
                       {/* Cloud Sync */}
@@ -4157,17 +4157,17 @@ export default function App() {
                           background: 'transparent', border: 'none', borderRadius: '14px', cursor: isSyncing ? 'default' : 'pointer', textAlign: 'left',
                           transition: 'background 0.2s ease', opacity: isSyncing ? 0.7 : 1
                         }}
-                        onMouseEnter={e => !isSyncing && (e.currentTarget.style.background = '#F8FAFC')}
+                        onMouseEnter={e => !isSyncing && (e.currentTarget.style.background = 'var(--bg-hover)')}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           {isSyncing ? <Loader2 size={18} color="#3B82F6" className="spin" /> : <Cloud size={18} color="#3B82F6" />}
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>{isSyncing ? 'Syncing...' : 'Cloud Sync'}</div>
-                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>Sync your projects across devices</div>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>{isSyncing ? 'Syncing...' : 'Cloud Sync'}</div>
+                          <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>Sync your projects across devices</div>
                         </div>
-                        <ChevronRight size={15} color="#94A3B8" />
+                        <ChevronRight size={15} color="var(--text-muted)" />
                       </button>
 
                       {/* Security & Login */}
@@ -4178,23 +4178,23 @@ export default function App() {
                           background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
                           transition: 'background 0.2s ease'
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(139, 92, 246, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <Lock size={18} color="#8B5CF6" />
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1E293B' }}>Security &amp; Login</div>
-                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>Manage login, password &amp; 2FA</div>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>Security &amp; Login</div>
+                          <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>Manage login, password &amp; 2FA</div>
                         </div>
-                        <ChevronRight size={15} color="#94A3B8" />
+                        <ChevronRight size={15} color="var(--text-muted)" />
                       </button>
 
                       {/* Super Admin Panel */}
                       {currentUser.email === 'mabuneri143@gmail.com' && (
                         <>
-                          <div style={{ height: '1px', background: '#F1F5F9', margin: '6px 12px' }} />
+                          <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 12px' }} />
                           <button 
                             onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }}
                             style={{
@@ -4202,7 +4202,7 @@ export default function App() {
                               background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
                               transition: 'background 0.2s ease'
                             }}
-                            onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           >
                             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -4210,15 +4210,15 @@ export default function App() {
                             </div>
                             <div style={{ flex: 1, overflow: 'hidden' }}>
                               <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#FF007F' }}>Super Admin Panel</div>
-                              <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '2px' }}>Access admin dashboard</div>
+                              <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>Access admin dashboard</div>
                             </div>
-                            <ChevronRight size={15} color="#94A3B8" />
+                            <ChevronRight size={15} color="var(--text-muted)" />
                           </button>
                         </>
                       )}
 
                       {/* Sign Out */}
-                      <div style={{ height: '1px', background: '#F1F5F9', margin: '6px 12px' }} />
+                      <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 12px' }} />
                       <button
                         onClick={async () => {
                           setAuthDropdownOpen(false);
@@ -4237,11 +4237,11 @@ export default function App() {
                           clearData();
                         }}
                         style={{
-                          width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
-                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
-                          transition: 'background 0.2s ease'
+                           width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
+                           background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                           transition: 'background 0.2s ease'
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -4249,7 +4249,7 @@ export default function App() {
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#EF4444' }}>Sign Out</div>
-                          <div style={{ fontSize: '10.5px', color: '#94A3B8', marginTop: '2px' }}>Sign out from your account</div>
+                          <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px' }}>Sign out from your account</div>
                         </div>
                       </button>
                     </div>
@@ -4258,7 +4258,9 @@ export default function App() {
                   <div
                     style={{
                       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                      background: 'rgba(0,0,0,0.4)',
+                      background: 'rgba(9, 9, 15, 0.75)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       zIndex: 9999,
                       animation: 'dropdownFadeIn 0.2s ease'
@@ -4269,7 +4271,7 @@ export default function App() {
                       style={{
                         background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
                         borderRadius: '24px', width: '90%', maxWidth: '420px',
-                        boxShadow: '0 24px 80px rgba(0,0,0,0.4)',
+                        boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
                         overflow: 'hidden',
                       }}
                       onClick={e => e.stopPropagation()}

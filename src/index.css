@@ -70,7 +70,7 @@
   --main-padding-x: 24px;
 
   /* Glassmorphism Presets */
-  --glass-bg: #12121C;
+  --glass-bg: #0C0C14;
   --glass-border: rgba(255, 255, 255, 0.14);
   --glass-blur: blur(20px) saturate(140%);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
