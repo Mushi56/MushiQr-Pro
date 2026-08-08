@@ -627,7 +627,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                     <div style={{
                       height: '24px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                      background: 'linear-gradient(135deg, #7A0C1E 0%, #2D0207 100%)',
                       borderRadius: '0 6px 6px 0',
                       padding: '0 10px 0 8px',
                       display: 'flex',
@@ -640,7 +640,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                         fontSize: '13px',
                         fontWeight: 800,
                         margin: 0,
-                        backgroundImage: 'linear-gradient(90deg, #FF2E5B 0%, #FF0033 100%)',
+                        backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         lineHeight: 1,
@@ -738,7 +738,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                     <div style={{
                       height: '24px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                      background: 'linear-gradient(135deg, #7A0C1E 0%, #2D0207 100%)',
                       borderRadius: '0 6px 6px 0',
                       padding: '0 10px 0 8px',
                       display: 'flex',
@@ -751,7 +751,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                         fontSize: '13px',
                         fontWeight: 800,
                         margin: 0,
-                        backgroundImage: 'linear-gradient(90deg, #FF2E5B 0%, #FF0033 100%)',
+                        backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         lineHeight: 1,
@@ -848,7 +848,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                   <div style={{
                     height: '24px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                    background: 'linear-gradient(135deg, #7A0C1E 0%, #2D0207 100%)',
                     borderRadius: '0 6px 6px 0',
                     padding: '0 10px 0 8px',
                     display: 'flex',
@@ -861,7 +861,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       fontSize: '13px',
                       fontWeight: 800,
                       margin: 0,
-                      backgroundImage: 'linear-gradient(90deg, #FF2E5B 0%, #FF0033 100%)',
+                      backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       lineHeight: 1,
