@@ -6309,6 +6309,9 @@ export default function App() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
       <SaveLocationModal
         isOpen={isFolderModalOpen}
         onClose={() => setIsFolderModalOpen(false)}
