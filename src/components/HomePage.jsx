@@ -587,7 +587,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 boxSizing: 'border-box',
                 minHeight: '150px',
                 background: 'linear-gradient(135deg, #FF1744 0%, #880020 100%)',
-                border: '1.5px solid rgba(255, 255, 255, 0.4)',
+                border: 'none',
                 boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -671,7 +671,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 boxSizing: 'border-box',
                 minHeight: '150px',
                 background: 'linear-gradient(135deg, #FF1744 0%, #880020 100%)',
-                border: '1.5px solid rgba(255, 255, 255, 0.4)',
+                border: 'none',
                 boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -759,7 +759,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               padding: '16px',
               boxSizing: 'border-box',
               background: 'linear-gradient(135deg, #FF1744 0%, #880020 100%)',
-              border: '1.5px solid rgba(255, 255, 255, 0.4)',
+              border: 'none',
               boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
               width: '100%',
               cursor: 'pointer',
