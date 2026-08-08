@@ -5,16 +5,15 @@ import { getPreferences, savePreferences } from '../utils/storage';
 export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }) {
   const [folderName, setFolderName] = useState(() => {
     const prefs = getPreferences();
-    return prefs.saveLocation || 'Mushi QR Pro';
+    return prefs.saveLocation && prefs.saveLocation !== 'Mushi QR Pro' ? prefs.saveLocation : 'Pictures/Mushi QR Pro';
   });
 
   if (!isOpen) return null;
 
   const presets = [
-    { label: 'Mushi QR Pro (Root Internal Storage)', value: 'Mushi QR Pro' },
+    { label: 'Pictures / Mushi QR Pro (Recommended)', value: 'Pictures/Mushi QR Pro' },
     { label: 'Documents / Mushi QR Pro', value: 'Documents/Mushi QR Pro' },
     { label: 'Downloads / Mushi QR Pro', value: 'Downloads/Mushi QR Pro' },
-    { label: 'Pictures / Mushi QR Pro', value: 'Pictures/Mushi QR Pro' },
   ];
 
   const handleSelectPreset = (val) => {
@@ -22,7 +21,7 @@ export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }
   };
 
   const handleSave = () => {
-    const clean = folderName.trim() || 'Mushi QR Pro';
+    const clean = folderName.trim() || 'Pictures/Mushi QR Pro';
     const prefs = getPreferences();
     savePreferences({ ...prefs, saveLocation: clean });
     if (onSave) onSave(clean);
@@ -117,7 +116,7 @@ export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }
               <HardDrive size={13} color="var(--accent-primary)" /> Internal Storage Path
             </div>
             <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--accent-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-              /storage/emulated/0/{folderName || 'Mushi QR Pro'}
+              /storage/emulated/0/{folderName || 'Pictures/Mushi QR Pro'}
             </div>
           </div>
 
@@ -130,7 +129,7 @@ export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }
               type="text"
               value={folderName}
               onChange={(e) => setFolderName(e.target.value)}
-              placeholder="e.g. Mushi QR Pro"
+              placeholder="e.g. Pictures/Mushi QR Pro"
               style={{
                 width: '100%',
                 background: 'var(--bg-primary, #09090f)',
@@ -198,7 +197,7 @@ export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }
             <div style={{ color: 'var(--text-primary)', fontWeight: 700, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Sparkles size={14} color="var(--accent-primary)" /> Automatic Sub-Folder Tree:
             </div>
-            <div>📁 {folderName || 'Mushi QR Pro'}/</div>
+            <div>📁 {folderName || 'Pictures/Mushi QR Pro'}/</div>
             <div style={{ paddingLeft: '12px' }}>├── 📁 QR Codes/ (PNG, JPG, SVG, PDF)</div>
             <div style={{ paddingLeft: '12px' }}>├── 📁 Barcodes/ (PNG, JPG, SVG, PDF)</div>
             <div style={{ paddingLeft: '12px' }}>└── 📁 Bulk Batch Generation/ (ZIP, PNG, JPG...)</div>

@@ -37,7 +37,7 @@ function stringToBase64(str) {
 export function getOrganizedFilePath(filename, category = 'QR Codes') {
   let prefs = {};
   try { prefs = getPreferences() || {}; } catch {}
-  const rootFolder = prefs.saveLocation || 'Mushi QR Pro';
+  const rootFolder = prefs.saveLocation || 'Pictures/Mushi QR Pro';
 
   // Standardize category: 'QR Codes' | 'Barcodes' | 'Bulk Batch Generation'
   let categoryDir = 'QR Codes';

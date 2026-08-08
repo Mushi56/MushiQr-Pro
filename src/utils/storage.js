@@ -293,12 +293,12 @@ export function savePreferences(prefs) {
 export function getPreferences() {
   try {
     const prefs = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}');
-    if (!prefs.saveLocation) {
-      prefs.saveLocation = 'Mushi QR Pro';
+    if (!prefs.saveLocation || prefs.saveLocation === 'Mushi QR Pro') {
+      prefs.saveLocation = 'Pictures/Mushi QR Pro';
     }
     return prefs;
   } catch {
-    return { saveLocation: 'Mushi QR Pro' };
+    return { saveLocation: 'Pictures/Mushi QR Pro' };
   }
 }
 
