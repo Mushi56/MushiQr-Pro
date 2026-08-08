@@ -610,11 +610,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               {/* Top Title & Description */}
               <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
                     <div style={{
                       width: '32px',
                       height: '32px',
-                      borderRadius: '50%',
+                      borderRadius: '8px',
                       backgroundColor: '#FFFFFF',
                       display: 'flex',
                       alignItems: 'center',
@@ -625,13 +625,16 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       <QrCode size={16} color="#D60036" />
                     </div>
                     <h2 style={{
-                      fontSize: '15px',
+                      fontSize: '14px',
                       fontWeight: 800,
                       margin: 0,
                       backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       lineHeight: 1.2,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                       textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                     }}>
                       Custom QR
@@ -706,11 +709,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               {/* Top Title & Description */}
               <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
                     <div style={{
                       width: '32px',
                       height: '32px',
-                      borderRadius: '50%',
+                      borderRadius: '8px',
                       backgroundColor: '#FFFFFF',
                       display: 'flex',
                       alignItems: 'center',
@@ -721,13 +724,16 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       <Barcode size={16} color="#D60036" />
                     </div>
                     <h2 style={{
-                      fontSize: '15px',
+                      fontSize: '14px',
                       fontWeight: 800,
                       margin: 0,
                       backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       lineHeight: 1.2,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                       textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                     }}>
                       Barcodes
@@ -801,11 +807,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             {/* Top Title & Description */}
             <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2, flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
                   <div style={{
                     width: '32px',
                     height: '32px',
-                    borderRadius: '50%',
+                    borderRadius: '8px',
                     backgroundColor: '#FFFFFF',
                     display: 'flex',
                     alignItems: 'center',
@@ -816,7 +822,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <Layers size={16} color="#D60036" />
                   </div>
                   <h3 style={{
-                    fontSize: '15px',
+                    fontSize: '14px',
                     fontWeight: 800,
                     margin: 0,
                     backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
@@ -824,6 +830,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     WebkitTextFillColor: 'transparent',
                     lineHeight: 1.2,
                     whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                     textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                   }}>
                     Bulk Batch Generator
