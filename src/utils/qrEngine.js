@@ -125,12 +125,18 @@ export function getQRCodeStylingConfig(text, options = {}) {
   if (dotStyle === 'dots') dotsType = 'dots';
   else if (dotStyle === 'rounded') dotsType = 'rounded';
   else if (dotStyle === 'classy') dotsType = 'classy';
+  else if (dotStyle === 'classy-rounded') dotsType = 'classy-rounded';
   else if (dotStyle === 'extra-rounded') dotsType = 'extra-rounded';
   else if (dotStyle === 'fluid') dotsType = 'classy-rounded';
+  else if (dotStyle === 'square' || dotStyle === 'denso') dotsType = 'square';
 
   let cornerSquareType = 'square';
   if (eyeStyle === 'rounded' || eyeStyle === 'circle') cornerSquareType = 'extra-rounded';
   else if (eyeStyle === 'dot') cornerSquareType = 'dot';
+  else if (eyeStyle === 'square') cornerSquareType = 'square';
+
+  let cornerDotType = 'square';
+  if (eyeStyle === 'circle' || eyeStyle === 'rounded' || eyeStyle === 'dot') cornerDotType = 'dot';
 
   return {
     width: size,
@@ -154,7 +160,7 @@ export function getQRCodeStylingConfig(text, options = {}) {
       color: eyeOuterColor || eyeColor || qrColor
     },
     cornersDotOptions: {
-      type: cornerSquareType === 'square' ? 'square' : 'dot',
+      type: cornerDotType,
       color: eyeColor || qrColor
     },
     backgroundOptions: {
@@ -183,6 +189,8 @@ export const DOT_STYLES = {
   ROUNDED: 'rounded',
   DOTS: 'dots',
   CLASSY: 'classy',
+  CLASSY_ROUNDED: 'classy-rounded',
+  EXTRA_ROUNDED: 'extra-rounded',
   DIAMOND: 'diamond',
   STAR: 'star',
   TRIANGLE: 'triangle',
@@ -191,7 +199,6 @@ export const DOT_STYLES = {
   PLUS: 'plus',
   CROSS: 'cross',
   DENSO: 'denso',
-  EXTRA_ROUNDED: 'extra-rounded',
   LEAF: 'leaf',
   FLUID: 'fluid',
 };
