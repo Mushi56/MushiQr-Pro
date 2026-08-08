@@ -35,12 +35,12 @@ async function saveZipNative(base64Data, filename) {
     savedFileUri = docFile.uri;
     savedToDocuments = true;
   } catch (docErr) {
-    console.warn('Could not write organized path, falling back to root target:', docErr);
+    console.warn('Could not write organized path to targetDir, trying Documents fallback:', docErr);
     try {
       const docFile = await Filesystem.writeFile({
-        path: filename,
+        path: organizedPath,
         data: base64Data,
-        directory: targetDir,
+        directory: Directory.Documents,
         recursive: true,
       });
       savedFileUri = docFile.uri;

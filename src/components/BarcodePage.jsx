@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
-import { saveToSaved } from '../utils/storage';
+import { saveToSaved, saveToHistory } from '../utils/storage';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from '../utils/exportUtils';

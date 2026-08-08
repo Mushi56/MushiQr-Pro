@@ -71,24 +71,23 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
   let isSavedToDocs = false;
   const targetDir = Capacitor.getPlatform() === 'android' ? Directory.ExternalStorage : Directory.Documents;
 
-  // 1. Save directly into organized directory
+  // 1. Save directly into organized directory (ExternalStorage on Android, Documents on iOS)
   try {
     const docFile = await Filesystem.writeFile({
       path: organizedPath,
       data: base64Data,
       directory: targetDir,
       recursive: true,
-      encoding: undefined
     });
     fileUri = docFile.uri;
     isSavedToDocs = true;
   } catch (docErr) {
-    console.warn('Writing organized path failed, trying root fallback:', docErr);
+    console.warn('Writing to ExternalStorage failed, trying Documents organized path:', docErr);
     try {
       const fallbackFile = await Filesystem.writeFile({
-        path: filename,
+        path: organizedPath,
         data: base64Data,
-        directory: targetDir,
+        directory: Directory.Documents,
         recursive: true,
       });
       fileUri = fallbackFile.uri;
