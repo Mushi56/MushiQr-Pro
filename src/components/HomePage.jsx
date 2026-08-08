@@ -517,6 +517,46 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
           }} />
 
+          {/* Top App Header inside Hero Red Rectangle */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            position: 'relative',
+            zIndex: 2,
+            marginBottom: '4px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <AppIcon size={40} shadow />
+              <div style={{ fontSize: '20px', fontWeight: 800, color: '#FFFFFF', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
+                Mushi QR <span style={{ background: '#FF4D6D', color: '#FFFFFF', fontSize: '10px', padding: '2px 7px', borderRadius: '6px', textTransform: 'uppercase', verticalAlign: 'middle', marginLeft: '4px', fontWeight: 700 }}>PRO</span>
+              </div>
+            </div>
+            {/* User Profile Avatar */}
+            <div 
+              onClick={() => onNavigate('you')}
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(8px)',
+                border: '2px solid rgba(255, 255, 255, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                cursor: 'pointer'
+              }}
+            >
+              {currentUser?.photoURL ? (
+                <img src={currentUser.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <User size={20} color="#FFFFFF" />
+              )}
+            </div>
+          </div>
+
           {/* Welcome Message / Admin Dashboard Header Block */}
           <div style={{
             display: 'flex',

@@ -155,42 +155,32 @@
   transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Home Page Transparent Header to Theme Navbar Transition */
+/* Home Page Header: Hidden at Top, Fades In Smoothly On Scroll */
 .app-header.header-home-banner {
-  background: transparent !important;
-  color: #FFFFFF !important;
+  background: var(--nav-bg) !important;
+  color: var(--text-primary) !important;
   border-bottom: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  transition: background 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.35s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateY(-100%) !important;
 }
 
 .app-header.header-home-banner.scrolled {
-  background: var(--nav-bg) !important;
-  color: var(--text-primary) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
 }
 
 .app-header.header-home-banner .app-logo-text {
-  color: #FFFFFF !important;
-  transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.app-header.header-home-banner.scrolled .app-logo-text {
   color: var(--text-primary) !important;
 }
 
 .app-header.header-home-banner .btn-menu-toggle,
 .app-header.header-home-banner .btn-header-action {
-  color: #FFFFFF !important;
-  transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.app-header.header-home-banner.scrolled .btn-menu-toggle,
-.app-header.header-home-banner.scrolled .btn-header-action {
   color: var(--text-primary) !important;
 }
 
