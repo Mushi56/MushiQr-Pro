@@ -98,42 +98,42 @@ export const EC_LEVELS = {
   H: 'H', // 30%
 };
 
-// Dot styles
+// Dot styles (Ordered by popularity)
 export const DOT_STYLES = {
   SQUARE: 'square',
   ROUNDED: 'rounded',
   DOTS: 'dots',
+  FLUID: 'fluid',
+  EXTRA_ROUNDED: 'extra-rounded',
   CLASSY: 'classy',
+  DENSO: 'denso',
   DIAMOND: 'diamond',
+  LEAF: 'leaf',
   STAR: 'star',
-  TRIANGLE: 'triangle',
   HEART: 'heart',
+  TRIANGLE: 'triangle',
   OCTAGON: 'octagon',
   PLUS: 'plus',
   CROSS: 'cross',
-  DENSO: 'denso',
-  EXTRA_ROUNDED: 'extra-rounded',
-  LEAF: 'leaf',
-  FLUID: 'fluid',
 };
 
-// Eye styles
+// Eye styles (Ordered by popularity)
 export const EYE_STYLES = {
   SQUARE: 'square',
   ROUNDED: 'rounded',
   CIRCLE: 'circle',
   LEAF: 'leaf',
+  MODERN: 'modern',
   FLOWER: 'flower',
   SHIELD: 'shield',
+  DIAMOND: 'diamond',
+  GEOMETRIC: 'geometric',
   OCTAGON: 'octagon',
   HEXAGON: 'hexagon',
+  LCD: 'notch',
   STAR: 'star',
   HEART: 'spotlight',
   TRIANGLE: 'pillow',
-  DIAMOND: 'diamond',
-  GEOMETRIC: 'geometric',
-  MODERN: 'modern',
-  LCD: 'notch',
 };
 
 // Frame styles
