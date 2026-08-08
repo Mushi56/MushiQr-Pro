@@ -13,6 +13,7 @@ import {
 } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import AppIcon from './AppIcon';
 function handleAuthError(err) {
   switch (err.code) {
     case 'auth/invalid-email': return 'Invalid email address format.';
@@ -144,13 +145,8 @@ export default function AuthDropdownPanel({ onClose }) {
           <X size={18} />
         </button>
 
-        <div style={{
-          width: '56px', height: '56px', borderRadius: '50%',
-          background: 'var(--accent-gradient)', color: '#fff',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 12px', boxShadow: '0 4px 14px rgba(214,0,54,0.25)'
-        }}>
-          <User size={26} color="#fff" strokeWidth={2.5} />
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+          <AppIcon size={56} shadow />
         </div>
         <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px' }}>
           {isSignUp ? 'Create Account' : 'Welcome Back'}
