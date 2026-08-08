@@ -1,7 +1,4 @@
 import qrcode from 'qrcode-generator';
-import QRCodeStyling from 'qr-code-styling';
-
-export { QRCodeStyling };
 
 /**
  * QR Code Generation Engine
@@ -101,96 +98,12 @@ export const EC_LEVELS = {
   H: 'H', // 30%
 };
 
-/**
- * Get QRCodeStyling configuration from Mushi QR Pro options
- */
-export function getQRCodeStylingConfig(text, options = {}) {
-  const {
-    size = 1024,
-    qrColor = '#000000',
-    bgColor = '#ffffff',
-    bgTransparent = false,
-    dotStyle = 'square',
-    eyeStyle = 'square',
-    eyeColor = '',
-    eyeOuterColor = '',
-    gradientEnabled = false,
-    gradientColor1 = '#000000',
-    gradientColor2 = '#0066ff',
-    gradientType = 'linear',
-    logo = null,
-  } = options;
-
-  let dotsType = 'square';
-  if (dotStyle === 'dots') dotsType = 'dots';
-  else if (dotStyle === 'rounded') dotsType = 'rounded';
-  else if (dotStyle === 'classy') dotsType = 'classy';
-  else if (dotStyle === 'classy-rounded') dotsType = 'classy-rounded';
-  else if (dotStyle === 'extra-rounded') dotsType = 'extra-rounded';
-  else if (dotStyle === 'fluid') dotsType = 'classy-rounded';
-  else if (dotStyle === 'square' || dotStyle === 'denso') dotsType = 'square';
-
-  let cornerSquareType = 'square';
-  if (eyeStyle === 'rounded' || eyeStyle === 'circle') cornerSquareType = 'extra-rounded';
-  else if (eyeStyle === 'dot') cornerSquareType = 'dot';
-  else if (eyeStyle === 'square') cornerSquareType = 'square';
-
-  let cornerDotType = 'square';
-  if (eyeStyle === 'circle' || eyeStyle === 'rounded' || eyeStyle === 'dot') cornerDotType = 'dot';
-
-  return {
-    width: size,
-    height: size,
-    data: text || '',
-    image: logo || undefined,
-    dotsOptions: {
-      color: gradientEnabled ? undefined : qrColor,
-      type: dotsType,
-      gradient: gradientEnabled ? {
-        type: gradientType === 'radial' ? 'radial' : 'linear',
-        rotation: 0,
-        colorStops: [
-          { offset: 0, color: gradientColor1 },
-          { offset: 1, color: gradientColor2 }
-        ]
-      } : undefined
-    },
-    cornersSquareOptions: {
-      type: cornerSquareType,
-      color: eyeOuterColor || eyeColor || qrColor
-    },
-    cornersDotOptions: {
-      type: cornerDotType,
-      color: eyeColor || qrColor
-    },
-    backgroundOptions: {
-      color: bgTransparent ? 'transparent' : bgColor
-    },
-    imageOptions: {
-      crossOrigin: 'anonymous',
-      hideBackgroundDots: true,
-      imageSize: 0.35,
-      margin: 4
-    }
-  };
-}
-
-/**
- * Instantiate a new QRCodeStyling instance
- */
-export function createQRCodeStylingInstance(text, options = {}) {
-  const config = getQRCodeStylingConfig(text, options);
-  return new QRCodeStyling(config);
-}
-
 // Dot styles
 export const DOT_STYLES = {
   SQUARE: 'square',
   ROUNDED: 'rounded',
   DOTS: 'dots',
   CLASSY: 'classy',
-  CLASSY_ROUNDED: 'classy-rounded',
-  EXTRA_ROUNDED: 'extra-rounded',
   DIAMOND: 'diamond',
   STAR: 'star',
   TRIANGLE: 'triangle',
@@ -199,6 +112,7 @@ export const DOT_STYLES = {
   PLUS: 'plus',
   CROSS: 'cross',
   DENSO: 'denso',
+  EXTRA_ROUNDED: 'extra-rounded',
   LEAF: 'leaf',
   FLUID: 'fluid',
 };
@@ -662,7 +576,7 @@ export function renderQR(canvas, options) {
  * Draw a single dot module
  */
 function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
-  const dotPadding = options.dotPadding !== undefined ? options.dotPadding : 5;
+  const dotPadding = options.dotPadding !== undefined ? options.dotPadding : 0;
   const padding = (size * dotPadding) / 100;
   const s = size - padding * 2;
   const { top, bottom, left, right } = neighbors;
@@ -673,7 +587,8 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
       break;
     case DOT_STYLES.DOTS:
       ctx.beginPath();
-      ctx.arc(x + size / 2, y + size / 2, s / 2, 0, Math.PI * 2);
+      const dotRadius = Math.max(0, (s / 2) + (dotPadding === 0 ? 0.25 : 0));
+      ctx.arc(x + size / 2, y + size / 2, dotRadius, 0, Math.PI * 2);
       ctx.fill();
       break;
     case DOT_STYLES.DIAMOND:

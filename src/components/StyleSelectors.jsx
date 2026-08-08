@@ -22,6 +22,7 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
       frameStyle: 'none',          // Remove outer frames
       quietZone: 1,                // Add a very small quiet zone to maximize visual size
       size: 384,                   // Render size
+      dotPadding: 0,               // Zero gap between modules by default
       ...overrideParams
     };
 
@@ -63,11 +64,6 @@ const DOT_PREVIEWS = {
   [DOT_STYLES.CLASSY]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="2" y="2" width="24" height="24" rx="12" fill="currentColor" />
-    </svg>
-  ),
-  [DOT_STYLES.CLASSY_ROUNDED]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <path d="M2 14 C2 7 7 2 14 2 L26 2 L26 14 C26 21 21 26 14 26 L2 26 Z" fill="currentColor" />
     </svg>
   ),
   [DOT_STYLES.DIAMOND]: (
