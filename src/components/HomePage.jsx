@@ -587,8 +587,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '16px',
                 boxSizing: 'border-box',
                 minHeight: '150px',
-                background: 'linear-gradient(145deg, rgba(70, 8, 22, 0.92) 0%, rgba(18, 3, 8, 0.96) 100%)',
-                border: '1px solid rgba(255, 77, 109, 0.28)',
+                background: 'linear-gradient(145deg, #460816 0%, #120308 100%)',
+                border: 'none',
                 boxShadow: '0 8px 28px rgba(214, 0, 54, 0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -628,17 +628,16 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   <ChevronRight size={15} color="#FF4D6D" />
                 </div>
                 <p style={{ fontSize: '10px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.72)', fontWeight: 500, lineHeight: 1.4 }}>
-                  Colors, logos, styles &amp; textures.
+                  Design custom QR codes with custom logos, vibrant colors, unique frames &amp; artistic textures.
                 </p>
               </div>
 
-              {/* 3 Feature Pills */}
+              {/* 2 Feature Pills (Dividers removed) */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 padding: '8px 16px',
                 backgroundColor: 'rgba(255, 77, 109, 0.1)',
-                borderTop: '1px solid rgba(255, 77, 109, 0.2)',
                 width: 'calc(100% + 32px)',
                 boxSizing: 'border-box',
                 margin: 'auto -16px -16px -16px',
@@ -648,7 +647,6 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   <Image size={9} color="#FF4D6D" />
                   <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Logo</span>
                 </div>
-                <div style={{ width: '1px', height: '12px', background: 'rgba(255,77,109,0.25)' }} />
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                   <Crown size={9} color="#FF4D6D" />
                   <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Customize</span>
@@ -672,8 +670,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '16px',
                 boxSizing: 'border-box',
                 minHeight: '150px',
-                background: 'linear-gradient(145deg, rgba(4, 42, 35, 0.92) 0%, rgba(1, 12, 10, 0.96) 100%)',
-                border: '1px solid rgba(45, 212, 191, 0.25)',
+                background: 'linear-gradient(145deg, #042A23 0%, #010C0A 100%)',
+                border: 'none',
                 boxShadow: '0 8px 28px rgba(13, 148, 136, 0.16), inset 0 1px 0 rgba(255,255,255,0.06)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -713,17 +711,16 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   <ChevronRight size={15} color="#2DD4BF" />
                 </div>
                 <p style={{ fontSize: '10px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.72)', fontWeight: 500, lineHeight: 1.4 }}>
-                  30+ barcode formats supported.
+                  Generate professional 1D &amp; 2D barcodes supporting 30+ industrial standards &amp; formats.
                 </p>
               </div>
 
-              {/* 3 Feature Pills */}
+              {/* 2 Feature Pills (Dividers removed) */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 padding: '8px 16px',
                 backgroundColor: 'rgba(45, 212, 191, 0.1)',
-                borderTop: '1px solid rgba(45, 212, 191, 0.2)',
                 width: 'calc(100% + 32px)',
                 boxSizing: 'border-box',
                 margin: 'auto -16px -16px -16px',
@@ -733,7 +730,6 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   <Barcode size={9} color="#2DD4BF" />
                   <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>30+ Formats</span>
                 </div>
-                <div style={{ width: '1px', height: '12px', background: 'rgba(45,212,191,0.25)' }} />
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                   <Layers size={9} color="#2DD4BF" />
                   <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>1D &amp; 2D</span>
@@ -744,7 +740,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           </div>
         </div>
 
-        {/* Bottom Full-Width Card: Batch Creator (Overlapping bottom of red rectangle by 50%) */}
+        {/* Bottom Full-Width Card: Batch Creator */}
         <div style={{ padding: '0 var(--main-padding-x)', marginTop: '-36px', position: 'relative', zIndex: 10, marginBottom: '10px' }}>
           <div
             onClick={() => onNavigate('batch', 'QR')}
@@ -759,10 +755,10 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               justifyContent: 'space-between',
               position: 'relative',
               overflow: 'hidden',
-              padding: '14px 16px',
+              padding: '16px',
               boxSizing: 'border-box',
-              background: 'linear-gradient(145deg, rgba(8, 24, 54, 0.92) 0%, rgba(2, 6, 18, 0.96) 100%)',
-              border: '1px solid rgba(0, 136, 255, 0.25)',
+              background: 'linear-gradient(145deg, #081836 0%, #020612 100%)',
+              border: 'none',
               boxShadow: '0 8px 24px rgba(0, 102, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.06)',
               width: '100%',
               cursor: 'pointer',
@@ -777,19 +773,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
             }} />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', zIndex: 2, flex: 1, minWidth: 0 }}>
-              <div style={{
-                width: '36px', height: '36px', borderRadius: '10px',
-                background: 'rgba(0, 136, 255, 0.15)',
-                border: '1px solid rgba(0, 136, 255, 0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#4DA8FF', flexShrink: 0
-              }}>
-                <Layers size={18} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', zIndex: 2, flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Layers size={14} color="#4DA8FF" />
                 <h3 style={{
-                  fontSize: '13px',
+                  fontSize: '15px',
                   fontWeight: 800,
                   margin: 0,
                   backgroundImage: 'linear-gradient(90deg, #4DA8FF 0%, #80C8FF 100%)',
@@ -800,15 +788,15 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 }}>
                   Bulk Batch Generator
                 </h3>
-                <p style={{ fontSize: '10.5px', margin: 0, color: 'rgba(255,255,255,0.65)', fontWeight: 500, lineHeight: 1.3 }}>
-                  Create 10K+ QR codes &amp; barcodes from CSV / Excel
-                </p>
               </div>
+              <p style={{ fontSize: '10.5px', margin: 0, color: 'rgba(255,255,255,0.65)', fontWeight: 500, lineHeight: 1.3 }}>
+                Create 10K+ QR codes &amp; barcodes from CSV / Excel files seamlessly.
+              </p>
             </div>
 
             {/* Inline chevron arrow */}
-            <div style={{ zIndex: 2, flexShrink: 0, marginLeft: '8px', color: 'rgba(77,168,255,0.7)' }}>
-              <ChevronRight size={18} />
+            <div style={{ zIndex: 2, flexShrink: 0, marginLeft: '8px', color: 'rgba(77,168,255,0.8)' }}>
+              <ChevronRight size={16} />
             </div>
           </div>
         </div>
