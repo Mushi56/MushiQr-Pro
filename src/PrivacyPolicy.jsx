@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
       <div style={styles.card}>
         <div style={styles.badge}>Legal</div>
         <h1 style={styles.title}>Privacy Policy</h1>
-        <p style={styles.updated}>Last updated: June 25, 2026</p>
+        <p style={styles.updated}>Last updated: August 8, 2026</p>
 
         <Section title="1. Overview">
           Welcome to <strong>Mushi Qr Pro</strong>. We value your privacy above all else. This Privacy Policy outlines how your data is handled when you use our application.
@@ -18,8 +18,8 @@ export default function PrivacyPolicy() {
           Mushi Qr Pro is designed as a client-side application. Any content, URLs, text, Wi-Fi credentials, or image logos you upload to blend onto the QR code are processed **entirely within your local browser**. No logo image files or QR data are ever transmitted to, stored on, or processed by external web servers.
         </Section>
 
-        <Section title="3. Local Storage for Projects">
-          Your project history, preferences, and saved custom templates are stored locally in your browser's <code>localStorage</code> database. This data never leaves your device and is not shared with us or any third party. You can clear this data at any time through the Settings page or by clearing your browser site settings.
+        <Section title="3. Local Storage & Cloud Sync">
+          Your project history, preferences, and saved custom templates are stored locally in your browser's <code>localStorage</code> database. Optionally, you can create a user account and sign in to utilize our <strong>Cloud Sync</strong> feature, which securely mirrors and backups your projects, templates, and settings to the cloud. If you choose not to log in, all data remains strictly local to your device.
         </Section>
 
         <Section title="4. Cookies and Advertising">
@@ -31,9 +31,10 @@ export default function PrivacyPolicy() {
         </Section>
 
         <Section title="6. Third-Party Services">
-          Our hosting environment and external services are managed by:
+          Our hosting environment, authentication, and database services are managed by:
           <ul style={styles.list}>
             <li>Vercel (Website Hosting and Performance Logging)</li>
+            <li>Firebase (Authentication, Cloud Sync, and Secure Database Storage)</li>
             <li>Google AdSense (Ad Delivery)</li>
             <li>Google Analytics (Aggregated Traffic Insights)</li>
           </ul>

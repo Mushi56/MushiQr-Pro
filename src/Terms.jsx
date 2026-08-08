@@ -7,7 +7,7 @@ export default function Terms() {
       <div style={styles.card}>
         <div style={styles.badge}>Legal</div>
         <h1 style={styles.title}>Terms of Service</h1>
-        <p style={styles.updated}>Last updated: June 25, 2026</p>
+        <p style={styles.updated}>Last updated: August 8, 2026</p>
 
         <Section title="1. Acceptance of Terms">
           By accessing and using <strong>Mushi Qr Pro</strong>, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use the application.
@@ -17,8 +17,10 @@ export default function Terms() {
           All QR codes, branded graphics, and design assets generated using Mushi Qr Pro are <strong>100% owned by you</strong> (the creator). You are granted a non-exclusive, perpetual, worldwide, royalty-free license to use, reproduce, and distribute the generated images for any personal or commercial purposes without any credit or attribution required.
         </Section>
 
-        <Section title="3. User Content & Responsibilities">
-          You are solely responsible for the content, URLs, text, credentials, or other data you encode into the QR codes using our service. You represent and warrant that you have the legal right to distribute the encoded content and that it does not infringe on any third-party intellectual property or privacy rights.
+        <Section title="3. User Accounts, Content & Responsibilities">
+          You are solely responsible for the content, URLs, text, credentials, or other data you encode into the QR codes using our service.
+          <br /><br />
+          If you create a user account to use <strong>Cloud Sync</strong>, you are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account.
         </Section>
 
         <Section title="4. Prohibited Uses">
