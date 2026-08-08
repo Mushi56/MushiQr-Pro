@@ -155,33 +155,21 @@
   transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Home Page Header: Hidden at Top, Fades In Smoothly On Scroll */
+/* Home Page Red Upper Navbar Banner Styling */
 .app-header.header-home-banner {
-  background: var(--nav-bg) !important;
-  color: var(--text-primary) !important;
+  background: linear-gradient(135deg, #7A0C1E 0%, #2D0207 100%) !important;
+  color: #FFFFFF !important;
   border-bottom: none !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  transform: translateY(-100%) !important;
-}
-
-.app-header.header-home-banner.scrolled {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  transform: translateY(0) !important;
+  box-shadow: none !important;
 }
 
 .app-header.header-home-banner .app-logo-text {
-  color: var(--text-primary) !important;
+  color: #FFFFFF !important;
 }
 
 .app-header.header-home-banner .btn-menu-toggle,
 .app-header.header-home-banner .btn-header-action {
-  color: var(--text-primary) !important;
+  color: #FFFFFF !important;
 }
 
 
