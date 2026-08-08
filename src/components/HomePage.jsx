@@ -492,12 +492,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
       flexDirection: 'column',
       position: 'relative'
     }}>
-      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up" onScroll={handleScroll}>        {/* Static Hero Section with Red Rounded Rectangle Container */}
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up" onScroll={handleScroll}>
+        {/* Static Hero Section with Red Rounded Rectangle Container */}
         <div style={{
           width: '100%',
           background: 'linear-gradient(180deg, #6B0014 0%, #3B000B 100%)',
           borderRadius: '0 0 28px 28px',
-          padding: '14px var(--main-padding-x) 48px var(--main-padding-x)',
+          padding: '14px var(--main-padding-x) 24px var(--main-padding-x)',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
@@ -592,7 +593,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              {/* Ambient glow only — no noise texture */}
+              {/* Ambient glow */}
               <div style={{
                 position: 'absolute', top: '-40%', right: '-15%',
                 width: '130px', height: '130px',
@@ -609,8 +610,17 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               {/* Top Title & Description */}
               <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <QrCode size={15} color="#FFFFFF" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {/* Frosted rounded icon container matching image */}
+                    <div style={{
+                      width: '32px', height: '32px', borderRadius: '10px',
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      backdropFilter: 'blur(8px)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <QrCode size={16} color="#FFFFFF" />
+                    </div>
                     <h2 style={{
                       fontSize: '15px',
                       fontWeight: 800,
@@ -623,12 +633,12 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                   <ChevronRight size={15} color="#FFFFFF" />
                 </div>
-                <p style={{ fontSize: '10px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.95)', fontWeight: 500, lineHeight: 1.4 }}>
-                  Design custom QR codes with custom logos, vibrant colors, unique frames &amp; artistic textures.
+                <p style={{ fontSize: '10.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.92)', fontWeight: 400, lineHeight: 1.4 }}>
+                  Design QR codes with logos, colors, frames &amp; artistic styles.
                 </p>
               </div>
 
-              {/* 2 Feature Pills (Dividers removed) */}
+              {/* 2 Feature Pills */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -639,13 +649,14 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 margin: 'auto -16px -16px -16px',
                 zIndex: 2
               }}>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                  <Image size={9} color="#FFFFFF" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: '#FFFFFF' }}>Logo</span>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                  <Image size={10} color="#FFFFFF" />
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#FFFFFF' }}>Logo</span>
                 </div>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                  <Crown size={9} color="#FFFFFF" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: '#FFFFFF' }}>Customize</span>
+                <div style={{ width: '1px', height: '10px', background: 'rgba(255,255,255,0.2)' }} />
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                  <Crown size={10} color="#FFFFFF" />
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#FFFFFF' }}>Customize</span>
                 </div>
               </div>
             </div>
@@ -673,7 +684,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              {/* Ambient glow only — no noise texture */}
+              {/* Ambient glow */}
               <div style={{
                 position: 'absolute', top: '-40%', right: '-15%',
                 width: '130px', height: '130px',
@@ -690,8 +701,17 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               {/* Top Title & Description */}
               <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Barcode size={15} color="#FFFFFF" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {/* Frosted rounded icon container matching image */}
+                    <div style={{
+                      width: '32px', height: '32px', borderRadius: '10px',
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      backdropFilter: 'blur(8px)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Barcode size={16} color="#FFFFFF" />
+                    </div>
                     <h2 style={{
                       fontSize: '15px',
                       fontWeight: 800,
@@ -704,12 +724,12 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                   <ChevronRight size={15} color="#FFFFFF" />
                 </div>
-                <p style={{ fontSize: '10px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.95)', fontWeight: 500, lineHeight: 1.4 }}>
-                  Generate professional 1D &amp; 2D barcodes supporting 30+ industrial standards &amp; formats.
+                <p style={{ fontSize: '10.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.92)', fontWeight: 400, lineHeight: 1.4 }}>
+                  Create professional 1D &amp; 2D barcodes in 30+ formats with industry standards.
                 </p>
               </div>
 
-              {/* 2 Feature Pills (Dividers removed) */}
+              {/* 2 Feature Pills */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -720,60 +740,68 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 margin: 'auto -16px -16px -16px',
                 zIndex: 2
               }}>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                  <Barcode size={9} color="#FFFFFF" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: '#FFFFFF' }}>30+ Formats</span>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                  <Barcode size={10} color="#FFFFFF" />
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#FFFFFF' }}>30+ Formats</span>
                 </div>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                  <Layers size={9} color="#FFFFFF" />
-                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: '#FFFFFF' }}>1D &amp; 2D</span>
+                <div style={{ width: '1px', height: '10px', background: 'rgba(255,255,255,0.2)' }} />
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                  <Layers size={10} color="#FFFFFF" />
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#FFFFFF' }}>1D &amp; 2D</span>
                 </div>
               </div>
             </div>
 
           </div>
-        </div>
 
-        {/* Bottom Full-Width Card: Batch Creator */}
-        <div style={{ padding: '0 var(--main-padding-x)', marginTop: '-36px', position: 'relative', zIndex: 10, marginBottom: '10px' }}>
-          <div
-            onClick={() => onNavigate('batch', 'QR')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && onNavigate('batch', 'QR')}
-            style={{
-              borderRadius: '16px',
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              position: 'relative',
-              overflow: 'hidden',
-              padding: '16px',
-              boxSizing: 'border-box',
-              background: 'linear-gradient(135deg, #E60033 0%, #B30024 100%)',
-              border: 'none',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
-              width: '100%',
-              cursor: 'pointer',
-              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          >
-            {/* Background ambient glow */}
-            <div style={{
-              position: 'absolute', top: '-50%', right: '20%',
-              width: '180px', height: '180px',
-              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 70%)',
-              filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
-            }} />
+          {/* Bottom Full-Width Card: Batch Creator Inside Hero Container */}
+          <div style={{ width: '100%', position: 'relative', zIndex: 2 }}>
+            <div
+              onClick={() => onNavigate('batch', 'QR')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && onNavigate('batch', 'QR')}
+              style={{
+                borderRadius: '18px',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                position: 'relative',
+                overflow: 'hidden',
+                padding: '16px',
+                boxSizing: 'border-box',
+                background: 'linear-gradient(135deg, #E60033 0%, #B30024 100%)',
+                border: 'none',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              {/* Background ambient glow */}
+              <div style={{
+                position: 'absolute', top: '-50%', right: '20%',
+                width: '180px', height: '180px',
+                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 70%)',
+                filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
+              }} />
 
-            {/* Top Title & Description */}
-            <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2, flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Layers size={15} color="#FFFFFF" />
+              {/* Top Title & Description */}
+              <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2, flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  {/* Frosted rounded icon container matching image */}
+                  <div style={{
+                    width: '32px', height: '32px', borderRadius: '10px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Layers size={16} color="#FFFFFF" />
+                  </div>
                   <h3 style={{
-                    fontSize: '15px',
+                    fontSize: '16px',
                     fontWeight: 800,
                     margin: 0,
                     color: '#FFFFFF',
@@ -783,11 +811,10 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     Bulk Batch Generator
                   </h3>
                 </div>
-                <ChevronRight size={15} color="#FFFFFF" />
+                <p style={{ fontSize: '11px', margin: 0, color: 'rgba(255,255,255,0.92)', fontWeight: 400, lineHeight: 1.3 }}>
+                  Create 10K+ QR codes &amp; barcodes from CSV / Excel files.
+                </p>
               </div>
-              <p style={{ fontSize: '10.5px', margin: 0, color: 'rgba(255,255,255,0.95)', fontWeight: 500, lineHeight: 1.3 }}>
-                Create 10K+ QR codes &amp; barcodes from CSV / Excel files.
-              </p>
             </div>
           </div>
         </div>

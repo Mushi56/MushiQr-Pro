@@ -3499,7 +3499,7 @@ export default function App() {
       )}
       {/* ── Header ── */}
       <header 
-        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' && !isHomeScrolled ? 'header-home-banner' : ''}`}
+        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' ? 'header-home-banner' : ''} ${activePage === 'home' && isHomeScrolled ? 'scrolled' : ''}`}
         style={{ display: activePage === 'barcode' ? 'none' : 'flex' }}
       >
         <div className="app-logo">
