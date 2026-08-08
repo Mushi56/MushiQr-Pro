@@ -731,7 +731,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 </div>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                   <Layers size={9} color="#FB7185" />
-                  <span style={{ fontSize: '8.5px', fontWeight 700, color: 'rgba(255,255,255,0.95)' }}>1D &amp; 2D</span>
+                  <span style={{ fontSize: '8.5px', fontWeight: 700, color: 'rgba(255,255,255,0.95)' }}>1D &amp; 2D</span>
                 </div>
               </div>
             </div>
