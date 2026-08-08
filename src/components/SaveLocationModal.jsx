@@ -49,7 +49,7 @@ export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }
       <div 
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: 'var(--bg-elevated, #14141e)',
+          background: 'var(--bg-elevated, #0C0C14)',
           border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
           borderRadius: '24px',
           padding: '24px 20px',

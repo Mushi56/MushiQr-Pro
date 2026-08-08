@@ -1305,7 +1305,7 @@ export default function BatchPage({
           <div 
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: 'var(--bg-elevated, #14141e)',
+              background: 'var(--bg-elevated, #0C0C14)',
               border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
               borderRadius: '24px',
               padding: '28px 24px',
@@ -1401,7 +1401,7 @@ export default function BatchPage({
           <div 
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: 'var(--bg-elevated, #14141e)',
+              background: 'var(--bg-elevated, #0C0C14)',
               border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
               borderRadius: '24px',
               padding: '32px 24px',
