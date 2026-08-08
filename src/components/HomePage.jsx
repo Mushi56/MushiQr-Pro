@@ -773,30 +773,29 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
             }} />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', zIndex: 2, flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Layers size={14} color="#4DA8FF" />
-                <h3 style={{
-                  fontSize: '15px',
-                  fontWeight: 800,
-                  margin: 0,
-                  backgroundImage: 'linear-gradient(90deg, #4DA8FF 0%, #80C8FF 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  lineHeight: 1.2,
-                  whiteSpace: 'nowrap'
-                }}>
-                  Bulk Batch Generator
-                </h3>
+            {/* Top Title & Description */}
+            <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2, flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Layers size={14} color="#4DA8FF" />
+                  <h3 style={{
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    margin: 0,
+                    backgroundImage: 'linear-gradient(90deg, #4DA8FF 0%, #80C8FF 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    lineHeight: 1.2,
+                    whiteSpace: 'nowrap'
+                  }}>
+                    Bulk Batch Generator
+                  </h3>
+                </div>
+                <ChevronRight size={15} color="#4DA8FF" />
               </div>
               <p style={{ fontSize: '10.5px', margin: 0, color: 'rgba(255,255,255,0.65)', fontWeight: 500, lineHeight: 1.3 }}>
-                Create 10K+ QR codes &amp; barcodes from CSV / Excel
+                Create 10K+ QR codes &amp; barcodes from CSV / Excel files.
               </p>
-            </div>
-
-            {/* Inline chevron arrow */}
-            <div style={{ zIndex: 2, flexShrink: 0, marginLeft: '8px', color: 'rgba(77,168,255,0.8)' }}>
-              <ChevronRight size={16} />
             </div>
           </div>
         </div>
