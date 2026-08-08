@@ -610,7 +610,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               {/* Top Title & Description */}
               <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={{
                       width: '32px',
                       height: '32px',
@@ -620,25 +620,35 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       alignItems: 'center',
                       justifyContent: 'center',
                       boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+                      zIndex: 2,
                       flexShrink: 0
                     }}>
                       <QrCode size={16} color="#D60036" />
                     </div>
-                    <h2 style={{
-                      fontSize: '14px',
-                      fontWeight: 800,
-                      margin: 0,
-                      backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      lineHeight: 1.2,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                    <div style={{
+                      height: '24px',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '0 6px 6px 0',
+                      padding: '0 10px 0 8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginLeft: '-4px',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      zIndex: 1
                     }}>
-                      Custom QR
-                    </h2>
+                      <h2 style={{
+                        fontSize: '13px',
+                        fontWeight: 800,
+                        margin: 0,
+                        color: '#D60036',
+                        lineHeight: 1,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>
+                        Custom QR
+                      </h2>
+                    </div>
                   </div>
                   <ChevronRight size={15} color="#FFFFFF" />
                 </div>
@@ -709,7 +719,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               {/* Top Title & Description */}
               <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={{
                       width: '32px',
                       height: '32px',
@@ -719,25 +729,35 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       alignItems: 'center',
                       justifyContent: 'center',
                       boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+                      zIndex: 2,
                       flexShrink: 0
                     }}>
                       <Barcode size={16} color="#D60036" />
                     </div>
-                    <h2 style={{
-                      fontSize: '14px',
-                      fontWeight: 800,
-                      margin: 0,
-                      backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      lineHeight: 1.2,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                    <div style={{
+                      height: '24px',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '0 6px 6px 0',
+                      padding: '0 10px 0 8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginLeft: '-4px',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      zIndex: 1
                     }}>
-                      Barcodes
-                    </h2>
+                      <h2 style={{
+                        fontSize: '13px',
+                        fontWeight: 800,
+                        margin: 0,
+                        color: '#D60036',
+                        lineHeight: 1,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>
+                        Barcodes
+                      </h2>
+                    </div>
                   </div>
                   <ChevronRight size={15} color="#FFFFFF" />
                 </div>
@@ -807,7 +827,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             {/* Top Title & Description */}
             <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2, flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                   <div style={{
                     width: '32px',
                     height: '32px',
@@ -817,25 +837,35 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+                    zIndex: 2,
                     flexShrink: 0
                   }}>
                     <Layers size={16} color="#D60036" />
                   </div>
-                  <h3 style={{
-                    fontSize: '14px',
-                    fontWeight: 800,
-                    margin: 0,
-                    backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    lineHeight: 1.2,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                  <div style={{
+                    height: '24px',
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '0 6px 6px 0',
+                    padding: '0 10px 0 8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginLeft: '-4px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    zIndex: 1
                   }}>
-                    Bulk Batch Generator
-                  </h3>
+                    <h3 style={{
+                      fontSize: '13px',
+                      fontWeight: 800,
+                      margin: 0,
+                      color: '#D60036',
+                      lineHeight: 1,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      Bulk Batch Generator
+                    </h3>
+                  </div>
                 </div>
                 <ChevronRight size={15} color="#FFFFFF" />
               </div>
