@@ -758,7 +758,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               overflow: 'hidden',
               padding: '16px',
               boxSizing: 'border-box',
-              background: 'linear-gradient(135deg, #FF6B00 0%, #992200 100%)',
+              background: 'linear-gradient(135deg, #FF1744 0%, #880020 100%)',
               border: '1.5px solid rgba(255, 255, 255, 0.4)',
               boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
               width: '100%',
@@ -770,7 +770,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             <div style={{
               position: 'absolute', top: '-50%', right: '20%',
               width: '180px', height: '180px',
-              background: 'radial-gradient(circle, rgba(255, 180, 100, 0.4) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 70%)',
               filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
             }} />
 
@@ -783,7 +783,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     fontSize: '15px',
                     fontWeight: 800,
                     margin: 0,
-                    backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFE5D9 100%)',
+                    backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD6DE 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     lineHeight: 1.2,
