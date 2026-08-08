@@ -1,4 +1,7 @@
 import qrcode from 'qrcode-generator';
+import QRCodeStyling from 'qr-code-styling';
+
+export { QRCodeStyling };
 
 /**
  * QR Code Generation Engine
@@ -97,6 +100,82 @@ export const EC_LEVELS = {
   Q: 'Q', // 25%
   H: 'H', // 30%
 };
+
+/**
+ * Get QRCodeStyling configuration from Mushi QR Pro options
+ */
+export function getQRCodeStylingConfig(text, options = {}) {
+  const {
+    size = 1024,
+    qrColor = '#000000',
+    bgColor = '#ffffff',
+    bgTransparent = false,
+    dotStyle = 'square',
+    eyeStyle = 'square',
+    eyeColor = '',
+    eyeOuterColor = '',
+    gradientEnabled = false,
+    gradientColor1 = '#000000',
+    gradientColor2 = '#0066ff',
+    gradientType = 'linear',
+    logo = null,
+  } = options;
+
+  let dotsType = 'square';
+  if (dotStyle === 'dots') dotsType = 'dots';
+  else if (dotStyle === 'rounded') dotsType = 'rounded';
+  else if (dotStyle === 'classy') dotsType = 'classy';
+  else if (dotStyle === 'extra-rounded') dotsType = 'extra-rounded';
+  else if (dotStyle === 'fluid') dotsType = 'classy-rounded';
+
+  let cornerSquareType = 'square';
+  if (eyeStyle === 'rounded' || eyeStyle === 'circle') cornerSquareType = 'extra-rounded';
+  else if (eyeStyle === 'dot') cornerSquareType = 'dot';
+
+  return {
+    width: size,
+    height: size,
+    data: text || '',
+    image: logo || undefined,
+    dotsOptions: {
+      color: gradientEnabled ? undefined : qrColor,
+      type: dotsType,
+      gradient: gradientEnabled ? {
+        type: gradientType === 'radial' ? 'radial' : 'linear',
+        rotation: 0,
+        colorStops: [
+          { offset: 0, color: gradientColor1 },
+          { offset: 1, color: gradientColor2 }
+        ]
+      } : undefined
+    },
+    cornersSquareOptions: {
+      type: cornerSquareType,
+      color: eyeOuterColor || eyeColor || qrColor
+    },
+    cornersDotOptions: {
+      type: cornerSquareType === 'square' ? 'square' : 'dot',
+      color: eyeColor || qrColor
+    },
+    backgroundOptions: {
+      color: bgTransparent ? 'transparent' : bgColor
+    },
+    imageOptions: {
+      crossOrigin: 'anonymous',
+      hideBackgroundDots: true,
+      imageSize: 0.35,
+      margin: 4
+    }
+  };
+}
+
+/**
+ * Instantiate a new QRCodeStyling instance
+ */
+export function createQRCodeStylingInstance(text, options = {}) {
+  const config = getQRCodeStylingConfig(text, options);
+  return new QRCodeStyling(config);
+}
 
 // Dot styles
 export const DOT_STYLES = {
