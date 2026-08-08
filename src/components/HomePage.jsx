@@ -669,9 +669,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '16px',
                 boxSizing: 'border-box',
                 minHeight: '150px',
-                background: 'linear-gradient(135deg, #FF453A 0%, #B80028 100%)',
+                background: 'linear-gradient(135deg, #E60039 0%, #900020 100%)',
                 border: 'none',
-                boxShadow: '0 10px 30px rgba(220, 0, 40, 0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
+                boxShadow: '0 10px 30px rgba(210, 0, 50, 0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
@@ -680,13 +680,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div style={{
                 position: 'absolute', top: '-40%', right: '-15%',
                 width: '130px', height: '130px',
-                background: 'radial-gradient(circle, rgba(255, 190, 180, 0.45) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(255, 150, 180, 0.45) 0%, transparent 70%)',
                 filter: 'blur(28px)', pointerEvents: 'none', zIndex: 1
               }} />
               <div style={{
                 position: 'absolute', bottom: '-30%', left: '-10%',
                 width: '100px', height: '100px',
-                background: 'radial-gradient(circle, rgba(255, 140, 130, 0.25) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(255, 90, 130, 0.25) 0%, transparent 70%)',
                 filter: 'blur(20px)', pointerEvents: 'none', zIndex: 1
               }} />
 
@@ -699,7 +699,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       fontSize: '15px',
                       fontWeight: 800,
                       margin: 0,
-                      backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFE2DF 100%)',
+                      backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD1DC 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       lineHeight: 1.2
@@ -756,9 +756,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               overflow: 'hidden',
               padding: '16px',
               boxSizing: 'border-box',
-              background: 'linear-gradient(135deg, #E60039 0%, #900020 100%)',
+              background: 'linear-gradient(135deg, #FF453A 0%, #B80028 100%)',
               border: 'none',
-              boxShadow: '0 10px 30px rgba(210, 0, 50, 0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
+              boxShadow: '0 10px 30px rgba(220, 0, 40, 0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
               width: '100%',
               cursor: 'pointer',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -768,7 +768,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             <div style={{
               position: 'absolute', top: '-50%', right: '20%',
               width: '180px', height: '180px',
-              background: 'radial-gradient(circle, rgba(255, 150, 180, 0.45) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(255, 190, 180, 0.45) 0%, transparent 70%)',
               filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
             }} />
 
@@ -781,7 +781,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     fontSize: '15px',
                     fontWeight: 800,
                     margin: 0,
-                    backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFD1DC 100%)',
+                    backgroundImage: 'linear-gradient(90deg, #FFFFFF 0%, #FFE2DF 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     lineHeight: 1.2,
