@@ -502,7 +502,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
-          gap: '14px',
+          gap: '8px',
           color: '#FFFFFF',
           boxShadow: '0 12px 30px rgba(122, 12, 30, 0.35)',
           position: 'relative',
@@ -540,7 +540,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     WELCOME BACK 👋
                   </div>
                   <div style={{
-                    fontSize: '22px',
+                    fontSize: '18px',
                     fontWeight: 800,
                     color: '#FFFFFF',
                     display: 'flex',
@@ -556,7 +556,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 </>
               ) : (
                 <div style={{
-                  fontSize: '22px',
+                  fontSize: '18px',
                   fontWeight: 800,
                   color: '#FFFFFF',
                   lineHeight: 1.2,
