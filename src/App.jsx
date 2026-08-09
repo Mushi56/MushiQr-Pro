@@ -1188,6 +1188,7 @@ export default function App() {
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
   const [canvasSelection, setCanvasSelection] = useState(null); // 'logo' | 'text' | null
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [templateHandleText, setTemplateHandleText] = useState('');
   const [templateCategory, setTemplateCategory] = useState('All');
   const applyLogoBySlug = (slug) => {
     const LOGO_PRESETS = [
@@ -1220,9 +1221,11 @@ export default function App() {
   const applyTemplate = (tpl) => {
     if (!tpl) {
       setSelectedTemplate(null);
+      setTemplateHandleText('');
       return;
     }
     setSelectedTemplate(tpl);
+    setTemplateHandleText(tpl.defaultHandle || '');
     setQrBgImage(null);
     setQrBgImageEnabled(false);
     setQrTexture(null);
@@ -2260,6 +2263,7 @@ export default function App() {
       renderQR(canvasRef.current, {
         ...qrMatrixInfo, size: 512,
         template: selectedTemplate,
+        templateHandleText: templateHandleText || selectedTemplate?.defaultHandle || '',
         qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
         eyeColor,
         eyeOuterColor,
@@ -2805,6 +2809,18 @@ export default function App() {
       const pad = 25; 
       return px >= rx - pad && px <= rx + rw + pad && py >= ry - pad && py <= ry + rh + pad;
     };
+    // 0. Check Template Text Interaction
+    if (selectedTemplate) {
+      handleTabChange('template');
+      setTimeout(() => {
+        const input = document.getElementById('template-handle-input');
+        if (input) {
+          input.focus();
+          if (typeof input.select === 'function') input.select();
+        }
+      }, 100);
+    }
+
     // 1. Check Center Text
     if (textCenterEnabled && textCenterText) {
       const fontSize = contentSize * textCenterSize;
@@ -4204,6 +4220,48 @@ export default function App() {
                 <div className="tab-panel fade-in" id="panel-template">
                   <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 20px 100px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     
+                    {selectedTemplate && (
+                      <div style={{
+                        background: 'var(--bg-elevated)',
+                        borderRadius: '16px',
+                        padding: '14px 16px',
+                        border: '1.5px solid var(--accent-primary)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                        boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+                        animation: 'fadeIn 0.2s ease'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Pencil size={15} color="var(--accent-primary)" /> Edit Username / Text
+                          </span>
+                          <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--accent-primary)', background: 'var(--accent-light)', padding: '2px 8px', borderRadius: '10px' }}>
+                            Active Template
+                          </span>
+                        </div>
+                        <input 
+                          type="text"
+                          id="template-handle-input"
+                          value={templateHandleText}
+                          onChange={(e) => setTemplateHandleText(e.target.value)}
+                          placeholder={selectedTemplate.defaultHandle || 'Type your username/handle...'}
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border-color)',
+                            background: 'var(--bg-card)',
+                            color: 'var(--text-primary)',
+                            fontSize: '13.5px',
+                            fontWeight: 600,
+                            outline: 'none',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+                    )}
+
                     {/* Category Selector Bar (Swipeable) */}
                     <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', borderBottom: '1px solid var(--border-color)' }}>
                       {/* Category tabs — dynamic list based on available templates */}
@@ -4276,6 +4334,7 @@ export default function App() {
                               theme={effectiveTheme} 
                               qrMatrixInfo={qrMatrixInfo}
                               currentQrOptions={{
+                                templateHandleText: templateHandleText || tpl.defaultHandle || '',
                                 qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
                                 eyeColor, eyeOuterColor, syncEyes,
                                 gradientEnabled, gradientColor1, gradientColor2, gradientType,
