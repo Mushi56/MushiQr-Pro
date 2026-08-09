@@ -760,14 +760,28 @@ export function renderQR(canvas, options) {
  * Draw a single dot module
  */
 function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
-  const dotPadding = options.dotPadding !== undefined ? options.dotPadding : 5;
-  const padding = (size * dotPadding) / 100;
+  const userPadding = options.dotPadding !== undefined ? options.dotPadding : 12;
+
+  // Enforce healthy minimum padding for discrete shapes so dots stay separate and beautiful
+  let effectivePaddingPct = userPadding;
+  if (style === DOT_STYLES.DOTS) {
+    effectivePaddingPct = Math.max(14, userPadding);
+  } else if (style === DOT_STYLES.ROUNDED || style === DOT_STYLES.CLASSY || style === DOT_STYLES.EXTRA_ROUNDED) {
+    effectivePaddingPct = Math.max(8, userPadding);
+  } else if (style === DOT_STYLES.DIAMOND || style === DOT_STYLES.STAR || style === DOT_STYLES.HEART || style === DOT_STYLES.OCTAGON) {
+    effectivePaddingPct = Math.max(10, userPadding);
+  }
+
+  const padding = (size * effectivePaddingPct) / 100;
   const s = size - padding * 2;
   const { top, bottom, left, right } = neighbors;
 
   switch (style) {
+    case DOT_STYLES.SQUARE:
+      ctx.fillRect(x + padding, y + padding, s, s);
+      break;
     case DOT_STYLES.ROUNDED:
-      drawRoundedRect(ctx, x + padding, y + padding, s, s, s * 0.3);
+      drawRoundedRect(ctx, x + padding, y + padding, s, s, s * 0.32);
       break;
     case DOT_STYLES.DOTS:
       ctx.beginPath();

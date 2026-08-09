@@ -1272,7 +1272,7 @@ export default function App() {
   // ── Shapes ──
   const [dotStyle, setDotStyle] = useState(DOT_STYLES.SQUARE);
   const [eyeStyle, setEyeStyle] = useState(EYE_STYLES.SQUARE);
-  const [dotPadding, setDotPadding] = useState(0);
+  const [dotPadding, setDotPadding] = useState(12);
   const [eyePadding, setEyePadding] = useState(0);
   // ── Logo ──
   const [logo, setLogo] = useState(null);
