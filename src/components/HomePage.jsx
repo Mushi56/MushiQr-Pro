@@ -582,7 +582,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 justifyContent: 'space-between',
                 position: 'relative',
                 overflow: 'hidden',
-                padding: '16px',
+                padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
                 background: 'linear-gradient(135deg, #FF1744 0%, #880020 100%)',
@@ -599,7 +599,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 style={{
                   position: 'absolute',
                   right: '-20px',
-                  bottom: '6px',
+                  bottom: '2px',
                   width: '130px',
                   height: '130px',
                   objectFit: 'contain',
@@ -680,9 +680,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alignItems: 'center',
                 padding: '8px 16px',
                 backgroundColor: 'rgba(0, 0, 0, 0.25)',
-                width: 'calc(100% + 32px)',
+                width: 'calc(100% + 24px)',
                 boxSizing: 'border-box',
-                margin: 'auto -16px -16px -16px',
+                margin: 'auto -12px -12px -12px',
                 zIndex: 2,
                 position: 'relative'
               }}>
@@ -710,7 +710,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 justifyContent: 'space-between',
                 position: 'relative',
                 overflow: 'hidden',
-                padding: '16px',
+                padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
                 background: 'linear-gradient(135deg, #FF1744 0%, #880020 100%)',
@@ -727,7 +727,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 style={{
                   position: 'absolute',
                   right: '-20px',
-                  bottom: '6px',
+                  bottom: '2px',
                   width: '130px',
                   height: '130px',
                   objectFit: 'contain',
@@ -808,9 +808,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alignItems: 'center',
                 padding: '8px 16px',
                 backgroundColor: 'rgba(0, 0, 0, 0.25)',
-                width: 'calc(100% + 32px)',
+                width: 'calc(100% + 24px)',
                 boxSizing: 'border-box',
-                margin: 'auto -16px -16px -16px',
+                margin: 'auto -12px -12px -12px',
                 zIndex: 2,
                 position: 'relative'
               }}>
@@ -843,7 +843,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               justifyContent: 'space-between',
               position: 'relative',
               overflow: 'hidden',
-              padding: '16px',
+              padding: '12px',
               boxSizing: 'border-box',
               background: 'linear-gradient(135deg, #FF1744 0%, #880020 100%)',
               border: 'none',
