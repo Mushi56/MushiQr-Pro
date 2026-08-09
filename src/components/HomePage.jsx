@@ -496,7 +496,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
         {/* Static Hero Section with Red Rounded Rectangle Container */}
         <div style={{
           width: '100%',
-          background: 'linear-gradient(135deg, #E6002A 0%, #B8001F 30%, #7A0014 65%, #2B0007 100%)',
+          background: 'linear-gradient(135deg, #7A0C1E 0%, #2D0207 100%)',
           borderRadius: '0 0 28px 28px',
           padding: '14px var(--main-padding-x) 48px var(--main-padding-x)',
           boxSizing: 'border-box',
@@ -504,21 +504,15 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           flexDirection: 'column',
           gap: '14px',
           color: '#FFFFFF',
-          boxShadow: '0 16px 40px rgba(230, 0, 42, 0.4)',
+          boxShadow: '0 12px 30px rgba(122, 12, 30, 0.35)',
           position: 'relative',
           overflow: 'hidden'
         }}>
-          {/* Vibrant liquid ambient blur orbs */}
+          {/* Subtle background ambient blur circle */}
           <div style={{
-            position: 'absolute', top: '-50%', right: '-20%',
-            width: '260px', height: '260px',
-            background: 'radial-gradient(circle, rgba(255, 77, 106, 0.4) 0%, rgba(255, 0, 51, 0.15) 50%, transparent 75%)',
-            filter: 'blur(35px)', pointerEvents: 'none', zIndex: 1
-          }} />
-          <div style={{
-            position: 'absolute', bottom: '-40%', left: '-10%',
-            width: '200px', height: '200px',
-            background: 'radial-gradient(circle, rgba(255, 0, 85, 0.3) 0%, transparent 70%)',
+            position: 'absolute', top: '-40%', right: '-15%',
+            width: '220px', height: '220px',
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%)',
             filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
           }} />
 
@@ -590,7 +584,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                background: 'linear-gradient(145deg, #8A0018 0%, #4D020F 45%, #1F0106 100%)',
+                background: 'linear-gradient(160deg, #3D0610 0%, #170206 100%)',
                 border: 'none',
                 boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
                 cursor: 'pointer',
@@ -617,7 +611,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div style={{
                 position: 'absolute', top: '-40%', right: '-15%',
                 width: '130px', height: '130px',
-                background: 'radial-gradient(circle, rgba(255, 26, 64, 0.45) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(255, 42, 85, 0.25) 0%, transparent 70%)',
                 filter: 'blur(28px)', pointerEvents: 'none', zIndex: 1
               }} />
 
@@ -628,11 +622,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     width: '32px',
                     height: '32px',
                     borderRadius: '10px',
-                    background: 'linear-gradient(135deg, #FF0033 0%, #A8001F 100%)',
+                    background: 'linear-gradient(135deg, #FF2A55 0%, #B3002D 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 10px rgba(255, 0, 51, 0.35)',
+                    boxShadow: '0 4px 10px rgba(255, 42, 85, 0.35)',
                     flexShrink: 0
                   }}>
                     <QrCode size={16} color="#FFFFFF" />
@@ -650,7 +644,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <div style={{
                       fontSize: '8.5px',
                       fontWeight: 600,
-                      color: '#FF3355',
+                      color: '#FF4D79',
                       marginTop: '2px',
                       lineHeight: 1
                     }}>
@@ -683,13 +677,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     width: '18px',
                     height: '18px',
                     borderRadius: '6px',
-                    background: 'linear-gradient(135deg, rgba(255, 0, 51, 0.3) 0%, rgba(168, 0, 31, 0.3) 100%)',
+                    background: 'linear-gradient(135deg, rgba(255, 42, 85, 0.3) 0%, rgba(179, 0, 45, 0.3) 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <Image size={10} color="#FF3355" />
+                    <Image size={10} color="#FF4D79" />
                   </div>
                   <span style={{ fontSize: '8px', fontWeight: 700, color: '#FFFFFF' }}>Make it Yours</span>
                 </div>
@@ -697,11 +691,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   width: '20px',
                   height: '20px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #FF0033 0%, #A8001F 100%)',
+                  background: 'linear-gradient(135deg, #FF2A55 0%, #B3002D 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 2px 6px rgba(255, 0, 51, 0.4)'
+                  boxShadow: '0 2px 6px rgba(255, 42, 85, 0.4)'
                 }}>
                   <ChevronRight size={12} color="#FFFFFF" />
                 </div>
@@ -724,7 +718,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                background: 'linear-gradient(145deg, #7A2800 0%, #451A02 45%, #1C0901 100%)',
+                background: 'linear-gradient(160deg, #381602 0%, #140701 100%)',
                 border: 'none',
                 boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
                 cursor: 'pointer',
@@ -751,7 +745,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div style={{
                 position: 'absolute', top: '-40%', right: '-15%',
                 width: '130px', height: '130px',
-                background: 'radial-gradient(circle, rgba(255, 136, 0, 0.45) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(255, 124, 0, 0.3) 0%, transparent 70%)',
                 filter: 'blur(28px)', pointerEvents: 'none', zIndex: 1
               }} />
 
@@ -862,7 +856,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               overflow: 'hidden',
               padding: '12px',
               boxSizing: 'border-box',
-              background: 'linear-gradient(145deg, #7A0033 0%, #42021E 45%, #1C010C 100%)',
+              background: 'linear-gradient(160deg, #350217 0%, #15010A 100%)',
               border: 'none',
               boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
               width: '100%',
@@ -891,7 +885,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             <div style={{
               position: 'absolute', top: '-50%', right: '20%',
               width: '180px', height: '180px',
-              background: 'radial-gradient(circle, rgba(255, 26, 92, 0.45) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(255, 11, 72, 0.3) 0%, transparent 70%)',
               filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
             }} />
 
