@@ -598,8 +598,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alt="QR Code" 
                 style={{
                   position: 'absolute',
-                  right: '-20px',
-                  bottom: '-6px',
+                  right: '-24px',
+                  bottom: '-2px',
                   width: '130px',
                   height: '130px',
                   objectFit: 'contain',
@@ -726,8 +726,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alt="Barcode" 
                 style={{
                   position: 'absolute',
-                  right: '-20px',
-                  bottom: '-6px',
+                  right: '-24px',
+                  bottom: '-2px',
                   width: '130px',
                   height: '130px',
                   objectFit: 'contain',
