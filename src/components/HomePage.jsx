@@ -652,8 +652,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '8px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 300, lineHeight: 1.3, maxWidth: '85px' }}>
-                  Design custom QR codes with custom logos, vibrant colors, unique frames &amp; artistic textures.
+                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 400, lineHeight: 1.3, maxWidth: '85px' }}>
+                  Create beautiful, custom QR codes with logos, colors, and unique frames.
                 </p>
               </div>
 
@@ -786,8 +786,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '8px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 300, lineHeight: 1.3, maxWidth: '85px' }}>
-                  Generate professional 1D &amp; 2D barcodes supporting 30+ industrial standards &amp; formats.
+                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 400, lineHeight: 1.3, maxWidth: '85px' }}>
+                  Generate reliable 1D &amp; 2D barcodes for over 30 industrial standards.
                 </p>
               </div>
 
@@ -926,8 +926,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                 </div>
               </div>
-              <p style={{ fontSize: '8px', margin: '6px 115px 0 0', color: 'rgba(255,255,255,0.75)', fontWeight: 300, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                Create 10K+ QR codes &amp; barcodes from CSV / Excel files.
+              <p style={{ fontSize: '8.5px', margin: '6px 115px 0 0', color: 'rgba(255,255,255,0.75)', fontWeight: 400, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Instantly create 10K+ codes directly from your spreadsheets.
               </p>
             </div>
           </div>
