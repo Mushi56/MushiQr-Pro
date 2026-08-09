@@ -1189,6 +1189,7 @@ export default function App() {
   const [canvasSelection, setCanvasSelection] = useState(null); // 'logo' | 'text' | null
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [templateHandleText, setTemplateHandleText] = useState('');
+  const [isEditingTemplateText, setIsEditingTemplateText] = useState(false);
   const [templateCategory, setTemplateCategory] = useState('All');
   const applyLogoBySlug = (slug) => {
     const LOGO_PRESETS = [
@@ -2811,14 +2812,8 @@ export default function App() {
     };
     // 0. Check Template Text Interaction
     if (selectedTemplate) {
-      handleTabChange('template');
-      setTimeout(() => {
-        const input = document.getElementById('template-handle-input');
-        if (input) {
-          input.focus();
-          if (typeof input.select === 'function') input.select();
-        }
-      }, 100);
+      setIsEditingTemplateText(true);
+      return;
     }
 
     // 1. Check Center Text
@@ -4168,6 +4163,104 @@ export default function App() {
                       }} 
                     />
                   )}
+                  {selectedTemplate && (
+                    <div 
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        position: 'absolute',
+                        bottom: '9%',
+                        left: '8%',
+                        right: '8%',
+                        zIndex: 25,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        pointerEvents: 'auto'
+                      }}
+                    >
+                      {isEditingTemplateText ? (
+                        <div style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(0, 0, 0, 0.85)',
+                          backdropFilter: 'blur(16px)',
+                          WebkitBackdropFilter: 'blur(16px)',
+                          border: '1.5px solid var(--accent-primary)',
+                          borderRadius: '24px',
+                          padding: '3px 6px 3px 14px',
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
+                        }}>
+                          <input
+                            type="text"
+                            autoFocus
+                            value={templateHandleText}
+                            onChange={(e) => setTemplateHandleText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === 'Escape') setIsEditingTemplateText(false);
+                            }}
+                            onBlur={() => setIsEditingTemplateText(false)}
+                            placeholder={selectedTemplate.defaultHandle || 'Enter handle...'}
+                            style={{
+                              flex: 1,
+                              background: 'transparent',
+                              border: 'none',
+                              outline: 'none',
+                              color: '#FFFFFF',
+                              fontSize: '13px',
+                              fontWeight: 700,
+                              textAlign: 'center'
+                            }}
+                          />
+                          <button
+                            onClick={() => setIsEditingTemplateText(false)}
+                            style={{
+                              border: 'none',
+                              background: 'var(--accent-primary)',
+                              color: '#FFFFFF',
+                              borderRadius: '50%',
+                              width: '26px',
+                              height: '26px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              flexShrink: 0
+                            }}
+                          >
+                            <Check size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div 
+                          onClick={() => setIsEditingTemplateText(true)}
+                          title="Click to edit handle on canvas"
+                          style={{
+                            padding: '4px 14px',
+                            background: 'rgba(0, 0, 0, 0.45)',
+                            backdropFilter: 'blur(8px)',
+                            WebkitBackdropFilter: 'blur(8px)',
+                            border: '1px dashed rgba(255, 255, 255, 0.45)',
+                            borderRadius: '20px',
+                            color: '#FFFFFF',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            opacity: 0.9,
+                            transition: 'all 0.2s ease',
+                            boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+                          }}
+                        >
+                          <Pencil size={11} color="#FFFFFF" />
+                          <span>Click to Edit Text</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </section>
             </ErrorBoundary>
@@ -4220,48 +4313,6 @@ export default function App() {
                 <div className="tab-panel fade-in" id="panel-template">
                   <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 20px 100px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     
-                    {selectedTemplate && (
-                      <div style={{
-                        background: 'var(--bg-elevated)',
-                        borderRadius: '16px',
-                        padding: '14px 16px',
-                        border: '1.5px solid var(--accent-primary)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '10px',
-                        boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
-                        animation: 'fadeIn 0.2s ease'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Pencil size={15} color="var(--accent-primary)" /> Edit Username / Text
-                          </span>
-                          <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--accent-primary)', background: 'var(--accent-light)', padding: '2px 8px', borderRadius: '10px' }}>
-                            Active Template
-                          </span>
-                        </div>
-                        <input 
-                          type="text"
-                          id="template-handle-input"
-                          value={templateHandleText}
-                          onChange={(e) => setTemplateHandleText(e.target.value)}
-                          placeholder={selectedTemplate.defaultHandle || 'Type your username/handle...'}
-                          style={{
-                            width: '100%',
-                            padding: '10px 14px',
-                            borderRadius: '10px',
-                            border: '1px solid var(--border-color)',
-                            background: 'var(--bg-card)',
-                            color: 'var(--text-primary)',
-                            fontSize: '13.5px',
-                            fontWeight: 600,
-                            outline: 'none',
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-                    )}
-
                     {/* Category Selector Bar (Swipeable) */}
                     <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', borderBottom: '1px solid var(--border-color)' }}>
                       {/* Category tabs — dynamic list based on available templates */}
