@@ -593,7 +593,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             >
               {/* Card Image */}
               <img 
-                src="/Qr Code.png" 
+                src="/Qr Code.webp" 
                 alt="QR Code" 
                 style={{
                   position: 'absolute',
@@ -727,7 +727,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             >
               {/* Card Image */}
               <img 
-                src="/Barcode.png" 
+                src="/Barcode.webp" 
                 alt="Barcode" 
                 style={{
                   position: 'absolute',
@@ -866,7 +866,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           >
             {/* Card Image */}
             <img 
-              src="/Bulk Ganaration.png" 
+              src="/Bulk Ganaration.webp" 
               alt="Bulk Generation" 
               style={{
                 position: 'absolute',
