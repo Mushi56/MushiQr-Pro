@@ -4212,9 +4212,8 @@ export default function App() {
                 </div>
               )}
               {/* Template Tab */}
-              {/* Template Tab */}
               {activeTab === 'template' && (
-                <div className="tab-panel fade-in" id="panel-template" style={{ background: '#0D0D12', minHeight: '100%' }}>
+                <div className="tab-panel fade-in" id="panel-template">
                   <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 16px 100px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     
                     {/* Top Floating Category Toolbar */}
@@ -4279,10 +4278,13 @@ export default function App() {
 
                     {/* Grouped Category Sections */}
                     {[
+                      { id: 'Hot', title: 'Hot 🔥' },
                       { id: 'Social', title: 'Social Media' },
                       { id: 'Business', title: 'Business & Essentials' },
                       { id: 'Payments', title: 'Payments' },
-                      { id: 'Food', title: 'Food & Hospitality' }
+                      { id: 'Food', title: 'Food & Hospitality' },
+                      { id: 'Wifi', title: 'Wi-Fi & Networks' },
+                      { id: 'Event', title: 'Events & Specials' }
                     ]
                     .filter(sec => templateCategory === 'All' || templateCategory === sec.id)
                     .map(sec => {
