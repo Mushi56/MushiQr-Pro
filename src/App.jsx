@@ -4286,9 +4286,9 @@ export default function App() {
                       { id: 'Wifi', title: 'Wi-Fi & Networks' },
                       { id: 'Event', title: 'Events & Specials' }
                     ]
-                    .filter(sec => templateCategory === 'All' || templateCategory === sec.id)
+                    .filter(sec => templateCategory === 'All' || templateCategory.toLowerCase() === sec.id.toLowerCase())
                     .map(sec => {
-                      const sectionTemplates = ALL_TEMPLATES.filter(t => t.category === sec.id);
+                      const sectionTemplates = ALL_TEMPLATES.filter(t => (t.category || '').toLowerCase() === sec.id.toLowerCase());
                       if (sectionTemplates.length === 0) return null;
 
                       return (
