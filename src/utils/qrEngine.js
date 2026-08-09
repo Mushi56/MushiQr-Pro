@@ -1876,7 +1876,7 @@ function drawBackgroundShape(ctx, shape, x, y, w, h, color, sizeMultiplier = 1) 
 
   if (options.template) {
     ctx.restore();
-    options.template.drawForeground(ctx, size, options.templateTexts || {});
+    options.template.drawForeground(ctx, size);
   }
 }
 
