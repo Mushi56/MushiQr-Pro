@@ -1183,24 +1183,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                 )}
               </div>
 
-              {/* Details List Card */}
-              <div className="qrs-details-card">
-                <div className="qrs-detail-row">
-                  <div className="qrs-detail-icon-box">
-                    <Tag size={16} />
-                  </div>
-                  <span className="qrs-detail-label">Format</span>
-                  <span className="qrs-detail-value">{detectedFormatName || 'QR Code'}</span>
-                </div>
 
-                <div className="qrs-detail-row">
-                  <div className="qrs-detail-icon-box">
-                    <Hash size={16} />
-                  </div>
-                  <span className="qrs-detail-label">Type</span>
-                  <span className="qrs-detail-value">{qrTypeData.type}</span>
-                </div>
-              </div>
 
               {/* Bottom Actions Outlined/Solid */}
               <div className="qrs-bottom-row-grid">
