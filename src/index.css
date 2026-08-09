@@ -6719,8 +6719,8 @@ video {
 
 .qrs-result-value-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   gap: 12px;
   width: 100%;
 }
@@ -6732,7 +6732,7 @@ video {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
-  text-align: center;
+  text-align: left;
   line-height: 1.35;
   letter-spacing: -0.1px;
   padding: 0 4px;

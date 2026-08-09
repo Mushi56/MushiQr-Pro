@@ -1099,41 +1099,6 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                 </div>
               )}
 
-              {/* Details List Card */}
-              <div className="qrs-details-card">
-                <div className="qrs-detail-row">
-                  <div className="qrs-detail-icon-box">
-                    <Tag size={16} />
-                  </div>
-                  <span className="qrs-detail-label">Format</span>
-                  <span className="qrs-detail-value">{detectedFormatName || 'QR Code'}</span>
-                </div>
-
-                <div className="qrs-detail-row">
-                  <div className="qrs-detail-icon-box">
-                    <Hash size={16} />
-                  </div>
-                  <span className="qrs-detail-label">Type</span>
-                  <span className="qrs-detail-value">{qrTypeData.type}</span>
-                </div>
-
-                <div className="qrs-detail-row">
-                  <div className="qrs-detail-icon-box">
-                    <FileText size={16} />
-                  </div>
-                  <span className="qrs-detail-label">Value</span>
-                  <span className="qrs-detail-value">{result}</span>
-                </div>
-
-                <div className="qrs-detail-row">
-                  <div className="qrs-detail-icon-box">
-                    <Calendar size={16} />
-                  </div>
-                  <span className="qrs-detail-label">Date & Time</span>
-                  <span className="qrs-detail-value">{scanDate}</span>
-                </div>
-              </div>
-
               {/* Quick Action Button Grid */}
               <div className="qrs-result-actions-grid">
                 <button className="qrs-action-box-btn" onClick={handleCopy}>
@@ -1216,6 +1181,25 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                     </div>
                   </>
                 )}
+              </div>
+
+              {/* Details List Card */}
+              <div className="qrs-details-card">
+                <div className="qrs-detail-row">
+                  <div className="qrs-detail-icon-box">
+                    <Tag size={16} />
+                  </div>
+                  <span className="qrs-detail-label">Format</span>
+                  <span className="qrs-detail-value">{detectedFormatName || 'QR Code'}</span>
+                </div>
+
+                <div className="qrs-detail-row">
+                  <div className="qrs-detail-icon-box">
+                    <Hash size={16} />
+                  </div>
+                  <span className="qrs-detail-label">Type</span>
+                  <span className="qrs-detail-value">{qrTypeData.type}</span>
+                </div>
               </div>
 
               {/* Bottom Actions Outlined/Solid */}
