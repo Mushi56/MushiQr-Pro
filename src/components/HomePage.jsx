@@ -926,7 +926,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 </div>
                 <ChevronRight size={15} color="#FFFFFF" />
               </div>
-              <p style={{ fontSize: '7.5px', margin: 0, color: 'rgba(255,255,255,0.95)', fontWeight: 500, lineHeight: 1.3, textShadow: '0 1px 2px rgba(0,0,0,0.3)', maxWidth: '60px' }}>
+              <p style={{ fontSize: '7.5px', margin: 0, color: 'rgba(255,255,255,0.95)', fontWeight: 500, lineHeight: 1.3, textShadow: '0 1px 2px rgba(0,0,0,0.3)', marginRight: '140px' }}>
                 Create 10K+ QR codes &amp; barcodes from CSV / Excel files.
               </p>
             </div>
