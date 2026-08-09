@@ -6234,21 +6234,22 @@ function TemplatePreviewCanvas({ template, theme, qrMatrixInfo, currentQrOptions
     if (!ref.current) return;
     const canvas = ref.current;
     const ctx = canvas.getContext('2d');
-    const size = 240; // High-res preview size
-    canvas.width = size;
-    canvas.height = size;
-    ctx.clearRect(0, 0, size, size);
+    const w = 240; // High-res preview base width
+    const h = template.heightRatio ? Math.round(w * template.heightRatio) : w;
+    canvas.width = w;
+    canvas.height = h;
+    ctx.clearRect(0, 0, w, h);
 
     // 1. Draw template background
     if (template.drawBackground) {
-      template.drawBackground(ctx, size);
+      template.drawBackground(ctx, w, h);
     }
 
     // 2. Draw real QR code inside placeholder slot
     ctx.save();
-    const tplQrSize = size * template.qrSize;
-    const tplQrX = size * template.qrX - tplQrSize / 2;
-    const tplQrY = size * template.qrY - tplQrSize / 2;
+    const tplQrSize = w * template.qrSize;
+    const tplQrX = w * template.qrX - tplQrSize / 2;
+    const tplQrY = h * template.qrY - tplQrSize / 2;
 
     // Use current active QR matrix, or fallback to standard 21x21 matrix if none
     const activeMatrixInfo = qrMatrixInfo || generateQRMatrix('https://mushiqr.pro');
@@ -6302,7 +6303,7 @@ function TemplatePreviewCanvas({ template, theme, qrMatrixInfo, currentQrOptions
     ctx.restore();
 
     // 3. Draw template foreground overlay
-    if (template.drawForeground) template.drawForeground(ctx, size);
+    if (template.drawForeground) template.drawForeground(ctx, w, h);
   }, [template, theme, tick, qrMatrixInfo, currentQrOptions]);
 
   return <canvas ref={ref} style={{ width: '100%', height: '100%', borderRadius: '14px', display: 'block' }} />;

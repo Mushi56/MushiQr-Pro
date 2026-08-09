@@ -291,20 +291,22 @@ export function renderQR(canvas, options) {
   if (!matrix || !canvas) return;
 
   const ctx = canvas.getContext('2d');
-  canvas.width = size;
-  canvas.height = size;
+  const w = size;
+  const h = options.template?.heightRatio ? Math.round(size * options.template.heightRatio) : size;
+  canvas.width = w;
+  canvas.height = h;
 
   // Clear canvas
-  ctx.clearRect(0, 0, size, size);
+  ctx.clearRect(0, 0, w, h);
 
   const effectiveBgTransparent = bgTransparent;
 
   if (options.template) {
-    options.template.drawBackground(ctx, size);
+    options.template.drawBackground(ctx, w, h);
     ctx.save();
-    const qrSize = size * options.template.qrSize;
-    const qrX = size * options.template.qrX - qrSize / 2;
-    const qrY = size * options.template.qrY - qrSize / 2;
+    const qrSize = w * options.template.qrSize;
+    const qrX = w * options.template.qrX - qrSize / 2;
+    const qrY = h * options.template.qrY - qrSize / 2;
     ctx.translate(qrX, qrY);
     ctx.scale(options.template.qrSize, options.template.qrSize);
   }
@@ -1876,7 +1878,9 @@ function drawBackgroundShape(ctx, shape, x, y, w, h, color, sizeMultiplier = 1) 
 
   if (options.template) {
     ctx.restore();
-    options.template.drawForeground(ctx, size);
+    const w = size;
+    const h = options.template?.heightRatio ? Math.round(size * options.template.heightRatio) : size;
+    options.template.drawForeground(ctx, w, h);
   }
 }
 
