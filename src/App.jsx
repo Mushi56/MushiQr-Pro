@@ -1188,7 +1188,7 @@ export default function App() {
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
   const [canvasSelection, setCanvasSelection] = useState(null); // 'logo' | 'text' | null
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [templateCategory, setTemplateCategory] = useState('Hot');
+  const [templateCategory, setTemplateCategory] = useState('All');
   const applyLogoBySlug = (slug) => {
     const LOGO_PRESETS = [
       { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.avif' },
@@ -4206,8 +4206,8 @@ export default function App() {
                     
                     {/* Category Selector Bar (Swipeable) */}
                     <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', borderBottom: '1px solid var(--border-color)' }}>
-                      {/* Category tabs — include 'Custom' if user has custom templates */}
-                      {[...['Hot', 'Social', 'Wifi', 'Event'], ...(customTemplates.length > 0 ? ['Custom'] : [])].map(cat => {
+                      {/* Category tabs — dynamic list based on available templates */}
+                      {['All', ...Array.from(new Set(ALL_TEMPLATES.map(t => t.category || 'Social')))].map(cat => {
                         const isSelected = templateCategory === cat;
                         const label = cat === 'Hot' ? 'Hot 🔥' : cat;
                         return (
@@ -4250,7 +4250,7 @@ export default function App() {
                       gap: '12px',
                       marginTop: '8px'
                     }}>
-                      {ALL_TEMPLATES.filter(t => t.category === templateCategory).map(tpl => {
+                      {ALL_TEMPLATES.filter(t => templateCategory === 'All' || t.category === templateCategory).map(tpl => {
                         const isSelected = selectedTemplate?.id === tpl.id;
                         return (
                           <button
