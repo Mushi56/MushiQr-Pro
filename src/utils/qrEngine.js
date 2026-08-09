@@ -105,13 +105,11 @@ export const EC_LEVELS = {
 
 // Dot styles (Ordered by popularity)
 export const DOT_STYLES = {
+  DENSO: 'denso',
   SQUARE: 'square',
   ROUNDED: 'rounded',
   DOTS: 'dots',
   FLUID: 'fluid',
-  EXTRA_ROUNDED: 'extra-rounded',
-  CLASSY: 'classy',
-  DENSO: 'denso',
   DIAMOND: 'diamond',
   LEAF: 'leaf',
   STAR: 'star',

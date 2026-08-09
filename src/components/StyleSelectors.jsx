@@ -45,6 +45,11 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
 }
 
 const DOT_PREVIEWS = {
+  [DOT_STYLES.DENSO]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="0" y="0" width="28" height="28" fill="currentColor" />
+    </svg>
+  ),
   [DOT_STYLES.SQUARE]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="2" y="2" width="24" height="24" fill="currentColor" />
@@ -63,21 +68,6 @@ const DOT_PREVIEWS = {
   [DOT_STYLES.FLUID]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <path d="M4 14 a10 10 0 0 1 10 -10 v20 a10 10 0 0 1 -10 -10 M14 4 h4 a10 10 0 0 1 0 20 h-4 Z" fill="currentColor" />
-    </svg>
-  ),
-  [DOT_STYLES.EXTRA_ROUNDED]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <rect x="2" y="2" width="24" height="24" rx="10" fill="currentColor" />
-    </svg>
-  ),
-  [DOT_STYLES.CLASSY]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <rect x="2" y="2" width="24" height="24" rx="12" fill="currentColor" />
-    </svg>
-  ),
-  [DOT_STYLES.DENSO]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <rect x="0" y="0" width="28" height="28" fill="currentColor" />
     </svg>
   ),
   [DOT_STYLES.DIAMOND]: (
