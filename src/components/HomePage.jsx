@@ -648,7 +648,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       marginTop: '2px',
                       lineHeight: 1
                     }}>
-                      Fully Customizable
+                      Design Without Limits
                     </div>
                   </div>
                 </div>
@@ -782,7 +782,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       marginTop: '2px',
                       lineHeight: 1
                     }}>
-                      Industry Standard
+                      Professional &amp; Reliable
                     </div>
                   </div>
                 </div>
@@ -922,12 +922,12 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     marginTop: '2px',
                     lineHeight: 1
                   }}>
-                    Fast &amp; Efficient
+                    Powerful • Fast • Efficient
                   </div>
                 </div>
               </div>
               <p style={{ fontSize: '8.5px', margin: '6px 110px 0 0', color: 'rgba(255,255,255,0.75)', fontWeight: 400, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                Create 10K+ codes from spreadsheets.
+                Create 10K+ codes from your spreadsheets.
               </p>
             </div>
           </div>
