@@ -599,7 +599,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 style={{
                   position: 'absolute',
                   right: '-28px',
-                  bottom: '2px',
+                  bottom: '-2px',
                   width: '130px',
                   height: '130px',
                   objectFit: 'contain',
@@ -727,7 +727,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 style={{
                   position: 'absolute',
                   right: '-28px',
-                  bottom: '2px',
+                  bottom: '-2px',
                   width: '130px',
                   height: '130px',
                   objectFit: 'contain',
