@@ -122,17 +122,8 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
     }
   }
 
-  // 4. Open native Share sheet so user can share or inspect file
-  if (fileUri) {
-    try {
-      await Share.share({
-        title: 'Mushi QR Pro',
-        text: `Saved to ${organizedPath}`,
-        url: fileUri,
-        dialogTitle: 'Save or Share your File',
-      });
-    } catch (shareErr) {}
-  }
+  // 4. Removed automatic native Share sheet on save.
+  // The share action is now handled manually via the Success Modal.
 
   return isSavedToDocs ? 'saved' : 'share';
 }

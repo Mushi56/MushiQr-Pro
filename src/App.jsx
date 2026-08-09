@@ -95,7 +95,6 @@ import AppIcon from './components/AppIcon';
 import SaveLocationModal from './components/SaveLocationModal';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
-
 const QRDotsIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
@@ -111,7 +110,6 @@ const QRDotsIcon = ({ size = 18 }) => (
     <rect x="17.5" y="17.5" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
   </svg>
 );
-
 const QREyesIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     {/* Top-Left Eye */}
@@ -127,7 +125,6 @@ const QREyesIcon = ({ size = 18 }) => (
     <rect x="4.5" y="17" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
   </svg>
 );
-
 const QRStyleIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ overflow: 'visible' }}>
     {/* Three Main Position Marker Eyes */}
@@ -159,7 +156,6 @@ const QRStyleIcon = ({ size = 18 }) => (
     <rect x="18.5" y="18.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
   </svg>
 );
-
 const QRGradientIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <defs>
@@ -171,7 +167,6 @@ const QRGradientIcon = ({ size = 18 }) => (
     <circle cx="12" cy="12" r="9" fill="url(#qr-icon-grad)" />
   </svg>
 );
-
 const TEXT_SHAPES = [
   { id: 'solid', label: 'Solid Box' },
   { id: 'rounded', label: 'Rounded Box' },
@@ -184,7 +179,6 @@ const TEXT_SHAPES = [
   { id: 'hexagon', label: 'Hexagon' },
   { id: 'dots', label: 'Dotted Box' }
 ];
-
 const LOGO_BG_SHAPES = [
   { id: 'circle', label: 'Circle Box' },
   { id: 'solid', label: 'Solid Box' },
@@ -194,7 +188,25 @@ const LOGO_BG_SHAPES = [
   { id: 'glow', label: 'Glow Effect' },
   { id: 'hexagon', label: 'Hexagon' }
 ];
-
+const QR_BG_SHAPES = [
+  { id: 'full', label: 'Full Canvas' },
+  { id: 'rounded', label: 'Rounded Box' },
+  { id: 'squircle', label: 'Squircle Box' },
+  { id: 'cut', label: 'Cut/Beveled' },
+  { id: 'leaf', label: 'Leaf Shape' },
+  { id: 'circle', label: 'Circle Box' },
+  { id: 'shield', label: 'Shield' },
+  { id: 'hexagon', label: 'Hexagon' },
+  { id: 'octagon', label: 'Octagon' },
+  { id: 'diamond', label: 'Diamond' }
+];
+const QR_CARD_SHAPES = [
+  { id: 'rounded', label: 'Rounded Box' },
+  { id: 'squircle', label: 'Squircle Box' },
+  { id: 'cut', label: 'Cut/Beveled' },
+  { id: 'leaf', label: 'Leaf Shape' },
+  { id: 'circle', label: 'Circle Box' }
+];
 /* ── Color Presets ── */
 /* ── Color Presets (Expanded to 50) ── */
 const COLOR_PRESETS = [
@@ -251,7 +263,6 @@ const COLOR_PRESETS = [
   { name: 'Warm Amber', qr: '#FFAB00', bg: '#FFF8E1' },
   { name: 'Deep Purple', qr: '#6200EA', bg: '#EDE7F6' },
 ];
-
 /* ── Gradient Presets (Expanded to 50) ── */
 const GRADIENT_PRESETS = [
   { name: 'Sunset', c1: '#FF512F', c2: '#DD2476' },
@@ -305,7 +316,6 @@ const GRADIENT_PRESETS = [
   { name: 'Coal', c1: '#000000', c2: '#434343' },
   { name: 'Titanium', c1: '#283048', c2: '#859398' },
 ];
-
 const TRENDING_GRADIENT_PRESETS = GRADIENT_PRESETS.map(p => {
   let bg = '#FFFFFF';
   const nameLower = p.name.toLowerCase();
@@ -318,7 +328,6 @@ const TRENDING_GRADIENT_PRESETS = GRADIENT_PRESETS.map(p => {
     bg: bg
   };
 });
-
 const LOGO_BG_GRADIENT_PRESETS = [
   'linear-gradient(135deg, #FF3B30, #FF9500)',
   'linear-gradient(135deg, #007AFF, #00F0FF)',
@@ -329,26 +338,23 @@ const LOGO_BG_GRADIENT_PRESETS = [
   'linear-gradient(135deg, #00C5FF, #25D366)',
   'linear-gradient(135deg, #111111, #444444)'
 ];
-
 const SWATCH_PRESETS = [
   '#000000', '#FFFFFF', '#FF3B30', '#34C759',
   '#007AFF', '#FFCC00', '#AF52DE', '#FF9500',
   '#5856D6', '#FF2D55', '#00F0FF', '#7000FF',
   '#FF007F', '#00D1FF', '#FFD700', '#8E8E93'
 ];
-
 const SOCIAL_TEXTURES = [
-  { slug: 'facebook', name: 'Facebook', url: '/textures/facebook_texture.png' },
-  { slug: 'whatsapp', name: 'WhatsApp', url: '/textures/whatsapp_texture.png' },
-  { slug: 'instagram', name: 'Instagram', url: '/textures/instagram_texture.png' },
-  { slug: 'youtube', name: 'YouTube', url: '/textures/youtube_texture.png' },
-  { slug: 'tiktok', name: 'TikTok', url: '/textures/tiktok_texture.png' },
-  { slug: 'snapchat', name: 'Snapchat', url: '/textures/snapchat_texture.png' },
-  { slug: 'twitter', name: 'Twitter / X', url: '/textures/twitter_texture.png' },
-  { slug: 'telegram', name: 'Telegram', url: '/textures/telegram_texture.png' },
-  { slug: 'spotify', name: 'Spotify', url: '/textures/spotify_texture.png' }
+  { slug: 'facebook', name: 'Facebook', url: '/textures/facebook_texture.webp' },
+  { slug: 'whatsapp', name: 'WhatsApp', url: '/textures/whatsapp_texture.webp' },
+  { slug: 'instagram', name: 'Instagram', url: '/textures/instagram_texture.webp' },
+  { slug: 'youtube', name: 'YouTube', url: '/textures/youtube_texture.webp' },
+  { slug: 'tiktok', name: 'TikTok', url: '/textures/tiktok_texture.webp' },
+  { slug: 'snapchat', name: 'Snapchat', url: '/textures/snapchat_texture.webp' },
+  { slug: 'twitter', name: 'Twitter / X', url: '/textures/twitter_texture.webp' },
+  { slug: 'telegram', name: 'Telegram', url: '/textures/telegram_texture.webp' },
+  { slug: 'spotify', name: 'Spotify', url: '/textures/spotify_texture.webp' }
 ];
-
 const renderShapeThumbnail = (shapeId, color = 'currentColor') => {
   switch (shapeId) {
     case 'circle':
@@ -403,7 +409,46 @@ const renderShapeThumbnail = (shapeId, color = 'currentColor') => {
       return null;
   }
 };
-
+function MiniQRCanvasBg({ qrParams, shapeId, isActive }) {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    if (!canvasRef.current || !qrParams) return;
+    // Generate a clean "Hello User" matrix for maximum shape readability
+    const demoMatrixInfo = generateQRMatrix("Hello User", qrParams.errorLevel || 'H');
+    if (!demoMatrixInfo) return;
+    const options = {
+      ...qrParams,
+      ...demoMatrixInfo,
+      bgTransparent: qrParams.bgTransparent,
+      bgColor: qrParams.bgColor || '#ffffff',
+      qrColor: qrParams.qrColor || '#000000',
+      logo: null,
+      textCenterEnabled: false,
+      textCenter: null,
+      frameStyle: 'none',
+      quietZone: 1,
+      size: 128,
+      qrBgShape: shapeId
+    };
+    renderQR(canvasRef.current, options);
+  }, [qrParams, shapeId, isActive]);
+  return (
+    <canvas 
+      ref={canvasRef} 
+      width="128" 
+      height="128" 
+      style={{ 
+        width: '64px', 
+        height: '64px', 
+        borderRadius: '8px',
+        objectFit: 'contain',
+        display: 'block',
+        border: '1px solid var(--border-light)',
+        background: qrParams.bgTransparent ? 'transparent' : 'var(--bg-primary)'
+      }} 
+    />
+  );
+}
 function parseGradientString(gradStr, defaultColor1 = '#FF3B30', defaultColor2 = '#FF9500') {
   if (gradStr && gradStr.startsWith('linear-gradient(')) {
     const match = gradStr.match(/linear-gradient\(([^,]+),\s*([^,]+),\s*([^)]+)\)/i);
@@ -419,7 +464,6 @@ function parseGradientString(gradStr, defaultColor1 = '#FF3B30', defaultColor2 =
     color2: defaultColor2
   };
 }
-
 const renderColorOrGradientPicker = (label, value, onChange, handleOpenAdv) => {
   const isGradient = value && value.startsWith('linear-gradient(');
   const { color1, color2 } = parseGradientString(value);
@@ -443,7 +487,6 @@ const renderColorOrGradientPicker = (label, value, onChange, handleOpenAdv) => {
           </button>
         </div>
       </div>
-
       {!isGradient ? (
         <div className="swatch-grid-mini">
           <ColorPicker isSwatch={true} icon={Pipette} value={value} onChange={onChange} onOpenAdvanced={handleOpenAdv} />
@@ -466,7 +509,6 @@ const renderColorOrGradientPicker = (label, value, onChange, handleOpenAdv) => {
           }}>
             {/* Start Color Picker */}
             <ColorPicker isSwatch={true} icon={Pipette} value={color1} onChange={(c) => onChange(`linear-gradient(135deg, ${c}, ${color2})`)} onOpenAdvanced={handleOpenAdv} />
-
             {/* Photoshop style connecting track & swap button */}
             <div style={{ 
               position: 'relative', 
@@ -513,7 +555,6 @@ const renderColorOrGradientPicker = (label, value, onChange, handleOpenAdv) => {
                 </svg>
               </button>
             </div>
-
             {/* End Color Picker */}
             <ColorPicker isSwatch={true} icon={Pipette} value={color2} onChange={(c) => onChange(`linear-gradient(135deg, ${color1}, ${c})`)} onOpenAdvanced={handleOpenAdv} />
           </div>
@@ -548,7 +589,6 @@ const renderColorOrGradientPicker = (label, value, onChange, handleOpenAdv) => {
     </div>
   );
 };
-
 const MockQR = () => {
   const size = 21;
   // Actual "Hello World" (Level M) pattern bits (Simplified representation for clarity)
@@ -583,7 +623,6 @@ const MockQR = () => {
     </svg>
   );
 };
-
 const FRAME_OPTIONS = [
   {
     id: FRAME_STYLES.NONE,
@@ -644,7 +683,6 @@ const FRAME_OPTIONS = [
     )
   },
 ];
-
 /* ── Error Correction Levels ── */
 const EC_LEVELS = [
   { key: 'L', label: 'L', pct: '7%', width: 25, desc: 'Low error correction. Best for simple QR codes with clean printing and close-range scanning.' },
@@ -652,7 +690,6 @@ const EC_LEVELS = [
   { key: 'Q', label: 'Q', pct: '25%', width: 75, desc: 'Quartile error correction. Recommended when adding a logo or for medium-range scanning.' },
   { key: 'H', label: 'H', pct: '30%', width: 100, desc: 'High error correction. Best for complex logos, small print sizes, or harsh environments.' },
 ];
-
 const FONT_OPTIONS = [
   { id: 'Inter', label: 'Inter' },
   { id: 'Outfit', label: 'Outfit' },
@@ -685,7 +722,6 @@ const FONT_OPTIONS = [
   { id: 'Quicksand', label: 'Quicksand' },
   { id: 'Satisfy', label: 'Satisfy' },
 ];
-
 /* ── Error Boundary ── */
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
@@ -703,13 +739,9 @@ class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
-
-
 function parseRawQRText(text) {
   if (!text) return { type: 'text', data: { text: '' } };
-
   const t = text.trim();
-
   // 1. WiFi
   // Example: WIFI:T:WPA;S:MySSID;P:password;H:false;;
   if (/^WIFI:/i.test(t)) {
@@ -717,7 +749,6 @@ function parseRawQRText(text) {
     const passwordMatch = t.match(/P:(.*?)(?:[;]|$)/i);
     const encryptionMatch = t.match(/T:(.*?)(?:[;]|$)/i);
     const hiddenMatch = t.match(/H:(.*?)(?:[;]|$)/i);
-
     return {
       type: 'wifi',
       data: {
@@ -728,7 +759,6 @@ function parseRawQRText(text) {
       }
     };
   }
-
   // 2. Email
   // Example: mailto:test@example.com?subject=Hello&body=World
   if (/^mailto:/i.test(t)) {
@@ -747,7 +777,6 @@ function parseRawQRText(text) {
       data: { email, subject, body }
     };
   }
-
   // 3. Phone
   // Example: tel:+123456789
   if (/^tel:/i.test(t)) {
@@ -756,7 +785,6 @@ function parseRawQRText(text) {
       data: { phone: t.substring(4) }
     };
   }
-
   // 4. SMS
   // Example: smsto:+123456789:Hello World
   if (/^smsto:/i.test(t)) {
@@ -768,7 +796,6 @@ function parseRawQRText(text) {
       data: { phone, message }
     };
   }
-
   // 5. vCard / Contact Card
   if (/^BEGIN:VCARD/i.test(t)) {
     // Parse standard vCard fields
@@ -779,7 +806,6 @@ function parseRawQRText(text) {
     const orgMatch = t.match(/ORG:(.*?)(?:[\r\n]|$)/i);
     const titleMatch = t.match(/TITLE:(.*?)(?:[\r\n]|$)/i);
     const urlMatch = t.match(/URL.*?:(.*?)(?:[\r\n]|$)/i);
-
     let firstName = '';
     let lastName = '';
     if (firstNameMatch) {
@@ -790,7 +816,6 @@ function parseRawQRText(text) {
       firstName = names[0] || '';
       lastName = names.slice(1).join(' ') || '';
     }
-
     return {
       type: 'vcard',
       data: {
@@ -804,7 +829,6 @@ function parseRawQRText(text) {
       }
     };
   }
-
   // 6. Location / Geo coordinates
   // Example: geo:37.7749,-122.4194
   if (/^geo:/i.test(t)) {
@@ -817,7 +841,6 @@ function parseRawQRText(text) {
       }
     };
   }
-
   // 7. WhatsApp
   // Example: https://wa.me/123456789 or https://api.whatsapp.com/send?phone=123456789
   if (/wa\.me/i.test(t) || /whatsapp\.com/i.test(t)) {
@@ -831,7 +854,6 @@ function parseRawQRText(text) {
       }
     };
   }
-
   // 8. Instagram
   if (/instagram\.com/i.test(t)) {
     const usernameMatch = t.match(/instagram\.com\/([^/?#\s]+)/i);
@@ -840,7 +862,6 @@ function parseRawQRText(text) {
       data: { username: usernameMatch ? usernameMatch[1] : '' }
     };
   }
-
   // 9. Facebook
   if (/facebook\.com/i.test(t)) {
     const usernameMatch = t.match(/facebook\.com\/([^/?#\s]+)/i);
@@ -849,7 +870,6 @@ function parseRawQRText(text) {
       data: { username: usernameMatch ? usernameMatch[1] : '' }
     };
   }
-
   // 10. Twitter/X
   if (/twitter\.com/i.test(t) || /x\.com/i.test(t)) {
     const usernameMatch = t.match(/(?:twitter\.com|x\.com)\/([^/?#\s]+)/i);
@@ -858,7 +878,6 @@ function parseRawQRText(text) {
       data: { username: usernameMatch ? usernameMatch[1] : '' }
     };
   }
-
   // 11. LinkedIn
   if (/linkedin\.com/i.test(t)) {
     const usernameMatch = t.match(/linkedin\.com\/(?:in|company)\/([^/?#\s]+)/i);
@@ -867,7 +886,6 @@ function parseRawQRText(text) {
       data: { username: usernameMatch ? usernameMatch[1] : t }
     };
   }
-
   // 12. YouTube
   if (/youtube\.com|youtu\.be/i.test(t)) {
     return {
@@ -875,7 +893,6 @@ function parseRawQRText(text) {
       data: { url: t }
     };
   }
-
   // 13. URL (falls back to URL if it looks like one)
   if (/^https?:\/\//i.test(t) || /^www\./i.test(t) || /^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.[a-z]{2,}(\/.*)?$/i.test(t)) {
     return {
@@ -883,19 +900,16 @@ function parseRawQRText(text) {
       data: { url: t.startsWith('http') ? t : 'https://' + t }
     };
   }
-
   // 14. Fallback to Text
   return {
     type: 'text',
     data: { text: t }
   };
 }
-
 export default function App() {
   // ── Tab & Theme ──
   const location = useLocation();
   const navigate = useNavigate();
-
   const getPageFromPath = (path) => {
     if (path === '/generator') return 'generator';
     if (path === '/settings') return 'settings';
@@ -908,7 +922,6 @@ export default function App() {
     if (path === '/scanner-gun') return 'scanner-gun';
     return 'home';
   };
-
   const [activeTab, setActiveTab] = useState('content');
   const [currentUser, setCurrentUser] = useState(null);
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
@@ -925,7 +938,6 @@ export default function App() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
   const authDropdownRef = useRef(null);
-
   // Close auth dropdown on outside click
   useEffect(() => {
     if (!authDropdownOpen) return;
@@ -937,7 +949,6 @@ export default function App() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [authDropdownOpen]);
-
   useEffect(() => {
     const checkRedirect = async () => {
       try {
@@ -951,7 +962,6 @@ export default function App() {
       }
     };
     checkRedirect();
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       if (user) {
@@ -959,7 +969,6 @@ export default function App() {
       }
     });
   }, []);
-
   // Pre-create organized folder structure on startup
   useEffect(() => {
     const createDefaultDirectories = async () => {
@@ -1003,7 +1012,6 @@ export default function App() {
     };
     createDefaultDirectories();
   }, []);
-
   const [tabHistory, setTabHistory] = useState([]);
   const [activePage, setActivePage] = useState(() => {
     return location.state?.activePage || getPageFromPath(location.pathname);
@@ -1012,7 +1020,6 @@ export default function App() {
   const [theme, setTheme] = useState('auto');
   const [effectiveTheme, setEffectiveTheme] = useState('dark');
   const [historyFilter, setHistoryFilter] = useState('All');
-
   useEffect(() => {
     const page = location.state?.activePage || getPageFromPath(location.pathname);
     if (page !== activePage) {
@@ -1032,9 +1039,6 @@ export default function App() {
       if (location.state.loadedBarcodeItem) setLoadedBarcodeItem(location.state.loadedBarcodeItem);
     }
   }, [location.pathname, location.state, activePage]);
-
-
-
   const goBack = () => {
     // 1. Close overlays first
     if (advPicker.open) {
@@ -1057,7 +1061,6 @@ export default function App() {
       setIsDataModalOpen(false);
       return;
     }
-
     // 2. Navigation logic
     if (activePage === 'scanner') {
       // From Scan to Home or Exit if launched from widget
@@ -1075,7 +1078,6 @@ export default function App() {
         setActiveTab(lastTab);
         return;
       }
-
       // If no tab history, exit to home immediately
       navigateTo(previousPage || 'home');
     } else if (activePage === 'history') {
@@ -1085,7 +1087,6 @@ export default function App() {
       navigateTo('home');
     }
   };
-
   // Resolve Auto Theme
   useEffect(() => {
     if (theme === 'auto') {
@@ -1098,14 +1099,11 @@ export default function App() {
       setEffectiveTheme(theme);
     }
   }, [theme]);
-
-
   // ── Admin Settings (read from Super Admin Panel) ──────────────────────────
   const [adminSettings, setAdminSettings]   = useState(null);
   const [adminAnnouncement, setAdminAnnouncement] = useState(null);
   const [featureFlags, setFeatureFlags]     = useState(null);
   const [customTemplates, setCustomTemplates] = useState(() => getUserTemplates());
-
   useEffect(() => {
     // Set local storage fallback/defaults initially
     const _read = (key) => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
@@ -1113,7 +1111,6 @@ export default function App() {
     const announce = _read('qrgen_announcement');
     const flags = _read('qrgen_feature_flags');
     const cacheTemplates = _read('qrgen_cloud_templates');
-
     if (settings) {
       setAdminSettings(settings);
       if (settings.appName) document.title = settings.appName;
@@ -1121,7 +1118,6 @@ export default function App() {
     if (announce) setAdminAnnouncement(announce);
     if (flags) setFeatureFlags(flags);
     if (cacheTemplates) setCustomTemplates(cacheTemplates);
-
     // Setup real-time subscribers from Firestore
     const unsubSettings = onSnapshot(doc(db, 'global_config', 'appSettings'), (snap) => {
       if (snap.exists()) {
@@ -1131,7 +1127,6 @@ export default function App() {
         if (val.appName) document.title = val.appName;
       }
     });
-
     const unsubAnnounce = onSnapshot(doc(db, 'global_config', 'announcement'), (snap) => {
       if (snap.exists()) {
         const val = snap.data();
@@ -1139,7 +1134,6 @@ export default function App() {
         localStorage.setItem('qrgen_announcement', JSON.stringify(val));
       }
     });
-
     const unsubFlags = onSnapshot(doc(db, 'global_config', 'featureFlags'), (snap) => {
       if (snap.exists()) {
         const val = snap.data();
@@ -1147,14 +1141,12 @@ export default function App() {
         localStorage.setItem('qrgen_feature_flags', JSON.stringify(val));
       }
     });
-
     const unsubTemplates = onSnapshot(collection(db, 'global_templates'), (snap) => {
       const list = [];
       snap.forEach(d => list.push({ ...d.data(), id: d.id }));
       setCustomTemplates(list);
       localStorage.setItem('qrgen_cloud_templates', JSON.stringify(list));
     });
-
     return () => {
       unsubSettings();
       unsubAnnounce();
@@ -1162,13 +1154,10 @@ export default function App() {
       unsubTemplates();
     };
   }, []);
-
   // Maintenance mode flag (used in render)
   const isMaintenanceMode = !!adminSettings?.maintenanceMode;
-
   // ─── All templates (built-in + custom) ─────────────────────────────────────
   const ALL_TEMPLATES = [...QR_TEMPLATES, ...customTemplates];
-
   // ── QR Content ──
   const [qrType, setQrType] = useState(() => location.state?.qrType || QR_TYPES.URL);
   const [qrData, setQrData] = useState(() => location.state?.qrData || { url: 'https://example.com' });
@@ -1179,11 +1168,9 @@ export default function App() {
   // Tracks whether the user has meaningfully changed the QR generator since it was last reset/loaded
   const generatorIsDirtyRef = useRef(false);
   const ignoreDirtyRef = useRef(false);
-
   // ── Batch QR ──
   const [batchItems, setBatchItems] = useState([]);
   const [activeBatchItemIndex, setActiveBatchItemIndex] = useState(null);
-
   // ── Colors ──
   const [qrColor, setQrColor] = useState('#000000');
   const [bgColor, setBgColor] = useState('#ffffff');
@@ -1202,17 +1189,16 @@ export default function App() {
   const [canvasSelection, setCanvasSelection] = useState(null); // 'logo' | 'text' | null
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [templateCategory, setTemplateCategory] = useState('Hot');
-
   const applyLogoBySlug = (slug) => {
     const LOGO_PRESETS = [
-      { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.png' },
-      { slug: 'facebook', name: 'Facebook', color: '#1877F2', url: '/presets/facebook.png' },
-      { slug: 'whatsapp', name: 'WhatsApp', color: '#25D366', url: '/presets/whatsapp.png' },
-      { slug: 'instagram', name: 'Instagram', color: '#E4405F', url: '/presets/instagram.png' },
-      { slug: 'youtube', name: 'YouTube', color: '#FF0000', url: '/presets/youtube.png' },
-      { slug: 'tiktok', name: 'TikTok', color: '#000000', url: '/presets/tiktok.png' },
-      { slug: 'linkedin', name: 'LinkedIn', color: '#0A66C2', url: '/presets/linkedin.png' },
-      { slug: 'twitter', name: 'Twitter', color: '#1DA1F2', url: '/presets/twitter.png' }
+      { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.avif' },
+      { slug: 'facebook', name: 'Facebook', color: '#1877F2', url: '/presets/facebook.avif' },
+      { slug: 'whatsapp', name: 'WhatsApp', color: '#25D366', url: '/presets/whatsapp.avif' },
+      { slug: 'instagram', name: 'Instagram', color: '#E4405F', url: '/presets/instagram.avif' },
+      { slug: 'youtube', name: 'YouTube', color: '#FF0000', url: '/presets/youtube.avif' },
+      { slug: 'tiktok', name: 'TikTok', color: '#000000', url: '/presets/tiktok.avif' },
+      { slug: 'linkedin', name: 'LinkedIn', color: '#0A66C2', url: '/presets/linkedin.avif' },
+      { slug: 'twitter', name: 'Twitter', color: '#1DA1F2', url: '/presets/twitter.avif' }
     ];
     const found = LOGO_PRESETS.find(item => item.slug === slug);
     if (found) {
@@ -1231,7 +1217,6 @@ export default function App() {
       setLogo(null);
     }
   };
-
   const applyTemplate = (tpl) => {
     if (!tpl) {
       setSelectedTemplate(null);
@@ -1242,7 +1227,6 @@ export default function App() {
     setQrBgImageEnabled(false);
     setQrTexture(null);
     setQrTextureEnabled(false);
-
     if (tpl.preset) {
       if (tpl.preset.qrColor) setQrColor(tpl.preset.qrColor);
       if (tpl.preset.bgColor) setBgColor(tpl.preset.bgColor);
@@ -1258,7 +1242,6 @@ export default function App() {
       }
     }
   };
-
   // ── Gradient ──
   const [gradientEnabled, setGradientEnabled] = useState(false);
   const [gradientColor1, setGradientColor1] = useState('#6c5ce7');
@@ -1269,7 +1252,6 @@ export default function App() {
   const [qrTextureEnabled, setQrTextureEnabled] = useState(false);
   const [qrTexture, setQrTexture] = useState(null); // { src, image, name }
   const [qrTextureSyncEyes, setQrTextureSyncEyes] = useState(true);
-
   // ── QR Background Image ──
   const [qrBgImageEnabled, setQrBgImageEnabled] = useState(false);
   const [qrBgImage, setQrBgImage] = useState(null); // { src, image, name }
@@ -1278,13 +1260,16 @@ export default function App() {
   const [qrBgImageOverlayOpacity, setQrBgImageOverlayOpacity] = useState(0.0);
   const [qrBgCardEnabled, setQrBgCardEnabled] = useState(false);
   const [qrBgCardOpacity, setQrBgCardOpacity] = useState(0.6);
-
+  const [qrBgShape, setQrBgShape] = useState('full'); // 'full' | 'rounded' | 'squircle' | 'cut' | 'leaf' | 'circle'
+  const [qrBgCardShape, setQrBgCardShape] = useState('rounded'); // 'rounded' | 'squircle' | 'cut' | 'leaf' | 'circle'
+  const [qrSizeScale, setQrSizeScale] = useState(1.0);
+  const [qrPosX, setQrPosX] = useState(0.5);
+  const [qrPosY, setQrPosY] = useState(0.5);
   // ── Shapes ──
   const [dotStyle, setDotStyle] = useState(DOT_STYLES.SQUARE);
   const [eyeStyle, setEyeStyle] = useState(EYE_STYLES.SQUARE);
   const [dotPadding, setDotPadding] = useState(0);
   const [eyePadding, setEyePadding] = useState(0);
-
   // ── Logo ──
   const [logo, setLogo] = useState(null);
   const [logoWidth, setLogoWidth] = useState(0.18);
@@ -1299,7 +1284,6 @@ export default function App() {
   const [logoOutlineOpacity, setLogoOutlineOpacity] = useState(1);
   const [logoPosX, setLogoPosX] = useState(0.5);
   const [logoPosY, setLogoPosY] = useState(0.5);
-
   // New Logo Features
   const [logoOpacity, setLogoOpacity] = useState(1);
   const [logoRotation, setLogoRotation] = useState(0);
@@ -1317,7 +1301,6 @@ export default function App() {
   const [logoTexture, setLogoTexture] = useState('none');
   const [logoCrop, setLogoCrop] = useState({ x: 0, y: 0, w: 1, h: 1 });
   const [logoAspectRatioLocked, setLogoAspectRatioLocked] = useState(true);
-
   // ── Frame ──
   const [frameStyle, setFrameStyle] = useState('none');
   const [frameText, setFrameText] = useState('SCAN ME');
@@ -1336,7 +1319,6 @@ export default function App() {
   const [textPopup, setTextPopup] = useState(null);
   const [logoPopup, setLogoPopup] = useState(null);
   const [textEditMode, setTextEditMode] = useState('center');
-
   const [textCenterText, setTextCenterText] = useState('');
   const [textCenterSize, setTextCenterSize] = useState(0.08);
   const [textCenterColor, setTextCenterColor] = useState('#000000');
@@ -1354,7 +1336,6 @@ export default function App() {
   const [textCenterHeight, setTextCenterHeight] = useState(null); // null means auto
   const [colorPopup, setColorPopup] = useState(null);
   const [shapePopup, setShapePopup] = useState(null);
-
   // ── References ──
   const canvasRef = useRef(null);
   const latestThumbnailRef = useRef(null);
@@ -1365,7 +1346,6 @@ export default function App() {
   const [qrMatrixInfo, setQrMatrixInfo] = useState(null);
   const [toast, setToast] = useState(null);
   const [downloadingFormat, setDownloadingFormat] = useState(null);
-
   // ── Advanced Picker State ──
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', setter: null });
   const handleOpenAdv = (color, setter) => setAdvPicker({ open: true, color, setter });
@@ -1384,13 +1364,11 @@ export default function App() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isInternalUpdate = useRef(false);
   const preEditSnapshot = useRef(null);
-
   useEffect(() => {
     if (qrBgImage || qrTexture) {
       setSelectedTemplate(null);
     }
   }, [qrBgImage, qrTexture]);
-
   const startEditing = (type, val) => {
     if (!preEditSnapshot.current) {
       preEditSnapshot.current = getSnapshot();
@@ -1412,7 +1390,6 @@ export default function App() {
       setCanvasSelection(null);
     }
   };
-
   const cancelEditing = () => {
     if (preEditSnapshot.current) {
       applySnapshot(preEditSnapshot.current);
@@ -1424,7 +1401,6 @@ export default function App() {
     setCanvasSelection(null);
     preEditSnapshot.current = null;
   };
-
   const applyEditing = () => {
     setLogoPopup(null);
     setTextPopup(null);
@@ -1434,7 +1410,6 @@ export default function App() {
     preEditSnapshot.current = null;
     saveSnapshot(); // Save the final result to history
   };
-
   const handleTabChange = (tabId) => {
     if (tabId !== activeTab) {
       if (logoPopup || textPopup || colorPopup || shapePopup) {
@@ -1442,7 +1417,6 @@ export default function App() {
       }
       setTabHistory(prev => [...prev, activeTab]);
       setActiveTab(tabId);
-
       // Manage canvas selections for interactive outlines/handles
       if (tabId === 'text') {
         if (canvasSelection !== 'text' && canvasSelection !== 'frame-text') {
@@ -1456,9 +1430,7 @@ export default function App() {
       }
     }
   };
-
   const [batchPageDefaultType, setBatchPageDefaultType] = useState('QR');
-
   // Custom navigation wrapper to track history
   const navigateTo = (page, type = 'QR') => {
     if (page === 'batch') {
@@ -1475,7 +1447,6 @@ export default function App() {
       performNavigation(page);
     }
   };
-
   const performNavigation = (page) => {
     if (page !== 'scanner') {
       setLaunchedDirectlyToScanner(false);
@@ -1485,14 +1456,12 @@ export default function App() {
     }
     setCanvasSelection(null);
     setPreviousPage(activePage);
-
     if (page !== 'generator') {
       setIsDataModalOpen(false);
       setAdvPicker(prev => ({ ...prev, open: false }));
       setFormatDropdownOpen(false);
       setActiveBatchItemIndex(null);
     }
-
     let path = '/';
     if (page === 'generator') path = '/generator';
     else if (page === 'settings') path = '/settings';
@@ -1503,11 +1472,9 @@ export default function App() {
     else if (page === 'batch') path = '/batch';
     else if (page === 'barcode') path = '/barcode';
     else if (page === 'scanner-gun') path = '/scanner-gun';
-
     if (location.pathname !== path) {
       navigate(path);
     }
-
     setActivePage(page);
     // Clear tab history when starting a new session or returning home
     if (page === 'generator' || page === 'home') {
@@ -1518,7 +1485,6 @@ export default function App() {
       }
     }
   };
-
   // ── Native App Actions / Deep Links (from Widget or quick settings tile) ──
   useEffect(() => {
     // 1. Check cold boot action via Android Javascript Interface or stored initial action
@@ -1534,7 +1500,6 @@ export default function App() {
     } catch (e) {
       console.warn('Native JS interface check failed:', e);
     }
-
     // 2. Listen for hot start action event dispatched from MainActivity
     const handleAppAction = (e) => {
       if (e.detail === 'scan') {
@@ -1546,7 +1511,6 @@ export default function App() {
     return () => window.removeEventListener('appAction', handleAppAction);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const getSnapshot = useCallback(() => {
     return {
       qrType, qrData, qrColor, bgColor, bgTransparent, eyeColor, eyeOuterColor, syncEyes,
@@ -1589,7 +1553,6 @@ export default function App() {
     textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight,
     errorLevel
   ]);
-
   const saveSnapshot = useCallback(() => {
     if (isInternalUpdate.current) return;
     if (!ignoreDirtyRef.current) {
@@ -1602,7 +1565,6 @@ export default function App() {
     if (historyIndex >= 0 && history[historyIndex]) {
       if (JSON.stringify(current) === JSON.stringify(history[historyIndex])) return;
     }
-
     setHistory(prev => {
       const newHistory = prev.slice(0, historyIndex + 1);
       newHistory.push(current);
@@ -1614,7 +1576,6 @@ export default function App() {
       return newIndex;
     });
   }, [getSnapshot, historyIndex, history]);
-
   const undo = useCallback(() => {
     if (historyIndex <= 0) return;
     const prevIndex = historyIndex - 1;
@@ -1622,7 +1583,6 @@ export default function App() {
     applySnapshot(snapshot);
     setHistoryIndex(prevIndex);
   }, [history, historyIndex]);
-
   const redo = useCallback(() => {
     if (historyIndex >= history.length - 1) return;
     const nextIndex = historyIndex + 1;
@@ -1630,7 +1590,6 @@ export default function App() {
     applySnapshot(snapshot);
     setHistoryIndex(nextIndex);
   }, [history, historyIndex]);
-
   const applySnapshot = (s) => {
     isInternalUpdate.current = true;
     if (s.qrType !== undefined) setQrType(s.qrType);
@@ -1670,7 +1629,6 @@ export default function App() {
     } else {
       setLogo(null);
     }
-
     if (s.logoWidth !== undefined) setLogoWidth(s.logoWidth);
     if (s.logoHeight !== undefined) setLogoHeight(s.logoHeight);
     if (s.logoAspectRatioLocked !== undefined) setLogoAspectRatioLocked(s.logoAspectRatioLocked);
@@ -1733,7 +1691,6 @@ export default function App() {
     
     setTimeout(() => { isInternalUpdate.current = false; }, 50);
   };
-
   // Initial snapshot
   useEffect(() => {
     if (history.length === 0) {
@@ -1742,7 +1699,6 @@ export default function App() {
       setHistoryIndex(0);
     }
   }, []);
-
   // Debounced auto-save for continuous and discrete changes
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1756,14 +1712,11 @@ export default function App() {
     eyeColor, eyeOuterColor, logoBackground, logoOutline, textCenterEnabled,
     framePosition, frameRotation, textCenterRotation
   ]);
-
   const handleFontUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const fontName = file.name.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_');
     const reader = new FileReader();
-
     reader.onload = async (event) => {
       try {
         const fontData = event.target.result;
@@ -1780,19 +1733,15 @@ export default function App() {
         showToast('Failed to load font file. Use TTF, OTF or WOFF.', 'error');
       }
     };
-
     reader.readAsArrayBuffer(file);
     // Reset input so same file can be uploaded again if needed
     e.target.value = '';
   };
-
   // ── Menu ──
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
-
   // ── Bottom Nav Toggle ──
   const [isNavExpanded, setIsNavExpanded] = useState(false);
-
   // ── Mobile App Fixes (Capacitor) ──
   useEffect(() => {
     const updateStatusBar = async () => {
@@ -1814,8 +1763,6 @@ export default function App() {
     };
     updateStatusBar();
   }, [effectiveTheme]);
-
-
   // ── Sync Eyes color with dots color when syncEyes is ON ──
   useEffect(() => {
     if (syncEyes) {
@@ -1823,7 +1770,6 @@ export default function App() {
       setEyeOuterColor(qrColor);
     }
   }, [syncEyes, qrColor]);
-
   // ── Auto Theme Logic ──
   useEffect(() => {
     const applyTheme = () => {
@@ -1835,9 +1781,7 @@ export default function App() {
         setTheme(systemDark ? 'dark' : 'light');
       }
     };
-
     applyTheme();
-
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e) => {
       const currentPrefs = getPreferences();
@@ -1845,17 +1789,13 @@ export default function App() {
         setTheme(e.matches ? 'dark' : 'light');
       }
     };
-
     mediaQuery.addEventListener('change', handleChange);
     window.addEventListener('preferences-sync', applyTheme);
-
     return () => {
       mediaQuery.removeEventListener('change', handleChange);
       window.removeEventListener('preferences-sync', applyTheme);
     };
   }, []);
-
-
   // ── Helper: build a human-readable display name from qrType + qrData ──
   const getQRDisplayName = (type, data) => {
     if (!data) return 'QR Code';
@@ -1873,7 +1813,6 @@ export default function App() {
       default:              return formatQRData(type, data)?.substring(0, 50) || 'QR Code';
     }
   };
-
   // ── Unsaved Changes Modal Actions ──
   const handleSaveAndExit = () => {
     const dataString = formatQRData(qrType, qrData);
@@ -1906,18 +1845,15 @@ export default function App() {
     setUnsavedChangesModal({ isOpen: false, nextPage: null });
     performNavigation(nextPage);
   };
-
   const handleDiscardAndExit = () => {
     generatorIsDirtyRef.current = false;
     const nextPage = unsavedChangesModal.nextPage;
     setUnsavedChangesModal({ isOpen: false, nextPage: null });
     performNavigation(nextPage);
   };
-
   const handleCancelExit = () => {
     setUnsavedChangesModal({ isOpen: false, nextPage: null });
   };
-
   // ── Auto-upgrade error correction when logo is present ──
   useEffect(() => {
     if (logo) {
@@ -1926,11 +1862,9 @@ export default function App() {
       setErrorLevel(prev => prev === 'H' ? 'M' : prev);
     }
   }, [logo]);
-
   // ── Back Button Handling (Centralized) ──
   const lastBackPress = useRef(0);
   const backHandlerRef = useRef();
-
   backHandlerRef.current = () => {
     if (activePage === 'home' && !advPicker.open && !formatDropdownOpen && !isMenuOpen && !isDataModalOpen) {
       const now = Date.now();
@@ -1944,7 +1878,6 @@ export default function App() {
       goBack();
     }
   };
-
   useEffect(() => {
     const setupListener = async () => {
       const backListener = await CapApp.addListener('backButton', (data) => {
@@ -1955,19 +1888,16 @@ export default function App() {
       });
       return backListener;
     };
-
     const listenerPromise = setupListener();
     
     return () => {
       listenerPromise.then(l => l.remove());
     };
   }, []); // Run once on mount
-
   // ── Update body theme ──
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', effectiveTheme);
   }, [effectiveTheme]);
-
   // ── Close dropdown/menu on outside click ──
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -1985,13 +1915,11 @@ export default function App() {
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, []);
-
   // ── Toast ──
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
-
   // ── Copy to Clipboard ──
   const handleCopyToClipboard = () => {
     if (!canvasRef.current) return;
@@ -2006,7 +1934,6 @@ export default function App() {
       }
     });
   };
-
   // ── Share ──
   const handleShare = () => {
     if (!canvasRef.current) return;
@@ -2037,7 +1964,6 @@ export default function App() {
       }
     });
   };
-
   // ── Download ──
   const FORMAT_MAP = { PNG: downloadPNG, SVG: downloadSVG, PDF: downloadPDF, JPG: downloadJPG };
   const QUALITY_SIZES = {
@@ -2046,7 +1972,6 @@ export default function App() {
     'High': 2048,
     'Ultra': 4096
   };
-
   const generateExportCanvas = (exportSize) => {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = exportSize;
@@ -2075,6 +2000,11 @@ export default function App() {
       backgroundImageOverlayOpacity: qrBgImageOverlayOpacity,
       qrBackgroundCardEnabled: qrBgCardEnabled,
       qrBackgroundCardOpacity: qrBgCardOpacity,
+      qrBgShape,
+      qrBackgroundCardShape: qrBgCardShape,
+      qrSizeScale,
+      qrPosX,
+      qrPosY,
       logo: logo?.image, logoWidth, logoHeight, logoPadding,
       logoBackground, logoBgColor, logoBgShape,
       logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
@@ -2104,7 +2034,6 @@ export default function App() {
     
     return tempCanvas;
   };
-
   const handleDownload = async (format, downloadFn) => {
     if (!canvasRef.current) return;
     setDownloadingFormat(format);
@@ -2127,7 +2056,6 @@ export default function App() {
       setTimeout(() => setDownloadingFormat(null), 800);
     }
   };
-
   // ── Save to Saved ──
   const handleSave = () => {
     if (!canvasRef.current) return;
@@ -2147,11 +2075,9 @@ export default function App() {
     }
     showToast('Added to Saved QRs', 'success');
   };
-
   const getActiveStyle = () => {
     return getSnapshot();
   };
-
   // ── Edit Batch Item Style ──
   const handleEditBatchItemStyle = (item, idx) => {
     ignoreDirtyRef.current = true;
@@ -2160,13 +2086,11 @@ export default function App() {
       ignoreDirtyRef.current = false;
       generatorIsDirtyRef.current = false;
     }, 800);
-
     applySnapshot(item.style);
     
     const parsed = parseRawQRText(item.data);
     setQrType(parsed.type);
     setQrData(parsed.data);
-
     navigateTo('generator');
     setActiveTab('color');
     
@@ -2175,7 +2099,6 @@ export default function App() {
       setActiveBatchItemIndex(idx);
     }, 100);
   };
-
   // ── Load QR ──
   const handleLoadQR = (item) => {
     if (!item) return;
@@ -2187,7 +2110,6 @@ export default function App() {
       'ITF', 'ITF / I2OF5', 'ITF (I25)', 'CODABAR', 'MAXICODE'
     ];
     const isBarcode = item.qrType === 'BARCODE' || barcodeFormats.includes(typeUpper);
-
     if (isBarcode) {
       const getBcid = (fmt) => {
         if (!fmt) return 'code128';
@@ -2207,7 +2129,6 @@ export default function App() {
         if (name.includes('itf') || name.includes('i25')) return 'i25';
         return 'code128';
       };
-
       setLoadedBarcodeItem({
         id: item.id,
         displayText: item.displayText || item.qrData?.text || '',
@@ -2248,15 +2169,12 @@ export default function App() {
       // Generated QR template: apply all saved snapshot settings
       applySnapshot(item);
     }
-
     setLoadedItemId(item.id || null);
-
     // Reset tab history when loading a template
     setTabHistory([]);
     navigateTo('generator');
     showToast('Template loaded');
   };
-
   const resetGenerator = () => {
     ignoreDirtyRef.current = true;
     setLoadedItemId(null);
@@ -2269,7 +2187,6 @@ export default function App() {
     setQrType(QR_TYPES.URL);
     setQrData({ url: 'https://example.com' });
     setErrorLevel('M');
-
     // Appearance
     setQrColor('#000000');
     setBgColor('#ffffff');
@@ -2278,19 +2195,16 @@ export default function App() {
     setEyeColor('');
     setEyeOuterColor('');
     setActivePreset(null);
-
     // Gradient
     setGradientEnabled(false);
     setGradientColor1('#6c5ce7');
     setGradientColor2('#a78bfa');
     setGradientType('linear');
-
     // Shapes
     setDotStyle(DOT_STYLES.SQUARE);
     setEyeStyle(EYE_STYLES.SQUARE);
     setDotPadding(0);
     setEyePadding(0);
-
     // Logo
     setLogo(null);
     setLogoWidth(0.18);
@@ -2309,17 +2223,14 @@ export default function App() {
     setTextCenterPosY(0.5);
     setTextCenterWidth(null);
     setTextCenterHeight(null);
-
     // Frame
     setFrameStyle('none');
     setFrameText('SCAN ME');
     setFrameColor('');
-
     // Tabs
     setActiveTab('content');
     setTabHistory([]);
   };
-
   // ── Generate QR Matrix ──
   const regenerateMatrix = useCallback(() => {
     const dataString = formatQRData(qrType, qrData);
@@ -2331,15 +2242,12 @@ export default function App() {
       console.error('QR Generate Error:', e);
     }
   }, [qrType, qrData, errorLevel]);
-
   useEffect(() => { regenerateMatrix(); }, [regenerateMatrix]);
-
   // ── Device Capability Detection ──
   const isLowEndDevice = typeof navigator !== 'undefined' && 
     ((navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || 
      (navigator.deviceMemory && navigator.deviceMemory <= 4));
   const RENDER_DELAY = isLowEndDevice ? 60 : 0; // Throttle low-end to ~16fps, High-end uses native requestAnimationFrame (60-120fps)
-
   // ── Render Canvas ──
   const renderCanvas = useCallback(() => {
     if (!qrMatrixInfo || !canvasRef.current) return;
@@ -2371,6 +2279,11 @@ export default function App() {
         backgroundImageOverlayOpacity: qrBgImageOverlayOpacity,
         qrBackgroundCardEnabled: qrBgCardEnabled,
         qrBackgroundCardOpacity: qrBgCardOpacity,
+        qrBgShape,
+        qrBackgroundCardShape: qrBgCardShape,
+        qrSizeScale,
+        qrPosX,
+        qrPosY,
         logo: logo?.image, logoWidth, logoHeight, logoPadding,
         logoBackground, logoBgColor, logoBgShape,
         logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity,
@@ -2397,7 +2310,6 @@ export default function App() {
         showHandle: canvasSelection === 'logo' || canvasSelection === 'text' || canvasSelection === 'frame-text',
         selectedType: canvasSelection === 'text' ? 'text' : (canvasSelection === 'frame-text' ? 'frame-text' : canvasSelection)
       });
-
       // Cache latest thumbnail base64 data url for saving to history later
       try {
         latestThumbnailRef.current = canvasRef.current.toDataURL('image/jpeg', 0.8);
@@ -2405,7 +2317,6 @@ export default function App() {
         console.warn('Failed to cache thumbnail:', e);
       }
     };
-
     if (isLowEndDevice) {
       if (renderTimeoutRef.current) clearTimeout(renderTimeoutRef.current);
       renderTimeoutRef.current = setTimeout(executeRender, RENDER_DELAY);
@@ -2429,7 +2340,6 @@ export default function App() {
         framePosition,
         frameRotation,
     textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
-
     textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
     textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
     textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight, logoPosX, logoPosY,
@@ -2437,9 +2347,9 @@ export default function App() {
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, 
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
     qrBgImageEnabled, qrBgImage, qrBgImageOpacity, qrBgImageBlur, qrBgImageOverlayOpacity, qrBgCardEnabled, qrBgCardOpacity,
+    qrBgShape, qrBgCardShape, qrSizeScale, qrPosX, qrPosY,
     activeTab, canvasSelection
   ]);
-
   useEffect(() => {
     renderCanvas();
     if (logo?.image && !logo.image.complete) {
@@ -2450,7 +2360,6 @@ export default function App() {
       qrTexture.image.onload = renderCanvas;
       qrTexture.image.onerror = () => showToast('Texture failed to load', 'error');
     }
-
     const handleTemplateLoad = () => {
       renderCanvas();
     };
@@ -2459,14 +2368,12 @@ export default function App() {
       window.removeEventListener('qr-template-loaded', handleTemplateLoad);
     };
   }, [renderCanvas, logo, qrTexture, activePage, selectedTemplate]);
-
   const getQRContentArea = useCallback(() => {
     const size = 512;
     const padding = size * 0.03;
     let contentX = 0;
     let contentY = 0;
     let contentSize = size;
-
     if (frameStyle !== 'none') {
       const labelHeight = size * 0.14;
       contentSize = size - (padding * 2) - labelHeight - (size * 0.06); 
@@ -2475,7 +2382,6 @@ export default function App() {
     }
     return { contentX, contentY, contentSize };
   }, [frameStyle]);
-
   // ── Pipette Handling ──
   // ── Pipette Handling ──
   const updateLoupe = useCallback((clientX, clientY) => {
@@ -2483,32 +2389,26 @@ export default function App() {
     const mainCanvas = canvasRef.current;
     const loupeCanvas = loupeCanvasRef.current;
     const canvasRect = mainCanvas.getBoundingClientRect();
-
     const scale = 512 / canvasRect.width;
     const x = (clientX - canvasRect.left) * scale;
     const y = (clientY - canvasRect.top) * scale;
-
     const ctx = loupeCanvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, 80, 80);
-
     // Source size: 11x11 pixels from main canvas (zooms by ~7.3x)
     const srcSize = 11; 
     const sx = Math.floor(x - srcSize / 2);
     const sy = Math.floor(y - srcSize / 2);
-
     // Draw magnified pixels
     try {
       ctx.drawImage(mainCanvas, sx, sy, srcSize, srcSize, 0, 0, 80, 80);
     } catch (err) {
       console.error("Loupe draw error:", err);
     }
-
     // Draw central pixel outline (crosshair)
     const pixelSize = 80 / srcSize;
     const cx = Math.floor(srcSize / 2) * pixelSize;
     const cy = Math.floor(srcSize / 2) * pixelSize;
-
     // Draw a border around the central pixel (the pixel currently being picked)
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.lineWidth = 1.5;
@@ -2518,18 +2418,15 @@ export default function App() {
     ctx.lineWidth = 0.5;
     ctx.strokeRect(cx - 0.5, cy - 0.5, pixelSize + 1, pixelSize + 1);
   }, []);
-
   const handlePipettePointerDown = useCallback((e) => {
     if (!canvasRef.current) return;
     try {
       e.target.setPointerCapture(e.pointerId);
     } catch (err) {}
-
     const canvas = canvasRef.current;
     const canvasRect = canvas.getBoundingClientRect();
     const clientX = e.clientX;
     const clientY = e.clientY;
-
     if (
       clientX >= canvasRect.left &&
       clientX <= canvasRect.right &&
@@ -2566,7 +2463,6 @@ export default function App() {
     }
     e.preventDefault();
   }, [pipetteTarget, updateLoupe]);
-
   const handlePipettePointerMove = useCallback((e) => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -2601,12 +2497,10 @@ export default function App() {
     }
     e.preventDefault();
   }, [updateLoupe]);
-
   const handlePipettePointerUp = useCallback((e) => {
     try {
       e.target.releasePointerCapture(e.pointerId);
     } catch (err) {}
-
     // On touch screen, lifting finger completes selection
     if (e.pointerType === 'touch' && hoverColor) {
       if (pipetteTarget?.setter) {
@@ -2618,7 +2512,6 @@ export default function App() {
     }
     e.preventDefault();
   }, [hoverColor, pipetteTarget]);
-
   // ── Canvas Interaction (Drag to Position) ──
   const handleCanvasInteraction = useCallback((e) => {
     if (!canvasRef.current || !qrMatrixInfo) return;
@@ -2630,7 +2523,6 @@ export default function App() {
     }
     
     // Selection will be cleared at the end of this function if no hit is registered
-
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -2639,15 +2531,12 @@ export default function App() {
     const scale = 512 / rect.width;
     const x = (clientX - rect.left) * scale;
     const y = (clientY - rect.top) * scale;
-
     const { contentX, contentY, contentSize } = getQRContentArea();
-
     // Helper to check if point is in rect with generous padding
     const inRect = (px, py, rx, ry, rw, rh) => {
       const pad = 25; 
       return px >= rx - pad && px <= rx + rw + pad && py >= ry - pad && py <= ry + rh + pad;
     };
-
     // 1. Check Logo
     if (logo?.image) {
       const lw = contentSize * logoWidth;
@@ -2661,13 +2550,11 @@ export default function App() {
       
       const centerX = lx + lw / 2;
       const centerY = ly + lh / 2;
-
       const dx_raw = x - centerX;
       const dy_raw = y - centerY;
       const ang = (-logoRotation * Math.PI) / 180;
       const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
       const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
-
       const hSize = 24; 
       const checkH = (hx, hy, type) => {
           if (localX >= hx - hSize && localX <= hx + hSize && localY >= hy - hSize && localY <= hy + hSize) {
@@ -2688,7 +2575,6 @@ export default function App() {
           }
           return false;
       };
-
       // Only allow interacting with handles (resizing, rotating, deleting) if the logo is already selected
       if (canvasSelection === 'logo') {
         // Bottom-Left Rotate Bracket (Offset -20, 20) with a larger hit area check (hSize = 24)
@@ -2737,7 +2623,6 @@ export default function App() {
         return;
       }
     }
-
     if (textCenterEnabled && textCenterText) {
       const fontSize = contentSize * textCenterSize;
       tempCtx.current.font = `bold ${fontSize}px '${textCenterFont}', sans-serif`;
@@ -2754,13 +2639,11 @@ export default function App() {
       
       const centerX = tx + tw / 2;
       const centerY = ty + th / 2;
-
       const dx_raw = x - centerX;
       const dy_raw = y - centerY;
       const ang = (-textCenterRotation * Math.PI) / 180;
       const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
       const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
-
       const hSize = 24;
       const checkH = (hx, hy, type) => {
           if (localX >= hx - hSize && localX <= hx + hSize && localY >= hy - hSize && localY <= hy + hSize) {
@@ -2782,7 +2665,6 @@ export default function App() {
           }
           return false;
       };
-
       // Only allow interacting with handles if text is already selected
       if (canvasSelection === 'text') {
         // Bottom-Left Rotate Bracket (Offset -20, 20) with a larger hit area check (hSize = 24)
@@ -2820,7 +2702,6 @@ export default function App() {
           return;
         }
       }
-
       // Clicking inside the body region always triggers dragging/selection
       if (inRect(localX, localY, tx, ty, tw, th)) {
         setCanvasSelection('text');
@@ -2832,7 +2713,6 @@ export default function App() {
         return;
       }
     }
-
     // 3. Check Frame Text
     if (frameStyle !== 'none' && frameText) {
       const framePadding = 512 * 0.03;
@@ -2848,13 +2728,11 @@ export default function App() {
       
       const centerX = 256;
       const centerY = textY;
-
       const dx_raw = x - centerX;
       const dy_raw = y - centerY;
       const ang = (-(frameRotation || 0) * Math.PI) / 180;
       const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
       const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
-
       const hSize = 24;
       const checkH = (hx, hy, type) => {
           if (localX >= hx - hSize && localX <= hx + hSize && localY >= hy - hSize && localY <= hy + hSize) {
@@ -2872,7 +2750,6 @@ export default function App() {
           }
           return false;
       };
-
       if (canvasSelection === 'frame-text') {
         const checkRotateFrame = (hx, hy) => {
             if (localX >= hx - hSize && localX <= hx + hSize && localY >= hy - hSize && localY <= hy + hSize) {
@@ -2902,7 +2779,6 @@ export default function App() {
           return;
         }
       }
-
       if (inRect(localX, localY, tx, ty, tw, th)) {
         setCanvasSelection('frame-text');
         setTextEditMode('frame');
@@ -2910,13 +2786,11 @@ export default function App() {
         return;
       }
     }
-
     // Clear selection if we clicked outside any active elements
     if (!isPipetteActive) {
       setCanvasSelection(null);
     }
   }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, canvasSelection, getSnapshot, frameStyle, frameText, frameSize, frameFont, framePosition, frameRotation]);
-
   const handleCanvasDoubleClick = useCallback((e) => {
     if (!canvasRef.current || !qrMatrixInfo) return;
     const canvas = canvasRef.current;
@@ -2926,13 +2800,11 @@ export default function App() {
     const scale = 512 / rect.width;
     const x = (clientX - rect.left) * scale;
     const y = (clientY - rect.top) * scale;
-
     const { contentX, contentY, contentSize } = getQRContentArea();
     const inRect = (px, py, rx, ry, rw, rh) => {
       const pad = 25; 
       return px >= rx - pad && px <= rx + rw + pad && py >= ry - pad && py <= ry + rh + pad;
     };
-
     // 1. Check Center Text
     if (textCenterEnabled && textCenterText) {
       const fontSize = contentSize * textCenterSize;
@@ -2950,13 +2822,11 @@ export default function App() {
       
       const centerX = tx + tw / 2;
       const centerY = ty + th / 2;
-
       const dx_raw = x - centerX;
       const dy_raw = y - centerY;
       const ang = (-textCenterRotation * Math.PI) / 180;
       const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
       const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
-
       if (inRect(localX, localY, tx, ty, tw, th)) {
         handleTabChange('text');
         setTextPopup('input');
@@ -2973,7 +2843,6 @@ export default function App() {
         return;
       }
     }
-
     // 2. Check Frame Text
     if (frameStyle !== 'none' && frameText) {
       const framePadding = 512 * 0.03;
@@ -2989,13 +2858,11 @@ export default function App() {
       
       const centerX = 256;
       const centerY = textY;
-
       const dx_raw = x - centerX;
       const dy_raw = y - centerY;
       const ang = (-(frameRotation || 0) * Math.PI) / 180;
       const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
       const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
-
       if (inRect(localX, localY, tx, ty, tw, th)) {
         handleTabChange('text');
         setTextPopup('input');
@@ -3013,7 +2880,6 @@ export default function App() {
       }
     }
   }, [textCenterEnabled, textCenterText, textCenterSize, textCenterFont, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, qrMatrixInfo, frameStyle, frameText, frameSize, frameFont, framePosition, frameRotation, handleTabChange]);
-
   const handleCanvasMove = useCallback((e) => {
     if (!isDraggingCanvas || !canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -3024,9 +2890,7 @@ export default function App() {
     const scale = 512 / rect.width;
     const x = (clientX - rect.left) * scale;
     const y = (clientY - rect.top) * scale;
-
     const { contentX, contentY, contentSize } = getQRContentArea();
-
     if (dragType.current === 'rotate-logo') {
         const lw = contentSize * logoWidth;
         const lh = contentSize * logoHeight;
@@ -3140,7 +3004,6 @@ export default function App() {
         const startH_px = contentSize * dragStartOffset.current.startH;
         const lx_start = contentX + (contentSize - startW_px) * dragStartOffset.current.startPosX;
         const ly_start = contentY + (contentSize - startH_px) * dragStartOffset.current.startPosY;
-
         let newW = dragStartOffset.current.startW;
         let newH = dragStartOffset.current.startH;
         if (dragType.current === 'resize-logo-br') {
@@ -3199,7 +3062,6 @@ export default function App() {
         } else if (contentSize - newH_px > 0) {
             newPosY = Math.max(0, Math.min(1, (ly_start - contentY) / (contentSize - newH_px)));
         }
-
         setLogoWidth(Math.round(newW * 100) / 100);
         setLogoHeight(Math.round(newH * 100) / 100);
         setLogoPosX(Math.round(newPosX * 1000) / 1000);
@@ -3342,12 +3204,10 @@ export default function App() {
       setTextCenterPosY(Math.round(valY * 1000) / 1000);
     }
   }, [isDraggingCanvas, qrMatrixInfo, logo, logoWidth, logoHeight, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, textCenterFont, logoPadding, getQRContentArea, framePosition, frameRotation, frameSize, setFrameRotation, setFrameSize]);
-
   const stopCanvasDrag = useCallback(() => {
     setIsDraggingCanvas(false);
     dragType.current = null;
   }, []);
-
   useEffect(() => {
     if (isDraggingCanvas) {
       window.addEventListener('mousemove', handleCanvasMove);
@@ -3362,7 +3222,6 @@ export default function App() {
       window.removeEventListener('touchend', stopCanvasDrag);
     };
   }, [isDraggingCanvas, handleCanvasMove, stopCanvasDrag]);
-
   // ── Tab definitions ──
   const TABS = [
     { id: 'content', label: 'Content', icon: Pencil },
@@ -3373,7 +3232,6 @@ export default function App() {
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
     { id: 'text', label: 'Text', icon: Type },
   ];
-
   // ── Get the frame CSS class for the preview wrapper ──
   const getFrameClass = () => {
     switch (frameStyle) {
@@ -3462,7 +3320,6 @@ export default function App() {
     logoTexture,
     logoCrop
   };
-
   return (
     <div className="app redesigned">
       {/* ── Maintenance Mode Overlay ── */}
@@ -3567,7 +3424,6 @@ export default function App() {
             <div className="app-logo-text" style={{ whiteSpace: 'nowrap' }}>Mushi QR <span>Pro</span></div>
           )}
         </div>
-
         <div className="app-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {activePage === 'generator' && (
             <>
@@ -3664,10 +3520,8 @@ export default function App() {
                       <Save size={16} color="#FFFFFF" />
                       <span>Save</span>
                     </button>
-
                     {/* Vertical Separation Line */}
                     <div style={{ width: '1px', height: '18px', background: 'rgba(255, 255, 255, 0.35)', flexShrink: 0 }} />
-
                     {/* Chevron Dropdown Arrow */}
                     <button
                       onClick={(e) => {
@@ -3691,7 +3545,6 @@ export default function App() {
                       <ChevronDown size={14} style={{ transform: formatDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                     </button>
                   </div>
-
                 {formatDropdownOpen && (
                   <div className="app-dropdown-menu save-as-dropdown fade-in" style={{ top: 'calc(100% + 12px)', right: 0, width: '280px' }}>
                     
@@ -3736,9 +3589,7 @@ export default function App() {
                         ))}
                       </div>
                     </div>
-
                     <div className="dropdown-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '0' }} />
-
                     <div className="dropdown-section" style={{ padding: '12px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Export Quality</div>
@@ -3780,9 +3631,7 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-
                     <div className="dropdown-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '0' }} />
-
                     <div className="dropdown-section" style={{ padding: '12px' }}>
                       <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Scan Reliability</div>
                       <div className="ec-buttons-row" style={{ marginBottom: '10px', gap: '8px' }}>
@@ -3810,9 +3659,7 @@ export default function App() {
                         />
                       </div>
                     </div>
-
                     <div className="dropdown-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '0' }} />
-
                     <div className="dropdown-section" style={{ padding: '12px' }}>
                       <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Quick Actions</div>
                       <div style={{ display: 'flex', gap: '8px' }}>
@@ -3848,7 +3695,6 @@ export default function App() {
                 )}
               </div>
               )}
-
               <div className="menu-container" ref={menuRef} style={{ position: 'relative' }}>
                 {activeBatchItemIndex !== null ? (
                   <button
@@ -3872,7 +3718,6 @@ export default function App() {
                     <Menu size={20} />
                   </button>
                 )}
-
                 {isMenuOpen && (
                   <div className="app-dropdown-menu fade-in" style={{ top: 'calc(100% + 12px)', right: 0 }}>
                     <div className="menu-links">
@@ -3889,7 +3734,6 @@ export default function App() {
                           if (theme === 'dark') next = 'light';
                           else if (theme === 'light') next = 'auto';
                           else next = 'dark';
-
                           setTheme(next);
                           savePreferences({ ...getPreferences(), theme: next });
                         }}
@@ -4005,7 +3849,6 @@ export default function App() {
                   <User size={18} color="#fff" />
                 )}
               </button>
-
               {authDropdownOpen && (
                 currentUser ? (
                   <div
@@ -4111,7 +3954,6 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-
                     {/* Menu Options */}
                     <div style={{ padding: '10px' }}>
                       {/* My Profile */}
@@ -4134,7 +3976,6 @@ export default function App() {
                         </div>
                         <ChevronRight size={15} color="var(--text-muted)" />
                       </button>
-
                       {/* Cloud Sync */}
                       <button 
                         onClick={async () => {
@@ -4169,7 +4010,6 @@ export default function App() {
                         </div>
                         <ChevronRight size={15} color="var(--text-muted)" />
                       </button>
-
                       {/* Security & Login */}
                       <button 
                         onClick={() => { setNewPassword(''); setConfirmPassword(''); setIsSecurityModalOpen(true); setAuthDropdownOpen(false); }}
@@ -4190,7 +4030,6 @@ export default function App() {
                         </div>
                         <ChevronRight size={15} color="var(--text-muted)" />
                       </button>
-
                       {/* Super Admin Panel */}
                       {currentUser.email === 'mabuneri143@gmail.com' && (
                         <>
@@ -4216,7 +4055,6 @@ export default function App() {
                           </button>
                         </>
                       )}
-
                       {/* Sign Out */}
                       <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 12px' }} />
                       <button
@@ -4285,7 +4123,6 @@ export default function App() {
           )}
         </div>
       </header>
-
       {/* ── Main Content Area ── */}
       <main className="app-main-redesigned">
         {activePage === 'generator' ? (
@@ -4316,14 +4153,8 @@ export default function App() {
                     />
                   )}
                 </div>
-
-
-
-
-
               </section>
             </ErrorBoundary>
-
             {/* ── Tab Panel Content ── */}
             <section className="tab-panel-area">
               {/* Content Tab */}
@@ -4341,9 +4172,6 @@ export default function App() {
                   </div>
                 </div>
               )}
-
-
-
               {/* Logo Tab */}
               {activeTab === 'logo' && (
                 <div className="tab-panel fade-in" id="panel-logo">
@@ -4369,10 +4197,8 @@ export default function App() {
                       }} 
                     />
                   </div>
-
                 </div>
               )}
-
               {/* Template Tab */}
               {activeTab === 'template' && (
                 <div className="tab-panel fade-in" id="panel-template">
@@ -4417,7 +4243,6 @@ export default function App() {
                         );
                       })}
                     </div>
-
                     {/* Template Card Grid (3 Columns) */}
                     <div style={{
                       display: 'grid',
@@ -4463,7 +4288,6 @@ export default function App() {
                           Custom / None
                         </span>
                       </button>
-
                       {ALL_TEMPLATES.filter(t => t.category === templateCategory).map(tpl => {
                         const isSelected = selectedTemplate?.id === tpl.id;
                         return (
@@ -4555,14 +4379,11 @@ export default function App() {
                   </div>
                 </div>
               )}
-
             </section>
-
             {/* ─── Shared Unified Expandable Toolbar (Centralized Bottom Layer) ─── */}
             {((activeTab === 'logo' && logo) || activeTab === 'text' || activeTab === 'color' || activeTab === 'shapes') && (
               <div className="logo-toolbar-container">
                 <div className="unified-toolbar-card">
-
                   {(logoPopup || textPopup || colorPopup || shapePopup) ? (
                     <div className="toolbar-editing-view fade-in">
                       <div className="toolbar-editing-header">
@@ -4573,7 +4394,6 @@ export default function App() {
                           <Check size={20} />
                         </button>
                       </div>
-
                       <div className="toolbar-properties-panel-full">
                       {logoPopup === 'size' && (
                         <div className="fade-in">
@@ -4780,7 +4600,6 @@ export default function App() {
                               </button>
                             </div>
                           </div>
-
                           {logoEraseColorEnabled && (
                             <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                               {logoEraseMode === 'custom' && (
@@ -4794,7 +4613,6 @@ export default function App() {
                                   </div>
                                 </div>
                               )}
-
                               <Slider 
                                 label="Sensitivity (Tolerance)" 
                                 value={logoEraseTolerance} 
@@ -4851,7 +4669,6 @@ export default function App() {
                            </p>
                         </div>
                       )}
-
                       {/* TEXT PROPERTIES */}
                       {textPopup === 'input' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -4901,7 +4718,6 @@ export default function App() {
                               />
                             )}
                           </div>
-
                           <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <Toggle
                               label={
@@ -5115,8 +4931,6 @@ export default function App() {
                           />
                         </div>
                       )}
-
-
                       {colorPopup === 'presets' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
@@ -5136,7 +4950,6 @@ export default function App() {
                               </button>
                             </div>
                           </div>
-
                           {presetTab === 'solid' ? (
                             <div className="fade-in">
                               <div className="swatch-grid-mini" style={{ padding: '4px 0 8px 0', gap: '10px' }}>
@@ -5275,18 +5088,13 @@ export default function App() {
                       )}
                       {colorPopup === 'bg' && (
                         <div className="fade-in">
-                          <Toggle label="Transparent Background" checked={bgTransparent} onChange={setBgTransparent} />
-                          {!bgTransparent && (
-                            <div style={{ marginTop: '16px' }}>
-                              {renderColorOrGradientPicker("Background Color", bgColor, (c) => { 
-                                setBgColor(c); 
-                                setLogoBgColor(c); 
-                                setBgTransparent(false); 
-                                setQrBgImage(null);
-                                setQrBgImageEnabled(false);
-                              }, handleOpenAdv)}
-                            </div>
-                          )}
+                          {renderColorOrGradientPicker("Background Color", bgColor, (c) => { 
+                            setBgColor(c); 
+                            setLogoBgColor(c); 
+                            setBgTransparent(false); 
+                            setQrBgImage(null);
+                            setQrBgImageEnabled(false);
+                          }, handleOpenAdv)}
                         </div>
                       )}
                       {colorPopup === 'eyes' && (
@@ -5324,7 +5132,6 @@ export default function App() {
                                       </button>
                                     </div>
                                   </div>
-
                                   {eyeColorTab === 'inner' ? (
                                     <div className="fade-in">
                                       {renderColorOrGradientPicker("Inner Eyes Color", eyeColor || qrColor, setEyeColor, handleOpenAdv)}
@@ -5386,7 +5193,6 @@ export default function App() {
                                   <UploadCloud size={24} color="var(--accent-primary)" />
                                 )}
                               </button>
-
                               {/* Social App Texture Presets */}
                               {SOCIAL_TEXTURES.map((p) => {
                                 const isActive = qrBgImage?.src === p.url;
@@ -5425,14 +5231,12 @@ export default function App() {
                                 );
                               })}
                             </div>
-
                             {qrBgImage && (
                               <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>
                                 Active: <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>{qrBgImage.name}</span>
                               </div>
                             )}
                           </div>
-
                           {qrBgImage && qrBgImageEnabled && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '4px' }} className="fade-in">
                               {/* Opacity Slider */}
@@ -5547,7 +5351,6 @@ export default function App() {
                                     <UploadCloud size={24} color="var(--accent-primary)" />
                                   )}
                                 </button>
-
                                 {/* Social App Texture Presets */}
                                 {SOCIAL_TEXTURES.map((p) => {
                                   const isActive = qrTexture?.src === p.url;
@@ -5585,7 +5388,6 @@ export default function App() {
                                   );
                                 })}
                               </div>
-
                               {qrTexture && (
                                 <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>
                                   Active: <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>{qrTexture.name}</span>
@@ -5596,35 +5398,178 @@ export default function App() {
                         </div>
                       )}
                        {shapePopup === 'dots' && (
-                        <div className="fade-in">
-                          <DotStyleSelector value={dotStyle} onChange={setDotStyle} qrParams={qrParams} />
-                        </div>
-                      )}
-                      {shapePopup === 'eyes' && (
-                        <div className="fade-in">
-                          <EyeStyleSelector value={eyeStyle} onChange={setEyeStyle} qrParams={qrParams} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                    <div className="toolbar-tabs-row fade-in">
-                      {activeTab === 'color' && (
-                        <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'presets')}><Bookmark size={18} /><span>Presets</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'dots')}><QRDotsIcon /><span>Dots</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                          <button className={`text-toolbar-btn${colorPopup === 'bg' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg')}><Paintbrush size={18} /><span>BG Color</span></button>
-                          <button className={`text-toolbar-btn${colorPopup === 'bg-image' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg-image')}><ImageIcon size={18} /><span>BG Image</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('color', 'texture')}><Layers size={18} /><span>Texture</span></button>
-                        </>
-                      )}
-                      {activeTab === 'shapes' && (
-                        <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('shapes', 'dots')}><QRDotsIcon /><span>Dots</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('shapes', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                        </>
-                      )}
+                         <div className="fade-in">
+                           <DotStyleSelector value={dotStyle} onChange={setDotStyle} qrParams={qrParams} />
+                         </div>
+                       )}
+                       {shapePopup === 'eyes' && (
+                         <div className="fade-in">
+                           <EyeStyleSelector value={eyeStyle} onChange={setEyeStyle} qrParams={qrParams} />
+                         </div>
+                       )}
+                        {shapePopup === 'background' && (
+                          <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <Toggle label="Transparent Background" checked={bgTransparent} onChange={setBgTransparent} />
+                            <div style={{ opacity: bgTransparent ? 0.4 : 1, pointerEvents: bgTransparent ? 'none' : 'auto', transition: 'all 0.2s ease' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Background Shape</div>
+                                {bgTransparent && (
+                                  <span style={{ fontSize: '10px', color: 'var(--accent-primary)', fontWeight: '600' }}>Disabled (Transparent BG)</span>
+                                )}
+                              </div>
+                              <div className="font-scroll-container" style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '4px 0 8px 0', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', marginBottom: '4px' }}>
+                                {QR_BG_SHAPES.map(shape => {
+                                  const isActive = qrBgShape === shape.id;
+                                  return (
+                                    <button 
+                                      key={shape.id} 
+                                      onClick={() => setQrBgShape(shape.id)}
+                                      className={`font-scroll-btn ${isActive ? 'active' : ''}`} 
+                                      style={{ 
+                                        flex: '0 0 auto', 
+                                        padding: '4px', 
+                                        borderRadius: '12px',
+                                        fontSize: '10px',
+                                        fontWeight: 600,
+                                        background: isActive ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                                        color: isActive ? '#fff' : 'var(--text-primary)',
+                                        border: isActive ? '2px solid var(--accent-primary)' : '1px solid var(--border-light)',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '6px',
+                                        width: '74px',
+                                        height: '94px',
+                                        boxShadow: isActive ? '0 6px 14px rgba(214,0,54,0.2)' : 'none',
+                                        transition: 'all 0.2s ease',
+                                        overflow: 'hidden'
+                                      }}
+                                    >
+                                      <MiniQRCanvasBg 
+                                        qrParams={{
+                                          dotStyle,
+                                          eyeStyle,
+                                          syncEyes,
+                                          gradientEnabled,
+                                          gradientColor1,
+                                          gradientColor2,
+                                          gradientType,
+                                          qrColor,
+                                          bgColor,
+                                          bgTransparent,
+                                          errorLevel: 'H'
+                                        }}
+                                        shapeId={shape.id}
+                                        isActive={isActive}
+                                      />
+                                      <span style={{ fontSize: '9px', whiteSpace: 'nowrap', opacity: isActive ? 1.0 : 0.8, marginTop: '2px' }}>
+                                        {shape.label.split(' ')[0]}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                       {shapePopup === 'size' && (
+                         <div className="fade-in">
+                           <Slider 
+                             label="QR Code Size" 
+                              value={Math.round(qrSizeScale * 100)} 
+                              min={20} 
+                              max={100} 
+                              step={1} 
+                              unit="%"
+                              onChange={(v) => setQrSizeScale(v / 100)} 
+                            />
+                           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px' }}>
+                             <button 
+                               onClick={() => setQrSizeScale(1.0)} 
+                               style={{ 
+                                 padding: '8px 16px', 
+                                 borderRadius: '10px', 
+                                 border: 'none', 
+                                 background: 'var(--bg-elevated)', 
+                                 color: 'var(--text-primary)', 
+                                 fontSize: '12px', 
+                                 fontWeight: 600, 
+                                 cursor: 'pointer', 
+                                 transition: 'all 0.2s ease' 
+                               }}
+                             >
+                               Reset Size
+                             </button>
+                           </div>
+                         </div>
+                       )}
+                       {shapePopup === 'pos' && (
+                         <div className="fade-in">
+                           <div style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
+                             <div style={{ display: 'flex', justifyContent: 'center' }}>
+                               <div className="pos-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', padding: '8px', background: 'var(--bg-elevated)', borderRadius: '16px' }}>
+                                 {[0, 0.5, 1].map(y => [0, 0.5, 1].map(x => (
+                                   <button 
+                                     key={`${x}-${y}`} 
+                                     onClick={() => { setQrPosX(x); setQrPosY(y); }} 
+                                     style={{ 
+                                       width: '36px', 
+                                       height: '36px', 
+                                       borderRadius: '8px', 
+                                       border: '1px solid var(--border-color)', 
+                                       background: qrPosX === x && qrPosY === y ? 'var(--accent-primary)' : 'var(--bg-primary)', 
+                                       cursor: 'pointer', 
+                                       transition: 'all 0.2s ease' 
+                                     }} 
+                                   />
+                                 )))}
+                               </div>
+                             </div>
+                             <div style={{ display: 'flex', justifyContent: 'center' }}>
+                               <button 
+                                 onClick={() => { setQrPosX(0.5); setQrPosY(0.5); }} 
+                                 style={{ 
+                                   padding: '8px 16px', 
+                                   borderRadius: '10px', 
+                                   border: 'none', 
+                                   background: 'var(--bg-elevated)', 
+                                   color: 'var(--text-primary)', 
+                                   fontSize: '12px', 
+                                   fontWeight: 600, 
+                                   cursor: 'pointer', 
+                                   transition: 'all 0.2s ease' 
+                                 }}
+                               >
+                                 Reset Position
+                               </button>
+                             </div>
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                 ) : (
+                     <div className="toolbar-tabs-row fade-in">
+                       {activeTab === 'color' && (
+                         <>
+                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'presets')}><Bookmark size={18} /><span>Presets</span></button>
+                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'dots')}><QRDotsIcon /><span>Dots</span></button>
+                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
+                           <button className={`text-toolbar-btn${colorPopup === 'bg' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg')}><Paintbrush size={18} /><span>BG Color</span></button>
+                           <button className={`text-toolbar-btn${colorPopup === 'bg-image' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg-image')}><ImageIcon size={18} /><span>BG Image</span></button>
+                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'texture')}><Layers size={18} /><span>Texture</span></button>
+                         </>
+                       )}
+                       {activeTab === 'shapes' && (
+                         <>
+                           <button className={`text-toolbar-btn${shapePopup === 'dots' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'dots')}><QRDotsIcon /><span>Dots</span></button>
+                           <button className={`text-toolbar-btn${shapePopup === 'eyes' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
+                           <button className={`text-toolbar-btn${shapePopup === 'background' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'background')}><Shapes size={18} /><span>Background</span></button>
+                           <button className={`text-toolbar-btn${shapePopup === 'size' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'size')}><ChevronUp size={18} /><span>Size</span></button>
+                           <button className={`text-toolbar-btn${shapePopup === 'pos' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'pos')}><Maximize size={18} /><span>Position</span></button>
+                         </>
+                       )}
                       {activeTab === 'logo' && (
                         <>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'size')}><ChevronUp size={18} /><span>Size</span></button>
@@ -5671,7 +5616,6 @@ export default function App() {
                 </div>
               </div>
             )}
-
           </>
         ) : activePage === 'scanner' ? (
           <QRScanner
@@ -5807,7 +5751,6 @@ export default function App() {
           <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} initialFilter={historyFilter} />
         )}
       </main>
-
       {/* ── Bottom Navigation Bar (Only for Generator) ── */}
       {activePage === 'generator' && (
         <nav className="bottom-nav">
@@ -5826,7 +5769,6 @@ export default function App() {
           ))}
         </nav>
       )}
-
       {/* ── Main App Navigation ── */}
       {(['home', 'saved', 'history', 'you', 'settings'].includes(activePage)) && (
         <nav className="bottom-nav">
@@ -5881,7 +5823,6 @@ export default function App() {
               <ScanLine size={28} />
             </button>
           </div>
-
           <button 
             className={`bottom-nav-tab${activePage === 'history' ? ' active' : ''}`}
             onClick={() => navigateTo('history')}
@@ -5901,7 +5842,6 @@ export default function App() {
           </button>
         </nav>
       )}
-
       {/* ── QR Data Modal ── */}
       {isDataModalOpen && (
         <div className="modal-overlay" onClick={() => setIsDataModalOpen(false)}>
@@ -5924,7 +5864,6 @@ export default function App() {
           </div>
         </div>
       )}
-
       {/* Toast */}
       {toast && (
         <div className={`toast ${toast.type}`}>
@@ -5958,7 +5897,6 @@ export default function App() {
           setIsPipetteActive(true);
         }}
       />
-
       {isPipetteActive && (
         <div 
           className="pipette-overlay fade-in"
@@ -6019,7 +5957,6 @@ export default function App() {
           </div>
         </div>
       )}
-
       {isPipetteActive && (
         <div 
           style={{
@@ -6073,7 +6010,6 @@ export default function App() {
               pointerEvents: 'none'
             }} />
           </div>
-
           {/* Color Code Label under the bubble */}
           <div style={{
             marginTop: '8px',
@@ -6093,7 +6029,6 @@ export default function App() {
           </div>
         </div>
       )}
-
       {/* ── Unsaved Changes Modal ── */}
       {unsavedChangesModal.isOpen && (
         <div className="modal-overlay" onClick={handleCancelExit}>
@@ -6177,7 +6112,6 @@ export default function App() {
           </div>
         </div>
       )}
-
       {/* ── My Profile Modal ── */}
       {isProfileModalOpen && (
         <div className="modal-overlay" style={{ zIndex: 10000 }} onClick={() => setIsProfileModalOpen(false)}>
@@ -6208,7 +6142,6 @@ export default function App() {
                   style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
-
               <div style={{ width: '100%' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>DISPLAY NAME</label>
                 <input 
@@ -6219,7 +6152,6 @@ export default function App() {
                   style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
-
               <div style={{ width: '100%' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>EMAIL ADDRESS</label>
                 <input 
@@ -6230,7 +6162,6 @@ export default function App() {
                 />
               </div>
             </div>
-
             <div style={{ display: 'flex', gap: '10px' }}>
               <button 
                 onClick={() => setIsProfileModalOpen(false)}
@@ -6261,7 +6192,6 @@ export default function App() {
           </div>
         </div>
       )}
-
       {/* ── Security & Login Modal ── */}
       {isSecurityModalOpen && (
         <div className="modal-overlay" style={{ zIndex: 10000 }} onClick={() => setIsSecurityModalOpen(false)}>
@@ -6270,7 +6200,6 @@ export default function App() {
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#0F172A' }}>Security &amp; Login</h3>
               <button onClick={() => setIsSecurityModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: '20px' }}>&times;</button>
             </div>
-
             {currentUser.providerData[0]?.providerId === 'google.com' ? (
               <div style={{ textAlign: 'center', padding: '12px 0 20px' }}>
                 <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
@@ -6292,7 +6221,6 @@ export default function App() {
                 <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.4 }}>
                   Update your account password. Must be at least 6 characters long.
                 </p>
-
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>NEW PASSWORD</label>
                   <input 
@@ -6303,7 +6231,6 @@ export default function App() {
                     style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }}
                   />
                 </div>
-
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>CONFIRM PASSWORD</label>
                   <input 
@@ -6314,7 +6241,6 @@ export default function App() {
                     style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }}
                   />
                 </div>
-
                 <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
                   <button 
                     onClick={() => setIsSecurityModalOpen(false)}
@@ -6364,10 +6290,8 @@ export default function App() {
     </div>
   );
 }
-
 function TemplatePreviewCanvas({ template, theme }) {
   const ref = useRef(null);
-
   useEffect(() => {
     if (!ref.current) return;
     const canvas = ref.current;
@@ -6376,12 +6300,10 @@ function TemplatePreviewCanvas({ template, theme }) {
     canvas.width = size;
     canvas.height = size;
     ctx.clearRect(0, 0, size, size);
-
     // Draw background
     if (template.drawBackground) {
       template.drawBackground(ctx, size);
     }
-
     // Draw a simplified dummy QR code in the placeholder slot
     ctx.save();
     const qrSize = size * template.qrSize;
@@ -6415,12 +6337,10 @@ function TemplatePreviewCanvas({ template, theme }) {
       ctx.fillStyle = eyeColor;
       ctx.fillRect(x + dotW * 2, y + dotW * 2, eyeSize - dotW * 4, eyeSize - dotW * 4);
     };
-
     // Draw 3 eyes
     drawEye(0, 0); // Top-left
     drawEye(qrSize - eyeSize, 0); // Top-right
     drawEye(0, qrSize - eyeSize); // Bottom-left
-
     // Draw realistic random data dots (avoiding eyes)
     ctx.fillStyle = qrColor;
     for (let r = 0; r < dotGrid; r++) {
@@ -6436,12 +6356,9 @@ function TemplatePreviewCanvas({ template, theme }) {
         }
       }
     }
-
     ctx.restore();
-
     // Draw foreground
     template.drawForeground(ctx, size);
   }, [template, theme]);
-
   return <canvas ref={ref} style={{ width: '100%', height: '100%', borderRadius: '14px', display: 'block' }} />;
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles, CheckCircle, FileArchive } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles, CheckCircle, FileArchive, Share2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -63,19 +63,8 @@ async function saveZipNative(base64Data, filename) {
     }
   }
 
-  // 3. Open native Share sheet so user can also send/save via Files app, Drive, etc.
-  if (savedFileUri) {
-    try {
-      await Share.share({
-        title: 'Mushi QR Pro - Bulk Export',
-        text: `Bulk exported ${filename}`,
-        url: savedFileUri,
-        dialogTitle: 'Save or Share your Bulk ZIP File',
-      });
-    } catch (shareErr) {
-      console.warn('Share sheet closed or unhandled:', shareErr);
-    }
-  }
+  // 3. Return the URI so we can share it manually from the modal
+  return savedFileUri;
 }
 
 export default function BatchPage({ 
@@ -510,12 +499,13 @@ export default function BatchPage({
         const reader = new FileReader();
         reader.onloadend = async () => {
           const base64Data = reader.result.split(',')[1];
-          await saveZipNative(base64Data, archiveName);
+          const uri = await saveZipNative(base64Data, archiveName);
           setIsExporting(false);
           setExportSuccessInfo({
             filename: archiveName,
             count: batchItems.length,
-            isNative: true
+            isNative: true,
+            fileUri: uri
           });
         };
         reader.readAsDataURL(content);
@@ -1458,23 +1448,56 @@ export default function BatchPage({
               </span>
             </div>
 
-            <button
-              onClick={() => setExportSuccessInfo(null)}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '14px',
-                border: 'none',
-                background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
-                color: '#FFFFFF',
-                fontWeight: 800,
-                fontSize: '15px',
-                cursor: 'pointer',
-                boxShadow: '0 8px 20px rgba(214, 0, 54, 0.35)'
-              }}
-            >
-              Done
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => setExportSuccessInfo(null)}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: 'var(--bg-hover)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 800,
+                  fontSize: '15px',
+                  cursor: 'pointer'
+                }}
+              >
+                Done
+              </button>
+              {exportSuccessInfo.isNative && exportSuccessInfo.fileUri && (
+                <button
+                  onClick={async () => {
+                    try {
+                      await Share.share({
+                        title: 'Mushi QR Pro - Bulk Export',
+                        text: `Bulk exported ${exportSuccessInfo.filename}`,
+                        url: exportSuccessInfo.fileUri,
+                        dialogTitle: 'Save or Share your Bulk ZIP File',
+                      });
+                    } catch (e) {}
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '14px',
+                    borderRadius: '14px',
+                    border: 'none',
+                    background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    fontSize: '15px',
+                    cursor: 'pointer',
+                    boxShadow: '0 8px 20px rgba(214, 0, 54, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Share2 size={18} /> Share
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

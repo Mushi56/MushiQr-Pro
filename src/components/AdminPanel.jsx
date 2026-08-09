@@ -440,7 +440,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose }) {
 
       {/* Logo */}
       <div style={{ padding: '18px 16px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-        <img src="/logo.png" alt="Logo" style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'contain', flexShrink: 0 }} />
+        <img src="/logo.webp" alt="Logo" style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'contain', flexShrink: 0 }} />
         <div>
           <div style={{ fontSize: 14, fontWeight: 800, color: T.text, lineHeight: 1.2 }}>Mushi QR Pro</div>
           <div style={{ fontSize: 10, color: T.accent, fontWeight: 700, letterSpacing: '0.5px' }}>⬡ SUPER ADMIN</div>
@@ -1262,10 +1262,10 @@ function BrandingPanel({ settings, onSave }) {
       <AdminCard title="Brand Identity" subtitle="Customize your app's visual identity">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <img src="/logo.png" alt="Logo" style={{ width: 72, height: 72, borderRadius: 18, objectFit: 'contain', background: T.bgEl, padding: 6, border: `1px solid ${T.border}` }} />
+            <img src="/logo.webp" alt="Logo" style={{ width: 72, height: 72, borderRadius: 18, objectFit: 'contain', background: T.bgEl, padding: 6, border: `1px solid ${T.border}` }} />
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: T.text, marginBottom: 4 }}>App Logo</div>
-              <div style={{ fontSize: 12, color: T.textSec, marginBottom: 8 }}>Served from /logo.png</div>
+              <div style={{ fontSize: 12, color: T.textSec, marginBottom: 8 }}>Served from /logo.webp</div>
               <Badge color={T.blue}>Build Asset</Badge>
             </div>
           </div>

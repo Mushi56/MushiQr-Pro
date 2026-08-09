@@ -4,8 +4,8 @@
   "description": "Premium QR code generator and scanner with beautiful designs",
   "icons": [
     {
-      "src": "/logo.png",
-      "type": "image/png",
+      "src": "/logo.webp",
+      "type": "image/webp",
       "sizes": "192x192 512x512",
       "purpose": "any maskable"
     }

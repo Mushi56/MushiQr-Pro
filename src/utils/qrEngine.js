@@ -206,6 +206,7 @@ export function renderQR(canvas, options) {
     qrColor = '#000000',
     bgColor = '#ffffff',
     bgTransparent = false,
+    qrBgShape = 'full',
     dotStyle = DOT_STYLES.SQUARE,
     eyeStyle = EYE_STYLES.SQUARE,
     eyeColor = '',
@@ -280,7 +281,11 @@ export function renderQR(canvas, options) {
     backgroundImageBlur = 0,
     backgroundImageOverlayOpacity = 0.3,
     qrBackgroundCardEnabled = true,
-    qrBackgroundCardOpacity = 0.9
+    qrBackgroundCardOpacity = 0.9,
+    qrBackgroundCardShape = 'rounded',
+    qrSizeScale = 1.0,
+    qrPosX = 0.5,
+    qrPosY = 0.5
   } = options;
 
   if (!matrix || !canvas) return;
@@ -304,44 +309,122 @@ export function renderQR(canvas, options) {
     ctx.scale(options.template.qrSize, options.template.qrSize);
   }
 
-  // Background
-  if (!effectiveBgTransparent) {
-    ctx.fillStyle = parseColorOrGradient(ctx, 0, 0, size, size, bgColor);
-    ctx.fillRect(0, 0, size, size);
-  }
-
-  // Draw Background Image
-  if (backgroundImageEnabled && backgroundImage) {
+  // Background & Clipping
+  const hasBgShape = !effectiveBgTransparent && qrBgShape && qrBgShape !== 'full';
+  
+  if (hasBgShape || (backgroundImageEnabled && backgroundImage)) {
     ctx.save();
-    
-    // Blur effect
-    if (backgroundImageBlur > 0) {
-      ctx.filter = `blur(${backgroundImageBlur}px)`;
+    if (qrBgShape && qrBgShape !== 'full') {
+      ctx.beginPath();
+      const r = size * 0.12; // corner radius
+      if (qrBgShape === 'circle') {
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      } else if (qrBgShape === 'rounded') {
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(0, 0, size, size, r);
+        } else {
+          ctx.rect(0, 0, size, size);
+        }
+      } else if (qrBgShape === 'squircle') {
+        const sr = size * 0.22;
+        ctx.moveTo(sr, 0);
+        ctx.lineTo(size - sr, 0);
+        ctx.bezierCurveTo(size - sr/2, 0, size, sr/2, size, sr);
+        ctx.lineTo(size, size - sr);
+        ctx.bezierCurveTo(size, size - sr/2, size - sr/2, size, size - sr, size);
+        ctx.lineTo(sr, size);
+        ctx.bezierCurveTo(sr/2, size, 0, size - sr/2, 0, size - sr);
+        ctx.lineTo(0, sr);
+        ctx.bezierCurveTo(0, sr/2, sr/2, 0, sr, 0);
+      } else if (qrBgShape === 'cut') {
+        const cut = size * 0.12;
+        ctx.moveTo(cut, 0);
+        ctx.lineTo(size - cut, 0);
+        ctx.lineTo(size, cut);
+        ctx.lineTo(size, size - cut);
+        ctx.lineTo(size - cut, size);
+        ctx.lineTo(cut, size);
+        ctx.lineTo(0, size - cut);
+        ctx.lineTo(0, cut);
+      } else if (qrBgShape === 'leaf') {
+        const rLarge = size * 0.35;
+        const rSmall = size * 0.05;
+        ctx.moveTo(rLarge, 0);
+        ctx.arcTo(size, 0, size, size, rSmall);
+        ctx.arcTo(size, size, 0, size, rLarge);
+        ctx.arcTo(0, size, 0, 0, rSmall);
+        ctx.arcTo(0, 0, size, 0, rLarge);
+      } else if (qrBgShape === 'shield') {
+        ctx.moveTo(0, 0);
+        ctx.lineTo(size, 0);
+        ctx.lineTo(size, size * 0.5);
+        ctx.quadraticCurveTo(size, size * 0.85, size * 0.5, size);
+        ctx.quadraticCurveTo(0, size * 0.85, 0, size * 0.5);
+      } else if (qrBgShape === 'hexagon') {
+        ctx.moveTo(size * 0.5, 0);
+        ctx.lineTo(size, size * 0.25);
+        ctx.lineTo(size, size * 0.75);
+        ctx.lineTo(size * 0.5, size);
+        ctx.lineTo(0, size * 0.75);
+        ctx.lineTo(0, size * 0.25);
+      } else if (qrBgShape === 'octagon') {
+        const diff = size * 0.29;
+        ctx.moveTo(diff, 0);
+        ctx.lineTo(size - diff, 0);
+        ctx.lineTo(size, diff);
+        ctx.lineTo(size, size - diff);
+        ctx.lineTo(size - diff, size);
+        ctx.lineTo(diff, size);
+        ctx.lineTo(0, size - diff);
+        ctx.lineTo(0, diff);
+      } else if (qrBgShape === 'diamond') {
+        ctx.moveTo(size * 0.5, 0);
+        ctx.lineTo(size, size * 0.5);
+        ctx.lineTo(size * 0.5, size);
+        ctx.lineTo(0, size * 0.5);
+      }
+      ctx.closePath();
+      ctx.clip();
     }
-    
-    // Cover calculation
-    const imgRatio = backgroundImage.width / backgroundImage.height;
-    const canvasRatio = size / size; // 1
-    let drawWidth, drawHeight, sx, sy;
-    if (imgRatio > canvasRatio) {
-      drawHeight = backgroundImage.height;
-      drawWidth = backgroundImage.height * canvasRatio;
-      sx = (backgroundImage.width - drawWidth) / 2;
-      sy = 0;
-    } else {
-      drawWidth = backgroundImage.width;
-      drawHeight = backgroundImage.width / canvasRatio;
-      sx = 0;
-      sy = (backgroundImage.height - drawHeight) / 2;
-    }
-    
-    ctx.globalAlpha = backgroundImageOpacity;
-    ctx.drawImage(backgroundImage, sx, sy, drawWidth, drawHeight, 0, 0, size, size);
-    ctx.restore();
 
-    // Dimming overlay
-    if (backgroundImageOverlayOpacity > 0) {
-      ctx.fillStyle = `rgba(255, 255, 255, ${backgroundImageOverlayOpacity})`;
+    if (!effectiveBgTransparent) {
+      ctx.fillStyle = parseColorOrGradient(ctx, 0, 0, size, size, bgColor);
+      ctx.fillRect(0, 0, size, size);
+    }
+
+    if (backgroundImageEnabled && backgroundImage) {
+      ctx.save();
+      if (backgroundImageBlur > 0) {
+        ctx.filter = `blur(${backgroundImageBlur}px)`;
+      }
+      const imgRatio = backgroundImage.width / backgroundImage.height;
+      const canvasRatio = 1;
+      let drawWidth, drawHeight, sx, sy;
+      if (imgRatio > canvasRatio) {
+        drawHeight = backgroundImage.height;
+        drawWidth = backgroundImage.height * canvasRatio;
+        sx = (backgroundImage.width - drawWidth) / 2;
+        sy = 0;
+      } else {
+        drawWidth = backgroundImage.width;
+        drawHeight = backgroundImage.width / canvasRatio;
+        sx = 0;
+        sy = (backgroundImage.height - drawHeight) / 2;
+      }
+      ctx.globalAlpha = backgroundImageOpacity;
+      ctx.drawImage(backgroundImage, sx, sy, drawWidth, drawHeight, 0, 0, size, size);
+      ctx.restore();
+
+      if (backgroundImageOverlayOpacity > 0) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${backgroundImageOverlayOpacity})`;
+        ctx.fillRect(0, 0, size, size);
+      }
+    }
+    
+    ctx.restore();
+  } else {
+    if (!effectiveBgTransparent) {
+      ctx.fillStyle = parseColorOrGradient(ctx, 0, 0, size, size, bgColor);
       ctx.fillRect(0, 0, size, size);
     }
   }
@@ -364,6 +447,61 @@ export function renderQR(canvas, options) {
       // Shift up to leave space at the bottom
       contentY = padding + (size - padding * 2 - labelHeight - contentSize) / 2;
     }
+  }
+
+  // Adjust content area for background shape corners to fit perfectly with margins
+  if (qrBgShape && qrBgShape !== 'full') {
+    let shapeScale = 1.0;
+    if (qrBgShape === 'circle') {
+      shapeScale = 0.68; // Leave a nice margin (0.707 is absolute max)
+    } else if (qrBgShape === 'leaf') {
+      shapeScale = 0.72; // Leaf shape cuts off top-left and bottom-right
+    } else if (qrBgShape === 'cut') {
+      shapeScale = 0.80; // Cut corners cut off diagonally
+    } else if (qrBgShape === 'squircle') {
+      shapeScale = 0.82; // Squircle has rounded corners
+    } else if (qrBgShape === 'rounded') {
+      shapeScale = 0.84; // Rounded box
+    } else if (qrBgShape === 'shield') {
+      shapeScale = 0.66; // Shield shape
+    } else if (qrBgShape === 'hexagon') {
+      shapeScale = 0.58; // Hexagon
+    } else if (qrBgShape === 'octagon') {
+      shapeScale = 0.66; // Octagon
+    } else if (qrBgShape === 'diamond') {
+      shapeScale = 0.45; // Diamond requires smaller scale to fit diagonally
+    }
+
+    contentSize = contentSize * shapeScale;
+    contentX = (size - contentSize) / 2;
+    if (frameStyle !== FRAME_STYLES.NONE) {
+      const labelHeight = size * 0.14;
+      if (framePosition === 'top') {
+        contentY = padding + labelHeight + (size - padding * 2 - labelHeight - contentSize) / 2;
+      } else {
+        contentY = padding + (size - padding * 2 - labelHeight - contentSize) / 2;
+      }
+    } else {
+      contentY = (size - contentSize) / 2;
+    }
+  }
+
+  // Apply custom QR Size Scale
+  if (qrSizeScale !== undefined && qrSizeScale !== 1.0) {
+    const oldSize = contentSize;
+    contentSize = contentSize * qrSizeScale;
+    contentX = contentX + (oldSize - contentSize) / 2;
+    contentY = contentY + (oldSize - contentSize) / 2;
+  }
+
+  // Apply custom QR Position Offset (qrPosX/Y from 0 to 1, default 0.5)
+  if (qrPosX !== undefined && qrPosX !== 0.5) {
+    const offsetX = (qrPosX - 0.5) * (size - contentSize);
+    contentX += offsetX;
+  }
+  if (qrPosY !== undefined && qrPosY !== 0.5) {
+    const offsetY = (qrPosY - 0.5) * (size - contentSize);
+    contentY += offsetY;
   }
 
   // Draw frame if enabled
@@ -408,10 +546,49 @@ export function renderQR(canvas, options) {
     
     const radius = cellSize * 1.5;
     ctx.beginPath();
-    if (typeof ctx.roundRect === 'function') {
-      ctx.roundRect(cardX, cardY, cardSize, cardSize, radius);
-    } else {
-      ctx.rect(cardX, cardY, cardSize, cardSize);
+    if (qrBackgroundCardShape === 'circle') {
+      const cx = cardX + cardSize / 2;
+      const cy = cardY + cardSize / 2;
+      const r = cardSize / 2;
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    } else if (qrBackgroundCardShape === 'cut') {
+      const cut = radius * 1.2;
+      ctx.moveTo(cardX + cut, cardY);
+      ctx.lineTo(cardX + cardSize - cut, cardY);
+      ctx.lineTo(cardX + cardSize, cardY + cut);
+      ctx.lineTo(cardX + cardSize, cardY + cardSize - cut);
+      ctx.lineTo(cardX + cardSize - cut, cardY + cardSize);
+      ctx.lineTo(cardX + cut, cardY + cardSize);
+      ctx.lineTo(cardX, cardY + cardSize - cut);
+      ctx.lineTo(cardX, cardY + cut);
+      ctx.closePath();
+    } else if (qrBackgroundCardShape === 'leaf') {
+      const rLarge = radius * 2.5;
+      const rSmall = radius * 0.3;
+      ctx.moveTo(cardX + rLarge, cardY);
+      ctx.arcTo(cardX + cardSize, cardY, cardX + cardSize, cardY + cardSize, rSmall);
+      ctx.arcTo(cardX + cardSize, cardY + cardSize, cardX, cardY + cardSize, rLarge);
+      ctx.arcTo(cardX, cardY + cardSize, cardX, cardY, rSmall);
+      ctx.arcTo(cardX, cardY, cardX + cardSize, cardY, rLarge);
+      ctx.closePath();
+    } else if (qrBackgroundCardShape === 'squircle') {
+      const r = radius * 2.0;
+      ctx.moveTo(cardX + r, cardY);
+      ctx.lineTo(cardX + cardSize - r, cardY);
+      ctx.bezierCurveTo(cardX + cardSize - r/2, cardY, cardX + cardSize, cardY + r/2, cardX + cardSize, cardY + r);
+      ctx.lineTo(cardX + cardSize, cardY + cardSize - r);
+      ctx.bezierCurveTo(cardX + cardSize, cardY + cardSize - r/2, cardX + cardSize - r/2, cardY + cardSize, cardX + cardSize - r, cardY + cardSize);
+      ctx.lineTo(cardX + r, cardY + cardSize);
+      ctx.bezierCurveTo(cardX + r/2, cardY + cardSize, cardX, cardY + cardSize - r/2, cardX, cardY + cardSize - r);
+      ctx.lineTo(cardX, cardY + r);
+      ctx.bezierCurveTo(cardX, cardY + r/2, cardX + r/2, cardY, cardX + r, cardY);
+      ctx.closePath();
+    } else { // default 'rounded'
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(cardX, cardY, cardSize, cardSize, radius);
+      } else {
+        ctx.rect(cardX, cardY, cardSize, cardSize);
+      }
     }
     ctx.fill();
     ctx.restore();

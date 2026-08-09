@@ -19,7 +19,7 @@ export const QR_TEMPLATES = [
     drawBackground: function(ctx, size) {
       if (!this.imageObj) {
         this.imageObj = new Image();
-        this.imageObj.src = '/presets/fb_template.png';
+        this.imageObj.src = '/presets/fb_template.webp';
         this.imageObj.onload = () => {
           window.dispatchEvent(new CustomEvent('qr-template-loaded'));
         };
@@ -54,7 +54,7 @@ export const QR_TEMPLATES = [
     drawBackground: function(ctx, size) {
       if (!this.imageObj) {
         this.imageObj = new Image();
-        this.imageObj.src = '/presets/ig_template.png';
+        this.imageObj.src = '/presets/ig_template.webp';
         this.imageObj.onload = () => {
           window.dispatchEvent(new CustomEvent('qr-template-loaded'));
         };
@@ -89,7 +89,7 @@ export const QR_TEMPLATES = [
     drawBackground: function(ctx, size) {
       if (!this.imageObj) {
         this.imageObj = new Image();
-        this.imageObj.src = '/presets/x_template.png';
+        this.imageObj.src = '/presets/x_template.webp';
         this.imageObj.onload = () => {
           window.dispatchEvent(new CustomEvent('qr-template-loaded'));
         };
@@ -121,7 +121,7 @@ export const QR_TEMPLATES = [
     drawBackground: function(ctx, size) {
       if (!this.imageObj) {
         this.imageObj = new Image();
-        this.imageObj.src = '/presets/linkedin_template.png';
+        this.imageObj.src = '/presets/linkedin_template.webp';
         this.imageObj.onload = () => {
           window.dispatchEvent(new CustomEvent('qr-template-loaded'));
         };
@@ -156,7 +156,7 @@ export const QR_TEMPLATES = [
     drawBackground: function(ctx, size) {
       if (!this.imageObj) {
         this.imageObj = new Image();
-        this.imageObj.src = '/presets/threads_template.png';
+        this.imageObj.src = '/presets/threads_template.webp';
         this.imageObj.onload = () => {
           window.dispatchEvent(new CustomEvent('qr-template-loaded'));
         };
@@ -188,7 +188,7 @@ export const QR_TEMPLATES = [
     drawBackground: function(ctx, size) {
       if (!this.imageObj) {
         this.imageObj = new Image();
-        this.imageObj.src = '/presets/google_template.png';
+        this.imageObj.src = '/presets/google_template.webp';
         this.imageObj.onload = () => {
           window.dispatchEvent(new CustomEvent('qr-template-loaded'));
         };
