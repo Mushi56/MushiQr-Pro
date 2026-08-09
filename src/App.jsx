@@ -1189,6 +1189,7 @@ export default function App() {
   const [canvasSelection, setCanvasSelection] = useState(null); // 'logo' | 'text' | null
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [templateCategory, setTemplateCategory] = useState('Hot');
+  const [templateTexts, setTemplateTexts] = useState({}); // { [tplId]: { key: value } }
   const applyLogoBySlug = (slug) => {
     const LOGO_PRESETS = [
       { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.avif' },
@@ -1223,6 +1224,15 @@ export default function App() {
       return;
     }
     setSelectedTemplate(tpl);
+    // Initialize editable texts with defaults if not already customized
+    if (tpl.texts && tpl.texts.length > 0) {
+      setTemplateTexts(prev => {
+        if (prev[tpl.id]) return prev; // keep existing customizations
+        const defaults = {};
+        tpl.texts.forEach(t => { defaults[t.key] = t.default; });
+        return { ...prev, [tpl.id]: defaults };
+      });
+    }
     setQrBgImage(null);
     setQrBgImageEnabled(false);
     setQrTexture(null);
@@ -2018,6 +2028,7 @@ export default function App() {
       frameShadowColor,
       framePosition,
       frameRotation,
+      templateTexts: selectedTemplate ? (templateTexts[selectedTemplate.id] || {}) : {},
       textCenterEnabled, 
       textCenter: textCenterEnabled ? textCenterText : null,
       textCenterSize, textCenterColor, textCenterFont,
@@ -2297,6 +2308,7 @@ export default function App() {
         frameShadowColor,
         framePosition,
         frameRotation,
+        templateTexts: selectedTemplate ? (templateTexts[selectedTemplate.id] || {}) : {},
         textCenterEnabled, 
         textCenter: textCenterEnabled ? textCenterText : null,
         textCenterSize, textCenterColor, textCenterFont,
@@ -4207,7 +4219,7 @@ export default function App() {
                     {/* Category Selector Bar (Swipeable) */}
                     <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', borderBottom: '1px solid var(--border-color)' }}>
                       {/* Category tabs — include 'Custom' if user has custom templates */}
-                      {[...['Hot', 'Social', 'Wifi', 'Event'], ...(customTemplates.length > 0 ? ['Custom'] : [])].map(cat => {
+                      {[...['Hot', 'Social', 'Business', 'Retail', 'Event', 'Wifi'], ...(customTemplates.length > 0 ? ['Custom'] : [])].map(cat => {
                         const isSelected = templateCategory === cat;
                         const label = cat === 'Hot' ? 'Hot 🔥' : cat;
                         return (
@@ -4255,7 +4267,7 @@ export default function App() {
                         return (
                           <button
                             key={tpl.id}
-                            onClick={() => applyTemplate(tpl)}
+                            onClick={() => applyTemplate(isSelected ? null : tpl)}
                             style={{
                               aspectRatio: '1 / 1',
                               borderRadius: '16px',
@@ -4271,143 +4283,142 @@ export default function App() {
                               padding: 0
                             }}
                           >
-                            <canvas
-                              width={180}
-                              height={180}
-                              style={{ width: '100%', height: '100%', display: 'block' }}
-                              ref={el => {
-                                if (!el) return;
-                                const ctx = el.getContext('2d');
-                                ctx.clearRect(0, 0, 180, 180);
-                                // Use the template's drawBackground function to render the thumbnail
-                                if (tpl.drawBackground) {
-                                  tpl.drawBackground(ctx, 180);
-                                  // If the template image hasn't loaded yet, listen for the event and re-render
-                                  const onLoaded = () => {
-                                    if (!el) return;
-                                    ctx.clearRect(0, 0, 180, 180);
-                                    tpl.drawBackground(ctx, 180);
-                                    // Draw placeholder QR grid
-                                    const qrSize = Math.round(180 * tpl.qrSize);
-                                    const qrX = Math.round(180 * tpl.qrX - qrSize / 2);
-                                    const qrY = Math.round(180 * tpl.qrY - qrSize / 2);
-                                    const cell = Math.floor(qrSize / 21);
-                                    const pattern = [
-                                      [1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
-                                      [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
-                                      [1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1],
-                                      [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,0,1],
-                                      [1,0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,1,1,1,0,1],
-                                      [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,1],
-                                      [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
-                                      [0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0],
-                                      [0,0,1,0,1,0,1,1,0,0,1,0,1,1,0,1,0,1,0,0,1],
-                                      [0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,0,0],
-                                      [1,0,1,0,0,1,1,0,1,0,1,0,0,1,1,0,0,1,0,1,0],
-                                      [0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0],
-                                      [0,0,1,0,1,1,1,0,0,0,1,0,1,1,0,1,0,0,1,0,1],
-                                      [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,1,0],
-                                      [1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0],
-                                      [1,0,0,0,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1],
-                                      [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,0,1,0],
-                                      [1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,1],
-                                      [1,0,1,1,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1,0],
-                                      [1,0,0,0,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1],
-                                      [1,1,1,1,1,1,1,0,0,1,0,0,1,1,0,1,0,0,1,0,0],
-                                    ];
-                                    ctx.fillStyle = tpl.preset?.qrColor || '#000000';
-                                    for (let r = 0; r < 21; r++) {
-                                      for (let c = 0; c < 21; c++) {
-                                        if (pattern[r][c]) {
-                                          ctx.fillRect(qrX + c * cell, qrY + r * cell, cell, cell);
-                                        }
-                                      }
-                                    }
-                                    window.removeEventListener('qr-template-loaded', onLoaded);
-                                  };
-                                  window.addEventListener('qr-template-loaded', onLoaded);
-                                }
-                                // Draw placeholder QR grid overlay
-                                const qrSize = Math.round(180 * tpl.qrSize);
-                                const qrX = Math.round(180 * tpl.qrX - qrSize / 2);
-                                const qrY = Math.round(180 * tpl.qrY - qrSize / 2);
-                                const cell = Math.floor(qrSize / 21);
-                                const pattern = [
-                                  [1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
-                                  [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
-                                  [1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1],
-                                  [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,0,1],
-                                  [1,0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,1,1,1,0,1],
-                                  [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,1],
-                                  [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
-                                  [0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0],
-                                  [0,0,1,0,1,0,1,1,0,0,1,0,1,1,0,1,0,1,0,0,1],
-                                  [0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,0,0],
-                                  [1,0,1,0,0,1,1,0,1,0,1,0,0,1,1,0,0,1,0,1,0],
-                                  [0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0],
-                                  [0,0,1,0,1,1,1,0,0,0,1,0,1,1,0,1,0,0,1,0,1],
-                                  [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,1,0],
-                                  [1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0],
-                                  [1,0,0,0,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1],
-                                  [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,0,1,0],
-                                  [1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,1],
-                                  [1,0,1,1,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1,0],
-                                  [1,0,0,0,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1],
-                                  [1,1,1,1,1,1,1,0,0,1,0,0,1,1,0,1,0,0,1,0,0],
-                                ];
-                                ctx.fillStyle = tpl.preset?.qrColor || '#000000';
-                                for (let r = 0; r < 21; r++) {
-                                  for (let c = 0; c < 21; c++) {
-                                    if (pattern[r][c]) {
-                                      ctx.fillRect(qrX + c * cell, qrY + r * cell, cell, cell);
-                                    }
-                                  }
-                                }
+                            <TemplatePreviewCanvas 
+                              template={tpl} 
+                              theme={effectiveTheme} 
+                              qrMatrixInfo={qrMatrixInfo}
+                              templateTexts={templateTexts[tpl.id] || {}}
+                              currentQrOptions={{
+                                qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
+                                eyeColor, eyeOuterColor, syncEyes,
+                                gradientEnabled, gradientColor1, gradientColor2, gradientType,
+                                qrTextureEnabled, qrTexture, qrTextureSyncEyes,
+                                qrBgShape, qrSizeScale, qrPosX, qrPosY,
+                                logo: logo?.image, logoWidth, logoHeight, logoPadding,
+                                logoBackground, logoBgColor, logoBgShape,
+                                logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity
                               }}
                             />
-                            {/* Label overlay at the bottom */}
-                            <div style={{
-                              position: 'absolute', bottom: 0, left: 0, right: 0,
-                              padding: '4px 6px',
-                              background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)',
-                              fontSize: '9px', fontWeight: 700, color: '#fff',
-                              textAlign: 'center', letterSpacing: '0.3px',
-                              pointerEvents: 'none'
-                            }}>
-                              {tpl.name}
-                            </div>
-                            {/* Active indicator (checkmark) */}
                             {isSelected && (
-                              <>
-                                <div style={{
+                              <div
+                                onClick={(e) => { e.stopPropagation(); applyTemplate(null); }}
+                                style={{
                                   position: 'absolute', top: '6px', right: '6px',
-                                  width: '20px', height: '20px', borderRadius: '50%',
+                                  width: '22px', height: '22px', borderRadius: '50%',
                                   background: 'var(--accent-primary)',
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                }}>
-                                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                    <path d="M2 5l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                  </svg>
-                                </div>
-                                {/* Dismiss X button to clear template */}
-                                <div
-                                  role="button"
-                                  onClick={e => { e.stopPropagation(); applyTemplate(null); }}
-                                  style={{
-                                    position: 'absolute', top: '6px', left: '6px',
-                                    width: '20px', height: '20px', borderRadius: '50%',
-                                    background: 'rgba(0,0,0,0.55)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    cursor: 'pointer', zIndex: 10
-                                  }}
-                                >
-                                  <X size={10} color="white" />
-                                </div>
-                              </>
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  cursor: 'pointer',
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                                }}
+                              >
+                                <X size={12} color="white" />
+                              </div>
                             )}
                           </button>
                         );
                       })}
+                    </div>
+
+                    {/* ✏️ Editable Text Panel — shown when template has text fields */}
+                    {selectedTemplate?.texts?.length > 0 && (
+                      <div style={{
+                        background: 'var(--bg-elevated)',
+                        borderRadius: '16px',
+                        padding: '16px',
+                        border: '1px solid var(--border-color)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '14px'
+                      }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{
+                            width: '28px', height: '28px', borderRadius: '8px',
+                            background: 'linear-gradient(135deg, var(--accent-primary), #ff6b9d)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                              <path d="M2 10.5L10.5 2 12 3.5 3.5 12H2V10.5Z" fill="white" stroke="white" strokeWidth="0.5" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>Customize Text</div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Edit text on the template</div>
+                          </div>
+                        </div>
+
+                        {/* Input fields */}
+                        {selectedTemplate.texts.map(textField => {
+                          const currentVal = templateTexts[selectedTemplate.id]?.[textField.key] ?? textField.default;
+                          return (
+                            <div key={textField.key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              <label style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                {textField.label}
+                              </label>
+                              <div style={{ position: 'relative' }}>
+                                <input
+                                  type="text"
+                                  value={currentVal}
+                                  placeholder={textField.default}
+                                  onChange={(e) => {
+                                    const newVal = e.target.value;
+                                    setTemplateTexts(prev => ({
+                                      ...prev,
+                                      [selectedTemplate.id]: {
+                                        ...(prev[selectedTemplate.id] || {}),
+                                        [textField.key]: newVal
+                                      }
+                                    }));
+                                    // Trigger re-render
+                                    setTimeout(() => renderCanvas(), 10);
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    padding: '10px 36px 10px 12px',
+                                    borderRadius: '10px',
+                                    border: '1.5px solid var(--border-color)',
+                                    background: 'var(--bg-card)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '13px',
+                                    fontWeight: 500,
+                                    outline: 'none',
+                                    boxSizing: 'border-box',
+                                    transition: 'border-color 0.2s ease',
+                                  }}
+                                  onFocus={e => e.target.style.borderColor = 'var(--accent-primary)'}
+                                  onBlur={e => e.target.style.borderColor = 'var(--border-color)'}
+                                />
+                                {/* Clear button */}
+                                {currentVal && currentVal !== textField.default && (
+                                  <button
+                                    onClick={() => {
+                                      setTemplateTexts(prev => ({
+                                        ...prev,
+                                        [selectedTemplate.id]: {
+                                          ...(prev[selectedTemplate.id] || {}),
+                                          [textField.key]: textField.default
+                                        }
+                                      }));
+                                      setTimeout(() => renderCanvas(), 10);
+                                    }}
+                                    style={{
+                                      position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                                      width: '18px', height: '18px', borderRadius: '50%',
+                                      background: 'var(--text-tertiary)', border: 'none',
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                      cursor: 'pointer', opacity: 0.6
+                                    }}
+                                  >
+                                    <X size={10} color="white" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -6322,8 +6333,17 @@ export default function App() {
     </div>
   );
 }
-function TemplatePreviewCanvas({ template, theme }) {
+function TemplatePreviewCanvas({ template, theme, qrMatrixInfo, currentQrOptions, templateTexts = {} }) {
   const ref = useRef(null);
+  const [tick, setTick] = useState(0);
+
+  // Re-draw whenever a template image finishes loading
+  useEffect(() => {
+    const handler = () => setTick(t => t + 1);
+    window.addEventListener('qr-template-loaded', handler);
+    return () => window.removeEventListener('qr-template-loaded', handler);
+  }, []);
+
   useEffect(() => {
     if (!ref.current) return;
     const canvas = ref.current;
@@ -6332,65 +6352,72 @@ function TemplatePreviewCanvas({ template, theme }) {
     canvas.width = size;
     canvas.height = size;
     ctx.clearRect(0, 0, size, size);
-    // Draw background
+
+    // 1. Draw template background
     if (template.drawBackground) {
       template.drawBackground(ctx, size);
     }
-    // Draw a simplified dummy QR code in the placeholder slot
+
+    // 2. Draw real QR code inside placeholder slot
     ctx.save();
-    const qrSize = size * template.qrSize;
-    const qrX = size * template.qrX - qrSize / 2;
-    const qrY = size * template.qrY - qrSize / 2;
-    ctx.translate(qrX, qrY);
-    
-    // Draw background card if template.preset.bgTransparent is false (matches main canvas)
-    if (template.preset && !template.preset.bgTransparent) {
-      ctx.fillStyle = template.preset.bgColor || '#FFFFFF';
-      ctx.beginPath();
-      ctx.roundRect(0, 0, qrSize, qrSize, qrSize * 0.08);
-      ctx.fill();
-    }
-    
-    const eyeColor = template.preset.eyeColor || template.preset.qrColor || '#000000';
-    const eyeOuterColor = template.preset.eyeOuterColor || template.preset.qrColor || '#000000';
-    const qrColor = template.preset.qrColor || '#000000';
-    
-    // Draw a realistic 21x21 QR code grid
-    const dotGrid = 21;
-    const dotW = qrSize / dotGrid;
-    const eyeSize = dotW * 7;
-    
-    // Helper to draw an eye (7x7 modules)
-    const drawEye = (x, y) => {
-      ctx.fillStyle = eyeOuterColor;
-      ctx.fillRect(x, y, eyeSize, eyeSize);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(x + dotW, y + dotW, eyeSize - dotW * 2, eyeSize - dotW * 2);
-      ctx.fillStyle = eyeColor;
-      ctx.fillRect(x + dotW * 2, y + dotW * 2, eyeSize - dotW * 4, eyeSize - dotW * 4);
-    };
-    // Draw 3 eyes
-    drawEye(0, 0); // Top-left
-    drawEye(qrSize - eyeSize, 0); // Top-right
-    drawEye(0, qrSize - eyeSize); // Bottom-left
-    // Draw realistic random data dots (avoiding eyes)
-    ctx.fillStyle = qrColor;
-    for (let r = 0; r < dotGrid; r++) {
-      for (let c = 0; c < dotGrid; c++) {
-        // Skip 7x7 corner areas (eyes)
-        if (r < 7 && c < 7) continue;
-        if (r < 7 && c >= dotGrid - 7) continue;
-        if (r >= dotGrid - 7 && c < 7) continue;
-        
-        // Consistent pseudo-random pattern
-        if (Math.sin(r * 12.9898 + c * 78.233) * 43758.5453 % 1 > 0.5) {
-          ctx.fillRect(c * dotW, r * dotW, dotW, dotW);
-        }
-      }
+    const tplQrSize = size * template.qrSize;
+    const tplQrX = size * template.qrX - tplQrSize / 2;
+    const tplQrY = size * template.qrY - tplQrSize / 2;
+
+    // Use current active QR matrix, or fallback to standard 21x21 matrix if none
+    const activeMatrixInfo = qrMatrixInfo || generateQRMatrix('https://mushiqr.pro');
+
+    if (activeMatrixInfo) {
+      // Create temporary canvas to render real QR with exact shape/colors/styles
+      const qrTempCanvas = document.createElement('canvas');
+      qrTempCanvas.width = 512;
+      qrTempCanvas.height = 512;
+
+      // Combine current user QR styling options with template preset overrides
+      const optionsForQR = {
+        ...activeMatrixInfo,
+        size: 512,
+        qrColor: template.preset?.qrColor || currentQrOptions?.qrColor || '#000000',
+        bgColor: template.preset?.bgColor || currentQrOptions?.bgColor || '#FFFFFF',
+        bgTransparent: template.preset?.bgTransparent ?? (currentQrOptions?.bgTransparent || false),
+        qrBgShape: currentQrOptions?.qrBgShape || 'full',
+        dotStyle: template.preset?.dotStyle || currentQrOptions?.dotStyle || DOT_STYLES.SQUARE,
+        eyeStyle: template.preset?.eyeStyle || currentQrOptions?.eyeStyle || EYE_STYLES.SQUARE,
+        eyeColor: template.preset?.eyeColor || currentQrOptions?.eyeColor || '',
+        eyeOuterColor: template.preset?.eyeOuterColor || currentQrOptions?.eyeOuterColor || '',
+        syncEyes: currentQrOptions?.syncEyes ?? true,
+        gradientEnabled: currentQrOptions?.gradientEnabled || false,
+        gradientColor1: currentQrOptions?.gradientColor1 || '#000000',
+        gradientColor2: currentQrOptions?.gradientColor2 || '#0066ff',
+        gradientType: currentQrOptions?.gradientType || 'linear',
+        qrTextureEnabled: currentQrOptions?.qrTextureEnabled || false,
+        qrTexture: currentQrOptions?.qrTexture || null,
+        qrTextureSyncEyes: currentQrOptions?.qrTextureSyncEyes || false,
+        qrSizeScale: currentQrOptions?.qrSizeScale || 1,
+        qrPosX: currentQrOptions?.qrPosX || 0.5,
+        qrPosY: currentQrOptions?.qrPosY || 0.5,
+        logo: currentQrOptions?.logo || null,
+        logoWidth: currentQrOptions?.logoWidth || 0.18,
+        logoHeight: currentQrOptions?.logoHeight || 0.18,
+        logoPadding: currentQrOptions?.logoPadding || 10,
+        logoBackground: currentQrOptions?.logoBackground || false,
+        logoBgColor: currentQrOptions?.logoBgColor || '#ffffff',
+        logoBgShape: currentQrOptions?.logoBgShape || 'circle',
+        logoOutline: currentQrOptions?.logoOutline || false,
+        logoOutlineColor: currentQrOptions?.logoOutlineColor || '#000000',
+        logoOutlineWidth: currentQrOptions?.logoOutlineWidth || 3,
+        logoOutlineOpacity: currentQrOptions?.logoOutlineOpacity || 1,
+        quietZone: 2,
+      };
+
+      renderQR(qrTempCanvas, optionsForQR);
+      ctx.drawImage(qrTempCanvas, tplQrX, tplQrY, tplQrSize, tplQrSize);
     }
     ctx.restore();
-    // Draw foreground
-    template.drawForeground(ctx, size);
-  }, [template, theme]);
+
+    // 3. Draw template foreground overlay
+    if (template.drawForeground) template.drawForeground(ctx, size, templateTexts);
+  }, [template, theme, tick, qrMatrixInfo, currentQrOptions, templateTexts]);
+
   return <canvas ref={ref} style={{ width: '100%', height: '100%', borderRadius: '14px', display: 'block' }} />;
-}
+}
