@@ -2812,7 +2812,8 @@ export default function App() {
     };
     // 0. Check Template Text Interaction
     if (selectedTemplate) {
-      setIsEditingTemplateText(true);
+      handleTabChange('text');
+      startEditing('text', 'input');
       return;
     }
 
@@ -4163,105 +4164,6 @@ export default function App() {
                       }} 
                     />
                   )}
-                  {selectedTemplate && (
-                    <div 
-                      onClick={(e) => e.stopPropagation()}
-                      style={{
-                        position: 'absolute',
-                        bottom: '9%',
-                        left: '8%',
-                        right: '8%',
-                        zIndex: 25,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        pointerEvents: 'auto'
-                      }}
-                    >
-                      {isEditingTemplateText ? (
-                        <div style={{
-                          width: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          background: 'rgba(0, 0, 0, 0.88)',
-                          backdropFilter: 'blur(16px)',
-                          WebkitBackdropFilter: 'blur(16px)',
-                          border: '1.5px solid var(--accent-primary)',
-                          borderRadius: '24px',
-                          padding: '4px 8px 4px 14px',
-                          boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
-                        }}>
-                          <Pencil size={13} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
-                          <input
-                            type="text"
-                            autoFocus
-                            value={templateHandleText}
-                            onChange={(e) => setTemplateHandleText(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === 'Escape') setIsEditingTemplateText(false);
-                            }}
-                            onBlur={() => setIsEditingTemplateText(false)}
-                            placeholder={selectedTemplate.defaultHandle || 'Enter handle...'}
-                            style={{
-                              flex: 1,
-                              background: 'transparent',
-                              border: 'none',
-                              outline: 'none',
-                              color: '#FFFFFF',
-                              fontSize: '13px',
-                              fontWeight: 700,
-                              textAlign: 'left'
-                            }}
-                          />
-                          <button
-                            onClick={() => setIsEditingTemplateText(false)}
-                            style={{
-                              border: 'none',
-                              background: 'var(--accent-primary)',
-                              color: '#FFFFFF',
-                              borderRadius: '50%',
-                              width: '24px',
-                              height: '24px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              cursor: 'pointer',
-                              flexShrink: 0
-                            }}
-                          >
-                            <Check size={13} />
-                          </button>
-                        </div>
-                      ) : (
-                        <div 
-                          onClick={() => setIsEditingTemplateText(true)}
-                          title="Click field to edit handle"
-                          style={{
-                            padding: '6px 16px',
-                            background: 'rgba(0, 0, 0, 0.55)',
-                            backdropFilter: 'blur(10px)',
-                            WebkitBackdropFilter: 'blur(10px)',
-                            border: '1.5px solid rgba(255, 255, 255, 0.28)',
-                            borderRadius: '24px',
-                            color: '#FFFFFF',
-                            fontSize: '12.5px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '7px',
-                            opacity: 0.95,
-                            transition: 'all 0.2s ease',
-                            boxShadow: '0 4px 14px rgba(0,0,0,0.4)'
-                          }}
-                        >
-                          <Pencil size={13} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
-                          <span>{templateHandleText || selectedTemplate.defaultHandle}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
               </section>
             </ErrorBoundary>
@@ -4712,6 +4614,37 @@ export default function App() {
                       {/* TEXT PROPERTIES */}
                       {textPopup === 'input' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          {selectedTemplate && (
+                            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1.5px solid var(--accent-primary)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <Pencil size={15} color="var(--accent-primary)" /> Template Handle / Username
+                                </span>
+                                <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--accent-primary)', background: 'var(--accent-light)', padding: '2px 8px', borderRadius: '10px' }}>
+                                  Active Template
+                                </span>
+                              </div>
+                              <input 
+                                id="template-handle-input"
+                                type="text" 
+                                value={templateHandleText} 
+                                onChange={(e) => setTemplateHandleText(e.target.value)}
+                                placeholder={selectedTemplate.defaultHandle || 'Enter handle...'} 
+                                style={{
+                                  width: '100%',
+                                  padding: '10px 14px',
+                                  borderRadius: '10px',
+                                  border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-card)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '13.5px',
+                                  fontWeight: 600,
+                                  outline: 'none',
+                                  boxSizing: 'border-box'
+                                }} 
+                              />
+                            </div>
+                          )}
                           <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <Toggle
                               label={
