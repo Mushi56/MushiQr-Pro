@@ -4217,22 +4217,27 @@ export default function App() {
                 <div className="tab-panel fade-in" id="panel-template" style={{ background: '#0D0D12', minHeight: '100%' }}>
                   <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 16px 100px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     
-                    {/* Top Icon Category Navigation Bar */}
+                    {/* Top Floating Category Toolbar */}
                     <div style={{
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      backdropFilter: 'blur(16px)',
+                      WebkitBackdropFilter: 'blur(16px)',
+                      borderRadius: '16px',
+                      padding: '8px 12px',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
                       display: 'flex',
-                      gap: '12px',
+                      gap: '8px',
                       overflowX: 'auto',
-                      paddingBottom: '8px',
                       WebkitOverflowScrolling: 'touch',
                       scrollbarWidth: 'none',
-                      borderBottom: '1px solid rgba(255,255,255,0.08)'
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
                     }}>
                       {[
-                        { id: 'All', label: 'All', icon: '🎛️' },
-                        { id: 'Social', label: 'Social', icon: '👥' },
-                        { id: 'Business', label: 'Business', icon: '💼' },
-                        { id: 'Payments', label: 'Payments', icon: '💳' },
-                        { id: 'Food', label: 'Food', icon: '🍽️' },
+                        { id: 'All', label: 'All', icon: <Grid size={18} /> },
+                        { id: 'Social', label: 'Social', icon: <Share2 size={18} /> },
+                        { id: 'Business', label: 'Business', icon: <Briefcase size={18} /> },
+                        { id: 'Payments', label: 'Payments', icon: <CreditCard size={18} /> },
+                        { id: 'Food', label: 'Food', icon: <Utensils size={18} /> },
                       ].map(cat => {
                         const isSelected = templateCategory === cat.id;
                         return (
@@ -4240,25 +4245,32 @@ export default function App() {
                             key={cat.id}
                             onClick={() => setTemplateCategory(cat.id)}
                             style={{
-                              flex: '0 0 auto',
+                              flex: '1 0 auto',
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: 'center',
                               justify: 'center',
                               gap: '4px',
-                              minWidth: '58px',
-                              height: '58px',
+                              padding: '8px 14px',
                               borderRadius: '12px',
-                              border: isSelected ? '1.5px solid #FF3B30' : '1px solid rgba(255,255,255,0.1)',
-                              background: isSelected ? 'rgba(255, 59, 48, 0.12)' : 'rgba(255,255,255,0.03)',
+                              border: isSelected ? '1.5px solid #FF3B30' : '1px solid transparent',
+                              background: isSelected ? 'rgba(255, 59, 48, 0.16)' : 'transparent',
                               color: isSelected ? '#FF3B30' : '#8E8E93',
                               fontSize: '11px',
-                              fontWeight: 600,
+                              fontWeight: 700,
                               cursor: 'pointer',
-                              transition: 'all 0.2s ease'
+                              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                              boxShadow: isSelected ? '0 4px 14px rgba(255, 59, 48, 0.35)' : 'none'
                             }}
                           >
-                            <span style={{ fontSize: '18px' }}>{cat.icon}</span>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justify: 'center',
+                              color: isSelected ? '#FF3B30' : '#8E8E93'
+                            }}>
+                              {cat.icon}
+                            </div>
                             <span>{cat.label}</span>
                           </button>
                         );
