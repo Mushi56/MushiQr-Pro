@@ -157,10 +157,10 @@
 
 /* Home Page Red Upper Navbar Banner Styling */
 .app-header.header-home-banner {
-  background: linear-gradient(135deg, #7A0C1E 0%, #2D0207 100%) !important;
+  background: linear-gradient(135deg, #CC0029 0%, #99001C 35%, #590010 70%, #240006 100%) !important;
   color: #FFFFFF !important;
   border-bottom: none !important;
-  box-shadow: none !important;
+  box-shadow: 0 4px 20px rgba(204, 0, 41, 0.25) !important;
 }
 
 .app-header.header-home-banner .app-logo-text {
