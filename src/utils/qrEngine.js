@@ -215,7 +215,7 @@ export function renderQR(canvas, options) {
     bgColor = '#ffffff',
     bgTransparent = false,
     qrBgShape = 'full',
-    dotStyle = DOT_STYLES.SQUARE,
+    dotStyle = DOT_STYLES.DENSO,
     eyeStyle = EYE_STYLES.SQUARE,
     eyeColor = '',
     eyeOuterColor = '',

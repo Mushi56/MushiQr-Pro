@@ -1270,7 +1270,7 @@ export default function App() {
   const [qrPosX, setQrPosX] = useState(0.5);
   const [qrPosY, setQrPosY] = useState(0.5);
   // ── Shapes ──
-  const [dotStyle, setDotStyle] = useState(DOT_STYLES.SQUARE);
+  const [dotStyle, setDotStyle] = useState(DOT_STYLES.DENSO);
   const [eyeStyle, setEyeStyle] = useState(EYE_STYLES.SQUARE);
   const [dotPadding, setDotPadding] = useState(12);
   const [eyePadding, setEyePadding] = useState(0);
@@ -2205,7 +2205,7 @@ export default function App() {
     setGradientColor2('#a78bfa');
     setGradientType('linear');
     // Shapes
-    setDotStyle(DOT_STYLES.SQUARE);
+    setDotStyle(DOT_STYLES.DENSO);
     setEyeStyle(EYE_STYLES.SQUARE);
     setDotPadding(0);
     setEyePadding(0);
@@ -6312,7 +6312,7 @@ function TemplatePreviewCanvas({ template, theme, qrMatrixInfo, currentQrOptions
         bgColor: template.preset?.bgColor || currentQrOptions?.bgColor || '#FFFFFF',
         bgTransparent: template.preset?.bgTransparent ?? (currentQrOptions?.bgTransparent || false),
         qrBgShape: currentQrOptions?.qrBgShape || 'full',
-        dotStyle: template.preset?.dotStyle || currentQrOptions?.dotStyle || DOT_STYLES.SQUARE,
+        dotStyle: template.preset?.dotStyle || currentQrOptions?.dotStyle || DOT_STYLES.DENSO,
         eyeStyle: template.preset?.eyeStyle || currentQrOptions?.eyeStyle || EYE_STYLES.SQUARE,
         eyeColor: template.preset?.eyeColor || currentQrOptions?.eyeColor || '',
         eyeOuterColor: template.preset?.eyeOuterColor || currentQrOptions?.eyeOuterColor || '',
