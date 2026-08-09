@@ -534,10 +534,10 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     fontWeight: 700,
                     letterSpacing: '0.8px',
                     textTransform: 'uppercase',
-                    color: 'rgba(255, 255, 255, 0.78)',
-                    marginBottom: '4px'
+                    color: '#FF2A55',
+                    marginBottom: '1px'
                   }}>
-                    WELCOME BACK
+                    WELCOME BACK 👋
                   </div>
                   <div style={{
                     fontSize: '22px',
@@ -672,8 +672,19 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 zIndex: 2,
                 position: 'relative'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Image size={10} color="#FF4D79" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <div style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '6px',
+                    background: 'linear-gradient(135deg, rgba(255, 42, 85, 0.3) 0%, rgba(179, 0, 45, 0.3) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Image size={10} color="#FF4D79" />
+                  </div>
                   <span style={{ fontSize: '8px', fontWeight: 700, color: '#FFFFFF' }}>Make it Yours</span>
                 </div>
                 <div style={{
@@ -775,7 +786,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '7.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3, maxWidth: '80px' }}>
+                <p style={{ fontSize: '7.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '85px' }}>
                   Generate professional 1D &amp; 2D barcodes supporting 30+ industrial standards &amp; formats.
                 </p>
               </div>
@@ -795,8 +806,19 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 zIndex: 2,
                 position: 'relative'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Barcode size={10} color="#FF944D" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <div style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '6px',
+                    background: 'linear-gradient(135deg, rgba(245, 110, 19, 0.3) 0%, rgba(158, 59, 0, 0.3) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Barcode size={10} color="#FF944D" />
+                  </div>
                   <span style={{ fontSize: '8px', fontWeight: 700, color: '#FFFFFF' }}>30+ Formats</span>
                 </div>
                 <div style={{
@@ -904,41 +926,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                 </div>
               </div>
-              <p style={{ fontSize: '7.5px', margin: '6px 140px 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3 }}>
+              <p style={{ fontSize: '7.5px', margin: '6px 140px 0 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3 }}>
                 Create 10K+ QR codes &amp; barcodes from CSV / Excel files.
               </p>
-
-              {/* Bottom Action Pill */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '5px 8px',
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                maxWidth: '190px',
-                boxSizing: 'border-box',
-                zIndex: 2,
-                position: 'relative'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Zap size={10} color="#FF4D79" />
-                  <span style={{ fontSize: '8px', fontWeight: 700, color: '#FFFFFF' }}>10K+ Codes</span>
-                </div>
-                <div style={{
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #FF2A55 0%, #B3002D 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 6px rgba(255, 42, 85, 0.4)'
-                }}>
-                  <ChevronRight size={12} color="#FFFFFF" />
-                </div>
-              </div>
             </div>
           </div>
         </div>
