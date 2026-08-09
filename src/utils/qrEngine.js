@@ -303,6 +303,8 @@ export function renderQR(canvas, options) {
   const h = options.template?.heightRatio ? Math.round(size * options.template.heightRatio) : size;
   canvas.width = w;
   canvas.height = h;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   // Clear canvas
   ctx.clearRect(0, 0, w, h);

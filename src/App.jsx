@@ -2262,7 +2262,7 @@ export default function App() {
       if (!canvasRef.current) return;
       
       renderQR(canvasRef.current, {
-        ...qrMatrixInfo, size: 512,
+        ...qrMatrixInfo, size: 1024,
         template: selectedTemplate,
         templateHandleText: templateHandleText || selectedTemplate?.defaultHandle || '',
         qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
@@ -6278,10 +6278,12 @@ function TemplatePreviewCanvas({ template, theme, qrMatrixInfo, currentQrOptions
     if (!ref.current) return;
     const canvas = ref.current;
     const ctx = canvas.getContext('2d');
-    const w = 240; // High-res preview base width
+    const w = 640; // High-res preview base width
     const h = template.heightRatio ? Math.round(w * template.heightRatio) : w;
     canvas.width = w;
     canvas.height = h;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.clearRect(0, 0, w, h);
 
     // 1. Draw template background
