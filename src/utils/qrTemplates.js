@@ -167,7 +167,8 @@ function createSocialTemplate({
       ctx.stroke();
 
       // Handle Text inside pill (Editable text from options or default)
-      const textToDisplay = options.templateHandleText || options.customText || defaultHandle;
+      const handleVal = options.templateHandleText || options.customText || defaultHandle;
+      const textToDisplay = `✏️ ${handleVal}`;
       ctx.fillStyle = '#FFFFFF';
       ctx.font = `700 ${Math.round(w * 0.034)}px "Inter", sans-serif`;
       ctx.textAlign = 'center';

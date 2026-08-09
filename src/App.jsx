@@ -4183,15 +4183,16 @@ export default function App() {
                           width: '100%',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '6px',
-                          background: 'rgba(0, 0, 0, 0.85)',
+                          gap: '8px',
+                          background: 'rgba(0, 0, 0, 0.88)',
                           backdropFilter: 'blur(16px)',
                           WebkitBackdropFilter: 'blur(16px)',
                           border: '1.5px solid var(--accent-primary)',
                           borderRadius: '24px',
-                          padding: '3px 6px 3px 14px',
+                          padding: '4px 8px 4px 14px',
                           boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
                         }}>
+                          <Pencil size={13} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
                           <input
                             type="text"
                             autoFocus
@@ -4210,7 +4211,7 @@ export default function App() {
                               color: '#FFFFFF',
                               fontSize: '13px',
                               fontWeight: 700,
-                              textAlign: 'center'
+                              textAlign: 'left'
                             }}
                           />
                           <button
@@ -4220,8 +4221,8 @@ export default function App() {
                               background: 'var(--accent-primary)',
                               color: '#FFFFFF',
                               borderRadius: '50%',
-                              width: '26px',
-                              height: '26px',
+                              width: '24px',
+                              height: '24px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -4229,34 +4230,34 @@ export default function App() {
                               flexShrink: 0
                             }}
                           >
-                            <Check size={14} />
+                            <Check size={13} />
                           </button>
                         </div>
                       ) : (
                         <div 
                           onClick={() => setIsEditingTemplateText(true)}
-                          title="Click to edit handle on canvas"
+                          title="Click field to edit handle"
                           style={{
-                            padding: '4px 14px',
-                            background: 'rgba(0, 0, 0, 0.45)',
-                            backdropFilter: 'blur(8px)',
-                            WebkitBackdropFilter: 'blur(8px)',
-                            border: '1px dashed rgba(255, 255, 255, 0.45)',
-                            borderRadius: '20px',
+                            padding: '6px 16px',
+                            background: 'rgba(0, 0, 0, 0.55)',
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
+                            border: '1.5px solid rgba(255, 255, 255, 0.28)',
+                            borderRadius: '24px',
                             color: '#FFFFFF',
-                            fontSize: '11px',
-                            fontWeight: 600,
+                            fontSize: '12.5px',
+                            fontWeight: 700,
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '5px',
-                            opacity: 0.9,
+                            gap: '7px',
+                            opacity: 0.95,
                             transition: 'all 0.2s ease',
-                            boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+                            boxShadow: '0 4px 14px rgba(0,0,0,0.4)'
                           }}
                         >
-                          <Pencil size={11} color="#FFFFFF" />
-                          <span>Click to Edit Text</span>
+                          <Pencil size={13} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
+                          <span>{templateHandleText || selectedTemplate.defaultHandle}</span>
                         </div>
                       )}
                     </div>
