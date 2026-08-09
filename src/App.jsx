@@ -1188,7 +1188,7 @@ export default function App() {
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
   const [canvasSelection, setCanvasSelection] = useState(null); // 'logo' | 'text' | null
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [templateCategory, setTemplateCategory] = useState('Hot');
+  const [templateCategory, setTemplateCategory] = useState('All');
   const [templateTexts, setTemplateTexts] = useState({}); // { [tplId]: { key: value } }
   const applyLogoBySlug = (slug) => {
     const LOGO_PRESETS = [
@@ -4212,112 +4212,145 @@ export default function App() {
                 </div>
               )}
               {/* Template Tab */}
+              {/* Template Tab */}
               {activeTab === 'template' && (
-                <div className="tab-panel fade-in" id="panel-template">
-                  <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 20px 100px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="tab-panel fade-in" id="panel-template" style={{ background: '#0D0D12', minHeight: '100%' }}>
+                  <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 16px 100px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     
-                    {/* Category Selector Bar (Swipeable) */}
-                    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', borderBottom: '1px solid var(--border-color)' }}>
-                      {/* Category tabs — include 'Custom' if user has custom templates */}
-                      {[...['Hot', 'Social', 'Business', 'Retail', 'Event', 'Wifi'], ...(customTemplates.length > 0 ? ['Custom'] : [])].map(cat => {
-                        const isSelected = templateCategory === cat;
-                        const label = cat === 'Hot' ? 'Hot 🔥' : cat;
+                    {/* Top Icon Category Navigation Bar */}
+                    <div style={{
+                      display: 'flex',
+                      gap: '12px',
+                      overflowX: 'auto',
+                      paddingBottom: '8px',
+                      WebkitOverflowScrolling: 'touch',
+                      scrollbarWidth: 'none',
+                      borderBottom: '1px solid rgba(255,255,255,0.08)'
+                    }}>
+                      {[
+                        { id: 'All', label: 'All', icon: '🎛️' },
+                        { id: 'Social', label: 'Social', icon: '👥' },
+                        { id: 'Business', label: 'Business', icon: '💼' },
+                        { id: 'Payments', label: 'Payments', icon: '💳' },
+                        { id: 'Food', label: 'Food', icon: '🍽️' },
+                      ].map(cat => {
+                        const isSelected = templateCategory === cat.id;
                         return (
                           <button
-                            key={cat}
-                            onClick={() => setTemplateCategory(cat)}
+                            key={cat.id}
+                            onClick={() => setTemplateCategory(cat.id)}
                             style={{
                               flex: '0 0 auto',
-                              border: 'none',
-                              background: 'transparent',
-                              color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                              fontSize: '13px',
-                              fontWeight: 700,
-                              padding: '8px 16px',
-                              position: 'relative',
-                              cursor: 'pointer',
-                              transition: 'color 0.2s ease'
-                            }}
-                          >
-                            {label}
-                            {isSelected && (
-                              <div style={{
-                                position: 'absolute',
-                                bottom: 0,
-                                left: '16px',
-                                right: '16px',
-                                height: '3px',
-                                borderRadius: '2px',
-                                background: 'var(--accent-primary)'
-                              }} />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {/* Template Card Grid (3 Columns) */}
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, 1fr)',
-                      gap: '12px',
-                      marginTop: '8px'
-                    }}>
-                      {ALL_TEMPLATES.filter(t => t.category === templateCategory).map(tpl => {
-                        const isSelected = selectedTemplate?.id === tpl.id;
-                        return (
-                          <button
-                            key={tpl.id}
-                            onClick={() => applyTemplate(isSelected ? null : tpl)}
-                            style={{
-                              aspectRatio: '1 / 1',
-                              borderRadius: '16px',
-                              border: isSelected ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                              background: 'var(--bg-elevated)',
                               display: 'flex',
                               flexDirection: 'column',
+                              alignItems: 'center',
+                              justify: 'center',
+                              gap: '4px',
+                              minWidth: '58px',
+                              height: '58px',
+                              borderRadius: '12px',
+                              border: isSelected ? '1.5px solid #FF3B30' : '1px solid rgba(255,255,255,0.1)',
+                              background: isSelected ? 'rgba(255, 59, 48, 0.12)' : 'rgba(255,255,255,0.03)',
+                              color: isSelected ? '#FF3B30' : '#8E8E93',
+                              fontSize: '11px',
+                              fontWeight: 600,
                               cursor: 'pointer',
-                              position: 'relative',
-                              overflow: 'hidden',
-                              boxShadow: isSelected ? '0 8px 20px rgba(255,59,48,0.15)' : 'none',
-                              transition: 'all 0.2s ease',
-                              padding: 0
+                              transition: 'all 0.2s ease'
                             }}
                           >
-                            <TemplatePreviewCanvas 
-                              template={tpl} 
-                              theme={effectiveTheme} 
-                              qrMatrixInfo={qrMatrixInfo}
-                              templateTexts={templateTexts[tpl.id] || {}}
-                              currentQrOptions={{
-                                qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
-                                eyeColor, eyeOuterColor, syncEyes,
-                                gradientEnabled, gradientColor1, gradientColor2, gradientType,
-                                qrTextureEnabled, qrTexture, qrTextureSyncEyes,
-                                qrBgShape, qrSizeScale, qrPosX, qrPosY,
-                                logo: logo?.image, logoWidth, logoHeight, logoPadding,
-                                logoBackground, logoBgColor, logoBgShape,
-                                logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity
-                              }}
-                            />
-                            {isSelected && (
-                              <div
-                                onClick={(e) => { e.stopPropagation(); applyTemplate(null); }}
-                                style={{
-                                  position: 'absolute', top: '6px', right: '6px',
-                                  width: '22px', height: '22px', borderRadius: '50%',
-                                  background: 'var(--accent-primary)',
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  cursor: 'pointer',
-                                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-                                }}
-                              >
-                                <X size={12} color="white" />
-                              </div>
-                            )}
+                            <span style={{ fontSize: '18px' }}>{cat.icon}</span>
+                            <span>{cat.label}</span>
                           </button>
                         );
                       })}
                     </div>
+
+                    {/* Grouped Category Sections */}
+                    {[
+                      { id: 'Social', title: 'Social Media' },
+                      { id: 'Business', title: 'Business & Essentials' },
+                      { id: 'Payments', title: 'Payments' },
+                      { id: 'Food', title: 'Food & Hospitality' }
+                    ]
+                    .filter(sec => templateCategory === 'All' || templateCategory === sec.id)
+                    .map(sec => {
+                      const sectionTemplates = ALL_TEMPLATES.filter(t => t.category === sec.id);
+                      if (sectionTemplates.length === 0) return null;
+
+                      return (
+                        <div key={sec.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {/* Section Header */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#FF3B30', margin: 0 }}>{sec.title}</h3>
+                            <span style={{ fontSize: '12px', color: '#FF3B30', fontWeight: 600, cursor: 'pointer' }}>See All &gt;</span>
+                          </div>
+
+                          {/* 3 Columns Grid for Section */}
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(3, 1fr)',
+                            gap: '10px'
+                          }}>
+                            {sectionTemplates.map(tpl => {
+                              const isSelected = selectedTemplate?.id === tpl.id;
+                              return (
+                                <button
+                                  key={tpl.id}
+                                  onClick={() => applyTemplate(isSelected ? null : tpl)}
+                                  style={{
+                                    aspectRatio: '0.65 / 1',
+                                    borderRadius: '14px',
+                                    border: isSelected ? '2px solid #FF3B30' : '1px solid rgba(255,255,255,0.08)',
+                                    background: '#050508',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    cursor: 'pointer',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    boxShadow: isSelected ? '0 0 12px rgba(255,59,48,0.4)' : 'none',
+                                    transition: 'all 0.2s ease',
+                                    padding: 0
+                                  }}
+                                >
+                                  <TemplatePreviewCanvas 
+                                    template={tpl} 
+                                    theme={effectiveTheme} 
+                                    qrMatrixInfo={qrMatrixInfo}
+                                    templateTexts={templateTexts[tpl.id] || {}}
+                                    currentQrOptions={{
+                                      qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
+                                      eyeColor, eyeOuterColor, syncEyes,
+                                      gradientEnabled, gradientColor1, gradientColor2, gradientType,
+                                      qrTextureEnabled, qrTexture, qrTextureSyncEyes,
+                                      qrBgShape, qrSizeScale, qrPosX, qrPosY,
+                                      logo: logo?.image, logoWidth, logoHeight, logoPadding,
+                                      logoBackground, logoBgColor, logoBgShape,
+                                      logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity
+                                    }}
+                                  />
+                                  {isSelected && (
+                                    <div
+                                      onClick={(e) => { e.stopPropagation(); applyTemplate(null); }}
+                                      style={{
+                                        position: 'absolute', top: '6px', right: '6px',
+                                        width: '22px', height: '22px', borderRadius: '50%',
+                                        background: '#FF3B30',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                                        zIndex: 10
+                                      }}
+                                    >
+                                      <X size={12} color="white" />
+                                    </div>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
 
                     {/* ✏️ Editable Text Panel — shown when template has text fields */}
                     {selectedTemplate?.texts?.length > 0 && (

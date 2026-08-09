@@ -1,1318 +1,826 @@
 // ─── QR Code Vector Templates ───────────────────────────────────────────────
 
 export const QR_TEMPLATES = [
+  // ─── SOCIAL MEDIA ────────────────────────────────────────────────────────────
   {
-    id: 'ai_facebook',
-    name: 'Facebook AI',
-    category: 'Hot',
-    qrSize: 0.52,
-    qrX: 0.50,
-    qrY: 0.57,
-    preset: {
-      qrColor: '#1877F2',
-      bgColor: '#FFFFFF',
-      dotStyle: 'square',
-      eyeStyle: 'square',
-      bgTransparent: false
-    },
-    imageObj: null,
-    drawBackground: function(ctx, size) {
-      if (!this.imageObj) {
-        this.imageObj = new Image();
-        this.imageObj.src = '/presets/fb_template.webp';
-        this.imageObj.onload = () => {
-          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
-        };
-      }
-      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
-        ctx.drawImage(this.imageObj, 0, 0, size, size);
-      } else {
-        const grad = ctx.createLinearGradient(0, 0, size, size);
-        grad.addColorStop(0, '#1877F2');
-        grad.addColorStop(1, '#0b3c80');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, size, size);
-      }
-    },
-    drawForeground: (ctx, size) => {}
-  },
-  {
-    id: 'ai_instagram',
-    name: 'Instagram AI',
-    category: 'Hot',
-    qrSize: 0.42,
-    qrX: 0.50,
-    qrY: 0.61,
-    preset: {
-      qrColor: '#E4405F',
-      bgColor: '#FFFFFF',
-      dotStyle: 'rounded',
-      eyeStyle: 'rounded',
-      bgTransparent: false
-    },
-    imageObj: null,
-    drawBackground: function(ctx, size) {
-      if (!this.imageObj) {
-        this.imageObj = new Image();
-        this.imageObj.src = '/presets/ig_template.webp';
-        this.imageObj.onload = () => {
-          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
-        };
-      }
-      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
-        ctx.drawImage(this.imageObj, 0, 0, size, size);
-      } else {
-        const grad = ctx.createLinearGradient(0, 0, size, size);
-        grad.addColorStop(0, '#C13584');
-        grad.addColorStop(1, '#F77737');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, size, size);
-      }
-    },
-    drawForeground: (ctx, size) => {}
-  },
-  {
-    id: 'ai_x',
-    name: 'X AI',
-    category: 'Hot',
-    qrSize: 0.50,
-    qrX: 0.49,
-    qrY: 0.62,
-    preset: {
-      qrColor: '#000000',
-      bgColor: '#FFFFFF',
-      dotStyle: 'square',
-      eyeStyle: 'square',
-      bgTransparent: false
-    },
-    imageObj: null,
-    drawBackground: function(ctx, size) {
-      if (!this.imageObj) {
-        this.imageObj = new Image();
-        this.imageObj.src = '/presets/x_template.webp';
-        this.imageObj.onload = () => {
-          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
-        };
-      }
-      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
-        ctx.drawImage(this.imageObj, 0, 0, size, size);
-      } else {
-        ctx.fillStyle = '#15202B';
-        ctx.fillRect(0, 0, size, size);
-      }
-    },
-    drawForeground: (ctx, size) => {}
-  },
-  {
-    id: 'ai_linkedin',
-    name: 'LinkedIn AI',
-    category: 'Hot',
-    qrSize: 0.38,
-    qrX: 0.50,
-    qrY: 0.64,
-    preset: {
-      qrColor: '#0A66C2',
-      bgColor: '#FFFFFF',
-      dotStyle: 'square',
-      eyeStyle: 'square',
-      bgTransparent: false
-    },
-    imageObj: null,
-    drawBackground: function(ctx, size) {
-      if (!this.imageObj) {
-        this.imageObj = new Image();
-        this.imageObj.src = '/presets/linkedin_template.webp';
-        this.imageObj.onload = () => {
-          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
-        };
-      }
-      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
-        ctx.drawImage(this.imageObj, 0, 0, size, size);
-      } else {
-        const grad = ctx.createLinearGradient(0, 0, size, size);
-        grad.addColorStop(0, '#0A66C2');
-        grad.addColorStop(1, '#053361');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, size, size);
-      }
-    },
-    drawForeground: (ctx, size) => {}
-  },
-  {
-    id: 'ai_threads',
-    name: 'Threads AI',
-    category: 'Hot',
-    qrSize: 0.43,
-    qrX: 0.49,
-    qrY: 0.62,
-    preset: {
-      qrColor: '#000000',
-      bgColor: '#FFFFFF',
-      dotStyle: 'rounded',
-      eyeStyle: 'rounded',
-      bgTransparent: false
-    },
-    imageObj: null,
-    drawBackground: function(ctx, size) {
-      if (!this.imageObj) {
-        this.imageObj = new Image();
-        this.imageObj.src = '/presets/threads_template.webp';
-        this.imageObj.onload = () => {
-          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
-        };
-      }
-      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
-        ctx.drawImage(this.imageObj, 0, 0, size, size);
-      } else {
-        ctx.fillStyle = '#101010';
-        ctx.fillRect(0, 0, size, size);
-      }
-    },
-    drawForeground: (ctx, size) => {}
-  },
-  {
-    id: 'ai_google',
-    name: 'Google AI',
-    category: 'Hot',
-    qrSize: 0.48,
-    qrX: 0.49,
-    qrY: 0.62,
-    preset: {
-      qrColor: '#4285F4',
-      bgColor: '#FFFFFF',
-      dotStyle: 'square',
-      eyeStyle: 'square',
-      bgTransparent: false
-    },
-    imageObj: null,
-    drawBackground: function(ctx, size) {
-      if (!this.imageObj) {
-        this.imageObj = new Image();
-        this.imageObj.src = '/presets/google_template.webp';
-        this.imageObj.onload = () => {
-          window.dispatchEvent(new CustomEvent('qr-template-loaded'));
-        };
-      }
-      if (this.imageObj.complete && this.imageObj.naturalWidth !== 0) {
-        ctx.drawImage(this.imageObj, 0, 0, size, size);
-      } else {
-        ctx.fillStyle = '#F8F9FA';
-        ctx.fillRect(0, 0, size, size);
-      }
-    },
-    drawForeground: (ctx, size) => {}
-  },
-  {
-    id: 'instagram',
-    name: 'Instagram Card',
+    id: 'social_instagram',
+    name: 'Instagram',
     category: 'Social',
-    qrSize: 0.52,
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.55,
-    preset: {
-      qrColor: '#D6001C',
-      bgColor: '#FFFFFF',
-      dotStyle: 'rounded',
-      eyeStyle: 'rounded',
-      eyeColor: '#C13584',
-      eyeOuterColor: '#E1306C',
-      logo: 'instagram',
-      bgTransparent: true
-    },
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'FOLLOW ME' },
+      { key: 'subtitle', label: 'Platform', default: 'on Instagram' },
+      { key: 'handle', label: 'Handle', default: '@username' },
+    ],
+    preset: { qrColor: '#E4405F', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#E4405F', eyeOuterColor: '#E4405F', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      // Warm Instagram mesh gradient
-      const grad = ctx.createLinearGradient(0, 0, size, size);
-      grad.addColorStop(0, '#F91B7F');
-      grad.addColorStop(0.4, '#C13584');
-      grad.addColorStop(0.8, '#FFDC80');
-      grad.addColorStop(1, '#833AB4');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, size, size);
-
-      // Rounded white card with drop shadow
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
-      ctx.shadowBlur = size * 0.04;
-      ctx.shadowOffsetY = size * 0.02;
+      const g = ctx.createLinearGradient(0, 0, size, size);
+      g.addColorStop(0, '#833AB4'); g.addColorStop(0.5, '#FD1D1D'); g.addColorStop(1, '#FCB045');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
       ctx.fillStyle = '#FFFFFF';
-      
-      const cardW = size * 0.76;
-      const cardH = size * 0.78;
-      const cardX = (size - cardW) / 2;
-      const cardY = size * 0.12;
-      
-      ctx.beginPath();
-      ctx.roundRect(cardX, cardY, cardW, cardH, size * 0.06);
-      ctx.fill();
-      ctx.restore();
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.89, size * 0.84, size * 0.07, size * 0.035); ctx.fill();
     },
-    drawForeground: (ctx, size) => {
-      // Draw Instagram logo icon inside the card
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center';
       const cx = size * 0.5;
-      const cy = size * 0.22;
-      const r = size * 0.035;
-
-      ctx.strokeStyle = 'url(#igGrad)'; // Fallback to gradient color or solid pink
-      const grad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
-      grad.addColorStop(0, '#405DE6');
-      grad.addColorStop(0.5, '#E1306C');
-      grad.addColorStop(1, '#F77737');
-      ctx.strokeStyle = grad;
-      ctx.lineWidth = size * 0.008;
-
-      // Outer Camera box
-      ctx.beginPath();
-      ctx.roundRect(cx - r, cy - r, r * 2, r * 2, r * 0.55);
-      ctx.stroke();
-
-      // Camera lens
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Flash dot
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(cx + r * 0.5, cy - r * 0.5, r * 0.12, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Card Header Text
-      ctx.fillStyle = '#1e293b';
-      ctx.font = `bold ${Math.round(size * 0.042)}px "Outfit", "Inter", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText('Instagram', size * 0.5, size * 0.32);
-
-      ctx.fillStyle = '#64748b';
-      ctx.font = `700 ${Math.round(size * 0.02)}px "Inter", sans-serif`;
-      ctx.fillText('SCAN TO FOLLOW ME', size * 0.5, size * 0.36);
-    }
-  },
-  {
-    id: 'facebook',
-    name: 'Facebook Banner',
-    category: 'Social',
-    qrSize: 0.50,
-    qrX: 0.5,
-    qrY: 0.56,
-    preset: {
-      qrColor: '#1877F2',
-      bgColor: '#FFFFFF',
-      dotStyle: 'square',
-      eyeStyle: 'square',
-      eyeColor: '#1877F2',
-      eyeOuterColor: '#1877F2',
-      logo: 'facebook',
-      bgTransparent: true
-    },
-    drawBackground: (ctx, size) => {
-      // Branded Facebook Blue
-      ctx.fillStyle = '#1877F2';
-      ctx.fillRect(0, 0, size, size);
-
-      // Clean card
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-      ctx.shadowBlur = size * 0.03;
+      const r = size * 0.032; const cy = size * 0.09;
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = size * 0.007;
+      ctx.beginPath(); ctx.roundRect(cx - r, cy - r, r * 2, r * 2, r * 0.5); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(cx + r * 0.5, cy - r * 0.5, r * 0.12, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#FFFFFF';
-      
-      const cardW = size * 0.74;
-      const cardH = size * 0.76;
-      ctx.beginPath();
-      ctx.roundRect((size - cardW) / 2, size * 0.14, cardW, cardH, size * 0.05);
-      ctx.fill();
-      ctx.restore();
-    },
-    drawForeground: (ctx, size) => {
-      // Facebook branded header
-      const cx = size * 0.5;
-      const cy = size * 0.24;
-      const r = size * 0.04;
-
-      // Facebook circle icon
-      ctx.fillStyle = '#1877F2';
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Facebook "f" letter
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'FOLLOW ME').toUpperCase(), cx, size * 0.19);
+      ctx.font = `italic ${Math.round(size * 0.035)}px "Georgia", serif`;
+      ctx.fillText(texts.subtitle || 'on Instagram', cx, size * 0.25);
+      ctx.font = `600 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText('👤  ' + (texts.handle || '@username'), cx, size * 0.935);
+    }
+  },
+  {
+    id: 'social_facebook',
+    name: 'Facebook',
+    category: 'Social',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'CONNECT WITH US' },
+      { key: 'subtitle', label: 'Platform', default: 'on Facebook' },
+      { key: 'handle', label: 'Handle', default: '/facebookname' },
+    ],
+    preset: { qrColor: '#1877F2', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#1877F2', eyeOuterColor: '#1877F2', bgTransparent: true },
+    drawBackground: (ctx, size) => {
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#1877F2'); g.addColorStop(1, '#0B51B3');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold ${Math.round(size * 0.065)}px "Inter", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('f', cx + size * 0.008, cy + size * 0.004);
-
-      // Text
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillStyle = '#0f172a';
-      ctx.font = `bold ${Math.round(size * 0.042)}px "Inter", sans-serif`;
-      ctx.fillText('facebook', size * 0.5, size * 0.33);
-
-      ctx.fillStyle = '#64748b';
-      ctx.font = `700 ${Math.round(size * 0.02)}px "Inter", sans-serif`;
-      ctx.fillText('CONNECT WITH US', size * 0.5, size * 0.37);
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.89, size * 0.84, size * 0.07, size * 0.035); ctx.fill();
+    },
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.07)}px "Inter", sans-serif`;
+      ctx.fillText('f', cx, size * 0.11);
+      ctx.font = `bold ${Math.round(size * 0.036)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'CONNECT WITH US').toUpperCase(), cx, size * 0.19);
+      ctx.font = `italic ${Math.round(size * 0.035)}px "Georgia", serif`;
+      ctx.fillText(texts.subtitle || 'on Facebook', cx, size * 0.25);
+      ctx.font = `600 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText('👍  ' + (texts.handle || '/facebookname'), cx, size * 0.935);
     }
   },
   {
-    id: 'linkedin',
-    name: 'LinkedIn Connect',
+    id: 'social_youtube',
+    name: 'YouTube',
     category: 'Social',
-    qrSize: 0.52,
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.54,
-    preset: {
-      qrColor: '#0A66C2',
-      bgColor: '#FFFFFF',
-      dotStyle: 'square',
-      eyeStyle: 'rounded',
-      eyeColor: '#0A66C2',
-      eyeOuterColor: '#0A66C2',
-      logo: 'linkedin',
-      bgTransparent: true
-    },
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'SUBSCRIBE US' },
+      { key: 'subtitle', label: 'Platform', default: 'on YouTube' },
+      { key: 'handle', label: 'Handle', default: '/yourchannel' },
+    ],
+    preset: { qrColor: '#FF0000', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#FF0000', eyeOuterColor: '#FF0000', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      // Background gradient
-      const grad = ctx.createLinearGradient(0, 0, 0, size);
-      grad.addColorStop(0, '#004182');
-      grad.addColorStop(1, '#0A66C2');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, size, size);
-
-      // White card
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#FF1E1E'); g.addColorStop(1, '#D00000');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
       ctx.fillStyle = '#FFFFFF';
-      const cardW = size * 0.78;
-      const cardH = size * 0.78;
-      ctx.beginPath();
-      ctx.roundRect((size - cardW) / 2, size * 0.11, cardW, cardH, size * 0.04);
-      ctx.fill();
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.89, size * 0.84, size * 0.07, size * 0.035); ctx.fill();
     },
-    drawForeground: (ctx, size) => {
-      // LinkedIn branded logo text
-      ctx.fillStyle = '#0A66C2';
-      ctx.font = `bold ${Math.round(size * 0.042)}px "Inter", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText('Linked', size * 0.44, size * 0.22);
-
-      // In box
-      const boxSize = size * 0.055;
-      ctx.fillStyle = '#0A66C2';
-      ctx.beginPath();
-      ctx.roundRect(size * 0.51, size * 0.178, boxSize, boxSize, size * 0.008);
-      ctx.fill();
-
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.beginPath();
+      ctx.roundRect(cx - size * 0.045, size * 0.06, size * 0.09, size * 0.055, size * 0.012); ctx.fill();
+      ctx.fillStyle = '#FF0000'; ctx.beginPath();
+      ctx.moveTo(cx - size * 0.01, size * 0.075); ctx.lineTo(cx + size * 0.015, size * 0.0875); ctx.lineTo(cx - size * 0.01, size * 0.1); ctx.closePath(); ctx.fill();
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold ${Math.round(size * 0.042)}px "Inter", sans-serif`;
-      ctx.fillText('in', size * 0.538, size * 0.22);
-
-      ctx.fillStyle = '#475569';
-      ctx.font = `700 ${Math.round(size * 0.02)}px "Inter", sans-serif`;
-      ctx.fillText('SCAN TO VIEW PROFILE', size * 0.5, size * 0.27);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'SUBSCRIBE US').toUpperCase(), cx, size * 0.19);
+      ctx.font = `italic ${Math.round(size * 0.035)}px "Georgia", serif`;
+      ctx.fillText(texts.subtitle || 'on YouTube', cx, size * 0.25);
+      ctx.font = `600 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText('🔔  ' + (texts.handle || '/yourchannel'), cx, size * 0.935);
     }
   },
   {
-    id: 'youtube',
-    name: 'YouTube Play',
+    id: 'social_tiktok',
+    name: 'TikTok',
     category: 'Social',
-    qrSize: 0.50,
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.56,
-    preset: {
-      qrColor: '#FF0000',
-      bgColor: '#FFFFFF',
-      dotStyle: 'rounded',
-      eyeStyle: 'rounded',
-      eyeColor: '#FF0000',
-      eyeOuterColor: '#FF0000',
-      logo: 'youtube',
-      bgTransparent: true
-    },
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'FOLLOW ME' },
+      { key: 'subtitle', label: 'Platform', default: 'on TikTok' },
+      { key: 'handle', label: 'Handle', default: '@username' },
+    ],
+    preset: { qrColor: '#000000', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#000000', eyeOuterColor: '#000000', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      ctx.fillStyle = '#FF0000';
-      ctx.fillRect(0, 0, size, size);
-
+      ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, size, size);
+      ctx.strokeStyle = 'rgba(37, 244, 238, 0.4)'; ctx.lineWidth = size * 0.005;
+      ctx.beginPath(); ctx.roundRect(size * 0.02, size * 0.02, size * 0.96, size * 0.96, size * 0.05); ctx.stroke();
       ctx.fillStyle = '#FFFFFF';
-      const cardW = size * 0.76;
-      const cardH = size * 0.76;
-      ctx.beginPath();
-      ctx.roundRect((size - cardW) / 2, size * 0.14, cardW, cardH, size * 0.05);
-      ctx.fill();
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.89, size * 0.84, size * 0.07, size * 0.035); ctx.fill();
     },
-    drawForeground: (ctx, size) => {
-      const cx = size * 0.5;
-      const cy = size * 0.24;
-
-      // Play button shape
-      ctx.fillStyle = '#FF0000';
-      ctx.beginPath();
-      ctx.roundRect(cx - size * 0.05, cy - size * 0.035, size * 0.1, size * 0.07, size * 0.016);
-      ctx.fill();
-
-      // Triangle
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#25F4EE'; ctx.font = `bold ${Math.round(size * 0.06)}px "Inter", sans-serif`;
+      ctx.fillText('🎵', cx - 2, size * 0.11);
+      ctx.fillStyle = '#FE2C55'; ctx.fillText('🎵', cx + 2, size * 0.11);
       ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.moveTo(cx - size * 0.012, cy - size * 0.018);
-      ctx.lineTo(cx + size * 0.018, cy);
-      ctx.lineTo(cx - size * 0.012, cy + size * 0.018);
-      ctx.closePath();
-      ctx.fill();
-
-      // Brand Title
-      ctx.fillStyle = '#000000';
-      ctx.font = `bold ${Math.round(size * 0.045)}px "Outfit", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText('YouTube', size * 0.5, size * 0.34);
-
-      ctx.fillStyle = '#dc2626';
-      ctx.font = `800 ${Math.round(size * 0.02)}px "Inter", sans-serif`;
-      ctx.fillText('WATCH & SUBSCRIBE', size * 0.5, size * 0.38);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'FOLLOW ME').toUpperCase(), cx, size * 0.19);
+      ctx.font = `italic ${Math.round(size * 0.035)}px "Georgia", serif`;
+      ctx.fillText(texts.subtitle || 'on TikTok', cx, size * 0.25);
+      ctx.font = `600 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText('👤  ' + (texts.handle || '@username'), cx, size * 0.935);
     }
   },
   {
-    id: 'wifi_modern',
-    name: 'WiFi Connect',
-    category: 'Wifi',
-    qrSize: 0.50,
+    id: 'social_whatsapp',
+    name: 'WhatsApp',
+    category: 'Social',
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.54,
-    preset: {
-      qrColor: '#059669',
-      bgColor: '#FFFFFF',
-      dotStyle: 'dots',
-      eyeStyle: 'rounded',
-      eyeColor: '#059669',
-      eyeOuterColor: '#10B981',
-      bgTransparent: true
-    },
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'CHAT WITH US' },
+      { key: 'subtitle', label: 'Platform', default: 'on WhatsApp' },
+      { key: 'handle', label: 'Number', default: '+60 123 456 7890' },
+    ],
+    preset: { qrColor: '#25D366', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#25D366', eyeOuterColor: '#25D366', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      // Emerald background
-      const grad = ctx.createLinearGradient(0, 0, size, size);
-      grad.addColorStop(0, '#06b6d4');
-      grad.addColorStop(1, '#059669');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, size, size);
-
-      // Card
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#25D366'); g.addColorStop(1, '#128C7E');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
       ctx.fillStyle = '#FFFFFF';
-      const cardW = size * 0.80;
-      const cardH = size * 0.80;
-      ctx.beginPath();
-      ctx.roundRect((size - cardW) / 2, size * 0.10, cardW, cardH, size * 0.06);
-      ctx.fill();
-    },
-    drawForeground: (ctx, size) => {
-      const cx = size * 0.5;
-      const cy = size * 0.20;
-
-      // WiFi waves icon
-      ctx.strokeStyle = '#059669';
-      ctx.lineWidth = size * 0.008;
-      ctx.lineCap = 'round';
-
-      // Dot
-      ctx.fillStyle = '#059669';
-      ctx.beginPath();
-      ctx.arc(cx, cy + size * 0.02, size * 0.008, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Wave 1
-      ctx.beginPath();
-      ctx.arc(cx, cy + size * 0.02, size * 0.025, -Math.PI * 0.8, -Math.PI * 0.2);
-      ctx.stroke();
-
-      // Wave 2
-      ctx.beginPath();
-      ctx.arc(cx, cy + size * 0.02, size * 0.045, -Math.PI * 0.8, -Math.PI * 0.2);
-      ctx.stroke();
-
-      // Texts
-      ctx.fillStyle = '#0f172a';
-      ctx.font = `bold ${Math.round(size * 0.045)}px "Outfit", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText('FREE WIFI NETWORK', size * 0.5, size * 0.30);
-
-      ctx.fillStyle = '#64748b';
-      ctx.font = `700 ${Math.round(size * 0.022)}px "Inter", sans-serif`;
-      ctx.fillText('SCAN TO CONNECT INSTANTLY', size * 0.5, size * 0.84);
-    }
-  },
-
-  // ─── NEW: Hot Templates ──────────────────────────────────────────────────────
-  {
-    id: 'neon_pulse',
-    name: 'Neon Pulse',
-    category: 'Hot',
-    qrSize: 0.52,
-    qrX: 0.5,
-    qrY: 0.54,
-    texts: [
-      { key: 'title',    label: 'Title',    default: 'SCAN ME NOW' },
-      { key: 'subtitle', label: 'Subtitle', default: 'Join the experience' },
-    ],
-    preset: { qrColor: '#00F0FF', bgColor: '#0A0A1A', dotStyle: 'dots', eyeStyle: 'circle', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      ctx.fillStyle = '#060612'; ctx.fillRect(0, 0, size, size);
-      ctx.strokeStyle = 'rgba(0,240,255,0.07)'; ctx.lineWidth = 1;
-      const step = size / 12;
-      for (let i = 0; i <= 12; i++) {
-        ctx.beginPath(); ctx.moveTo(i*step,0); ctx.lineTo(i*step,size); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0,i*step); ctx.lineTo(size,i*step); ctx.stroke();
-      }
-      ctx.save(); ctx.shadowColor='#00F0FF'; ctx.shadowBlur=size*0.06;
-      ctx.strokeStyle='rgba(0,240,255,0.6)'; ctx.lineWidth=size*0.006;
-      ctx.beginPath(); ctx.roundRect(size*0.08,size*0.08,size*0.84,size*0.84,size*0.04); ctx.stroke(); ctx.restore();
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.89, size * 0.84, size * 0.07, size * 0.035); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      const title = texts.title || 'SCAN ME NOW';
-      const sub   = texts.subtitle || 'Join the experience';
-      ctx.textAlign='center';
-      ctx.save(); ctx.shadowColor='#00F0FF'; ctx.shadowBlur=size*0.04;
-      ctx.fillStyle='#00F0FF'; ctx.font=`800 ${Math.round(size*0.046)}px "Inter",sans-serif`;
-      ctx.fillText(title, size*0.5, size*0.18); ctx.restore();
-      ctx.fillStyle='rgba(0,240,255,0.6)'; ctx.font=`600 ${Math.round(size*0.022)}px "Inter",sans-serif`;
-      ctx.fillText(sub.toUpperCase(), size*0.5, size*0.86);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.06)}px "Inter", sans-serif`;
+      ctx.fillText('💬', cx, size * 0.11);
+      ctx.font = `bold ${Math.round(size * 0.036)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'CHAT WITH US').toUpperCase(), cx, size * 0.19);
+      ctx.font = `italic ${Math.round(size * 0.035)}px "Georgia", serif`;
+      ctx.fillText(texts.subtitle || 'on WhatsApp', cx, size * 0.25);
+      ctx.font = `600 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText('📞  ' + (texts.handle || '+60 123 456 7890'), cx, size * 0.935);
     }
   },
   {
-    id: 'glass_card',
-    name: 'Glass Card',
-    category: 'Hot',
-    qrSize: 0.50,
-    qrX: 0.5,
-    qrY: 0.55,
-    texts: [
-      { key: 'title',    label: 'Title',   default: 'SCAN TO CONNECT' },
-      { key: 'subtitle', label: 'Tagline', default: 'Powered by MushiQR' },
-    ],
-    preset: { qrColor: '#FFFFFF', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      const g = ctx.createLinearGradient(0,0,size,size);
-      g.addColorStop(0,'#7c3aed'); g.addColorStop(0.5,'#c026d3'); g.addColorStop(1,'#db2777');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
-      ctx.save(); ctx.globalAlpha=0.2; ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.arc(size*0.2,size*0.2,size*0.25,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(size*0.8,size*0.8,size*0.20,0,Math.PI*2); ctx.fill(); ctx.restore();
-      ctx.save(); ctx.globalAlpha=0.18; ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.09,size*0.82,size*0.82,size*0.06); ctx.fill(); ctx.restore();
-      ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=size*0.005;
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.09,size*0.82,size*0.82,size*0.06); ctx.stroke();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`800 ${Math.round(size*0.044)}px "Inter",sans-serif`;
-      ctx.fillText(texts.title||'SCAN TO CONNECT', size*0.5, size*0.19);
-      ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.subtitle||'Powered by MushiQR', size*0.5, size*0.875);
-    }
-  },
-  {
-    id: 'cyber_frame',
-    name: 'Cyber Frame',
-    category: 'Hot',
-    qrSize: 0.50,
-    qrX: 0.5,
-    qrY: 0.54,
-    texts: [
-      { key: 'title', label: 'Title', default: 'ACCESS GRANTED' },
-      { key: 'code',  label: 'Code',  default: 'QR-7741' },
-    ],
-    preset: { qrColor: '#39FF14', bgColor: '#0D1117', dotStyle: 'square', eyeStyle: 'square', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      ctx.fillStyle='#0D1117'; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='rgba(57,255,20,0.06)';
-      for (let r=0;r<10;r++) for (let c=0;c<10;c++) {
-        ctx.beginPath(); ctx.arc(c*size/9+(r%2)*size/18,r*size/9,size*0.008,0,Math.PI*2); ctx.fill();
-      }
-      const m=size*0.07; const l=size*0.09;
-      ctx.strokeStyle='#39FF14'; ctx.lineWidth=size*0.007; ctx.lineCap='square';
-      [[m,m],[size-m,m],[m,size-m],[size-m,size-m]].forEach(([x,y],i)=>{
-        const dx=i%2===0?1:-1; const dy=i<2?1:-1;
-        ctx.beginPath(); ctx.moveTo(x,y+dy*l); ctx.lineTo(x,y); ctx.lineTo(x+dx*l,y); ctx.stroke();
-      });
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center';
-      ctx.save(); ctx.shadowColor='#39FF14'; ctx.shadowBlur=size*0.03;
-      ctx.fillStyle='#39FF14'; ctx.font=`800 ${Math.round(size*0.04)}px "Courier New",monospace`;
-      ctx.fillText(texts.title||'ACCESS GRANTED', size*0.5, size*0.175); ctx.restore();
-      ctx.fillStyle='rgba(57,255,20,0.5)'; ctx.font=`600 ${Math.round(size*0.025)}px "Courier New",monospace`;
-      ctx.fillText(`[ ${texts.code||'QR-7741'} ]`, size*0.5, size*0.865);
-    }
-  },
-  {
-    id: 'sunset_wave',
-    name: 'Sunset Wave',
-    category: 'Hot',
-    qrSize: 0.50,
-    qrX: 0.5,
-    qrY: 0.54,
-    texts: [
-      { key: 'title',    label: 'Title',    default: 'SCAN TO EXPLORE' },
-      { key: 'subtitle', label: 'Subtitle', default: 'Discover something amazing' },
-    ],
-    preset: { qrColor: '#FFFFFF', bgColor: '#FF6B35', dotStyle: 'rounded', eyeStyle: 'rounded', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      const g = ctx.createLinearGradient(0,0,0,size);
-      g.addColorStop(0,'#FF6B35'); g.addColorStop(0.5,'#F7931E'); g.addColorStop(1,'#FFD166');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='rgba(255,255,255,0.12)';
-      ctx.beginPath(); ctx.moveTo(0,size*0.28);
-      ctx.bezierCurveTo(size*0.3,size*0.22,size*0.7,size*0.34,size,size*0.28);
-      ctx.lineTo(size,0); ctx.lineTo(0,0); ctx.closePath(); ctx.fill();
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.28,size*0.8,size*0.62,size*0.04); ctx.fill();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`800 ${Math.round(size*0.044)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.title||'SCAN TO EXPLORE', size*0.5, size*0.195);
-      ctx.fillStyle='#FF6B35'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.subtitle||'Discover something amazing', size*0.5, size*0.89);
-    }
-  },
-  {
-    id: 'midnight_aurora',
-    name: 'Midnight Aurora',
-    category: 'Hot',
-    qrSize: 0.50,
-    qrX: 0.5,
-    qrY: 0.54,
-    texts: [
-      { key: 'title',    label: 'Title',    default: 'SCAN ME' },
-      { key: 'subtitle', label: 'Subtitle', default: 'Unlock the experience' },
-    ],
-    preset: { qrColor: '#A5F3FC', bgColor: '#0F172A', dotStyle: 'dots', eyeStyle: 'circle', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      ctx.fillStyle='#0F172A'; ctx.fillRect(0,0,size,size);
-      [['#6366f1',0.2],['#8b5cf6',0.45],['#06b6d4',0.68]].forEach(([color,yFrac])=>{
-        ctx.fillStyle=color+'38';
-        ctx.beginPath(); ctx.ellipse(size*0.5,yFrac*size,size*0.55,size*0.12,0,0,Math.PI*2); ctx.fill();
-      });
-      ctx.fillStyle='rgba(15,23,42,0.75)';
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.24,size*0.82,size*0.60,size*0.04); ctx.fill();
-      ctx.strokeStyle='rgba(165,243,252,0.2)'; ctx.lineWidth=size*0.004;
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.24,size*0.82,size*0.60,size*0.04); ctx.stroke();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center';
-      const g = ctx.createLinearGradient(size*0.2,0,size*0.8,0);
-      g.addColorStop(0,'#818cf8'); g.addColorStop(0.5,'#a5f3fc'); g.addColorStop(1,'#818cf8');
-      ctx.fillStyle=g; ctx.font=`800 ${Math.round(size*0.048)}px "Inter",sans-serif`;
-      ctx.fillText(texts.title||'SCAN ME', size*0.5, size*0.185);
-      ctx.fillStyle='rgba(165,243,252,0.6)'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText((texts.subtitle||'Unlock the experience').toUpperCase(), size*0.5, size*0.88);
-    }
-  },
-
-  // ─── NEW: Social Templates ────────────────────────────────────────────────────
-  {
-    id: 'whatsapp_chat',
-    name: 'WhatsApp Chat',
+    id: 'social_linkedin',
+    name: 'LinkedIn',
     category: 'Social',
-    qrSize: 0.48,
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.56,
+    qrY: 0.58,
     texts: [
-      { key: 'title', label: 'Title',    default: 'Chat on WhatsApp' },
-      { key: 'cta',   label: 'CTA Text', default: 'SCAN TO MESSAGE US' },
+      { key: 'title', label: 'Title', default: 'CONNECT WITH ME' },
+      { key: 'subtitle', label: 'Platform', default: 'on LinkedIn' },
+      { key: 'handle', label: 'Profile', default: '/yourprofile' },
     ],
-    preset: { qrColor: '#128C7E', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', bgTransparent: true },
+    preset: { qrColor: '#0A66C2', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#0A66C2', eyeOuterColor: '#0A66C2', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      const g = ctx.createLinearGradient(0,0,0,size);
-      g.addColorStop(0,'#25D366'); g.addColorStop(1,'#128C7E');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.28,size*0.82,size*0.62,size*0.04); ctx.fill();
-      ctx.fillStyle='#25D366';
-      ctx.beginPath(); ctx.roundRect(size*0.37,size*0.10,size*0.26,size*0.16,size*0.05); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(size*0.43,size*0.26); ctx.lineTo(size*0.48,size*0.30); ctx.lineTo(size*0.48,size*0.26); ctx.closePath(); ctx.fill();
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#0A66C2'); g.addColorStop(1, '#004182');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.89, size * 0.84, size * 0.07, size * 0.035); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.fillStyle='#FFFFFF'; ctx.font=`600 ${Math.round(size*0.085)}px "Inter",sans-serif`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('💬', size*0.5, size*0.175);
-      ctx.textBaseline='alphabetic'; ctx.fillStyle='#1a1a1a';
-      ctx.font=`bold ${Math.round(size*0.042)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.title||'Chat on WhatsApp', size*0.5, size*0.35);
-      ctx.fillStyle='#25D366'; ctx.font=`700 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'SCAN TO MESSAGE US', size*0.5, size*0.875);
-    }
-  },
-  {
-    id: 'tiktok_stage',
-    name: 'TikTok Stage',
-    category: 'Social',
-    qrSize: 0.48,
-    qrX: 0.5,
-    qrY: 0.56,
-    texts: [
-      { key: 'title',    label: 'Username', default: '@yourhandle' },
-      { key: 'subtitle', label: 'CTA',      default: 'FOLLOW FOR MORE' },
-    ],
-    preset: { qrColor: '#FFFFFF', bgColor: '#010101', dotStyle: 'square', eyeStyle: 'square', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      ctx.fillStyle='#010101'; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='#69C9D0'; ctx.fillRect(0,0,size*0.5,size*0.14);
-      ctx.fillStyle='#EE1D52'; ctx.fillRect(size*0.5,0,size*0.5,size*0.14);
-      ctx.fillStyle='#010101';
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.26,size*0.82,size*0.60,size*0.03); ctx.fill();
-      ctx.strokeStyle='#EE1D52'; ctx.lineWidth=size*0.004;
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.26,size*0.82,size*0.60,size*0.03); ctx.stroke();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center';
-      ctx.save(); ctx.shadowColor='#69C9D0'; ctx.shadowBlur=size*0.015; ctx.fillStyle='#69C9D0';
-      ctx.font=`900 ${Math.round(size*0.048)}px "Outfit",sans-serif`;
-      ctx.fillText('TikTok', size*0.502, size*0.20);
-      ctx.shadowColor='#EE1D52'; ctx.fillStyle='#EE1D52';
-      ctx.fillText('TikTok', size*0.498, size*0.20); ctx.restore();
-      ctx.fillStyle='#FFFFFF'; ctx.font=`700 ${Math.round(size*0.036)}px "Inter",sans-serif`;
-      ctx.fillText(texts.title||'@yourhandle', size*0.5, size*0.34);
-      ctx.fillStyle='#EE1D52'; ctx.font=`700 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.subtitle||'FOLLOW FOR MORE', size*0.5, size*0.875);
-    }
-  },
-  {
-    id: 'discord_server',
-    name: 'Discord Server',
-    category: 'Social',
-    qrSize: 0.50,
-    qrX: 0.5,
-    qrY: 0.55,
-    texts: [
-      { key: 'server', label: 'Server Name', default: 'My Server' },
-      { key: 'cta',    label: 'CTA',         default: 'JOIN OUR COMMUNITY' },
-    ],
-    preset: { qrColor: '#FFFFFF', bgColor: '#5865F2', dotStyle: 'rounded', eyeStyle: 'rounded', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      const g = ctx.createLinearGradient(0,0,size,size);
-      g.addColorStop(0,'#4752C4'); g.addColorStop(1,'#5865F2');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='rgba(255,255,255,0.08)';
-      ctx.beginPath(); ctx.arc(size*0.15,size*0.15,size*0.22,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#36393F';
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.24,size*0.82,size*0.64,size*0.04); ctx.fill();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillStyle='#FFFFFF'; ctx.font=`700 ${Math.round(size*0.07)}px "Outfit",sans-serif`;
-      ctx.fillText('🎮', size*0.5, size*0.15);
-      ctx.textBaseline='alphabetic'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`bold ${Math.round(size*0.044)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.server||'My Server', size*0.5, size*0.34);
-      ctx.fillStyle='#5865F2'; ctx.font=`700 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'JOIN OUR COMMUNITY', size*0.5, size*0.875);
-    }
-  },
-  {
-    id: 'snapchat_ghost',
-    name: 'Snapchat Snap',
-    category: 'Social',
-    qrSize: 0.48,
-    qrX: 0.5,
-    qrY: 0.56,
-    texts: [
-      { key: 'title', label: 'Username', default: '@yoursnap' },
-      { key: 'cta',   label: 'CTA',      default: 'ADD ME ON SNAPCHAT' },
-    ],
-    preset: { qrColor: '#000000', bgColor: '#FFFC00', dotStyle: 'dots', eyeStyle: 'rounded', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      ctx.fillStyle='#FFFC00'; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.28,size*0.82,size*0.62,size*0.04); ctx.fill();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillStyle='#000000'; ctx.font=`700 ${Math.round(size*0.085)}px "Inter",sans-serif`;
-      ctx.fillText('👻', size*0.5, size*0.175);
-      ctx.textBaseline='alphabetic'; ctx.fillStyle='#1a1a1a';
-      ctx.font=`bold ${Math.round(size*0.042)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.title||'@yoursnap', size*0.5, size*0.36);
-      ctx.fillStyle='#b8a900'; ctx.font=`700 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'ADD ME ON SNAPCHAT', size*0.5, size*0.875);
-    }
-  },
-  {
-    id: 'pinterest_board',
-    name: 'Pinterest Board',
-    category: 'Social',
-    qrSize: 0.48,
-    qrX: 0.5,
-    qrY: 0.56,
-    texts: [
-      { key: 'title', label: 'Board Name', default: 'My Inspiration' },
-      { key: 'cta',   label: 'CTA',        default: 'SAVE & FOLLOW' },
-    ],
-    preset: { qrColor: '#E60023', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      ctx.fillStyle='#E60023'; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.26,size*0.82,size*0.64,size*0.04); ctx.fill();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.fillStyle='#E60023';
-      ctx.beginPath(); ctx.arc(size*0.5,size*0.165,size*0.065,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${Math.round(size*0.085)}px "Georgia",serif`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('P', size*0.5, size*0.165);
-      ctx.textBaseline='alphabetic'; ctx.fillStyle='#1a1a1a';
-      ctx.font=`bold ${Math.round(size*0.04)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.title||'My Inspiration', size*0.5, size*0.36);
-      ctx.fillStyle='#E60023'; ctx.font=`700 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'SAVE & FOLLOW', size*0.5, size*0.875);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('in', cx, size * 0.11);
+      ctx.font = `bold ${Math.round(size * 0.036)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'CONNECT WITH ME').toUpperCase(), cx, size * 0.19);
+      ctx.font = `italic ${Math.round(size * 0.035)}px "Georgia", serif`;
+      ctx.fillText(texts.subtitle || 'on LinkedIn', cx, size * 0.25);
+      ctx.font = `600 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText('👤  ' + (texts.handle || '/yourprofile'), cx, size * 0.935);
     }
   },
 
-  // ─── NEW: Business Templates ──────────────────────────────────────────────────
+  // ─── BUSINESS & ESSENTIALS ──────────────────────────────────────────────────
   {
-    id: 'biz_card_pro',
+    id: 'biz_business_card',
     name: 'Business Card',
     category: 'Business',
-    qrSize: 0.46,
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.57,
+    qrY: 0.58,
     texts: [
-      { key: 'name',    label: 'Your Name', default: 'John Smith' },
-      { key: 'title',   label: 'Job Title', default: 'CEO & Founder' },
-      { key: 'company', label: 'Company',   default: 'Acme Corp' },
+      { key: 'title', label: 'Title', default: 'BUSINESS CARD' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Save Contact' },
+      { key: 'cta', label: 'CTA', default: 'Scan to save my contact' },
     ],
-    preset: { qrColor: '#1e293b', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', bgTransparent: true },
+    preset: { qrColor: '#B8860B', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#B8860B', eyeOuterColor: '#B8860B', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='#1e293b'; ctx.fillRect(0,0,size,size*0.28);
-      ctx.fillStyle='#334155';
-      ctx.beginPath(); ctx.moveTo(0,size*0.28); ctx.lineTo(size*0.4,size*0.28); ctx.lineTo(size*0.3,0); ctx.lineTo(0,0); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle='#e2e8f0'; ctx.lineWidth=size*0.003;
-      ctx.beginPath(); ctx.roundRect(size*0.15,size*0.3,size*0.7,size*0.58,size*0.02); ctx.stroke();
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#C5A059'); g.addColorStop(1, '#8B6914');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`800 ${Math.round(size*0.052)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.name||'John Smith', size*0.5, size*0.16);
-      ctx.fillStyle='#94a3b8'; ctx.font=`500 ${Math.round(size*0.022)}px "Inter",sans-serif`;
-      ctx.fillText(texts.title||'CEO & Founder', size*0.5, size*0.21);
-      ctx.fillStyle='#64748b'; ctx.font=`600 ${Math.round(size*0.019)}px "Inter",sans-serif`;
-      ctx.fillText((texts.company||'Acme Corp').toUpperCase(), size*0.5, size*0.87);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(cx, size * 0.13, size * 0.045, 0, Math.PI * 2); ctx.stroke();
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText('👤', cx, size * 0.145);
+      ctx.fillText((texts.title || 'BUSINESS CARD').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Save Contact', cx, size * 0.27);
+      ctx.fillStyle = '#8B6914';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('📱 ' + (texts.cta || 'Scan to save my contact'), cx, size * 0.935);
     }
   },
   {
-    id: 'corporate_blue',
-    name: 'Corporate Blue',
-    category: 'Business',
-    qrSize: 0.48,
-    qrX: 0.5,
-    qrY: 0.56,
-    texts: [
-      { key: 'company', label: 'Company', default: 'YourBrand' },
-      { key: 'tagline', label: 'Tagline', default: 'Excellence in every detail' },
-      { key: 'cta',     label: 'CTA',     default: 'SCAN FOR MORE INFO' },
-    ],
-    preset: { qrColor: '#FFFFFF', bgColor: '#003087', dotStyle: 'square', eyeStyle: 'square', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      const g = ctx.createLinearGradient(0,0,0,size);
-      g.addColorStop(0,'#003087'); g.addColorStop(1,'#005FCC');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
-      ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=size*0.003;
-      ctx.beginPath(); ctx.moveTo(size*0.1,size*0.28); ctx.lineTo(size*0.9,size*0.28); ctx.stroke();
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.30,size*0.8,size*0.60,size*0.03); ctx.fill();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`800 ${Math.round(size*0.054)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.company||'YourBrand', size*0.5, size*0.195);
-      ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.font=`400 ${Math.round(size*0.019)}px "Inter",sans-serif`;
-      ctx.fillText(texts.tagline||'Excellence in every detail', size*0.5, size*0.245);
-      ctx.fillStyle='#003087'; ctx.font=`700 ${Math.round(size*0.019)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'SCAN FOR MORE INFO', size*0.5, size*0.875);
-    }
-  },
-  {
-    id: 'real_estate',
-    name: 'Real Estate',
-    category: 'Business',
-    qrSize: 0.46,
-    qrX: 0.5,
-    qrY: 0.57,
-    texts: [
-      { key: 'address', label: 'Property',  default: '123 Dream Street' },
-      { key: 'agent',   label: 'Agent',     default: 'Call: +1 555 0100' },
-      { key: 'cta',     label: 'CTA',       default: 'SCAN TO VIEW PROPERTY' },
-    ],
-    preset: { qrColor: '#14532d', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'rounded', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      ctx.fillStyle='#f0fdf4'; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='#14532d'; ctx.fillRect(0,0,size,size*0.26);
-      ctx.fillStyle='#166534';
-      ctx.beginPath(); ctx.moveTo(size*0.38,size*0.26); ctx.lineTo(size*0.5,size*0.12); ctx.lineTo(size*0.62,size*0.26); ctx.closePath(); ctx.fill();
-      ctx.fillRect(size*0.41,size*0.22,size*0.18,size*0.05);
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.28,size*0.8,size*0.62,size*0.03); ctx.fill();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`700 ${Math.round(size*0.035)}px "Outfit",sans-serif`;
-      ctx.fillText('FOR SALE', size*0.5, size*0.12);
-      ctx.fillStyle='#14532d'; ctx.font=`bold ${Math.round(size*0.038)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.address||'123 Dream Street', size*0.5, size*0.375);
-      ctx.fillStyle='#64748b'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.agent||'Call: +1 555 0100', size*0.5, size*0.415);
-      ctx.fillStyle='#14532d'; ctx.font=`700 ${Math.round(size*0.018)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'SCAN TO VIEW PROPERTY', size*0.5, size*0.875);
-    }
-  },
-  {
-    id: 'restaurant_menu',
-    name: 'Menu QR',
-    category: 'Business',
-    qrSize: 0.48,
-    qrX: 0.5,
-    qrY: 0.56,
-    texts: [
-      { key: 'name',    label: 'Restaurant', default: 'La Maison' },
-      { key: 'tagline', label: 'Tagline',    default: 'Fine Dining Experience' },
-      { key: 'cta',     label: 'CTA',        default: 'SCAN TO VIEW MENU' },
-    ],
-    preset: { qrColor: '#7f1d1d', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', bgTransparent: true },
-    drawBackground: (ctx, size) => {
-      ctx.fillStyle='#fef3c7'; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='#7f1d1d'; ctx.fillRect(0,0,size,size*0.26);
-      ctx.strokeStyle='#b91c1c'; ctx.lineWidth=size*0.004;
-      ctx.beginPath(); ctx.moveTo(size*0.05,size*0.02); ctx.lineTo(size*0.05,size*0.24); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(size*0.95,size*0.02); ctx.lineTo(size*0.95,size*0.24); ctx.stroke();
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.28,size*0.8,size*0.62,size*0.03); ctx.fill();
-    },
-    drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#fef3c7';
-      ctx.font=`800 ${Math.round(size*0.056)}px "Georgia",serif`;
-      ctx.fillText(texts.name||'La Maison', size*0.5, size*0.17);
-      ctx.fillStyle='rgba(254,243,199,0.7)'; ctx.font=`400 italic ${Math.round(size*0.019)}px "Georgia",serif`;
-      ctx.fillText(texts.tagline||'Fine Dining Experience', size*0.5, size*0.22);
-      ctx.fillStyle='#7f1d1d'; ctx.font=`700 ${Math.round(size*0.018)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'SCAN TO VIEW MENU', size*0.5, size*0.875);
-    }
-  },
-  {
-    id: 'vcard_pro',
-    name: 'vCard Pro',
+    id: 'biz_website',
+    name: 'Website',
     category: 'Business',
     qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.57,
+    qrY: 0.58,
     texts: [
-      { key: 'name',    label: 'Full Name', default: 'Sarah Johnson' },
-      { key: 'title',   label: 'Title',     default: 'Product Designer' },
-      { key: 'contact', label: 'Contact',   default: 'sarah@company.com' },
+      { key: 'title', label: 'Title', default: 'WEBSITE' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Visit Our Website' },
+      { key: 'url', label: 'URL', default: 'www.yourwebsite.com' },
     ],
-    preset: { qrColor: '#0f172a', bgColor: '#FFFFFF', dotStyle: 'dots', eyeStyle: 'circle', bgTransparent: true },
+    preset: { qrColor: '#0052CC', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#0052CC', eyeOuterColor: '#0052CC', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,size,size);
-      const g = ctx.createLinearGradient(0,0,size,size*0.28);
-      g.addColorStop(0,'#0f172a'); g.addColorStop(1,'#1e3a5f');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size*0.30);
-      ctx.fillStyle='#334155';
-      ctx.beginPath(); ctx.arc(size*0.5,size*0.30,size*0.09,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.arc(size*0.5,size*0.30,size*0.076,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#334155'; ctx.font=`700 ${Math.round(size*0.065)}px "Inter",sans-serif`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('👤', size*0.5, size*0.305); ctx.textBaseline='alphabetic';
-      ctx.strokeStyle='#e2e8f0'; ctx.lineWidth=size*0.003;
-      ctx.beginPath(); ctx.moveTo(size*0.2,size*0.69); ctx.lineTo(size*0.8,size*0.69); ctx.stroke();
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#2684FF'); g.addColorStop(1, '#0052CC');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`700 ${Math.round(size*0.038)}px "Outfit",sans-serif`;
-      ctx.fillText('CONTACT', size*0.5, size*0.165);
-      ctx.fillStyle='#0f172a'; ctx.font=`800 ${Math.round(size*0.046)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.name||'Sarah Johnson', size*0.5, size*0.51);
-      ctx.fillStyle='#64748b'; ctx.font=`500 ${Math.round(size*0.021)}px "Inter",sans-serif`;
-      ctx.fillText(texts.title||'Product Designer', size*0.5, size*0.545);
-      ctx.fillStyle='#94a3b8'; ctx.font=`400 ${Math.round(size*0.018)}px "Inter",sans-serif`;
-      ctx.fillText(texts.contact||'sarah@company.com', size*0.5, size*0.73);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('🌐', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'WEBSITE').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Visit Our Website', cx, size * 0.27);
+      ctx.fillStyle = '#0052CC';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('🌐 ' + (texts.url || 'www.yourwebsite.com'), cx, size * 0.935);
     }
   },
-
-  // ─── NEW: Event Templates ─────────────────────────────────────────────────────
   {
-    id: 'event_ticket',
-    name: 'Event Ticket',
-    category: 'Event',
+    id: 'biz_location',
+    name: 'Location',
+    category: 'Business',
     qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.57,
+    qrY: 0.58,
     texts: [
-      { key: 'event', label: 'Event Name', default: 'SUMMER FEST 2025' },
-      { key: 'date',  label: 'Date',       default: 'Aug 15 • 8PM' },
-      { key: 'venue', label: 'Venue',      default: 'City Arena, Hall A' },
+      { key: 'title', label: 'Title', default: 'LOCATION' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Find Us Here' },
+      { key: 'cta', label: 'CTA', default: 'Scan for location' },
     ],
-    preset: { qrColor: '#1e1b4b', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', bgTransparent: true },
+    preset: { qrColor: '#2e7d32', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#2e7d32', eyeOuterColor: '#2e7d32', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      const g = ctx.createLinearGradient(0,0,size,size);
-      g.addColorStop(0,'#4f46e5'); g.addColorStop(1,'#7c3aed');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
-      ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=size*0.004; ctx.setLineDash([size*0.03,size*0.02]);
-      ctx.beginPath(); ctx.moveTo(size*0.1,size*0.28); ctx.lineTo(size*0.9,size*0.28); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle='#4f46e5';
-      ctx.beginPath(); ctx.arc(size*0.08,size*0.28,size*0.025,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(size*0.92,size*0.28,size*0.025,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.30,size*0.8,size*0.60,size*0.02); ctx.fill();
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#4CAF50'); g.addColorStop(1, '#2E7D32');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`900 ${Math.round(size*0.046)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.event||'SUMMER FEST 2025', size*0.5, size*0.17);
-      ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.date||'Aug 15 • 8PM', size*0.5, size*0.22);
-      ctx.fillStyle='#64748b'; ctx.font=`500 ${Math.round(size*0.019)}px "Inter",sans-serif`;
-      ctx.fillText(texts.venue||'City Arena, Hall A', size*0.5, size*0.39);
-      ctx.fillStyle='#4f46e5'; ctx.font=`700 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText('SCAN TO GET TICKETS', size*0.5, size*0.875);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('📍', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'LOCATION').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Find Us Here', cx, size * 0.27);
+      ctx.fillStyle = '#2E7D32';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('📍 ' + (texts.cta || 'Scan for location'), cx, size * 0.935);
     }
   },
   {
-    id: 'concert_pass',
-    name: 'Concert Pass',
-    category: 'Event',
-    qrSize: 0.46,
+    id: 'biz_email',
+    name: 'Email',
+    category: 'Business',
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.57,
+    qrY: 0.58,
     texts: [
-      { key: 'artist', label: 'Artist',    default: 'THE ELECTRIC BAND' },
-      { key: 'date',   label: 'Date',      default: 'SAT 22 NOV 2025' },
-      { key: 'type',   label: 'Pass Type', default: 'VIP BACKSTAGE PASS' },
+      { key: 'title', label: 'Title', default: 'EMAIL' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Send Us an Email' },
+      { key: 'email', label: 'Email Address', default: 'info@example.com' },
     ],
-    preset: { qrColor: '#fbbf24', bgColor: '#0c0a09', dotStyle: 'square', eyeStyle: 'square', bgTransparent: true },
+    preset: { qrColor: '#6A1B9A', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#6A1B9A', eyeOuterColor: '#6A1B9A', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      ctx.fillStyle='#0c0a09'; ctx.fillRect(0,0,size,size);
-      ctx.strokeStyle='#fbbf24'; ctx.lineWidth=size*0.006;
-      ctx.beginPath(); ctx.moveTo(0,size*0.28); ctx.lineTo(size,size*0.28); ctx.stroke();
-      ctx.strokeStyle='rgba(251,191,36,0.3)'; ctx.lineWidth=size*0.003;
-      ctx.beginPath(); ctx.moveTo(0,size*0.84); ctx.lineTo(size,size*0.84); ctx.stroke();
-      const rg = ctx.createRadialGradient(size*0.5,size*0.56,0,size*0.5,size*0.56,size*0.35);
-      rg.addColorStop(0,'rgba(251,191,36,0.08)'); rg.addColorStop(1,'transparent');
-      ctx.fillStyle=rg; ctx.fillRect(0,0,size,size);
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#9C27B0'); g.addColorStop(1, '#6A1B9A');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center';
-      ctx.save(); ctx.shadowColor='#fbbf24'; ctx.shadowBlur=size*0.03;
-      ctx.fillStyle='#fbbf24'; ctx.font=`900 ${Math.round(size*0.044)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.artist||'THE ELECTRIC BAND', size*0.5, size*0.19); ctx.restore();
-      ctx.fillStyle='rgba(251,191,36,0.7)'; ctx.font=`600 ${Math.round(size*0.022)}px "Inter",sans-serif`;
-      ctx.fillText(texts.date||'SAT 22 NOV 2025', size*0.5, size*0.235);
-      ctx.fillStyle='#fbbf24'; ctx.font=`700 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.type||'VIP BACKSTAGE PASS', size*0.5, size*0.875);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('✉️', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'EMAIL').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Send Us an Email', cx, size * 0.27);
+      ctx.fillStyle = '#6A1B9A';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('✉️ ' + (texts.email || 'info@example.com'), cx, size * 0.935);
     }
   },
   {
-    id: 'conference_badge',
-    name: 'Conference',
-    category: 'Event',
-    qrSize: 0.46,
+    id: 'biz_wifi',
+    name: 'Wi-Fi',
+    category: 'Business',
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.57,
+    qrY: 0.58,
     texts: [
-      { key: 'event',   label: 'Event Name', default: 'TechSummit 2025' },
-      { key: 'speaker', label: 'Speaker',    default: 'Keynote Speaker' },
-      { key: 'date',    label: 'Date',       default: 'March 10–12, 2025' },
+      { key: 'title', label: 'Title', default: 'WI-FI' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Connect to Wi-Fi' },
+      { key: 'cta', label: 'CTA', default: 'Scan to connect' },
     ],
-    preset: { qrColor: '#0369a1', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', bgTransparent: true },
+    preset: { qrColor: '#0277BD', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#0277BD', eyeOuterColor: '#0277BD', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      ctx.fillStyle='#f8fafc'; ctx.fillRect(0,0,size,size);
-      const g = ctx.createLinearGradient(0,0,size,0);
-      g.addColorStop(0,'#0369a1'); g.addColorStop(1,'#0ea5e9');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size*0.26);
-      ctx.fillStyle='rgba(255,255,255,0.3)';
-      ctx.beginPath(); ctx.roundRect(size*0.41,size*0.018,size*0.18,size*0.04,size*0.02); ctx.fill();
-      ctx.strokeStyle='#e2e8f0'; ctx.lineWidth=size*0.003;
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.28,size*0.8,size*0.62,size*0.02); ctx.stroke();
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#03A9F4'); g.addColorStop(1, '#0277BD');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`800 ${Math.round(size*0.048)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.event||'TechSummit 2025', size*0.5, size*0.165);
-      ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.date||'March 10–12, 2025', size*0.5, size*0.215);
-      ctx.fillStyle='#64748b'; ctx.font=`600 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.speaker||'Keynote Speaker', size*0.5, size*0.385);
-      ctx.fillStyle='#0369a1'; ctx.font=`700 ${Math.round(size*0.018)}px "Inter",sans-serif`;
-      ctx.fillText('SCAN TO REGISTER', size*0.5, size*0.875);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('📶', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'WI-FI').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Connect to Wi-Fi', cx, size * 0.27);
+      ctx.fillStyle = '#0277BD';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('📶 ' + (texts.cta || 'Scan to connect'), cx, size * 0.935);
     }
   },
   {
-    id: 'holiday_special',
-    name: 'Holiday Special',
-    category: 'Event',
-    qrSize: 0.46,
+    id: 'biz_call_us',
+    name: 'Call Us',
+    category: 'Business',
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.56,
+    qrY: 0.58,
     texts: [
-      { key: 'greeting', label: 'Greeting', default: 'Happy Holidays! 🎄' },
-      { key: 'from',     label: 'From',     default: 'From: YourBrand' },
-      { key: 'cta',      label: 'CTA',      default: 'SCAN FOR A GIFT' },
+      { key: 'title', label: 'Title', default: 'CALL US' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Tap to Call' },
+      { key: 'phone', label: 'Phone Number', default: '+60 123 456 7890' },
     ],
-    preset: { qrColor: '#FFFFFF', bgColor: '#14532d', dotStyle: 'rounded', eyeStyle: 'rounded', bgTransparent: true },
+    preset: { qrColor: '#2E7D32', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#2E7D32', eyeOuterColor: '#2E7D32', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      const g = ctx.createLinearGradient(0,0,0,size);
-      g.addColorStop(0,'#14532d'); g.addColorStop(1,'#166534');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='rgba(255,255,255,0.5)';
-      [[0.1,0.05],[0.85,0.12],[0.3,0.08],[0.6,0.04],[0.75,0.09],[0.2,0.15],[0.5,0.03],[0.9,0.18]].forEach(([x,y])=>{
-        ctx.beginPath(); ctx.arc(x*size,y*size,size*0.006,0,Math.PI*2); ctx.fill();
-      });
-      ctx.fillStyle='#b91c1c'; ctx.fillRect(0,size*0.22,size,size*0.06);
-      ctx.fillStyle='#FFFFFF';
-      for (let i=0;i<20;i++) if (i%2===0) { ctx.fillRect(i*size/20,size*0.22,size/40,size*0.06); }
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.30,size*0.8,size*0.60,size*0.03); ctx.fill();
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#4CAF50'); g.addColorStop(1, '#1B5E20');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`700 ${Math.round(size*0.04)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.greeting||'Happy Holidays! 🎄', size*0.5, size*0.18);
-      ctx.fillStyle='#64748b'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.from||'From: YourBrand', size*0.5, size*0.38);
-      ctx.fillStyle='#14532d'; ctx.font=`700 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'SCAN FOR A GIFT', size*0.5, size*0.875);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('📞', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'CALL US').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Tap to Call', cx, size * 0.27);
+      ctx.fillStyle = '#1B5E20';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('📞 ' + (texts.phone || '+60 123 456 7890'), cx, size * 0.935);
     }
   },
 
-  // ─── NEW: Retail Templates ────────────────────────────────────────────────────
+  // ─── PAYMENTS ───────────────────────────────────────────────────────────────
   {
-    id: 'sale_banner',
-    name: 'Sale Banner',
-    category: 'Retail',
-    qrSize: 0.46,
+    id: 'pay_paypal',
+    name: 'PayPal',
+    category: 'Payments',
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.57,
+    qrY: 0.58,
     texts: [
-      { key: 'discount', label: 'Discount',   default: '50% OFF' },
-      { key: 'product',  label: 'Product',    default: 'Everything Store-Wide' },
-      { key: 'code',     label: 'Promo Code', default: 'Use Code: SCAN50' },
+      { key: 'title', label: 'Title', default: 'PAYPAL' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Secure Payment' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Pay' },
     ],
-    preset: { qrColor: '#FFFFFF', bgColor: '#dc2626', dotStyle: 'rounded', eyeStyle: 'rounded', bgTransparent: true },
+    preset: { qrColor: '#003087', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#003087', eyeOuterColor: '#003087', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      const g = ctx.createLinearGradient(0,0,size,size);
-      g.addColorStop(0,'#dc2626'); g.addColorStop(1,'#b91c1c');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
-      ctx.save(); ctx.globalAlpha=0.07; ctx.strokeStyle='#FFFFFF'; ctx.lineWidth=size*0.04;
-      for (let i=-2;i<6;i++) { ctx.beginPath(); ctx.moveTo(i*size*0.25-size*0.1,0); ctx.lineTo(i*size*0.25+size*0.6,size); ctx.stroke(); }
-      ctx.restore();
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.30,size*0.8,size*0.60,size*0.03); ctx.fill();
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#0079C1'); g.addColorStop(1, '#003087');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`900 ${Math.round(size*0.07)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.discount||'50% OFF', size*0.5, size*0.18);
-      ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font=`500 ${Math.round(size*0.022)}px "Inter",sans-serif`;
-      ctx.fillText(texts.product||'Everything Store-Wide', size*0.5, size*0.23);
-      ctx.fillStyle='#dc2626'; ctx.font=`700 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.code||'Use Code: SCAN50', size*0.5, size*0.875);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold italic ${Math.round(size * 0.06)}px "Georgia", serif`;
+      ctx.fillText('P', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'PAYPAL').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Secure Payment', cx, size * 0.27);
+      ctx.fillStyle = '#003087';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('💳 ' + (texts.cta || 'Scan to Pay'), cx, size * 0.935);
     }
   },
   {
-    id: 'product_scan',
-    name: 'Product Scan',
-    category: 'Retail',
-    qrSize: 0.46,
+    id: 'pay_duitnow',
+    name: 'DuitNow',
+    category: 'Payments',
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.57,
+    qrY: 0.58,
     texts: [
-      { key: 'brand',   label: 'Brand',        default: 'YourBrand™' },
-      { key: 'product', label: 'Product Name',  default: 'Premium Edition' },
-      { key: 'cta',     label: 'CTA',           default: 'SCAN FOR DETAILS' },
+      { key: 'title', label: 'Title', default: 'DUITNOW' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Malaysia QR' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Pay' },
     ],
-    preset: { qrColor: '#18181b', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', bgTransparent: true },
+    preset: { qrColor: '#ED1C24', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#ED1C24', eyeOuterColor: '#ED1C24', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,size,size);
-      ctx.fillStyle='#18181b'; ctx.fillRect(0,0,size,size*0.24);
-      ctx.fillStyle='#d4d4d8'; ctx.fillRect(size*0.1,size*0.83,size*0.8,size*0.004);
-      ctx.strokeStyle='#e4e4e7'; ctx.lineWidth=size*0.004;
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.27,size*0.8,size*0.62,size*0.02); ctx.stroke();
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#FF4D4D'); g.addColorStop(1, '#ED1C24');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFFFF';
-      ctx.font=`800 ${Math.round(size*0.05)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.brand||'YourBrand™', size*0.5, size*0.16);
-      ctx.fillStyle='#52525b'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.product||'Premium Edition', size*0.5, size*0.375);
-      ctx.fillStyle='#71717a'; ctx.font=`600 ${Math.round(size*0.018)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'SCAN FOR DETAILS', size*0.5, size*0.875);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(cx, size * 0.12, size * 0.04, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ED1C24'; ctx.font = `bold ${Math.round(size * 0.035)}px "Inter", sans-serif`;
+      ctx.fillText('D', cx, size * 0.13);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'DUITNOW').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Malaysia QR', cx, size * 0.27);
+      ctx.fillStyle = '#ED1C24';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('💳 ' + (texts.cta || 'Scan to Pay'), cx, size * 0.935);
     }
   },
   {
-    id: 'loyalty_card',
-    name: 'Loyalty Card',
-    category: 'Retail',
-    qrSize: 0.46,
+    id: 'pay_upi',
+    name: 'UPI Payment',
+    category: 'Payments',
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.56,
+    qrY: 0.58,
     texts: [
-      { key: 'brand',  label: 'Brand',  default: 'Coffee House' },
-      { key: 'reward', label: 'Reward', default: 'Earn Points Every Visit' },
-      { key: 'cta',    label: 'CTA',    default: 'SCAN TO COLLECT POINTS' },
+      { key: 'title', label: 'Title', default: 'UPI PAYMENT' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Scan & Pay' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Pay' },
     ],
-    preset: { qrColor: '#78350f', bgColor: '#FFFBEB', dotStyle: 'dots', eyeStyle: 'rounded', bgTransparent: true },
+    preset: { qrColor: '#000000', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#000000', eyeOuterColor: '#000000', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      ctx.fillStyle='#fffbeb'; ctx.fillRect(0,0,size,size);
-      const g = ctx.createLinearGradient(0,0,0,size*0.28);
-      g.addColorStop(0,'#78350f'); g.addColorStop(1,'#92400e');
-      ctx.fillStyle=g; ctx.fillRect(0,0,size,size*0.28);
-      ctx.strokeStyle='rgba(120,53,15,0.2)'; ctx.lineWidth=size*0.005;
-      [0.22,0.36,0.5,0.64,0.78].forEach(x=>{
-        ctx.beginPath(); ctx.arc(size*x,size*0.845,size*0.045,0,Math.PI*2); ctx.stroke();
-      });
-      ctx.fillStyle='rgba(120,53,15,0.12)';
-      ctx.beginPath(); ctx.arc(size*0.22,size*0.845,size*0.045,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath(); ctx.roundRect(size*0.1,size*0.30,size*0.8,size*0.50,size*0.03); ctx.fill();
+      ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, size, size);
+      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = size * 0.005;
+      ctx.beginPath(); ctx.roundRect(size * 0.02, size * 0.02, size * 0.96, size * 0.96, size * 0.05); ctx.stroke();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.fillStyle='#FFFBEB';
-      ctx.font=`800 ${Math.round(size*0.05)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.brand||'Coffee House', size*0.5, size*0.18);
-      ctx.fillStyle='#78350f'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.reward||'Earn Points Every Visit', size*0.5, size*0.38);
-      ctx.fillStyle='#92400e'; ctx.font=`700 ${Math.round(size*0.018)}px "Inter",sans-serif`;
-      ctx.fillText(texts.cta||'SCAN TO COLLECT POINTS', size*0.5, size*0.795);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#D4AF37'; ctx.font = `bold italic ${Math.round(size * 0.045)}px "Inter", sans-serif`;
+      ctx.fillText('UPI ▶', cx, size * 0.13);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'UPI PAYMENT').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Scan & Pay', cx, size * 0.27);
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('💳 ' + (texts.cta || 'Scan to Pay'), cx, size * 0.935);
     }
   },
   {
-    id: 'crypto_wallet',
-    name: 'Crypto Wallet',
-    category: 'Hot',
-    qrSize: 0.50,
+    id: 'pay_alipay',
+    name: 'Alipay',
+    category: 'Payments',
+    qrSize: 0.44,
     qrX: 0.5,
-    qrY: 0.54,
+    qrY: 0.58,
     texts: [
-      { key: 'coin',  label: 'Coin',  default: 'Bitcoin' },
-      { key: 'label', label: 'Label', default: 'Send BTC Here' },
+      { key: 'title', label: 'Title', default: 'ALIPAY' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Easy Payment' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Pay' },
     ],
-    preset: { qrColor: '#f59e0b', bgColor: '#1c1917', dotStyle: 'square', eyeStyle: 'square', bgTransparent: true },
+    preset: { qrColor: '#1677FF', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#1677FF', eyeOuterColor: '#1677FF', bgTransparent: true },
     drawBackground: (ctx, size) => {
-      ctx.fillStyle='#1c1917'; ctx.fillRect(0,0,size,size);
-      ctx.strokeStyle='rgba(245,158,11,0.06)'; ctx.lineWidth=1;
-      const step=size/10;
-      for (let i=0;i<=10;i++) {
-        ctx.beginPath(); ctx.moveTo(i*step,0); ctx.lineTo(i*step,size); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0,i*step); ctx.lineTo(size,i*step); ctx.stroke();
-      }
-      const rg = ctx.createRadialGradient(size*0.5,size*0.18,0,size*0.5,size*0.18,size*0.18);
-      rg.addColorStop(0,'rgba(245,158,11,0.25)'); rg.addColorStop(1,'transparent');
-      ctx.fillStyle=rg; ctx.fillRect(0,0,size,size);
-      ctx.strokeStyle='rgba(245,158,11,0.3)'; ctx.lineWidth=size*0.005;
-      ctx.beginPath(); ctx.roundRect(size*0.09,size*0.25,size*0.82,size*0.62,size*0.03); ctx.stroke();
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#4096FF'); g.addColorStop(1, '#1677FF');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
     },
     drawForeground: (ctx, size, texts = {}) => {
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillStyle='#f59e0b'; ctx.font=`700 ${Math.round(size*0.065)}px "Outfit",sans-serif`;
-      ctx.fillText('₿', size*0.5, size*0.165);
-      ctx.textBaseline='alphabetic'; ctx.fillStyle='#f59e0b';
-      ctx.font=`800 ${Math.round(size*0.044)}px "Outfit",sans-serif`;
-      ctx.fillText(texts.coin||'Bitcoin', size*0.5, size*0.35);
-      ctx.fillStyle='rgba(245,158,11,0.6)'; ctx.font=`500 ${Math.round(size*0.02)}px "Inter",sans-serif`;
-      ctx.fillText(texts.label||'Send BTC Here', size*0.5, size*0.87);
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.06)}px "Inter", sans-serif`;
+      ctx.fillText('支', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'ALIPAY').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Easy Payment', cx, size * 0.27);
+      ctx.fillStyle = '#1677FF';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('💳 ' + (texts.cta || 'Scan to Pay'), cx, size * 0.935);
+    }
+  },
+  {
+    id: 'pay_wechat',
+    name: 'WeChat Pay',
+    category: 'Payments',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'WECHAT PAY' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Safe & Easy' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Pay' },
+    ],
+    preset: { qrColor: '#07C160', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#07C160', eyeOuterColor: '#07C160', bgTransparent: true },
+    drawBackground: (ctx, size) => {
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#38D479'); g.addColorStop(1, '#07C160');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+    },
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('💬', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'WECHAT PAY').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Safe & Easy', cx, size * 0.27);
+      ctx.fillStyle = '#07C160';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('💳 ' + (texts.cta || 'Scan to Pay'), cx, size * 0.935);
+    }
+  },
+  {
+    id: 'pay_cashapp',
+    name: 'Cash App',
+    category: 'Payments',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'CASH APP' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Send Money' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Pay' },
+    ],
+    preset: { qrColor: '#00D632', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#00D632', eyeOuterColor: '#00D632', bgTransparent: true },
+    drawBackground: (ctx, size) => {
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#00E636'); g.addColorStop(1, '#00B32A');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+    },
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('$', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'CASH APP').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Send Money', cx, size * 0.27);
+      ctx.fillStyle = '#00B32A';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('💳 ' + (texts.cta || 'Scan to Pay'), cx, size * 0.935);
+    }
+  },
+
+  // ─── FOOD & HOSPITALITY ──────────────────────────────────────────────────────
+  {
+    id: 'food_restaurant',
+    name: 'Restaurant',
+    category: 'Food',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'RESTAURANT' },
+      { key: 'subtitle', label: 'Subtitle', default: 'View Our Menu' },
+      { key: 'cta', label: 'CTA', default: 'Scan for Menu' },
+    ],
+    preset: { qrColor: '#8D4004', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#8D4004', eyeOuterColor: '#8D4004', bgTransparent: true },
+    drawBackground: (ctx, size) => {
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#5A2A02'); g.addColorStop(1, '#2A1200');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = size * 0.005;
+      ctx.beginPath(); ctx.roundRect(size * 0.02, size * 0.02, size * 0.96, size * 0.96, size * 0.05); ctx.stroke();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+    },
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#D4AF37'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('🍴', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'RESTAURANT').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'View Our Menu', cx, size * 0.27);
+      ctx.fillStyle = '#5A2A02';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('🍷 ' + (texts.cta || 'Scan for Menu'), cx, size * 0.935);
+    }
+  },
+  {
+    id: 'food_cafe',
+    name: 'Café Menu',
+    category: 'Food',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'CAFÉ MENU' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Order & Enjoy' },
+      { key: 'cta', label: 'CTA', default: 'Scan for Menu' },
+    ],
+    preset: { qrColor: '#4A2E19', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#4A2E19', eyeOuterColor: '#4A2E19', bgTransparent: true },
+    drawBackground: (ctx, size) => {
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#795548'); g.addColorStop(1, '#3E2723');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+    },
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('☕', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'CAFÉ MENU').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Order & Enjoy', cx, size * 0.27);
+      ctx.fillStyle = '#3E2723';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('☕ ' + (texts.cta || 'Scan for Menu'), cx, size * 0.935);
+    }
+  },
+  {
+    id: 'food_table_qr',
+    name: 'Table QR',
+    category: 'Food',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'TABLE QR' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Order from Table' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Order' },
+    ],
+    preset: { qrColor: '#000000', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#000000', eyeOuterColor: '#000000', bgTransparent: true },
+    drawBackground: (ctx, size) => {
+      ctx.fillStyle = '#1A150E'; ctx.fillRect(0, 0, size, size);
+      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = size * 0.005;
+      ctx.beginPath(); ctx.roundRect(size * 0.02, size * 0.02, size * 0.96, size * 0.96, size * 0.05); ctx.stroke();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+    },
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#D4AF37'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('🔔', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'TABLE QR').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Order from Table', cx, size * 0.27);
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('🍽️ ' + (texts.cta || 'Scan to Order'), cx, size * 0.935);
+    }
+  },
+  {
+    id: 'food_hotel',
+    name: 'Hotel',
+    category: 'Food',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'HOTEL' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Explore & Book' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Explore' },
+    ],
+    preset: { qrColor: '#00695C', bgColor: '#FFFFFF', dotStyle: 'square', eyeStyle: 'square', eyeColor: '#00695C', eyeOuterColor: '#00695C', bgTransparent: true },
+    drawBackground: (ctx, size) => {
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#00897B'); g.addColorStop(1, '#004D40');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+    },
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('🏨', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'HOTEL').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Explore & Book', cx, size * 0.27);
+      ctx.fillStyle = '#004D40';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('🏨 ' + (texts.cta || 'Scan to Explore'), cx, size * 0.935);
+    }
+  },
+  {
+    id: 'food_review_us',
+    name: 'Review Us',
+    category: 'Food',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'REVIEW US' },
+      { key: 'subtitle', label: 'Subtitle', default: 'We Value Your Feedback' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Review' },
+    ],
+    preset: { qrColor: '#000000', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#000000', eyeOuterColor: '#000000', bgTransparent: true },
+    drawBackground: (ctx, size) => {
+      ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, size, size);
+      ctx.strokeStyle = '#FFB300'; ctx.lineWidth = size * 0.005;
+      ctx.beginPath(); ctx.roundRect(size * 0.02, size * 0.02, size * 0.96, size * 0.96, size * 0.05); ctx.stroke();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+    },
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFB300'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('⭐', cx, size * 0.13);
+      ctx.fillStyle = '#FFB300';
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'REVIEW US').toUpperCase(), cx, size * 0.22);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'We Value Your Feedback', cx, size * 0.27);
+      ctx.fillStyle = '#FFB300';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('⭐ ' + (texts.cta || 'Scan to Review'), cx, size * 0.935);
+    }
+  },
+  {
+    id: 'food_wifi_access',
+    name: 'Wi-Fi Access',
+    category: 'Food',
+    qrSize: 0.44,
+    qrX: 0.5,
+    qrY: 0.58,
+    texts: [
+      { key: 'title', label: 'Title', default: 'WI-FI ACCESS' },
+      { key: 'subtitle', label: 'Subtitle', default: 'Connect Easily' },
+      { key: 'cta', label: 'CTA', default: 'Scan to Connect' },
+    ],
+    preset: { qrColor: '#1565C0', bgColor: '#FFFFFF', dotStyle: 'rounded', eyeStyle: 'rounded', eyeColor: '#1565C0', eyeOuterColor: '#1565C0', bgTransparent: true },
+    drawBackground: (ctx, size) => {
+      const g = ctx.createLinearGradient(0, 0, 0, size);
+      g.addColorStop(0, '#1E88E5'); g.addColorStop(1, '#0D47A1');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.roundRect(size * 0.08, size * 0.34, size * 0.84, size * 0.54, size * 0.05); ctx.fill();
+    },
+    drawForeground: (ctx, size, texts = {}) => {
+      ctx.textAlign = 'center'; const cx = size * 0.5;
+      ctx.fillStyle = '#FFFFFF'; ctx.font = `bold ${Math.round(size * 0.055)}px "Inter", sans-serif`;
+      ctx.fillText('📶', cx, size * 0.13);
+      ctx.font = `bold ${Math.round(size * 0.038)}px "Inter", sans-serif`;
+      ctx.fillText((texts.title || 'WI-FI ACCESS').toUpperCase(), cx, size * 0.22);
+      ctx.font = `500 ${Math.round(size * 0.025)}px "Inter", sans-serif`;
+      ctx.fillText(texts.subtitle || 'Connect Easily', cx, size * 0.27);
+      ctx.fillStyle = '#0D47A1';
+      ctx.font = `600 ${Math.round(size * 0.024)}px "Inter", sans-serif`;
+      ctx.fillText('📶 ' + (texts.cta || 'Scan to Connect'), cx, size * 0.935);
     }
   }
 ];
