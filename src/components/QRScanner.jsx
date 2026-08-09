@@ -1053,9 +1053,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                   <ArrowLeft size={20} />
                 </button>
                 <h3 className="qrs-result-banner-title">Scan Result</h3>
-                <button className="qrs-result-banner-btn" onClick={handleEditResult} aria-label="Edit Code">
-                  <Pencil size={18} />
-                </button>
+                <div style={{ width: 36 }} />
               </div>
 
               <div className="qrs-result-success-badge-container">
@@ -1120,11 +1118,11 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                   <span>Save</span>
                 </button>
 
-                <button className="qrs-action-box-btn" onClick={handleSave}>
+                <button className="qrs-action-box-btn" onClick={handleEditResult}>
                   <div className="qrs-action-icon-circle">
-                    <ListPlus size={16} />
+                    <Pencil size={16} />
                   </div>
-                  <span>Add to List</span>
+                  <span>Edit</span>
                 </button>
               </div>
 
