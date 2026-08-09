@@ -1088,9 +1088,6 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
                 <div className="qrs-result-value-row">
                   <span className="qrs-result-value-text">{result}</span>
-                  <button className="qrs-value-copy-btn" onClick={handleCopy} title="Copy Code">
-                    {copied ? <Check size={18} color="var(--success)" /> : <Copy size={18} />}
-                  </button>
                 </div>
               </div>
 
