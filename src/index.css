@@ -6729,11 +6729,14 @@ video {
   font-size: 13.5px;
   font-weight: 600;
   color: var(--text-primary);
-  word-break: break-all;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
   text-align: center;
-  line-height: 1.25;
+  line-height: 1.35;
   letter-spacing: -0.1px;
   padding: 0 4px;
+  width: 100%;
 }
 
 .qrs-value-copy-btn {
@@ -6805,8 +6808,10 @@ video {
   font-weight: 600;
   color: var(--text-primary);
   text-align: right;
-  word-break: break-all;
-  max-width: 60%;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 65%;
 }
 
 /* Secondary Actions Container */

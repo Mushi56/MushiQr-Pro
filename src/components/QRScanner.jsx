@@ -1122,7 +1122,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                     <FileText size={16} />
                   </div>
                   <span className="qrs-detail-label">Value</span>
-                  <span className="qrs-detail-value" style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{result}</span>
+                  <span className="qrs-detail-value">{result}</span>
                 </div>
 
                 <div className="qrs-detail-row">
