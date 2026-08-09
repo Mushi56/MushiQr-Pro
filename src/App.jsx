@@ -4250,44 +4250,6 @@ export default function App() {
                       gap: '12px',
                       marginTop: '8px'
                     }}>
-                      {/* Option to clear/reset template */}
-                      <button
-                        onClick={() => applyTemplate(null)}
-                        style={{
-                          aspectRatio: '1 / 1.15',
-                          borderRadius: '16px',
-                          border: !selectedTemplate ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                          background: 'var(--bg-elevated)',
-                          color: 'var(--text-primary)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '8px',
-                          cursor: 'pointer',
-                          position: 'relative',
-                          overflow: 'hidden',
-                          boxShadow: !selectedTemplate ? '0 8px 20px rgba(255,59,48,0.15)' : 'none',
-                          transition: 'all 0.2s ease',
-                          padding: '12px'
-                        }}
-                      >
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          background: 'rgba(214,0,54,0.08)',
-                          color: 'var(--accent-primary)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <X size={16} />
-                        </div>
-                        <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.3px', textAlign: 'center' }}>
-                          Custom / None
-                        </span>
-                      </button>
                       {ALL_TEMPLATES.filter(t => t.category === templateCategory).map(tpl => {
                         const isSelected = selectedTemplate?.id === tpl.id;
                         return (
@@ -4314,68 +4276,138 @@ export default function App() {
                               height={180}
                               style={{ width: '100%', height: '100%', display: 'block' }}
                               ref={el => {
-                                if (!el || !tpl.bgImage) return;
+                                if (!el) return;
                                 const ctx = el.getContext('2d');
-                                const img = new Image();
-                                img.onload = () => {
-                                  ctx.clearRect(0, 0, 180, 180);
-                                  ctx.drawImage(img, 0, 0, 180, 180);
-                                  // Draw placeholder QR grid
-                                  const qrSize = Math.round(180 * tpl.qrSize);
-                                  const qrX = Math.round(180 * tpl.qrX - qrSize / 2);
-                                  const qrY = Math.round(180 * tpl.qrY - qrSize / 2);
-                                  const cell = Math.floor(qrSize / 21);
-                                  const pattern = [
-                                    [1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
-                                    [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
-                                    [1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1],
-                                    [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,0,1],
-                                    [1,0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,1,1,1,0,1],
-                                    [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,1],
-                                    [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
-                                    [0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0],
-                                    [0,0,1,0,1,0,1,1,0,0,1,0,1,1,0,1,0,1,0,0,1],
-                                    [0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,0,0],
-                                    [1,0,1,0,0,1,1,0,1,0,1,0,0,1,1,0,0,1,0,1,0],
-                                    [0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0],
-                                    [0,0,1,0,1,1,1,0,0,0,1,0,1,1,0,1,0,0,1,0,1],
-                                    [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,1,0],
-                                    [1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0],
-                                    [1,0,0,0,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1],
-                                    [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,0,1,0],
-                                    [1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,1],
-                                    [1,0,1,1,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1,0],
-                                    [1,0,0,0,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1],
-                                    [1,1,1,1,1,1,1,0,0,1,0,0,1,1,0,1,0,0,1,0,0],
-                                  ];
-                                  ctx.fillStyle = tpl.preset?.qrColor || '#000000';
-                                  for (let r = 0; r < 21; r++) {
-                                    for (let c = 0; c < 21; c++) {
-                                      if (pattern[r][c]) {
-                                        ctx.fillRect(qrX + c * cell, qrY + r * cell, cell, cell);
+                                ctx.clearRect(0, 0, 180, 180);
+                                // Use the template's drawBackground function to render the thumbnail
+                                if (tpl.drawBackground) {
+                                  tpl.drawBackground(ctx, 180);
+                                  // If the template image hasn't loaded yet, listen for the event and re-render
+                                  const onLoaded = () => {
+                                    if (!el) return;
+                                    ctx.clearRect(0, 0, 180, 180);
+                                    tpl.drawBackground(ctx, 180);
+                                    // Draw placeholder QR grid
+                                    const qrSize = Math.round(180 * tpl.qrSize);
+                                    const qrX = Math.round(180 * tpl.qrX - qrSize / 2);
+                                    const qrY = Math.round(180 * tpl.qrY - qrSize / 2);
+                                    const cell = Math.floor(qrSize / 21);
+                                    const pattern = [
+                                      [1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+                                      [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+                                      [1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1],
+                                      [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,0,1],
+                                      [1,0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,1,1,1,0,1],
+                                      [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,1],
+                                      [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
+                                      [0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0],
+                                      [0,0,1,0,1,0,1,1,0,0,1,0,1,1,0,1,0,1,0,0,1],
+                                      [0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,0,0],
+                                      [1,0,1,0,0,1,1,0,1,0,1,0,0,1,1,0,0,1,0,1,0],
+                                      [0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0],
+                                      [0,0,1,0,1,1,1,0,0,0,1,0,1,1,0,1,0,0,1,0,1],
+                                      [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,1,0],
+                                      [1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0],
+                                      [1,0,0,0,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1],
+                                      [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,0,1,0],
+                                      [1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,1],
+                                      [1,0,1,1,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1,0],
+                                      [1,0,0,0,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1],
+                                      [1,1,1,1,1,1,1,0,0,1,0,0,1,1,0,1,0,0,1,0,0],
+                                    ];
+                                    ctx.fillStyle = tpl.preset?.qrColor || '#000000';
+                                    for (let r = 0; r < 21; r++) {
+                                      for (let c = 0; c < 21; c++) {
+                                        if (pattern[r][c]) {
+                                          ctx.fillRect(qrX + c * cell, qrY + r * cell, cell, cell);
+                                        }
                                       }
                                     }
+                                    window.removeEventListener('qr-template-loaded', onLoaded);
+                                  };
+                                  window.addEventListener('qr-template-loaded', onLoaded);
+                                }
+                                // Draw placeholder QR grid overlay
+                                const qrSize = Math.round(180 * tpl.qrSize);
+                                const qrX = Math.round(180 * tpl.qrX - qrSize / 2);
+                                const qrY = Math.round(180 * tpl.qrY - qrSize / 2);
+                                const cell = Math.floor(qrSize / 21);
+                                const pattern = [
+                                  [1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+                                  [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+                                  [1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1],
+                                  [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,0,1],
+                                  [1,0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,1,1,1,0,1],
+                                  [1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,1],
+                                  [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
+                                  [0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0],
+                                  [0,0,1,0,1,0,1,1,0,0,1,0,1,1,0,1,0,1,0,0,1],
+                                  [0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,0,0],
+                                  [1,0,1,0,0,1,1,0,1,0,1,0,0,1,1,0,0,1,0,1,0],
+                                  [0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0],
+                                  [0,0,1,0,1,1,1,0,0,0,1,0,1,1,0,1,0,0,1,0,1],
+                                  [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,1,0],
+                                  [1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0],
+                                  [1,0,0,0,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,1],
+                                  [1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,0,1,0],
+                                  [1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,1],
+                                  [1,0,1,1,1,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1,0],
+                                  [1,0,0,0,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1],
+                                  [1,1,1,1,1,1,1,0,0,1,0,0,1,1,0,1,0,0,1,0,0],
+                                ];
+                                ctx.fillStyle = tpl.preset?.qrColor || '#000000';
+                                for (let r = 0; r < 21; r++) {
+                                  for (let c = 0; c < 21; c++) {
+                                    if (pattern[r][c]) {
+                                      ctx.fillRect(qrX + c * cell, qrY + r * cell, cell, cell);
+                                    }
                                   }
-                                };
-                                img.src = tpl.bgImage;
+                                }
                               }}
                             />
+                            {/* Label overlay at the bottom */}
+                            <div style={{
+                              position: 'absolute', bottom: 0, left: 0, right: 0,
+                              padding: '4px 6px',
+                              background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)',
+                              fontSize: '9px', fontWeight: 700, color: '#fff',
+                              textAlign: 'center', letterSpacing: '0.3px',
+                              pointerEvents: 'none'
+                            }}>
+                              {tpl.name}
+                            </div>
+                            {/* Active indicator (checkmark) */}
                             {isSelected && (
-                              <div style={{
-                                position: 'absolute', top: '6px', right: '6px',
-                                width: '18px', height: '18px', borderRadius: '50%',
-                                background: 'var(--accent-primary)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                              }}>
-                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                  <path d="M2 5l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              </div>
+                              <>
+                                <div style={{
+                                  position: 'absolute', top: '6px', right: '6px',
+                                  width: '20px', height: '20px', borderRadius: '50%',
+                                  background: 'var(--accent-primary)',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                    <path d="M2 5l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                </div>
+                                {/* Dismiss X button to clear template */}
+                                <div
+                                  role="button"
+                                  onClick={e => { e.stopPropagation(); applyTemplate(null); }}
+                                  style={{
+                                    position: 'absolute', top: '6px', left: '6px',
+                                    width: '20px', height: '20px', borderRadius: '50%',
+                                    background: 'rgba(0,0,0,0.55)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    cursor: 'pointer', zIndex: 10
+                                  }}
+                                >
+                                  <X size={10} color="white" />
+                                </div>
+                              </>
                             )}
                           </button>
                         );
                       })}
-                    </div>
                   </div>
                 </div>
               )}
