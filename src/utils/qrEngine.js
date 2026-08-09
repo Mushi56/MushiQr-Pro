@@ -30,8 +30,13 @@ export const QR_TYPES = {
 
 export function formatQRData(type, data) {
   switch (type) {
-    case QR_TYPES.URL:
-      return data.url || '';
+    case QR_TYPES.URL: {
+      const rawUrl = (data.url || '').trim();
+      if (/^(javascript|data|vbscript):/i.test(rawUrl)) {
+        return 'https://about:blank';
+      }
+      return rawUrl;
+    }
     case QR_TYPES.TEXT:
       return data.text || '';
     case QR_TYPES.WIFI:

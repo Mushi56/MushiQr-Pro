@@ -723,8 +723,12 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     const t = result.trim();
     try {
       if (qrTypeData.type === 'Website') {
+        if (/^(javascript|data|vbscript):/i.test(t)) {
+          alert('Security Alert: Malicious URI scheme blocked.');
+          return;
+        }
         const url = /^https?:\/\//i.test(t) ? t : 'https://' + t;
-        if (Capacitor.isNativePlatform()) { await Browser.open({ url, windowName: '_system' }); } else { window.open(url, '_blank'); }
+        if (Capacitor.isNativePlatform()) { await Browser.open({ url, windowName: '_system' }); } else { window.open(url, '_blank', 'noopener,noreferrer'); }
       } else if (qrTypeData.type === 'WiFi') {
         const p = t.match(/P:(.*?);/); await navigator.clipboard.writeText(p ? p[1] : t); alert(p ? 'WiFi Password Copied!' : 'WiFi details copied.');
       } else if (qrTypeData.type === 'Email' || qrTypeData.type === 'Phone') { window.location.href = t; }

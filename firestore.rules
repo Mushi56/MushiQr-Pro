@@ -2,12 +2,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper Functions ─────────────────────────────────────────────
+    // ── Security Helper Functions ────────────────────────────────────
     function isAuth() {
-      return request.auth != null;
+      return request.auth != null && request.auth.uid != null;
     }
+    
     function isSuperAdmin() {
-      return request.auth != null && request.auth.token.email == 'mabuneri143@gmail.com';
+      return isAuth() && 
+             request.auth.token != null && 
+             request.auth.token.email != null &&
+             request.auth.token.email == 'mabuneri143@gmail.com' &&
+             (request.auth.token.email_verified == true || request.auth.provider_id == 'google.com');
+    }
+
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
     }
 
     // ── Global Config (appSettings, featureFlags, announcement, remoteConfig)
@@ -21,22 +30,22 @@ service cloud.firestore {
     // Anyone authenticated can READ, only super-admin can WRITE/DELETE
     match /global_templates/{docId} {
       allow read: if isAuth();
-      allow write, delete: if isSuperAdmin();
+      allow create, update, delete: if isSuperAdmin();
     }
 
     // ── Audit Logs
     // Only super-admin can read/write
     match /global_audit_logs/{docId} {
-      allow read, write: if isSuperAdmin();
+      allow read, create, update, delete: if isSuperAdmin();
     }
 
     // ── Per-User Data
-    // Each user can read/write their own documents
+    // Each user can read/write strictly their own sub-documents
     match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
 
-    // ── Fallback: deny everything else
+    // ── Default Deny All Other Unmatched Paths
     match /{document=**} {
       allow read, write: if false;
     }
