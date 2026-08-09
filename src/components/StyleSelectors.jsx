@@ -50,16 +50,6 @@ const DOT_PREVIEWS = {
       <rect x="0" y="0" width="28" height="28" fill="currentColor" />
     </svg>
   ),
-  [DOT_STYLES.SQUARE]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <rect x="2" y="2" width="24" height="24" fill="currentColor" />
-    </svg>
-  ),
-  [DOT_STYLES.ROUNDED]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <rect x="2" y="2" width="24" height="24" rx="6" fill="currentColor" />
-    </svg>
-  ),
   [DOT_STYLES.DOTS]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <circle cx="14" cy="14" r="12" fill="currentColor" />
@@ -68,11 +58,6 @@ const DOT_PREVIEWS = {
   [DOT_STYLES.SPARKLE]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <path d="M14 2 Q14 14 26 14 Q14 14 14 26 Q14 14 2 14 Q14 14 14 2 Z" fill="currentColor" />
-    </svg>
-  ),
-  [DOT_STYLES.HEXAGON]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <polygon points="14,2 24.4,8 24.4,20 14,26 3.6,20 3.6,8" fill="currentColor" />
     </svg>
   ),
   [DOT_STYLES.FLUID]: (
@@ -85,14 +70,24 @@ const DOT_PREVIEWS = {
       <rect x="5" y="2" width="18" height="24" rx="9" fill="currentColor" />
     </svg>
   ),
-  [DOT_STYLES.SHIELD]: (
+  [DOT_STYLES.HEXAGON]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
-      <path d="M4 2 h20 v12 q0 12 -10 14 q-10 -2 -10 -14 Z" fill="currentColor" />
+      <polygon points="14,2 24.4,8 24.4,20 14,26 3.6,20 3.6,8" fill="currentColor" />
     </svg>
   ),
-  [DOT_STYLES.PIXEL]: (
+  [DOT_STYLES.SQUARE]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
-      <path d="M2 2 h24 v24 h-24 Z M10 10 h8 v8 h-8 Z" fillRule="evenodd" fill="currentColor" />
+      <rect x="2" y="2" width="24" height="24" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.ROUNDED]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="2" y="2" width="24" height="24" rx="6" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.LEAF]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M14 2 H26 V14 Q26 26 14 26 H2 V14 Q2 2 14 2 Z" fill="currentColor" />
     </svg>
   ),
   [DOT_STYLES.DIAMOND]: (
@@ -100,9 +95,14 @@ const DOT_PREVIEWS = {
       <polygon points="14,2 26,14 14,26 2,14" fill="currentColor" />
     </svg>
   ),
-  [DOT_STYLES.LEAF]: (
+  [DOT_STYLES.PIXEL]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
-      <path d="M14 2 H26 V14 Q26 26 14 26 H2 V14 Q2 2 14 2 Z" fill="currentColor" />
+      <path d="M2 2 h24 v24 h-24 Z M10 10 h8 v8 h-8 Z" fillRule="evenodd" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.SHIELD]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M4 2 h20 v12 q0 12 -10 14 q-10 -2 -10 -14 Z" fill="currentColor" />
     </svg>
   ),
   [DOT_STYLES.STAR]: (
