@@ -584,7 +584,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 overflow: 'hidden',
                 padding: '16px',
                 boxSizing: 'border-box',
-                minHeight: '220px',
+                minHeight: '180px',
                 background: 'linear-gradient(145deg, #6E051D 0%, #3B000C 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.12)',
                 boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
@@ -603,11 +603,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               {/* Main Illustration Image (Positioned on upper right above description text) */}
               <div style={{
                 position: 'absolute',
-                right: '-40px',
-                top: '15%',
+                right: '0px',
+                top: '10%',
                 transform: 'translateY(0)',
-                width: '200px',
-                height: '200px',
+                width: '140px',
+                height: '140px',
                 pointerEvents: 'none',
                 zIndex: 2,
                 filter: 'drop-shadow(0 12px 20px rgba(0,0,0,0.45))'
@@ -638,7 +638,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                   <div>
                     <h2 style={{
-                      fontSize: '18px',
+                      fontSize: '16px',
                       fontWeight: 800,
                       margin: 0,
                       color: '#FFFFFF',
@@ -648,7 +648,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       Custom QR
                     </h2>
                     <div style={{
-                      fontSize: '11px',
+                      fontSize: '10px',
                       fontWeight: 600,
                       color: '#FF6B8B',
                       marginTop: '2px',
@@ -660,7 +660,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 </div>
 
                 <p style={{
-                  fontSize: '11px',
+                  fontSize: '10px',
                   margin: '8px 0 0 0',
                   color: 'rgba(255, 255, 255, 0.78)',
                   fontWeight: 400,
@@ -690,8 +690,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#FFB3C1', border: '1.5px solid #3B000C', marginLeft: '-6px' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1 }}>Make it Yours</span>
-                    <span style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.6)' }}>Fully Customizable</span>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1 }}>Make it Yours</span>
+                    <span style={{ fontSize: '8px', color: 'rgba(255, 255, 255, 0.6)' }}>Fully Customizable</span>
                   </div>
                 </div>
                 <div style={{
@@ -724,7 +724,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 overflow: 'hidden',
                 padding: '16px',
                 boxSizing: 'border-box',
-                minHeight: '220px',
+                minHeight: '180px',
                 background: 'linear-gradient(145deg, #4A1204 0%, #240700 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
@@ -743,11 +743,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               {/* Main Illustration Image (Positioned on upper right above description text) */}
               <div style={{
                 position: 'absolute',
-                right: '-40px',
-                top: '15%',
+                right: '0px',
+                top: '10%',
                 transform: 'translateY(0)',
-                width: '200px',
-                height: '200px',
+                width: '140px',
+                height: '140px',
                 pointerEvents: 'none',
                 zIndex: 2,
                 filter: 'drop-shadow(0 12px 20px rgba(0,0,0,0.45))'
@@ -778,7 +778,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                   <div>
                     <h2 style={{
-                      fontSize: '18px',
+                      fontSize: '16px',
                       fontWeight: 800,
                       margin: 0,
                       color: '#FFFFFF',
@@ -788,7 +788,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       Barcodes
                     </h2>
                     <div style={{
-                      fontSize: '11px',
+                      fontSize: '10px',
                       fontWeight: 600,
                       color: '#FF9E7D',
                       marginTop: '2px',
@@ -800,7 +800,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 </div>
 
                 <p style={{
-                  fontSize: '11px',
+                  fontSize: '10px',
                   margin: '8px 0 0 0',
                   color: 'rgba(255, 255, 255, 0.78)',
                   fontWeight: 400,
@@ -836,8 +836,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <Layers size={11} color="#FF9E7D" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1 }}>30+ Formats</span>
-                    <span style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.6)' }}>1D &amp; 2D Supported</span>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1 }}>30+ Formats</span>
+                    <span style={{ fontSize: '8px', color: 'rgba(255, 255, 255, 0.6)' }}>1D &amp; 2D Supported</span>
                   </div>
                 </div>
                 <div style={{
@@ -878,7 +878,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               border: '1px solid rgba(255, 255, 255, 0.12)',
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
               width: '100%',
-              minHeight: '150px',
+              minHeight: '140px',
               cursor: 'pointer',
               transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'
             }}
@@ -909,7 +909,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 </div>
                 <div>
                   <h3 style={{
-                    fontSize: '20px',
+                    fontSize: '16px',
                     fontWeight: 800,
                     margin: 0,
                     color: '#FFFFFF',
@@ -920,7 +920,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     Bulk Generator
                   </h3>
                   <div style={{
-                    fontSize: '11.5px',
+                    fontSize: '10px',
                     fontWeight: 600,
                     color: '#FF6B8B',
                     marginTop: '2px'
@@ -931,7 +931,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               </div>
 
               <p style={{
-                fontSize: '11px',
+                fontSize: '10px',
                 margin: '8px 0 10px 0',
                 color: 'rgba(255, 255, 255, 0.78)',
                 fontWeight: 400,
@@ -966,8 +966,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <Zap size={12} color="#FFFFFF" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1 }}>10K+ Codes</span>
-                    <span style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.6)' }}>At Lightning Speed</span>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1 }}>10K+ Codes</span>
+                    <span style={{ fontSize: '8px', color: 'rgba(255, 255, 255, 0.6)' }}>At Lightning Speed</span>
                   </div>
                 </div>
                 <div style={{
@@ -987,11 +987,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             {/* Right Column: Illustration Image (Positioned on upper right with right: 8px) */}
             <div style={{
               position: 'absolute',
-              right: '8px',
+              right: '0px',
               top: '10%',
               transform: 'translateY(0)',
-              width: '180px',
-              height: '180px',
+              width: '140px',
+              height: '140px',
               pointerEvents: 'none',
               zIndex: 2,
               filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.5))'
