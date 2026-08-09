@@ -4257,7 +4257,7 @@ export default function App() {
                             key={tpl.id}
                             onClick={() => applyTemplate(isSelected ? null : tpl)}
                             style={{
-                              aspectRatio: '1 / 1',
+                              aspectRatio: tpl.heightRatio ? `1 / ${tpl.heightRatio}` : '1 / 1',
                               borderRadius: '16px',
                               border: isSelected ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
                               background: 'var(--bg-elevated)',
@@ -6306,5 +6306,5 @@ function TemplatePreviewCanvas({ template, theme, qrMatrixInfo, currentQrOptions
     if (template.drawForeground) template.drawForeground(ctx, w, h);
   }, [template, theme, tick, qrMatrixInfo, currentQrOptions]);
 
-  return <canvas ref={ref} style={{ width: '100%', height: '100%', borderRadius: '14px', display: 'block' }} />;
+  return <canvas ref={ref} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '14px', display: 'block' }} />;
 }
