@@ -109,7 +109,12 @@ export const DOT_STYLES = {
   SQUARE: 'square',
   ROUNDED: 'rounded',
   DOTS: 'dots',
+  SPARKLE: 'sparkle',
+  HEXAGON: 'hexagon',
   FLUID: 'fluid',
+  CAPSULE: 'capsule',
+  SHIELD: 'shield',
+  PIXEL: 'pixel',
   DIAMOND: 'diamond',
   LEAF: 'leaf',
   STAR: 'star',
@@ -786,6 +791,51 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
       ctx.arc(x + size / 2, y + size / 2, s / 2, 0, Math.PI * 2);
       ctx.fill();
       break;
+    case DOT_STYLES.SPARKLE: {
+      const cx = x + size / 2, cy = y + size / 2, r = s / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r);
+      ctx.quadraticCurveTo(cx, cy, cx + r, cy);
+      ctx.quadraticCurveTo(cx, cy, cx, cy + r);
+      ctx.quadraticCurveTo(cx, cy, cx - r, cy);
+      ctx.quadraticCurveTo(cx, cy, cx, cy - r);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case DOT_STYLES.HEXAGON: {
+      const r = s / 2, cx = x + size / 2, cy = y + size / 2;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI / 3);
+        ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+      }
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case DOT_STYLES.CAPSULE: {
+      const r = s * 0.4;
+      drawRoundedRect(ctx, x + padding + s * 0.1, y + padding, s * 0.8, s, r);
+      break;
+    }
+    case DOT_STYLES.SHIELD: {
+      const w = s, h = s, leftX = x + padding, topY = y + padding;
+      ctx.beginPath();
+      ctx.moveTo(leftX, topY);
+      ctx.lineTo(leftX + w, topY);
+      ctx.lineTo(leftX + w, topY + h * 0.5);
+      ctx.quadraticCurveTo(leftX + w * 0.5, topY + h * 1.1, leftX, topY + h * 0.5);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case DOT_STYLES.PIXEL: {
+      ctx.fillRect(x + padding, y + padding, s, s);
+      const innerCut = s * 0.35;
+      ctx.clearRect(x + size / 2 - innerCut / 2, y + size / 2 - innerCut / 2, innerCut, innerCut);
+      break;
+    }
     case DOT_STYLES.DIAMOND:
       ctx.beginPath();
       ctx.moveTo(x + size / 2, y + padding);
