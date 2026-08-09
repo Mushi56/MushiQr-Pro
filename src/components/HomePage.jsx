@@ -534,13 +534,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     fontWeight: 700,
                     letterSpacing: '0.8px',
                     textTransform: 'uppercase',
-                    color: '#FFB3C6',
+                    color: '#ff5675',
                     marginBottom: '0'
                   }}>
                     WELCOME BACK 👋
                   </div>
                   <div style={{
-                    fontSize: '24px',
+                    fontSize: '22px',
                     fontWeight: 800,
                     color: '#FFFFFF',
                     display: 'flex',
