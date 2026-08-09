@@ -598,7 +598,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 style={{
                   position: 'absolute',
                   right: '-12px',
-                  bottom: '14px',
+                  bottom: '16px',
                   width: '100px',
                   height: '100px',
                   objectFit: 'contain',
@@ -639,7 +639,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                       margin: 0,
                       lineHeight: 1.1
                     }}>
-                      Custom QR
+                      QR Codes
                     </h2>
                     <div style={{
                       fontSize: '8.5px',
@@ -652,7 +652,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '7.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3, maxWidth: '80px' }}>
+                <p style={{ fontSize: '10px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
                   Design custom QR codes with custom logos, vibrant colors, unique frames &amp; artistic textures.
                 </p>
               </div>
@@ -732,7 +732,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 style={{
                   position: 'absolute',
                   right: '-12px',
-                  bottom: '14px',
+                  bottom: '16px',
                   width: '100px',
                   height: '100px',
                   objectFit: 'contain',
@@ -786,7 +786,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '7.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '85px' }}>
+                <p style={{ fontSize: '10px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
                   Generate professional 1D &amp; 2D barcodes supporting 30+ industrial standards &amp; formats.
                 </p>
               </div>
@@ -913,7 +913,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     margin: 0,
                     lineHeight: 1.1
                   }}>
-                    Bulk Batch Generator
+                    Bulk Generation
                   </h3>
                   <div style={{
                     fontSize: '8.5px',
@@ -926,7 +926,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                 </div>
               </div>
-              <p style={{ fontSize: '7.5px', margin: '6px 140px 0 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3 }}>
+              <p style={{ fontSize: '10px', margin: '6px 115px 0 0', color: 'rgba(255,255,255,0.75)', fontWeight: 500, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Create 10K+ QR codes &amp; barcodes from CSV / Excel files.
               </p>
             </div>
