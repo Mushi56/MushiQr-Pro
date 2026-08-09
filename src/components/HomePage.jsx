@@ -570,7 +570,6 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
 
           {/* Top Row: Create QR Code & Create Barcode 50-50 side-by-side in 1 line */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%', position: 'relative', zIndex: 2 }}>
-                      {/* Card 1: Create QR Code (Entire Card Interactive) */}
             <div 
               onClick={() => onNavigate('generator')}
               role="button"
@@ -585,7 +584,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 overflow: 'hidden',
                 padding: '16px',
                 boxSizing: 'border-box',
-                minHeight: '150px',
+                minHeight: '135px',
                 background: 'linear-gradient(135deg, #FF1744 0%, #880020 100%)',
                 border: 'none',
                 boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
@@ -670,7 +669,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                   <ChevronRight size={15} color="#FFFFFF" />
                 </div>
-                <p style={{ fontSize: '7.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.95)', fontWeight: 500, lineHeight: 1.3, textShadow: '0 1px 2px rgba(0,0,0,0.3)', maxWidth: '100px' }}>
+                <p style={{ fontSize: '7.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.95)', fontWeight: 500, lineHeight: 1.3, textShadow: '0 1px 2px rgba(0,0,0,0.3)', maxWidth: '80px' }}>
                   Design custom QR codes with custom logos, vibrant colors, unique frames &amp; artistic textures.
                 </p>
               </div>
@@ -713,7 +712,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 overflow: 'hidden',
                 padding: '16px',
                 boxSizing: 'border-box',
-                minHeight: '150px',
+                minHeight: '135px',
                 background: 'linear-gradient(135deg, #FF1744 0%, #880020 100%)',
                 border: 'none',
                 boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
@@ -798,7 +797,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                   <ChevronRight size={15} color="#FFFFFF" />
                 </div>
-                <p style={{ fontSize: '7.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.95)', fontWeight: 500, lineHeight: 1.3, textShadow: '0 1px 2px rgba(0,0,0,0.3)', maxWidth: '100px' }}>
+                <p style={{ fontSize: '7.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.95)', fontWeight: 500, lineHeight: 1.3, textShadow: '0 1px 2px rgba(0,0,0,0.3)', maxWidth: '80px' }}>
                   Generate professional 1D &amp; 2D barcodes supporting 30+ industrial standards &amp; formats.
                 </p>
               </div>
