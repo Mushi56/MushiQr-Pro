@@ -1069,8 +1069,6 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
                 </div>
               </div>
 
-              <h2>Scan Successful!</h2>
-              <p>{detectedFormatName && detectedFormatName !== 'QR Code' ? 'Barcode scanned' : 'QR Code scanned'}</p>
             </div>
 
             {/* Central Card Body */}
