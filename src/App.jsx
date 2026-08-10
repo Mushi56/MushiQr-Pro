@@ -2038,7 +2038,11 @@ export default function App() {
       const exportSize = QUALITY_SIZES[exportQuality] || 2048;
       const exportCanvas = generateExportCanvas(exportSize);
       
-      const result = await downloadFn(exportCanvas, 'qrcode', 'QR Codes');
+      // Generate a unique filename using timestamp to avoid overwriting previous saves
+      const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+      const uniqueFilename = `qrcode_${timestamp}`;
+      
+      const result = await downloadFn(exportCanvas, uniqueFilename, 'QR Codes');
       if (result === 'gallery') {
         showToast('Saved to Gallery');
       } else if (result === 'share') {

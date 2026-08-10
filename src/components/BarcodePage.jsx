@@ -226,7 +226,8 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   const handleDownload = async (format) => {
     if (!canvasRef.current || !isDataValid) return;
     try {
-      const filename = `barcode_${bcid}_${text.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+      const filename = `barcode_${bcid}_${text.replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}`;
       
       // Scale based on exportQuality (Low=1x, Medium=2x, High=3x, Ultra=4x)
       const scaleMap = { 'Low': 1, 'Medium': 2, 'High': 3, 'Ultra': 4 };
