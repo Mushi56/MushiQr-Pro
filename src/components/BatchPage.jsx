@@ -606,12 +606,12 @@ export default function BatchPage({
               padding: '12px',
               borderRadius: '10px',
               border: 'none',
-              background: batchType === 'QR' ? 'var(--accent-primary)' : 'transparent',
-              color: batchType === 'QR' ? '#FFFFFF' : 'var(--text-secondary)',
+              background: batchType === 'QR' ? 'rgba(214, 0, 54, 0.1)' : 'transparent',
+              color: batchType === 'QR' ? 'var(--accent-primary)' : 'var(--text-secondary)',
               fontWeight: 800,
               fontSize: '14px',
               cursor: isProcessing ? 'default' : 'pointer',
-              boxShadow: batchType === 'QR' ? '0 4px 14px rgba(214, 0, 54, 0.35)' : 'none',
+              boxShadow: 'none',
               transition: 'all 0.2s ease',
               position: 'relative',
               overflow: 'hidden',
@@ -644,8 +644,8 @@ export default function BatchPage({
                   justifyContent: 'center',
                   padding: '6px',
                   borderRadius: '8px',
-                  background: batchType === 'QR' ? 'rgba(255,255,255,0.2)' : 'var(--bg-secondary)',
-                  color: batchType === 'QR' ? '#ffffff' : 'var(--text-secondary)',
+                  background: batchType === 'QR' ? 'rgba(214, 0, 54, 0.15)' : 'var(--bg-secondary)',
+                  color: batchType === 'QR' ? 'var(--accent-primary)' : 'var(--text-secondary)',
                   transition: 'all 0.2s ease'
                 }}>
                   <QrCode size={16} />
@@ -662,12 +662,12 @@ export default function BatchPage({
               padding: '12px',
               borderRadius: '10px',
               border: 'none',
-              background: batchType === 'BARCODE' ? 'var(--accent-primary)' : 'transparent',
-              color: batchType === 'BARCODE' ? '#FFFFFF' : 'var(--text-secondary)',
+              background: batchType === 'BARCODE' ? 'rgba(214, 0, 54, 0.1)' : 'transparent',
+              color: batchType === 'BARCODE' ? 'var(--accent-primary)' : 'var(--text-secondary)',
               fontWeight: 800,
               fontSize: '14px',
               cursor: isProcessing ? 'default' : 'pointer',
-              boxShadow: batchType === 'BARCODE' ? '0 4px 14px rgba(214, 0, 54, 0.35)' : 'none',
+              boxShadow: 'none',
               transition: 'all 0.2s ease',
               position: 'relative',
               overflow: 'hidden',
@@ -700,8 +700,8 @@ export default function BatchPage({
                   justifyContent: 'center',
                   padding: '6px',
                   borderRadius: '8px',
-                  background: batchType === 'BARCODE' ? 'rgba(255,255,255,0.2)' : 'var(--bg-secondary)',
-                  color: batchType === 'BARCODE' ? '#ffffff' : 'var(--text-secondary)',
+                  background: batchType === 'BARCODE' ? 'rgba(214, 0, 54, 0.15)' : 'var(--bg-secondary)',
+                  color: batchType === 'BARCODE' ? 'var(--accent-primary)' : 'var(--text-secondary)',
                   transition: 'all 0.2s ease'
                 }}>
                   <Barcode size={16} />
