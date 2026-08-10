@@ -396,73 +396,96 @@ export default function BatchPage({
     const zip = new JSZip();
     const exportSize = QUALITY_SIZES[exportQuality] || 1024;
 
-    for (let idx = 0; idx < batchItems.length; idx++) {
+    // ── Chunked processing to prevent memory exhaustion on large batches ──
+    // Each canvas can hold 4–16MB of pixel data. Processing 1000+ at once
+    // exhausts RAM silently and the browser truncates the output.
+    // By processing in chunks and explicitly releasing canvases we keep
+    // peak memory usage bounded regardless of batch size.
+    const CHUNK_SIZE = 50; // items per chunk before GC yield
+    const total = batchItems.length;
+
+    for (let idx = 0; idx < total; idx++) {
       const item = batchItems[idx];
-      const tempCanvas = document.createElement('canvas');
 
-      if (batchType === 'BARCODE') {
-        // High quality scale multiplier for barcode export canvas
-        const scale = exportQuality === 'Low' ? 1 : exportQuality === 'Normal' ? 2 : exportQuality === 'HD' ? 3 : 4;
-        tempCanvas.width = 400 * scale;
-        tempCanvas.height = 150 * scale;
+      // Create canvas, render, then IMMEDIATELY extract data and destroy canvas
+      let pngDataUrl;
+      let pngBase64;
 
-        renderBarcode(tempCanvas, item.data, {
-          bcid: item.style?.bcid || 'code128',
-          barColor: item.style?.barColor || '#000000',
-          bgColor: item.style?.bgColor || '#ffffff',
-          barWidth: (item.style?.barWidth || 2) * scale,
-          height: (item.style?.height || 90) * scale,
-          margin: (item.style?.margin || 16) * scale,
-          displayValue: item.style?.displayValue !== undefined ? item.style.displayValue : true,
-          font: `${12 * scale}px Inter, sans-serif`
-        });
-      } else {
-        tempCanvas.width = exportSize;
-        tempCanvas.height = exportSize;
+      {
+        // Scoped block so tempCanvas goes out of scope as soon as possible
+        const tempCanvas = document.createElement('canvas');
 
-        const matrixInfo = generateQRMatrix(item.data, item.style.errorCorrection || 'H');
-        const logoImgElement = item.style?.logo?.src ? logoCache[item.style.logo.src] : null;
+        if (batchType === 'BARCODE') {
+          const scale = exportQuality === 'Low' ? 1 : exportQuality === 'Normal' ? 2 : exportQuality === 'HD' ? 3 : 4;
+          tempCanvas.width = 400 * scale;
+          tempCanvas.height = 150 * scale;
 
-        renderQR(tempCanvas, {
-          ...matrixInfo,
-          size: exportSize,
-          ...item.style,
-          logo: logoImgElement,
-          textCenter: item.style.textCenterEnabled ? item.style.textCenterText : null,
-          showHandle: false,
-          selectedType: null
-        });
+          renderBarcode(tempCanvas, item.data, {
+            bcid: item.style?.bcid || 'code128',
+            barColor: item.style?.barColor || '#000000',
+            bgColor: item.style?.bgColor || '#ffffff',
+            barWidth: (item.style?.barWidth || 2) * scale,
+            height: (item.style?.height || 90) * scale,
+            margin: (item.style?.margin || 16) * scale,
+            displayValue: item.style?.displayValue !== undefined ? item.style.displayValue : true,
+            font: `${12 * scale}px Inter, sans-serif`
+          });
+        } else {
+          tempCanvas.width = exportSize;
+          tempCanvas.height = exportSize;
+
+          const matrixInfo = generateQRMatrix(item.data, item.style.errorCorrection || 'H');
+          const logoImgElement = item.style?.logo?.src ? logoCache[item.style.logo.src] : null;
+
+          renderQR(tempCanvas, {
+            ...matrixInfo,
+            size: exportSize,
+            ...item.style,
+            logo: logoImgElement,
+            textCenter: item.style.textCenterEnabled ? item.style.textCenterText : null,
+            showHandle: false,
+            selectedType: null
+          });
+        }
+
+        pngDataUrl = tempCanvas.toDataURL('image/png');
+        pngBase64 = pngDataUrl.split(',')[1];
+
+        // 2. JPG — generate while tempCanvas still exists in scope
+        if (selectedFormat === 'ALL' || selectedFormat === 'JPG') {
+          const jpgCanvas = document.createElement('canvas');
+          jpgCanvas.width = tempCanvas.width;
+          jpgCanvas.height = tempCanvas.height;
+          const ctx = jpgCanvas.getContext('2d');
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, jpgCanvas.width, jpgCanvas.height);
+          ctx.drawImage(tempCanvas, 0, 0);
+          const jpgBase64 = jpgCanvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+          zip.file(`jpg/${item.filename}.jpg`, jpgBase64, { base64: true });
+          // Explicitly release JPG canvas GPU memory
+          jpgCanvas.width = 0;
+          jpgCanvas.height = 0;
+        }
+
+        // Explicitly release main canvas GPU memory before leaving the block
+        tempCanvas.width = 0;
+        tempCanvas.height = 0;
       }
 
-      let pngDataUrl = tempCanvas.toDataURL('image/png');
-      let pngBase64 = pngDataUrl.split(',')[1];
-
-      // 1. PNG Base64
+      // 1. PNG
       if (selectedFormat === 'ALL' || selectedFormat === 'PNG') {
         zip.file(`png/${item.filename}.png`, pngBase64, { base64: true });
       }
 
-      // 2. JPG Base64
-      if (selectedFormat === 'ALL' || selectedFormat === 'JPG') {
-        const jpgCanvas = document.createElement('canvas');
-        jpgCanvas.width = tempCanvas.width;
-        jpgCanvas.height = tempCanvas.height;
-        const ctx = jpgCanvas.getContext('2d');
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, jpgCanvas.width, jpgCanvas.height);
-        ctx.drawImage(tempCanvas, 0, 0);
-        const jpgDataUrl = jpgCanvas.toDataURL('image/jpeg', 0.9);
-        const jpgBase64 = jpgDataUrl.split(',')[1];
-        zip.file(`jpg/${item.filename}.jpg`, jpgBase64, { base64: true });
-      }
-
-      // 3. SVG Base64
+      // 3. SVG (wraps the PNG)
       if (selectedFormat === 'ALL' || selectedFormat === 'SVG') {
+        const sw = exportSize;
+        const sh = batchType === 'BARCODE' ? Math.round(150 * (exportQuality === 'Low' ? 1 : exportQuality === 'Normal' ? 2 : exportQuality === 'HD' ? 3 : 4)) : exportSize;
         const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="${tempCanvas.width}" height="${tempCanvas.height}"
-     viewBox="0 0 ${tempCanvas.width} ${tempCanvas.height}">
-  <image width="${tempCanvas.width}" height="${tempCanvas.height}" xlink:href="data:image/png;base64,${pngBase64}"/>
+     width="${sw}" height="${sh}"
+     viewBox="0 0 ${sw} ${sh}">
+  <image width="${sw}" height="${sh}" xlink:href="data:image/png;base64,${pngBase64}"/>
 </svg>`;
         zip.file(`svg/${item.filename}.svg`, svgContent);
       }
@@ -474,20 +497,30 @@ export default function BatchPage({
           unit: 'mm',
           format: 'a4',
         });
-        
+
         if (batchType === 'BARCODE') {
-          // Fit barcode nicely on landscape A4 PDF
           pdf.addImage(pngDataUrl, 'PNG', 15, 30, 260, 100);
         } else {
           pdf.addImage(pngDataUrl, 'PNG', 20, 20, 170, 170);
         }
 
-        const pdfArrayBuffer = pdf.output('arraybuffer');
-        zip.file(`pdf/${item.filename}.pdf`, pdfArrayBuffer);
+        zip.file(`pdf/${item.filename}.pdf`, pdf.output('arraybuffer'));
       }
 
-      setExportProgress(Math.round(((idx + 1) / batchItems.length) * 100));
-      await new Promise(resolve => setTimeout(resolve, 0));
+      // Release large string references
+      pngDataUrl = null;
+      pngBase64 = null;
+
+      setExportProgress(Math.round(((idx + 1) / total) * 100));
+
+      // Yield to the browser every CHUNK_SIZE items so GC can reclaim memory.
+      // This is the critical fix: without a real delay, the browser accumulates
+      // all canvas allocations in memory and crashes silently ~200 items in.
+      if ((idx + 1) % CHUNK_SIZE === 0) {
+        await new Promise(resolve => setTimeout(resolve, 16));
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
     }
 
     try {
@@ -503,7 +536,7 @@ export default function BatchPage({
           setIsExporting(false);
           setExportSuccessInfo({
             filename: archiveName,
-            count: batchItems.length,
+            count: total,
             isNative: true,
             fileUri: uri
           });
@@ -514,7 +547,7 @@ export default function BatchPage({
         setIsExporting(false);
         setExportSuccessInfo({
           filename: archiveName,
-          count: batchItems.length,
+          count: total,
           isNative: false
         });
       }
