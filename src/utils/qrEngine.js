@@ -998,7 +998,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     // ── Floral / Decorative Dot Styles (9 premium flower shapes) ──
     case DOT_STYLES.CHERRY_BLOSSOM: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
       const petalR = r * 0.55;
       const petalD = r * 0.45;
 
@@ -1030,7 +1030,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.VIOLET_FLOWER: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
       const petalR = r * 0.52;
       const petalD = r * 0.42;
 
@@ -1055,7 +1055,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.SUNFLOWER: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
 
       ctx.save();
       ctx.fillStyle = '#f1c232'; // Golden yellow sunflower petals
@@ -1082,7 +1082,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.ROSE: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
 
       ctx.save();
       // Draw green leaves under the rose if large
@@ -1124,7 +1124,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.DAISY: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
 
       ctx.save();
       // Draw green leaves/stem if large
@@ -1171,7 +1171,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.TULIP: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
 
       ctx.save();
       // Stem & Leaf
@@ -1210,7 +1210,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.LOTUS: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
 
       ctx.save();
       // Base leaf (pad)
@@ -1239,7 +1239,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.FORGET_ME_NOT: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
       const petalR = r * 0.45;
       const petalD = r * 0.48;
 
@@ -1265,7 +1265,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.PANSY: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
 
       ctx.save();
       // 2 top petals (Indigo purple)
@@ -1300,7 +1300,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.DOLLAR_COIN: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
       ctx.save();
       if (isLarge) {
         // Draw a stack of coins
@@ -1344,7 +1344,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.CUTE_EMOTICON: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
       ctx.save();
       if (isLarge) {
         // Draw vertical orange pill-shaped character
@@ -1374,7 +1374,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.LAVENDER: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
       ctx.save();
       if (isLarge) {
         // Green stem
@@ -1404,7 +1404,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     }
     case DOT_STYLES.MONSTERA: {
       const cx = x + size / 2, cy = y + size / 2;
-      const r = size * (isLarge ? 0.58 : 0.28);
+      const r = size * (isLarge ? 0.75 : 0.45);
       ctx.save();
       ctx.fillStyle = '#27ae60'; // Vibrant green monstera
       if (isLarge) {
