@@ -107,6 +107,15 @@ export const EC_LEVELS = {
 export const DOT_STYLES = {
   DENSO: 'denso',
   DOTS: 'dots',
+  CHERRY_BLOSSOM: 'cherry-blossom',
+  FORGET_ME_NOT: 'forget-me-not',
+  SUNFLOWER: 'sunflower',
+  ROSE: 'rose',
+  DAISY: 'daisy',
+  TULIP: 'tulip',
+  LOTUS: 'lotus',
+  HYACINTH: 'hyacinth',
+  VIOLET: 'violet',
   SPARKLE: 'sparkle',
   FLUID: 'fluid',
   CAPSULE: 'capsule',
@@ -793,6 +802,189 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
       ctx.arc(x + size / 2, y + size / 2, s / 2, 0, Math.PI * 2);
       ctx.fill();
       break;
+
+    case DOT_STYLES.CHERRY_BLOSSOM: {
+      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
+      ctx.save();
+      const petalColor = ctx.fillStyle;
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+        const px = cx + Math.cos(angle) * (r * 0.38);
+        const py = cy + Math.sin(angle) * (r * 0.38);
+        ctx.fillStyle = petalColor;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+
+    case DOT_STYLES.FORGET_ME_NOT: {
+      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
+      ctx.save();
+      const petalColor = ctx.fillStyle;
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * Math.PI * 2) / 5;
+        const px = cx + Math.cos(angle) * (r * 0.4);
+        const py = cy + Math.sin(angle) * (r * 0.4);
+        ctx.fillStyle = petalColor;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.42, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.26, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+
+    case DOT_STYLES.SUNFLOWER: {
+      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
+      ctx.save();
+      const petalColor = ctx.fillStyle;
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI * 2) / 8;
+        const px = cx + Math.cos(angle) * (r * 0.42);
+        const py = cy + Math.sin(angle) * (r * 0.42);
+        ctx.fillStyle = petalColor;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#5A3818';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.38, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+
+    case DOT_STYLES.ROSE: {
+      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
+      ctx.save();
+      const roseColor = ctx.fillStyle;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.beginPath();
+      ctx.arc(cx - r * 0.15, cy - r * 0.15, r * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = roseColor;
+      ctx.beginPath();
+      ctx.arc(cx + r * 0.1, cy + r * 0.1, r * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+
+    case DOT_STYLES.DAISY: {
+      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
+      ctx.save();
+      const petalColor = ctx.fillStyle;
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI * 2) / 8;
+        const px = cx + Math.cos(angle) * (r * 0.45);
+        const py = cy + Math.sin(angle) * (r * 0.45);
+        ctx.fillStyle = petalColor;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.32, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#FFC800';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.36, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+
+    case DOT_STYLES.TULIP: {
+      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
+      ctx.save();
+      const mainColor = ctx.fillStyle;
+      ctx.beginPath();
+      ctx.arc(cx, cy + r * 0.1, r * 0.75, 0.2, Math.PI - 0.2);
+      ctx.lineTo(cx, cy - r * 0.8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#4CAF50';
+      ctx.beginPath();
+      ctx.arc(cx, cy + r * 0.7, r * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+
+    case DOT_STYLES.LOTUS: {
+      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
+      ctx.save();
+      const lotusColor = ctx.fillStyle;
+      ctx.fillStyle = '#5BB381';
+      ctx.beginPath();
+      ctx.arc(cx, cy + r * 0.3, r * 0.65, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = lotusColor;
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+        const px = cx + Math.cos(angle) * (r * 0.35);
+        const py = cy - r * 0.15 + Math.sin(angle) * (r * 0.35);
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.38, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      break;
+    }
+
+    case DOT_STYLES.HYACINTH: {
+      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
+      ctx.save();
+      const petalColor = ctx.fillStyle;
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+        const px = cx + Math.cos(angle) * (r * 0.42);
+        const py = cy + Math.sin(angle) * (r * 0.42);
+        ctx.fillStyle = petalColor;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.38, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#E0F7FA';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+
+    case DOT_STYLES.VIOLET: {
+      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
+      ctx.save();
+      const petalColor = ctx.fillStyle;
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+        const px = cx + Math.cos(angle) * (r * 0.42);
+        const py = cy + Math.sin(angle) * (r * 0.42);
+        ctx.fillStyle = petalColor;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.44, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#FFD54F';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.24, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
     case DOT_STYLES.SPARKLE: {
       const cx = x + size / 2, cy = y + size / 2, r = s / 2;
       ctx.beginPath();
