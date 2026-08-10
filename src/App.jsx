@@ -96,64 +96,44 @@ import SaveLocationModal from './components/SaveLocationModal';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 const QRDotsIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="10.25" y="3" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="17.5" y="3" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="mushi-pro-wide-dots">
+    {/* Smaller Rounded Star (Preserving the shape and style) */}
+    <path d="M12 4 L13 8.5 L17.5 9.5 L13 10.5 L12 15 L11 10.5 L6.5 9.5 L11 8.5 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
     
-    <rect x="3" y="10.25" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="10.25" y="10.25" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="17.5" y="10.25" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
-    
-    <rect x="3" y="17.5" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="10.25" y="17.5" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="17.5" y="17.5" width="3.5" height="3.5" rx="0.5" fill="currentColor" stroke="none" />
+    {/* Much Larger Smooth Dots, set further apart (Increased spacing) */}
+    <circle cx="6.5" cy="15.5" r="3" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+    <circle cx="17.5" cy="15.5" r="3" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
   </svg>
 );
 const QREyesIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    {/* Top-Left Eye */}
-    <rect x="2.5" y="2.5" width="6.5" height="6.5" rx="1.5" />
-    <rect x="4.5" y="4.5" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="qr-eye-heavy-bold">
+    {/* Main outer shape with hole cut out (evenodd fill rule) */}
+    <path fillRule="evenodd" d="M3 7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7zm4-1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7z" clipRule="evenodd" />
     
-    {/* Top-Right Eye */}
-    <rect x="15" y="2.5" width="6.5" height="6.5" rx="1.5" />
-    <rect x="17" y="4.5" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
-    
-    {/* Bottom-Left Eye */}
-    <rect x="2.5" y="15" width="6.5" height="6.5" rx="1.5" />
-    <rect x="4.5" y="17" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+    {/* Enlarged Central Pupil (Increased from 5x5 to 8x8) */}
+    <rect x="8" y="8" width="8" height="8" rx="1.5" />
   </svg>
 );
 const QRStyleIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ overflow: 'visible' }}>
-    {/* Three Main Position Marker Eyes */}
-    <rect x="2.5" y="2.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-    <rect x="4.5" y="4.5" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mushi-qr-star-all-circles">
+    {/* Top Left Eye & Pupil */}
+    <rect x="3" y="3" width="7" height="7" rx="1.5" style={{ fill: 'transparent' }} />
+    <circle cx="6.5" cy="6.5" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
     
-    <rect x="2.5" y="15" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-    <rect x="4.5" y="17" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+    {/* Top Right Eye & Pupil */}
+    <rect x="14" y="3" width="7" height="7" rx="1.5" style={{ fill: 'transparent' }} />
+    <circle cx="17.5" cy="6.5" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
     
-    <rect x="15" y="2.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-    <rect x="17" y="4.5" width="2.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+    {/* Bottom Left Eye & Pupil */}
+    <rect x="3" y="14" width="7" height="7" rx="1.5" style={{ fill: 'transparent' }} />
+    <circle cx="6.5" cy="17.5" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
     
-    {/* Grid pixels */}
-    <rect x="11" y="4" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="11" y="7.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="4" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="7.5" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="11" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="14.5" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="18" y="11" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    {/* The Pro Sparkle */}
+    <path d="M17 12l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
     
-    <rect x="11" y="14.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="11" y="18" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    
-    {/* Bottom right corner */}
-    <rect x="15.5" y="15.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="18.5" y="15.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="15.5" y="18.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
-    <rect x="18.5" y="18.5" width="2" height="2" rx="0.5" fill="currentColor" stroke="none" />
+    {/* Two Circular Dots Below */}
+    <circle cx="15" cy="20" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+    <circle cx="19.5" cy="20" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
   </svg>
 );
 const QRGradientIcon = ({ size = 18 }) => (
@@ -165,6 +145,19 @@ const QRGradientIcon = ({ size = 18 }) => (
       </linearGradient>
     </defs>
     <circle cx="12" cy="12" r="9" fill="url(#qr-icon-grad)" />
+  </svg>
+);
+const QRSizeIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-size-expand">
+    <path d="M15 3h6v6" />
+    <path d="M21 3l-7 7" />
+    <path d="M9 21H3v-6" />
+    <path d="M3 21l7-7" />
+  </svg>
+);
+const QRBgIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="shape-square">
+    <rect x="3" y="3" width="18" height="18" rx="4" style={{ fill: 'currentColor', fillOpacity: 1 }} />
   </svg>
 );
 const TEXT_SHAPES = [
@@ -5538,14 +5531,14 @@ export default function App() {
                          <>
                            <button className={`text-toolbar-btn${shapePopup === 'dots' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'dots')}><QRDotsIcon /><span>Dots</span></button>
                            <button className={`text-toolbar-btn${shapePopup === 'eyes' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                           <button className={`text-toolbar-btn${shapePopup === 'background' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'background')}><Shapes size={18} /><span>Background</span></button>
-                           <button className={`text-toolbar-btn${shapePopup === 'size' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'size')}><ChevronUp size={18} /><span>Size</span></button>
+                           <button className={`text-toolbar-btn${shapePopup === 'background' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'background')}><QRBgIcon size={18} /><span>Background</span></button>
+                           <button className={`text-toolbar-btn${shapePopup === 'size' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'size')}><QRSizeIcon size={18} /><span>Size</span></button>
                            <button className={`text-toolbar-btn${shapePopup === 'pos' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'pos')}><Maximize size={18} /><span>Position</span></button>
                          </>
                        )}
                       {activeTab === 'logo' && (
                         <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'size')}><ChevronUp size={18} /><span>Size</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'size')}><QRSizeIcon size={18} /><span>Size</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'pos')}><Maximize size={18} /><span>Position</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
                           <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'bg')}><Hexagon size={18} /><span>Background</span></button>
@@ -5573,7 +5566,7 @@ export default function App() {
                               <>
                                 <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('pos')}><Maximize size={18} /><span>Position</span></button>
                                 <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('size')}><ChevronUp size={18} /><span>Size</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('size')}><QRSizeIcon size={18} /><span>Size</span></button>
                                 <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('color')}><Palette size={18} /><span>Color</span></button>
                                 <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
                                 <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('shadow')}><Moon size={18} /><span>Shadow</span></button>
