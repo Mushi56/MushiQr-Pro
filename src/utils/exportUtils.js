@@ -29,35 +29,31 @@ function stringToBase64(str) {
 }
 
 /**
- * Construct organized path: {RootFolder}/{Category}/{Format}/{Filename}
- * E.g.: "Mushi QR Pro/QR Codes/PNG/qrcode_123.png"
- * E.g.: "Mushi QR Pro/Barcodes/PDF/barcode_123.pdf"
- * E.g.: "Mushi QR Pro/Bulk Batch Generation/ZIP/batch.zip"
+/**
+ * Construct save path: {RootFolder}/{Category}/{Filename}
+ *
+ * New flat structure (no format subfolders):
+ *   Pictures/Mushi QR Pro/QR Codes/qrcode_20260811.png
+ *   Pictures/Mushi QR Pro/QR Codes/mushi-qr-batch.zip
+ *   Pictures/Mushi QR Pro/Barcodes/barcode_ean13_20260811.pdf
+ *   Pictures/Mushi QR Pro/Barcodes/mushi-barcode-batch.zip
+ *
+ * The root folder is user-configurable via Settings (defaults to
+ * Pictures/Mushi QR Pro which maps to /storage/emulated/0/Pictures/Mushi QR Pro
+ * on Android ExternalStorage).
  */
 export function getOrganizedFilePath(filename, category = 'QR Codes') {
   let prefs = {};
   try { prefs = getPreferences() || {}; } catch {}
   const rootFolder = prefs.saveLocation || 'Pictures/Mushi QR Pro';
 
-  // Standardize category: 'QR Codes' | 'Barcodes' | 'Bulk Batch Generation'
-  let categoryDir = 'QR Codes';
+  // Only two top-level categories:
+  //   'QR Codes'  — all QR formats + bulk QR ZIPs
+  //   'Barcodes'  — all barcode formats + bulk barcode ZIPs
   const catLower = (category || '').toLowerCase();
-  if (catLower.includes('barcode')) {
-    categoryDir = 'Barcodes';
-  } else if (catLower.includes('batch') || catLower.includes('bulk')) {
-    categoryDir = 'Bulk Batch Generation';
-  } else {
-    categoryDir = 'QR Codes';
-  }
+  const categoryDir = catLower.includes('barcode') ? 'Barcodes' : 'QR Codes';
 
-  // Standardize format folder: PNG | JPG | SVG | PDF | ZIP
-  let formatDir = 'PNG';
-  const ext = filename.split('.').pop().toUpperCase();
-  if (['PNG', 'JPG', 'JPEG', 'SVG', 'PDF', 'ZIP'].includes(ext)) {
-    formatDir = ext === 'JPEG' ? 'JPG' : ext;
-  }
-
-  return `${rootFolder}/${categoryDir}/${formatDir}/${filename}`;
+  return `${rootFolder}/${categoryDir}/${filename}`;
 }
 
 /**

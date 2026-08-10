@@ -12,19 +12,19 @@ import { jsPDF } from 'jspdf';
 import { getOrganizedFilePath } from '../utils/exportUtils';
 
 // Helper for mobile ZIP saving
-async function saveZipNative(base64Data, filename) {
+async function saveZipNative(base64Data, filename, category = 'QR Codes') {
   try {
     await Filesystem.requestPermissions();
   } catch (e) {
     console.warn('Filesystem permissions warning:', e);
   }
 
-  const organizedPath = getOrganizedFilePath(filename, 'Bulk Batch Generation');
+  const organizedPath = getOrganizedFilePath(filename, category);
   let savedFileUri = null;
   let savedToDocuments = false;
   const targetDir = Capacitor.getPlatform() === 'android' ? Directory.ExternalStorage : Directory.Documents;
 
-  // 1. Primary: Save to device target directory under organized Bulk Batch Generation/ZIP path
+  // 1. Primary: Save to device target directory
   try {
     const docFile = await Filesystem.writeFile({
       path: organizedPath,
@@ -35,7 +35,7 @@ async function saveZipNative(base64Data, filename) {
     savedFileUri = docFile.uri;
     savedToDocuments = true;
   } catch (docErr) {
-    console.warn('Could not write organized path to targetDir, trying Documents fallback:', docErr);
+    console.warn('Could not write ZIP to targetDir, trying Documents fallback:', docErr);
     try {
       const docFile = await Filesystem.writeFile({
         path: organizedPath,
@@ -532,7 +532,8 @@ export default function BatchPage({
         const reader = new FileReader();
         reader.onloadend = async () => {
           const base64Data = reader.result.split(',')[1];
-          const uri = await saveZipNative(base64Data, archiveName);
+          const zipCategory = batchType === 'BARCODE' ? 'Barcodes' : 'QR Codes';
+          const uri = await saveZipNative(base64Data, archiveName, zipCategory);
           setIsExporting(false);
           setExportSuccessInfo({
             filename: archiveName,

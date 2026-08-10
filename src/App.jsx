@@ -969,22 +969,11 @@ export default function App() {
         try {
           const targetDir = Capacitor.getPlatform() === 'android' ? Directory.ExternalStorage : Directory.Documents;
           const prefs = getPreferences() || {};
-          const rootFolder = prefs.saveLocation || 'Mushi QR Pro';
+          const rootFolder = prefs.saveLocation || 'Pictures/Mushi QR Pro';
           
           const dirs = [
-            `${rootFolder}/QR Codes/PNG`,
-            `${rootFolder}/QR Codes/JPG`,
-            `${rootFolder}/QR Codes/SVG`,
-            `${rootFolder}/QR Codes/PDF`,
-            `${rootFolder}/Barcodes/PNG`,
-            `${rootFolder}/Barcodes/JPG`,
-            `${rootFolder}/Barcodes/SVG`,
-            `${rootFolder}/Barcodes/PDF`,
-            `${rootFolder}/Bulk Batch Generation/ZIP`,
-            `${rootFolder}/Bulk Batch Generation/PNG`,
-            `${rootFolder}/Bulk Batch Generation/JPG`,
-            `${rootFolder}/Bulk Batch Generation/SVG`,
-            `${rootFolder}/Bulk Batch Generation/PDF`,
+            `${rootFolder}/QR Codes`,
+            `${rootFolder}/Barcodes`,
           ];
           
           for (const dir of dirs) {
