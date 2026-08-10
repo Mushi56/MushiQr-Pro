@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles, CheckCircle, FileArchive, Share2 } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles, CheckCircle, FileArchive, Share2, QrCode, Barcode } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -637,7 +637,10 @@ export default function BatchPage({
                 </span>
               </>
             ) : (
-              'Bulk QR'
+              <>
+                <QrCode size={18} style={{ opacity: batchType === 'QR' ? 1 : 0.6 }} />
+                Bulk QR
+              </>
             )}
           </button>
           <button 
@@ -679,7 +682,10 @@ export default function BatchPage({
                 </span>
               </>
             ) : (
-              'Bulk Barcode'
+              <>
+                <Barcode size={18} style={{ opacity: batchType === 'BARCODE' ? 1 : 0.6 }} />
+                Bulk Barcode
+              </>
             )}
           </button>
         </div>
