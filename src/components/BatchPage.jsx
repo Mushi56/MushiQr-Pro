@@ -282,6 +282,7 @@ export default function BatchPage({
     const startIndex = hasHeader ? 1 : 0;
     const imported = [];
     const totalRows = fileData.length - startIndex;
+    const nameCountMap = new Map();
 
     // Base default style configurations depending on QR vs BARCODE
     const defaultStyle = batchType === 'BARCODE' ? {
@@ -301,9 +302,20 @@ export default function BatchPage({
         const codeData = row[parseInt(dataCol)];
         if (codeData && codeData.toString().trim() !== '') {
           const fileNameVal = nameCol !== 'none' && nameCol !== '' ? row[parseInt(nameCol)] : null;
-          const cleanFileName = fileNameVal 
-            ? fileNameVal.toString().trim().replace(/[^a-zA-Z0-9-_]/g, '_') 
-            : `${batchType.toLowerCase()}_code_${i - startIndex + 1}`;
+          let rawName = fileNameVal ? fileNameVal.toString().trim().replace(/[^a-zA-Z0-9-_]/g, '_') : '';
+          if (!rawName) {
+            rawName = `${batchType.toLowerCase()}_code_${i - startIndex + 1}`;
+          }
+
+          // Guarantee unique filename across imported items
+          let cleanFileName = rawName;
+          if (nameCountMap.has(rawName.toLowerCase())) {
+            const count = nameCountMap.get(rawName.toLowerCase()) + 1;
+            nameCountMap.set(rawName.toLowerCase(), count);
+            cleanFileName = `${rawName}_${count}`;
+          } else {
+            nameCountMap.set(rawName.toLowerCase(), 1);
+          }
 
           imported.push({
             id: `batch-${Date.now()}-${i}`,
@@ -395,17 +407,28 @@ export default function BatchPage({
 
     const zip = new JSZip();
     const exportSize = QUALITY_SIZES[exportQuality] || 1024;
+    const zipFilenameMap = new Map();
 
     // ── Chunked processing to prevent memory exhaustion on large batches ──
-    // Each canvas can hold 4–16MB of pixel data. Processing 1000+ at once
-    // exhausts RAM silently and the browser truncates the output.
-    // By processing in chunks and explicitly releasing canvases we keep
-    // peak memory usage bounded regardless of batch size.
     const CHUNK_SIZE = 50; // items per chunk before GC yield
     const total = batchItems.length;
 
     for (let idx = 0; idx < total; idx++) {
       const item = batchItems[idx];
+
+      // Ensure item has a unique filename in the ZIP output
+      let rawName = (item.filename || '').toString().trim().replace(/[^a-zA-Z0-9-_]/g, '_');
+      if (!rawName) {
+        rawName = `${batchType.toLowerCase()}_code_${idx + 1}`;
+      }
+      let safeItemName = rawName;
+      if (zipFilenameMap.has(rawName.toLowerCase())) {
+        const count = zipFilenameMap.get(rawName.toLowerCase()) + 1;
+        zipFilenameMap.set(rawName.toLowerCase(), count);
+        safeItemName = `${rawName}_${count}`;
+      } else {
+        zipFilenameMap.set(rawName.toLowerCase(), 1);
+      }
 
       // Create canvas, render, then IMMEDIATELY extract data and destroy canvas
       let pngDataUrl;
@@ -461,7 +484,7 @@ export default function BatchPage({
           ctx.fillRect(0, 0, jpgCanvas.width, jpgCanvas.height);
           ctx.drawImage(tempCanvas, 0, 0);
           const jpgBase64 = jpgCanvas.toDataURL('image/jpeg', 0.9).split(',')[1];
-          zip.file(`jpg/${item.filename}.jpg`, jpgBase64, { base64: true });
+          zip.file(`jpg/${safeItemName}.jpg`, jpgBase64, { base64: true });
           // Explicitly release JPG canvas GPU memory
           jpgCanvas.width = 0;
           jpgCanvas.height = 0;
@@ -474,7 +497,7 @@ export default function BatchPage({
 
       // 1. PNG
       if (selectedFormat === 'ALL' || selectedFormat === 'PNG') {
-        zip.file(`png/${item.filename}.png`, pngBase64, { base64: true });
+        zip.file(`png/${safeItemName}.png`, pngBase64, { base64: true });
       }
 
       // 3. SVG (wraps the PNG)
@@ -487,7 +510,7 @@ export default function BatchPage({
      viewBox="0 0 ${sw} ${sh}">
   <image width="${sw}" height="${sh}" xlink:href="data:image/png;base64,${pngBase64}"/>
 </svg>`;
-        zip.file(`svg/${item.filename}.svg`, svgContent);
+        zip.file(`svg/${safeItemName}.svg`, svgContent);
       }
 
       // 4. PDF
@@ -504,18 +527,17 @@ export default function BatchPage({
           pdf.addImage(pngDataUrl, 'PNG', 20, 20, 170, 170);
         }
 
-        zip.file(`pdf/${item.filename}.pdf`, pdf.output('arraybuffer'));
+        zip.file(`pdf/${safeItemName}.pdf`, pdf.output('arraybuffer'));
       }
 
       // Release large string references
       pngDataUrl = null;
       pngBase64 = null;
 
-      setExportProgress(Math.round(((idx + 1) / total) * 100));
+      // 0-90% for item rendering
+      setExportProgress(Math.round(((idx + 1) / total) * 90));
 
       // Yield to the browser every CHUNK_SIZE items so GC can reclaim memory.
-      // This is the critical fix: without a real delay, the browser accumulates
-      // all canvas allocations in memory and crashes silently ~200 items in.
       if ((idx + 1) % CHUNK_SIZE === 0) {
         await new Promise(resolve => setTimeout(resolve, 16));
       } else {
@@ -524,7 +546,10 @@ export default function BatchPage({
     }
 
     try {
-      const content = await zip.generateAsync({ type: 'blob' });
+      // 90-100% for zip packaging
+      const content = await zip.generateAsync({ type: 'blob', compression: 'STORE' }, (metadata) => {
+        setExportProgress(90 + Math.round((metadata.percent / 100) * 10));
+      });
       const defaultName = `mushi-${batchType.toLowerCase()}-batch`;
       const cleanBaseName = customZipFileName.trim().replace(/[^a-zA-Z0-9-_]/g, '_') || defaultName;
       const archiveName = `${cleanBaseName}.zip`;
