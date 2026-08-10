@@ -122,6 +122,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   const previewCanvasRef = useRef(null);
   const mountedRef = useRef(true);
   const busyRef = useRef(false);
+  const scanHandledRef = useRef(false);
   const touchStateRef = useRef({ distance: 0, initialZoom: 1 });
   const capTimersRef = useRef([]);
   const zoomRafRef = useRef(null);
@@ -426,91 +427,92 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   }, [flashOn, triggerHapticFeedback]);
 
   const handleScanResult = useCallback((decodedText, decodedResult) => {
-    if (!mountedRef.current || busyRef.current) return;
-    setStatus(prev => {
-      if (prev === 'DETECTED') return prev;
-      playBeep();
-      if (Capacitor.isNativePlatform()) { Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => { }); }
-      else if (navigator.vibrate) { navigator.vibrate(200); }
+    if (!mountedRef.current || busyRef.current || scanHandledRef.current) return;
+    scanHandledRef.current = true; // Block subsequent scans
 
-      const scanner = qrScannerRef.current;
-      if (scanner) {
-        try { scanner.pause(); } catch { }
-      }
+    playBeep();
+    if (Capacitor.isNativePlatform()) { Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => { }); }
+    else if (navigator.vibrate) { navigator.vibrate(200); }
 
-      const fmtId = decodedResult?.result?.format?.format
-        ?? decodedResult?.decodedResult?.result?.format?.format
-        ?? null;
-      let fmtName = fmtId != null ? (FORMAT_NAME_MAP[fmtId] || 'Unknown') : null;
-      if (!fmtName || fmtName === 'Unknown') {
-        fmtName = detectFormatFromText(decodedText);
-      }
-      const finalBcid = mapFormatToBcid(fmtName);
-      if (fmtId != null) setDetectedFormatId(fmtId);
-      setDetectedFormatName(fmtName);
+    const scanner = qrScannerRef.current;
+    if (scanner) {
+      try { scanner.pause(); } catch { }
+    }
 
-      const parsed = parseQRData(decodedText);
-      setQrTypeData(parsed);
-      setResult(decodedText);
-      
-      const d = new Date();
-      const formattedDate = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) + ' • ' + 
-                            d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-      setScanDate(formattedDate);
-      
-      let thumbnail = null;
-      try {
-        const canvas = document.createElement('canvas');
-        if (finalBcid && finalBcid !== 'qrcode') {
-          canvas.width = 200;
-          canvas.height = 120;
-          renderBarcode(canvas, decodedText, {
-            bcid: finalBcid,
-            barColor: '#000000',
+    const fmtId = decodedResult?.result?.format?.format
+      ?? decodedResult?.decodedResult?.result?.format?.format
+      ?? null;
+    let fmtName = fmtId != null ? (FORMAT_NAME_MAP[fmtId] || 'Unknown') : null;
+    if (!fmtName || fmtName === 'Unknown') {
+      fmtName = detectFormatFromText(decodedText);
+    }
+    const finalBcid = mapFormatToBcid(fmtName);
+    if (fmtId != null) setDetectedFormatId(fmtId);
+    setDetectedFormatName(fmtName);
+
+    const parsed = parseQRData(decodedText);
+    setQrTypeData(parsed);
+    setResult(decodedText);
+    
+    const d = new Date();
+    const formattedDate = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) + ' • ' + 
+                          d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    setScanDate(formattedDate);
+    
+    let thumbnail = null;
+    try {
+      const canvas = document.createElement('canvas');
+      if (finalBcid && finalBcid !== 'qrcode') {
+        canvas.width = 200;
+        canvas.height = 120;
+        renderBarcode(canvas, decodedText, {
+          bcid: finalBcid,
+          barColor: '#000000',
+          bgColor: '#ffffff',
+          barWidth: 2,
+          height: 80,
+          margin: 10,
+          displayValue: false
+        });
+        thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+      } else {
+        canvas.width = 120;
+        canvas.height = 120;
+        const matrixInfo = generateQRMatrix(decodedText, 'M');
+        if (matrixInfo) {
+          renderQR(canvas, {
+            matrix: matrixInfo.matrix,
+            moduleCount: matrixInfo.moduleCount,
+            size: 120,
+            qrColor: '#000000',
             bgColor: '#ffffff',
-            barWidth: 2,
-            height: 80,
-            margin: 10,
-            displayValue: false
+            bgTransparent: false
           });
           thumbnail = canvas.toDataURL('image/jpeg', 0.5);
-        } else {
-          canvas.width = 120;
-          canvas.height = 120;
-          const matrixInfo = generateQRMatrix(decodedText, 'M');
-          if (matrixInfo) {
-            renderQR(canvas, {
-              matrix: matrixInfo.matrix,
-              moduleCount: matrixInfo.moduleCount,
-              size: 120,
-              qrColor: '#000000',
-              bgColor: '#ffffff',
-              bgTransparent: false
-            });
-            thumbnail = canvas.toDataURL('image/jpeg', 0.5);
-          }
         }
-      } catch (err) {
-        console.error('Failed to generate thumbnail for scanned QR:', err);
       }
+    } catch (err) {
+      console.error('Failed to generate thumbnail for scanned QR:', err);
+    }
 
-      import('../utils/storage').then(({ saveToHistory }) => {
-        saveToHistory({
-          source: 'scan',
-          qrData: { text: decodedText },
-          type: (fmtName || parsed.type).toUpperCase(),
-          displayText: decodedText,
-          thumbnail: thumbnail
-        });
+    import('../utils/storage').then(({ saveToHistory }) => {
+      saveToHistory({
+        source: 'scan',
+        qrData: { text: decodedText },
+        type: (fmtName || parsed.type).toUpperCase(),
+        displayText: decodedText,
+        thumbnail: thumbnail
       });
-      return 'DETECTED';
     });
-  }, []);
+    
+    setStatus('DETECTED');
+  }, [playBeep]);
 
   const startScanner = useCallback(async () => {
     if (busyRef.current) return;
     busyRef.current = true;
     if (!mountedRef.current) return;
+    scanHandledRef.current = false;
     setResult(null); setQrTypeData(null); setDetectedFormatId(null); setDetectedFormatName(null); setError(null); setStatus('SCANNING'); setZoom(1); setVideoPlaying(false);
     try {
       await stopScanner();
@@ -750,6 +752,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     } else {
       startScanner();
     }
+    scanHandledRef.current = false;
     setResult(null); setQrTypeData(null); setDetectedFormatId(null); setDetectedFormatName(null); setStatus('SCANNING');
   };
 
