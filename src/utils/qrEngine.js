@@ -107,15 +107,6 @@ export const EC_LEVELS = {
 export const DOT_STYLES = {
   DENSO: 'denso',
   DOTS: 'dots',
-  CHERRY_BLOSSOM: 'cherry-blossom',
-  FORGET_ME_NOT: 'forget-me-not',
-  SUNFLOWER: 'sunflower',
-  ROSE: 'rose',
-  DAISY: 'daisy',
-  TULIP: 'tulip',
-  LOTUS: 'lotus',
-  HYACINTH: 'hyacinth',
-  VIOLET: 'violet',
   SPARKLE: 'sparkle',
   FLUID: 'fluid',
   CAPSULE: 'capsule',
@@ -132,6 +123,19 @@ export const DOT_STYLES = {
   OCTAGON: 'octagon',
   PLUS: 'plus',
   CROSS: 'cross',
+  CHERRY_BLOSSOM: 'cherry-blossom',
+  VIOLET_FLOWER: 'violet-flower',
+  SUNFLOWER: 'sunflower',
+  ROSE: 'rose',
+  DAISY: 'daisy',
+  TULIP: 'tulip',
+  LOTUS: 'lotus',
+  FORGET_ME_NOT: 'forget-me-not',
+  PANSY: 'pansy',
+  DOLLAR_COIN: 'dollar-coin',
+  CUTE_EMOTICON: 'cute-emoticon',
+  LAVENDER: 'lavender',
+  MONSTERA: 'monstera',
 };
 
 // Eye styles (Ordered by popularity)
@@ -151,6 +155,15 @@ export const EYE_STYLES = {
   STAR: 'star',
   HEART: 'spotlight',
   TRIANGLE: 'pillow',
+  DOLLAR_COIN: 'dollar-coin',
+  CUTE_EMOTICON: 'cute-emoticon',
+  CHERRY_BLOSSOM: 'cherry-blossom',
+  LOTUS: 'lotus',
+  SUNFLOWER: 'sunflower',
+  LAVENDER: 'lavender',
+  ROSE: 'rose',
+  MONSTERA: 'monstera',
+  DAISY: 'daisy',
 };
 
 // Frame styles
@@ -684,10 +697,10 @@ export function renderQR(canvas, options) {
 
       if (qrTextureEnabled && qrTexture?.image) {
         silhouetteCtx.fillStyle = '#000';
-        drawDotModule(silhouetteCtx, x, y, cellSize, dotStyle, neighbors, options);
+        drawDotModule(silhouetteCtx, x, y, cellSize, dotStyle, neighbors, options, row, col);
       } else {
         ctx.fillStyle = fillStyle;
-        drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, options);
+        drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, options, row, col);
       }
     }
   }
@@ -773,7 +786,7 @@ export function renderQR(canvas, options) {
 /**
  * Draw a single dot module
  */
-function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
+function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row = 0, col = 0) {
   const userPadding = options.dotPadding !== undefined ? options.dotPadding : 12;
 
   // Enforce healthy minimum padding for discrete shapes so dots stay separate and beautiful
@@ -784,11 +797,35 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
     effectivePaddingPct = Math.max(8, userPadding);
   } else if (style === DOT_STYLES.DIAMOND || style === DOT_STYLES.STAR || style === DOT_STYLES.HEART || style === DOT_STYLES.OCTAGON) {
     effectivePaddingPct = Math.max(10, userPadding);
+  } else if (
+    style === DOT_STYLES.CHERRY_BLOSSOM || style === DOT_STYLES.VIOLET_FLOWER ||
+    style === DOT_STYLES.SUNFLOWER || style === DOT_STYLES.ROSE ||
+    style === DOT_STYLES.DAISY || style === DOT_STYLES.TULIP ||
+    style === DOT_STYLES.LOTUS || style === DOT_STYLES.FORGET_ME_NOT ||
+    style === DOT_STYLES.PANSY || style === DOT_STYLES.DOLLAR_COIN ||
+    style === DOT_STYLES.CUTE_EMOTICON || style === DOT_STYLES.LAVENDER ||
+    style === DOT_STYLES.MONSTERA
+  ) {
+    // For premium floral and decorative styles, we handle sizing internally to match reference style
+    effectivePaddingPct = 0; 
   }
 
   const padding = (size * effectivePaddingPct) / 100;
   const s = size - padding * 2;
   const { top, bottom, left, right } = neighbors;
+
+  // Premium decorative/floral styles setup
+  const isFloral = [
+    DOT_STYLES.CHERRY_BLOSSOM, DOT_STYLES.VIOLET_FLOWER, DOT_STYLES.SUNFLOWER,
+    DOT_STYLES.ROSE, DOT_STYLES.DAISY, DOT_STYLES.TULIP,
+    DOT_STYLES.LOTUS, DOT_STYLES.FORGET_ME_NOT, DOT_STYLES.PANSY,
+    DOT_STYLES.DOLLAR_COIN, DOT_STYLES.CUTE_EMOTICON, DOT_STYLES.LAVENDER,
+    DOT_STYLES.MONSTERA
+  ].includes(style);
+
+  // Deterministically scatter large premium flowers (~8% of the modules)
+  // The rest are smaller floral filler dots, matching the style of the reference image.
+  const isLarge = isFloral && ((row * 17 + col * 23) % 13 === 0);
 
   switch (style) {
     case DOT_STYLES.SQUARE:
@@ -802,189 +839,6 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
       ctx.arc(x + size / 2, y + size / 2, s / 2, 0, Math.PI * 2);
       ctx.fill();
       break;
-
-    case DOT_STYLES.CHERRY_BLOSSOM: {
-      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
-      ctx.save();
-      const petalColor = ctx.fillStyle;
-      for (let i = 0; i < 5; i++) {
-        const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
-        const px = cx + Math.cos(angle) * (r * 0.38);
-        const py = cy + Math.sin(angle) * (r * 0.38);
-        ctx.fillStyle = petalColor;
-        ctx.beginPath();
-        ctx.arc(px, py, r * 0.45, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      break;
-    }
-
-    case DOT_STYLES.FORGET_ME_NOT: {
-      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
-      ctx.save();
-      const petalColor = ctx.fillStyle;
-      for (let i = 0; i < 5; i++) {
-        const angle = (i * Math.PI * 2) / 5;
-        const px = cx + Math.cos(angle) * (r * 0.4);
-        const py = cy + Math.sin(angle) * (r * 0.4);
-        ctx.fillStyle = petalColor;
-        ctx.beginPath();
-        ctx.arc(px, py, r * 0.42, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.26, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      break;
-    }
-
-    case DOT_STYLES.SUNFLOWER: {
-      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
-      ctx.save();
-      const petalColor = ctx.fillStyle;
-      for (let i = 0; i < 8; i++) {
-        const angle = (i * Math.PI * 2) / 8;
-        const px = cx + Math.cos(angle) * (r * 0.42);
-        const py = cy + Math.sin(angle) * (r * 0.42);
-        ctx.fillStyle = petalColor;
-        ctx.beginPath();
-        ctx.arc(px, py, r * 0.35, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.fillStyle = '#5A3818';
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.38, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      break;
-    }
-
-    case DOT_STYLES.ROSE: {
-      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
-      ctx.save();
-      const roseColor = ctx.fillStyle;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.beginPath();
-      ctx.arc(cx - r * 0.15, cy - r * 0.15, r * 0.55, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = roseColor;
-      ctx.beginPath();
-      ctx.arc(cx + r * 0.1, cy + r * 0.1, r * 0.32, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      break;
-    }
-
-    case DOT_STYLES.DAISY: {
-      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
-      ctx.save();
-      const petalColor = ctx.fillStyle;
-      for (let i = 0; i < 8; i++) {
-        const angle = (i * Math.PI * 2) / 8;
-        const px = cx + Math.cos(angle) * (r * 0.45);
-        const py = cy + Math.sin(angle) * (r * 0.45);
-        ctx.fillStyle = petalColor;
-        ctx.beginPath();
-        ctx.arc(px, py, r * 0.32, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.fillStyle = '#FFC800';
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.36, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      break;
-    }
-
-    case DOT_STYLES.TULIP: {
-      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
-      ctx.save();
-      const mainColor = ctx.fillStyle;
-      ctx.beginPath();
-      ctx.arc(cx, cy + r * 0.1, r * 0.75, 0.2, Math.PI - 0.2);
-      ctx.lineTo(cx, cy - r * 0.8);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = '#4CAF50';
-      ctx.beginPath();
-      ctx.arc(cx, cy + r * 0.7, r * 0.25, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      break;
-    }
-
-    case DOT_STYLES.LOTUS: {
-      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
-      ctx.save();
-      const lotusColor = ctx.fillStyle;
-      ctx.fillStyle = '#5BB381';
-      ctx.beginPath();
-      ctx.arc(cx, cy + r * 0.3, r * 0.65, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = lotusColor;
-      for (let i = 0; i < 5; i++) {
-        const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
-        const px = cx + Math.cos(angle) * (r * 0.35);
-        const py = cy - r * 0.15 + Math.sin(angle) * (r * 0.35);
-        ctx.beginPath();
-        ctx.arc(px, py, r * 0.38, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-      break;
-    }
-
-    case DOT_STYLES.HYACINTH: {
-      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
-      ctx.save();
-      const petalColor = ctx.fillStyle;
-      for (let i = 0; i < 5; i++) {
-        const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
-        const px = cx + Math.cos(angle) * (r * 0.42);
-        const py = cy + Math.sin(angle) * (r * 0.42);
-        ctx.fillStyle = petalColor;
-        ctx.beginPath();
-        ctx.arc(px, py, r * 0.38, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.fillStyle = '#E0F7FA';
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.25, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      break;
-    }
-
-    case DOT_STYLES.VIOLET: {
-      const cx = x + size / 2, cy = y + size / 2, r = s * 0.48;
-      ctx.save();
-      const petalColor = ctx.fillStyle;
-      for (let i = 0; i < 5; i++) {
-        const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
-        const px = cx + Math.cos(angle) * (r * 0.42);
-        const py = cy + Math.sin(angle) * (r * 0.42);
-        ctx.fillStyle = petalColor;
-        ctx.beginPath();
-        ctx.arc(px, py, r * 0.44, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.fillStyle = '#FFD54F';
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.24, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      break;
-    }
     case DOT_STYLES.SPARKLE: {
       const cx = x + size / 2, cy = y + size / 2, r = s / 2;
       ctx.beginPath();
@@ -1090,6 +944,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
       ctx.save();
       ctx.translate(x + size / 2, y + size / 2);
       ctx.rotate(Math.PI / 4);
+      ctx.rotate(Math.PI / 4);
       ctx.fillRect(-t / 2, -s / 2, t, s);
       ctx.fillRect(-s / 2, -t / 2, s, t);
       ctx.restore();
@@ -1140,6 +995,450 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}) {
       ctx.fill();
       break;
     }
+    // ── Floral / Decorative Dot Styles (9 premium flower shapes) ──
+    case DOT_STYLES.CHERRY_BLOSSOM: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+      const petalR = r * 0.55;
+      const petalD = r * 0.45;
+
+      ctx.save();
+      // Draw 5 petals
+      ctx.fillStyle = '#ff758f'; // Premium Cherry Blossom Pink
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+        const px = cx + Math.cos(angle) * petalD;
+        const py = cy + Math.sin(angle) * petalD;
+        
+        ctx.beginPath();
+        // Heart shape notch representation
+        const a1 = angle - 0.5;
+        const a2 = angle + 0.5;
+        ctx.moveTo(px, py);
+        ctx.arc(px + Math.cos(a1) * petalR * 0.5, py + Math.sin(a1) * petalR * 0.5, petalR * 0.5, angle + Math.PI, angle + Math.PI * 2, false);
+        ctx.arc(px + Math.cos(a2) * petalR * 0.5, py + Math.sin(a2) * petalR * 0.5, petalR * 0.5, angle + Math.PI, angle, true);
+        ctx.closePath();
+        ctx.fill();
+      }
+      // Center disc
+      ctx.beginPath();
+      ctx.fillStyle = '#ffe066'; // Golden yellow center
+      ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.VIOLET_FLOWER: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+      const petalR = r * 0.52;
+      const petalD = r * 0.42;
+
+      ctx.save();
+      ctx.fillStyle = '#8e7cc3'; // Soft violet purple
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+        const px = cx + Math.cos(angle) * petalD;
+        const py = cy + Math.sin(angle) * petalD;
+        ctx.moveTo(cx, cy);
+        ctx.arc(px, py, petalR, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      // Center yellow accent
+      ctx.beginPath();
+      ctx.fillStyle = '#ffd966';
+      ctx.arc(cx, cy, r * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.SUNFLOWER: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+
+      ctx.save();
+      ctx.fillStyle = '#f1c232'; // Golden yellow sunflower petals
+      ctx.beginPath();
+      const petalCount = 10;
+      for (let i = 0; i < petalCount; i++) {
+        const angle = (i * 2 * Math.PI / petalCount) - Math.PI / 2;
+        const tipX = cx + Math.cos(angle) * r;
+        const tipY = cy + Math.sin(angle) * r;
+        const baseL = angle - 0.32;
+        const baseR = angle + 0.32;
+        const bD = r * 0.35;
+        ctx.moveTo(cx + Math.cos(baseL) * bD, cy + Math.sin(baseL) * bD);
+        ctx.quadraticCurveTo(tipX, tipY, cx + Math.cos(baseR) * bD, cy + Math.sin(baseR) * bD);
+      }
+      ctx.fill();
+      // Dark center disc
+      ctx.beginPath();
+      ctx.fillStyle = '#7f6000'; // Sunflower dark center
+      ctx.arc(cx, cy, r * 0.38, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.ROSE: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+
+      ctx.save();
+      // Draw green leaves under the rose if large
+      if (isLarge) {
+        ctx.fillStyle = '#38761d';
+        ctx.beginPath();
+        // Leaf 1
+        ctx.ellipse(cx - r * 0.4, cy + r * 0.4, r * 0.4, r * 0.25, Math.PI / 4, 0, Math.PI * 2);
+        // Leaf 2
+        ctx.ellipse(cx + r * 0.4, cy + r * 0.4, r * 0.4, r * 0.25, -Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#cc0000'; // Rich red rose
+      // Outer petals
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI / 5);
+        const px = cx + Math.cos(angle) * r * 0.3;
+        const py = cy + Math.sin(angle) * r * 0.3;
+        ctx.moveTo(px + r * 0.5, py);
+        ctx.arc(px, py, r * 0.5, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      // Inner rose detail
+      ctx.fillStyle = '#990000'; // Darker rose core
+      ctx.beginPath();
+      for (let i = 0; i < 3; i++) {
+        const angle = (i * 2 * Math.PI / 3) + 0.5;
+        const px = cx + Math.cos(angle) * r * 0.15;
+        const py = cy + Math.sin(angle) * r * 0.15;
+        ctx.moveTo(px + r * 0.3, py);
+        ctx.arc(px, py, r * 0.3, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.DAISY: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+
+      ctx.save();
+      // Draw green leaves/stem if large
+      if (isLarge) {
+        ctx.strokeStyle = '#6aa84f';
+        ctx.lineWidth = size * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx, cy + r);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#ffffff'; // White daisy petals
+      ctx.strokeStyle = '#dddddd';
+      ctx.lineWidth = size * 0.02;
+      const petalCount = 8;
+      const petalLen = r * 0.9;
+      const petalW = r * 0.26;
+      
+      for (let i = 0; i < petalCount; i++) {
+        const angle = (i * 2 * Math.PI / petalCount);
+        const tipX = cx + Math.cos(angle) * petalLen;
+        const tipY = cy + Math.sin(angle) * petalLen;
+        const perpAngle = angle + Math.PI / 2;
+        const bl = { x: cx + Math.cos(perpAngle) * petalW, y: cy + Math.sin(perpAngle) * petalW };
+        const br = { x: cx - Math.cos(perpAngle) * petalW, y: cy - Math.sin(perpAngle) * petalW };
+        
+        ctx.beginPath();
+        ctx.moveTo(bl.x, bl.y);
+        ctx.quadraticCurveTo(tipX + Math.cos(perpAngle) * petalW * 0.3, tipY + Math.sin(perpAngle) * petalW * 0.3, tipX, tipY);
+        ctx.quadraticCurveTo(tipX - Math.cos(perpAngle) * petalW * 0.3, tipY - Math.sin(perpAngle) * petalW * 0.3, br.x, br.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // Yellow Center disc
+      ctx.beginPath();
+      ctx.fillStyle = '#f1c232';
+      ctx.arc(cx, cy, r * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.TULIP: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+
+      ctx.save();
+      // Stem & Leaf
+      ctx.fillStyle = '#4f772d'; // Tulip stem olive green
+      ctx.fillRect(cx - r * 0.08, cy, r * 0.16, r);
+      if (isLarge) {
+        ctx.beginPath();
+        ctx.ellipse(cx - r * 0.3, cy + r * 0.4, r * 0.3, r * 0.15, -Math.PI / 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Tulip Cup
+      ctx.fillStyle = '#ff4d6d'; // Pink tulip petals
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + r * 0.2);
+      ctx.quadraticCurveTo(cx - r * 0.9, cy - r * 0.2, cx - r * 0.3, cy - r * 0.9);
+      ctx.quadraticCurveTo(cx, cy - r * 0.5, cx, cy + r * 0.2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + r * 0.2);
+      ctx.quadraticCurveTo(cx + r * 0.9, cy - r * 0.2, cx + r * 0.3, cy - r * 0.9);
+      ctx.quadraticCurveTo(cx, cy - r * 0.5, cx, cy + r * 0.2);
+      ctx.fill();
+
+      // Middle petal
+      ctx.fillStyle = '#c9184a'; // Darker pink highlight
+      ctx.beginPath();
+      ctx.moveTo(cx - r * 0.2, cy - r * 0.2);
+      ctx.quadraticCurveTo(cx, cy - r * 1.0, cx + r * 0.2, cy - r * 0.2);
+      ctx.quadraticCurveTo(cx, cy + r * 0.2, cx - r * 0.2, cy - r * 0.2);
+      ctx.fill();
+
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.LOTUS: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+
+      ctx.save();
+      // Base leaf (pad)
+      ctx.fillStyle = '#52b788'; // Mint green
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + r * 0.3, r * 0.7, r * 0.22, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Layered pink petals
+      ctx.fillStyle = '#ff758f';
+      const petalAngles = [-0.7, -0.35, 0, 0.35, 0.7];
+      for (let i = 0; i < petalAngles.length; i++) {
+        const angle = petalAngles[i] - Math.PI / 2;
+        const tipX = cx + Math.cos(angle) * r * 0.95;
+        const tipY = cy + Math.sin(angle) * r * 0.95;
+        const spread = 0.32;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + r * 0.1);
+        ctx.quadraticCurveTo(cx + Math.cos(angle - spread) * r * 0.65, cy + Math.sin(angle - spread) * r * 0.65, tipX, tipY);
+        ctx.quadraticCurveTo(cx + Math.cos(angle + spread) * r * 0.65, cy + Math.sin(angle + spread) * r * 0.65, cx, cy + r * 0.1);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.FORGET_ME_NOT: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+      const petalR = r * 0.45;
+      const petalD = r * 0.48;
+
+      ctx.save();
+      ctx.fillStyle = '#3a86c8'; // Sky blue forget-me-not petals
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+        const px = cx + Math.cos(angle) * petalD;
+        const py = cy + Math.sin(angle) * petalD;
+        ctx.moveTo(px + petalR, py);
+        ctx.arc(px, py, petalR, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      // Center yellow accent
+      ctx.beginPath();
+      ctx.fillStyle = '#ffb703';
+      ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.PANSY: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+
+      ctx.save();
+      // 2 top petals (Indigo purple)
+      ctx.fillStyle = '#6c5ce7';
+      for (let i = 0; i < 2; i++) {
+        const angle = (i === 0 ? -0.55 : 0.55) - Math.PI / 2;
+        const px = cx + Math.cos(angle) * r * 0.32;
+        const py = cy + Math.sin(angle) * r * 0.32;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 3 bottom petals (Lavender blue)
+      ctx.fillStyle = '#a29bfe';
+      for (let i = 0; i < 3; i++) {
+        const angle = ((i - 1) * 0.6) + Math.PI / 2;
+        const px = cx + Math.cos(angle) * r * 0.32;
+        const py = cy + Math.sin(angle) * r * 0.32;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Center yellow/black core
+      ctx.beginPath();
+      ctx.fillStyle = '#fdcb6e';
+      ctx.arc(cx, cy, r * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.DOLLAR_COIN: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+      ctx.save();
+      if (isLarge) {
+        // Draw a stack of coins
+        // Bottom coin
+        ctx.fillStyle = '#d4af37'; // Gold border
+        ctx.beginPath(); ctx.ellipse(cx - r*0.2, cy + r*0.3, r*0.6, r*0.3, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffd700'; // Gold fill
+        ctx.beginPath(); ctx.ellipse(cx - r*0.2, cy + r*0.3, r*0.5, r*0.22, 0, 0, Math.PI*2); ctx.fill();
+
+        // Middle coin
+        ctx.fillStyle = '#d4af37';
+        ctx.beginPath(); ctx.ellipse(cx + r*0.2, cy + r*0.1, r*0.6, r*0.3, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath(); ctx.ellipse(cx + r*0.2, cy + r*0.1, r*0.5, r*0.22, 0, 0, Math.PI*2); ctx.fill();
+
+        // Top coin
+        ctx.fillStyle = '#d4af37';
+        ctx.beginPath(); ctx.ellipse(cx, cy - r*0.2, r*0.6, r*0.3, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath(); ctx.ellipse(cx, cy - r*0.2, r*0.5, r*0.22, 0, 0, Math.PI*2); ctx.fill();
+        // $ sign
+        ctx.fillStyle = '#996515';
+        ctx.font = `bold ${r*0.3}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('$', cx, cy - r*0.2);
+      } else {
+        // Single flat coin
+        ctx.fillStyle = '#d4af37';
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath(); ctx.arc(cx, cy, r * 0.8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#996515';
+        ctx.font = `bold ${r*1.0}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('$', cx, cy);
+      }
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.CUTE_EMOTICON: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+      ctx.save();
+      if (isLarge) {
+        // Draw vertical orange pill-shaped character
+        ctx.fillStyle = '#f39c12'; // Main orange color
+        drawRoundedRect(ctx, cx - r * 0.5, cy - r, r, r * 2, r * 0.5);
+        
+        // Eyes
+        ctx.fillStyle = '#000000';
+        ctx.beginPath(); ctx.arc(cx - r * 0.2, cy - r * 0.2, r * 0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + r * 0.2, cy - r * 0.2, r * 0.1, 0, Math.PI * 2); ctx.fill();
+        
+        // Happy open mouth
+        ctx.beginPath();
+        ctx.arc(cx, cy + r * 0.1, r * 0.2, 0, Math.PI, false);
+        ctx.fill();
+      } else {
+        // Small round face
+        ctx.fillStyle = '#f1c40f'; // Cute yellow face
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#000000';
+        ctx.beginPath(); ctx.arc(cx - r*0.3, cy - r*0.1, r*0.15, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + r*0.3, cy - r*0.1, r*0.15, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy + r*0.3, r*0.2, 0, Math.PI, false); ctx.fill();
+      }
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.LAVENDER: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+      ctx.save();
+      if (isLarge) {
+        // Green stem
+        ctx.strokeStyle = '#556b2f';
+        ctx.lineWidth = size * 0.08;
+        ctx.beginPath(); ctx.moveTo(cx, cy + r); ctx.lineTo(cx, cy - r * 0.8); ctx.stroke();
+
+        // Stacked purple flower pods
+        ctx.fillStyle = '#9b59b6'; // Deep lavender purple
+        for (let i = 0; i < 4; i++) {
+          const py = cy - r * 0.6 + i * r * 0.45;
+          ctx.beginPath(); ctx.ellipse(cx - r * 0.35, py, r * 0.3, r * 0.18, -Math.PI/6, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(cx + r * 0.35, py, r * 0.3, r * 0.18, Math.PI/6, 0, Math.PI*2); ctx.fill();
+        }
+        // Top bud
+        ctx.beginPath(); ctx.arc(cx, cy - r * 0.8, r * 0.22, 0, Math.PI*2); ctx.fill();
+      } else {
+        // Cluster of lavender purple dots
+        ctx.fillStyle = '#a29bfe';
+        ctx.beginPath(); ctx.arc(cx, cy - r*0.4, r*0.7, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#8e7cc3';
+        ctx.beginPath(); ctx.arc(cx - r*0.4, cy + r*0.3, r*0.6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + r*0.4, cy + r*0.3, r*0.6, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.restore();
+      break;
+    }
+    case DOT_STYLES.MONSTERA: {
+      const cx = x + size / 2, cy = y + size / 2;
+      const r = size * (isLarge ? 0.58 : 0.28);
+      ctx.save();
+      ctx.fillStyle = '#27ae60'; // Vibrant green monstera
+      if (isLarge) {
+        // Draw heart-ish shape with cuts
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + r);
+        ctx.quadraticCurveTo(cx - r * 1.1, cy + r * 0.2, cx - r * 0.8, cy - r * 0.6);
+        ctx.quadraticCurveTo(cx, cy - r * 1.1, cx + r * 0.8, cy - r * 0.6);
+        ctx.quadraticCurveTo(cx + r * 1.1, cy + r * 0.2, cx, cy + r);
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw leaf vein cuts
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = size * 0.06;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - r * 0.6);
+        ctx.lineTo(cx, cy + r * 0.6);
+        // Slits
+        ctx.moveTo(cx, cy - r * 0.2); ctx.lineTo(cx - r * 0.6, cy - r * 0.4);
+        ctx.moveTo(cx, cy - r * 0.2); ctx.lineTo(cx + r * 0.6, cy - r * 0.4);
+        ctx.moveTo(cx, cy + r * 0.2); ctx.lineTo(cx - r * 0.6, cy);
+        ctx.moveTo(cx, cy + r * 0.2); ctx.lineTo(cx + r * 0.6, cy);
+        ctx.stroke();
+      } else {
+        // Small round palm leaf/dot
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#1e8449';
+        ctx.lineWidth = size * 0.08;
+        ctx.beginPath(); ctx.moveTo(cx - r*0.7, cy + r*0.7); ctx.lineTo(cx + r*0.7, cy - r*0.7); ctx.stroke();
+      }
+      ctx.restore();
+      break;
+    }
     default: // SQUARE
       // Use 0.5px overfill to eliminate sub-pixel anti-aliasing gaps between adjacent modules
       ctx.fillRect(x + padding, y + padding, s + 0.5, s + 0.5);
@@ -1160,11 +1459,20 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
   ctx.beginPath();
   switch (style) {
     case EYE_STYLES.CIRCLE:
+    case EYE_STYLES.DOLLAR_COIN:
+    case EYE_STYLES.CUTE_EMOTICON:
       ctx.arc(14, 14, 14, 0, Math.PI * 2);
       ctx.moveTo(24, 14);
       ctx.arc(14, 14, 10, 0, Math.PI * 2, true);
       break;
     case EYE_STYLES.ROUNDED:
+    case EYE_STYLES.CHERRY_BLOSSOM:
+    case EYE_STYLES.LOTUS:
+    case EYE_STYLES.SUNFLOWER:
+    case EYE_STYLES.LAVENDER:
+    case EYE_STYLES.ROSE:
+    case EYE_STYLES.MONSTERA:
+    case EYE_STYLES.DAISY:
       drawRoundedRectPath(ctx, 0, 0, 28, 28, 8);
       drawRoundedRectPath(ctx, 4, 4, 20, 20, 4);
       break;
@@ -1229,6 +1537,15 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
   }
   ctx.restore();
   ctx.fillStyle = outerColor;
+  if (style === EYE_STYLES.DOLLAR_COIN) ctx.fillStyle = '#d4af37';
+  else if (style === EYE_STYLES.CUTE_EMOTICON) ctx.fillStyle = '#f39c12';
+  else if (style === EYE_STYLES.CHERRY_BLOSSOM) ctx.fillStyle = '#ff758f';
+  else if (style === EYE_STYLES.LOTUS) ctx.fillStyle = '#3a86c8';
+  else if (style === EYE_STYLES.SUNFLOWER) ctx.fillStyle = '#f1c232';
+  else if (style === EYE_STYLES.LAVENDER) ctx.fillStyle = '#9b59b6';
+  else if (style === EYE_STYLES.ROSE) ctx.fillStyle = '#cc0000';
+  else if (style === EYE_STYLES.MONSTERA) ctx.fillStyle = '#27ae60';
+  else if (style === EYE_STYLES.DAISY) ctx.fillStyle = '#dddddd';
   ctx.fill('evenodd');
 
   // 2. Draw Inner Dot Path
@@ -1275,6 +1592,181 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     case EYE_STYLES.LEAF:
       drawRoundedRectPath(ctx, 8, 8, 12, 12, 4);
       break;
+    case EYE_STYLES.DOLLAR_COIN: {
+      ctx.fillStyle = '#ffd700'; // Gold center
+      ctx.beginPath(); ctx.arc(14, 14, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#996515';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('$', 14, 14);
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.CUTE_EMOTICON: {
+      ctx.fillStyle = '#f1c40f'; // Yellow base
+      ctx.beginPath(); ctx.arc(14, 14, 7, 0, Math.PI * 2); ctx.fill();
+      
+      // Left winking eye
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath(); ctx.arc(11, 13, 1.5, Math.PI, 0, false); ctx.stroke();
+      
+      // Right happy winking eye
+      ctx.beginPath(); ctx.arc(17, 13, 1.5, Math.PI, 0, false); ctx.stroke();
+      
+      // Sticking out tongue
+      ctx.fillStyle = '#e74c3c';
+      ctx.beginPath(); ctx.arc(14, 16, 2, 0, Math.PI, false); ctx.fill();
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.CHERRY_BLOSSOM: {
+      const cx = 14, cy = 14, r = 6.5;
+      const petalR = r * 0.55;
+      const petalD = r * 0.45;
+      ctx.fillStyle = '#ff758f';
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+        const px = cx + Math.cos(angle) * petalD;
+        const py = cy + Math.sin(angle) * petalD;
+        ctx.beginPath();
+        const a1 = angle - 0.5;
+        const a2 = angle + 0.5;
+        ctx.moveTo(px, py);
+        ctx.arc(px + Math.cos(a1) * petalR * 0.5, py + Math.sin(a1) * petalR * 0.5, petalR * 0.5, angle + Math.PI, angle + Math.PI * 2, false);
+        ctx.arc(px + Math.cos(a2) * petalR * 0.5, py + Math.sin(a2) * petalR * 0.5, petalR * 0.5, angle + Math.PI, angle, true);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = '#ffe066';
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.LOTUS: {
+      const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = '#52b788';
+      ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.3, r * 0.7, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#3a86c8';
+      const petalAngles = [-0.7, -0.35, 0, 0.35, 0.7];
+      for (let i = 0; i < petalAngles.length; i++) {
+        const angle = petalAngles[i] - Math.PI / 2;
+        const tipX = cx + Math.cos(angle) * r * 0.95;
+        const tipY = cy + Math.sin(angle) * r * 0.95;
+        const spread = 0.32;
+        ctx.beginPath(); ctx.moveTo(cx, cy + r * 0.1);
+        ctx.quadraticCurveTo(cx + Math.cos(angle - spread) * r * 0.65, cy + Math.sin(angle - spread) * r * 0.65, tipX, tipY);
+        ctx.quadraticCurveTo(cx + Math.cos(angle + spread) * r * 0.65, cy + Math.sin(angle + spread) * r * 0.65, cx, cy + r * 0.1);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.SUNFLOWER: {
+      const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = '#f1c232';
+      ctx.beginPath();
+      const petalCount = 10;
+      for (let i = 0; i < petalCount; i++) {
+        const angle = (i * 2 * Math.PI / petalCount) - Math.PI / 2;
+        const tipX = cx + Math.cos(angle) * r;
+        const tipY = cy + Math.sin(angle) * r;
+        const baseL = angle - 0.32;
+        const baseR = angle + 0.32;
+        const bD = r * 0.35;
+        ctx.moveTo(cx + Math.cos(baseL) * bD, cy + Math.sin(baseL) * bD);
+        ctx.quadraticCurveTo(tipX, tipY, cx + Math.cos(baseR) * bD, cy + Math.sin(baseR) * bD);
+      }
+      ctx.fill();
+      ctx.fillStyle = '#7f6000';
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.38, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.LAVENDER: {
+      const cx = 14, cy = 14, r = 6.5;
+      ctx.strokeStyle = '#556b2f';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(cx, cy + r); ctx.lineTo(cx, cy - r * 0.8); ctx.stroke();
+      ctx.fillStyle = '#9b59b6';
+      for (let i = 0; i < 4; i++) {
+        const py = cy - r * 0.6 + i * r * 0.45;
+        ctx.beginPath(); ctx.ellipse(cx - r * 0.35, py, r * 0.3, r * 0.18, -Math.PI / 6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(cx + r * 0.35, py, r * 0.3, r * 0.18, Math.PI / 6, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(cx, cy - r * 0.8, r * 0.22, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.ROSE: {
+      const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = '#cc0000';
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI / 5);
+        const px = cx + Math.cos(angle) * r * 0.3;
+        const py = cy + Math.sin(angle) * r * 0.3;
+        ctx.moveTo(px + r * 0.5, py); ctx.arc(px, py, r * 0.5, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      ctx.fillStyle = '#990000';
+      ctx.beginPath();
+      for (let i = 0; i < 3; i++) {
+        const angle = (i * 2 * Math.PI / 3) + 0.5;
+        const px = cx + Math.cos(angle) * r * 0.15;
+        const py = cy + Math.sin(angle) * r * 0.15;
+        ctx.moveTo(px + r * 0.3, py); ctx.arc(px, py, r * 0.3, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.MONSTERA: {
+      const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = '#27ae60';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + r);
+      ctx.quadraticCurveTo(cx - r * 1.1, cy + r * 0.2, cx - r * 0.8, cy - r * 0.6);
+      ctx.quadraticCurveTo(cx, cy - r * 1.1, cx + r * 0.8, cy - r * 0.6);
+      ctx.quadraticCurveTo(cx + r * 1.1, cy + r * 0.2, cx, cy + r);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r * 0.6); ctx.lineTo(cx, cy + r * 0.6);
+      ctx.moveTo(cx, cy - r * 0.2); ctx.lineTo(cx - r * 0.6, cy - r * 0.4);
+      ctx.moveTo(cx, cy - r * 0.2); ctx.lineTo(cx + r * 0.6, cy - r * 0.4);
+      ctx.moveTo(cx, cy + r * 0.2); ctx.lineTo(cx - r * 0.6, cy);
+      ctx.moveTo(cx, cy + r * 0.2); ctx.lineTo(cx + r * 0.6, cy);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.DAISY: {
+      const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#dddddd';
+      ctx.lineWidth = 0.2;
+      const petalCount = 8;
+      const petalLen = r * 0.9;
+      const petalW = r * 0.26;
+      for (let i = 0; i < petalCount; i++) {
+        const angle = (i * 2 * Math.PI / petalCount);
+        const tipX = cx + Math.cos(angle) * petalLen;
+        const tipY = cy + Math.sin(angle) * petalLen;
+        const perpAngle = angle + Math.PI / 2;
+        const bl = { x: cx + Math.cos(perpAngle) * petalW, y: cy + Math.sin(perpAngle) * petalW };
+        const br = { x: cx - Math.cos(perpAngle) * petalW, y: cy - Math.sin(perpAngle) * petalW };
+        ctx.beginPath(); ctx.moveTo(bl.x, bl.y);
+        ctx.quadraticCurveTo(tipX + Math.cos(perpAngle) * petalW * 0.3, tipY + Math.sin(perpAngle) * petalW * 0.3, tipX, tipY);
+        ctx.quadraticCurveTo(tipX - Math.cos(perpAngle) * petalW * 0.3, tipY - Math.sin(perpAngle) * petalW * 0.3, br.x, br.y);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = '#f1c232';
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.32, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      return;
+    }
     default: // SQUARE
       ctx.rect(8, 8, 12, 12);
       break;

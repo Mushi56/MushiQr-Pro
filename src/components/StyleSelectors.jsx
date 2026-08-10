@@ -55,94 +55,6 @@ const DOT_PREVIEWS = {
       <circle cx="14" cy="14" r="12" fill="currentColor" />
     </svg>
   ),
-  [DOT_STYLES.CHERRY_BLOSSOM]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <circle cx="14" cy="7" r="5" fill="#FF77A9" />
-      <circle cx="20.6" cy="11.8" r="5" fill="#FF77A9" />
-      <circle cx="18.1" cy="19.6" r="5" fill="#FF77A9" />
-      <circle cx="9.9" cy="19.6" r="5" fill="#FF77A9" />
-      <circle cx="7.4" cy="11.8" r="5" fill="#FF77A9" />
-      <circle cx="14" cy="14" r="3" fill="#FFFFFF" />
-    </svg>
-  ),
-  [DOT_STYLES.FORGET_ME_NOT]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <circle cx="14" cy="7" r="5" fill="#7C83FD" />
-      <circle cx="20.6" cy="11.8" r="5" fill="#7C83FD" />
-      <circle cx="18.1" cy="19.6" r="5" fill="#7C83FD" />
-      <circle cx="9.9" cy="19.6" r="5" fill="#7C83FD" />
-      <circle cx="7.4" cy="11.8" r="5" fill="#7C83FD" />
-      <circle cx="14" cy="14" r="3.2" fill="#FFD700" />
-    </svg>
-  ),
-  [DOT_STYLES.SUNFLOWER]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <circle cx="14" cy="4" r="3.5" fill="#FFB703" />
-      <circle cx="21" cy="7" r="3.5" fill="#FFB703" />
-      <circle cx="24" cy="14" r="3.5" fill="#FFB703" />
-      <circle cx="21" cy="21" r="3.5" fill="#FFB703" />
-      <circle cx="14" cy="24" r="3.5" fill="#FFB703" />
-      <circle cx="7" cy="21" r="3.5" fill="#FFB703" />
-      <circle cx="4" cy="14" r="3.5" fill="#FFB703" />
-      <circle cx="7" cy="7" r="3.5" fill="#FFB703" />
-      <circle cx="14" cy="14" r="5.5" fill="#5A3818" />
-    </svg>
-  ),
-  [DOT_STYLES.ROSE]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <circle cx="14" cy="14" r="12" fill="#D32F2F" />
-      <circle cx="12" cy="12" r="7" fill="rgba(255,255,255,0.4)" />
-      <circle cx="15" cy="15" r="4" fill="#D32F2F" />
-    </svg>
-  ),
-  [DOT_STYLES.DAISY]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <circle cx="14" cy="4" r="3.5" fill="#E0E0E0" />
-      <circle cx="21" cy="7" r="3.5" fill="#E0E0E0" />
-      <circle cx="24" cy="14" r="3.5" fill="#E0E0E0" />
-      <circle cx="21" cy="21" r="3.5" fill="#E0E0E0" />
-      <circle cx="14" cy="24" r="3.5" fill="#E0E0E0" />
-      <circle cx="7" cy="21" r="3.5" fill="#E0E0E0" />
-      <circle cx="4" cy="14" r="3.5" fill="#E0E0E0" />
-      <circle cx="7" cy="7" r="3.5" fill="#E0E0E0" />
-      <circle cx="14" cy="14" r="5" fill="#FFC800" />
-    </svg>
-  ),
-  [DOT_STYLES.TULIP]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <path d="M6 14 C6 22 22 22 22 14 L14 2 Z" fill="#E91E63" />
-      <circle cx="14" cy="22" r="3" fill="#4CAF50" />
-    </svg>
-  ),
-  [DOT_STYLES.LOTUS]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <ellipse cx="14" cy="20" rx="10" ry="5" fill="#5BB381" />
-      <circle cx="14" cy="10" r="4.5" fill="#EC407A" />
-      <circle cx="9" cy="13" r="4.5" fill="#EC407A" />
-      <circle cx="19" cy="13" r="4.5" fill="#EC407A" />
-      <circle cx="14" cy="15" r="4.5" fill="#F48FB1" />
-    </svg>
-  ),
-  [DOT_STYLES.HYACINTH]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <circle cx="14" cy="7" r="4.8" fill="#4FC3F7" />
-      <circle cx="20.6" cy="11.8" r="4.8" fill="#4FC3F7" />
-      <circle cx="18.1" cy="19.6" r="4.8" fill="#4FC3F7" />
-      <circle cx="9.9" cy="19.6" r="4.8" fill="#4FC3F7" />
-      <circle cx="7.4" cy="11.8" r="4.8" fill="#4FC3F7" />
-      <circle cx="14" cy="14" r="3" fill="#E0F7FA" />
-    </svg>
-  ),
-  [DOT_STYLES.VIOLET]: (
-    <svg viewBox="0 0 28 28" width="28" height="28">
-      <circle cx="14" cy="7" r="5" fill="#7E57C2" />
-      <circle cx="20.6" cy="11.8" r="5" fill="#7E57C2" />
-      <circle cx="18.1" cy="19.6" r="5" fill="#7E57C2" />
-      <circle cx="9.9" cy="19.6" r="5" fill="#7E57C2" />
-      <circle cx="7.4" cy="11.8" r="5" fill="#7E57C2" />
-      <circle cx="14" cy="14" r="3" fill="#FFD54F" />
-    </svg>
-  ),
   [DOT_STYLES.SPARKLE]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <path d="M14 2 Q14 14 26 14 Q14 14 14 26 Q14 14 2 14 Q14 14 14 2 Z" fill="currentColor" />
@@ -223,6 +135,127 @@ const DOT_PREVIEWS = {
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="11" y="2" width="6" height="24" fill="currentColor" transform="rotate(45 14 14)" />
       <rect x="2" y="11" width="24" height="6" fill="currentColor" transform="rotate(45 14 14)" />
+    </svg>
+  ),
+  [DOT_STYLES.CHERRY_BLOSSOM]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="5.5" r="4.2" fill="currentColor" />
+      <circle cx="6" cy="11" r="4.2" fill="currentColor" />
+      <circle cx="22" cy="11" r="4.2" fill="currentColor" />
+      <circle cx="8.5" cy="20" r="4.2" fill="currentColor" />
+      <circle cx="19.5" cy="20" r="4.2" fill="currentColor" />
+      <circle cx="14" cy="14" r="2.2" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.VIOLET_FLOWER]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="5" r="5" fill="currentColor" />
+      <circle cx="5.5" cy="11.5" r="5" fill="currentColor" />
+      <circle cx="22.5" cy="11.5" r="5" fill="currentColor" />
+      <circle cx="8" cy="21" r="5" fill="currentColor" />
+      <circle cx="20" cy="21" r="5" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.SUNFLOWER]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M14 2L16 8 14 6 12 8Z M22 5L19 10 19 8 16 9Z M26 14L20 12 22 14 20 16Z M22 23L19 18 16 19 19 20Z M14 26L12 20 14 22 16 20Z M6 23L9 18 12 19 9 20Z M2 14L8 16 6 14 8 12Z M6 5L9 10 12 9 9 8Z" fill="currentColor" />
+      <circle cx="14" cy="14" r="4" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.ROSE]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="7" r="5.5" fill="currentColor" />
+      <circle cx="7" cy="15" r="5.5" fill="currentColor" />
+      <circle cx="21" cy="15" r="5.5" fill="currentColor" />
+      <circle cx="10" cy="22" r="5" fill="currentColor" />
+      <circle cx="18" cy="22" r="5" fill="currentColor" />
+      <circle cx="14" cy="14" r="3.5" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.DAISY]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M14 2Q16 8 14 10Q12 8 14 2Z" fill="currentColor" />
+      <path d="M22 6Q18 10 16 10Q17 8 22 6Z" fill="currentColor" />
+      <path d="M26 14Q20 16 18 14Q20 12 26 14Z" fill="currentColor" />
+      <path d="M22 22Q18 18 18 16Q20 17 22 22Z" fill="currentColor" />
+      <path d="M14 26Q12 20 14 18Q16 20 14 26Z" fill="currentColor" />
+      <path d="M6 22Q10 18 12 18Q10 20 6 22Z" fill="currentColor" />
+      <path d="M2 14Q8 12 10 14Q8 16 2 14Z" fill="currentColor" />
+      <path d="M6 6Q10 10 10 12Q8 10 6 6Z" fill="currentColor" />
+      <circle cx="14" cy="14" r="3" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.TULIP]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M14 14 Q6 8 9 2 Q14 6 14 14Z" fill="currentColor" />
+      <path d="M14 14 Q22 8 19 2 Q14 6 14 14Z" fill="currentColor" />
+      <path d="M12 2 Q14 -1 16 2 Q14 6 12 2Z" fill="currentColor" />
+      <rect x="13" y="14" width="2" height="12" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.LOTUS]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M14 20 Q6 14 8 6 Q14 12 14 20Z" fill="currentColor" />
+      <path d="M14 20 Q22 14 20 6 Q14 12 14 20Z" fill="currentColor" />
+      <path d="M14 18 Q2 16 4 10 Q14 14 14 18Z" fill="currentColor" />
+      <path d="M14 18 Q26 16 24 10 Q14 14 14 18Z" fill="currentColor" />
+      <path d="M11 4 Q14 0 17 4 Q14 10 11 4Z" fill="currentColor" />
+      <ellipse cx="14" cy="22" rx="6" ry="2" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.FORGET_ME_NOT]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="5.5" r="4.5" fill="currentColor" />
+      <circle cx="5.8" cy="11.5" r="4.5" fill="currentColor" />
+      <circle cx="22.2" cy="11.5" r="4.5" fill="currentColor" />
+      <circle cx="8.5" cy="20.5" r="4.5" fill="currentColor" />
+      <circle cx="19.5" cy="20.5" r="4.5" fill="currentColor" />
+      <circle cx="14" cy="14" r="2.5" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.PANSY]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="9" cy="7" r="5.5" fill="currentColor" />
+      <circle cx="19" cy="7" r="5.5" fill="currentColor" />
+      <circle cx="6" cy="18" r="5" fill="currentColor" />
+      <circle cx="14" cy="21" r="5" fill="currentColor" />
+      <circle cx="22" cy="18" r="5" fill="currentColor" />
+      <circle cx="14" cy="14" r="2" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.DOLLAR_COIN]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="14" r="11" fill="none" stroke="currentColor" strokeWidth="2" />
+      <circle cx="14" cy="14" r="8" fill="none" stroke="currentColor" strokeWidth="1" />
+      <text x="14" y="15" fontSize="12" fontWeight="bold" textAnchor="middle" fill="currentColor" dominantBaseline="middle">$</text>
+    </svg>
+  ),
+  [DOT_STYLES.CUTE_EMOTICON]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="14" r="11" fill="currentColor" />
+      <circle cx="10" cy="11" r="1.5" fill="#000" />
+      <circle cx="18" cy="11" r="1.5" fill="#000" />
+      <path d="M10 17 Q14 20 18 17" stroke="#000" strokeWidth="1.5" fill="none" />
+    </svg>
+  ),
+  [DOT_STYLES.LAVENDER]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <line x1="14" y1="24" x2="14" y2="8" stroke="currentColor" strokeWidth="2" />
+      <ellipse cx="10" cy="10" rx="3" ry="2" fill="currentColor" transform="rotate(-30 10 10)" />
+      <ellipse cx="18" cy="10" rx="3" ry="2" fill="currentColor" transform="rotate(30 18 10)" />
+      <ellipse cx="10" cy="16" rx="3" ry="2" fill="currentColor" transform="rotate(-30 10 16)" />
+      <ellipse cx="18" cy="16" rx="3" ry="2" fill="currentColor" transform="rotate(30 18 16)" />
+      <circle cx="14" cy="6" r="2.5" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.MONSTERA]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M14 24 C6 20 6 10 14 4 C22 10 22 20 14 24 Z" fill="currentColor" />
+      <line x1="14" y1="6" x2="14" y2="22" stroke="#fff" strokeWidth="1.5" />
+      <line x1="14" y1="10" x2="8" y2="12" stroke="#fff" strokeWidth="1" />
+      <line x1="14" y1="10" x2="20" y2="12" stroke="#fff" strokeWidth="1" />
+      <line x1="14" y1="15" x2="8" y2="18" stroke="#fff" strokeWidth="1" />
+      <line x1="14" y1="15" x2="20" y2="18" stroke="#fff" strokeWidth="1" />
     </svg>
   ),
 };
@@ -317,6 +350,89 @@ const EYE_PREVIEWS = {
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="1" y="1" width="26" height="26" rx="12" fill="none" stroke="currentColor" strokeWidth="3.5" />
       <rect x="8" y="8" width="12" height="12" rx="5" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.DOLLAR_COIN]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="14" r="12" fill="none" stroke="currentColor" strokeWidth="3" />
+      <circle cx="14" cy="14" r="8" fill="currentColor" />
+      <text x="14" y="15" fontSize="10" fontWeight="bold" textAnchor="middle" fill="#fff" dominantBaseline="middle">$</text>
+    </svg>
+  ),
+  [EYE_STYLES.CUTE_EMOTICON]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="14" r="12" fill="none" stroke="currentColor" strokeWidth="3" />
+      <circle cx="14" cy="14" r="8" fill="currentColor" />
+      <circle cx="11" cy="12" r="1" fill="#fff" />
+      <circle cx="17" cy="12" r="1" fill="#fff" />
+      <path d="M12 16 Q14 18 16 16" stroke="#fff" strokeWidth="1" fill="none" />
+    </svg>
+  ),
+  [EYE_STYLES.CHERRY_BLOSSOM]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <circle cx="14" cy="9.5" r="2.2" fill="currentColor" />
+      <circle cx="9.5" cy="12.5" r="2.2" fill="currentColor" />
+      <circle cx="18.5" cy="12.5" r="2.2" fill="currentColor" />
+      <circle cx="11.5" cy="17.5" r="2.2" fill="currentColor" />
+      <circle cx="16.5" cy="17.5" r="2.2" fill="currentColor" />
+      <circle cx="14" cy="14" r="1.2" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.LOTUS]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <path d="M14 18 Q9 14 10 9 Q14 13 14 18Z" fill="currentColor" />
+      <path d="M14 18 Q19 14 18 9 Q14 13 14 18Z" fill="currentColor" />
+      <ellipse cx="14" cy="19.5" rx="3.5" ry="1.2" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.SUNFLOWER]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <path d="M14 7L15 10 14 9 13 10Z M19 9L17 11 17 10 16 11Z M21 14L18 13 19 14 18 15Z M19 19L17 16 16 17 17 17Z M14 21L13 18 14 19 15 18Z M9 19L11 16 12 17 11 17Z M7 14L10 15 9 14 10 13Z M9 9L11 11 12 10 11 11Z" fill="currentColor" />
+      <circle cx="14" cy="14" r="2.2" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.LAVENDER]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <line x1="14" y1="20" x2="14" y2="8" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="11.5" cy="11.5" r="1.8" fill="currentColor" />
+      <circle cx="16.5" cy="11.5" r="1.8" fill="currentColor" />
+      <circle cx="11.5" cy="15.5" r="1.8" fill="currentColor" />
+      <circle cx="16.5" cy="15.5" r="1.8" fill="currentColor" />
+      <circle cx="14" cy="8.5" r="1.5" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.ROSE]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <circle cx="14" cy="10" r="3.2" fill="currentColor" />
+      <circle cx="10" cy="15" r="3.2" fill="currentColor" />
+      <circle cx="18" cy="15" r="3.2" fill="currentColor" />
+      <circle cx="14" cy="14" r="2" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.MONSTERA]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <path d="M14 20 C9 18 9 12 14 8 C19 12 19 18 14 20 Z" fill="currentColor" />
+      <line x1="14" y1="9" x2="14" y2="19" stroke="#fff" strokeWidth="0.8" />
+    </svg>
+  ),
+  [EYE_STYLES.DAISY]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <path d="M14 7Q15 10 14 11Q13 10 14 7Z" fill="currentColor" />
+      <path d="M19 9Q17 11 16 11Q17 10 19 9Z" fill="currentColor" />
+      <path d="M21 14Q18 15 17 14Q18 13 21 14Z" fill="currentColor" />
+      <path d="M19 19Q17 17 17 16Q18 17 19 19Z" fill="currentColor" />
+      <path d="M14 21Q13 18 14 17Q15 18 14 21Z" fill="currentColor" />
+      <path d="M9 19Q11 17 12 17Q11 18 9 19Z" fill="currentColor" />
+      <path d="M7 14Q10 13 11 14Q10 15 7 14Z" fill="currentColor" />
+      <path d="M9 9Q11 11 11 12Q10 11 9 9Z" fill="currentColor" />
+      <circle cx="14" cy="14" r="1.5" fill="currentColor" />
     </svg>
   ),
 };
