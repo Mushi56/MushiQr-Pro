@@ -638,7 +638,18 @@ export default function BatchPage({
               </>
             ) : (
               <>
-                <QrCode size={18} style={{ opacity: batchType === 'QR' ? 1 : 0.6 }} />
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '6px',
+                  borderRadius: '8px',
+                  background: batchType === 'QR' ? 'rgba(255,255,255,0.2)' : 'var(--bg-secondary)',
+                  color: batchType === 'QR' ? '#ffffff' : 'var(--text-secondary)',
+                  transition: 'all 0.2s ease'
+                }}>
+                  <QrCode size={16} />
+                </div>
                 Bulk QR
               </>
             )}
@@ -683,7 +694,18 @@ export default function BatchPage({
               </>
             ) : (
               <>
-                <Barcode size={18} style={{ opacity: batchType === 'BARCODE' ? 1 : 0.6 }} />
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '6px',
+                  borderRadius: '8px',
+                  background: batchType === 'BARCODE' ? 'rgba(255,255,255,0.2)' : 'var(--bg-secondary)',
+                  color: batchType === 'BARCODE' ? '#ffffff' : 'var(--text-secondary)',
+                  transition: 'all 0.2s ease'
+                }}>
+                  <Barcode size={16} />
+                </div>
                 Bulk Barcode
               </>
             )}
