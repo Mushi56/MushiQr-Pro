@@ -784,7 +784,7 @@ function TemplateCanvas({ form, size = 280 }) {
 // TEMPLATE EDITOR MODAL
 // ═══════════════════════════════════════════════════════════════════════════
 
-const DOT_STYLES   = ['square','rounded','dots','extra-rounded','classy','classy-rounded'];
+const DOT_STYLES   = ['square','rounded','dots','extra-rounded','classy','classy-rounded','cherry-blossom','forget-me-not','sunflower','rose','daisy','tulip','lotus','hyacinth','violet'];
 const EYE_STYLES   = ['square','rounded','circle','leaf','extra-rounded'];
 const GRAD_DIRS    = [{ v:'diagonal', l:'↘ Diagonal' },{ v:'horizontal', l:'→ Horizontal' },{ v:'vertical', l:'↓ Vertical' },{ v:'radial', l:'◎ Radial' }];
 const TPL_CATS     = ['Social','Business','Hot','Creative','Minimal','Event','Retail','Custom'];
