@@ -646,8 +646,9 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
 }
 
 export function EyeStyleSelector({ value, onChange, qrParams }) {
+  const eyeColor = qrParams?.eyeColor || qrParams?.fgColor || 'currentColor';
   return (
-    <div className="style-grid">
+    <div className="style-grid eye-style-grid">
       {Object.entries(EYE_PREVIEWS).map(([style, preview]) => (
         <button
           key={style}
@@ -655,12 +656,8 @@ export function EyeStyleSelector({ value, onChange, qrParams }) {
           onClick={() => onChange(style)}
           title={style}
         >
-          <div className="style-option-preview">
-            {qrParams && qrParams.qrMatrixInfo ? (
-              <MiniQRCanvas qrParams={qrParams} overrideParams={{ eyeStyle: style, hideDots: true }} />
-            ) : (
-              preview
-            )}
+          <div className="style-option-preview" style={{ color: eyeColor, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+            {preview}
           </div>
         </button>
       ))}

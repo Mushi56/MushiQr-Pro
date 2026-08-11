@@ -1170,6 +1170,11 @@ input[type="range"]::-moz-range-thumb {
   margin: 0;
 }
 
+.eye-style-grid {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
 .style-option {
   width: 100%;
   aspect-ratio: 1 / 1;
