@@ -669,9 +669,9 @@ export function renderQR(canvas, options) {
   // 1. Draw Eyes (Finder Patterns)
   if (!options.hideEyes) {
     const eyePositions = [
-      { r: 0, c: 0 }, // Top-left
-      { r: 0, c: moduleCount - 7 }, // Top-right
-      { r: moduleCount - 7, c: 0 } // Bottom-left
+      { r: 0, c: 0, type: 'top-left' }, // Top-left
+      { r: 0, c: moduleCount - 7, type: 'top-right' }, // Top-right
+      { r: moduleCount - 7, c: 0, type: 'bottom-left' } // Bottom-left
     ];
     
     eyePositions.forEach(pos => {
@@ -686,9 +686,9 @@ export function renderQR(canvas, options) {
       
       // If texture enabled and syncing eyes, draw eye on silhouette
       if (qrTextureEnabled && qrTexture?.image && qrTextureSyncEyes) {
-        drawEye(silhouetteCtx, x, y, cellSize * 7, eyeStyle, '#000', '#000');
+        drawEye(silhouetteCtx, x, y, cellSize * 7, eyeStyle, '#000', '#000', pos.type);
       } else {
-        drawEye(ctx, x, y, cellSize * 7, eyeStyle, parsedOuter, parsedInner);
+        drawEye(ctx, x, y, cellSize * 7, eyeStyle, parsedOuter, parsedInner, pos.type);
       }
     });
   }
@@ -1575,7 +1575,7 @@ export function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = 
 /**
  * Draw the full 7x7 eye (finder pattern) as a single unit
  */
-export function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
+export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType = 'top-left') {
   const s = size / 28; // Scale factor from 28x28 coordinate space
 
   // 1. Draw Outer Ring Path
@@ -1609,8 +1609,15 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       drawRoundedRectPath(ctx, 4, 4, 20, 20, 4);
       break;
     case EYE_STYLES.LEAF:
-      ctx.moveTo(0, 0); ctx.lineTo(20, 0); ctx.quadraticCurveTo(28, 0, 28, 8); ctx.lineTo(28, 28); ctx.lineTo(8, 28); ctx.quadraticCurveTo(0, 28, 0, 20); ctx.closePath();
-      ctx.moveTo(4, 4); ctx.lineTo(20, 4); ctx.quadraticCurveTo(24, 4, 24, 8); ctx.lineTo(24, 24); ctx.lineTo(8, 24); ctx.quadraticCurveTo(4, 24, 4, 20); ctx.closePath();
+      if (eyeType === 'top-right' || eyeType === 'bottom-left') {
+        // Flipped leaf (sharp at top-right and bottom-left)
+        ctx.moveTo(28, 0); ctx.lineTo(8, 0); ctx.quadraticCurveTo(0, 0, 0, 8); ctx.lineTo(0, 28); ctx.lineTo(20, 28); ctx.quadraticCurveTo(28, 28, 28, 20); ctx.closePath();
+        ctx.moveTo(24, 4); ctx.lineTo(8, 4); ctx.quadraticCurveTo(4, 4, 4, 8); ctx.lineTo(4, 24); ctx.lineTo(20, 24); ctx.quadraticCurveTo(24, 24, 24, 20); ctx.closePath();
+      } else {
+        // Original leaf (sharp at top-left and bottom-right)
+        ctx.moveTo(0, 0); ctx.lineTo(20, 0); ctx.quadraticCurveTo(28, 0, 28, 8); ctx.lineTo(28, 28); ctx.lineTo(8, 28); ctx.quadraticCurveTo(0, 28, 0, 20); ctx.closePath();
+        ctx.moveTo(4, 4); ctx.lineTo(20, 4); ctx.quadraticCurveTo(24, 4, 24, 8); ctx.lineTo(24, 24); ctx.lineTo(8, 24); ctx.quadraticCurveTo(4, 24, 4, 20); ctx.closePath();
+      }
       break;
     case EYE_STYLES.FLOWER:
       for (let i = 0; i < 24; i++) {
@@ -1738,8 +1745,14 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       drawRoundedRectPath(ctx, 7, 7, 14, 14, 2);
       break;
     case EYE_STYLES.ROUNDED:
-    case EYE_STYLES.LEAF:
       drawRoundedRectPath(ctx, 8, 8, 12, 12, 4);
+      break;
+    case EYE_STYLES.LEAF:
+      if (eyeType === 'top-right' || eyeType === 'bottom-left') {
+        ctx.moveTo(20, 8); ctx.lineTo(12, 8); ctx.quadraticCurveTo(8, 8, 8, 12); ctx.lineTo(8, 20); ctx.lineTo(16, 20); ctx.quadraticCurveTo(20, 20, 20, 16); ctx.closePath();
+      } else {
+        ctx.moveTo(8, 8); ctx.lineTo(16, 8); ctx.quadraticCurveTo(20, 8, 20, 12); ctx.lineTo(20, 20); ctx.lineTo(12, 20); ctx.quadraticCurveTo(8, 20, 8, 16); ctx.closePath();
+      }
       break;
     case EYE_STYLES.DOLLAR_COIN: {
       ctx.fillStyle = '#ffd700'; // Gold center
