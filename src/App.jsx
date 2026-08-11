@@ -85,7 +85,7 @@ import YouPage from './components/YouPage';
 import AuthDropdownPanel from './components/AuthDropdownPanel';
 import GoldenAdminBadge from './components/GoldenAdminBadge';
 import { auth, db } from './services/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { trackUserProfile, trackAnonymousVisitor, linkVisitorToUser } from './services/adminDataService';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import BatchPage from './components/BatchPage';
@@ -958,17 +958,33 @@ export default function App() {
       }
     };
     checkRedirect();
+    let unsubProfile = null;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (unsubProfile) unsubProfile(); // cleanup previous listener
       setCurrentUser(user);
       if (user) {
         syncUserFirestoreData();
         // Track user profile for admin panel visibility
         trackUserProfile(user);
         linkVisitorToUser(user.uid);
+        
+        // Enforce blocked status
+        unsubProfile = onSnapshot(doc(db, 'app_users', user.uid), (docSnap) => {
+          if (docSnap.exists() && docSnap.data().status === 'blocked') {
+            signOut(auth);
+            alert('Your account has been blocked by an administrator.');
+            window.location.reload();
+          }
+        });
       }
     });
     // Track every app open as a visitor (even if not signed in)
     trackAnonymousVisitor();
+    
+    return () => {
+      unsubscribe();
+      if (unsubProfile) unsubProfile();
+    };
   }, []);
   // Pre-create organized folder structure on startup
   useEffect(() => {
