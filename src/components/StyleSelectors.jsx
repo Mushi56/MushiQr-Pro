@@ -482,14 +482,16 @@ const EYE_PREVIEWS = {
   [EYE_STYLES.COFFEE_BEAN]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
-      <ellipse cx="14" cy="14" rx="4" ry="6" fill="currentColor" />
-      <line x1="14" y1="8.5" x2="14" y2="19.5" stroke="rgba(0,0,0,0.4)" strokeWidth="1" />
+      <rect x="8" y="8" width="12" height="12" rx="3.5" fill="currentColor" />
+      <ellipse cx="14" cy="14" rx="3.8" ry="5.5" fill="#fff" />
+      <line x1="14" y1="9" x2="14" y2="19" stroke="rgba(0,0,0,0.4)" strokeWidth="1" />
     </svg>
   ),
   [EYE_STYLES.RAINDROP]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
-      <path d="M14 8 Q10 12 10 16 A4 4 0 0 0 18 16 Q18 12 14 8Z" fill="currentColor" />
+      <rect x="8" y="8" width="12" height="12" rx="3.5" fill="currentColor" />
+      <path d="M14 9.2 Q10.5 12.5 11 15.5 A3.5 3.5 0 0 0 17 15.5 Q17.5 12.5 14 9.2Z" fill="#fff" />
     </svg>
   ),
   [EYE_STYLES.CACTUS]: (
@@ -514,17 +516,19 @@ const EYE_PREVIEWS = {
   [EYE_STYLES.CHESS]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
-      <ellipse cx="15" cy="10" rx="3" ry="2.5" fill="currentColor" />
-      <path d="M10 20 L18 20 L17 14 Q16 12 15 11 L13 14 Q11.5 15 10 20Z" fill="currentColor" />
+      <rect x="8" y="8" width="12" height="12" rx="3.5" fill="currentColor" />
+      <ellipse cx="14.5" cy="10.5" rx="2.8" ry="2.5" fill="#fff" transform="rotate(-15 14.5 10.5)" />
+      <path d="M10 19 L18 19 L17.5 13.5 Q16.5 11.5 14.5 11 L12.5 14.5 Q11 16 10 19Z" fill="#fff" />
     </svg>
   ),
 
   [EYE_STYLES.BOW]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
-      <path d="M14 14 C12 10 7 9 7 14 C7 19 12 18 14 14Z" fill="currentColor" />
-      <path d="M14 14 C16 10 21 9 21 14 C21 19 16 18 14 14Z" fill="currentColor" />
-      <circle cx="14" cy="14" r="2" fill="currentColor" />
+      <rect x="8" y="8" width="12" height="12" rx="3.5" fill="currentColor" />
+      <path d="M14 14 C12 11 8.5 10.5 8.5 14 C8.5 17.5 12 17 14 14Z" fill="#fff" />
+      <path d="M14 14 C16 11 19.5 10.5 19.5 14 C19.5 17.5 16 17 14 14Z" fill="#fff" />
+      <circle cx="14" cy="14" r="1.5" fill="#fff" />
     </svg>
   ),
 };

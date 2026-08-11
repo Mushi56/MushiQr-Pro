@@ -1674,12 +1674,12 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
   else if (style === EYE_STYLES.ROSE) ctx.fillStyle = '#990000'; // Match container
   else if (style === EYE_STYLES.MONSTERA) ctx.fillStyle = '#196f3d'; // Match container
   else if (style === EYE_STYLES.DAISY) ctx.fillStyle = '#d4ac0d'; // Match container
-  else if (style === EYE_STYLES.COFFEE_BEAN) ctx.fillStyle = '#6f3d11';
-  else if (style === EYE_STYLES.RAINDROP) ctx.fillStyle = '#1a5276';
+  else if (style === EYE_STYLES.COFFEE_BEAN) ctx.fillStyle = '#5c2d0a'; // Match container
+  else if (style === EYE_STYLES.RAINDROP) ctx.fillStyle = '#154360'; // Match container
   else if (style === EYE_STYLES.CACTUS) ctx.fillStyle = '#196f3d';
   else if (style === EYE_STYLES.BASKETBALL) ctx.fillStyle = '#b94a00';
-  else if (style === EYE_STYLES.CHESS) ctx.fillStyle = '#2c2c2c';
-  else if (style === EYE_STYLES.BOW) ctx.fillStyle = '#c0175e';
+  else if (style === EYE_STYLES.CHESS) ctx.fillStyle = '#1a1a1a'; // Match container
+  else if (style === EYE_STYLES.BOW) ctx.fillStyle = '#96124a'; // Match container
   ctx.fill('evenodd');
 
   // New icon eye styles: delegate to dedicated draw function and return
@@ -1967,23 +1967,29 @@ function drawEyeIconPupil(ctx, x, y, size, style) {
 
   switch(style) {
     case EYE_STYLES.COFFEE_BEAN: {
+      // Dark brown container
+      ctx.fillStyle = '#5c2d0a';
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
       // Bean body (dark brown)
       ctx.fillStyle = '#3b1a06';
-      ctx.beginPath(); ctx.ellipse(14, 14, 4.5, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(14, 14, 3.8, 5.5, 0, 0, Math.PI * 2); ctx.fill();
       // Bean crease
       ctx.strokeStyle = '#1a0a00'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(14, 8); ctx.lineTo(14, 20); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(14, 9); ctx.lineTo(14, 19); ctx.stroke();
       break;
     }
     case EYE_STYLES.RAINDROP: {
+      // Dark blue container
+      ctx.fillStyle = '#154360';
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
       // Raindrop shape (dark blue)
       ctx.fillStyle = '#0d2b3e';
       ctx.beginPath();
-      ctx.arc(14, 16.5, 4.2, 0, Math.PI * 2); ctx.fill();
+      ctx.arc(14, 15.5, 3.5, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath();
-      ctx.moveTo(10.5, 16.5);
-      ctx.quadraticCurveTo(10, 12.5, 14, 8.2);
-      ctx.quadraticCurveTo(18, 12.5, 17.5, 16.5);
+      ctx.moveTo(11, 15.5);
+      ctx.quadraticCurveTo(10.5, 12.5, 14, 9.2);
+      ctx.quadraticCurveTo(17.5, 12.5, 17, 15.5);
       ctx.closePath(); ctx.fill();
       break;
     }
@@ -2013,35 +2019,41 @@ function drawEyeIconPupil(ctx, x, y, size, style) {
       break;
     }
     case EYE_STYLES.CHESS: {
+      // Dark container
+      ctx.fillStyle = '#1a1a1a';
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
       // Chess knight silhouette (dark)
       ctx.fillStyle = '#0a0a0a';
       // Knight head
-      ctx.beginPath(); ctx.ellipse(14.5, 10, 3.5, 3, -0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(14.5, 10.5, 2.8, 2.5, -0.3, 0, Math.PI * 2); ctx.fill();
       // Knight body
       ctx.beginPath();
-      ctx.moveTo(9, 20); ctx.lineTo(19, 20);
-      ctx.lineTo(18, 13.5); ctx.quadraticCurveTo(16.5, 11, 14.5, 10.5);
-      ctx.lineTo(12, 14.5); ctx.quadraticCurveTo(10, 16, 9, 20);
+      ctx.moveTo(10, 19); ctx.lineTo(18, 19);
+      ctx.lineTo(17.5, 13.5); ctx.quadraticCurveTo(16.5, 11.5, 14.5, 11);
+      ctx.lineTo(12.5, 14.5); ctx.quadraticCurveTo(11, 16, 10, 19);
       ctx.closePath(); ctx.fill();
       break;
     }
     case EYE_STYLES.BOW: {
+      // Dark pink container
+      ctx.fillStyle = '#96124a';
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
       // Bow wings (dark pink)
       ctx.fillStyle = '#6b0d35';
       // Left wing
       ctx.beginPath();
       ctx.moveTo(14, 14);
-      ctx.bezierCurveTo(11.5, 10.5, 7, 10, 7, 14);
-      ctx.bezierCurveTo(7, 18, 11.5, 17.5, 14, 14);
+      ctx.bezierCurveTo(12, 11, 8.5, 10.5, 8.5, 14);
+      ctx.bezierCurveTo(8.5, 17.5, 12, 17, 14, 14);
       ctx.closePath(); ctx.fill();
       // Right wing
       ctx.beginPath();
       ctx.moveTo(14, 14);
-      ctx.bezierCurveTo(16.5, 10.5, 21, 10, 21, 14);
-      ctx.bezierCurveTo(21, 18, 16.5, 17.5, 14, 14);
+      ctx.bezierCurveTo(16, 11, 19.5, 10.5, 19.5, 14);
+      ctx.bezierCurveTo(19.5, 17.5, 16, 17, 14, 14);
       ctx.closePath(); ctx.fill();
       // Center knot
-      ctx.beginPath(); ctx.arc(14, 14, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(14, 14, 1.5, 0, Math.PI * 2); ctx.fill();
       break;
     }
   }
