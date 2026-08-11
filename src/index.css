@@ -1504,18 +1504,15 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.18s ease-out forwards;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
-
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -2385,9 +2382,7 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
-.fade-in {
-  animation: fadeIn 300ms ease-out;
-}
+/* .fade-in handled by main animation rule */
 
 .scale-in {
   animation: scaleIn 300ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -4698,21 +4693,7 @@ input[type="range"]::-moz-range-thumb {
   cursor: not-allowed !important;
 }
 
-.fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* .fade-in handled by main animation rule */
 
 /* Ã¢â€â‚¬Ã¢â€â‚¬ Premium Logo Upload (Sleek Redesign) Ã¢â€â‚¬Ã¢â€â‚¬ */
 .logo-compact-upload-fixed {
@@ -7823,7 +7804,7 @@ button:active,
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -7832,7 +7813,7 @@ button:active,
 }
 
 .fade-in-up {
-  animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Sleek Floating Toast Notification Card */
