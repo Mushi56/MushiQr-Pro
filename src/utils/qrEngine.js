@@ -1647,10 +1647,27 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
       ctx.moveTo(14 + 10, 14);
       ctx.arc(14, 14, 9, 0, Math.PI * 2, true);
       break;
-    case EYE_STYLES.SHIELD:
+    case EYE_STYLES.SHIELD: {
+      let angle = 0;
+      if (eyeType === 'top-right') angle = Math.PI / 2;
+      else if (eyeType === 'bottom-left') angle = Math.PI;
+
+      if (angle !== 0) {
+        ctx.translate(14, 14);
+        ctx.rotate(angle);
+        ctx.translate(-14, -14);
+      }
+
       ctx.moveTo(0, 2); ctx.lineTo(28, 2); ctx.lineTo(28, 14); ctx.quadraticCurveTo(28, 24, 14, 28); ctx.quadraticCurveTo(0, 24, 0, 14); ctx.closePath();
       ctx.moveTo(4, 6); ctx.lineTo(24, 6); ctx.lineTo(24, 14); ctx.quadraticCurveTo(24, 20, 14, 24); ctx.quadraticCurveTo(4, 20, 4, 14); ctx.closePath();
+
+      if (angle !== 0) {
+        ctx.translate(14, 14);
+        ctx.rotate(-angle);
+        ctx.translate(-14, -14);
+      }
       break;
+    }
     case EYE_STYLES.OCTAGON:
       ctx.moveTo(9, 0); ctx.lineTo(19, 0); ctx.lineTo(28, 9); ctx.lineTo(28, 19); ctx.lineTo(19, 28); ctx.lineTo(9, 28); ctx.lineTo(0, 19); ctx.lineTo(0, 9); ctx.closePath();
       ctx.moveTo(10, 4); ctx.lineTo(18, 4); ctx.lineTo(24, 10); ctx.lineTo(24, 18); ctx.lineTo(18, 24); ctx.lineTo(10, 24); ctx.lineTo(4, 18); ctx.lineTo(4, 10); ctx.closePath();
@@ -1734,9 +1751,26 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
     case EYE_STYLES.HEART:
       ctx.arc(14, 14, 6, 0, Math.PI * 2);
       break;
-    case EYE_STYLES.SHIELD:
+    case EYE_STYLES.SHIELD: {
+      let angle = 0;
+      if (eyeType === 'top-right') angle = Math.PI / 2;
+      else if (eyeType === 'bottom-left') angle = Math.PI;
+
+      if (angle !== 0) {
+        ctx.translate(14, 14);
+        ctx.rotate(angle);
+        ctx.translate(-14, -14);
+      }
+
       ctx.moveTo(8, 9); ctx.lineTo(20, 9); ctx.lineTo(20, 14); ctx.quadraticCurveTo(20, 18, 14, 20); ctx.quadraticCurveTo(8, 18, 8, 14); ctx.closePath();
+
+      if (angle !== 0) {
+        ctx.translate(14, 14);
+        ctx.rotate(-angle);
+        ctx.translate(-14, -14);
+      }
       break;
+    }
     case EYE_STYLES.OCTAGON:
       ctx.moveTo(12, 8); ctx.lineTo(16, 8); ctx.lineTo(20, 12); ctx.lineTo(20, 16); ctx.lineTo(16, 20); ctx.lineTo(12, 20); ctx.lineTo(8, 16); ctx.lineTo(8, 12); ctx.closePath();
       break;
