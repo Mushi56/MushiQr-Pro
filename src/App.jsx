@@ -95,7 +95,7 @@ import AppIcon from './components/AppIcon';
 import SaveLocationModal from './components/SaveLocationModal';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
-const QRDotsIcon = ({ size = 18 }) => (
+const QRDotsIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="mushi-pro-wide-dots">
     {/* Smaller Rounded Star (Preserving the shape and style) */}
     <path d="M12 4 L13 8.5 L17.5 9.5 L13 10.5 L12 15 L11 10.5 L6.5 9.5 L11 8.5 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
@@ -105,7 +105,7 @@ const QRDotsIcon = ({ size = 18 }) => (
     <circle cx="17.5" cy="15.5" r="3" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
   </svg>
 );
-const QREyesIcon = ({ size = 18 }) => (
+const QREyesIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="qr-eye-heavy-bold">
     {/* Main outer shape with hole cut out (evenodd fill rule) */}
     <path fillRule="evenodd" d="M3 7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7zm4-1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7z" clipRule="evenodd" />
@@ -114,7 +114,7 @@ const QREyesIcon = ({ size = 18 }) => (
     <rect x="8" y="8" width="8" height="8" rx="1.5" />
   </svg>
 );
-const QRStyleIcon = ({ size = 18 }) => (
+const QRStyleIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mushi-qr-star-all-circles">
     {/* Top Left Eye & Pupil */}
     <rect x="3" y="3" width="7" height="7" rx="1.5" style={{ fill: 'transparent' }} />
@@ -136,7 +136,7 @@ const QRStyleIcon = ({ size = 18 }) => (
     <circle cx="19.5" cy="20" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
   </svg>
 );
-const QRGradientIcon = ({ size = 18 }) => (
+const QRGradientIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <defs>
       <linearGradient id="qr-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -147,7 +147,7 @@ const QRGradientIcon = ({ size = 18 }) => (
     <circle cx="12" cy="12" r="9" fill="url(#qr-icon-grad)" />
   </svg>
 );
-const QRSizeIcon = ({ size = 18 }) => (
+const QRSizeIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-size-expand">
     <path d="M15 3h6v6" />
     <path d="M21 3l-7 7" />
@@ -155,7 +155,7 @@ const QRSizeIcon = ({ size = 18 }) => (
     <path d="M3 21l7-7" />
   </svg>
 );
-const QRBgIcon = ({ size = 18 }) => (
+const QRBgIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="shape-square">
     <rect x="3" y="3" width="18" height="18" rx="4" style={{ fill: 'currentColor', fillOpacity: 1 }} />
   </svg>
@@ -3398,7 +3398,7 @@ export default function App() {
                 }}
                 title="Undo"
               >
-                <Undo2 size={18} strokeWidth={2.5} />
+                <Undo2 size={24} strokeWidth={2.5} />
               </button>
               <button 
                 onClick={redo} 
@@ -3415,7 +3415,7 @@ export default function App() {
                 }}
                 title="Redo"
               >
-                <Redo2 size={18} strokeWidth={2.5} />
+                <Redo2 size={24} strokeWidth={2.5} />
               </button>
             </div>
           ) : (
@@ -3581,7 +3581,7 @@ export default function App() {
                               transition: 'all 0.2s'
                             }}
                           >
-                            <Icon size={18} />
+                            <Icon size={24} />
                             <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
                           </button>
                         ))}
@@ -3844,7 +3844,7 @@ export default function App() {
                     )}
                   </div>
                 ) : (
-                  <User size={18} color="#fff" />
+                  <User size={24} color="#fff" />
                 )}
               </button>
               {authDropdownOpen && (
@@ -3883,7 +3883,7 @@ export default function App() {
                               alignItems: 'center',
                               justifyContent: 'center'
                             }}>
-                              <GoldenAdminBadge size={18} />
+                              <GoldenAdminBadge size={24} />
                             </div>
                           )}
                         </div>
@@ -3966,7 +3966,7 @@ export default function App() {
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(236, 72, 153, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <User size={18} color="#EC4899" />
+                          <User size={24} color="#EC4899" />
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>My Profile</div>
@@ -4000,7 +4000,7 @@ export default function App() {
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {isSyncing ? <Loader2 size={18} color="#3B82F6" className="spin" /> : <Cloud size={18} color="#3B82F6" />}
+                          {isSyncing ? <Loader2 size={24} color="#3B82F6" className="spin" /> : <Cloud size={24} color="#3B82F6" />}
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>{isSyncing ? 'Syncing...' : 'Cloud Sync'}</div>
@@ -4020,7 +4020,7 @@ export default function App() {
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(139, 92, 246, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <Lock size={18} color="#8B5CF6" />
+                          <Lock size={24} color="#8B5CF6" />
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>Security &amp; Login</div>
@@ -4043,7 +4043,7 @@ export default function App() {
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           >
                             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <Shield size={18} color="#F59E0B" />
+                              <Shield size={24} color="#F59E0B" />
                             </div>
                             <div style={{ flex: 1, overflow: 'hidden' }}>
                               <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#FF007F' }}>Super Admin Panel</div>
@@ -4081,7 +4081,7 @@ export default function App() {
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <LogOut size={18} color="#EF4444" />
+                          <LogOut size={24} color="#EF4444" />
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#EF4444' }}>Sign Out</div>
@@ -5183,7 +5183,7 @@ export default function App() {
                                         style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
                                       />
                                       {isActive && (
-                                        <X size={18} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+                                        <X size={24} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
                                       )}
                                     </div>
                                   </button>
@@ -5340,7 +5340,7 @@ export default function App() {
                                           style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
                                         />
                                         {isActive && (
-                                          <X size={18} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+                                          <X size={24} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
                                         )}
                                       </div>
                                     </button>
@@ -5512,40 +5512,40 @@ export default function App() {
                      <div className="toolbar-tabs-row fade-in">
                        {activeTab === 'color' && (
                          <>
-                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'presets')}><Bookmark size={18} /><span>Presets</span></button>
+                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'presets')}><Bookmark size={24} /><span>Presets</span></button>
                            <button className="text-toolbar-btn" onClick={() => startEditing('color', 'dots')}><QRDotsIcon /><span>Dots</span></button>
                            <button className="text-toolbar-btn" onClick={() => startEditing('color', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                           <button className={`text-toolbar-btn${colorPopup === 'bg' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg')}><Paintbrush size={18} /><span>BG Color</span></button>
-                           <button className={`text-toolbar-btn${colorPopup === 'bg-image' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg-image')}><ImageIcon size={18} /><span>BG Image</span></button>
-                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'texture')}><Layers size={18} /><span>Texture</span></button>
+                           <button className={`text-toolbar-btn${colorPopup === 'bg' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg')}><Paintbrush size={24} /><span>BG Color</span></button>
+                           <button className={`text-toolbar-btn${colorPopup === 'bg-image' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg-image')}><ImageIcon size={24} /><span>BG Image</span></button>
+                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'texture')}><Layers size={24} /><span>Texture</span></button>
                          </>
                        )}
                        {activeTab === 'shapes' && (
                          <>
                            <button className={`text-toolbar-btn${shapePopup === 'dots' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'dots')}><QRDotsIcon /><span>Dots</span></button>
                            <button className={`text-toolbar-btn${shapePopup === 'eyes' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                           <button className={`text-toolbar-btn${shapePopup === 'background' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'background')}><QRBgIcon size={18} /><span>Background</span></button>
-                           <button className={`text-toolbar-btn${shapePopup === 'size' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'size')}><QRSizeIcon size={18} /><span>Size</span></button>
-                           <button className={`text-toolbar-btn${shapePopup === 'pos' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'pos')}><Maximize size={18} /><span>Position</span></button>
+                           <button className={`text-toolbar-btn${shapePopup === 'background' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'background')}><QRBgIcon size={24} /><span>Background</span></button>
+                           <button className={`text-toolbar-btn${shapePopup === 'size' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'size')}><QRSizeIcon size={24} /><span>Size</span></button>
+                           <button className={`text-toolbar-btn${shapePopup === 'pos' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'pos')}><Maximize size={24} /><span>Position</span></button>
                          </>
                        )}
                       {activeTab === 'logo' && (
                         <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'size')}><QRSizeIcon size={18} /><span>Size</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'pos')}><Maximize size={18} /><span>Position</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'bg')}><Hexagon size={18} /><span>Background</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'rotate')}><RotateCw size={18} /><span>Rotate</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'opacity')}><Sun size={18} /><span>Opacity</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'shadow')}><Moon size={18} /><span>Shadow</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'filter')}><Eraser size={18} /><span>Remove BG</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'texture')}><Layers size={18} /><span>Texture</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'crop')}><Crop size={18} /><span>Crop</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'size')}><QRSizeIcon size={24} /><span>Size</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'pos')}><Maximize size={24} /><span>Position</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'stroke')}><Paintbrush size={24} /><span>Stroke</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'bg')}><Hexagon size={24} /><span>Background</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'rotate')}><RotateCw size={24} /><span>Rotate</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'opacity')}><Sun size={24} /><span>Opacity</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'shadow')}><Moon size={24} /><span>Shadow</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'filter')}><Eraser size={24} /><span>Remove BG</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'texture')}><Layers size={24} /><span>Texture</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'crop')}><Crop size={24} /><span>Crop</span></button>
                         </>
                       )}
                       {activeTab === 'text' && (
                         <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={18} /><span>Add Text</span></button>
+                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={24} /><span>Add Text</span></button>
                           {(() => {
                             const isTextEnabled = textCenterEnabled || frameStyle !== 'none';
                             const handleTextToolClick = (tool) => {
@@ -5557,14 +5557,14 @@ export default function App() {
                             };
                             return (
                               <>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('pos')}><Maximize size={18} /><span>Position</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('fonts')}><ALargeSmall size={18} /><span>Fonts</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('size')}><QRSizeIcon size={18} /><span>Size</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('color')}><Palette size={18} /><span>Color</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('stroke')}><Paintbrush size={18} /><span>Stroke</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('shadow')}><Moon size={18} /><span>Shadow</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('rotate')}><RotateCw size={18} /><span>Rotate</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('bg')}><Hexagon size={18} /><span>Shape</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('pos')}><Maximize size={24} /><span>Position</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('fonts')}><ALargeSmall size={24} /><span>Fonts</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('size')}><QRSizeIcon size={24} /><span>Size</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('color')}><Palette size={24} /><span>Color</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('stroke')}><Paintbrush size={24} /><span>Stroke</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('shadow')}><Moon size={24} /><span>Shadow</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('rotate')}><RotateCw size={24} /><span>Rotate</span></button>
+                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('bg')}><Hexagon size={24} /><span>Shape</span></button>
                               </>
                             );
                           })()}
