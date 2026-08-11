@@ -1545,7 +1545,7 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
   else if (style === EYE_STYLES.LAVENDER) ctx.fillStyle = '#9b59b6';
   else if (style === EYE_STYLES.ROSE) ctx.fillStyle = '#cc0000';
   else if (style === EYE_STYLES.MONSTERA) ctx.fillStyle = '#27ae60';
-  else if (style === EYE_STYLES.DAISY) ctx.fillStyle = '#dddddd';
+  else if (style === EYE_STYLES.DAISY) ctx.fillStyle = '#f1c232';
   ctx.fill('evenodd');
 
   // 2. Draw Inner Dot Path
@@ -1622,12 +1622,15 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.CHERRY_BLOSSOM: {
-      const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = innerColor || '#000000';
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      // 1. Draw rounded corner square container for pupil (no black/white, high contrast)
+      ctx.fillStyle = '#ff758f'; // Cherry blossom pink
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+
+      // 2. Draw flower centered and perfectly fitted inside (r=4.5)
+      const cx = 14, cy = 14, r = 4.5;
       const petalR = r * 0.55;
       const petalD = r * 0.45;
-      ctx.fillStyle = '#ff758f';
+      ctx.fillStyle = '#ffffff'; // White petals for high contrast
       for (let i = 0; i < 5; i++) {
         const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
         const px = cx + Math.cos(angle) * petalD;
@@ -1640,15 +1643,13 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
         ctx.arc(px + Math.cos(a2) * petalR * 0.5, py + Math.sin(a2) * petalR * 0.5, petalR * 0.5, angle + Math.PI, angle, true);
         ctx.closePath(); ctx.fill();
       }
-      ctx.fillStyle = '#ffe066';
-      ctx.beginPath(); ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffe066'; // Yellow center
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.28, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       return;
     }
     case EYE_STYLES.LOTUS: {
       const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = innerColor || '#000000';
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#52b788';
       ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.3, r * 0.7, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#3a86c8';
@@ -1668,8 +1669,6 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.SUNFLOWER: {
       const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = innerColor || '#000000';
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#f1c232';
       ctx.beginPath();
       const petalCount = 10;
@@ -1691,8 +1690,6 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.LAVENDER: {
       const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = innerColor || '#000000';
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = '#556b2f';
       ctx.lineWidth = 0.8;
       ctx.beginPath(); ctx.moveTo(cx, cy + r); ctx.lineTo(cx, cy - r * 0.8); ctx.stroke();
@@ -1708,8 +1705,6 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.ROSE: {
       const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = innerColor || '#000000';
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#cc0000';
       ctx.beginPath();
       for (let i = 0; i < 5; i++) {
@@ -1733,8 +1728,6 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.MONSTERA: {
       const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = innerColor || '#000000';
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#27ae60';
       ctx.beginPath();
       ctx.moveTo(cx, cy + r);
@@ -1755,12 +1748,15 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.DAISY: {
-      const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = innerColor || '#000000';
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.strokeStyle = '#dddddd';
-      ctx.lineWidth = 0.2;
+      // 1. Draw rounded corner square container for pupil (no black/white, high contrast)
+      ctx.fillStyle = '#f1c232'; // Matching yellow
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+
+      // 2. Draw flower centered and perfectly fitted inside (r=4.5)
+      const cx = 14, cy = 14, r = 4.5;
+      ctx.fillStyle = '#ffffff'; // White petals
+      ctx.strokeStyle = '#e69138'; // Orange stroke for definition
+      ctx.lineWidth = 0.15;
       const petalCount = 8;
       const petalLen = r * 0.9;
       const petalW = r * 0.26;
@@ -1776,7 +1772,7 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
         ctx.quadraticCurveTo(tipX - Math.cos(perpAngle) * petalW * 0.3, tipY - Math.sin(perpAngle) * petalW * 0.3, br.x, br.y);
         ctx.closePath(); ctx.fill(); ctx.stroke();
       }
-      ctx.fillStyle = '#f1c232';
+      ctx.fillStyle = '#e69138'; // Orange center for contrast against white petals
       ctx.beginPath(); ctx.arc(cx, cy, r * 0.32, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       return;
