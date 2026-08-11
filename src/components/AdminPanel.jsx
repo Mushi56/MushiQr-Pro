@@ -451,18 +451,50 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       paddingTop: 'max(14px, env(safe-area-inset-top))',
       paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
     }}>
-      {/* Logo */}
-      <div style={{ padding: '16px 16px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-        <img src="/logo.webp" alt="Logo" style={{ width: 36, height: 36, borderRadius: 10, objectFit: 'contain', flexShrink: 0, border: `1px solid rgba(245, 158, 11, 0.4)` }} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 900, color: T.text, lineHeight: 1.2, letterSpacing: '-0.3px' }}>Mushi QR Pro</div>
-          <div style={{ fontSize: 11, color: '#F59E0B', fontWeight: 800, letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5, marginTop: 3 }}>
-            <GoldenAdminBadge size={14} /> SUPER ADMIN
+      {/* Top Section: User Profile & Close Btn */}
+      <div style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
+        {currentUser && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0,
+            background: 'rgba(20,20,30,0.65)', backdropFilter: 'blur(10px)',
+            borderRadius: T.r.md, padding: '8px 10px', border: `1px solid ${T.border}`,
+          }}>
+            <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
+              {currentUser.photoURL ? (
+                <img src={currentUser.photoURL} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #F59E0B' }} />
+              ) : (
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 13, border: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
+                  {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
+                </div>
+              )}
+              <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
+                <GoldenAdminBadge size={12} />
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: T.text, display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Super Admin'}</span>
+              </div>
+              <div style={{ fontSize: 10, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {currentUser.email}
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Log Out"
+              style={{
+                background: 'rgba(239, 68, 68, 0.12)', border: `1px solid rgba(239, 68, 68, 0.25)`,
+                borderRadius: T.r.md, color: T.red, cursor: 'pointer', padding: 6,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                transition: 'all 0.15s'
+              }}
+            >
+              <LogOut size={14} />
+            </button>
           </div>
-        </div>
-        {/* Close btn (mobile only) */}
-        <button className="ad-sidebar-close" onClick={onClose}>
-          <X size={16} />
+        )}
+        <button className="ad-sidebar-close" onClick={onClose} style={{ marginLeft: 4 }}>
+          <X size={18} />
         </button>
       </div>
 
@@ -497,49 +529,6 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
         ))}
         <div style={{ height: 20 }} />
       </div>
-
-      {/* User profile & Logout */}
-      {currentUser && (
-        <div style={{
-          padding: '12px 14px', borderTop: `1px solid ${T.border}`,
-          display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
-          background: 'rgba(20,20,30,0.65)', backdropFilter: 'blur(10px)',
-          borderRadius: T.r.md, margin: '0 8px 4px', border: `1px solid ${T.border}`,
-        }}>
-          <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
-            {currentUser.photoURL ? (
-              <img src={currentUser.photoURL} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #F59E0B' }} />
-            ) : (
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 13, border: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
-                {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
-              </div>
-            )}
-            <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
-              <GoldenAdminBadge size={13} />
-            </div>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: T.text, display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Super Admin'}</span>
-            </div>
-            <div style={{ fontSize: 10, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {currentUser.email}
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            title="Log Out"
-            style={{
-              background: 'rgba(239, 68, 68, 0.12)', border: `1px solid rgba(239, 68, 68, 0.25)`,
-              borderRadius: T.r.md, color: T.red, cursor: 'pointer', padding: 8,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              transition: 'all 0.15s'
-            }}
-          >
-            <LogOut size={15} />
-          </button>
-        </div>
-      )}
     </aside>
   );
 }
@@ -549,15 +538,6 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function Header({ section, onMenuToggle, isMobile, currentUser }) {
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      window.location.reload();
-    } catch (e) {
-      console.error('Logout error:', e);
-    }
-  };
-
   return (
     <div style={{
       minHeight: 60, background: T.bgEl, borderBottom: `1px solid ${T.border}`,
@@ -571,9 +551,18 @@ function Header({ section, onMenuToggle, isMobile, currentUser }) {
         <Menu size={20} />
       </button>
 
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{LABELS[section] || 'Admin Panel'}</div>
-        <div className="ad-header-subtitle" style={{ fontSize: 11, color: T.textSec }}>Mushi QR Pro · Super Admin Dashboard</div>
+      {/* App Logo & Title in Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+        <img src="/logo.webp" alt="Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', flexShrink: 0, border: `1px solid rgba(245, 158, 11, 0.4)` }} />
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
+          <div style={{ fontSize: isMobile ? 14 : 15, fontWeight: 900, color: T.text, lineHeight: 1.2, letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ flexShrink: 0 }}>Mushi QR Pro</span>
+            {!isMobile && <span style={{ fontSize: 12, color: T.textSec, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>/ {LABELS[section] || 'Admin Panel'}</span>}
+          </div>
+          <div style={{ fontSize: 10, color: '#F59E0B', fontWeight: 800, letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+            <GoldenAdminBadge size={12} /> SUPER ADMIN
+          </div>
+        </div>
       </div>
 
       <div className="ad-header-search">
