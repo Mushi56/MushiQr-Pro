@@ -14,13 +14,13 @@ import {
   ArrowUpRight, MoreVertical, Calendar, AlertTriangle, CheckCircle,
   XCircle, Clock, Info, Star, Zap, Globe, AlertCircle, Save,
   ExternalLink, Key, ArrowLeft, Mail, Monitor, Cpu,
-  DollarSign, Tag, Percent, Receipt,
+  DollarSign, Tag, Percent, Receipt, LogOut,
 } from 'lucide-react';
 
 import * as DS from '../services/adminDataService';
 import { QR_TEMPLATES } from '../utils/qrTemplates';
-import { auth } from '../services/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { auth, googleProvider } from '../services/firebase';
+import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────
 const T = {
@@ -425,17 +425,29 @@ function DonutSVG({ segments = [], size = 160 }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // SIDEBAR
 // ═══════════════════════════════════════════════════════════════════════════
 
-function Sidebar({ active, setActive, isMobile, open, onClose }) {
+function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+  };
+
   return (
     <aside style={{
-      width: 240, background: T.sidebar, borderRight: `1px solid ${T.border}`,
+      width: 250, background: 'rgba(12,12,21,0.97)', backdropFilter: 'blur(16px)',
+      borderRight: `1px solid ${T.border}`,
       display: 'flex', flexDirection: 'column',
-      position: 'fixed', left: open ? 0 : -260, top: 0, bottom: 0,
+      position: 'fixed', left: open ? 0 : -270, top: 0, bottom: 0,
       zIndex: 25, transition: 'left 0.27s cubic-bezier(0.4,0,0.2,1)',
-      boxShadow: isMobile && open ? '4px 0 32px rgba(0,0,0,0.7)' : 'none',
+      boxShadow: isMobile && open ? '4px 0 32px rgba(0,0,0,0.8)' : 'none',
+      paddingTop: 'max(14px, env(safe-area-inset-top))',
+      paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
     }}>
       {/* Close btn (mobile only) */}
       <button className="ad-sidebar-close" onClick={onClose}>
@@ -443,38 +455,40 @@ function Sidebar({ active, setActive, isMobile, open, onClose }) {
       </button>
 
       {/* Logo */}
-      <div style={{ padding: '18px 16px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-        <img src="/logo.webp" alt="Logo" style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'contain', flexShrink: 0 }} />
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 800, color: T.text, lineHeight: 1.2 }}>Mushi QR Pro</div>
-          <div style={{ fontSize: 10, color: T.accent, fontWeight: 700, letterSpacing: '0.5px' }}>⬡ SUPER ADMIN</div>
+      <div style={{ padding: '16px 16px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
+        <img src="/logo.webp" alt="Logo" style={{ width: 36, height: 36, borderRadius: 10, objectFit: 'contain', flexShrink: 0, border: `1px solid ${T.accent}44` }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 900, color: T.text, lineHeight: 1.2, letterSpacing: '-0.3px' }}>Mushi QR Pro</div>
+          <div style={{ fontSize: 10, color: T.accent, fontWeight: 800, letterSpacing: '0.6px', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent }} /> SUPER ADMIN
+          </div>
         </div>
       </div>
 
       {/* Nav */}
-      <div className="ad-sidebar-nav" style={{ flex: 1, overflowY: 'auto', padding: '10px 8px' }}>
+      <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
         {NAV.map(({ section, items }) => (
-          <div key={section} style={{ marginBottom: 6 }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: T.textMut, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 12px 4px' }}>
+          <div key={section} style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: T.textMut, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '6px 12px 4px' }}>
               {section}
             </div>
             {items.map(({ id, icon: Icon, label }) => {
               const isActive = active === id;
               return (
                 <button key={id} onClick={() => setActive(id)} style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: 9,
-                  padding: '8px 12px', borderRadius: T.r.md, border: 'none', cursor: 'pointer',
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '9px 12px', borderRadius: T.r.md, border: 'none', cursor: 'pointer',
                   background: isActive ? T.sidebarAct : 'transparent',
                   color: isActive ? T.accent : T.textSec,
                   fontFamily: 'inherit', fontSize: 13, fontWeight: isActive ? 700 : 500,
-                  transition: 'all 0.12s', textAlign: 'left', position: 'relative',
+                  transition: 'all 0.15s ease', textAlign: 'left', position: 'relative',
                 }}
                   onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = T.sidebarHov; e.currentTarget.style.color = T.text; } }}
                   onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = T.textSec; } }}
                 >
-                  {isActive && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 3, height: 18, background: T.accent, borderRadius: '0 3px 3px 0' }} />}
-                  <Icon size={15} />
-                  <span style={{ flex: 1 }}>{label}</span>
+                  {isActive && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 3, height: 20, background: T.accent, borderRadius: '0 4px 4px 0', boxShadow: `0 0 10px ${T.accent}` }} />}
+                  <Icon size={16} color={isActive ? T.accent : T.textSec} />
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
                 </button>
               );
             })}
@@ -483,16 +497,42 @@ function Sidebar({ active, setActive, isMobile, open, onClose }) {
         <div style={{ height: 20 }} />
       </div>
 
-      {/* User profile */}
-      <div style={{ padding: '12px 14px', borderTop: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-        <div style={{ width: 32, height: 32, borderRadius: T.r.sm, background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 12, flexShrink: 0 }}>
-          SA
+      {/* User profile & Logout */}
+      {currentUser && (
+        <div style={{
+          padding: '12px 14px', borderTop: `1px solid ${T.border}`,
+          display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
+          background: 'rgba(20,20,30,0.5)',
+        }}>
+          {currentUser.photoURL ? (
+            <img src={currentUser.photoURL} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `1.5px solid ${T.accent}` }} />
+          ) : (
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 13, flexShrink: 0, border: `1.5px solid ${T.accent}44` }}>
+              {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
+            </div>
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {currentUser.displayName || 'Super Admin'}
+            </div>
+            <div style={{ fontSize: 10, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {currentUser.email}
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            title="Log Out"
+            style={{
+              background: 'rgba(239, 68, 68, 0.12)', border: `1px solid rgba(239, 68, 68, 0.25)`,
+              borderRadius: T.r.md, color: T.red, cursor: 'pointer', padding: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              transition: 'all 0.15s'
+            }}
+          >
+            <LogOut size={15} />
+          </button>
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Super Admin</div>
-          <div style={{ fontSize: 10, color: T.textSec }}>Local Mode</div>
-        </div>
-      </div>
+      )}
     </aside>
   );
 }
@@ -501,12 +541,21 @@ function Sidebar({ active, setActive, isMobile, open, onClose }) {
 // HEADER
 // ═══════════════════════════════════════════════════════════════════════════
 
-function Header({ section, onMenuToggle, isMobile }) {
+function Header({ section, onMenuToggle, isMobile, currentUser }) {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+  };
+
   return (
     <div style={{
-      height: 58, background: T.bgEl, borderBottom: `1px solid ${T.border}`,
+      minHeight: 60, background: T.bgEl, borderBottom: `1px solid ${T.border}`,
       display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10,
       position: 'sticky', top: 0, zIndex: 10, flexShrink: 0,
+      paddingTop: 'max(8px, env(safe-area-inset-top))',
     }}>
       <button onClick={onMenuToggle} style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 6, borderRadius: T.r.sm, display: 'flex', flexShrink: 0 }}
         onMouseEnter={e => e.currentTarget.style.color = T.text}
@@ -515,30 +564,38 @@ function Header({ section, onMenuToggle, isMobile }) {
       </button>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: isMobile ? 14 : 15, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{LABELS[section] || 'Admin Panel'}</div>
-        <div className="ad-header-subtitle" style={{ fontSize: 11, color: T.textSec }}>Mushi QR Pro · Super Admin</div>
+        <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{LABELS[section] || 'Admin Panel'}</div>
+        <div className="ad-header-subtitle" style={{ fontSize: 11, color: T.textSec }}>Mushi QR Pro · Super Admin Dashboard</div>
       </div>
 
       <div className="ad-header-search">
         <Search size={13} color={T.textMut} />
-        <input placeholder="Search..." style={{ background: 'none', border: 'none', outline: 'none', color: T.text, fontSize: 12, fontFamily: 'inherit', width: 160 }} />
+        <input placeholder="Search admin panel..." style={{ background: 'none', border: 'none', outline: 'none', color: T.text, fontSize: 12, fontFamily: 'inherit', width: 160 }} />
         <span style={{ fontSize: 10, color: T.textMut }}>⌘K</span>
       </div>
 
-      <button style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 6, borderRadius: T.r.sm, position: 'relative', display: 'flex', flexShrink: 0 }}>
-        <Bell size={18} />
-        <div style={{ position: 'absolute', top: 4, right: 4, width: 7, height: 7, borderRadius: '50%', background: T.accent, border: `2px solid ${T.bgEl}` }} />
-      </button>
-
       <a href="/#/" style={{
         display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
-        background: T.accentLow, border: `1px solid rgba(214,0,54,0.25)`,
-        color: T.accent, borderRadius: T.r.md, padding: '6px 12px',
-        fontSize: 12, fontWeight: 700, textDecoration: 'none',
+        background: 'rgba(255,255,255,0.05)', border: `1px solid ${T.border}`,
+        color: T.textSec, borderRadius: T.r.md, padding: '6px 12px',
+        fontSize: 12, fontWeight: 700, textDecoration: 'none', transition: 'all 0.15s'
       }}>
         <ArrowLeft size={13} />
         <span className="ad-header-app-btn">App</span>
       </a>
+
+      <button
+        onClick={handleLogout}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
+          background: `${T.red}18`, border: `1px solid ${T.red}33`,
+          color: T.red, borderRadius: T.r.md, padding: '6px 12px',
+          fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+        }}
+      >
+        <LogOut size={13} />
+        <span className="ad-header-app-btn">Log Out</span>
+      </button>
     </div>
   );
 }
@@ -3498,15 +3555,92 @@ function AdminPanelInner() {
     );
   }
 
+  const handleAdminSignIn = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (e) {
+      console.error('Super admin login failed:', e);
+    }
+  };
+
   if (!currentUser || currentUser.email !== 'mabuneri143@gmail.com') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: T.bg, color: T.text, padding: 24, textAlign: 'center', fontFamily: "sans-serif" }}>
-        <Shield size={64} color={T.accent} style={{ marginBottom: 24 }} />
-        <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>Access Denied</h1>
-        <p style={{ color: T.textSec, maxWidth: 360, marginBottom: 24 }}>You must be logged in as the superadmin to access this panel.</p>
-        <button onClick={() => window.location.hash = '#/'} style={{ background: T.accent, color: '#fff', border: 'none', padding: '12px 24px', borderRadius: T.r.md, cursor: 'pointer', fontWeight: 700 }}>
-          Go to Home
-        </button>
+      <div style={{
+        display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: T.bg, color: T.text, padding: 24, textAlign: 'center', fontFamily: "'Outfit', sans-serif",
+        paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)',
+      }}>
+        <div style={{
+          background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.xl,
+          padding: '40px 32px', maxWidth: 420, width: '100%',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
+          boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+        }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: T.accentLow, border: `1px solid ${T.accent}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent }}>
+            <Shield size={34} />
+          </div>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 900, color: T.text, margin: 0 }}>Super Admin Access</h1>
+            <p style={{ color: T.textSec, fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
+              {currentUser
+                ? `Signed in as (${currentUser.email}). Only mabuneri143@gmail.com is authorized.`
+                : 'Authentication required. Only mabuneri143@gmail.com has superadmin privileges.'}
+            </p>
+          </div>
+
+          {currentUser && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: T.bgEl, padding: '10px 14px', borderRadius: T.r.md, width: '100%', boxSizing: 'border-box' }}>
+              {currentUser.photoURL ? (
+                <img src={currentUser.photoURL} alt="" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+              ) : (
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: T.accentLow, color: T.accent, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>
+                  {(currentUser.displayName || currentUser.email || 'U')[0].toUpperCase()}
+                </div>
+              )}
+              <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Current User'}</div>
+                <div style={{ fontSize: 10, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 8 }}>
+            <button
+              onClick={handleAdminSignIn}
+              style={{
+                background: T.accent, color: '#fff', border: 'none', padding: '12px 20px',
+                borderRadius: T.r.md, cursor: 'pointer', fontWeight: 700, fontSize: 14,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
+                fontFamily: 'inherit'
+              }}
+            >
+              <Zap size={16} /> Sign In as Admin (Google)
+            </button>
+            {currentUser && (
+              <button
+                onClick={() => signOut(auth)}
+                style={{
+                  background: 'transparent', color: T.red, border: `1px solid ${T.red}44`,
+                  padding: '10px 20px', borderRadius: T.r.md, cursor: 'pointer', fontWeight: 700, fontSize: 13,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
+                  fontFamily: 'inherit'
+                }}
+              >
+                <LogOut size={14} /> Switch Account / Log Out
+              </button>
+            )}
+            <button
+              onClick={() => window.location.hash = '#/'}
+              style={{
+                background: 'transparent', color: T.textSec, border: `1px solid ${T.border}`,
+                padding: '10px 20px', borderRadius: T.r.md, cursor: 'pointer', fontWeight: 600, fontSize: 13,
+                width: '100%', fontFamily: 'inherit'
+              }}
+            >
+              Back to Home App
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -3771,10 +3905,10 @@ function AdminPanelInner() {
           <div onClick={() => setSidebar(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 15 }} />
         )}
 
-        <Sidebar active={section} setActive={s => { setSection(s); if (isMobile) setSidebar(false); }} isMobile={isMobile} open={isMobile ? sidebarOpen : true} onClose={() => setSidebar(false)} />
+        <Sidebar active={section} setActive={s => { setSection(s); if (isMobile) setSidebar(false); }} isMobile={isMobile} open={isMobile ? sidebarOpen : true} onClose={() => setSidebar(false)} currentUser={currentUser} />
 
         <div className={`ad-main-content${isMobile ? ' mobile' : ''}`}>
-          <Header section={section} onMenuToggle={() => setSidebar(o => !o)} isMobile={isMobile} />
+          <Header section={section} onMenuToggle={() => setSidebar(o => !o)} isMobile={isMobile} currentUser={currentUser} />
 
           <main className="ad-scroll" style={{ flex: 1, overflowY: 'auto' }}>
             <div className="ad-main-pad ad-section-anim" key={section}>
