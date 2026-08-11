@@ -468,74 +468,109 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       paddingTop: 'max(14px, env(safe-area-inset-top))',
       paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
     }}>
-      {/* Top Section: User Profile */}
-      <div style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+      {/* Top Section: App Profile Style Card */}
+      <div style={{ padding: '12px 14px 4px', flexShrink: 0 }}>
         {currentUser && (
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0,
-            background: 'rgba(20,20,30,0.65)', backdropFilter: 'blur(10px)',
-            borderRadius: T.r.md, padding: '8px 10px', border: 'none',
+            background: 'rgba(24, 24, 36, 0.9)',
+            border: `1px solid ${T.border}`,
+            borderRadius: 16,
+            padding: '14px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
           }}>
-            <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
-              {currentUser.photoURL ? (
-                <img src={currentUser.photoURL} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #F59E0B' }} />
-              ) : (
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 13, border: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
-                  {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
+                {currentUser.photoURL ? (
+                  <img src={currentUser.photoURL} alt="" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B' }} />
+                ) : (
+                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 16, border: '2px solid rgba(245, 158, 11, 0.4)' }}>
+                    {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
+                  </div>
+                )}
+                <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
+                  <GoldenAdminBadge size={14} />
                 </div>
-              )}
-              <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
-                <GoldenAdminBadge size={12} />
               </div>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {currentUser.displayName || 'Super Admin'}
+                  </span>
+                </div>
+                <div style={{ fontSize: 11, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', marginTop: 1 }}>
+                  {currentUser.email}
+                </div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 5, background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', padding: '2px 8px', borderRadius: 100, fontSize: 9, fontWeight: 800, letterSpacing: '0.4px' }}>
+                  ★ SUPER ADMIN
+                </div>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                title="Log Out"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.12)', border: `1px solid rgba(239, 68, 68, 0.25)`,
+                  borderRadius: 10, color: T.red, cursor: 'pointer', padding: 8,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  transition: 'all 0.15s'
+                }}
+              >
+                <LogOut size={15} />
+              </button>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: T.text, display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Super Admin'}</span>
-              </div>
-              <div style={{ fontSize: 10, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {currentUser.email}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              title="Log Out"
-              style={{
-                background: 'rgba(239, 68, 68, 0.12)', border: `1px solid rgba(239, 68, 68, 0.25)`,
-                borderRadius: T.r.md, color: T.red, cursor: 'pointer', padding: 6,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                transition: 'all 0.15s'
-              }}
-            >
-              <LogOut size={14} />
-            </button>
           </div>
         )}
       </div>
 
-      {/* Nav */}
-      <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
+      {/* Nav: YouPage Grouped Card Style */}
+      <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 14px' }}>
         {NAV.map(({ section, items }) => (
-          <div key={section} style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: T.textMut, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '6px 12px 4px' }}>
+          <div key={section} style={{
+            background: 'rgba(20, 20, 32, 0.6)',
+            border: `1px solid ${T.border}`,
+            borderRadius: 16,
+            overflow: 'hidden',
+            marginBottom: 14,
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: T.textMut, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '10px 14px 6px' }}>
               {section}
             </div>
-            {items.map(({ id, icon: Icon, label }) => {
+
+            {items.map(({ id, icon: Icon, label }, index) => {
               const isActive = active === id;
               return (
-                <button key={id} onClick={() => setActive(id)} style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '9px 12px', borderRadius: 4, border: 'none', cursor: 'pointer',
-                  background: isActive ? T.sidebarAct : 'transparent',
-                  color: isActive ? T.accent : T.textSec,
-                  fontFamily: 'inherit', fontSize: 13, fontWeight: isActive ? 700 : 500,
-                  transition: 'all 0.15s ease', textAlign: 'left', position: 'relative',
-                }}
-                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = T.sidebarHov; e.currentTarget.style.color = T.text; } }}
-                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = T.textSec; } }}
-                >
-                  <Icon size={16} color={isActive ? T.accent : T.textSec} />
-                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
-                </button>
+                <React.Fragment key={id}>
+                  {index > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', marginLeft: 52 }} />}
+                  <div
+                    onClick={() => setActive(id)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '10px 14px', cursor: 'pointer',
+                      background: isActive ? T.sidebarAct : 'transparent',
+                      transition: 'background 0.15s ease',
+                    }}
+                  >
+                    <div style={{
+                      width: 30, height: 30, borderRadius: 8,
+                      background: isActive ? T.accent : 'rgba(255,255,255,0.06)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0, transition: 'all 0.15s ease',
+                    }}>
+                      <Icon size={15} color={isActive ? '#fff' : T.textSec} />
+                    </div>
+
+                    <span style={{
+                      flex: 1, fontSize: 13, fontWeight: isActive ? 700 : 500,
+                      color: isActive ? T.accent : T.text,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {label}
+                    </span>
+
+                    <ChevronRight size={14} color={isActive ? T.accent : T.textMut} />
+                  </div>
+                </React.Fragment>
               );
             })}
           </div>
