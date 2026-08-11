@@ -5,9 +5,10 @@
 
 import { db } from './firebase';
 import {
-  doc, getDoc, setDoc, deleteDoc,
+  doc, getDoc, setDoc, deleteDoc, updateDoc,
   collection, getDocs, addDoc,
   query, orderBy, limit as firestoreLimit,
+  increment,
 } from 'firebase/firestore';
 
 // ── Helper: format Firestore errors into readable messages ─────────────────
@@ -445,6 +446,225 @@ export async function getAllUserSubscriptions() {
     return list;
   } catch (e) {
     console.error('[DS] getAllUserSubscriptions:', e?.code, e?.message);
+    return [];
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// APP USER TRACKING  —  app_users/{uid}
+// Tracks every authenticated user (email, Google, etc.) for admin visibility
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Called whenever a user signs in. Creates the profile on first visit,
+ * updates lastActiveAt on subsequent visits.
+ */
+export async function trackUserProfile(user) {
+  if (!user?.uid) return;
+  try {
+    const ref = doc(db, 'app_users', user.uid);
+    const snap = await getDoc(ref);
+    const now = new Date().toISOString();
+
+    // Determine auth provider
+    const providerData = user.providerData || [];
+    const provider = providerData[0]?.providerId === 'google.com' ? 'google'
+      : providerData[0]?.providerId === 'password' ? 'email'
+      : providerData[0]?.providerId || 'unknown';
+
+    // Device info
+    const deviceInfo = {
+      userAgent: navigator.userAgent || '',
+      platform: navigator.platform || navigator.userAgentData?.platform || '',
+      language: navigator.language || '',
+      screenWidth: window.screen?.width || 0,
+      screenHeight: window.screen?.height || 0,
+    };
+
+    if (snap.exists()) {
+      // Existing user — update last active + visit count
+      await updateDoc(ref, {
+        lastActiveAt: now,
+        displayName: user.displayName || snap.data().displayName || '',
+        photoURL: user.photoURL || snap.data().photoURL || '',
+        deviceInfo,
+        visitCount: increment(1),
+      });
+    } else {
+      // New user — create full profile
+      await setDoc(ref, {
+        uid: user.uid,
+        email: user.email || '',
+        displayName: user.displayName || '',
+        photoURL: user.photoURL || '',
+        provider,
+        status: 'active',
+        createdAt: now,
+        lastActiveAt: now,
+        deviceInfo,
+        visitCount: 1,
+      });
+    }
+  } catch (e) {
+    // Non-fatal — don't block auth flow
+    console.warn('[DS] trackUserProfile:', e?.code, e?.message);
+  }
+}
+
+/**
+ * Fetch all registered users for the admin panel
+ */
+export async function getAllAppUsers() {
+  try {
+    const snap = await getDocs(collection(db, 'app_users'));
+    const list = [];
+    snap.forEach(d => list.push({ ...d.data(), uid: d.id }));
+    return list;
+  } catch (e) {
+    console.error('[DS] getAllAppUsers:', e?.code, e?.message);
+    return [];
+  }
+}
+
+/**
+ * Update a user's status (e.g. 'active', 'blocked')
+ */
+export async function updateUserStatus(uid, status) {
+  try {
+    await updateDoc(doc(db, 'app_users', uid), {
+      status,
+      _statusUpdatedAt: new Date().toISOString(),
+    });
+    await _audit('USER_STATUS_UPDATED', { uid, status });
+  } catch (e) {
+    console.error('[DS] updateUserStatus:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
+}
+
+/**
+ * Delete a user's admin-visible profile (doesn't delete Firebase Auth account)
+ */
+export async function deleteUserProfile(uid) {
+  try {
+    await deleteDoc(doc(db, 'app_users', uid));
+    await _audit('USER_PROFILE_DELETED', { uid });
+  } catch (e) {
+    console.error('[DS] deleteUserProfile:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
+}
+
+/**
+ * Get per-user stats (QR history count + saved count) from their Firestore subcollections
+ */
+export async function getUserActivityStats(uid) {
+  try {
+    const [historySnap, savedSnap] = await Promise.all([
+      getDocs(collection(db, 'users', uid, 'history')),
+      getDocs(collection(db, 'users', uid, 'saved')),
+    ]);
+    return {
+      historyCount: historySnap.size,
+      savedCount: savedSnap.size,
+    };
+  } catch (e) {
+    console.warn('[DS] getUserActivityStats:', e?.code, e?.message);
+    return { historyCount: 0, savedCount: 0 };
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANONYMOUS VISITOR TRACKING  —  app_visitors/{deviceId}
+// Tracks devices that open the app, even without signing in
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Generate or retrieve a persistent device fingerprint
+ */
+function getDeviceId() {
+  const KEY = 'mushiqr_device_id';
+  let id = localStorage.getItem(KEY);
+  if (!id) {
+    id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem(KEY, id);
+  }
+  return id;
+}
+
+/**
+ * Called on every app startup to count device visits.
+ * If the user later registers, linkVisitorToUser() marks them as registered.
+ */
+export async function trackAnonymousVisitor() {
+  try {
+    const deviceId = getDeviceId();
+    const ref = doc(db, 'app_visitors', deviceId);
+    const snap = await getDoc(ref);
+    const now = new Date().toISOString();
+
+    const deviceInfo = {
+      userAgent: navigator.userAgent || '',
+      platform: navigator.platform || navigator.userAgentData?.platform || '',
+      language: navigator.language || '',
+      screenWidth: window.screen?.width || 0,
+      screenHeight: window.screen?.height || 0,
+      isMobile: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent),
+    };
+
+    if (snap.exists()) {
+      await updateDoc(ref, {
+        lastSeenAt: now,
+        visitCount: increment(1),
+        deviceInfo,
+      });
+    } else {
+      await setDoc(ref, {
+        deviceId,
+        firstSeenAt: now,
+        lastSeenAt: now,
+        visitCount: 1,
+        isRegistered: false,
+        registeredUid: null,
+        deviceInfo,
+      });
+    }
+  } catch (e) {
+    // Non-fatal
+    console.warn('[DS] trackAnonymousVisitor:', e?.code, e?.message);
+  }
+}
+
+/**
+ * When a user signs in, link their visitor record to their uid
+ */
+export async function linkVisitorToUser(uid) {
+  try {
+    const deviceId = getDeviceId();
+    const ref = doc(db, 'app_visitors', deviceId);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      await updateDoc(ref, {
+        isRegistered: true,
+        registeredUid: uid,
+      });
+    }
+  } catch (e) {
+    console.warn('[DS] linkVisitorToUser:', e?.code, e?.message);
+  }
+}
+
+/**
+ * Fetch all visitor records for admin panel
+ */
+export async function getAllVisitors() {
+  try {
+    const snap = await getDocs(collection(db, 'app_visitors'));
+    const list = [];
+    snap.forEach(d => list.push({ ...d.data(), id: d.id }));
+    return list;
+  } catch (e) {
+    console.error('[DS] getAllVisitors:', e?.code, e?.message);
     return [];
   }
 }

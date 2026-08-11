@@ -2273,25 +2273,566 @@ function DeveloperPanel({ currentUser }) {
 // SIMPLE FUNCTIONAL PANELS
 // ═══════════════════════════════════════════════════════════════════════════
 
-function UsersPanel({ currentUser }) {
+function UsersPanel() {
+  const toast = useToast();
+  const [appUsers, setAppUsers] = useState([]);
+  const [visitors, setVisitors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all'); // all, google, email, active, blocked
+  const [sortBy, setSortBy] = useState('newest'); // newest, oldest, active, name
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userStats, setUserStats] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [showVisitors, setShowVisitors] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Load users and visitors on mount
+  useEffect(() => {
+    async function load() {
+      try {
+        const [users, vis] = await Promise.all([
+          DS.getAllAppUsers(),
+          DS.getAllVisitors(),
+        ]);
+        setAppUsers(users);
+        setVisitors(vis);
+      } catch (e) {
+        toast?.('Failed to load users: ' + e.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  // Refresh helper
+  const refresh = async () => {
+    setLoading(true);
+    try {
+      const [users, vis] = await Promise.all([
+        DS.getAllAppUsers(),
+        DS.getAllVisitors(),
+      ]);
+      setAppUsers(users);
+      setVisitors(vis);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Open user detail
+  const openDetail = async (user) => {
+    setSelectedUser(user);
+    setDetailLoading(true);
+    setUserStats(null);
+    try {
+      const stats = await DS.getUserActivityStats(user.uid);
+      setUserStats(stats);
+    } catch { setUserStats({ historyCount: 0, savedCount: 0 }); }
+    setDetailLoading(false);
+  };
+
+  // Block / Unblock
+  const toggleStatus = async (uid, currentStatus) => {
+    setActionLoading(true);
+    try {
+      const newStatus = currentStatus === 'blocked' ? 'active' : 'blocked';
+      await DS.updateUserStatus(uid, newStatus);
+      setAppUsers(prev => prev.map(u => u.uid === uid ? { ...u, status: newStatus } : u));
+      if (selectedUser?.uid === uid) setSelectedUser(prev => ({ ...prev, status: newStatus }));
+      toast?.(`User ${newStatus === 'blocked' ? 'blocked' : 'unblocked'}`, 'success');
+    } catch (e) {
+      toast?.('Failed: ' + e.message, 'error');
+    }
+    setActionLoading(false);
+  };
+
+  // Delete user profile
+  const handleDelete = async (uid) => {
+    if (!confirm('Remove this user from admin view? This does NOT delete their Firebase Auth account.')) return;
+    setActionLoading(true);
+    try {
+      await DS.deleteUserProfile(uid);
+      setAppUsers(prev => prev.filter(u => u.uid !== uid));
+      setSelectedUser(null);
+      toast?.('User profile removed', 'success');
+    } catch (e) {
+      toast?.('Failed: ' + e.message, 'error');
+    }
+    setActionLoading(false);
+  };
+
+  // CSV export
+  const exportCSV = () => {
+    const header = 'Name,Email,Provider,Status,Joined,Last Active,Visits\n';
+    const rows = filteredUsers.map(u =>
+      `"${u.displayName || ''}","${u.email || ''}","${u.provider || ''}","${u.status || ''}","${u.createdAt || ''}","${u.lastActiveAt || ''}","${u.visitCount || 0}"`
+    ).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `mushiqr_users_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+    toast?.('CSV exported', 'success');
+  };
+
+  // Filter & Sort
+  const filteredUsers = appUsers
+    .filter(u => {
+      if (filter === 'google') return u.provider === 'google';
+      if (filter === 'email') return u.provider === 'email';
+      if (filter === 'active') return u.status === 'active';
+      if (filter === 'blocked') return u.status === 'blocked';
+      return true;
+    })
+    .filter(u => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (u.displayName || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+    })
+    .sort((a, b) => {
+      if (sortBy === 'newest') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      if (sortBy === 'oldest') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      if (sortBy === 'active') return new Date(b.lastActiveAt || 0) - new Date(a.lastActiveAt || 0);
+      if (sortBy === 'name') return (a.displayName || '').localeCompare(b.displayName || '');
+      return 0;
+    });
+
+  // Stats calculations
+  const now = Date.now();
+  const activeCount = appUsers.filter(u => u.lastActiveAt && (now - new Date(u.lastActiveAt).getTime()) < 7 * 86400000).length;
+  const newCount = appUsers.filter(u => u.createdAt && (now - new Date(u.createdAt).getTime()) < 30 * 86400000).length;
+  const anonVisitors = visitors.filter(v => !v.isRegistered).length;
+  const mobileVisitors = visitors.filter(v => v.deviceInfo?.isMobile).length;
+  const desktopVisitors = visitors.filter(v => !v.deviceInfo?.isMobile).length;
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 14 }}>
+        <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
+        <span style={{ fontSize: 14, color: T.textSec }}>Loading users...</span>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <AdminCard title="Registered Account" subtitle="Authenticated user session via Firebase Auth">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '8px 0' }}>
-          {currentUser?.photoURL ? (
-            <img src={currentUser.photoURL} alt="User" style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${T.accent}` }} />
-          ) : (
-            <div style={{ width: 52, height: 52, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 20 }}>
-              {currentUser?.displayName ? currentUser.displayName[0].toUpperCase() : 'U'}
-            </div>
-          )}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>{currentUser?.displayName || 'Mushi User'}</div>
-            <div style={{ fontSize: 13, color: T.textSec, fontFamily: 'monospace' }}>{currentUser?.email}</div>
+      {/* ─── Stat Cards ─── */}
+      <div className="ad-stat-grid">
+        <StatCard icon={Users} label="Total Users" value={appUsers.length} color={T.purple} trendLabel="registered accounts" />
+        <StatCard icon={Activity} label="Active (7d)" value={activeCount} color={T.green} trendLabel="last 7 days" />
+        <StatCard icon={Globe} label="Anonymous Visitors" value={anonVisitors} color={T.orange} trendLabel="unregistered devices" />
+        <StatCard icon={TrendingUp} label="New (30d)" value={newCount} color={T.blue} trendLabel="last 30 days" />
+      </div>
+
+      {/* ─── Users Table Card ─── */}
+      <AdminCard
+        title={`Registered Users (${filteredUsers.length})`}
+        subtitle="All authenticated users tracked via Firebase Auth"
+        right={
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Btn variant="ghost" size="sm" onClick={refresh} icon={<RefreshCw size={12} />}>Refresh</Btn>
+            <Btn variant="ghost" size="sm" onClick={exportCSV} icon={<Download size={12} />}>CSV</Btn>
           </div>
-          <Badge color={T.green}>Active Session</Badge>
+        }
+        noPadding
+      >
+        {/* Search & Filters */}
+        <div style={{ padding: '14px 20px', borderBottom: `1px solid ${T.border}`, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: '6px 12px', flex: 1, minWidth: 180 }}>
+            <Search size={14} color={T.textMut} />
+            <input
+              placeholder="Search by name or email..."
+              value={search} onChange={e => setSearch(e.target.value)}
+              style={{ background: 'none', border: 'none', outline: 'none', color: T.text, fontSize: 12, fontFamily: 'inherit', width: '100%' }}
+            />
+            {search && (
+              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: T.textMut, cursor: 'pointer', padding: 0, lineHeight: 0 }}>
+                <X size={12} />
+              </button>
+            )}
+          </div>
+
+          {/* Filter pills */}
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {[
+              { id: 'all', label: 'All' },
+              { id: 'google', label: 'Google' },
+              { id: 'email', label: 'Email' },
+              { id: 'active', label: 'Active' },
+              { id: 'blocked', label: 'Blocked' },
+            ].map(f => (
+              <button key={f.id} onClick={() => setFilter(f.id)} style={{
+                padding: '4px 12px', borderRadius: 100, border: 'none', cursor: 'pointer',
+                fontSize: 11, fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.12s',
+                background: filter === f.id ? T.accentLow : 'rgba(255,255,255,0.04)',
+                color: filter === f.id ? T.accent : T.textSec,
+              }}>{f.label}</button>
+            ))}
+          </div>
+
+          {/* Sort */}
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{
+            background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md,
+            color: T.text, fontSize: 11, fontWeight: 600, padding: '5px 10px', cursor: 'pointer', outline: 'none', fontFamily: 'inherit',
+          }}>
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="active">Most Active</option>
+            <option value="name">Name A-Z</option>
+          </select>
         </div>
+
+        {/* Table */}
+        {filteredUsers.length === 0 ? (
+          <EmptyState icon={Users} title="No users found" desc={search ? 'Try a different search query.' : 'Users who sign in to the app will appear here.'} />
+        ) : (
+          <div className="ad-table-wrap">
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${T.border}` }}>
+                  {['User', 'Provider', 'Status', 'Joined', 'Last Active', 'Visits'].map(h => (
+                    <th key={h} style={{ textAlign: 'left', padding: '10px 16px', fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map(u => (
+                  <tr key={u.uid}
+                    onClick={() => openDetail(u)}
+                    style={{ borderBottom: `1px solid ${T.border}`, cursor: 'pointer', transition: 'background 0.1s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = T.bgHov}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    {/* Avatar + Name + Email */}
+                    <td style={{ padding: '10px 16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {u.photoURL ? (
+                          <img src={u.photoURL} alt="" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        ) : (
+                          <div style={{ width: 34, height: 34, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 13, flexShrink: 0 }}>
+                            {(u.displayName || u.email || 'U')[0].toUpperCase()}
+                          </div>
+                        )}
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>
+                            {u.displayName || 'Anonymous'}
+                          </div>
+                          <div style={{ fontSize: 11, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>
+                            {u.email || '—'}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Provider */}
+                    <td style={{ padding: '10px 16px' }}>
+                      <Badge color={u.provider === 'google' ? '#4285F4' : u.provider === 'email' ? T.purple : T.textMut}>
+                        {u.provider === 'google' ? '● Google' : u.provider === 'email' ? '● Email' : u.provider || '?'}
+                      </Badge>
+                    </td>
+
+                    {/* Status */}
+                    <td style={{ padding: '10px 16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ width: 7, height: 7, borderRadius: '50%', background: u.status === 'blocked' ? T.red : T.green }} />
+                        <span style={{ fontSize: 12, color: u.status === 'blocked' ? T.red : T.green, fontWeight: 700, textTransform: 'capitalize' }}>
+                          {u.status || 'active'}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Joined */}
+                    <td style={{ padding: '10px 16px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
+                      {fmtDate(u.createdAt)}
+                    </td>
+
+                    {/* Last Active */}
+                    <td style={{ padding: '10px 16px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
+                      {timeAgo(u.lastActiveAt)}
+                    </td>
+
+                    {/* Visits */}
+                    <td style={{ padding: '10px 16px', fontSize: 12, fontWeight: 700, color: T.text }}>
+                      {u.visitCount || 1}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </AdminCard>
+
+      {/* ─── Anonymous Visitors Section ─── */}
+      <AdminCard
+        title={`Anonymous Visitors (${visitors.length})`}
+        subtitle="Devices that opened the app — includes unregistered users"
+        right={
+          <button onClick={() => setShowVisitors(v => !v)} style={{
+            background: 'none', border: `1px solid ${T.border}`, borderRadius: T.r.md,
+            color: T.textSec, cursor: 'pointer', padding: '5px 12px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            {showVisitors ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+            {showVisitors ? 'Collapse' : 'Expand'}
+          </button>
+        }
+      >
+        {/* Summary always visible */}
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: showVisitors ? 16 : 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 40, height: 40, borderRadius: T.r.md, background: `${T.blue}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Globe size={18} color={T.blue} />
+            </div>
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: T.text }}>{visitors.length}</div>
+              <div style={{ fontSize: 10, color: T.textSec }}>Total Devices</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 40, height: 40, borderRadius: T.r.md, background: `${T.green}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CheckCircle size={18} color={T.green} />
+            </div>
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: T.text }}>{visitors.filter(v => v.isRegistered).length}</div>
+              <div style={{ fontSize: 10, color: T.textSec }}>Converted to Users</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 40, height: 40, borderRadius: T.r.md, background: `${T.orange}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Monitor size={18} color={T.orange} />
+            </div>
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: T.text }}>{desktopVisitors}</div>
+              <div style={{ fontSize: 10, color: T.textSec }}>Desktop</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 40, height: 40, borderRadius: T.r.md, background: `${T.purple}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Cpu size={18} color={T.purple} />
+            </div>
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: T.text }}>{mobileVisitors}</div>
+              <div style={{ fontSize: 10, color: T.textSec }}>Mobile</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Platform breakdown donut */}
+        {showVisitors && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+              <DonutSVG segments={[
+                { label: 'Mobile', value: mobileVisitors, color: T.purple },
+                { label: 'Desktop', value: desktopVisitors, color: T.blue },
+                { label: 'Registered', value: visitors.filter(v => v.isRegistered).length, color: T.green },
+              ]} size={130} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[
+                  { l: 'Mobile Devices', v: mobileVisitors, c: T.purple },
+                  { l: 'Desktop Devices', v: desktopVisitors, c: T.blue },
+                  { l: 'Converted to Users', v: visitors.filter(v => v.isRegistered).length, c: T.green },
+                  { l: 'Unregistered', v: anonVisitors, c: T.orange },
+                ].map(s => (
+                  <div key={s.l} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 9, height: 9, borderRadius: '50%', background: s.c, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: T.textSec, minWidth: 130 }}>{s.l}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{s.v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Visitor list table */}
+            <div className="ad-table-wrap" style={{ marginTop: 8 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${T.border}` }}>
+                    {['Device ID', 'Platform', 'First Seen', 'Last Seen', 'Visits', 'Registered'].map(h => (
+                      <th key={h} style={{ textAlign: 'left', padding: '8px 14px', fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {visitors.slice(0, 50).map(v => (
+                    <tr key={v.id || v.deviceId} style={{ borderBottom: `1px solid ${T.border}` }}
+                      onMouseEnter={e => e.currentTarget.style.background = T.bgHov}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <td style={{ padding: '8px 14px', fontSize: 11, color: T.textSec, fontFamily: 'monospace' }}>
+                        {(v.deviceId || v.id || '').slice(0, 20)}...
+                      </td>
+                      <td style={{ padding: '8px 14px' }}>
+                        <Badge color={v.deviceInfo?.isMobile ? T.purple : T.blue}>
+                          {v.deviceInfo?.isMobile ? 'Mobile' : 'Desktop'}
+                        </Badge>
+                      </td>
+                      <td style={{ padding: '8px 14px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
+                        {fmtDate(v.firstSeenAt)}
+                      </td>
+                      <td style={{ padding: '8px 14px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
+                        {timeAgo(v.lastSeenAt)}
+                      </td>
+                      <td style={{ padding: '8px 14px', fontSize: 12, fontWeight: 700, color: T.text }}>
+                        {v.visitCount || 1}
+                      </td>
+                      <td style={{ padding: '8px 14px' }}>
+                        {v.isRegistered ? (
+                          <Badge color={T.green}>Yes</Badge>
+                        ) : (
+                          <Badge color={T.textMut}>No</Badge>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {visitors.length > 50 && (
+                <div style={{ padding: '12px 14px', fontSize: 11, color: T.textMut, textAlign: 'center' }}>
+                  Showing first 50 of {visitors.length} visitors
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </AdminCard>
+
+      {/* ─── User Detail Modal ─── */}
+      {selectedUser && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+          onClick={() => setSelectedUser(null)}
+        >
+          <div onClick={e => e.stopPropagation()} style={{
+            background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.xl,
+            width: '100%', maxWidth: 520, maxHeight: '85vh', overflowY: 'auto',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.7)',
+          }}>
+            {/* Modal Header */}
+            <div style={{ padding: '20px 24px', borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>User Details</div>
+              <button onClick={() => setSelectedUser(null)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: T.textSec, cursor: 'pointer', borderRadius: T.r.sm, padding: 6, lineHeight: 0 }}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ padding: '24px' }}>
+              {/* Profile card */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+                {selectedUser.photoURL ? (
+                  <img src={selectedUser.photoURL} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${T.accent}` }} />
+                ) : (
+                  <div style={{ width: 64, height: 64, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 24 }}>
+                    {(selectedUser.displayName || selectedUser.email || 'U')[0].toUpperCase()}
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: T.text }}>{selectedUser.displayName || 'Anonymous'}</div>
+                  <div style={{ fontSize: 13, color: T.textSec, fontFamily: 'monospace', marginTop: 2 }}>{selectedUser.email || '—'}</div>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                    <Badge color={selectedUser.provider === 'google' ? '#4285F4' : T.purple}>
+                      {selectedUser.provider === 'google' ? 'Google' : selectedUser.provider === 'email' ? 'Email' : selectedUser.provider || '?'}
+                    </Badge>
+                    <Badge color={selectedUser.status === 'blocked' ? T.red : T.green}>
+                      {selectedUser.status || 'active'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Info grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+                {[
+                  { icon: Calendar, label: 'Joined', value: fmtDate(selectedUser.createdAt), color: T.blue },
+                  { icon: Clock, label: 'Last Active', value: timeAgo(selectedUser.lastActiveAt), color: T.green },
+                  { icon: Eye, label: 'Total Visits', value: selectedUser.visitCount || 1, color: T.purple },
+                  { icon: Globe, label: 'Language', value: selectedUser.deviceInfo?.language || '—', color: T.orange },
+                ].map(item => (
+                  <div key={item.label} style={{ background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                      <item.icon size={13} color={item.color} />
+                      <span style={{ fontSize: 10, fontWeight: 700, color: T.textMut, textTransform: 'uppercase' }}>{item.label}</span>
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{item.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Activity stats */}
+              <div style={{ background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: 16, marginBottom: 24 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.5px' }}>
+                  App Activity
+                </div>
+                {detailLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: T.textSec, fontSize: 12 }}>
+                    <RefreshCw size={13} style={{ animation: 'adSpin 0.7s linear infinite' }} /> Loading...
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 20 }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: T.purple }}>{userStats?.historyCount ?? '—'}</div>
+                      <div style={{ fontSize: 10, color: T.textSec, marginTop: 2 }}>QR Codes Created</div>
+                    </div>
+                    <div style={{ width: 1, background: T.border }} />
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: T.blue }}>{userStats?.savedCount ?? '—'}</div>
+                      <div style={{ fontSize: 10, color: T.textSec, marginTop: 2 }}>Saved Items</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Device info */}
+              {selectedUser.deviceInfo && (
+                <div style={{ background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: 16, marginBottom: 24 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.5px' }}>
+                    Device Info
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {[
+                      { l: 'Platform', v: selectedUser.deviceInfo.platform || '—' },
+                      { l: 'Screen', v: selectedUser.deviceInfo.screenWidth ? `${selectedUser.deviceInfo.screenWidth} × ${selectedUser.deviceInfo.screenHeight}` : '—' },
+                      { l: 'User Agent', v: (selectedUser.deviceInfo.userAgent || '—').slice(0, 80) + (selectedUser.deviceInfo.userAgent?.length > 80 ? '...' : '') },
+                    ].map(d => (
+                      <div key={d.l} style={{ display: 'flex', gap: 10 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: T.textSec, minWidth: 80 }}>{d.l}</span>
+                        <span style={{ fontSize: 11, color: T.text, wordBreak: 'break-word' }}>{d.v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* UID */}
+              <div style={{ background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: '10px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Key size={13} color={T.textMut} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: T.textMut }}>UID</span>
+                <span style={{ fontSize: 11, color: T.textSec, fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedUser.uid}</span>
+                <button onClick={() => { navigator.clipboard.writeText(selectedUser.uid); toast?.('UID copied', 'info'); }}
+                  style={{ background: 'none', border: 'none', color: T.textMut, cursor: 'pointer', padding: 2, lineHeight: 0 }}>
+                  <Copy size={13} />
+                </button>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Btn
+                  variant={selectedUser.status === 'blocked' ? 'success' : 'danger'}
+                  onClick={() => toggleStatus(selectedUser.uid, selectedUser.status)}
+                  disabled={actionLoading}
+                  icon={selectedUser.status === 'blocked' ? <CheckCircle size={13} /> : <XCircle size={13} />}
+                >
+                  {selectedUser.status === 'blocked' ? 'Unblock User' : 'Block User'}
+                </Btn>
+                <Btn variant="danger" onClick={() => handleDelete(selectedUser.uid)} disabled={actionLoading} icon={<Trash2 size={13} />}>
+                  Remove
+                </Btn>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

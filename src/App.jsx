@@ -86,6 +86,7 @@ import AuthDropdownPanel from './components/AuthDropdownPanel';
 import GoldenAdminBadge from './components/GoldenAdminBadge';
 import { auth, db } from './services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { trackUserProfile, trackAnonymousVisitor, linkVisitorToUser } from './services/adminDataService';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import BatchPage from './components/BatchPage';
 import BarcodePage from './components/BarcodePage';
@@ -961,8 +962,13 @@ export default function App() {
       setCurrentUser(user);
       if (user) {
         syncUserFirestoreData();
+        // Track user profile for admin panel visibility
+        trackUserProfile(user);
+        linkVisitorToUser(user.uid);
       }
     });
+    // Track every app open as a visitor (even if not signed in)
+    trackAnonymousVisitor();
   }, []);
   // Pre-create organized folder structure on startup
   useEffect(() => {
