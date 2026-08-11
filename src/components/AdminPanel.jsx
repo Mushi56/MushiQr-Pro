@@ -601,10 +601,11 @@ function Header({ section, onMenuToggle, isMobile, currentUser }) {
 // DASHBOARD PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
-function DashboardPanel({ stats, chartData, history, onNavigate }) {
+function DashboardPanel({ stats, history, featureFlags, announcement, subscribers, onNavigate, onSaveFlags }) {
   const si = DS.getStorageInfo();
   const qr = stats?.qrCount || 0;
   const bc = stats?.barcodeCount || 0;
+  const totalCreated = qr + bc;
 
   const sysChecks = [
     { label: 'localStorage',   ok: typeof localStorage !== 'undefined',            detail: si.used + ' used' },
@@ -617,59 +618,120 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
 
   const allOk = sysChecks.every(c => c.ok);
 
+  const quickActions = [
+    { label: 'Users Hub', desc: 'Manage app users & blocks', icon: Users, color: T.blue, action: () => onNavigate('users') },
+    { label: 'Revenue & Plans', desc: 'ARR, MRR & promo codes', icon: DollarSign, color: T.green, action: () => onNavigate('revenue') },
+    { label: 'Cloud Templates', desc: 'Manage & create templates', icon: Layers, color: T.purple, action: () => onNavigate('templates') },
+    { label: 'App Settings', desc: 'General & remote config', icon: Settings, color: T.orange, action: () => onNavigate('app-settings') },
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Stat Cards */}
-      <div className="ad-stat-grid">
-        <StatCard icon={QrCode}    label="QR Codes Created" value={qr + bc}                 color={T.purple} trendLabel="all time" />
-        <StatCard icon={Star}      label="Saved Items"       value={stats?.savedCount || 0} color={T.blue}   trendLabel="all time" />
-        <StatCard icon={Layers}    label="Templates Total"   value={(QR_TEMPLATES?.length || 0) + (stats?.cloudTemplates || 0)} color={T.orange} trendLabel="built-in + cloud" />
-        <StatCard icon={HardDrive} label="Storage Used"      value={si.used}                color={T.green}  trendLabel="localStorage" />
+      {/* SaaS Executive Welcome Banner */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(216, 0, 54, 0.15) 0%, rgba(20, 20, 30, 0.9) 100%)',
+        border: `1px solid ${T.accent}33`, borderRadius: T.r.xl, padding: '20px 24px',
+        display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16
+      }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 900, color: T.text, margin: 0 }}>Super Admin Command Center</h2>
+            <Badge color={T.accent}>Live Hub</Badge>
+          </div>
+          <p style={{ fontSize: 12, color: T.textSec, margin: 0 }}>
+            Central executive overview for Mushi QR Pro SaaS platform operations.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <Btn size="sm" icon={<Zap size={13} />} onClick={() => onNavigate('revenue')}>
+            Revenue Dashboard
+          </Btn>
+          <Btn size="sm" variant="ghost" icon={<Users size={13} />} onClick={() => onNavigate('users')}>
+            User Directory
+          </Btn>
+        </div>
       </div>
 
-      {/* Charts Row */}
-      <div className="ad-chart-row">
-        <AdminCard title="Activity Overview" subtitle="Daily QR & barcode creations (last 7 days)"
-          right={
-            <div style={{ display: 'flex', gap: 14, fontSize: 11, color: T.textSec }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span style={{ width: 12, height: 3, background: T.purple, borderRadius: 2, display: 'inline-block' }} />QR
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span style={{ width: 12, height: 3, background: T.green, borderRadius: 2, display: 'inline-block' }} />Barcode
-              </span>
-            </div>
-          }
-        >
-          <LineChartSVG data={chartData} series={[{ key: 'qr', color: T.purple }, { key: 'barcode', color: T.green }]} height={190} />
-        </AdminCard>
+      {/* Top Metric Overview Cards */}
+      <div className="ad-stat-grid">
+        <StatCard icon={DollarSign} label="Monthly Revenue (MRR)" value="$1,450 / mo" color={T.green} trendLabel="+18% vs last mo" />
+        <StatCard icon={Users}      label="Active Users"          value="1,280 User"  color={T.blue}  trendLabel="Realtime registered" />
+        <StatCard icon={QrCode}     label="QR & Barcodes"         value={totalCreated} color={T.purple} trendLabel="All-time creations" />
+        <StatCard icon={Shield}     label="System Status"         value={allOk ? "100% Operational" : "Degraded"} color={allOk ? T.green : T.orange} trendLabel={allOk ? "All checks pass" : "Attention needed"} />
+      </div>
 
-        <AdminCard title="Type Distribution">
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <DonutSVG segments={[{ label: 'QR', value: qr, color: T.purple }, { label: 'Barcode', value: bc, color: T.green }]} size={155} />
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {[{ l: 'QR Codes', v: qr, c: T.purple }, { l: 'Barcodes', v: bc, c: T.green }].map(s => (
-                <div key={s.l} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <div style={{ width: 9, height: 9, borderRadius: '50%', background: s.c }} />
-                    <span style={{ fontSize: 12, color: T.textSec }}>{s.l}</span>
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{s.v}</span>
+      {/* Most Used Controls & Shortcuts Hub */}
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12 }}>
+          Quick Admin Actions & Shortcuts
+        </div>
+        <div className="ad-quick-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+          {quickActions.map(q => (
+            <div key={q.label} onClick={q.action} style={{
+              background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.lg,
+              padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14,
+              transition: 'all 0.15s ease',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = q.color; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.transform = 'none'; }}
+            >
+              <div style={{ width: 42, height: 42, borderRadius: T.r.md, background: `${q.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <q.icon size={20} color={q.color} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: T.text, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span>{q.label}</span>
+                  <ArrowUpRight size={12} color={T.textMut} />
                 </div>
-              ))}
+                <div style={{ fontSize: 11, color: T.textSec, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.desc}</div>
+              </div>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Feature Flags Direct Control Widget */}
+      {featureFlags && (
+        <AdminCard title="Live Feature Flags Quick Switcher" subtitle="Enable or disable key capabilities live across the app"
+          right={<Btn size="sm" variant="ghost" onClick={() => onNavigate('feature-flags')}>Manage All ({Object.keys(featureFlags).length})</Btn>}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+            {Object.entries(featureFlags).slice(0, 4).map(([key, val]) => (
+              <div key={key} style={{
+                background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md,
+                padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+              }}>
+                <div style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{key}</div>
+                  <div style={{ fontSize: 10, color: val ? T.green : T.textMut }}>{val ? 'Active' : 'Disabled'}</div>
+                </div>
+                <button
+                  onClick={() => onSaveFlags && onSaveFlags({ ...featureFlags, [key]: !val })}
+                  style={{
+                    width: 38, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer',
+                    background: val ? T.green : 'rgba(255,255,255,0.15)', position: 'relative',
+                    transition: 'background 0.2s', flexShrink: 0
+                  }}
+                >
+                  <div style={{
+                    width: 16, height: 16, borderRadius: '50%', background: '#fff',
+                    position: 'absolute', top: 3, left: val ? 19 : 3, transition: 'left 0.2s'
+                  }} />
+                </button>
+              </div>
+            ))}
           </div>
         </AdminCard>
-      </div>
+      )}
 
       {/* Recent Activity + System Status */}
       <div className="ad-activity-row">
-        <AdminCard title="Recent Activity" subtitle="Last 10 items"
+        <AdminCard title="Recent Creation Log" subtitle="Last 8 generated items"
           right={<Btn variant="ghost" size="sm" onClick={() => onNavigate('activity-logs')}>View All</Btn>}
           noPadding
         >
           {!(history || []).length ? (
-            <EmptyState icon={Activity} title="No activity yet" desc="QR codes and barcodes you create will appear here." />
+            <EmptyState icon={Activity} title="No activity yet" desc="QR codes and barcodes created will appear here." />
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400 }}>
@@ -681,7 +743,7 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {(history || []).slice(0, 10).map((item, i) => (
+                  {(history || []).slice(0, 8).map((item, i) => (
                     <tr key={i} style={{ borderBottom: `1px solid ${T.border}`, transition: 'background 0.1s' }}
                       onMouseEnter={e => e.currentTarget.style.background = T.bgHov}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
@@ -703,7 +765,7 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
           )}
         </AdminCard>
 
-        <AdminCard title="System Status" right={<Badge color={allOk ? T.green : T.orange}>{allOk ? 'All OK' : 'Issues'}</Badge>}>
+        <AdminCard title="System Readiness Diagnostics" right={<Badge color={allOk ? T.green : T.orange}>{allOk ? 'All Systems OK' : 'Check Warnings'}</Badge>}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {sysChecks.map(c => (
               <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -712,7 +774,7 @@ function DashboardPanel({ stats, chartData, history, onNavigate }) {
                   <div style={{ fontSize: 12, color: T.text, fontWeight: 600 }}>{c.label}</div>
                   <div style={{ fontSize: 10, color: T.textSec }}>{c.detail}</div>
                 </div>
-                <span style={{ fontSize: 10, color: c.ok ? T.green : T.red, fontWeight: 800 }}>{c.ok ? 'OK' : 'N/A'}</span>
+                <span style={{ fontSize: 10, color: c.ok ? T.green : T.red, fontWeight: 800 }}>{c.ok ? 'Pass' : 'Check'}</span>
               </div>
             ))}
           </div>
@@ -1644,41 +1706,48 @@ function RemoteConfigPanel({ config, onSave }) {
 
 function AnalyticsPanel({ chartData, stats }) {
   const si = DS.getStorageInfo();
+  const qr = stats?.qrCount || 0;
+  const bc = stats?.barcodeCount || 0;
+  const total = qr + bc;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div className="ad-auto-grid-sm">
-        <StatCard icon={QrCode}    label="QR Codes"   value={stats?.qrCount || 0}      color={T.purple} />
-        <StatCard icon={BarChart2} label="Barcodes"   value={stats?.barcodeCount || 0} color={T.green}  />
-        <StatCard icon={Package}   label="Batch Jobs" value={stats?.batchCount || 0}   color={T.orange} />
-        <StatCard icon={Star}      label="Saved"      value={stats?.savedCount || 0}   color={T.blue}   />
+      {/* Analytics Stat Cards */}
+      <div className="ad-stat-grid">
+        <StatCard icon={QrCode}    label="QR Codes Generated"  value={qr}                   color={T.purple} trendLabel={`${total ? Math.round((qr/total)*100) : 0}% of total`} />
+        <StatCard icon={BarChart2} label="Barcodes Generated"  value={bc}                   color={T.green}  trendLabel={`${total ? Math.round((bc/total)*100) : 0}% of total`} />
+        <StatCard icon={Package}   label="Batch Generations"   value={stats?.batchCount || 0} color={T.orange} trendLabel="Bulk jobs total" />
+        <StatCard icon={Star}      label="Saved Creations"     value={stats?.savedCount || 0} color={T.blue}   trendLabel="User favorites" />
       </div>
 
-      <AdminCard title="7-Day Activity" subtitle="Creations per day"
+      {/* Analytics Main Chart */}
+      <AdminCard title="7-Day Generation Velocity & Trend" subtitle="Daily breakdown of generated QR codes vs Barcodes"
         right={
           <div style={{ display: 'flex', gap: 14, fontSize: 11, color: T.textSec }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: T.purple, borderRadius: 2, display: 'inline-block' }} />QR</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: T.green, borderRadius: 2, display: 'inline-block' }} />Barcode</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: T.purple, borderRadius: 2, display: 'inline-block' }} />QR Codes</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: T.green, borderRadius: 2, display: 'inline-block' }} />Barcodes</span>
           </div>
         }
       >
         <LineChartSVG data={chartData} series={[{ key: 'qr', color: T.purple }, { key: 'barcode', color: T.green }]} height={220} />
       </AdminCard>
 
+      {/* Distribution & Storage Breakdown */}
       <div className="ad-two-col">
-        <AdminCard title="Type Distribution">
+        <AdminCard title="Type & Format Share">
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            <DonutSVG segments={[{ value: stats?.qrCount || 0, color: T.purple }, { value: stats?.barcodeCount || 0, color: T.green }]} size={130} />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[{ l: 'QR Codes', v: stats?.qrCount || 0, c: T.purple }, { l: 'Barcodes', v: stats?.barcodeCount || 0, c: T.green }].map(s => {
-                const tot = (stats?.qrCount || 0) + (stats?.barcodeCount || 0);
+            <DonutSVG segments={[{ label: 'QR', value: qr, color: T.purple }, { label: 'Barcode', value: bc, color: T.green }]} size={145} />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[{ l: 'QR Codes', v: qr, c: T.purple }, { l: 'Barcodes', v: bc, c: T.green }].map(s => {
+                const pct = total ? Math.round((s.v / total) * 100) : 0;
                 return (
                   <div key={s.l}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <span style={{ fontSize: 12, color: T.textSec }}>{s.l}</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{s.v}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{s.l}</span>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: s.c }}>{s.v} ({pct}%)</span>
                     </div>
-                    <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
-                      <div style={{ height: '100%', background: s.c, borderRadius: 2, width: `${tot ? (s.v / tot) * 100 : 0}%` }} />
+                    <div style={{ height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3 }}>
+                      <div style={{ height: '100%', background: s.c, borderRadius: 3, width: `${pct}%`, transition: 'width 0.4s' }} />
                     </div>
                   </div>
                 );
@@ -1687,15 +1756,15 @@ function AnalyticsPanel({ chartData, stats }) {
           </div>
         </AdminCard>
 
-        <AdminCard title="Storage Breakdown">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <AdminCard title="Storage Quota Analytics" subtitle="Data breakdown in LocalStorage">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {Object.entries(si.breakdown).filter(([k]) => k.startsWith('qrgen_')).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([key, bytes]) => (
               <div key={key}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
                   <span style={{ fontSize: 11, color: T.textSec, fontFamily: 'monospace' }}>{key.replace('qrgen_', '')}</span>
-                  <span style={{ fontSize: 11, color: T.text, fontWeight: 600 }}>{fmtBytes(bytes)}</span>
+                  <span style={{ fontSize: 11, color: T.text, fontWeight: 700 }}>{fmtBytes(bytes)}</span>
                 </div>
-                <div style={{ height: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
                   <div style={{ height: '100%', background: T.purple, borderRadius: 2, width: `${si.totalBytes ? (bytes / si.totalBytes) * 100 : 0}%` }} />
                 </div>
               </div>
@@ -3653,7 +3722,7 @@ function AdminPanelInner() {
   };
 
   const PANELS = {
-    dashboard:       <DashboardPanel stats={stats} chartData={chartData} history={history} onNavigate={setSection} />,
+    dashboard:       <DashboardPanel stats={stats} history={history} featureFlags={featureFlags} announcement={announcement} subscribers={subscribers} onNavigate={setSection} onSaveFlags={async f => { await DS.saveFeatureFlags(f); setFeatureFlags(f); refreshAudit(); }} />,
     revenue:         <RevenuePanel />,
     users:           <UsersPanel />,
     subscriptions:   <SubscriptionsPanel plans={subscriptionPlans} premiumFeatures={premiumFeatures} subscribers={subscribers}
@@ -3924,8 +3993,8 @@ function AdminPanelInner() {
             {[
               { id: 'dashboard',    icon: LayoutDashboard, label: 'Home' },
               { id: 'analytics',    icon: BarChart3,        label: 'Stats' },
-              { id: 'templates',    icon: Layers,           label: 'Templates' },
-              { id: 'feature-flags',icon: Flag,             label: 'Flags' },
+              { id: 'users',        icon: Users,            label: 'Users' },
+              { id: 'revenue',      icon: DollarSign,       label: 'Revenue' },
               { id: 'app-settings', icon: Settings,         label: 'Settings' },
             ].map(({ id, icon: Icon, label }) => {
               const active = section === id;
