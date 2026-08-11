@@ -459,8 +459,8 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       style={{
-      width: 250, background: 'rgba(12,12,21,0.97)', backdropFilter: 'blur(16px)',
-      borderRight: `1px solid ${T.border}`,
+      width: 270, background: 'rgba(12,12,21,0.97)', backdropFilter: 'blur(16px)',
+      borderRight: 'none',
       display: 'flex', flexDirection: 'column',
       position: 'fixed', left: open ? 0 : -270, top: 0, bottom: 0,
       zIndex: 35, transition: 'left 0.27s cubic-bezier(0.4,0,0.2,1)',
@@ -469,12 +469,12 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
     }}>
       {/* Top Section: User Profile */}
-      <div style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
+      <div style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {currentUser && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0,
             background: 'rgba(20,20,30,0.65)', backdropFilter: 'blur(10px)',
-            borderRadius: T.r.md, padding: '8px 10px', border: `1px solid ${T.border}`,
+            borderRadius: T.r.md, padding: '8px 10px', border: 'none',
           }}>
             <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
               {currentUser.photoURL ? (
@@ -3773,7 +3773,7 @@ function AdminPanelInner() {
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          margin-left: 240px;
+          margin-left: 270px;
           transition: margin-left 0.25s;
         }
         .ad-main-content.mobile {
