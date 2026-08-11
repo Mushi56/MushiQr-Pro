@@ -524,7 +524,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
               return (
                 <button key={id} onClick={() => setActive(id)} style={{
                   width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '9px 12px', borderRadius: T.r.md, border: 'none', cursor: 'pointer',
+                  padding: '9px 12px', borderRadius: 4, border: 'none', cursor: 'pointer',
                   background: isActive ? T.sidebarAct : 'transparent',
                   color: isActive ? T.accent : T.textSec,
                   fontFamily: 'inherit', fontSize: 13, fontWeight: isActive ? 700 : 500,
@@ -533,7 +533,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
                   onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = T.sidebarHov; e.currentTarget.style.color = T.text; } }}
                   onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = T.textSec; } }}
                 >
-                  {isActive && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 3, height: 20, background: T.accent, borderRadius: '0 4px 4px 0', boxShadow: `0 0 10px ${T.accent}` }} />}
+                  {isActive && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 3, height: 20, background: T.accent, borderRadius: 0, boxShadow: `0 0 10px ${T.accent}` }} />}
                   <Icon size={16} color={isActive ? T.accent : T.textSec} />
                   <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
                 </button>
