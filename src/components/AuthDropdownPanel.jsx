@@ -76,20 +76,16 @@ export default function AuthDropdownPanel({ onClose }) {
   };
 
   const handleGoogle = async () => {
-    setError(''); setMessage('Starting Google Sign-In...'); setLoading(true);
+    setError(''); setMessage(''); setLoading(true);
     try {
       if (Capacitor.isNativePlatform()) {
         try {
-          setMessage('Requesting native credential...');
           const result = await FirebaseAuthentication.signInWithGoogle({
             useCredentialManager: false,
           });
-          setMessage('Received native result, checking token...');
           if (result.credential?.idToken) {
-            setMessage('Authenticating with Firebase...');
             const credential = GoogleAuthProvider.credential(result.credential.idToken);
             await signInWithCredential(auth, credential);
-            setMessage('Signed in with Google (Native)!');
             setTimeout(onClose, 1000);
           } else {
             throw new Error('No idToken received from native Google Sign-In');
@@ -101,7 +97,6 @@ export default function AuthDropdownPanel({ onClose }) {
       } else {
         try {
           await signInWithPopup(auth, googleProvider);
-          setMessage('Signed in with Google!');
           setTimeout(onClose, 1000);
         } catch (popupErr) {
           if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
