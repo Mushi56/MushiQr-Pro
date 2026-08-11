@@ -434,8 +434,9 @@ const EYE_PREVIEWS = {
   [EYE_STYLES.SUNFLOWER]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
-      <path d="M14 7L15 10 14 9 13 10Z M19 9L17 11 17 10 16 11Z M21 14L18 13 19 14 18 15Z M19 19L17 16 16 17 17 17Z M14 21L13 18 14 19 15 18Z M9 19L11 16 12 17 11 17Z M7 14L10 15 9 14 10 13Z M9 9L11 11 12 10 11 11Z" fill="currentColor" />
-      <circle cx="14" cy="14" r="2.2" fill="currentColor" />
+      <rect x="8" y="8" width="12" height="12" rx="3.5" fill="currentColor" />
+      <path d="M14 7L15 10 14 9 13 10Z M19 9L17 11 17 10 16 11Z M21 14L18 13 19 14 18 15Z M19 19L17 16 16 17 17 17Z M14 21L13 18 14 19 15 18Z M9 19L11 16 12 17 11 17Z M7 14L10 15 9 14 10 13Z M9 9L11 11 12 10 11 11Z" fill="#fff" />
+      <circle cx="14" cy="14" r="2.2" fill="#fff" />
     </svg>
   ),
   [EYE_STYLES.LAVENDER]: (

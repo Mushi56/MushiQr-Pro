@@ -1669,7 +1669,7 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
   else if (style === EYE_STYLES.CUTE_EMOTICON) ctx.fillStyle = '#f39c12';
   else if (style === EYE_STYLES.CHERRY_BLOSSOM) ctx.fillStyle = '#c9184a'; // Match container
   else if (style === EYE_STYLES.LOTUS) ctx.fillStyle = '#1e3a8a'; // Match container
-  else if (style === EYE_STYLES.SUNFLOWER) ctx.fillStyle = '#7f6000'; // Match container
+  else if (style === EYE_STYLES.SUNFLOWER) ctx.fillStyle = '#4a2500'; // Match container
   else if (style === EYE_STYLES.LAVENDER) ctx.fillStyle = '#6c3483'; // Match container
   else if (style === EYE_STYLES.ROSE) ctx.fillStyle = '#990000'; // Match container
   else if (style === EYE_STYLES.MONSTERA) ctx.fillStyle = '#196f3d'; // Match container
@@ -1818,8 +1818,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.SUNFLOWER: {
-      // 1. Strong dark container
-      ctx.fillStyle = '#7f6000';
+      // 1. Strong dark container (Dark Brown for contrast with golden petals)
+      ctx.fillStyle = '#4a2500';
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
       // 2. Darker petals so entire pupil reads as solid dark to binarizer
