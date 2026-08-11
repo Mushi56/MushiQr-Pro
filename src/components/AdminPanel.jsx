@@ -218,17 +218,17 @@ function Badge({ children, color = T.purple }) {
 function StatCard({ icon: Icon, label, value, color = T.purple, trendLabel }) {
   return (
     <div style={{
-      background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.lg,
-      padding: '20px', display: 'flex', gap: 14, alignItems: 'flex-start', flex: 1, minWidth: 0,
+      background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.md,
+      padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'center', flex: 1, minWidth: 0,
     }}>
-      <div style={{ width: 46, height: 46, borderRadius: T.r.md, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <Icon size={22} color={color} />
+      <div style={{ width: 38, height: 38, borderRadius: T.r.sm, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon size={19} color={color} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: T.textSec, marginBottom: 4, fontWeight: 600 }}>{label}</div>
-        <div style={{ fontSize: 28, fontWeight: 900, color: T.text, lineHeight: 1, letterSpacing: '-1px' }}>{value}</div>
+        <div style={{ fontSize: 11, color: T.textSec, marginBottom: 2, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
+        <div className="ad-stat-value" style={{ fontSize: 20, fontWeight: 800, color: T.text, lineHeight: 1.1, letterSpacing: '-0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</div>
         {trendLabel && (
-          <div style={{ fontSize: 11, color: T.textMut, marginTop: 5 }}>{trendLabel}</div>
+          <div style={{ fontSize: 10, color: T.textMut, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trendLabel}</div>
         )}
       </div>
     </div>
@@ -260,15 +260,15 @@ function AdminCard({ title, subtitle, right, children, noPadding, style: s }) {
   return (
     <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.lg, overflow: 'hidden', ...s }}>
       {(title || right) && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${T.border}`, gap: 12 }}>
-          <div style={{ minWidth: 0 }}>
-            {title && <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{title}</div>}
-            {subtitle && <div style={{ fontSize: 11, color: T.textSec, marginTop: 2 }}>{subtitle}</div>}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${T.border}`, gap: 10 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            {title && <div className="ad-card-title" style={{ fontSize: 13, fontWeight: 700, color: T.text, lineHeight: 1.3 }}>{title}</div>}
+            {subtitle && <div style={{ fontSize: 10, color: T.textSec, marginTop: 1, lineHeight: 1.3 }}>{subtitle}</div>}
           </div>
           {right && <div style={{ flexShrink: 0 }}>{right}</div>}
         </div>
       )}
-      <div style={noPadding ? {} : { padding: 20 }}>{children}</div>
+      <div style={noPadding ? {} : { padding: '14px 16px' }}>{children}</div>
     </div>
   );
 }
@@ -631,15 +631,15 @@ function DashboardPanel({ stats, history, featureFlags, announcement, subscriber
       {/* SaaS Executive Welcome Banner */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(216, 0, 54, 0.15) 0%, rgba(20, 20, 30, 0.9) 100%)',
-        border: `1px solid ${T.accent}33`, borderRadius: T.r.xl, padding: '20px 24px',
-        display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16
+        border: `1px solid ${T.accent}33`, borderRadius: T.r.lg, padding: '14px 16px',
+        display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12
       }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 900, color: T.text, margin: 0 }}>Super Admin Command Center</h2>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 800, color: T.text, margin: 0 }}>Super Admin Command Center</h2>
             <Badge color={T.accent}>Live Hub</Badge>
           </div>
-          <p style={{ fontSize: 12, color: T.textSec, margin: 0 }}>
+          <p style={{ fontSize: 11, color: T.textSec, margin: 0, lineHeight: 1.4 }}>
             Central executive overview for Mushi QR Pro SaaS platform operations.
           </p>
         </div>
@@ -3883,29 +3883,32 @@ function AdminPanelInner() {
 
         /* Mobile — 768px */
         @media (max-width: 768px) {
-          .ad-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-          .ad-chart-row { grid-template-columns: 1fr; }
-          .ad-activity-row { grid-template-columns: 1fr; }
-          .ad-quick-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-          .ad-two-col { grid-template-columns: 1fr; }
-          .ad-three-col { grid-template-columns: 1fr 1fr; }
-          .ad-auto-grid { grid-template-columns: repeat(2, 1fr); }
-          .ad-auto-grid-sm { grid-template-columns: repeat(2, 1fr); }
-          .ad-template-grid { grid-template-columns: repeat(2, 1fr); }
+          .ad-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+          .ad-chart-row { grid-template-columns: 1fr; gap: 12px; }
+          .ad-activity-row { grid-template-columns: 1fr; gap: 12px; }
+          .ad-quick-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+          .ad-two-col { grid-template-columns: 1fr; gap: 12px; }
+          .ad-three-col { grid-template-columns: 1fr; gap: 10px; }
+          .ad-auto-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+          .ad-auto-grid-sm { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+          .ad-template-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
           .ad-header-search { display: none; }
           .ad-header-subtitle { display: none; }
-          .ad-main-pad { padding: 14px 12px 80px; }
+          .ad-main-pad { padding: 10px 8px 90px; }
+          .ad-stat-value { font-size: 16px !important; }
+          .ad-card-title { font-size: 12px !important; }
         }
 
         /* Small mobile — 480px */
         @media (max-width: 480px) {
-          .ad-stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-          .ad-quick-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-          .ad-two-col { grid-template-columns: 1fr; }
+          .ad-stat-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+          .ad-quick-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+          .ad-two-col { grid-template-columns: 1fr; gap: 10px; }
           .ad-three-col { grid-template-columns: 1fr; }
-          .ad-auto-grid { grid-template-columns: 1fr 1fr; }
-          .ad-template-grid { grid-template-columns: repeat(2, 1fr); }
-          .ad-main-pad { padding: 12px 10px 80px; }
+          .ad-auto-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+          .ad-template-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+          .ad-main-pad { padding: 8px 6px 90px; }
+          .ad-stat-value { font-size: 15px !important; }
         }
 
         /* Mobile bottom nav */
