@@ -426,23 +426,24 @@ function DonutSVG({ segments = [], size = 160 }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════════════════
 // SIDEBAR
 // ═══════════════════════════════════════════════════════════════════════════
 
 function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
-  const [touchStartX, setTouchStartX] = useState(null);
+  const touchStartX = useRef(null);
+  const touchEndX = useRef(null);
 
-  const handleTouchStart = (e) => setTouchStartX(e.touches[0].clientX);
-  const handleTouchMove = (e) => {
-    if (touchStartX === null) return;
-    const diff = touchStartX - e.touches[0].clientX;
-    if (diff > 50) {
-      onClose();
-      setTouchStartX(null);
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchMove = (e) => { touchEndX.current = e.touches[0].clientX; };
+  const handleTouchEnd = () => {
+    if (touchStartX.current !== null && touchEndX.current !== null) {
+      if (touchEndX.current - touchStartX.current > 50) {
+        onClose();
+      }
     }
+    touchStartX.current = null;
+    touchEndX.current = null;
   };
-  const handleTouchEnd = () => setTouchStartX(null);
 
   const handleLogout = async () => {
     try {
@@ -487,114 +488,110 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       style={{
-      width: 320, background: 'rgba(12,12,21,0.97)', backdropFilter: 'blur(20px)',
-      borderLeft: `1px solid ${T.border}`, borderRight: 'none',
-      display: 'flex', flexDirection: 'column',
-      position: 'fixed', right: open ? 0 : -330, left: 'auto', top: 0, bottom: 0,
-      zIndex: 35, transition: 'right 0.27s cubic-bezier(0.4,0,0.2,1)',
-      boxShadow: open ? '-8px 0 40px rgba(0,0,0,0.8)' : 'none',
-      paddingTop: 'max(14px, env(safe-area-inset-top))',
-      paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
-    }}>
-      {/* Top Section: User Profile Card (YouPage Style) */}
-      <div style={{ padding: '16px 16px 8px', flexShrink: 0 }}>
+        width: 320,
+        background: 'var(--bg-primary)',
+        borderLeft: '1px solid var(--border-color)',
+        borderRight: 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'fixed',
+        right: open ? 0 : -330,
+        left: 'auto',
+        top: 0,
+        bottom: 0,
+        zIndex: 35,
+        transition: 'right 0.27s cubic-bezier(0.4,0,0.2,1)',
+        boxShadow: open ? '-8px 0 40px rgba(0,0,0,0.4)' : 'none',
+        paddingTop: 'max(14px, env(safe-area-inset-top))',
+        paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
+      }}
+    >
+      {/* Top Profile Card Header without boxes */}
+      <div style={{ padding: '24px 20px 16px', flexShrink: 0, borderBottom: '1px solid var(--border-color)' }}>
         {currentUser && (
-          <div style={{
-            background: 'var(--bg-secondary, #14141e)',
-            border: `1px solid ${T.border}`,
-            borderRadius: 18,
-            padding: '16px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
-                {currentUser.photoURL ? (
-                  <img src={currentUser.photoURL} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B' }} />
-                ) : (
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 18, border: '2px solid rgba(245, 158, 11, 0.4)' }}>
-                    {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
-                  </div>
-                )}
-                <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
-                  <GoldenAdminBadge size={14} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
+              {currentUser.photoURL ? (
+                <img src={currentUser.photoURL} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B' }} />
+              ) : (
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 16, border: '2px solid #F59E0B' }}>
+                  {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
                 </div>
+              )}
+              <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
+                <GoldenAdminBadge size={14} />
               </div>
-
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {currentUser.displayName || 'Super Admin'}
-                </div>
-                <div style={{ fontSize: 12, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', marginTop: 2 }}>
-                  {currentUser.email}
-                </div>
-              </div>
-
-              <button
-                onClick={handleLogout}
-                title="Log Out"
-                style={{
-                  background: 'rgba(239, 68, 68, 0.12)', border: `1px solid rgba(239, 68, 68, 0.25)`,
-                  borderRadius: 12, color: T.red, cursor: 'pointer', padding: 10,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  transition: 'all 0.15s'
-                }}
-              >
-                <LogOut size={16} />
-              </button>
             </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {currentUser.displayName || 'Super Admin'}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', marginTop: 2 }}>
+                {currentUser.email}
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              title="Log Out"
+              style={{
+                background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: 8,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                transition: 'color 0.15s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         )}
       </div>
 
-      {/* Nav List: Identical to YouPage Settings List */}
-      <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 24px' }}>
+      {/* Nav List styled exactly like YouPage.jsx Settings list */}
+      <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 0' }}>
         {NAV.map(({ section, items }) => (
           <div key={section} style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: T.textMut, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 4px 8px' }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.8px', textTransform: 'uppercase', padding: '12px 20px 6px' }}>
               {section}
             </div>
 
-            <div className="settings-group-container" style={{ borderRadius: 16, overflow: 'hidden', border: `1px solid ${T.border}`, background: 'var(--bg-secondary, #14141e)' }}>
-              {items.map(({ id, icon: Icon, label }, index) => {
-                const isActive = active === id;
-                const gradientBg = ITEM_GRADIENTS[id] || 'linear-gradient(135deg, #D60036 0%, #ff4d6d 100%)';
-                return (
-                  <Fragment key={id}>
-                    {index > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginLeft: 66 }} />}
-                    <div
-                      className="settings-row-item"
-                      onClick={() => { setActive(id); if (isMobile) onClose(); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 14,
-                        padding: '14px 16px', cursor: 'pointer',
-                        background: isActive ? T.sidebarAct : 'transparent',
-                        transition: 'background 0.15s ease',
-                      }}
-                    >
-                      <div className="icon-container-gradient" style={{
-                        width: 36, height: 36, borderRadius: 10,
-                        background: gradientBg,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#fff', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-                        marginRight: 0,
-                      }}>
-                        <Icon size={18} color="#fff" />
-                      </div>
-
-                      <span style={{
-                        flex: 1, fontSize: 14, fontWeight: isActive ? 700 : 600,
-                        color: isActive ? T.accent : T.text,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>
-                        {label}
-                      </span>
-
-                      <ChevronRight size={16} color={isActive ? T.accent : T.textMut} />
+            {items.map(({ id, icon: Icon, label }, index) => {
+              const isActive = active === id;
+              const gradientBg = ITEM_GRADIENTS[id] || 'linear-gradient(135deg, #D60036 0%, #ff4d6d 100%)';
+              return (
+                <Fragment key={id}>
+                  <div
+                    onClick={() => { setActive(id); if (isMobile) onClose(); }}
+                    className="settings-row-item"
+                    style={{
+                      padding: '12px 20px',
+                      background: isActive ? 'var(--bg-secondary)' : 'transparent',
+                    }}
+                  >
+                    <div className="icon-container-gradient" style={{
+                      background: gradientBg,
+                      width: 36, height: 36, borderRadius: 10,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      marginRight: 16, flexShrink: 0,
+                    }}>
+                      <Icon size={18} />
                     </div>
-                  </Fragment>
-                );
-              })}
-            </div>
+
+                    <div style={{
+                      flex: 1, fontSize: '14px', fontWeight: isActive ? 800 : 600,
+                      color: isActive ? 'var(--accent-primary)' : 'var(--text-primary)',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {label}
+                    </div>
+
+                    <ChevronRight size={16} color={isActive ? 'var(--accent-primary)' : 'var(--text-muted)'} />
+                  </div>
+                </Fragment>
+              );
+            })}
           </div>
         ))}
         <div style={{ height: 20 }} />
