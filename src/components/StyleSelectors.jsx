@@ -153,7 +153,7 @@ function MiniEyeCanvas({ eyeStyle, qrParams }) {
     ctx.fillRect(0, 0, size, size);
 
     // Draw single eye centered in canvas using exact QR engine drawEye
-    const padding = 10;
+    const padding = 2;
     const eyeSize = size - padding * 2;
     drawEye(ctx, padding, padding, eyeSize, eyeStyle, outerColor, fgColor);
   }, [eyeStyle, fgColor, outerColor]);
