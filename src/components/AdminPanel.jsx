@@ -601,11 +601,13 @@ function Header({ section, onMenuToggle, isMobile, currentUser }) {
 // DASHBOARD PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
-function DashboardPanel({ stats, history, featureFlags, announcement, subscribers, onNavigate, onSaveFlags }) {
+function DashboardPanel({ stats, history, featureFlags, announcement, subscribers, revenueData, appUsers, onNavigate, onSaveFlags }) {
   const si = DS.getStorageInfo();
   const qr = stats?.qrCount || 0;
   const bc = stats?.barcodeCount || 0;
   const totalCreated = qr + bc;
+  const mrrVal = revenueData?.mrr !== undefined ? `$${revenueData.mrr}` : '$0.00';
+  const usersVal = appUsers?.length !== undefined ? `${appUsers.length}` : '0';
 
   const sysChecks = [
     { label: 'localStorage',   ok: typeof localStorage !== 'undefined',            detail: si.used + ' used' },
@@ -654,8 +656,8 @@ function DashboardPanel({ stats, history, featureFlags, announcement, subscriber
 
       {/* Top Metric Overview Cards */}
       <div className="ad-stat-grid">
-        <StatCard icon={DollarSign} label="Monthly Revenue (MRR)" value="$1,450 / mo" color={T.green} trendLabel="+18% vs last mo" />
-        <StatCard icon={Users}      label="Active Users"          value="1,280 User"  color={T.blue}  trendLabel="Realtime registered" />
+        <StatCard icon={DollarSign} label="Monthly Revenue (MRR)" value={mrrVal} color={T.green} trendLabel={`${revenueData?.paidUsers || 0} paid subscribers`} />
+        <StatCard icon={Users}      label="Registered Users"      value={`${usersVal} Accounts`} color={T.blue} trendLabel="Realtime registered" />
         <StatCard icon={QrCode}     label="QR & Barcodes"         value={totalCreated} color={T.purple} trendLabel="All-time creations" />
         <StatCard icon={Shield}     label="System Status"         value={allOk ? "100% Operational" : "Degraded"} color={allOk ? T.green : T.orange} trendLabel={allOk ? "All checks pass" : "Attention needed"} />
       </div>
@@ -3580,6 +3582,8 @@ function AdminPanelInner() {
   const [subscriptionPlans, setSubscriptionPlans] = useState([]);
   const [premiumFeatures, setPremiumFeatures]     = useState([]);
   const [subscribers, setSubscribers]             = useState([]);
+  const [revenueData, setRevenueData]             = useState(null);
+  const [appUsers, setAppUsers]                   = useState([]);
   const [loading, setLoading]               = useState(true);
 
   useEffect(() => {
@@ -3595,16 +3599,18 @@ function AdminPanelInner() {
 
     async function init() {
       try {
-        const [s, c, h, as_, ff, ct, ann, rc, al, sp, pf, subs] = await Promise.all([
+        const [s, c, h, as_, ff, ct, ann, rc, al, sp, pf, subs, rev, usr] = await Promise.all([
           DS.getAppStats(), DS.getActivityChartData(7), DS.getHistory(100),
           DS.getAppSettings(), DS.getFeatureFlags(), DS.getCloudTemplates(),
           DS.getAnnouncement(), DS.getRemoteConfig(), DS.getAuditLog(100),
           DS.getSubscriptionPlans(), DS.getPremiumFeatures(), DS.getAllUserSubscriptions(),
+          DS.getRevenueAnalytics(), DS.getAllAppUsers(),
         ]);
         setStats(s); setChartData(c); setHistory(h);
         setAppSettings(as_); setFeatureFlags(ff); setCloudTemplates(ct);
         setAnnouncement(ann); setRemoteConfig(rc); setAuditLog(al);
         setSubscriptionPlans(sp); setPremiumFeatures(pf); setSubscribers(subs);
+        setRevenueData(rev); setAppUsers(usr);
       } finally { setLoading(false); }
     }
     init();
@@ -3722,7 +3728,7 @@ function AdminPanelInner() {
   };
 
   const PANELS = {
-    dashboard:       <DashboardPanel stats={stats} history={history} featureFlags={featureFlags} announcement={announcement} subscribers={subscribers} onNavigate={setSection} onSaveFlags={async f => { await DS.saveFeatureFlags(f); setFeatureFlags(f); refreshAudit(); }} />,
+    dashboard:       <DashboardPanel stats={stats} history={history} featureFlags={featureFlags} announcement={announcement} subscribers={subscribers} revenueData={revenueData} appUsers={appUsers} onNavigate={setSection} onSaveFlags={async f => { await DS.saveFeatureFlags(f); setFeatureFlags(f); refreshAudit(); }} />,
     revenue:         <RevenuePanel />,
     users:           <UsersPanel />,
     subscriptions:   <SubscriptionsPanel plans={subscriptionPlans} premiumFeatures={premiumFeatures} subscribers={subscribers}

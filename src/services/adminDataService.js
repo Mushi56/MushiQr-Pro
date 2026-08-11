@@ -787,10 +787,7 @@ export async function getPromoCodes() {
   try {
     const snap = await getDoc(doc(db, 'global_config', 'promo_codes'));
     if (snap.exists()) return snap.data().codes || [];
-    return [
-      { id: 'PROMO50', code: 'PROMO50', discount: '50%', type: 'percentage', uses: 14, active: true },
-      { id: 'LAUNCH2026', code: 'LAUNCH2026', discount: '100%', type: 'free_trial', uses: 42, active: true }
-    ];
+    return [];
   } catch (e) {
     console.warn('[DS] getPromoCodes fallback:', e?.code);
     return [];
