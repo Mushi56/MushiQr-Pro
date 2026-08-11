@@ -139,11 +139,8 @@ export const DOT_STYLES = {
   COFFEE_BEAN: 'coffee-bean',
   RAINDROP: 'raindrop',
   CACTUS_PLANT: 'cactus-plant',
-  SPACE_STAR: 'space-star',
   BASKETBALL_DOT: 'basketball-dot',
   CHESS_PAWN: 'chess-pawn',
-  HEART_ICON: 'heart-icon',
-  GOLD_STAR: 'gold-star',
   BOW_RIBBON: 'bow-ribbon',
 };
 
@@ -176,11 +173,8 @@ export const EYE_STYLES = {
   COFFEE_BEAN: 'coffee-bean-eye',
   RAINDROP: 'raindrop-eye',
   CACTUS: 'cactus-eye',
-  SPACE_STAR: 'space-star-eye',
   BASKETBALL: 'basketball-eye',
   CHESS: 'chess-eye',
-  RED_HEART: 'red-heart-eye',
-  GOLD_STAR: 'gold-star-eye',
   BOW: 'bow-eye',
 };
 
@@ -824,9 +818,8 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     style === DOT_STYLES.CUTE_EMOTICON || style === DOT_STYLES.LAVENDER ||
     style === DOT_STYLES.MONSTERA || style === DOT_STYLES.COFFEE_BEAN ||
     style === DOT_STYLES.RAINDROP || style === DOT_STYLES.CACTUS_PLANT ||
-    style === DOT_STYLES.SPACE_STAR || style === DOT_STYLES.BASKETBALL_DOT ||
-    style === DOT_STYLES.CHESS_PAWN || style === DOT_STYLES.HEART_ICON ||
-    style === DOT_STYLES.GOLD_STAR || style === DOT_STYLES.BOW_RIBBON
+    style === DOT_STYLES.BASKETBALL_DOT || style === DOT_STYLES.CHESS_PAWN ||
+    style === DOT_STYLES.BOW_RIBBON
   ) {
     // For premium floral and decorative styles, we handle sizing internally to match reference style
     effectivePaddingPct = 0; 
@@ -843,9 +836,8 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
     DOT_STYLES.LOTUS, DOT_STYLES.FORGET_ME_NOT, DOT_STYLES.PANSY,
     DOT_STYLES.DOLLAR_COIN, DOT_STYLES.CUTE_EMOTICON, DOT_STYLES.LAVENDER,
     DOT_STYLES.MONSTERA, DOT_STYLES.COFFEE_BEAN, DOT_STYLES.RAINDROP,
-    DOT_STYLES.CACTUS_PLANT, DOT_STYLES.SPACE_STAR, DOT_STYLES.BASKETBALL_DOT,
-    DOT_STYLES.CHESS_PAWN, DOT_STYLES.HEART_ICON, DOT_STYLES.GOLD_STAR,
-    DOT_STYLES.BOW_RIBBON
+    DOT_STYLES.CACTUS_PLANT, DOT_STYLES.BASKETBALL_DOT,
+    DOT_STYLES.CHESS_PAWN, DOT_STYLES.BOW_RIBBON
   ].includes(style);
 
   // Deterministically scatter large premium flowers (~8% of the modules)
@@ -1518,21 +1510,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
       ctx.fill();
       ctx.restore(); break;
     }
-    case DOT_STYLES.SPACE_STAR: {
-      ctx.save();
-      ctx.fillStyle = '#6c3483';
-      const cx = x + size / 2, cy = y + size / 2;
-      const ro = size * 0.44, ri = size * 0.19;
-      ctx.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const angle = (i * Math.PI / 5) - Math.PI / 2;
-        const r2 = i % 2 === 0 ? ro : ri;
-        i === 0 ? ctx.moveTo(cx + r2 * Math.cos(angle), cy + r2 * Math.sin(angle))
-                : ctx.lineTo(cx + r2 * Math.cos(angle), cy + r2 * Math.sin(angle));
-      }
-      ctx.closePath(); ctx.fill();
-      ctx.restore(); break;
-    }
+
     case DOT_STYLES.BASKETBALL_DOT: {
       ctx.save();
       const cx = x + size / 2, cy = y + size / 2;
@@ -1561,33 +1539,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
       ctx.beginPath(); ctx.roundRect(cx - u * 2, cy + u, u * 4, u * 1.5, u * 0.4); ctx.fill();
       ctx.restore(); break;
     }
-    case DOT_STYLES.HEART_ICON: {
-      ctx.save();
-      ctx.fillStyle = '#c0392b';
-      const cx = x + size / 2, cy = y + size / 2;
-      const r = size * 0.28;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy + r * 1.2);
-      ctx.bezierCurveTo(cx - r * 2.5, cy, cx - r * 2.5, cy - r * 1.6, cx, cy - r * 0.5);
-      ctx.bezierCurveTo(cx + r * 2.5, cy - r * 1.6, cx + r * 2.5, cy, cx, cy + r * 1.2);
-      ctx.closePath(); ctx.fill();
-      ctx.restore(); break;
-    }
-    case DOT_STYLES.GOLD_STAR: {
-      ctx.save();
-      ctx.fillStyle = '#9a7d0a';
-      const cx = x + size / 2, cy = y + size / 2;
-      const ro = size * 0.44, ri = size * 0.19;
-      ctx.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const angle = (i * Math.PI / 5) - Math.PI / 2;
-        const r2 = i % 2 === 0 ? ro : ri;
-        i === 0 ? ctx.moveTo(cx + r2 * Math.cos(angle), cy + r2 * Math.sin(angle))
-                : ctx.lineTo(cx + r2 * Math.cos(angle), cy + r2 * Math.sin(angle));
-      }
-      ctx.closePath(); ctx.fill();
-      ctx.restore(); break;
-    }
+
     case DOT_STYLES.BOW_RIBBON: {
       ctx.save();
       ctx.fillStyle = '#c0175e';
@@ -1631,6 +1583,7 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     case EYE_STYLES.CIRCLE:
     case EYE_STYLES.DOLLAR_COIN:
     case EYE_STYLES.CUTE_EMOTICON:
+    case EYE_STYLES.BASKETBALL:
       ctx.arc(14, 14, 14, 0, Math.PI * 2);
       ctx.moveTo(24, 14);
       ctx.arc(14, 14, 10, 0, Math.PI * 2, true);
@@ -1643,6 +1596,11 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     case EYE_STYLES.ROSE:
     case EYE_STYLES.MONSTERA:
     case EYE_STYLES.DAISY:
+    case EYE_STYLES.COFFEE_BEAN:
+    case EYE_STYLES.RAINDROP:
+    case EYE_STYLES.CACTUS:
+    case EYE_STYLES.CHESS:
+    case EYE_STYLES.BOW:
       drawRoundedRectPath(ctx, 0, 0, 28, 28, 8);
       drawRoundedRectPath(ctx, 4, 4, 20, 20, 4);
       break;
@@ -1719,11 +1677,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
   else if (style === EYE_STYLES.COFFEE_BEAN) ctx.fillStyle = '#6f3d11';
   else if (style === EYE_STYLES.RAINDROP) ctx.fillStyle = '#1a5276';
   else if (style === EYE_STYLES.CACTUS) ctx.fillStyle = '#196f3d';
-  else if (style === EYE_STYLES.SPACE_STAR) ctx.fillStyle = '#6c3483';
   else if (style === EYE_STYLES.BASKETBALL) ctx.fillStyle = '#b94a00';
   else if (style === EYE_STYLES.CHESS) ctx.fillStyle = '#2c2c2c';
-  else if (style === EYE_STYLES.RED_HEART) ctx.fillStyle = '#c0392b';
-  else if (style === EYE_STYLES.GOLD_STAR) ctx.fillStyle = '#9a7d0a';
   else if (style === EYE_STYLES.BOW) ctx.fillStyle = '#c0175e';
   ctx.fill('evenodd');
 
@@ -2012,146 +1967,81 @@ function drawEyeIconPupil(ctx, x, y, size, style) {
 
   switch(style) {
     case EYE_STYLES.COFFEE_BEAN: {
-      // Dark brown container
-      ctx.fillStyle = '#5c2d0a';
-      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // Bean body (darker than container)
+      // Bean body (dark brown)
       ctx.fillStyle = '#3b1a06';
-      ctx.beginPath(); ctx.ellipse(14, 14, 3.5, 5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(14, 14, 4.5, 6.5, 0, 0, Math.PI * 2); ctx.fill();
       // Bean crease
-      ctx.strokeStyle = '#1a0a00'; ctx.lineWidth = 0.7;
-      ctx.beginPath(); ctx.moveTo(14, 9.5); ctx.lineTo(14, 18.5); ctx.stroke();
+      ctx.strokeStyle = '#1a0a00'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(14, 8); ctx.lineTo(14, 20); ctx.stroke();
       break;
     }
     case EYE_STYLES.RAINDROP: {
-      // Dark blue container
-      ctx.fillStyle = '#154360';
-      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // Raindrop shape (darker)
+      // Raindrop shape (dark blue)
       ctx.fillStyle = '#0d2b3e';
       ctx.beginPath();
-      ctx.arc(14, 15.5, 3.2, 0, Math.PI * 2); ctx.fill();
+      ctx.arc(14, 16.5, 4.2, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath();
-      ctx.moveTo(11.4, 15.5);
-      ctx.quadraticCurveTo(11, 12.5, 14, 9.2);
-      ctx.quadraticCurveTo(17, 12.5, 16.6, 15.5);
+      ctx.moveTo(10.5, 16.5);
+      ctx.quadraticCurveTo(10, 12.5, 14, 8.2);
+      ctx.quadraticCurveTo(18, 12.5, 17.5, 16.5);
       ctx.closePath(); ctx.fill();
       break;
     }
     case EYE_STYLES.CACTUS: {
-      // Dark green container
-      ctx.fillStyle = '#0e4025';
-      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // Mini cactus (even darker)
+      // Mini cactus (dark green)
       ctx.fillStyle = '#071a0e';
       // Trunk
-      ctx.beginPath(); ctx.roundRect(13, 10, 2, 9, 0.5); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(12, 9, 4, 11, 1); ctx.fill();
       // Left arm
-      ctx.beginPath(); ctx.roundRect(10, 13, 3, 1.2, 0.4); ctx.fill();
-      ctx.beginPath(); ctx.roundRect(10, 11.5, 1.2, 1.8, 0.4); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(8, 13, 5, 2, 1); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(8, 11, 2, 3, 1); ctx.fill();
       // Right arm
-      ctx.beginPath(); ctx.roundRect(15, 14, 3, 1.2, 0.4); ctx.fill();
-      ctx.beginPath(); ctx.roundRect(16.8, 12.5, 1.2, 1.8, 0.4); ctx.fill();
-      break;
-    }
-    case EYE_STYLES.SPACE_STAR: {
-      // Dark purple container
-      ctx.fillStyle = '#4a235a';
-      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // 5-pointed star (darker)
-      ctx.fillStyle = '#2c1436';
-      ctx.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const angle = (i * Math.PI / 5) - Math.PI / 2;
-        const r2 = i % 2 === 0 ? 5.5 : 2.4;
-        i === 0 ? ctx.moveTo(14 + r2 * Math.cos(angle), 14 + r2 * Math.sin(angle))
-                : ctx.lineTo(14 + r2 * Math.cos(angle), 14 + r2 * Math.sin(angle));
-      }
-      ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(15, 14.5, 5, 2, 1); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(18, 12.5, 2, 3, 1); ctx.fill();
       break;
     }
     case EYE_STYLES.BASKETBALL: {
-      // Dark orange container
-      ctx.fillStyle = '#8c3800';
-      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // Ball circle (darker orange)
+      // Ball circle (dark orange)
       ctx.fillStyle = '#5c2600';
-      ctx.beginPath(); ctx.arc(14, 14, 4.8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(14, 14, 6.5, 0, Math.PI * 2); ctx.fill();
       // Seam lines
-      ctx.strokeStyle = '#3a1800'; ctx.lineWidth = 0.6;
-      ctx.beginPath(); ctx.moveTo(9.2, 14); ctx.lineTo(18.8, 14); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(14, 9.2); ctx.lineTo(14, 18.8); ctx.stroke();
-      ctx.beginPath(); ctx.arc(12.5, 14, 4, -0.6, 0.6); ctx.stroke();
-      ctx.beginPath(); ctx.arc(15.5, 14, 4, Math.PI - 0.6, Math.PI + 0.6); ctx.stroke();
+      ctx.strokeStyle = '#2a1200'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(7.5, 14); ctx.lineTo(20.5, 14); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(14, 7.5); ctx.lineTo(14, 20.5); ctx.stroke();
+      ctx.beginPath(); ctx.arc(11, 14, 5.5, -0.7, 0.7); ctx.stroke();
+      ctx.beginPath(); ctx.arc(17, 14, 5.5, Math.PI - 0.7, Math.PI + 0.7); ctx.stroke();
       break;
     }
     case EYE_STYLES.CHESS: {
-      // Dark container
-      ctx.fillStyle = '#1a1a1a';
-      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // Chess knight silhouette (even darker)
+      // Chess knight silhouette (dark)
       ctx.fillStyle = '#0a0a0a';
       // Knight head
-      ctx.beginPath(); ctx.ellipse(14.5, 10.5, 2.5, 2, -0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(14.5, 10, 3.5, 3, -0.3, 0, Math.PI * 2); ctx.fill();
       // Knight body
       ctx.beginPath();
-      ctx.moveTo(11, 18.5); ctx.lineTo(18, 18.5);
-      ctx.lineTo(17, 13); ctx.quadraticCurveTo(16, 11.5, 14.5, 11);
-      ctx.lineTo(13, 14); ctx.quadraticCurveTo(11.5, 15, 11, 18.5);
-      ctx.closePath(); ctx.fill();
-      break;
-    }
-    case EYE_STYLES.RED_HEART: {
-      // Dark red container
-      ctx.fillStyle = '#96281b';
-      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // Heart (darker red)
-      ctx.fillStyle = '#5c1813';
-      ctx.beginPath();
-      ctx.moveTo(14, 18.5);
-      ctx.bezierCurveTo(7.5, 14.5, 7.5, 10.5, 11, 10);
-      ctx.bezierCurveTo(12.5, 9.8, 13.5, 10.5, 14, 11.5);
-      ctx.bezierCurveTo(14.5, 10.5, 15.5, 9.8, 17, 10);
-      ctx.bezierCurveTo(20.5, 10.5, 20.5, 14.5, 14, 18.5);
-      ctx.closePath(); ctx.fill();
-      break;
-    }
-    case EYE_STYLES.GOLD_STAR: {
-      // Dark gold container
-      ctx.fillStyle = '#7d6508';
-      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // Star (darker gold)
-      ctx.fillStyle = '#524304';
-      ctx.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const angle = (i * Math.PI / 5) - Math.PI / 2;
-        const r2 = i % 2 === 0 ? 5.5 : 2.4;
-        i === 0 ? ctx.moveTo(14 + r2 * Math.cos(angle), 14 + r2 * Math.sin(angle))
-                : ctx.lineTo(14 + r2 * Math.cos(angle), 14 + r2 * Math.sin(angle));
-      }
+      ctx.moveTo(9, 20); ctx.lineTo(19, 20);
+      ctx.lineTo(18, 13.5); ctx.quadraticCurveTo(16.5, 11, 14.5, 10.5);
+      ctx.lineTo(12, 14.5); ctx.quadraticCurveTo(10, 16, 9, 20);
       ctx.closePath(); ctx.fill();
       break;
     }
     case EYE_STYLES.BOW: {
-      // Dark pink container
-      ctx.fillStyle = '#96124a';
-      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // Bow wings (darker)
+      // Bow wings (dark pink)
       ctx.fillStyle = '#6b0d35';
       // Left wing
       ctx.beginPath();
       ctx.moveTo(14, 14);
-      ctx.bezierCurveTo(12.5, 11.5, 9, 11, 9, 14);
-      ctx.bezierCurveTo(9, 17, 12.5, 16.5, 14, 14);
+      ctx.bezierCurveTo(11.5, 10.5, 7, 10, 7, 14);
+      ctx.bezierCurveTo(7, 18, 11.5, 17.5, 14, 14);
       ctx.closePath(); ctx.fill();
       // Right wing
       ctx.beginPath();
       ctx.moveTo(14, 14);
-      ctx.bezierCurveTo(15.5, 11.5, 19, 11, 19, 14);
-      ctx.bezierCurveTo(19, 17, 15.5, 16.5, 14, 14);
+      ctx.bezierCurveTo(16.5, 10.5, 21, 10, 21, 14);
+      ctx.bezierCurveTo(21, 18, 16.5, 17.5, 14, 14);
       ctx.closePath(); ctx.fill();
       // Center knot
-      ctx.beginPath(); ctx.arc(14, 14, 1.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(14, 14, 2, 0, Math.PI * 2); ctx.fill();
       break;
     }
   }
