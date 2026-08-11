@@ -93,6 +93,8 @@ import ScannerGunPage from './components/ScannerGunPage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
 import SaveLocationModal from './components/SaveLocationModal';
+import PremiumModal from './components/PremiumModal';
+import { usePremium } from './services/premiumContext';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 const QRDotsIcon = ({ size = 24 }) => (
@@ -1331,6 +1333,7 @@ export default function App() {
   const tempCtx = useRef(tempCanvas.current.getContext('2d'));
   const [qrMatrixInfo, setQrMatrixInfo] = useState(null);
   const [toast, setToast] = useState(null);
+  const [exportSuccessInfo, setExportSuccessInfo] = useState(null);
   const [downloadingFormat, setDownloadingFormat] = useState(null);
   // ── Advanced Picker State ──
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', setter: null });
@@ -2031,13 +2034,18 @@ export default function App() {
       const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
       const uniqueFilename = `qrcode_${timestamp}`;
       
-      const result = await downloadFn(exportCanvas, uniqueFilename, 'QR Codes');
-      if (result === 'gallery') {
-        showToast('Saved to Gallery');
-      } else if (result === 'share') {
-        showToast('Save Options Opened');
+      const resultObj = await downloadFn(exportCanvas, uniqueFilename, 'QR Codes');
+      if (resultObj && typeof resultObj === 'object') {
+        setExportSuccessInfo(resultObj);
       } else {
-        showToast('Saved successfully');
+        const result = resultObj;
+        if (result === 'gallery') {
+          showToast('Saved to Gallery');
+        } else if (result === 'share') {
+          showToast('Save Options Opened');
+        } else {
+          showToast('Saved successfully');
+        }
       }
     } catch (err) {
       console.error('Download failed:', err);
@@ -3336,6 +3344,8 @@ export default function App() {
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Mushi QR Pro</div>
         </div>
       )}
+      {/* ── Premium Paywall Modal ── */}
+      <PremiumModal />
       {/* ── Admin Announcement Banner ── */}
       {adminAnnouncement?.active && adminAnnouncement?.message && (
         <div style={{
@@ -3496,9 +3506,12 @@ export default function App() {
                       pointerEvents: !qrMatrixInfo ? 'none' : 'auto'
                     }}
                   >
-                    {/* Main Button: Default PNG Normal Quality Save */}
+                    {/* Main Button: Save using selected format and quality */}
                     <button
-                      onClick={() => handleDownload('PNG', FORMAT_MAP['PNG'])}
+                      onClick={() => {
+                        const format = selectedFormat || 'PNG';
+                        handleDownload(format, FORMAT_MAP[format]);
+                      }}
                       disabled={!qrMatrixInfo}
                       style={{
                         display: 'flex',
@@ -3513,7 +3526,7 @@ export default function App() {
                         cursor: 'pointer',
                         height: '100%'
                       }}
-                      title="Save as PNG (Normal Quality)"
+                      title={`Save as ${selectedFormat || 'PNG'} (${exportQuality || 'Normal'} Quality)`}
                     >
                       <Save size={16} color="#FFFFFF" />
                       <span>Save</span>
@@ -5823,17 +5836,180 @@ export default function App() {
           </div>
         </div>
       )}
-      {/* Toast */}
+      {/* Toast (Styled like Batch Success Info) */}
       {toast && (
-        <div className={`toast ${toast.type}`}>
-          {toast.type === 'success' ? (
-            <CheckCircle2 color="#10B981" size={16} strokeWidth={2.5} />
-          ) : (
-            <XCircle color="#EF4444" size={16} strokeWidth={2.5} />
-          )}
-          <span>{toast.message}</span>
+        <div className={`toast fade-in-up ${toast.type}`} style={{
+          background: 'var(--bg-elevated, #0C0C14)',
+          border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
+          borderRadius: '24px',
+          padding: '24px',
+          maxWidth: '320px',
+          width: '90%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)'
+        }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            background: toast.type === 'success' ? 'rgba(34, 197, 94, 0.15)' : toast.type === 'info' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+            color: toast.type === 'success' ? '#22C55E' : toast.type === 'info' ? '#3B82F6' : '#EF4444',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '16px',
+            border: `1px solid ${toast.type === 'success' ? 'rgba(34, 197, 94, 0.3)' : toast.type === 'info' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+          }}>
+            {toast.type === 'success' ? (
+              <CheckCircle2 size={28} />
+            ) : toast.type === 'info' ? (
+              <Info size={28} />
+            ) : (
+              <XCircle size={28} />
+            )}
+          </div>
+          <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+            {toast.type === 'success' ? 'Success! 🎉' : toast.type === 'info' ? 'Notice' : 'Error'}
+          </h3>
+          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+            {toast.message}
+          </p>
         </div>
       )}
+
+      {/* Export Success Modal */}
+      {exportSuccessInfo && (
+        <div 
+          onClick={() => setExportSuccessInfo(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            background: 'rgba(9, 9, 15, 0.85)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-elevated, #0C0C14)',
+              border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
+              borderRadius: '24px',
+              padding: '32px 24px',
+              maxWidth: '380px',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)'
+            }}
+          >
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              background: 'rgba(34, 197, 94, 0.15)',
+              color: '#22C55E',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px',
+              border: '1px solid rgba(34, 197, 94, 0.3)'
+            }}>
+              <CheckCircle2 size={32} />
+            </div>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+              Export Complete! 🎉
+            </h3>
+
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+              {exportSuccessInfo.isNative
+                ? `Your QR code has been saved to your device's Documents folder:`
+                : `Your QR code has been generated and downloaded:`
+              }
+            </p>
+
+            <div style={{
+              width: '100%',
+              background: 'var(--bg-hover, rgba(255,255,255,0.05))',
+              border: '1px solid var(--border-color, rgba(255,255,255,0.1))',
+              borderRadius: '14px',
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '24px',
+              boxSizing: 'border-box'
+            }}>
+              <FileImage size={20} color="var(--accent-primary, #D60036)" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>
+                {exportSuccessInfo.filename}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+              <button
+                onClick={() => setExportSuccessInfo(null)}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: 'var(--bg-hover)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 800,
+                  fontSize: '15px',
+                  cursor: 'pointer'
+                }}
+              >
+                Done
+              </button>
+              {exportSuccessInfo.isNative && exportSuccessInfo.fileUri && (
+                <button
+                  onClick={async () => {
+                    try {
+                      await Share.share({
+                        title: 'Mushi QR Pro',
+                        text: `Check out this QR code I made!`,
+                        url: exportSuccessInfo.fileUri,
+                        dialogTitle: 'Share your QR Code',
+                      });
+                    } catch (e) {}
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '14px',
+                    borderRadius: '14px',
+                    border: 'none',
+                    background: 'var(--accent-primary, #D60036)',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '15px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <Share2 size={16} /> Share
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Advanced Color Picker Modal */}
       <AdvancedColorPicker
         isOpen={advPicker.open}
@@ -5991,7 +6167,27 @@ export default function App() {
       {/* ── Unsaved Changes Modal ── */}
       {unsavedChangesModal.isOpen && (
         <div className="modal-overlay" onClick={handleCancelExit}>
-          <div className="modal-container glass-panel" style={{ maxWidth: '360px', padding: '24px' }} onClick={e => e.stopPropagation()}>
+          <div className="modal-container glass-panel" style={{ position: 'relative', maxWidth: '360px', padding: '24px' }} onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={handleCancelExit}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'var(--bg-hover)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={16} />
+            </button>
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
               <div style={{
                 width: '56px',
@@ -6050,22 +6246,6 @@ export default function App() {
                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
               >
                 Discard Changes
-              </button>
-              
-              <button 
-                onClick={handleCancelExit}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--text-secondary)',
-                  padding: '12px',
-                  borderRadius: '12px',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancel
               </button>
             </div>
           </div>

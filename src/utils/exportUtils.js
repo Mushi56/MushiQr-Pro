@@ -121,7 +121,7 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
   // 4. Removed automatic native Share sheet on save.
   // The share action is now handled manually via the Success Modal.
 
-  return isSavedToDocs ? 'saved' : 'share';
+  return { result: isSavedToDocs ? 'saved' : 'share', fileUri, filename, isNative: true };
 }
 
 function triggerDownload(url, filename) {
@@ -137,7 +137,7 @@ export async function downloadPNG(canvas, filename = 'qrcode', category = 'QR Co
     return await saveFileNative(dataUrl.split(',')[1], `${filename}.png`, category);
   } else {
     triggerDownload(dataUrl, `${filename}.png`);
-    return 'download';
+    return { result: 'download', filename: `${filename}.png`, isNative: false };
   }
 }
 
@@ -155,7 +155,7 @@ export async function downloadJPG(canvas, filename = 'qrcode', category = 'QR Co
     return await saveFileNative(dataUrl.split(',')[1], `${filename}.jpg`, category);
   } else {
     triggerDownload(dataUrl, `${filename}.jpg`);
-    return 'download';
+    return { result: 'download', filename: `${filename}.jpg`, isNative: false };
   }
 }
 
@@ -170,14 +170,13 @@ export async function downloadSVG(canvas, filename = 'qrcode', category = 'QR Co
 </svg>`;
 
   if (Capacitor.isNativePlatform()) {
-    const base64Data = stringToBase64(svgContent);
-    return await saveFileNative(base64Data, `${filename}.svg`, category);
+    return await saveFileNative(btoa(unescape(encodeURIComponent(svgContent))), `${filename}.svg`, category);
   } else {
-    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+    const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     triggerDownload(url, `${filename}.svg`);
-    URL.revokeObjectURL(url);
-    return 'download';
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return { result: 'download', filename: `${filename}.svg`, isNative: false };
   }
 }
 

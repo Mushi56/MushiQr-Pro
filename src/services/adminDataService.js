@@ -332,3 +332,119 @@ export function getStorageInfo() {
     used: kb < 1024 ? kb.toFixed(1) + ' KB' : (kb / 1024).toFixed(2) + ' MB',
   };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUBSCRIPTION PLANS  —  global_config/subscriptionPlans
+// ═══════════════════════════════════════════════════════════════════════════
+const DEFAULT_PLANS = [
+  { id: 'free',    name: 'Free',    price: 0,     period: 'forever', color: '#8b8fa8', active: true,  popular: false, sortOrder: 0 },
+  { id: 'daily',   name: 'Daily',   price: 0.49,  period: 'day',     color: '#3b82f6', active: true,  popular: false, sortOrder: 1 },
+  { id: 'weekly',  name: 'Weekly',  price: 2.99,  period: 'week',    color: '#8b5cf6', active: true,  popular: true,  sortOrder: 2 },
+  { id: 'yearly',  name: 'Yearly',  price: 29.99, period: 'year',    color: '#D60036', active: true,  popular: false, sortOrder: 3 },
+];
+
+export async function getSubscriptionPlans() {
+  try {
+    const snap = await getDoc(doc(db, 'global_config', 'subscriptionPlans'));
+    if (snap.exists() && Array.isArray(snap.data().plans)) return snap.data().plans;
+  } catch (e) {
+    console.error('[DS] getSubscriptionPlans:', e?.code, e?.message);
+  }
+  return [...DEFAULT_PLANS];
+}
+
+export async function saveSubscriptionPlans(plans) {
+  try {
+    await setDoc(doc(db, 'global_config', 'subscriptionPlans'), {
+      plans,
+      _updatedAt: new Date().toISOString(),
+    });
+    await _audit('SUBSCRIPTION_PLANS_UPDATED', { count: plans.length });
+    return plans;
+  } catch (e) {
+    console.error('[DS] saveSubscriptionPlans:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PREMIUM FEATURES  —  global_config/premiumFeatures
+// ═══════════════════════════════════════════════════════════════════════════
+const DEFAULT_PREMIUM_FEATURES = [
+  { id: 'export_svg',       label: 'SVG Export',            description: 'Download QR codes as vector SVG files',            plans: ['daily','weekly','yearly'] },
+  { id: 'export_pdf',       label: 'PDF Export',            description: 'Download QR codes as PDF documents',               plans: ['daily','weekly','yearly'] },
+  { id: 'bulk_generation',  label: 'Batch Generation',      description: 'Generate multiple QR codes at once',               plans: ['daily','weekly','yearly'] },
+  { id: 'cloud_sync',       label: 'Cloud Sync & Templates',description: 'Sync QR codes across devices via cloud',          plans: ['daily','weekly','yearly'] },
+  { id: 'custom_eyes',      label: 'Custom Eye Styles',     description: 'Floral, icon, and decorative eye patterns',        plans: ['daily','weekly','yearly'] },
+  { id: 'background_image', label: 'Background Image',      description: 'Use custom images as QR background',              plans: ['daily','weekly','yearly'] },
+  { id: 'logo_upload',      label: 'Logo Upload',           description: 'Embed custom logos inside QR codes',               plans: ['daily','weekly','yearly'] },
+  { id: 'text_overlay',     label: 'Text Overlay',          description: 'Add text inside QR codes',                         plans: ['daily','weekly','yearly'] },
+  { id: 'texture_effects',  label: 'Texture Effects',       description: 'Apply texture overlays to QR codes',               plans: ['daily','weekly','yearly'] },
+  { id: 'gradient_colors',  label: 'Gradient Colors',       description: 'Use gradient color fills on QR codes',             plans: ['daily','weekly','yearly'] },
+  { id: 'custom_frames',    label: 'Custom Frames',         description: 'Add decorative frames around QR codes',            plans: ['daily','weekly','yearly'] },
+  { id: 'ad_free',          label: 'Ad-Free Experience',    description: 'Remove all advertisements from the app',           plans: ['daily','weekly','yearly'] },
+];
+
+export async function getPremiumFeatures() {
+  try {
+    const snap = await getDoc(doc(db, 'global_config', 'premiumFeatures'));
+    if (snap.exists() && Array.isArray(snap.data().features)) return snap.data().features;
+  } catch (e) {
+    console.error('[DS] getPremiumFeatures:', e?.code, e?.message);
+  }
+  return [...DEFAULT_PREMIUM_FEATURES];
+}
+
+export async function savePremiumFeatures(features) {
+  try {
+    await setDoc(doc(db, 'global_config', 'premiumFeatures'), {
+      features,
+      _updatedAt: new Date().toISOString(),
+    });
+    await _audit('PREMIUM_FEATURES_UPDATED', { count: features.length });
+    return features;
+  } catch (e) {
+    console.error('[DS] savePremiumFeatures:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// USER SUBSCRIPTIONS  —  user_subscriptions/{uid}
+// ═══════════════════════════════════════════════════════════════════════════
+export async function getUserSubscription(uid) {
+  if (!uid) return null;
+  try {
+    const snap = await getDoc(doc(db, 'user_subscriptions', uid));
+    if (snap.exists()) return snap.data();
+  } catch (e) {
+    console.error('[DS] getUserSubscription:', e?.code, e?.message);
+  }
+  return null;
+}
+
+export async function saveUserSubscription(uid, sub) {
+  try {
+    await setDoc(doc(db, 'user_subscriptions', uid), {
+      ...sub,
+      _updatedAt: new Date().toISOString(),
+    });
+    await _audit('USER_SUBSCRIPTION_UPDATED', { uid, planId: sub.planId });
+    return sub;
+  } catch (e) {
+    console.error('[DS] saveUserSubscription:', e?.code, e?.message);
+    throw new Error(friendlyError(e));
+  }
+}
+
+export async function getAllUserSubscriptions() {
+  try {
+    const snap = await getDocs(collection(db, 'user_subscriptions'));
+    const list = [];
+    snap.forEach(d => list.push({ ...d.data(), uid: d.id }));
+    return list;
+  } catch (e) {
+    console.error('[DS] getAllUserSubscriptions:', e?.code, e?.message);
+    return [];
+  }
+}

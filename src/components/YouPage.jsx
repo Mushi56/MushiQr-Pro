@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Settings, ChevronRight, Moon, Sun, Info, Shield, FileText, Folder
+  Settings, ChevronRight, Moon, Sun, Info, Shield, FileText, Folder, Crown, Zap, Star
 } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
+import { usePremium } from '../services/premiumContext';
 
 import SaveLocationModal from './SaveLocationModal';
 
 export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, currentUser, showToast }) {
   const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const { isPremium, currentPlan, showPaywall, subscription } = usePremium();
 
   useEffect(() => {
     const handlePrefSync = () => {
@@ -43,8 +45,110 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
     }}>
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px var(--main-padding-x) 100px' }}>
 
+        {/* ── Premium Subscription Card ── */}
+        {!isPremium ? (
+          <div
+            onClick={() => showPaywall()}
+            style={{
+              position: 'relative',
+              background: 'linear-gradient(135deg, #D60036 0%, #ff4d6d 50%, #8b5cf6 100%)',
+              borderRadius: '18px',
+              padding: '22px 20px',
+              marginBottom: '16px',
+              cursor: 'pointer',
+              overflow: 'hidden',
+              transition: 'transform 0.2s',
+            }}
+          >
+            {/* Decorative sparkle */}
+            <div style={{ position: 'absolute', top: 10, right: 16, opacity: 0.25 }}>
+              <Sparkle />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: 14,
+                background: 'rgba(255,255,255,0.2)',
+                backdropFilter: 'blur(8px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <Crown size={24} color="#fff" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 3 }}>
+                  Upgrade to Pro
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 1.4 }}>
+                  Unlock all premium features, templates & export options
+                </div>
+              </div>
+              <div style={{
+                background: 'rgba(255,255,255,0.2)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: 10,
+                padding: '8px 14px',
+                display: 'flex', alignItems: 'center', gap: 5,
+                flexShrink: 0,
+              }}>
+                <Zap size={13} color="#fff" />
+                <span style={{ fontSize: 12, fontWeight: 800, color: '#fff' }}>GO PRO</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '18px',
+            padding: '18px 20px',
+            marginBottom: '16px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12,
+                background: `${currentPlan?.color || '#8b5cf6'}20`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <Crown size={22} color={currentPlan?.color || '#8b5cf6'} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {currentPlan?.name || 'Pro'} Plan
+                  </span>
+                  <span style={{
+                    fontSize: 9, fontWeight: 800, textTransform: 'uppercase',
+                    background: `${currentPlan?.color || '#8b5cf6'}20`,
+                    color: currentPlan?.color || '#8b5cf6',
+                    padding: '2px 7px', borderRadius: 100, letterSpacing: '0.5px',
+                  }}>Active</span>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 3 }}>
+                  All premium features unlocked
+                </div>
+              </div>
+              <Star size={20} color={currentPlan?.color || '#8b5cf6'} fill={currentPlan?.color || '#8b5cf6'} />
+            </div>
+          </div>
+        )}
+
         {/* Settings List */}
         <div className="settings-group-container" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+
+          {/* Subscription */}
+          <div className="settings-row-item" onClick={() => showPaywall()} style={{ padding: '16px' }}>
+            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #D60036 0%, #ff4d6d 100%)' }}>
+              <Crown size={18} />
+            </div>
+            <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Subscription</div>
+            <div style={{ marginRight: '12px', fontSize: '13px', color: isPremium ? '#10b981' : 'var(--text-secondary)', fontWeight: 'bold' }}>
+              {isPremium ? (currentPlan?.name || 'Pro') : 'Free'}
+            </div>
+            <ChevronRight size={16} color="var(--text-muted)" />
+          </div>
+
+          <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
 
           {/* Theme */}
           <div className="settings-row-item" onClick={handleThemeChange} style={{ padding: '16px' }}>
@@ -129,3 +233,13 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
     </div>
   );
 }
+
+// Decorative sparkle SVG for the premium card
+function Sparkle() {
+  return (
+    <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+      <path d="M30 0L33.5 26.5L60 30L33.5 33.5L30 60L26.5 33.5L0 30L26.5 26.5L30 0Z" fill="rgba(255,255,255,0.3)" />
+    </svg>
+  );
+}
+

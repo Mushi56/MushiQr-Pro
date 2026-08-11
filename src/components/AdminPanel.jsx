@@ -2296,32 +2296,229 @@ function UsersPanel({ currentUser }) {
   );
 }
 
-function SubscriptionsPanel() {
-  const plans = [
-    { name: 'Free',    price: '$0',   color: T.textSec, features: ['Unlimited QR codes', 'Basic templates', 'PNG export'] },
-    { name: 'Pro',     price: '$4.99', color: T.purple,  features: ['All templates', 'SVG & PDF export', 'Batch generation', 'Cloud Sync'] },
-    { name: 'Business',price: '$12.99',color: T.accent,  features: ['Everything in Pro', 'Super Admin panel', 'Custom branding', 'Priority support'] },
+function SubscriptionsPanel({ plans: initPlans, premiumFeatures: initFeatures, subscribers: initSubs, onSavePlans, onSaveFeatures }) {
+  const [plans, setPlans] = useState(initPlans || []);
+  const [features, setFeatures] = useState(initFeatures || []);
+  const [subs] = useState(initSubs || []);
+  const [tab, setTab] = useState('plans');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [newFeature, setNewFeature] = useState('');
+  const toast = useToast();
+
+  useEffect(() => { if (initPlans) setPlans(initPlans); }, [initPlans]);
+  useEffect(() => { if (initFeatures) setFeatures(initFeatures); }, [initFeatures]);
+
+  const PERIOD_OPTS = [
+    { value: 'forever', label: 'Forever (Free)' },
+    { value: 'day',     label: 'Daily' },
+    { value: 'week',    label: 'Weekly' },
+    { value: 'month',   label: 'Monthly' },
+    { value: 'year',    label: 'Yearly' },
   ];
+
+  // Plan CRUD
+  const updatePlan = (id, key, val) => setPlans(p => p.map(pl => pl.id === id ? { ...pl, [key]: val } : pl));
+  const deletePlan = (id) => { if (id === 'free') return; setPlans(p => p.filter(pl => pl.id !== id)); };
+  const addPlan = () => {
+    const id = 'plan_' + Date.now();
+    setPlans(p => [...p, { id, name: 'New Plan', price: 0, period: 'month', color: '#8b5cf6', active: true, popular: false, sortOrder: p.length }]);
+    setEditingPlan(id);
+  };
+
+  // Feature CRUD
+  const updateFeature = (id, key, val) => setFeatures(f => f.map(ft => ft.id === id ? { ...ft, [key]: val } : ft));
+  const toggleFeaturePlan = (featureId, planId) => {
+    setFeatures(f => f.map(ft => {
+      if (ft.id !== featureId) return ft;
+      const has = (ft.plans || []).includes(planId);
+      return { ...ft, plans: has ? ft.plans.filter(p => p !== planId) : [...(ft.plans || []), planId] };
+    }));
+  };
+  const deleteFeature = (id) => setFeatures(f => f.filter(ft => ft.id !== id));
+  const addFeature = () => {
+    if (!newFeature.trim()) return;
+    const id = newFeature.trim().toLowerCase().replace(/\s+/g, '_');
+    if (features.find(f => f.id === id)) { toast('Feature ID already exists', 'warning'); return; }
+    setFeatures(f => [...f, { id, label: newFeature.trim(), description: '', plans: plans.filter(p => p.id !== 'free').map(p => p.id) }]);
+    setNewFeature('');
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      if (tab === 'plans') { await onSavePlans(plans); toast('Subscription plans saved!', 'success'); }
+      else { await onSaveFeatures(features); toast('Premium features saved!', 'success'); }
+      setSaved(true); setTimeout(() => setSaved(false), 2500);
+    } catch (e) { toast('Save failed: ' + (e.message || ''), 'error', 6000); }
+    finally { setSaving(false); }
+  };
+
+  // Stats
+  const paidSubs = subs.filter(s => s.planId && s.planId !== 'free' && !s.cancelled);
+  const planCounts = {};
+  paidSubs.forEach(s => { planCounts[s.planId] = (planCounts[s.planId] || 0) + 1; });
+
+  const paidPlans = plans.filter(p => p.id !== 'free');
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Stats Row */}
       <div className="ad-auto-grid">
-        {plans.map(plan => (
-          <AdminCard key={plan.name} style={{ border: `1px solid ${plan.color}33` }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div>
-                <Badge color={plan.color}>{plan.name}</Badge>
-                <div style={{ fontSize: 26, fontWeight: 900, color: plan.color, marginTop: 8 }}>{plan.price}<span style={{ fontSize: 12, color: T.textSec, fontWeight: 500 }}>/mo</span></div>
-              </div>
-              {plan.features.map(f => (
-                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <Check size={12} color={plan.color} />
-                  <span style={{ fontSize: 12, color: T.textSec }}>{f}</span>
-                </div>
-              ))}
-            </div>
-          </AdminCard>
+        <StatCard icon={CreditCard} label="Total Subscribers" value={paidSubs.length} color={T.purple} trendLabel="active paid" />
+        <StatCard icon={Users} label="Free Users" value={subs.length - paidSubs.length} color={T.textSec} trendLabel="no active plan" />
+        <StatCard icon={Zap} label="Active Plans" value={plans.filter(p => p.active).length} color={T.green} trendLabel={`of ${plans.length} total`} />
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 6 }}>
+        {[['plans', 'Plans'], ['features', 'Premium Features'], ['subscribers', 'Subscribers']].map(([id, label]) => (
+          <button key={id} onClick={() => setTab(id)} style={{
+            padding: '8px 16px', borderRadius: T.r.md, border: `1px solid ${tab === id ? T.accent : T.border}`,
+            background: tab === id ? T.accentLow : 'transparent', color: tab === id ? T.accent : T.textSec,
+            fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+          }}>{label}</button>
         ))}
       </div>
+
+      {/* ═══ PLANS TAB ═══ */}
+      {tab === 'plans' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <Btn onClick={addPlan} icon={<Plus size={13} />} variant="ghost">Add Plan</Btn>
+            <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Plans'}
+            </Btn>
+          </div>
+          <div className="ad-auto-grid">
+            {plans.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(plan => (
+              <AdminCard key={plan.id} style={{ border: `1px solid ${plan.color}33` }}
+                right={plan.id !== 'free' && <button onClick={() => deletePlan(plan.id)} style={{ background: 'none', border: 'none', color: T.red, cursor: 'pointer', padding: 4 }}><Trash2 size={14} /></button>}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Badge color={plan.color}>{plan.name}</Badge>
+                    {plan.popular && <Badge color={T.orange}>Popular</Badge>}
+                    {!plan.active && <Badge color={T.red}>Inactive</Badge>}
+                  </div>
+                  <div style={{ fontSize: 26, fontWeight: 900, color: plan.color }}>
+                    ${typeof plan.price === 'number' ? plan.price.toFixed(2) : plan.price}
+                    <span style={{ fontSize: 12, color: T.textSec, fontWeight: 500 }}>/{plan.period}</span>
+                  </div>
+                  {editingPlan === plan.id ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <FormInput label="Plan Name" value={plan.name} onChange={v => updatePlan(plan.id, 'name', v)} />
+                      <FormInput label="Price ($)" type="number" value={plan.price} onChange={v => updatePlan(plan.id, 'price', parseFloat(v) || 0)} />
+                      <FormSelect label="Billing Period" value={plan.period} onChange={v => updatePlan(plan.id, 'period', v)} options={PERIOD_OPTS} />
+                      <FormInput label="Color" type="color" value={plan.color} onChange={v => updatePlan(plan.id, 'color', v)} />
+                      <FormInput label="Sort Order" type="number" value={plan.sortOrder || 0} onChange={v => updatePlan(plan.id, 'sortOrder', parseInt(v) || 0)} />
+                      <ToggleRow label="Active" description="Show this plan to users" checked={!!plan.active} onChange={v => updatePlan(plan.id, 'active', v)} />
+                      <ToggleRow label="Popular" description="Highlight as the recommended plan" checked={!!plan.popular} onChange={v => updatePlan(plan.id, 'popular', v)} />
+                      <Btn onClick={() => setEditingPlan(null)} variant="ghost" icon={<Check size={13} />}>Done Editing</Btn>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <Btn onClick={() => setEditingPlan(plan.id)} variant="ghost" size="sm" icon={<Edit size={12} />}>Edit</Btn>
+                    </div>
+                  )}
+                  {/* Subscriber count */}
+                  <div style={{ fontSize: 11, color: T.textMut, marginTop: 4 }}>
+                    {planCounts[plan.id] || 0} active subscriber{(planCounts[plan.id] || 0) !== 1 ? 's' : ''}
+                  </div>
+                </div>
+              </AdminCard>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ═══ FEATURES TAB ═══ */}
+      {tab === 'features' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
+              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Features'}
+            </Btn>
+          </div>
+
+          <AdminCard title="Feature × Plan Matrix" subtitle="Toggle which plans include each premium feature">
+            {/* Header Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: `1fr 60px repeat(${paidPlans.length}, 70px)`, gap: 4, alignItems: 'center', marginBottom: 8, paddingBottom: 8, borderBottom: `1px solid ${T.border}` }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Feature</div>
+              <div></div>
+              {paidPlans.map(p => (
+                <div key={p.id} style={{ fontSize: 10, fontWeight: 800, color: p.color, textAlign: 'center', textTransform: 'uppercase' }}>{p.name}</div>
+              ))}
+            </div>
+            {/* Feature Rows */}
+            {features.map((feat, i) => (
+              <div key={feat.id} style={{
+                display: 'grid', gridTemplateColumns: `1fr 60px repeat(${paidPlans.length}, 70px)`, gap: 4, alignItems: 'center',
+                padding: '8px 0', borderBottom: i < features.length - 1 ? `1px solid ${T.border}` : 'none',
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{feat.label}</div>
+                  <div style={{ fontSize: 11, color: T.textMut }}>{feat.description}</div>
+                </div>
+                <button onClick={() => deleteFeature(feat.id)} style={{ background: 'none', border: 'none', color: T.red, cursor: 'pointer', padding: 4, justifySelf: 'center' }}>
+                  <Trash2 size={12} />
+                </button>
+                {paidPlans.map(p => {
+                  const included = (feat.plans || []).includes(p.id);
+                  return (
+                    <div key={p.id} style={{ display: 'flex', justifyContent: 'center' }}>
+                      <button onClick={() => toggleFeaturePlan(feat.id, p.id)} style={{
+                        width: 28, height: 28, borderRadius: 8, border: `1.5px solid ${included ? p.color : T.border}`,
+                        background: included ? `${p.color}20` : 'transparent', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
+                      }}>
+                        {included && <Check size={14} color={p.color} />}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+            {/* Add Feature */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <input value={newFeature} onChange={e => setNewFeature(e.target.value)} placeholder="New feature name…"
+                onKeyDown={e => e.key === 'Enter' && addFeature()}
+                style={{ flex: 1, background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, color: T.text, fontSize: 13, padding: '8px 12px', outline: 'none', fontFamily: 'inherit' }}
+              />
+              <Btn onClick={addFeature} variant="ghost" icon={<Plus size={13} />}>Add</Btn>
+            </div>
+          </AdminCard>
+        </>
+      )}
+
+      {/* ═══ SUBSCRIBERS TAB ═══ */}
+      {tab === 'subscribers' && (
+        <AdminCard title="Active Subscribers" subtitle={`${paidSubs.length} paid subscriber${paidSubs.length !== 1 ? 's' : ''}`} noPadding>
+          {paidSubs.length === 0 ? (
+            <EmptyState icon={CreditCard} title="No subscribers yet" desc="When users subscribe to a premium plan, they will appear here." />
+          ) : (
+            <div>
+              {paidSubs.map((sub, i) => {
+                const plan = plans.find(p => p.id === sub.planId);
+                return (
+                  <div key={sub.uid || i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', borderBottom: i < paidSubs.length - 1 ? `1px solid ${T.border}` : 'none' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: `${plan?.color || T.purple}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: plan?.color || T.purple, fontSize: 14, fontWeight: 800 }}>
+                      {(sub.userName || sub.userEmail || '?')[0].toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub.userName || sub.userEmail || sub.uid}</div>
+                      <div style={{ fontSize: 11, color: T.textMut }}>{sub.userEmail || sub.uid}</div>
+                    </div>
+                    <Badge color={plan?.color || T.purple}>{plan?.name || sub.planId}</Badge>
+                    <div style={{ fontSize: 11, color: T.textMut }}>{sub.startedAt ? new Date(sub.startedAt).toLocaleDateString() : '—'}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </AdminCard>
+      )}
     </div>
   );
 }
@@ -2415,6 +2612,9 @@ function AdminPanelInner() {
   const [announcement, setAnnouncement]     = useState(null);
   const [remoteConfig, setRemoteConfig]     = useState({});
   const [auditLog, setAuditLog]             = useState([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
+  const [premiumFeatures, setPremiumFeatures]     = useState([]);
+  const [subscribers, setSubscribers]             = useState([]);
   const [loading, setLoading]               = useState(true);
 
   useEffect(() => {
@@ -2430,14 +2630,16 @@ function AdminPanelInner() {
 
     async function init() {
       try {
-        const [s, c, h, as_, ff, ct, ann, rc, al] = await Promise.all([
+        const [s, c, h, as_, ff, ct, ann, rc, al, sp, pf, subs] = await Promise.all([
           DS.getAppStats(), DS.getActivityChartData(7), DS.getHistory(100),
           DS.getAppSettings(), DS.getFeatureFlags(), DS.getCloudTemplates(),
           DS.getAnnouncement(), DS.getRemoteConfig(), DS.getAuditLog(100),
+          DS.getSubscriptionPlans(), DS.getPremiumFeatures(), DS.getAllUserSubscriptions(),
         ]);
         setStats(s); setChartData(c); setHistory(h);
         setAppSettings(as_); setFeatureFlags(ff); setCloudTemplates(ct);
         setAnnouncement(ann); setRemoteConfig(rc); setAuditLog(al);
+        setSubscriptionPlans(sp); setPremiumFeatures(pf); setSubscribers(subs);
       } finally { setLoading(false); }
     }
     init();
@@ -2480,7 +2682,10 @@ function AdminPanelInner() {
   const PANELS = {
     dashboard:       <DashboardPanel stats={stats} chartData={chartData} history={history} onNavigate={setSection} />,
     users:           <UsersPanel />,
-    subscriptions:   <SubscriptionsPanel />,
+    subscriptions:   <SubscriptionsPanel plans={subscriptionPlans} premiumFeatures={premiumFeatures} subscribers={subscribers}
+      onSavePlans={async p => { await DS.saveSubscriptionPlans(p); setSubscriptionPlans(p); refreshAudit(); }}
+      onSaveFeatures={async f => { await DS.savePremiumFeatures(f); setPremiumFeatures(f); refreshAudit(); }}
+    />,
     analytics:       <AnalyticsPanel chartData={chartData} stats={stats} />,
     reports:         <ReportsPanel history={history} />,
     templates:       <TemplatesPanel cloudTemplates={cloudTemplates} onRefresh={refreshTemplates} />,

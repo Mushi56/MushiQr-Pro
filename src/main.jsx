@@ -7,28 +7,32 @@ import PrivacyPolicy from './PrivacyPolicy.jsx';
 import Terms from './Terms.jsx';
 import Footer from './Footer.jsx';
 import AdminPanel from './components/AdminPanel.jsx';
+import { PremiumProvider } from './services/premiumContext.jsx';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HashRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/generator" element={<App />} />
-        <Route path="/settings" element={<App />} />
-        <Route path="/you" element={<App />} />
-        <Route path="/saved" element={<App />} />
-        <Route path="/history" element={<App />} />
-        <Route path="/scanner" element={<App />} />
-        <Route path="/batch" element={<App />} />
-        <Route path="/barcode" element={<App />} />
-        <Route path="/scanner-gun" element={<App />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/admin/*" element={<AdminPanel />} />
-      </Routes>
+      <PremiumProvider>
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/generator" element={<App />} />
+          <Route path="/settings" element={<App />} />
+          <Route path="/you" element={<App />} />
+          <Route path="/saved" element={<App />} />
+          <Route path="/history" element={<App />} />
+          <Route path="/scanner" element={<App />} />
+          <Route path="/batch" element={<App />} />
+          <Route path="/barcode" element={<App />} />
+          <Route path="/scanner-gun" element={<App />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin/*" element={<AdminPanel />} />
+        </Routes>
+      </PremiumProvider>
     </HashRouter>
   </StrictMode>,
 );
+
