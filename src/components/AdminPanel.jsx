@@ -21,6 +21,7 @@ import * as DS from '../services/adminDataService';
 import { QR_TEMPLATES } from '../utils/qrTemplates';
 import { auth, googleProvider } from '../services/firebase';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import GoldenAdminBadge from './GoldenAdminBadge';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────
 const T = {
@@ -445,10 +446,10 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       borderRight: `1px solid ${T.border}`,
       display: 'flex', flexDirection: 'column',
       position: 'fixed', left: open ? 0 : -270, top: 0, bottom: 0,
-      zIndex: 25, transition: 'left 0.27s cubic-bezier(0.4,0,0.2,1)',
+      zIndex: 35, transition: 'left 0.27s cubic-bezier(0.4,0,0.2,1)',
       boxShadow: isMobile && open ? '4px 0 32px rgba(0,0,0,0.8)' : 'none',
       paddingTop: 'max(14px, env(safe-area-inset-top))',
-      paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
+      paddingBottom: isMobile ? 'calc(68px + max(14px, env(safe-area-inset-bottom)))' : 'max(14px, env(safe-area-inset-bottom))',
     }}>
       {/* Close btn (mobile only) */}
       <button className="ad-sidebar-close" onClick={onClose}>
@@ -457,11 +458,11 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
 
       {/* Logo */}
       <div style={{ padding: '16px 16px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-        <img src="/logo.webp" alt="Logo" style={{ width: 36, height: 36, borderRadius: 10, objectFit: 'contain', flexShrink: 0, border: `1px solid ${T.accent}44` }} />
+        <img src="/logo.webp" alt="Logo" style={{ width: 36, height: 36, borderRadius: 10, objectFit: 'contain', flexShrink: 0, border: `1px solid rgba(245, 158, 11, 0.4)` }} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 900, color: T.text, lineHeight: 1.2, letterSpacing: '-0.3px' }}>Mushi QR Pro</div>
-          <div style={{ fontSize: 10, color: T.accent, fontWeight: 800, letterSpacing: '0.6px', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent }} /> SUPER ADMIN
+          <div style={{ fontSize: 11, color: '#F59E0B', fontWeight: 800, letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5, marginTop: 3 }}>
+            <GoldenAdminBadge size={14} /> SUPER ADMIN
           </div>
         </div>
       </div>
@@ -503,18 +504,24 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
         <div style={{
           padding: '12px 14px', borderTop: `1px solid ${T.border}`,
           display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
-          background: 'rgba(20,20,30,0.5)',
+          background: 'rgba(20,20,30,0.65)', backdropFilter: 'blur(10px)',
+          borderRadius: T.r.md, margin: '0 8px 4px', border: `1px solid ${T.border}`,
         }}>
-          {currentUser.photoURL ? (
-            <img src={currentUser.photoURL} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `1.5px solid ${T.accent}` }} />
-          ) : (
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 13, flexShrink: 0, border: `1.5px solid ${T.accent}44` }}>
-              {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
+          <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
+            {currentUser.photoURL ? (
+              <img src={currentUser.photoURL} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #F59E0B' }} />
+            ) : (
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 13, border: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
+                {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
+              </div>
+            )}
+            <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
+              <GoldenAdminBadge size={13} />
             </div>
-          )}
+          </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {currentUser.displayName || 'Super Admin'}
+            <div style={{ fontSize: 12, fontWeight: 800, color: T.text, display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Super Admin'}</span>
             </div>
             <div style={{ fontSize: 10, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {currentUser.email}
