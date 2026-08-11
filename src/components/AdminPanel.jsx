@@ -661,36 +661,6 @@ function DashboardPanel({ stats, history, featureFlags, announcement, subscriber
         <StatCard icon={Shield}     label="System Status"         value={allOk ? "100% Operational" : "Degraded"} color={allOk ? T.green : T.orange} trendLabel={allOk ? "All checks pass" : "Attention needed"} />
       </div>
 
-      {/* Most Used Controls & Shortcuts Hub */}
-      <div>
-        <div style={{ fontSize: 11, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12 }}>
-          Quick Admin Actions & Shortcuts
-        </div>
-        <div className="ad-quick-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
-          {quickActions.map(q => (
-            <div key={q.label} onClick={q.action} style={{
-              background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.lg,
-              padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14,
-              transition: 'all 0.15s ease',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = q.color; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.transform = 'none'; }}
-            >
-              <div style={{ width: 42, height: 42, borderRadius: T.r.md, background: `${q.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <q.icon size={20} color={q.color} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: T.text, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span>{q.label}</span>
-                  <ArrowUpRight size={12} color={T.textMut} />
-                </div>
-                <div style={{ fontSize: 11, color: T.textSec, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Feature Flags Direct Control Widget */}
       {featureFlags && (
         <AdminCard title="Live Feature Flags Quick Switcher" subtitle="Enable or disable key capabilities live across the app"
