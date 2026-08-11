@@ -208,9 +208,9 @@ function Btn({ children, onClick, variant = 'primary', size = 'md', disabled, ic
 function Badge({ children, color = T.purple }) {
   return (
     <span style={{
-      display: 'inline-block', padding: '2px 9px', borderRadius: 100,
+      display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 100,
       fontSize: 10, fontWeight: 800, letterSpacing: '0.4px', textTransform: 'uppercase',
-      background: `${color}20`, color,
+      background: `${color}20`, color, lineHeight: 1, whiteSpace: 'nowrap',
     }}>{children}</span>
   );
 }
@@ -2657,7 +2657,8 @@ function UsersPanel() {
                     {/* Provider */}
                     <td style={{ padding: '10px 16px' }}>
                       <Badge color={u.provider === 'google' ? '#4285F4' : u.provider === 'email' ? T.purple : T.textMut}>
-                        {u.provider === 'google' ? '● Google' : u.provider === 'email' ? '● Email' : u.provider || '?'}
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block', flexShrink: 0 }} />
+                        {u.provider === 'google' ? 'Google' : u.provider === 'email' ? 'Email' : u.provider || '?'}
                       </Badge>
                     </td>
 
@@ -2860,6 +2861,7 @@ function UsersPanel() {
                   <div style={{ fontSize: 13, color: T.textSec, fontFamily: 'monospace', marginTop: 2 }}>{selectedUser.email || '—'}</div>
                   <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                     <Badge color={selectedUser.provider === 'google' ? '#4285F4' : T.purple}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block', flexShrink: 0 }} />
                       {selectedUser.provider === 'google' ? 'Google' : selectedUser.provider === 'email' ? 'Email' : selectedUser.provider || '?'}
                     </Badge>
                     <Badge color={selectedUser.status === 'blocked' ? T.red : T.green}>
