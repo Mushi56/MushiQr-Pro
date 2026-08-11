@@ -262,8 +262,8 @@ function AdminCard({ title, subtitle, right, children, noPadding, style: s }) {
       {(title || right) && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${T.border}`, gap: 10 }}>
           <div style={{ minWidth: 0, flex: 1 }}>
-            {title && <div className="ad-card-title" style={{ fontSize: 13, fontWeight: 700, color: T.text, lineHeight: 1.3 }}>{title}</div>}
-            {subtitle && <div style={{ fontSize: 10, color: T.textSec, marginTop: 1, lineHeight: 1.3 }}>{subtitle}</div>}
+            {title && <div className="ad-card-title" style={{ fontSize: 13, fontWeight: 700, color: T.text, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>}
+            {subtitle && <div style={{ fontSize: 10, color: T.textSec, marginTop: 1, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</div>}
           </div>
           {right && <div style={{ flexShrink: 0 }}>{right}</div>}
         </div>
@@ -3073,14 +3073,14 @@ function RevenuePanel() {
       {/* Revenue Header Banner */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(214,0,54,0.15) 0%, rgba(139,92,246,0.15) 100%)',
-        border: `1px solid ${T.accent}33`, borderRadius: T.r.xl, padding: '24px',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16
+        border: `1px solid ${T.accent}33`, borderRadius: T.r.lg, padding: '14px 16px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12
       }}>
-        <div>
-          <div style={{ fontSize: 20, fontWeight: 900, color: T.text, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <DollarSign size={22} color={T.accent} /> SaaS Revenue & Monetization
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ fontSize: 16, fontWeight: 800, color: T.text, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <DollarSign size={18} color={T.accent} /> SaaS Revenue & Monetization
           </div>
-          <div style={{ fontSize: 13, color: T.textSec, marginTop: 4 }}>
+          <div style={{ fontSize: 11, color: T.textSec, marginTop: 2, lineHeight: 1.4 }}>
             Real-time calculation of MRR, ARR, Conversion rates, and Subscription Tiers
           </div>
         </div>
@@ -3089,23 +3089,23 @@ function RevenuePanel() {
 
       {/* Top Financial KPI Grid */}
       <div className="ad-stat-grid">
-        <StatCard icon={DollarSign} label="Monthly Recurring (MRR)" value={`$${data?.mrr || '0.00'}`} color={T.green} trendLabel="estimated monthly" />
-        <StatCard icon={TrendingUp} label="Annual Recurring (ARR)" value={`$${data?.arr || '0.00'}`} color={T.purple} trendLabel="projected 12 months" />
+        <StatCard icon={DollarSign} label="Monthly Revenue (MRR)" value={`$${data?.mrr || '0.00'}`} color={T.green} trendLabel="estimated monthly" />
+        <StatCard icon={TrendingUp} label="Annual Revenue (ARR)" value={`$${data?.arr || '0.00'}`} color={T.purple} trendLabel="projected 12 months" />
         <StatCard icon={Zap} label="Paid Subscribers" value={data?.paidUsers || 0} color={T.blue} trendLabel={`${data?.conversionRate || 0}% conversion`} />
         <StatCard icon={CreditCard} label="ARPU (Per User)" value={`$${data?.arpu || '0.00'}`} color={T.orange} trendLabel="avg revenue/user" />
       </div>
 
       {/* Sub Tab Buttons */}
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {[
-          ['overview', 'Financial Overview'],
-          ['ledger', 'Transactions & Tiers'],
-          ['promos', 'Promo Codes & Discounts']
+          ['overview', 'Overview'],
+          ['ledger', 'Ledger & Tiers'],
+          ['promos', 'Promo Codes']
         ].map(([id, label]) => (
           <button key={id} onClick={() => setSubTab(id)} style={{
-            padding: '8px 16px', borderRadius: T.r.md, border: `1px solid ${subTab === id ? T.accent : T.border}`,
+            padding: '6px 12px', borderRadius: T.r.md, border: `1px solid ${subTab === id ? T.accent : T.border}`,
             background: subTab === id ? T.accentLow : 'transparent', color: subTab === id ? T.accent : T.textSec,
-            fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s'
+            fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s'
           }}>
             {label}
           </button>
@@ -3116,38 +3116,38 @@ function RevenuePanel() {
       {subTab === 'overview' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="ad-two-col">
-            <AdminCard title="Subscription Tier Distribution" subtitle="Active user count by plan type">
+            <AdminCard title="Subscription Tier Share" subtitle="Active user count by plan type">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
                 {[
-                  { label: 'Free Tier Users', count: data?.freeUsers || 0, color: T.textMut, pct: (((data?.freeUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
+                  { label: 'Free Tier', count: data?.freeUsers || 0, color: T.textMut, pct: (((data?.freeUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
                   { label: 'Pro Monthly ($4.99/mo)', count: data?.proMonthlyUsers || 0, color: T.purple, pct: (((data?.proMonthlyUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
                   { label: 'Pro Yearly ($39.99/yr)', count: data?.proYearlyUsers || 0, color: T.green, pct: (((data?.proYearlyUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
-                  { label: 'Lifetime Unlimited ($99.99)', count: data?.lifetimeUsers || 0, color: T.orange, pct: (((data?.lifetimeUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
+                  { label: 'Lifetime Pass ($99.99)', count: data?.lifetimeUsers || 0, color: T.orange, pct: (((data?.lifetimeUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
                 ].map(item => (
                   <div key={item.label}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
                       <span style={{ color: T.text, fontWeight: 600 }}>{item.label}</span>
-                      <span style={{ color: T.textSec }}>{item.count} users ({item.pct}%)</span>
+                      <span style={{ color: T.textSec }}>{item.count} ({item.pct}%)</span>
                     </div>
-                    <div style={{ width: '100%', height: 8, background: T.bgEl, borderRadius: 4, overflow: 'hidden' }}>
-                      <div style={{ width: `${item.pct}%`, height: '100%', background: item.color, borderRadius: 4, transition: 'width 0.4s' }} />
+                    <div style={{ width: '100%', height: 6, background: T.bgEl, borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ width: `${item.pct}%`, height: '100%', background: item.color, borderRadius: 3, transition: 'width 0.4s' }} />
                     </div>
                   </div>
                 ))}
               </div>
             </AdminCard>
 
-            <AdminCard title="Monetization Health Metrics" subtitle="SaaS conversion benchmark">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ padding: 14, background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
-                  <div style={{ fontSize: 12, color: T.textSec }}>Conversion Rate (Free → Pro)</div>
-                  <div style={{ fontSize: 24, fontWeight: 900, color: T.accent, marginTop: 4 }}>{data?.conversionRate}%</div>
-                  <div style={{ fontSize: 11, color: T.textMut, marginTop: 2 }}>Target: 5.0% or higher</div>
+            <AdminCard title="Monetization Benchmarks" subtitle="SaaS conversion metrics">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ padding: 12, background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
+                  <div style={{ fontSize: 11, color: T.textSec }}>Conversion Rate (Free → Pro)</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: T.accent, marginTop: 2 }}>{data?.conversionRate}%</div>
+                  <div style={{ fontSize: 10, color: T.textMut, marginTop: 2 }}>Target: 5.0% or higher</div>
                 </div>
-                <div style={{ padding: 14, background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
-                  <div style={{ fontSize: 12, color: T.textSec }}>Lifetime Value (LTV) Estimate</div>
-                  <div style={{ fontSize: 24, fontWeight: 900, color: T.green, marginTop: 4 }}>${(parseFloat(data?.arpu || 0) * 12).toFixed(2)}</div>
-                  <div style={{ fontSize: 11, color: T.textMut, marginTop: 2 }}>Based on 12-month average retention</div>
+                <div style={{ padding: 12, background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
+                  <div style={{ fontSize: 11, color: T.textSec }}>Lifetime Value (LTV) Estimate</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: T.green, marginTop: 2 }}>${(parseFloat(data?.arpu || 0) * 12).toFixed(2)}</div>
+                  <div style={{ fontSize: 10, color: T.textMut, marginTop: 2 }}>Based on 12-month retention</div>
                 </div>
               </div>
             </AdminCard>
@@ -3896,7 +3896,12 @@ function AdminPanelInner() {
           .ad-header-subtitle { display: none; }
           .ad-main-pad { padding: 10px 8px 90px; }
           .ad-stat-value { font-size: 16px !important; }
-          .ad-card-title { font-size: 12px !important; }
+          .ad-card-title {
+            font-size: 12px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
         }
 
         /* Small mobile — 480px */
