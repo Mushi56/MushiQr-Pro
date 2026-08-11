@@ -136,6 +136,44 @@ function MiniDotPreviewCanvas({ dotStyle, qrParams }) {
   );
 }
 
+function MiniEyeCanvas({ eyeStyle, qrParams }) {
+  const canvasRef = useRef(null);
+  const fgColor = qrParams?.eyeColor || qrParams?.fgColor || '#000000';
+  const outerColor = qrParams?.eyeOuterColor || fgColor;
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const size = 120;
+    ctx.clearRect(0, 0, size, size);
+
+    // Draw background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, size, size);
+
+    // Draw single eye centered in canvas using exact QR engine drawEye
+    const padding = 10;
+    const eyeSize = size - padding * 2;
+    drawEye(ctx, padding, padding, eyeSize, eyeStyle, outerColor, fgColor);
+  }, [eyeStyle, fgColor, outerColor]);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      width="120" 
+      height="120" 
+      style={{ 
+        width: '100%', 
+        height: '100%', 
+        borderRadius: '6px',
+        objectFit: 'cover',
+        display: 'block'
+      }} 
+    />
+  );
+}
+
 const DOT_PREVIEWS = {
   [DOT_STYLES.DENSO]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
@@ -646,21 +684,23 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
 }
 
 export function EyeStyleSelector({ value, onChange, qrParams }) {
-  const eyeColor = qrParams?.eyeColor || qrParams?.fgColor || 'currentColor';
   return (
     <div className="style-grid eye-style-grid">
-      {Object.entries(EYE_PREVIEWS).map(([style, preview]) => (
-        <button
-          key={style}
-          className={`style-option ${value === style ? 'active' : ''}`}
-          onClick={() => onChange(style)}
-          title={style}
-        >
-          <div className="style-option-preview" style={{ color: eyeColor, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-            {preview}
-          </div>
-        </button>
-      ))}
+      {Object.keys(EYE_STYLES).map((styleKey) => {
+        const style = EYE_STYLES[styleKey];
+        return (
+          <button
+            key={style}
+            className={`style-option ${value === style ? 'active' : ''}`}
+            onClick={() => onChange(style)}
+            title={style}
+          >
+            <div className="style-option-preview">
+              <MiniEyeCanvas eyeStyle={style} qrParams={qrParams} />
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }
