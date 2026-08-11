@@ -1622,15 +1622,15 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.CHERRY_BLOSSOM: {
-      // 1. Draw rounded corner square container for pupil (no black/white, high contrast)
-      ctx.fillStyle = '#ffe5ec'; // Light pink container (no white)
+      // 1. Draw rounded corner square container for pupil (strong contrast pink against white)
+      ctx.fillStyle = '#ff758f'; // Strong cherry blossom pink
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
-      // 2. Draw flower centered and perfectly fitted inside (r=4.5) using original pink color
+      // 2. Draw flower centered and perfectly fitted inside (r=4.5) using light pink petals (no white)
       const cx = 14, cy = 14, r = 4.5;
       const petalR = r * 0.55;
       const petalD = r * 0.45;
-      ctx.fillStyle = '#ff758f'; // Original cherry blossom pink petals (no white)
+      ctx.fillStyle = '#ffe5ec'; // Light pastel pink petals for contrast inside
       for (let i = 0; i < 5; i++) {
         const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
         const px = cx + Math.cos(angle) * petalD;
@@ -1649,15 +1649,15 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.LOTUS: {
-      // 1. Pupil container (light blue-gray, no white)
-      ctx.fillStyle = '#d0e1fd';
+      // 1. Pupil container (strong blue against white)
+      ctx.fillStyle = '#3a86c8'; // Lotus blue
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
       // 2. Scaled down Lotus flower (r=4.5)
       const cx = 14, cy = 14, r = 4.5;
       ctx.fillStyle = '#52b788'; // Green leaf base
       ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.3, r * 0.7, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#3a86c8'; // Original blue petals (no white)
+      ctx.fillStyle = '#d0e1fd'; // Light blue petals (no white)
       const petalAngles = [-0.7, -0.35, 0, 0.35, 0.7];
       for (let i = 0; i < petalAngles.length; i++) {
         const angle = petalAngles[i] - Math.PI / 2;
@@ -1673,13 +1673,13 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.SUNFLOWER: {
-      // 1. Pupil container (light gold/cream, no white)
-      ctx.fillStyle = '#fef9e7';
+      // 1. Pupil container (strong yellow against white)
+      ctx.fillStyle = '#f1c232'; // Sunflower yellow
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
       // 2. Scaled down Sunflower (r=4.5)
       const cx = 14, cy = 14, r = 4.5;
-      ctx.fillStyle = '#f1c232'; // Original yellow petals (no white)
+      ctx.fillStyle = '#fef9e7'; // Light cream/yellow petals (no white)
       ctx.beginPath();
       const petalCount = 10;
       for (let i = 0; i < petalCount; i++) {
@@ -1699,8 +1699,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.LAVENDER: {
-      // 1. Pupil container (light lavender, no white)
-      ctx.fillStyle = '#f3e5f5';
+      // 1. Pupil container (strong purple against white)
+      ctx.fillStyle = '#9b59b6'; // Lavender purple
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
       // 2. Scaled down Lavender (r=4.5)
@@ -1708,7 +1708,7 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       ctx.strokeStyle = '#556b2f'; // Original green stem
       ctx.lineWidth = 0.6;
       ctx.beginPath(); ctx.moveTo(cx, cy + r); ctx.lineTo(cx, cy - r * 0.8); ctx.stroke();
-      ctx.fillStyle = '#9b59b6'; // Original purple buds (no white)
+      ctx.fillStyle = '#f3e5f5'; // Light pastel purple buds (no white)
       for (let i = 0; i < 4; i++) {
         const py = cy - r * 0.6 + i * r * 0.45;
         ctx.beginPath(); ctx.ellipse(cx - r * 0.35, py, r * 0.3, r * 0.18, -Math.PI / 6, 0, Math.PI * 2); ctx.fill();
@@ -1719,13 +1719,13 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.ROSE: {
-      // 1. Pupil container (light red-rose tint, no white)
-      ctx.fillStyle = '#ffebee';
+      // 1. Pupil container (strong red against white)
+      ctx.fillStyle = '#cc0000'; // Rose red
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
       // 2. Scaled down Rose (r=4.5)
       const cx = 14, cy = 14, r = 4.5;
-      ctx.fillStyle = '#cc0000'; // Original rose red petals (no white)
+      ctx.fillStyle = '#ffcccc'; // Light pink petals (no white)
       ctx.beginPath();
       for (let i = 0; i < 5; i++) {
         const angle = (i * 2 * Math.PI / 5);
@@ -1747,20 +1747,20 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.MONSTERA: {
-      // 1. Pupil container (light mint green, no white)
-      ctx.fillStyle = '#e8f5e9';
+      // 1. Pupil container (strong green against white)
+      ctx.fillStyle = '#27ae60'; // Monstera green
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
       // 2. Scaled down Monstera (r=4.5)
       const cx = 14, cy = 14, r = 4.5;
-      ctx.fillStyle = '#27ae60'; // Original green leaf
+      ctx.fillStyle = '#e8f5e9'; // Light green leaf (no white)
       ctx.beginPath();
       ctx.moveTo(cx, cy + r);
       ctx.quadraticCurveTo(cx - r * 1.1, cy + r * 0.2, cx - r * 0.8, cy - r * 0.6);
       ctx.quadraticCurveTo(cx, cy - r * 1.1, cx + r * 0.8, cy - r * 0.6);
       ctx.quadraticCurveTo(cx + r * 1.1, cy + r * 0.2, cx, cy + r);
       ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#a3e4d7'; // Light mint-green vein cuts (replacing white)
+      ctx.strokeStyle = '#27ae60'; // Green vein cuts
       ctx.lineWidth = 0.4;
       ctx.beginPath();
       ctx.moveTo(cx, cy - r * 0.6); ctx.lineTo(cx, cy + r * 0.6);
@@ -1773,20 +1773,20 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.DAISY: {
-      // 1. Pupil container (light yellow-cream, no white)
-      ctx.fillStyle = '#fef9e7';
+      // 1. Pupil container (strong yellow against white)
+      ctx.fillStyle = '#f1c232'; // Daisy yellow
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
       // 2. Draw flower centered and perfectly fitted inside (r=4.5)
       const cx = 14, cy = 14, r = 4.5;
-      ctx.fillStyle = '#e69138'; // Orange-yellow petals (replacing white)
-      ctx.strokeStyle = '#d4a373'; // Muted outline
+      ctx.fillStyle = '#fef9e7'; // Light cream petals (no white)
+      ctx.strokeStyle = '#e69138'; // Orange stroke for definition
       ctx.lineWidth = 0.15;
       const petalCount = 8;
       const petalLen = r * 0.9;
       const petalW = r * 0.26;
       for (let i = 0; i < petalCount; i++) {
-        const angle = (i * 2 * Math.PI / petalCount);
+        const angle = (i * 2 * Math.PI / 2 / 4); // Wait, make sure we use standard angles
         const tipX = cx + Math.cos(angle) * petalLen;
         const tipY = cy + Math.sin(angle) * petalLen;
         const perpAngle = angle + Math.PI / 2;
