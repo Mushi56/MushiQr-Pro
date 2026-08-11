@@ -490,7 +490,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       style={{
         width: 320,
         background: 'var(--bg-primary)',
-        borderLeft: '1px solid var(--border-color)',
+        borderLeft: 'none',
         borderRight: 'none',
         display: 'flex',
         flexDirection: 'column',
@@ -506,10 +506,19 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
         paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
       }}
     >
-      {/* Top Profile Card Header without boxes */}
-      <div style={{ padding: '24px 20px 16px', flexShrink: 0, borderBottom: '1px solid var(--border-color)' }}>
+      {/* Top Profile Card Header with container box */}
+      <div style={{ padding: '20px', flexShrink: 0, borderBottom: '1px solid var(--border-color)' }}>
         {currentUser && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 16,
+            padding: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          }}>
             <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
               {currentUser.photoURL ? (
                 <img src={currentUser.photoURL} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B' }} />
@@ -3963,7 +3972,7 @@ function AdminPanelInner() {
           bottom: 0; left: 0; right: 0;
           height: 60px;
           background: rgba(12,12,21,0.97);
-          border-top: 1px solid rgba(255,255,255,0.06);
+          border-top: none;
           z-index: 30;
           align-items: center;
           justify-content: space-around;
