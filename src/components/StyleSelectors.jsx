@@ -84,7 +84,7 @@ function MiniDotPreviewCanvas({ dotStyle, qrParams }) {
 
     // 2. Grid Dimensions (6x6 mini matrix for extra LARGE dots)
     const gridCount = 6;
-    const padding = 6;
+    const padding = 2;
     const availableSize = size - padding * 2;
     const cellSize = availableSize / gridCount;
 
