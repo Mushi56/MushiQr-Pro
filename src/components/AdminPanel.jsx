@@ -125,6 +125,18 @@ function fmtDate(ts) {
   if (!ts) return '—';
   return new Date(ts).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
 }
+function fmtDateTime(ts) {
+  if (!ts) return '—';
+  try {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return '—';
+    const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const timeStr = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return `${dateStr} · ${timeStr}`;
+  } catch {
+    return '—';
+  }
+}
 
 // ─── Navigation Config ────────────────────────────────────────────────────
 const LABELS = {
@@ -2617,76 +2629,94 @@ function UsersPanel() {
           <EmptyState icon={Users} title="No users found" desc={search ? 'Try a different search query.' : 'Users who sign in to the app will appear here.'} />
         ) : (
           <div className="ad-table-wrap">
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 680 }}>
               <thead>
                 <tr style={{ borderBottom: `1px solid ${T.border}` }}>
-                  {['User', 'Provider', 'Status', 'Joined', 'Last Active', 'Visits'].map(h => (
+                  {['User & Email', 'Provider', 'Status', 'Joined Date & Time', 'Last Active Time', 'Visits', 'Actions'].map(h => (
                     <th key={h} style={{ textAlign: 'left', padding: '10px 16px', fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map(u => (
-                  <tr key={u.uid}
-                    onClick={() => openDetail(u)}
-                    style={{ borderBottom: `1px solid ${T.border}`, cursor: 'pointer', transition: 'background 0.1s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = T.bgHov}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                  >
-                    {/* Avatar + Name + Email */}
-                    <td style={{ padding: '10px 16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        {u.photoURL ? (
-                          <img src={u.photoURL} alt="" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                        ) : (
-                          <div style={{ width: 34, height: 34, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 13, flexShrink: 0 }}>
-                            {(u.displayName || u.email || 'U')[0].toUpperCase()}
-                          </div>
-                        )}
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>
-                            {u.displayName || 'Anonymous'}
-                          </div>
-                          <div style={{ fontSize: 11, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>
-                            {u.email || '—'}
+                {filteredUsers.map(u => {
+                  const nameText = u.displayName && u.displayName !== u.email ? u.displayName : (u.email ? u.email.split('@')[0] : 'User');
+                  const emailText = u.email || (u.uid ? `UID: ${u.uid.slice(0, 14)}...` : 'No email attached');
+                  return (
+                    <tr key={u.uid}
+                      onClick={() => openDetail(u)}
+                      style={{ borderBottom: `1px solid ${T.border}`, cursor: 'pointer', transition: 'background 0.1s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = T.bgHov}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      {/* Avatar + Name + Email */}
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          {u.photoURL ? (
+                            <img src={u.photoURL} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `1px solid ${T.border}` }} />
+                          ) : (
+                            <div style={{ width: 38, height: 38, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 14, flexShrink: 0, border: `1px solid ${T.accent}33` }}>
+                              {(nameText || 'U')[0].toUpperCase()}
+                            </div>
+                          )}
+                          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, gap: 2 }}>
+                            <div style={{ fontSize: 13, fontWeight: 800, color: T.text, lineHeight: 1.2 }}>
+                              {nameText}
+                            </div>
+                            <div style={{ fontSize: 11, color: T.accent, fontWeight: 600, fontFamily: 'monospace', opacity: 0.95 }}>
+                              {emailText}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Provider */}
-                    <td style={{ padding: '10px 16px' }}>
-                      <Badge color={u.provider === 'google' ? '#4285F4' : u.provider === 'email' ? T.purple : T.textMut}>
-                        {u.provider === 'google' ? '● Google' : u.provider === 'email' ? '● Email' : u.provider || '?'}
-                      </Badge>
-                    </td>
+                      {/* Provider */}
+                      <td style={{ padding: '12px 16px' }}>
+                        <Badge color={u.provider === 'google' ? '#4285F4' : u.provider === 'email' ? T.purple : T.textMut}>
+                          {u.provider === 'google' ? '● Google' : u.provider === 'email' ? '● Email' : u.provider || '?'}
+                        </Badge>
+                      </td>
 
-                    {/* Status */}
-                    <td style={{ padding: '10px 16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ width: 7, height: 7, borderRadius: '50%', background: u.status === 'blocked' ? T.red : T.green }} />
-                        <span style={{ fontSize: 12, color: u.status === 'blocked' ? T.red : T.green, fontWeight: 700, textTransform: 'capitalize' }}>
-                          {u.status || 'active'}
-                        </span>
-                      </div>
-                    </td>
+                      {/* Status */}
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: u.status === 'blocked' ? T.red : T.green }} />
+                          <span style={{ fontSize: 12, color: u.status === 'blocked' ? T.red : T.green, fontWeight: 700, textTransform: 'capitalize' }}>
+                            {u.status || 'active'}
+                          </span>
+                        </div>
+                      </td>
 
-                    {/* Joined */}
-                    <td style={{ padding: '10px 16px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
-                      {fmtDate(u.createdAt)}
-                    </td>
+                      {/* Joined Date & Time */}
+                      <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{fmtDateTime(u.createdAt)}</div>
+                        <div style={{ fontSize: 10, color: T.textMut, marginTop: 2 }}>{timeAgo(u.createdAt)}</div>
+                      </td>
 
-                    {/* Last Active */}
-                    <td style={{ padding: '10px 16px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
-                      {timeAgo(u.lastActiveAt)}
-                    </td>
+                      {/* Last Active Date & Time */}
+                      <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{fmtDateTime(u.lastActiveAt)}</div>
+                        <div style={{ fontSize: 10, color: u.lastActiveAt && (Date.now() - new Date(u.lastActiveAt).getTime() < 7 * 86400000) ? T.green : T.textMut, marginTop: 2, fontWeight: 600 }}>
+                          {timeAgo(u.lastActiveAt)}
+                        </div>
+                      </td>
 
-                    {/* Visits */}
-                    <td style={{ padding: '10px 16px', fontSize: 12, fontWeight: 700, color: T.text }}>
-                      {u.visitCount || 1}
-                    </td>
-                  </tr>
-                ))}
+                      {/* Visits */}
+                      <td style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: T.text }}>
+                        {u.visitCount || 1}
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <Btn variant="ghost" size="sm" onClick={() => openDetail(u)}>View</Btn>
+                          <Btn variant={u.status === 'blocked' ? 'success' : 'danger'} size="sm" onClick={() => toggleStatus(u.uid, u.status)}>
+                            {u.status === 'blocked' ? 'Unblock' : 'Block'}
+                          </Btn>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -2872,8 +2902,8 @@ function UsersPanel() {
               {/* Info grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
                 {[
-                  { icon: Calendar, label: 'Joined', value: fmtDate(selectedUser.createdAt), color: T.blue },
-                  { icon: Clock, label: 'Last Active', value: timeAgo(selectedUser.lastActiveAt), color: T.green },
+                  { icon: Calendar, label: 'Joined Date & Time', value: fmtDateTime(selectedUser.createdAt), color: T.blue },
+                  { icon: Clock, label: 'Last Active Time', value: fmtDateTime(selectedUser.lastActiveAt), color: T.green },
                   { icon: Eye, label: 'Total Visits', value: selectedUser.visitCount || 1, color: T.purple },
                   { icon: Globe, label: 'Language', value: selectedUser.deviceInfo?.language || '—', color: T.orange },
                 ].map(item => (
