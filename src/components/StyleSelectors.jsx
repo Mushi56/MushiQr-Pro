@@ -82,23 +82,21 @@ function MiniDotPreviewCanvas({ dotStyle, qrParams }) {
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, size, size);
 
-    // 2. Grid Dimensions (7x7 mini matrix for LARGE 15.5px dots)
-    const gridCount = 7;
+    // 2. Grid Dimensions (6x6 mini matrix for extra LARGE dots)
+    const gridCount = 6;
     const padding = 6;
     const availableSize = size - padding * 2;
     const cellSize = availableSize / gridCount;
 
-    // 3. 7x7 Matrix with 5x5 Secret Eye featuring a central PUPIL DOT at (r=3, c=3)
-    // Outer Dot Ring: rows 1 & 5, cols 1 & 5
-    // Central Pupil Dot: row 3, col 3
+    // 3. 6x6 Matrix with a small 3x3 Secret Eye made of dots (rows 2..4, cols 1..3)
+    // Placed slightly down from center with maximum dot module size (18px wide per dot!)
     const matrix = [
-      [1, 0, 1, 1, 0, 1, 1], // Row 0: Data dots
-      [0, 1, 1, 1, 1, 1, 0], // Row 1: Eye Top Ring (c=1..5)
-      [1, 1, 0, 0, 0, 1, 1], // Row 2: Eye Ring Sides (c=1 & c=5)
-      [0, 1, 0, 1, 0, 1, 0], // Row 3: Eye Ring Sides (c=1 & c=5) + CENTER PUPIL DOT (c=3)
-      [1, 1, 0, 0, 0, 1, 1], // Row 4: Eye Ring Sides (c=1 & c=5)
-      [0, 1, 1, 1, 1, 1, 0], // Row 5: Eye Bottom Ring (c=1..5)
-      [1, 0, 1, 0, 1, 1, 1]  // Row 6: Data dots
+      [1, 0, 1, 1, 0, 1], // Row 0
+      [0, 1, 1, 0, 1, 0], // Row 1
+      [1, 1, 1, 1, 0, 1], // Row 2: Secret Eye Top (c=1..3)
+      [0, 1, 0, 1, 1, 0], // Row 3: Secret Eye Middle (c=1..3, center gap at c=2)
+      [1, 1, 1, 1, 0, 1], // Row 4: Secret Eye Bottom (c=1..3)
+      [0, 1, 0, 1, 1, 1]  // Row 5
     ];
 
     ctx.fillStyle = fgColor;
