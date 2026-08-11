@@ -177,6 +177,10 @@ export const EYE_STYLES = {
   BASKETBALL: 'basketball-eye',
   CHESS: 'chess-eye',
   BOW: 'bow-eye',
+  VIOLET_FLOWER: 'violet-flower-eye',
+  TULIP: 'tulip-eye',
+  FORGET_ME_NOT: 'forget-me-not-eye',
+  PANSY: 'pansy-eye',
 };
 
 // Frame styles
@@ -1023,10 +1027,11 @@ export function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = 
       const r = size * (isLarge ? 0.75 : 0.45);
       const petalR = r * 0.55;
       const petalD = r * 0.45;
+      const baseColor = ctx.fillStyle;
 
       ctx.save();
-      // Draw 5 petals
-      ctx.fillStyle = '#ff758f'; // Premium Cherry Blossom Pink
+      // Draw 5 petals using scannable QR color
+      ctx.fillStyle = baseColor;
       for (let i = 0; i < 5; i++) {
         const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
         const px = cx + Math.cos(angle) * petalD;
@@ -1233,16 +1238,17 @@ export function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = 
     case DOT_STYLES.LOTUS: {
       const cx = x + size / 2, cy = y + size / 2;
       const r = size * (isLarge ? 0.75 : 0.45);
+      const baseColor = ctx.fillStyle;
 
       ctx.save();
       // Base leaf (pad)
-      ctx.fillStyle = '#52b788'; // Mint green
+      ctx.fillStyle = '#2d6a4f'; // Darker forest green for scan contrast
       ctx.beginPath();
       ctx.ellipse(cx, cy + r * 0.3, r * 0.7, r * 0.22, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Layered pink petals
-      ctx.fillStyle = '#ff758f';
+      // Layered petals using scannable QR color
+      ctx.fillStyle = baseColor;
       const petalAngles = [-0.7, -0.35, 0, 0.35, 0.7];
       for (let i = 0; i < petalAngles.length; i++) {
         const angle = petalAngles[i] - Math.PI / 2;
@@ -1606,6 +1612,10 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
     case EYE_STYLES.CACTUS:
     case EYE_STYLES.CHESS:
     case EYE_STYLES.BOW:
+    case EYE_STYLES.VIOLET_FLOWER:
+    case EYE_STYLES.TULIP:
+    case EYE_STYLES.FORGET_ME_NOT:
+    case EYE_STYLES.PANSY:
       drawRoundedRectPath(ctx, 0, 0, 28, 28, 8);
       drawRoundedRectPath(ctx, 4, 4, 20, 20, 4);
       break;
@@ -1725,6 +1735,10 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
   else if (style === EYE_STYLES.BASKETBALL) ctx.fillStyle = '#b94a00';
   else if (style === EYE_STYLES.CHESS) ctx.fillStyle = '#6c7a89'; // Match container
   else if (style === EYE_STYLES.BOW) ctx.fillStyle = '#d81b60'; // Match container
+  else if (style === EYE_STYLES.VIOLET_FLOWER) ctx.fillStyle = '#8e7cc3';
+  else if (style === EYE_STYLES.TULIP) ctx.fillStyle = '#ff4d6d';
+  else if (style === EYE_STYLES.FORGET_ME_NOT) ctx.fillStyle = '#3a86c8';
+  else if (style === EYE_STYLES.PANSY) ctx.fillStyle = '#7209b7';
   ctx.fill('evenodd');
 
   // New icon eye styles: delegate to dedicated draw function and return
@@ -1898,6 +1912,97 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
         ctx.quadraticCurveTo(cx + Math.cos(angle + spread) * r * 0.65, cy + Math.sin(angle + spread) * r * 0.65, cx, cy + r * 0.1);
         ctx.closePath(); ctx.fill();
       }
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.VIOLET_FLOWER: {
+      ctx.fillStyle = '#8e7cc3'; // Soft violet purple container
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+      const cx = 14, cy = 14, r = 4.5;
+      const petalR = r * 0.52;
+      const petalD = r * 0.42;
+      ctx.fillStyle = '#5c4b8b'; // Darker violet
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+        const px = cx + Math.cos(angle) * petalD;
+        const py = cy + Math.sin(angle) * petalD;
+        ctx.moveTo(cx, cy);
+        ctx.arc(px, py, petalR, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = '#ffd966'; // Center yellow
+      ctx.arc(cx, cy, r * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.TULIP: {
+      ctx.fillStyle = '#ff4d6d'; // Pinkish-red container
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+      const cx = 14, cy = 14, r = 4.5;
+      ctx.fillStyle = '#4f772d'; // Olive green stem
+      ctx.fillRect(cx - r * 0.08, cy, r * 0.16, r);
+      ctx.fillStyle = '#c9184a'; // Rich tulip red cup
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + r * 0.2);
+      ctx.quadraticCurveTo(cx - r * 0.9, cy - r * 0.2, cx - r * 0.3, cy - r * 0.9);
+      ctx.quadraticCurveTo(cx, cy - r * 0.5, cx, cy + r * 0.2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + r * 0.2);
+      ctx.quadraticCurveTo(cx + r * 0.9, cy - r * 0.2, cx + r * 0.3, cy - r * 0.9);
+      ctx.quadraticCurveTo(cx, cy - r * 0.5, cx, cy + r * 0.2);
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.FORGET_ME_NOT: {
+      ctx.fillStyle = '#3a86c8'; // Sky blue container
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+      const cx = 14, cy = 14, r = 4.5;
+      const petalR = r * 0.45;
+      const petalD = r * 0.48;
+      ctx.fillStyle = '#1b4d8a'; // Darker blue petals
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+        const px = cx + Math.cos(angle) * petalD;
+        const py = cy + Math.sin(angle) * petalD;
+        ctx.moveTo(cx, cy);
+        ctx.arc(px, py, petalR, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = '#ffe066'; // Yellow center
+      ctx.arc(cx, cy, r * 0.26, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
+    case EYE_STYLES.PANSY: {
+      ctx.fillStyle = '#7209b7'; // Deep violet container
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+      const cx = 14, cy = 14, r = 4.5;
+      // Top two petals (deep violet/blue)
+      ctx.fillStyle = '#3f076b';
+      ctx.beginPath();
+      ctx.arc(cx - r * 0.35, cy - r * 0.35, r * 0.45, 0, Math.PI * 2);
+      ctx.arc(cx + r * 0.35, cy - r * 0.35, r * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+      // Side/bottom petals (bright yellow/orange)
+      ctx.fillStyle = '#ffb703';
+      ctx.beginPath();
+      ctx.arc(cx - r * 0.45, cy + r * 0.2, r * 0.42, 0, Math.PI * 2);
+      ctx.arc(cx + r * 0.45, cy + r * 0.2, r * 0.42, 0, Math.PI * 2);
+      ctx.arc(cx, cy + r * 0.45, r * 0.48, 0, Math.PI * 2);
+      ctx.fill();
+      // Center dark spot
+      ctx.fillStyle = '#023047';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.2, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
       return;
     }
