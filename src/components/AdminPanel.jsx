@@ -2,7 +2,7 @@
 // Mushi QR Pro — Super Admin Panel (SaaS-grade)
 // ═══════════════════════════════════════════════════════════════════════
 
-import { useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
+import React, { Fragment, useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
 import {
   LayoutDashboard, Users, CreditCard, BarChart3, FileText,
   Layers, QrCode, Grid, Package, Settings, Palette, Sliders,
@@ -540,7 +540,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
             {items.map(({ id, icon: Icon, label }, index) => {
               const isActive = active === id;
               return (
-                <React.Fragment key={id}>
+                <Fragment key={id}>
                   {index > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', marginLeft: 52 }} />}
                   <div
                     onClick={() => setActive(id)}
@@ -570,7 +570,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
 
                     <ChevronRight size={14} color={isActive ? T.accent : T.textMut} />
                   </div>
-                </React.Fragment>
+                </Fragment>
               );
             })}
           </div>
