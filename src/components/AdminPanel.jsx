@@ -431,6 +431,19 @@ function DonutSVG({ segments = [], size = 160 }) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
+  const [touchStartX, setTouchStartX] = useState(null);
+
+  const handleTouchStart = (e) => setTouchStartX(e.touches[0].clientX);
+  const handleTouchMove = (e) => {
+    if (touchStartX === null) return;
+    const diff = touchStartX - e.touches[0].clientX;
+    if (diff > 50) {
+      onClose();
+      setTouchStartX(null);
+    }
+  };
+  const handleTouchEnd = () => setTouchStartX(null);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -441,7 +454,11 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
   };
 
   return (
-    <aside style={{
+    <aside
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{
       width: 250, background: 'rgba(12,12,21,0.97)', backdropFilter: 'blur(16px)',
       borderRight: `1px solid ${T.border}`,
       display: 'flex', flexDirection: 'column',
@@ -451,7 +468,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       paddingTop: 'max(14px, env(safe-area-inset-top))',
       paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
     }}>
-      {/* Top Section: User Profile & Close Btn */}
+      {/* Top Section: User Profile */}
       <div style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
         {currentUser && (
           <div style={{
@@ -493,9 +510,6 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
             </button>
           </div>
         )}
-        <button className="ad-sidebar-close" onClick={onClose} style={{ marginLeft: 4 }}>
-          <X size={18} />
-        </button>
       </div>
 
       {/* Nav */}
