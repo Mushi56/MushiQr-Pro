@@ -592,19 +592,6 @@ function Header({ section, onMenuToggle, isMobile, currentUser }) {
         <ArrowLeft size={13} />
         <span className="ad-header-app-btn">App</span>
       </a>
-
-      <button
-        onClick={handleLogout}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
-          background: `${T.red}18`, border: `1px solid ${T.red}33`,
-          color: T.red, borderRadius: T.r.md, padding: '6px 12px',
-          fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-        }}
-      >
-        <LogOut size={13} />
-        <span className="ad-header-app-btn">Log Out</span>
-      </button>
     </div>
   );
 }
