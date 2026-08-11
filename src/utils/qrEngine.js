@@ -1649,8 +1649,7 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
       break;
     case EYE_STYLES.SHIELD: {
       let angle = 0;
-      if (eyeType === 'top-right') angle = Math.PI / 2;
-      else if (eyeType === 'bottom-left') angle = Math.PI;
+      if (eyeType === 'bottom-left') angle = Math.PI;
 
       if (angle !== 0) {
         ctx.translate(14, 14);
@@ -1753,8 +1752,7 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
       break;
     case EYE_STYLES.SHIELD: {
       let angle = 0;
-      if (eyeType === 'top-right') angle = Math.PI / 2;
-      else if (eyeType === 'bottom-left') angle = Math.PI;
+      if (eyeType === 'bottom-left') angle = Math.PI;
 
       if (angle !== 0) {
         ctx.translate(14, 14);
