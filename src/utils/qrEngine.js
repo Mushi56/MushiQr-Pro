@@ -667,52 +667,56 @@ export function renderQR(canvas, options) {
   }
 
   // 1. Draw Eyes (Finder Patterns)
-  const eyePositions = [
-    { r: 0, c: 0 }, // Top-left
-    { r: 0, c: moduleCount - 7 }, // Top-right
-    { r: moduleCount - 7, c: 0 } // Bottom-left
-  ];
-  
-  eyePositions.forEach(pos => {
-    const x = contentX + (pos.c + quietZone) * cellSize;
-    const y = contentY + (pos.r + quietZone) * cellSize;
+  if (!options.hideEyes) {
+    const eyePositions = [
+      { r: 0, c: 0 }, // Top-left
+      { r: 0, c: moduleCount - 7 }, // Top-right
+      { r: moduleCount - 7, c: 0 } // Bottom-left
+    ];
     
-    const useEyeColor = syncEyes ? fillStyle : (eyeColor || qrColor);
-    const useEyeOuterColor = syncEyes ? fillStyle : (eyeOuterColor || useEyeColor);
-    
-    const parsedInner = typeof useEyeColor === 'string' ? parseColorOrGradient(ctx, x, y, cellSize * 7, cellSize * 7, useEyeColor) : useEyeColor;
-    const parsedOuter = typeof useEyeOuterColor === 'string' ? parseColorOrGradient(ctx, x, y, cellSize * 7, cellSize * 7, useEyeOuterColor) : useEyeOuterColor;
-    
-    // If texture enabled and syncing eyes, draw eye on silhouette
-    if (qrTextureEnabled && qrTexture?.image && qrTextureSyncEyes) {
-      drawEye(silhouetteCtx, x, y, cellSize * 7, eyeStyle, '#000', '#000');
-    } else {
-      drawEye(ctx, x, y, cellSize * 7, eyeStyle, parsedOuter, parsedInner);
-    }
-  });
+    eyePositions.forEach(pos => {
+      const x = contentX + (pos.c + quietZone) * cellSize;
+      const y = contentY + (pos.r + quietZone) * cellSize;
+      
+      const useEyeColor = syncEyes ? fillStyle : (eyeColor || qrColor);
+      const useEyeOuterColor = syncEyes ? fillStyle : (eyeOuterColor || useEyeColor);
+      
+      const parsedInner = typeof useEyeColor === 'string' ? parseColorOrGradient(ctx, x, y, cellSize * 7, cellSize * 7, useEyeColor) : useEyeColor;
+      const parsedOuter = typeof useEyeOuterColor === 'string' ? parseColorOrGradient(ctx, x, y, cellSize * 7, cellSize * 7, useEyeOuterColor) : useEyeOuterColor;
+      
+      // If texture enabled and syncing eyes, draw eye on silhouette
+      if (qrTextureEnabled && qrTexture?.image && qrTextureSyncEyes) {
+        drawEye(silhouetteCtx, x, y, cellSize * 7, eyeStyle, '#000', '#000');
+      } else {
+        drawEye(ctx, x, y, cellSize * 7, eyeStyle, parsedOuter, parsedInner);
+      }
+    });
+  }
   
   // 2. Draw QR modules
-  for (let row = 0; row < moduleCount; row++) {
-    for (let col = 0; col < moduleCount; col++) {
-      if (isFinderPattern(row, col, moduleCount)) continue;
-      if (!matrix[row][col]) continue;
+  if (!options.hideDots) {
+    for (let row = 0; row < moduleCount; row++) {
+      for (let col = 0; col < moduleCount; col++) {
+        if (isFinderPattern(row, col, moduleCount)) continue;
+        if (!matrix[row][col]) continue;
 
-      const x = contentX + (col + quietZone) * cellSize;
-      const y = contentY + (row + quietZone) * cellSize;
+        const x = contentX + (col + quietZone) * cellSize;
+        const y = contentY + (row + quietZone) * cellSize;
 
-      const neighbors = {
-        top: row > 0 && matrix[row-1][col] && !isFinderPattern(row-1, col, moduleCount),
-        bottom: row < moduleCount - 1 && matrix[row+1][col] && !isFinderPattern(row+1, col, moduleCount),
-        left: col > 0 && matrix[row][col-1] && !isFinderPattern(row, col-1, moduleCount),
-        right: col < moduleCount - 1 && matrix[row][col+1] && !isFinderPattern(row, col+1, moduleCount)
-      };
+        const neighbors = {
+          top: row > 0 && matrix[row-1][col] && !isFinderPattern(row-1, col, moduleCount),
+          bottom: row < moduleCount - 1 && matrix[row+1][col] && !isFinderPattern(row+1, col, moduleCount),
+          left: col > 0 && matrix[row][col-1] && !isFinderPattern(row, col-1, moduleCount),
+          right: col < moduleCount - 1 && matrix[row][col+1] && !isFinderPattern(row, col+1, moduleCount)
+        };
 
-      if (qrTextureEnabled && qrTexture?.image) {
-        silhouetteCtx.fillStyle = '#000';
-        drawDotModule(silhouetteCtx, x, y, cellSize, dotStyle, neighbors, options, row, col);
-      } else {
-        ctx.fillStyle = fillStyle;
-        drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, options, row, col);
+        if (qrTextureEnabled && qrTexture?.image) {
+          silhouetteCtx.fillStyle = '#000';
+          drawDotModule(silhouetteCtx, x, y, cellSize, dotStyle, neighbors, options, row, col);
+        } else {
+          ctx.fillStyle = fillStyle;
+          drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, options, row, col);
+        }
       }
     }
   }

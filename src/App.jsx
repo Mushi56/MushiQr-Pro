@@ -96,7 +96,7 @@ import SaveLocationModal from './components/SaveLocationModal';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 const QRDotsIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="mushi-pro-wide-dots">
+  <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="mushi-pro-wide-dots">
     {/* Smaller Rounded Star (Preserving the shape and style) */}
     <path d="M12 4 L13 8.5 L17.5 9.5 L13 10.5 L12 15 L11 10.5 L6.5 9.5 L11 8.5 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
     
@@ -106,7 +106,7 @@ const QRDotsIcon = ({ size = 24 }) => (
   </svg>
 );
 const QREyesIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="qr-eye-heavy-bold">
+  <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="qr-eye-heavy-bold">
     {/* Main outer shape with hole cut out (evenodd fill rule) */}
     <path fillRule="evenodd" d="M3 7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7zm4-1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7z" clipRule="evenodd" />
     
@@ -115,7 +115,7 @@ const QREyesIcon = ({ size = 24 }) => (
   </svg>
 );
 const QRStyleIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mushi-qr-star-all-circles">
+  <svg width={size} height={size} viewBox="2 2 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mushi-qr-star-all-circles">
     {/* Top Left Eye & Pupil */}
     <rect x="3" y="3" width="7" height="7" rx="1.5" style={{ fill: 'transparent' }} />
     <circle cx="6.5" cy="6.5" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
@@ -156,7 +156,7 @@ const QRSizeIcon = ({ size = 24 }) => (
   </svg>
 );
 const QRBgIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="shape-square">
+  <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="shape-square">
     <rect x="3" y="3" width="18" height="18" rx="4" style={{ fill: 'currentColor', fillOpacity: 1 }} />
   </svg>
 );

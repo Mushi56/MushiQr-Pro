@@ -546,7 +546,7 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
         >
           <div className="style-option-preview">
             {qrParams && qrParams.qrMatrixInfo ? (
-              <MiniQRCanvas qrParams={qrParams} overrideParams={{ dotStyle: style }} />
+              <MiniQRCanvas qrParams={qrParams} overrideParams={{ dotStyle: style, hideEyes: true }} />
             ) : (
               preview
             )}
@@ -569,7 +569,7 @@ export function EyeStyleSelector({ value, onChange, qrParams }) {
         >
           <div className="style-option-preview">
             {qrParams && qrParams.qrMatrixInfo ? (
-              <MiniQRCanvas qrParams={qrParams} overrideParams={{ eyeStyle: style }} />
+              <MiniQRCanvas qrParams={qrParams} overrideParams={{ eyeStyle: style, hideDots: true }} />
             ) : (
               preview
             )}
