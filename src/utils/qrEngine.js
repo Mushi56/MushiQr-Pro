@@ -1649,10 +1649,15 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.LOTUS: {
-      const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = '#52b788';
+      // 1. Pupil container (matching blue, no black/white)
+      ctx.fillStyle = '#3a86c8'; // Lotus blue
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+
+      // 2. Scaled down Lotus flower (r=4.5)
+      const cx = 14, cy = 14, r = 4.5;
+      ctx.fillStyle = '#52b788'; // Green leaf base
       ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.3, r * 0.7, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#3a86c8';
+      ctx.fillStyle = '#ffffff'; // White petals for high contrast
       const petalAngles = [-0.7, -0.35, 0, 0.35, 0.7];
       for (let i = 0; i < petalAngles.length; i++) {
         const angle = petalAngles[i] - Math.PI / 2;
@@ -1668,8 +1673,13 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.SUNFLOWER: {
-      const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = '#f1c232';
+      // 1. Pupil container (matching yellow, no black/white)
+      ctx.fillStyle = '#f1c232'; // Sunflower yellow
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+
+      // 2. Scaled down Sunflower (r=4.5)
+      const cx = 14, cy = 14, r = 4.5;
+      ctx.fillStyle = '#ffffff'; // White petals
       ctx.beginPath();
       const petalCount = 10;
       for (let i = 0; i < petalCount; i++) {
@@ -1683,17 +1693,22 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
         ctx.quadraticCurveTo(tipX, tipY, cx + Math.cos(baseR) * bD, cy + Math.sin(baseR) * bD);
       }
       ctx.fill();
-      ctx.fillStyle = '#7f6000';
+      ctx.fillStyle = '#7f6000'; // Brown center
       ctx.beginPath(); ctx.arc(cx, cy, r * 0.38, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       return;
     }
     case EYE_STYLES.LAVENDER: {
-      const cx = 14, cy = 14, r = 6.5;
-      ctx.strokeStyle = '#556b2f';
-      ctx.lineWidth = 0.8;
+      // 1. Pupil container (matching purple, no black/white)
+      ctx.fillStyle = '#9b59b6'; // Lavender purple
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+
+      // 2. Scaled down Lavender (r=4.5)
+      const cx = 14, cy = 14, r = 4.5;
+      ctx.strokeStyle = '#ffffff'; // White stem for high contrast
+      ctx.lineWidth = 0.6;
       ctx.beginPath(); ctx.moveTo(cx, cy + r); ctx.lineTo(cx, cy - r * 0.8); ctx.stroke();
-      ctx.fillStyle = '#9b59b6';
+      ctx.fillStyle = '#ffffff'; // White buds
       for (let i = 0; i < 4; i++) {
         const py = cy - r * 0.6 + i * r * 0.45;
         ctx.beginPath(); ctx.ellipse(cx - r * 0.35, py, r * 0.3, r * 0.18, -Math.PI / 6, 0, Math.PI * 2); ctx.fill();
@@ -1704,8 +1719,13 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.ROSE: {
-      const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = '#cc0000';
+      // 1. Pupil container (matching red, no black/white)
+      ctx.fillStyle = '#cc0000'; // Rose red
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+
+      // 2. Scaled down Rose (r=4.5)
+      const cx = 14, cy = 14, r = 4.5;
+      ctx.fillStyle = '#ffffff'; // White outer petals for high contrast
       ctx.beginPath();
       for (let i = 0; i < 5; i++) {
         const angle = (i * 2 * Math.PI / 5);
@@ -1714,7 +1734,7 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
         ctx.moveTo(px + r * 0.5, py); ctx.arc(px, py, r * 0.5, 0, Math.PI * 2);
       }
       ctx.fill();
-      ctx.fillStyle = '#990000';
+      ctx.fillStyle = '#ffcccc'; // Light pink inner rose details
       ctx.beginPath();
       for (let i = 0; i < 3; i++) {
         const angle = (i * 2 * Math.PI / 3) + 0.5;
@@ -1727,16 +1747,21 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.MONSTERA: {
-      const cx = 14, cy = 14, r = 6.5;
-      ctx.fillStyle = '#27ae60';
+      // 1. Pupil container (matching green, no black/white)
+      ctx.fillStyle = '#27ae60'; // Monstera green
+      drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
+
+      // 2. Scaled down Monstera (r=4.5)
+      const cx = 14, cy = 14, r = 4.5;
+      ctx.fillStyle = '#ffffff'; // White leaf for high contrast
       ctx.beginPath();
       ctx.moveTo(cx, cy + r);
       ctx.quadraticCurveTo(cx - r * 1.1, cy + r * 0.2, cx - r * 0.8, cy - r * 0.6);
       ctx.quadraticCurveTo(cx, cy - r * 1.1, cx + r * 0.8, cy - r * 0.6);
       ctx.quadraticCurveTo(cx + r * 1.1, cy + r * 0.2, cx, cy + r);
       ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = '#27ae60'; // Green vein cuts
+      ctx.lineWidth = 0.4;
       ctx.beginPath();
       ctx.moveTo(cx, cy - r * 0.6); ctx.lineTo(cx, cy + r * 0.6);
       ctx.moveTo(cx, cy - r * 0.2); ctx.lineTo(cx - r * 0.6, cy - r * 0.4);
