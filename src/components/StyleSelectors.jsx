@@ -258,6 +258,63 @@ const DOT_PREVIEWS = {
       <line x1="14" y1="15" x2="20" y2="18" stroke="#fff" strokeWidth="1" />
     </svg>
   ),
+  [DOT_STYLES.COFFEE_BEAN]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <ellipse cx="14" cy="14" rx="8" ry="12" fill="currentColor" />
+      <line x1="14" y1="4" x2="14" y2="24" stroke="rgba(0,0,0,0.4)" strokeWidth="2" />
+    </svg>
+  ),
+  [DOT_STYLES.RAINDROP]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M14 3 Q7 10 7 17 A7 7 0 0 0 21 17 Q21 10 14 3Z" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.CACTUS_PLANT]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="12" y="4" width="4" height="20" rx="2" fill="currentColor" />
+      <rect x="5" y="11" width="7" height="3" rx="1.5" fill="currentColor" />
+      <rect x="5" y="8" width="3" height="6" rx="1.5" fill="currentColor" />
+      <rect x="16" y="13" width="7" height="3" rx="1.5" fill="currentColor" />
+      <rect x="20" y="10" width="3" height="6" rx="1.5" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.SPACE_STAR]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <polygon points="14,2 17,11 26,11 19,17 22,26 14,20 6,26 9,17 2,11 11,11" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.BASKETBALL_DOT]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="14" r="12" fill="currentColor" />
+      <path d="M2 14 Q8 8 14 14 Q20 20 26 14" fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="1.5" />
+      <path d="M2 14 Q8 20 14 14 Q20 8 26 14" fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="1.5" />
+      <line x1="14" y1="2" x2="14" y2="26" stroke="rgba(0,0,0,0.35)" strokeWidth="1.5" />
+    </svg>
+  ),
+  [DOT_STYLES.CHESS_PAWN]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <circle cx="14" cy="7" r="5" fill="currentColor" />
+      <rect x="11" y="12" width="6" height="6" rx="1" fill="currentColor" />
+      <rect x="8" y="18" width="12" height="5" rx="2" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.HEART_ICON]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M14 23 C14 23 3 16 3 9.5 A5.5 5.5 0 0 1 14 7 A5.5 5.5 0 0 1 25 9.5 C25 16 14 23 14 23Z" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.GOLD_STAR]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <polygon points="14,2 17,11 26,11 19,17 22,26 14,20 6,26 9,17 2,11 11,11" fill="currentColor" />
+    </svg>
+  ),
+  [DOT_STYLES.BOW_RIBBON]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <path d="M14 14 C12 10 4 8 4 14 C4 20 12 18 14 14Z" fill="currentColor" />
+      <path d="M14 14 C16 10 24 8 24 14 C24 20 16 18 14 14Z" fill="currentColor" />
+      <circle cx="14" cy="14" r="2.5" fill="currentColor" />
+    </svg>
+  ),
 };
 
 const EYE_PREVIEWS = {
@@ -433,6 +490,70 @@ const EYE_PREVIEWS = {
       <path d="M7 14Q10 13 11 14Q10 15 7 14Z" fill="currentColor" />
       <path d="M9 9Q11 11 11 12Q10 11 9 9Z" fill="currentColor" />
       <circle cx="14" cy="14" r="1.5" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.COFFEE_BEAN]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <ellipse cx="14" cy="14" rx="4" ry="6" fill="currentColor" />
+      <line x1="14" y1="8.5" x2="14" y2="19.5" stroke="rgba(0,0,0,0.4)" strokeWidth="1" />
+    </svg>
+  ),
+  [EYE_STYLES.RAINDROP]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <path d="M14 8 Q10 12 10 16 A4 4 0 0 0 18 16 Q18 12 14 8Z" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.CACTUS]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <rect x="12.5" y="8" width="3" height="12" rx="1.5" fill="currentColor" />
+      <rect x="8" y="13" width="5" height="2" rx="1" fill="currentColor" />
+      <rect x="8" y="11" width="2" height="4" rx="1" fill="currentColor" />
+      <rect x="15" y="14" width="5" height="2" rx="1" fill="currentColor" />
+      <rect x="18" y="12" width="2" height="4" rx="1" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.SPACE_STAR]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <polygon points="14,8 15.5,12.5 20,12.5 16.5,15.5 17.5,20 14,17.5 10.5,20 11.5,15.5 8,12.5 12.5,12.5" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.BASKETBALL]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <circle cx="14" cy="14" r="5.5" fill="currentColor" />
+      <path d="M8.5 14 Q11 11 14 14 Q17 17 19.5 14" fill="none" stroke="rgba(0,0,0,0.4)" strokeWidth="1" />
+      <line x1="14" y1="8.5" x2="14" y2="19.5" stroke="rgba(0,0,0,0.4)" strokeWidth="1" />
+    </svg>
+  ),
+  [EYE_STYLES.CHESS]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <ellipse cx="15" cy="10" rx="3" ry="2.5" fill="currentColor" />
+      <path d="M10 20 L18 20 L17 14 Q16 12 15 11 L13 14 Q11.5 15 10 20Z" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.RED_HEART]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <path d="M14 20 C14 20 7 15 7 11 A4 4 0 0 1 14 10 A4 4 0 0 1 21 11 C21 15 14 20 14 20Z" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.GOLD_STAR]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <polygon points="14,8 15.5,12.5 20,12.5 16.5,15.5 17.5,20 14,17.5 10.5,20 11.5,15.5 8,12.5 12.5,12.5" fill="currentColor" />
+    </svg>
+  ),
+  [EYE_STYLES.BOW]: (
+    <svg viewBox="0 0 28 28" width="28" height="28">
+      <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
+      <path d="M14 14 C12 10 7 9 7 14 C7 19 12 18 14 14Z" fill="currentColor" />
+      <path d="M14 14 C16 10 21 9 21 14 C21 19 16 18 14 14Z" fill="currentColor" />
+      <circle cx="14" cy="14" r="2" fill="currentColor" />
     </svg>
   ),
 };

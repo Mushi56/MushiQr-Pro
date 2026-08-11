@@ -784,8 +784,8 @@ function TemplateCanvas({ form, size = 280 }) {
 // TEMPLATE EDITOR MODAL
 // ═══════════════════════════════════════════════════════════════════════════
 
-const DOT_STYLES   = ['square','rounded','dots','extra-rounded','classy','classy-rounded','cherry-blossom','violet-flower','sunflower','rose','daisy','tulip','lotus','forget-me-not','pansy','dollar-coin','cute-emoticon','lavender','monstera'];
-const EYE_STYLES   = ['square','rounded','circle','leaf','extra-rounded','dollar-coin','cute-emoticon','cherry-blossom','lotus','sunflower','lavender','rose','monstera','daisy'];
+const DOT_STYLES   = ['square','rounded','dots','extra-rounded','classy','classy-rounded','cherry-blossom','violet-flower','sunflower','rose','daisy','tulip','lotus','forget-me-not','pansy','dollar-coin','cute-emoticon','lavender','monstera','coffee-bean','raindrop','cactus-plant','space-star','basketball-dot','chess-pawn','heart-icon','gold-star','bow-ribbon'];
+const EYE_STYLES   = ['square','rounded','circle','leaf','extra-rounded','dollar-coin','cute-emoticon','cherry-blossom','lotus','sunflower','lavender','rose','monstera','daisy','coffee-bean-eye','raindrop-eye','cactus-eye','space-star-eye','basketball-eye','chess-eye','red-heart-eye','gold-star-eye','bow-eye'];
 const GRAD_DIRS    = [{ v:'diagonal', l:'↘ Diagonal' },{ v:'horizontal', l:'→ Horizontal' },{ v:'vertical', l:'↓ Vertical' },{ v:'radial', l:'◎ Radial' }];
 const TPL_CATS     = ['Social','Business','Hot','Creative','Minimal','Event','Retail','Custom'];
 
