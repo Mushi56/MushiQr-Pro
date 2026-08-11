@@ -1623,6 +1623,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.CHERRY_BLOSSOM: {
       const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = innerColor || '#000000';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       const petalR = r * 0.55;
       const petalD = r * 0.45;
       ctx.fillStyle = '#ff758f';
@@ -1645,6 +1647,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.LOTUS: {
       const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = innerColor || '#000000';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#52b788';
       ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.3, r * 0.7, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#3a86c8';
@@ -1664,6 +1668,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.SUNFLOWER: {
       const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = innerColor || '#000000';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#f1c232';
       ctx.beginPath();
       const petalCount = 10;
@@ -1685,6 +1691,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.LAVENDER: {
       const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = innerColor || '#000000';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = '#556b2f';
       ctx.lineWidth = 0.8;
       ctx.beginPath(); ctx.moveTo(cx, cy + r); ctx.lineTo(cx, cy - r * 0.8); ctx.stroke();
@@ -1700,6 +1708,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.ROSE: {
       const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = innerColor || '#000000';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#cc0000';
       ctx.beginPath();
       for (let i = 0; i < 5; i++) {
@@ -1723,6 +1733,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.MONSTERA: {
       const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = innerColor || '#000000';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#27ae60';
       ctx.beginPath();
       ctx.moveTo(cx, cy + r);
@@ -1744,6 +1756,8 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
     }
     case EYE_STYLES.DAISY: {
       const cx = 14, cy = 14, r = 6.5;
+      ctx.fillStyle = innerColor || '#000000';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#ffffff';
       ctx.strokeStyle = '#dddddd';
       ctx.lineWidth = 0.2;
