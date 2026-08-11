@@ -453,18 +453,46 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
     }
   };
 
+  const ITEM_GRADIENTS = {
+    dashboard: 'linear-gradient(135deg, #D60036 0%, #ff4d6d 100%)',
+    analytics: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+    users: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+    revenue: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    subscriptions: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    templates: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+    'qr-barcode': 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)',
+    categories: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+    bulk: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)',
+    'app-settings': 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    branding: 'linear-gradient(135deg, #ec4899 0%, #d946ef 100%)',
+    'remote-config': 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+    'feature-flags': 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
+    maintenance: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+    announcements: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+    'admin-users': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    roles: 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+    'activity-logs': 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+    security: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    backups: 'linear-gradient(135deg, #64748b 0%, #334155 100%)',
+    'audit-logs': 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+    'system-health': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    integrations: 'linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)',
+    developer: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+    support: 'linear-gradient(135deg, #ec4899 0%, #c026d3 100%)',
+  };
+
   return (
     <aside
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       style={{
-      width: 270, background: 'rgba(12,12,21,0.97)', backdropFilter: 'blur(16px)',
-      borderRight: 'none',
+      width: 320, background: 'rgba(12,12,21,0.97)', backdropFilter: 'blur(20px)',
+      borderLeft: `1px solid ${T.border}`, borderRight: 'none',
       display: 'flex', flexDirection: 'column',
-      position: 'fixed', left: open ? 0 : -270, top: 0, bottom: 0,
-      zIndex: 35, transition: 'left 0.27s cubic-bezier(0.4,0,0.2,1)',
-      boxShadow: isMobile && open ? '4px 0 32px rgba(0,0,0,0.8)' : 'none',
+      position: 'fixed', right: open ? 0 : -330, left: 'auto', top: 0, bottom: 0,
+      zIndex: 35, transition: 'right 0.27s cubic-bezier(0.4,0,0.2,1)',
+      boxShadow: open ? '-8px 0 40px rgba(0,0,0,0.8)' : 'none',
       paddingTop: 'max(14px, env(safe-area-inset-top))',
       paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
     }}>
@@ -539,11 +567,12 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
 
             {items.map(({ id, icon: Icon, label }, index) => {
               const isActive = active === id;
+              const gradientBg = ITEM_GRADIENTS[id] || 'linear-gradient(135deg, #D60036 0%, #ff4d6d 100%)';
               return (
                 <Fragment key={id}>
-                  {index > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', marginLeft: 52 }} />}
+                  {index > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', marginLeft: 54 }} />}
                   <div
-                    onClick={() => setActive(id)}
+                    onClick={() => { setActive(id); if (isMobile) onClose(); }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 12,
                       padding: '10px 14px', cursor: 'pointer',
@@ -552,16 +581,16 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
                     }}
                   >
                     <div style={{
-                      width: 30, height: 30, borderRadius: 8,
-                      background: isActive ? T.accent : 'rgba(255,255,255,0.06)',
+                      width: 32, height: 32, borderRadius: 10,
+                      background: gradientBg,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      flexShrink: 0, transition: 'all 0.15s ease',
+                      flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                     }}>
-                      <Icon size={15} color={isActive ? '#fff' : T.textSec} />
+                      <Icon size={16} color="#fff" />
                     </div>
 
                     <span style={{
-                      flex: 1, fontSize: 13, fontWeight: isActive ? 700 : 500,
+                      flex: 1, fontSize: 13, fontWeight: isActive ? 800 : 600,
                       color: isActive ? T.accent : T.text,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
@@ -592,13 +621,7 @@ function Header({ section, onMenuToggle, isMobile, currentUser }) {
       display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10,
       position: 'sticky', top: 0, zIndex: 10, flexShrink: 0,
     }}>
-      <button onClick={onMenuToggle} style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 6, borderRadius: T.r.sm, display: 'flex', flexShrink: 0 }}
-        onMouseEnter={e => e.currentTarget.style.color = T.text}
-        onMouseLeave={e => e.currentTarget.style.color = T.textSec}>
-        <Menu size={20} />
-      </button>
-
-      {/* App Logo & Title in Header */}
+      {/* App Logo & Title on the Left */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
         <img src="/logo.webp" alt="Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', flexShrink: 0, border: `1px solid rgba(245, 158, 11, 0.4)` }} />
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
@@ -627,6 +650,28 @@ function Header({ section, onMenuToggle, isMobile, currentUser }) {
         <ArrowLeft size={13} />
         <span className="ad-header-app-btn">App</span>
       </a>
+
+      {/* User Profile Picture Button on Right Side to Trigger Menu Drawer */}
+      <button
+        onClick={onMenuToggle}
+        title="Open Admin Menu"
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          display: 'flex', alignItems: 'center', flexShrink: 0, position: 'relative',
+          marginLeft: 4,
+        }}
+      >
+        {currentUser?.photoURL ? (
+          <img src={currentUser.photoURL} alt="Profile" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B', boxShadow: '0 2px 10px rgba(245,158,11,0.3)' }} />
+        ) : (
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 14, border: '2px solid #F59E0B' }}>
+            {(currentUser?.displayName || currentUser?.email || 'A')[0].toUpperCase()}
+          </div>
+        )}
+        <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
+          <GoldenAdminBadge size={12} />
+        </div>
+      </button>
     </div>
   );
 }
@@ -3853,7 +3898,7 @@ function AdminPanelInner() {
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          margin-left: 270px;
+          margin-left: 0;
           transition: margin-left 0.25s;
         }
         .ad-main-content.mobile {
