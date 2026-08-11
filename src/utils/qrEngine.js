@@ -150,6 +150,7 @@ export const EYE_STYLES = {
   ROUNDED: 'rounded',
   CIRCLE: 'circle',
   LEAF: 'leaf',
+  TEARDROP: 'teardrop',
   MODERN: 'modern',
   FLOWER: 'flower',
   SHIELD: 'shield',
@@ -1619,6 +1620,23 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
         ctx.moveTo(4, 4); ctx.lineTo(20, 4); ctx.quadraticCurveTo(24, 4, 24, 8); ctx.lineTo(24, 24); ctx.lineTo(8, 24); ctx.quadraticCurveTo(4, 24, 4, 20); ctx.closePath();
       }
       break;
+    case EYE_STYLES.TEARDROP: {
+      const sharpCorner = (eyeType === 'top-right') ? 'bottom-left' : (eyeType === 'bottom-left' ? 'top-right' : 'bottom-right');
+      const drawT = (pad, r) => {
+        const s = 28;
+        if (sharpCorner === 'bottom-left') {
+          ctx.moveTo(pad + r, pad); ctx.lineTo(s - pad - r, pad); ctx.quadraticCurveTo(s - pad, pad, s - pad, pad + r); ctx.lineTo(s - pad, s - pad - r); ctx.quadraticCurveTo(s - pad, s - pad, s - pad - r, s - pad); ctx.lineTo(pad, s - pad); ctx.lineTo(pad, pad + r); ctx.quadraticCurveTo(pad, pad, pad + r, pad);
+        } else if (sharpCorner === 'top-right') {
+          ctx.moveTo(pad + r, pad); ctx.lineTo(s - pad, pad); ctx.lineTo(s - pad, s - pad - r); ctx.quadraticCurveTo(s - pad, s - pad, s - pad - r, s - pad); ctx.lineTo(pad + r, s - pad); ctx.quadraticCurveTo(pad, s - pad, pad, s - pad - r); ctx.lineTo(pad, pad + r); ctx.quadraticCurveTo(pad, pad, pad + r, pad);
+        } else {
+          ctx.moveTo(pad + r, pad); ctx.lineTo(s - pad - r, pad); ctx.quadraticCurveTo(s - pad, pad, s - pad, pad + r); ctx.lineTo(s - pad, s - pad); ctx.lineTo(pad + r, s - pad); ctx.quadraticCurveTo(pad, s - pad, pad, s - pad - r); ctx.lineTo(pad, pad + r); ctx.quadraticCurveTo(pad, pad, pad + r, pad);
+        }
+        ctx.closePath();
+      };
+      drawT(0, 8);
+      drawT(4, 4);
+      break;
+    }
     case EYE_STYLES.FLOWER:
       for (let i = 0; i < 24; i++) {
         const a = i * Math.PI / 12;
@@ -1712,11 +1730,15 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
   switch (style) {
     case EYE_STYLES.CIRCLE:
     case EYE_STYLES.FLOWER:
-    case EYE_STYLES.SHIELD:
-    case EYE_STYLES.OCTAGON:
     case EYE_STYLES.STAR:
     case EYE_STYLES.HEART:
       ctx.arc(14, 14, 6, 0, Math.PI * 2);
+      break;
+    case EYE_STYLES.SHIELD:
+      ctx.moveTo(8, 9); ctx.lineTo(20, 9); ctx.lineTo(20, 14); ctx.quadraticCurveTo(20, 18, 14, 20); ctx.quadraticCurveTo(8, 18, 8, 14); ctx.closePath();
+      break;
+    case EYE_STYLES.OCTAGON:
+      ctx.moveTo(12, 8); ctx.lineTo(16, 8); ctx.lineTo(20, 12); ctx.lineTo(20, 16); ctx.lineTo(16, 20); ctx.lineTo(12, 20); ctx.lineTo(8, 16); ctx.lineTo(8, 12); ctx.closePath();
       break;
     case EYE_STYLES.HEXAGON: {
       const hr = 6;
@@ -1754,6 +1776,19 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
         ctx.moveTo(8, 8); ctx.lineTo(16, 8); ctx.quadraticCurveTo(20, 8, 20, 12); ctx.lineTo(20, 20); ctx.lineTo(12, 20); ctx.quadraticCurveTo(8, 20, 8, 16); ctx.closePath();
       }
       break;
+    case EYE_STYLES.TEARDROP: {
+      const sharpCorner = (eyeType === 'top-right') ? 'bottom-left' : (eyeType === 'bottom-left' ? 'top-right' : 'bottom-right');
+      const pad = 8, r = 3, s = 28;
+      if (sharpCorner === 'bottom-left') {
+        ctx.moveTo(pad + r, pad); ctx.lineTo(s - pad - r, pad); ctx.quadraticCurveTo(s - pad, pad, s - pad, pad + r); ctx.lineTo(s - pad, s - pad - r); ctx.quadraticCurveTo(s - pad, s - pad, s - pad - r, s - pad); ctx.lineTo(pad, s - pad); ctx.lineTo(pad, pad + r); ctx.quadraticCurveTo(pad, pad, pad + r, pad);
+      } else if (sharpCorner === 'top-right') {
+        ctx.moveTo(pad + r, pad); ctx.lineTo(s - pad, pad); ctx.lineTo(s - pad, s - pad - r); ctx.quadraticCurveTo(s - pad, s - pad, s - pad - r, s - pad); ctx.lineTo(pad + r, s - pad); ctx.quadraticCurveTo(pad, s - pad, pad, s - pad - r); ctx.lineTo(pad, pad + r); ctx.quadraticCurveTo(pad, pad, pad + r, pad);
+      } else {
+        ctx.moveTo(pad + r, pad); ctx.lineTo(s - pad - r, pad); ctx.quadraticCurveTo(s - pad, pad, s - pad, pad + r); ctx.lineTo(s - pad, s - pad); ctx.lineTo(pad + r, s - pad); ctx.quadraticCurveTo(pad, s - pad, pad, s - pad - r); ctx.lineTo(pad, pad + r); ctx.quadraticCurveTo(pad, pad, pad + r, pad);
+      }
+      ctx.closePath();
+      break;
+    }
     case EYE_STYLES.DOLLAR_COIN: {
       ctx.fillStyle = '#ffd700'; // Gold center
       ctx.beginPath(); ctx.arc(14, 14, 7, 0, Math.PI * 2); ctx.fill();
