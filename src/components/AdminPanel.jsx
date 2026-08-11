@@ -554,10 +554,9 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
 function Header({ section, onMenuToggle, isMobile, currentUser }) {
   return (
     <div style={{
-      minHeight: 60, background: T.bgEl, borderBottom: `1px solid ${T.border}`,
+      minHeight: 60, background: T.bgEl, borderBottom: 'none',
       display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10,
       position: 'sticky', top: 0, zIndex: 10, flexShrink: 0,
-      paddingTop: 'max(8px, env(safe-area-inset-top))',
     }}>
       <button onClick={onMenuToggle} style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer', padding: 6, borderRadius: T.r.sm, display: 'flex', flexShrink: 0 }}
         onMouseEnter={e => e.currentTarget.style.color = T.text}
