@@ -1738,7 +1738,7 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
   else if (style === EYE_STYLES.VIOLET_FLOWER) ctx.fillStyle = '#8e7cc3';
   else if (style === EYE_STYLES.TULIP) ctx.fillStyle = '#ff4d6d';
   else if (style === EYE_STYLES.FORGET_ME_NOT) ctx.fillStyle = '#3a86c8';
-  else if (style === EYE_STYLES.PANSY) ctx.fillStyle = '#7209b7';
+  else if (style === EYE_STYLES.PANSY) ctx.fillStyle = '#6c5ce7';
   ctx.fill('evenodd');
 
   // New icon eye styles: delegate to dedicated draw function and return
@@ -1982,7 +1982,7 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
       return;
     }
     case EYE_STYLES.PANSY: {
-      ctx.fillStyle = '#7209b7'; // Deep violet container
+      ctx.fillStyle = '#6c5ce7'; // Indigo purple container
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
       const cx = 14, cy = 14, r = 4.5;
       // Top two petals (deep violet/blue)
@@ -1991,15 +1991,14 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
       ctx.arc(cx - r * 0.35, cy - r * 0.35, r * 0.45, 0, Math.PI * 2);
       ctx.arc(cx + r * 0.35, cy - r * 0.35, r * 0.45, 0, Math.PI * 2);
       ctx.fill();
-      // Side/bottom petals (bright yellow/orange)
-      ctx.fillStyle = '#ffb703';
+      // Side/bottom petals (Bright Lavender/Yellow)
+      ctx.fillStyle = '#a29bfe';
       ctx.beginPath();
       ctx.arc(cx - r * 0.45, cy + r * 0.2, r * 0.42, 0, Math.PI * 2);
       ctx.arc(cx + r * 0.45, cy + r * 0.2, r * 0.42, 0, Math.PI * 2);
-      ctx.arc(cx, cy + r * 0.45, r * 0.48, 0, Math.PI * 2);
       ctx.fill();
-      // Center dark spot
-      ctx.fillStyle = '#023047';
+      // Center yellow spot
+      ctx.fillStyle = '#fdcb6e';
       ctx.beginPath();
       ctx.arc(cx, cy, r * 0.2, 0, Math.PI * 2);
       ctx.fill();
@@ -2183,8 +2182,8 @@ function drawEyeIconPupil(ctx, x, y, size, style) {
       break;
     }
     case EYE_STYLES.CACTUS: {
-      // Mini cactus (dark green)
-      ctx.fillStyle = '#071a0e';
+      // Mini cactus (green - matches ring color)
+      ctx.fillStyle = '#196f3d';
       // Trunk
       ctx.beginPath(); ctx.roundRect(12, 9, 4, 11, 1); ctx.fill();
       // Left arm
@@ -2211,16 +2210,14 @@ function drawEyeIconPupil(ctx, x, y, size, style) {
       // Slate grey container
       ctx.fillStyle = '#6c7a89';
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
-      // Chess knight silhouette (dark)
+      // Chess pawn silhouette (dark)
       ctx.fillStyle = '#0a0a0a';
-      // Knight head
-      ctx.beginPath(); ctx.ellipse(14.5, 10.5, 2.8, 2.5, -0.3, 0, Math.PI * 2); ctx.fill();
-      // Knight body
-      ctx.beginPath();
-      ctx.moveTo(10, 19); ctx.lineTo(18, 19);
-      ctx.lineTo(17.5, 13.5); ctx.quadraticCurveTo(16.5, 11.5, 14.5, 11);
-      ctx.lineTo(12.5, 14.5); ctx.quadraticCurveTo(11, 16, 10, 19);
-      ctx.closePath(); ctx.fill();
+      // Pawn head
+      ctx.beginPath(); ctx.arc(14, 11.5, 2.2, 0, Math.PI * 2); ctx.fill();
+      // Pawn neck
+      ctx.beginPath(); ctx.roundRect(12.5, 13.7, 3, 2.3, 0.4); ctx.fill();
+      // Pawn base
+      ctx.beginPath(); ctx.roundRect(10.5, 16.5, 7, 2.5, 0.8); ctx.fill();
       break;
     }
     case EYE_STYLES.BOW: {

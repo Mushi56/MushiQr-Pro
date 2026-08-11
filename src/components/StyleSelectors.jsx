@@ -648,8 +648,9 @@ const EYE_PREVIEWS = {
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="1" y="1" width="26" height="26" rx="6" fill="none" stroke="currentColor" strokeWidth="3.5" />
       <rect x="8" y="8" width="12" height="12" rx="3.5" fill="currentColor" />
-      <ellipse cx="14.5" cy="10.5" rx="2.8" ry="2.5" fill="#fff" transform="rotate(-15 14.5 10.5)" />
-      <path d="M10 19 L18 19 L17.5 13.5 Q16.5 11.5 14.5 11 L12.5 14.5 Q11 16 10 19Z" fill="#fff" />
+      <circle cx="14" cy="11.5" r="2.2" fill="#fff" />
+      <rect x="12.5" y="13.7" width="3" height="2.3" rx="0.4" fill="#fff" />
+      <rect x="10.5" y="16.5" width="7" height="2.5" rx="0.8" fill="#fff" />
     </svg>
   ),
 
