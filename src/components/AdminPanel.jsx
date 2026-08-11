@@ -449,13 +449,8 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       zIndex: 35, transition: 'left 0.27s cubic-bezier(0.4,0,0.2,1)',
       boxShadow: isMobile && open ? '4px 0 32px rgba(0,0,0,0.8)' : 'none',
       paddingTop: 'max(14px, env(safe-area-inset-top))',
-      paddingBottom: isMobile ? 'calc(68px + max(14px, env(safe-area-inset-bottom)))' : 'max(14px, env(safe-area-inset-bottom))',
+      paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
     }}>
-      {/* Close btn (mobile only) */}
-      <button className="ad-sidebar-close" onClick={onClose}>
-        <X size={16} />
-      </button>
-
       {/* Logo */}
       <div style={{ padding: '16px 16px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
         <img src="/logo.webp" alt="Logo" style={{ width: 36, height: 36, borderRadius: 10, objectFit: 'contain', flexShrink: 0, border: `1px solid rgba(245, 158, 11, 0.4)` }} />
@@ -465,6 +460,10 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
             <GoldenAdminBadge size={14} /> SUPER ADMIN
           </div>
         </div>
+        {/* Close btn (mobile only) */}
+        <button className="ad-sidebar-close" onClick={onClose}>
+          <X size={16} />
+        </button>
       </div>
 
       {/* Nav */}
@@ -3873,8 +3872,6 @@ function AdminPanelInner() {
         /* Sidebar close btn (mobile) */
         .ad-sidebar-close {
           display: none;
-          position: absolute;
-          top: 12px; right: 12px;
           background: rgba(255,255,255,0.05);
           border: none;
           border-radius: 8px;
@@ -3882,6 +3879,7 @@ function AdminPanelInner() {
           cursor: pointer;
           padding: 6px;
           line-height: 0;
+          flex-shrink: 0;
         }
         @media (max-width: 768px) {
           .ad-sidebar-close { display: flex; align-items: center; justify-content: center; }
