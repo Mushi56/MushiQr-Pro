@@ -13,12 +13,38 @@ export default function LogoUpload({ logo, onLogoChange, onLogoRemove }) {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        onLogoChange({
-          image: img,
-          name: file.name,
-          size: file.size,
-          src: e.target.result,
-        });
+        // Downscale logo to max 256px to optimize memory and rendering speed
+        const canvas = document.createElement('canvas');
+        const maxDim = 256;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const resizedSrc = canvas.toDataURL('image/png');
+        const resizedImg = new Image();
+        resizedImg.onload = () => {
+          onLogoChange({
+            image: resizedImg,
+            name: file.name,
+            size: file.size,
+            src: resizedSrc,
+          });
+        };
+        resizedImg.src = resizedSrc;
       };
       img.src = e.target.result;
     };

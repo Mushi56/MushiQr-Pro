@@ -1,14 +1,33 @@
 import React, { useEffect, useRef } from 'react';
 import { DOT_STYLES, EYE_STYLES, renderQR, generateQRMatrix } from '../utils/qrEngine';
 
+// Cache for demo matrix to avoid redundant generations
+const matrixCache = {};
+function getCachedDemoMatrix(errorLevel) {
+  if (!matrixCache[errorLevel]) {
+    matrixCache[errorLevel] = generateQRMatrix("Hello User", errorLevel);
+  }
+  return matrixCache[errorLevel];
+}
+
 function MiniQRCanvas({ qrParams, overrideParams }) {
   const canvasRef = useRef(null);
 
-  useEffect(() => {
-    if (!canvasRef.current || !qrParams) return;
+  const errorLevel = qrParams?.errorLevel || 'H';
+  const dotStyle = overrideParams?.dotStyle;
+  const eyeStyle = overrideParams?.eyeStyle;
+  const hideEyes = overrideParams?.hideEyes;
+  const hideDots = overrideParams?.hideDots;
+  const fgColor = qrParams?.fgColor;
+  const fgType = qrParams?.fgType;
+  const fgColor1 = qrParams?.fgColor1;
+  const fgColor2 = qrParams?.fgColor2;
+  const fgAngle = qrParams?.fgAngle;
 
-    // Generate a clean "Hello User" matrix for maximum shape readability
-    const demoMatrixInfo = generateQRMatrix("Hello User", qrParams.errorLevel || 'H');
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const demoMatrixInfo = getCachedDemoMatrix(errorLevel);
     if (!demoMatrixInfo) return;
 
     const options = {
@@ -21,18 +40,21 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
       textCenter: null,
       frameStyle: 'none',          // Remove outer frames
       quietZone: 1,                // Add a very small quiet zone to maximize visual size
-      size: 384,                   // Render size
-      ...overrideParams
+      size: 120,                   // Render size (reduced from 384 to 120 for extreme speedup)
+      dotStyle,
+      eyeStyle,
+      hideEyes,
+      hideDots
     };
 
     renderQR(canvasRef.current, options);
-  }, [qrParams, overrideParams]);
+  }, [errorLevel, dotStyle, eyeStyle, hideEyes, hideDots, fgColor, fgType, fgColor1, fgColor2, fgAngle]);
 
   return (
     <canvas 
       ref={canvasRef} 
-      width="384" 
-      height="384" 
+      width="120" 
+      height="120" 
       style={{ 
         width: '100%', 
         height: '100%', 
