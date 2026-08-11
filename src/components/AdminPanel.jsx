@@ -433,6 +433,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      window.location.reload();
     } catch (e) {
       console.error('Logout error:', e);
     }
@@ -545,6 +546,7 @@ function Header({ section, onMenuToggle, isMobile, currentUser }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      window.location.reload();
     } catch (e) {
       console.error('Logout error:', e);
     }
