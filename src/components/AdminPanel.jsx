@@ -496,22 +496,22 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
       paddingTop: 'max(14px, env(safe-area-inset-top))',
       paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
     }}>
-      {/* Top Section: App Profile Style Card */}
-      <div style={{ padding: '12px 14px 4px', flexShrink: 0 }}>
+      {/* Top Section: User Profile Card (YouPage Style) */}
+      <div style={{ padding: '16px 16px 8px', flexShrink: 0 }}>
         {currentUser && (
           <div style={{
-            background: 'rgba(24, 24, 36, 0.9)',
+            background: 'var(--bg-secondary, #14141e)',
             border: `1px solid ${T.border}`,
-            borderRadius: 16,
-            padding: '14px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+            borderRadius: 18,
+            padding: '16px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
                 {currentUser.photoURL ? (
-                  <img src={currentUser.photoURL} alt="" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B' }} />
+                  <img src={currentUser.photoURL} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B' }} />
                 ) : (
-                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 16, border: '2px solid rgba(245, 158, 11, 0.4)' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 18, border: '2px solid rgba(245, 158, 11, 0.4)' }}>
                     {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
                   </div>
                 )}
@@ -521,16 +521,11 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {currentUser.displayName || 'Super Admin'}
-                  </span>
+                <div style={{ fontSize: 15, fontWeight: 800, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {currentUser.displayName || 'Super Admin'}
                 </div>
-                <div style={{ fontSize: 11, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', marginTop: 1 }}>
+                <div style={{ fontSize: 12, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', marginTop: 2 }}>
                   {currentUser.email}
-                </div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 5, background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', padding: '2px 8px', borderRadius: 100, fontSize: 9, fontWeight: 800, letterSpacing: '0.4px' }}>
-                  ★ SUPER ADMIN
                 </div>
               </div>
 
@@ -539,69 +534,67 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
                 title="Log Out"
                 style={{
                   background: 'rgba(239, 68, 68, 0.12)', border: `1px solid rgba(239, 68, 68, 0.25)`,
-                  borderRadius: 10, color: T.red, cursor: 'pointer', padding: 8,
+                  borderRadius: 12, color: T.red, cursor: 'pointer', padding: 10,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   transition: 'all 0.15s'
                 }}
               >
-                <LogOut size={15} />
+                <LogOut size={16} />
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Nav: YouPage Grouped Card Style */}
-      <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 14px' }}>
+      {/* Nav List: Identical to YouPage Settings List */}
+      <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 24px' }}>
         {NAV.map(({ section, items }) => (
-          <div key={section} style={{
-            background: 'rgba(20, 20, 32, 0.6)',
-            border: `1px solid ${T.border}`,
-            borderRadius: 16,
-            overflow: 'hidden',
-            marginBottom: 14,
-          }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: T.textMut, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '10px 14px 6px' }}>
+          <div key={section} style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: T.textMut, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 4px 8px' }}>
               {section}
             </div>
 
-            {items.map(({ id, icon: Icon, label }, index) => {
-              const isActive = active === id;
-              const gradientBg = ITEM_GRADIENTS[id] || 'linear-gradient(135deg, #D60036 0%, #ff4d6d 100%)';
-              return (
-                <Fragment key={id}>
-                  {index > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', marginLeft: 54 }} />}
-                  <div
-                    onClick={() => { setActive(id); if (isMobile) onClose(); }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      padding: '10px 14px', cursor: 'pointer',
-                      background: isActive ? T.sidebarAct : 'transparent',
-                      transition: 'background 0.15s ease',
-                    }}
-                  >
-                    <div style={{
-                      width: 32, height: 32, borderRadius: 10,
-                      background: gradientBg,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                    }}>
-                      <Icon size={16} color="#fff" />
+            <div className="settings-group-container" style={{ borderRadius: 16, overflow: 'hidden', border: `1px solid ${T.border}`, background: 'var(--bg-secondary, #14141e)' }}>
+              {items.map(({ id, icon: Icon, label }, index) => {
+                const isActive = active === id;
+                const gradientBg = ITEM_GRADIENTS[id] || 'linear-gradient(135deg, #D60036 0%, #ff4d6d 100%)';
+                return (
+                  <Fragment key={id}>
+                    {index > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginLeft: 66 }} />}
+                    <div
+                      className="settings-row-item"
+                      onClick={() => { setActive(id); if (isMobile) onClose(); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 14,
+                        padding: '14px 16px', cursor: 'pointer',
+                        background: isActive ? T.sidebarAct : 'transparent',
+                        transition: 'background 0.15s ease',
+                      }}
+                    >
+                      <div className="icon-container-gradient" style={{
+                        width: 36, height: 36, borderRadius: 10,
+                        background: gradientBg,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: '#fff', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+                        marginRight: 0,
+                      }}>
+                        <Icon size={18} color="#fff" />
+                      </div>
+
+                      <span style={{
+                        flex: 1, fontSize: 14, fontWeight: isActive ? 700 : 600,
+                        color: isActive ? T.accent : T.text,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {label}
+                      </span>
+
+                      <ChevronRight size={16} color={isActive ? T.accent : T.textMut} />
                     </div>
-
-                    <span style={{
-                      flex: 1, fontSize: 13, fontWeight: isActive ? 800 : 600,
-                      color: isActive ? T.accent : T.text,
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {label}
-                    </span>
-
-                    <ChevronRight size={14} color={isActive ? T.accent : T.textMut} />
-                  </div>
-                </Fragment>
-              );
-            })}
+                  </Fragment>
+                );
+              })}
+            </div>
           </div>
         ))}
         <div style={{ height: 20 }} />
