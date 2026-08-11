@@ -697,7 +697,7 @@ export function renderQR(canvas, options) {
   if (!options.hideDots) {
     for (let row = 0; row < moduleCount; row++) {
       for (let col = 0; col < moduleCount; col++) {
-        if (isFinderPattern(row, col, moduleCount)) continue;
+        if (!options.hideEyes && isFinderPattern(row, col, moduleCount)) continue;
         if (!matrix[row][col]) continue;
 
         const x = contentX + (col + quietZone) * cellSize;

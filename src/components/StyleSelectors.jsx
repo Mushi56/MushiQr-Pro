@@ -10,6 +10,22 @@ function getCachedDemoMatrix(errorLevel) {
   return matrixCache[errorLevel];
 }
 
+// 9x9 matrix with ~20% dot density & no eyes for ultra-clear dot shape previews
+const FAKE_DOTS_MATRIX = {
+  moduleCount: 9,
+  matrix: [
+    [true,  false, false, false, true,  false, false, false, true ],
+    [false, false, true,  false, false, false, true,  false, false],
+    [false, true,  false, false, false, false, false, true,  false],
+    [false, false, false, true,  false, true,  false, false, false],
+    [true,  false, false, false, true,  false, false, false, true ],
+    [false, false, false, true,  false, true,  false, false, false],
+    [false, true,  false, false, false, false, false, true,  false],
+    [false, false, true,  false, false, false, true,  false, false],
+    [true,  false, false, false, true,  false, false, false, true ],
+  ]
+};
+
 function MiniQRCanvas({ qrParams, overrideParams }) {
   const canvasRef = useRef(null);
 
@@ -27,8 +43,9 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const demoMatrixInfo = getCachedDemoMatrix(errorLevel);
-    if (!demoMatrixInfo) return;
+    // Use fake 20% density matrix with no eyes for dot thumbnails so dot shapes are large and perfectly visible
+    const matrixInfo = hideEyes ? FAKE_DOTS_MATRIX : getCachedDemoMatrix(errorLevel);
+    if (!matrixInfo) return;
 
     const options = {
       ...qrParams,
