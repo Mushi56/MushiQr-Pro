@@ -466,8 +466,12 @@ export async function trackUserProfile(user) {
     const snap = await getDoc(ref);
     const now = new Date().toISOString();
 
-    // Determine auth provider
+    // Determine auth provider and extract user email & name safely
     const providerData = user.providerData || [];
+    const userEmail = user.email || providerData[0]?.email || providerData.find(p => p.email)?.email || '';
+    const userDisplayName = user.displayName || providerData[0]?.displayName || providerData.find(p => p.displayName)?.displayName || '';
+    const userPhotoURL = user.photoURL || providerData[0]?.photoURL || providerData.find(p => p.photoURL)?.photoURL || '';
+
     const provider = providerData[0]?.providerId === 'google.com' ? 'google'
       : providerData[0]?.providerId === 'password' ? 'email'
       : providerData[0]?.providerId || 'unknown';
@@ -482,11 +486,13 @@ export async function trackUserProfile(user) {
     };
 
     if (snap.exists()) {
-      // Existing user — update last active + visit count
+      // Existing user — update last active, email, name, photo & visit count
+      const existingData = snap.data();
       await updateDoc(ref, {
         lastActiveAt: now,
-        displayName: user.displayName || snap.data().displayName || '',
-        photoURL: user.photoURL || snap.data().photoURL || '',
+        email: userEmail || existingData.email || '',
+        displayName: userDisplayName || existingData.displayName || '',
+        photoURL: userPhotoURL || existingData.photoURL || '',
         deviceInfo,
         visitCount: increment(1),
       });
@@ -494,9 +500,9 @@ export async function trackUserProfile(user) {
       // New user — create full profile
       await setDoc(ref, {
         uid: user.uid,
-        email: user.email || '',
-        displayName: user.displayName || '',
-        photoURL: user.photoURL || '',
+        email: userEmail,
+        displayName: userDisplayName,
+        photoURL: userPhotoURL,
         provider,
         status: 'active',
         createdAt: now,
