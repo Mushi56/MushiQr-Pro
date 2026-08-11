@@ -14,6 +14,7 @@ import {
   ArrowUpRight, MoreVertical, Calendar, AlertTriangle, CheckCircle,
   XCircle, Clock, Info, Star, Zap, Globe, AlertCircle, Save,
   ExternalLink, Key, ArrowLeft, Mail, Monitor, Cpu,
+  DollarSign, Tag, Percent, Receipt,
 } from 'lucide-react';
 
 import * as DS from '../services/adminDataService';
@@ -126,7 +127,7 @@ function fmtDate(ts) {
 
 // ─── Navigation Config ────────────────────────────────────────────────────
 const LABELS = {
-  dashboard:'Dashboard', users:'Users', subscriptions:'Subscriptions',
+  dashboard:'Dashboard', revenue:'Revenue & SaaS', users:'Users', subscriptions:'Subscriptions',
   analytics:'Analytics', reports:'Reports', templates:'Templates',
   'qr-barcode':'QR & Barcode', categories:'Categories', bulk:'Bulk Operations',
   'app-settings':'App Settings', branding:'Branding', 'remote-config':'Remote Config',
@@ -141,9 +142,12 @@ const NAV = [
   { section: 'MAIN', items: [
     { id: 'dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'users',         icon: Users,           label: 'Users' },
-    { id: 'subscriptions', icon: CreditCard,      label: 'Subscriptions' },
     { id: 'analytics',     icon: BarChart3,       label: 'Analytics' },
     { id: 'reports',       icon: FileText,        label: 'Reports' },
+  ]},
+  { section: 'MONETIZATION', items: [
+    { id: 'revenue',       icon: DollarSign,      label: 'Revenue & SaaS' },
+    { id: 'subscriptions', icon: CreditCard,      label: 'Subscriptions' },
   ]},
   { section: 'CONTENT', items: [
     { id: 'templates',  icon: Layers,  label: 'Templates' },
@@ -2816,7 +2820,28 @@ function UsersPanel() {
               </div>
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Btn
+                  variant={selectedUser.isPro ? 'ghost' : 'primary'}
+                  onClick={async () => {
+                    setActionLoading(true);
+                    if (selectedUser.isPro) {
+                      await DS.revokeUserProAccess(selectedUser.uid);
+                      toast?.('Pro access revoked', 'info');
+                      setSelectedUser({ ...selectedUser, isPro: false, planId: 'free' });
+                    } else {
+                      await DS.grantUserProAccess(selectedUser.uid, 'pro_monthly');
+                      toast?.('Pro access granted!', 'success');
+                      setSelectedUser({ ...selectedUser, isPro: true, planId: 'pro_monthly' });
+                    }
+                    setActionLoading(false);
+                    refresh();
+                  }}
+                  disabled={actionLoading}
+                  icon={<Zap size={13} />}
+                >
+                  {selectedUser.isPro ? 'Revoke Pro' : 'Grant Pro'}
+                </Btn>
                 <Btn
                   variant={selectedUser.status === 'blocked' ? 'success' : 'danger'}
                   onClick={() => toggleStatus(selectedUser.uid, selectedUser.status)}
@@ -2831,6 +2856,282 @@ function UsersPanel() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REVENUE & MONETIZATION PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function RevenuePanel() {
+  const [data, setData] = useState(null);
+  const [promos, setPromos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [subTab, setSubTab] = useState('overview');
+  const [newCode, setNewCode] = useState('');
+  const [newDiscount, setNewDiscount] = useState('20%');
+  const toast = useToast();
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [rev, pr] = await Promise.all([
+        DS.getRevenueAnalytics(),
+        DS.getPromoCodes(),
+      ]);
+      setData(rev);
+      setPromos(pr);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadData(); }, []);
+
+  const handleAddPromo = async () => {
+    if (!newCode.trim()) return;
+    const codeObj = {
+      id: newCode.trim().toUpperCase(),
+      code: newCode.trim().toUpperCase(),
+      discount: newDiscount,
+      type: 'percentage',
+      uses: 0,
+      active: true,
+      createdAt: new Date().toISOString()
+    };
+    const updated = [...promos, codeObj];
+    const res = await DS.savePromoCodes(updated);
+    if (res.ok) {
+      setPromos(updated);
+      setNewCode('');
+      toast('Promo code created!', 'success');
+    } else {
+      toast('Failed to save promo code', 'error');
+    }
+  };
+
+  const handleTogglePromo = async (codeId) => {
+    const updated = promos.map(p => p.id === codeId ? { ...p, active: !p.active } : p);
+    const res = await DS.savePromoCodes(updated);
+    if (res.ok) {
+      setPromos(updated);
+      toast('Promo code updated!', 'success');
+    }
+  };
+
+  const handleDeletePromo = async (codeId) => {
+    const updated = promos.filter(p => p.id !== codeId);
+    const res = await DS.savePromoCodes(updated);
+    if (res.ok) {
+      setPromos(updated);
+      toast('Promo code deleted!', 'success');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 14 }}>
+        <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
+        <span style={{ fontSize: 14, color: T.textSec }}>Loading SaaS revenue dashboard...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Revenue Header Banner */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(214,0,54,0.15) 0%, rgba(139,92,246,0.15) 100%)',
+        border: `1px solid ${T.accent}33`, borderRadius: T.r.xl, padding: '24px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16
+      }}>
+        <div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: T.text, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <DollarSign size={22} color={T.accent} /> SaaS Revenue & Monetization
+          </div>
+          <div style={{ fontSize: 13, color: T.textSec, marginTop: 4 }}>
+            Real-time calculation of MRR, ARR, Conversion rates, and Subscription Tiers
+          </div>
+        </div>
+        <Btn variant="ghost" size="sm" onClick={loadData} icon={<RefreshCw size={12} />}>Refresh Financials</Btn>
+      </div>
+
+      {/* Top Financial KPI Grid */}
+      <div className="ad-stat-grid">
+        <StatCard icon={DollarSign} label="Monthly Recurring (MRR)" value={`$${data?.mrr || '0.00'}`} color={T.green} trendLabel="estimated monthly" />
+        <StatCard icon={TrendingUp} label="Annual Recurring (ARR)" value={`$${data?.arr || '0.00'}`} color={T.purple} trendLabel="projected 12 months" />
+        <StatCard icon={Zap} label="Paid Subscribers" value={data?.paidUsers || 0} color={T.blue} trendLabel={`${data?.conversionRate || 0}% conversion`} />
+        <StatCard icon={CreditCard} label="ARPU (Per User)" value={`$${data?.arpu || '0.00'}`} color={T.orange} trendLabel="avg revenue/user" />
+      </div>
+
+      {/* Sub Tab Buttons */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        {[
+          ['overview', 'Financial Overview'],
+          ['ledger', 'Transactions & Tiers'],
+          ['promos', 'Promo Codes & Discounts']
+        ].map(([id, label]) => (
+          <button key={id} onClick={() => setSubTab(id)} style={{
+            padding: '8px 16px', borderRadius: T.r.md, border: `1px solid ${subTab === id ? T.accent : T.border}`,
+            background: subTab === id ? T.accentLow : 'transparent', color: subTab === id ? T.accent : T.textSec,
+            fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s'
+          }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Sub Tab: Overview */}
+      {subTab === 'overview' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="ad-two-col">
+            <AdminCard title="Subscription Tier Distribution" subtitle="Active user count by plan type">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
+                {[
+                  { label: 'Free Tier Users', count: data?.freeUsers || 0, color: T.textMut, pct: (((data?.freeUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
+                  { label: 'Pro Monthly ($4.99/mo)', count: data?.proMonthlyUsers || 0, color: T.purple, pct: (((data?.proMonthlyUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
+                  { label: 'Pro Yearly ($39.99/yr)', count: data?.proYearlyUsers || 0, color: T.green, pct: (((data?.proYearlyUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
+                  { label: 'Lifetime Unlimited ($99.99)', count: data?.lifetimeUsers || 0, color: T.orange, pct: (((data?.lifetimeUsers || 0) / (data?.totalUsers || 1)) * 100).toFixed(0) },
+                ].map(item => (
+                  <div key={item.label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                      <span style={{ color: T.text, fontWeight: 600 }}>{item.label}</span>
+                      <span style={{ color: T.textSec }}>{item.count} users ({item.pct}%)</span>
+                    </div>
+                    <div style={{ width: '100%', height: 8, background: T.bgEl, borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ width: `${item.pct}%`, height: '100%', background: item.color, borderRadius: 4, transition: 'width 0.4s' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </AdminCard>
+
+            <AdminCard title="Monetization Health Metrics" subtitle="SaaS conversion benchmark">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ padding: 14, background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
+                  <div style={{ fontSize: 12, color: T.textSec }}>Conversion Rate (Free → Pro)</div>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: T.accent, marginTop: 4 }}>{data?.conversionRate}%</div>
+                  <div style={{ fontSize: 11, color: T.textMut, marginTop: 2 }}>Target: 5.0% or higher</div>
+                </div>
+                <div style={{ padding: 14, background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
+                  <div style={{ fontSize: 12, color: T.textSec }}>Lifetime Value (LTV) Estimate</div>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: T.green, marginTop: 4 }}>${(parseFloat(data?.arpu || 0) * 12).toFixed(2)}</div>
+                  <div style={{ fontSize: 11, color: T.textMut, marginTop: 2 }}>Based on 12-month average retention</div>
+                </div>
+              </div>
+            </AdminCard>
+          </div>
+        </div>
+      )}
+
+      {/* Sub Tab: Ledger */}
+      {subTab === 'ledger' && (
+        <AdminCard title="Subscription Ledger" subtitle="Paid tier allocation status" noPadding>
+          <div className="ad-table-wrap">
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${T.border}` }}>
+                  {['Tier Name', 'Billing Interval', 'Monthly Value', 'Target Segment', 'Status'].map(h => (
+                    <th key={h} style={{ textAlign: 'left', padding: '10px 16px', fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { name: 'Free Starter', interval: 'Forever', value: '$0.00', segment: 'Casual Creators', status: 'Active' },
+                  { name: 'Pro Monthly', interval: 'Monthly', value: '$4.99', segment: 'Power Users', status: 'Active' },
+                  { name: 'Pro Yearly (Best Value)', interval: 'Yearly', value: '$3.33/mo', segment: 'Businesses', status: 'Active' },
+                  { name: 'Lifetime Pass', interval: 'One-Time', value: '$99.99', segment: 'VIP Accounts', status: 'Active' },
+                ].map((tier, idx) => (
+                  <tr key={idx} style={{ borderBottom: `1px solid ${T.border}` }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 700, color: T.text }}>{tier.name}</td>
+                    <td style={{ padding: '12px 16px', color: T.textSec, fontSize: 12 }}>{tier.interval}</td>
+                    <td style={{ padding: '12px 16px', fontWeight: 800, color: T.green }}>{tier.value}</td>
+                    <td style={{ padding: '12px 16px', color: T.textSec, fontSize: 12 }}>{tier.segment}</td>
+                    <td style={{ padding: '12px 16px' }}><Badge color={T.green}>{tier.status}</Badge></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </AdminCard>
+      )}
+
+      {/* Sub Tab: Promos */}
+      {subTab === 'promos' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <AdminCard title="Create New Promo Code">
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                placeholder="PROMO CODE (e.g. SUMMER2026)"
+                value={newCode}
+                onChange={e => setNewCode(e.target.value)}
+                style={{
+                  background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md,
+                  color: T.text, fontSize: 13, padding: '9px 14px', outline: 'none', fontFamily: 'inherit', flex: 1, minWidth: 200
+                }}
+              />
+              <select
+                value={newDiscount}
+                onChange={e => setNewDiscount(e.target.value)}
+                style={{
+                  background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md,
+                  color: T.text, fontSize: 13, padding: '9px 14px', outline: 'none', fontFamily: 'inherit'
+                }}
+              >
+                <option value="10%">10% OFF</option>
+                <option value="20%">20% OFF</option>
+                <option value="50%">50% OFF</option>
+                <option value="100%">100% OFF (FREE PRO)</option>
+              </select>
+              <Btn onClick={handleAddPromo} icon={<Plus size={14} />}>Add Promo</Btn>
+            </div>
+          </AdminCard>
+
+          <AdminCard title="Active Promo Codes" noPadding>
+            {promos.length === 0 ? (
+              <EmptyState icon={Tag} title="No promo codes" desc="Create discount codes above for marketing campaigns." />
+            ) : (
+              <div className="ad-table-wrap">
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${T.border}` }}>
+                      {['Code', 'Discount', 'Uses', 'Status', 'Action'].map(h => (
+                        <th key={h} style={{ textAlign: 'left', padding: '10px 16px', fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {promos.map(p => (
+                      <tr key={p.id} style={{ borderBottom: `1px solid ${T.border}` }}>
+                        <td style={{ padding: '12px 16px', fontWeight: 800, color: T.accent, letterSpacing: '0.5px' }}>{p.code}</td>
+                        <td style={{ padding: '12px 16px', color: T.green, fontWeight: 700 }}>{p.discount}</td>
+                        <td style={{ padding: '12px 16px', color: T.text, fontSize: 12 }}>{p.uses || 0} redeemed</td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <Badge color={p.active ? T.green : T.red}>{p.active ? 'Active' : 'Disabled'}</Badge>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <Btn variant="ghost" size="sm" onClick={() => handleTogglePromo(p.id)}>
+                              {p.active ? 'Disable' : 'Enable'}
+                            </Btn>
+                            <Btn variant="danger" size="sm" onClick={() => handleDeletePromo(p.id)} icon={<Trash2 size={12} />}>
+                              Delete
+                            </Btn>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </AdminCard>
         </div>
       )}
     </div>
@@ -3222,6 +3523,7 @@ function AdminPanelInner() {
 
   const PANELS = {
     dashboard:       <DashboardPanel stats={stats} chartData={chartData} history={history} onNavigate={setSection} />,
+    revenue:         <RevenuePanel />,
     users:           <UsersPanel />,
     subscriptions:   <SubscriptionsPanel plans={subscriptionPlans} premiumFeatures={premiumFeatures} subscribers={subscribers}
       onSavePlans={async p => { await DS.saveSubscriptionPlans(p); setSubscriptionPlans(p); refreshAudit(); }}

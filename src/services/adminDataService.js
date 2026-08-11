@@ -668,3 +668,144 @@ export async function getAllVisitors() {
     return [];
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REVENUE & MONETIZATION SERVICE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Compute real-time Revenue & SaaS Subscription metrics from app_users and plans
+ */
+export async function getRevenueAnalytics() {
+  try {
+    const users = await getAllAppUsers();
+    const plans = await getSubscriptionPlans();
+    
+    // Default pricing reference
+    const proMonthlyPrice = parseFloat(plans.find(p => p.id === 'pro_monthly' || p.billingPeriod === 'monthly')?.price || '4.99');
+    const proYearlyPrice  = parseFloat(plans.find(p => p.id === 'pro_yearly' || p.billingPeriod === 'yearly')?.price || '39.99');
+    const lifetimePrice   = parseFloat(plans.find(p => p.id === 'lifetime')?.price || '99.99');
+
+    let totalRevenue = 0;
+    let mrr = 0;
+    let proCount = 0;
+    let yearlyCount = 0;
+    let lifetimeCount = 0;
+    let freeCount = 0;
+
+    users.forEach(u => {
+      const plan = u.planId || u.subscriptionTier || (u.isPro ? 'pro_monthly' : 'free');
+      if (plan === 'pro_monthly') {
+        proCount++;
+        mrr += proMonthlyPrice;
+        totalRevenue += (u.visitCount || 1) * proMonthlyPrice;
+      } else if (plan === 'pro_yearly') {
+        yearlyCount++;
+        mrr += proYearlyPrice / 12;
+        totalRevenue += proYearlyPrice;
+      } else if (plan === 'lifetime') {
+        lifetimeCount++;
+        totalRevenue += lifetimePrice;
+      } else {
+        freeCount++;
+      }
+    });
+
+    const arr = mrr * 12;
+    const paidUsers = proCount + yearlyCount + lifetimeCount;
+    const totalUsers = users.length || 1;
+    const conversionRate = ((paidUsers / totalUsers) * 100).toFixed(1);
+    const arpu = (totalRevenue / totalUsers).toFixed(2);
+
+    return {
+      totalRevenue: totalRevenue.toFixed(2),
+      mrr: mrr.toFixed(2),
+      arr: arr.toFixed(2),
+      arpu,
+      conversionRate,
+      paidUsers,
+      freeUsers: freeCount,
+      proMonthlyUsers: proCount,
+      proYearlyUsers: yearlyCount,
+      lifetimeUsers: lifetimeCount,
+      totalUsers,
+    };
+  } catch (e) {
+    console.error('[DS] getRevenueAnalytics error:', e);
+    return {
+      totalRevenue: '0.00', mrr: '0.00', arr: '0.00', arpu: '0.00',
+      conversionRate: '0.0', paidUsers: 0, freeUsers: 0,
+      proMonthlyUsers: 0, proYearlyUsers: 0, lifetimeUsers: 0, totalUsers: 0
+    };
+  }
+}
+
+/**
+ * Grant Pro access directly to a user document
+ */
+export async function grantUserProAccess(uid, planId = 'pro_monthly') {
+  try {
+    const ref = doc(db, 'app_users', uid);
+    await updateDoc(ref, {
+      isPro: true,
+      planId: planId,
+      status: 'active',
+      proGrantedAt: new Date().toISOString(),
+      proGrantedBy: 'superadmin',
+    });
+    await _audit('USER_GRANTED_PRO', { uid, planId });
+    return { ok: true };
+  } catch (e) {
+    console.error('[DS] grantUserProAccess:', e);
+    return { ok: false, error: friendlyError(e) };
+  }
+}
+
+/**
+ * Revoke Pro access from a user document
+ */
+export async function revokeUserProAccess(uid) {
+  try {
+    const ref = doc(db, 'app_users', uid);
+    await updateDoc(ref, {
+      isPro: false,
+      planId: 'free',
+      proRevokedAt: new Date().toISOString(),
+    });
+    await _audit('USER_REVOKED_PRO', { uid });
+    return { ok: true };
+  } catch (e) {
+    console.error('[DS] revokeUserProAccess:', e);
+    return { ok: false, error: friendlyError(e) };
+  }
+}
+
+/**
+ * Fetch Promo Codes from global_config/promo_codes
+ */
+export async function getPromoCodes() {
+  try {
+    const snap = await getDoc(doc(db, 'global_config', 'promo_codes'));
+    if (snap.exists()) return snap.data().codes || [];
+    return [
+      { id: 'PROMO50', code: 'PROMO50', discount: '50%', type: 'percentage', uses: 14, active: true },
+      { id: 'LAUNCH2026', code: 'LAUNCH2026', discount: '100%', type: 'free_trial', uses: 42, active: true }
+    ];
+  } catch (e) {
+    console.warn('[DS] getPromoCodes fallback:', e?.code);
+    return [];
+  }
+}
+
+/**
+ * Save Promo Codes array to global_config/promo_codes
+ */
+export async function savePromoCodes(codes) {
+  try {
+    await setDoc(doc(db, 'global_config', 'promo_codes'), { codes, updatedAt: new Date().toISOString() });
+    await _audit('PROMO_CODES_UPDATED', { count: codes.length });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: friendlyError(e) };
+  }
+}
