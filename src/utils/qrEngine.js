@@ -1674,12 +1674,12 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
   else if (style === EYE_STYLES.ROSE) ctx.fillStyle = '#990000'; // Match container
   else if (style === EYE_STYLES.MONSTERA) ctx.fillStyle = '#196f3d'; // Match container
   else if (style === EYE_STYLES.DAISY) ctx.fillStyle = '#d4ac0d'; // Match container
-  else if (style === EYE_STYLES.COFFEE_BEAN) ctx.fillStyle = '#5c2d0a'; // Match container
-  else if (style === EYE_STYLES.RAINDROP) ctx.fillStyle = '#154360'; // Match container
+  else if (style === EYE_STYLES.COFFEE_BEAN) ctx.fillStyle = '#b35900'; // Match container
+  else if (style === EYE_STYLES.RAINDROP) ctx.fillStyle = '#2471a3'; // Match container
   else if (style === EYE_STYLES.CACTUS) ctx.fillStyle = '#196f3d';
   else if (style === EYE_STYLES.BASKETBALL) ctx.fillStyle = '#b94a00';
-  else if (style === EYE_STYLES.CHESS) ctx.fillStyle = '#1a1a1a'; // Match container
-  else if (style === EYE_STYLES.BOW) ctx.fillStyle = '#96124a'; // Match container
+  else if (style === EYE_STYLES.CHESS) ctx.fillStyle = '#6c7a89'; // Match container
+  else if (style === EYE_STYLES.BOW) ctx.fillStyle = '#d81b60'; // Match container
   ctx.fill('evenodd');
 
   // New icon eye styles: delegate to dedicated draw function and return
@@ -1967,8 +1967,8 @@ function drawEyeIconPupil(ctx, x, y, size, style) {
 
   switch(style) {
     case EYE_STYLES.COFFEE_BEAN: {
-      // Dark brown container
-      ctx.fillStyle = '#5c2d0a';
+      // Warm medium brown container (contrasts with dark bean)
+      ctx.fillStyle = '#b35900';
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
       // Bean body (dark brown)
       ctx.fillStyle = '#3b1a06';
@@ -1979,8 +1979,8 @@ function drawEyeIconPupil(ctx, x, y, size, style) {
       break;
     }
     case EYE_STYLES.RAINDROP: {
-      // Dark blue container
-      ctx.fillStyle = '#154360';
+      // Strong blue container
+      ctx.fillStyle = '#2471a3';
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
       // Raindrop shape (dark blue)
       ctx.fillStyle = '#0d2b3e';
@@ -2019,8 +2019,8 @@ function drawEyeIconPupil(ctx, x, y, size, style) {
       break;
     }
     case EYE_STYLES.CHESS: {
-      // Dark container
-      ctx.fillStyle = '#1a1a1a';
+      // Slate grey container
+      ctx.fillStyle = '#6c7a89';
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
       // Chess knight silhouette (dark)
       ctx.fillStyle = '#0a0a0a';
@@ -2035,8 +2035,8 @@ function drawEyeIconPupil(ctx, x, y, size, style) {
       break;
     }
     case EYE_STYLES.BOW: {
-      // Dark pink container
-      ctx.fillStyle = '#96124a';
+      // Vibrant pink container
+      ctx.fillStyle = '#d81b60';
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
       // Bow wings (dark pink)
       ctx.fillStyle = '#6b0d35';
