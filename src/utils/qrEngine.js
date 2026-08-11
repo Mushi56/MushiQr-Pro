@@ -697,7 +697,7 @@ export function renderQR(canvas, options) {
   if (!options.hideDots) {
     for (let row = 0; row < moduleCount; row++) {
       for (let col = 0; col < moduleCount; col++) {
-        if (!options.hideEyes && isFinderPattern(row, col, moduleCount)) continue;
+        if (isFinderPattern(row, col, moduleCount)) continue;
         if (!matrix[row][col]) continue;
 
         const x = contentX + (col + quietZone) * cellSize;
@@ -802,7 +802,7 @@ export function renderQR(canvas, options) {
 /**
  * Draw a single dot module
  */
-function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row = 0, col = 0) {
+export function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row = 0, col = 0) {
   const userPadding = options.dotPadding !== undefined ? options.dotPadding : 12;
 
   // Enforce healthy minimum padding for discrete shapes so dots stay separate and beautiful
@@ -1575,7 +1575,7 @@ function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = {}, row
 /**
  * Draw the full 7x7 eye (finder pattern) as a single unit
  */
-function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
+export function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
   const s = size / 28; // Scale factor from 28x28 coordinate space
 
   // 1. Draw Outer Ring Path

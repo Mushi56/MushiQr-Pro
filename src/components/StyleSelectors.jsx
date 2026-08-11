@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { DOT_STYLES, EYE_STYLES, renderQR, generateQRMatrix } from '../utils/qrEngine';
+import { DOT_STYLES, EYE_STYLES, renderQR, generateQRMatrix, drawDotModule, drawEye } from '../utils/qrEngine';
 
 // Cache for demo matrix to avoid redundant generations
 const matrixCache = {};
@@ -9,22 +9,6 @@ function getCachedDemoMatrix(errorLevel) {
   }
   return matrixCache[errorLevel];
 }
-
-// 9x9 matrix with ~20% dot density & no eyes for ultra-clear dot shape previews
-const FAKE_DOTS_MATRIX = {
-  moduleCount: 9,
-  matrix: [
-    [true,  false, false, false, true,  false, false, false, true ],
-    [false, false, true,  false, false, false, true,  false, false],
-    [false, true,  false, false, false, false, false, true,  false],
-    [false, false, false, true,  false, true,  false, false, false],
-    [true,  false, false, false, true,  false, false, false, true ],
-    [false, false, false, true,  false, true,  false, false, false],
-    [false, true,  false, false, false, false, false, true,  false],
-    [false, false, true,  false, false, false, true,  false, false],
-    [true,  false, false, false, true,  false, false, false, true ],
-  ]
-};
 
 function MiniQRCanvas({ qrParams, overrideParams }) {
   const canvasRef = useRef(null);
@@ -43,9 +27,8 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Use fake 20% density matrix with no eyes for dot thumbnails so dot shapes are large and perfectly visible
-    const matrixInfo = hideEyes ? FAKE_DOTS_MATRIX : getCachedDemoMatrix(errorLevel);
-    if (!matrixInfo) return;
+    const demoMatrixInfo = getCachedDemoMatrix(errorLevel);
+    if (!demoMatrixInfo) return;
 
     const options = {
       ...qrParams,
@@ -66,6 +49,88 @@ function MiniQRCanvas({ qrParams, overrideParams }) {
 
     renderQR(canvasRef.current, options);
   }, [errorLevel, dotStyle, eyeStyle, hideEyes, hideDots, fgColor, fgType, fgColor1, fgColor2, fgAngle]);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      width="120" 
+      height="120" 
+      style={{ 
+        width: '100%', 
+        height: '100%', 
+        borderRadius: '6px',
+        objectFit: 'cover',
+        display: 'block'
+      }} 
+    />
+  );
+}
+
+function MiniDotPreviewCanvas({ dotStyle, qrParams }) {
+  const canvasRef = useRef(null);
+
+  const fgColor = qrParams?.fgColor || '#000000';
+  const eyeStyle = qrParams?.eyeStyle || EYE_STYLES.ROUNDED;
+  const eyeColor = qrParams?.eyeColor || fgColor;
+  const eyeOuterColor = qrParams?.eyeOuterColor || eyeColor;
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const size = 120;
+    ctx.clearRect(0, 0, size, size);
+
+    // 1. Draw solid background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, size, size);
+
+    // 2. Grid Dimensions (7x7 mini matrix)
+    const gridCount = 7;
+    const padding = 8;
+    const availableSize = size - padding * 2;
+    const cellSize = availableSize / gridCount;
+
+    // 3. Draw Top-Left Finder Eye (~30% area of the preview thumbnail)
+    const eyeX = padding;
+    const eyeY = padding;
+    const eyeSize = cellSize * 3;
+    drawEye(ctx, eyeX, eyeY, eyeSize, eyeStyle, eyeOuterColor, eyeColor);
+
+    // 4. Draw fake QR data dots in the remaining 70% area
+    // 0 = empty, 1 = active module
+    const matrix = [
+      [0, 0, 0, 1, 0, 1, 1],
+      [0, 0, 0, 0, 1, 1, 0],
+      [0, 0, 0, 1, 1, 0, 1],
+      [1, 0, 1, 1, 0, 1, 1],
+      [0, 1, 1, 0, 1, 1, 0],
+      [1, 1, 0, 1, 1, 0, 1],
+      [1, 0, 1, 1, 0, 1, 1]
+    ];
+
+    ctx.fillStyle = fgColor;
+
+    for (let r = 0; r < gridCount; r++) {
+      for (let c = 0; c < gridCount; c++) {
+        // Skip top-left 3x3 eye area
+        if (r < 3 && c < 3) continue;
+        if (!matrix[r][c]) continue;
+
+        const x = padding + c * cellSize;
+        const y = padding + r * cellSize;
+
+        const neighbors = {
+          top: r > 0 && !(r - 1 < 3 && c < 3) && !!matrix[r - 1][c],
+          bottom: r < gridCount - 1 && !!matrix[r + 1][c],
+          left: c > 0 && !(r < 3 && c - 1 < 3) && !!matrix[r][c - 1],
+          right: c < gridCount - 1 && !!matrix[r][c + 1]
+        };
+
+        drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, qrParams || {}, r, c);
+      }
+    }
+  }, [dotStyle, fgColor, eyeStyle, eyeColor, eyeOuterColor, qrParams?.dotPadding]);
 
   return (
     <canvas 
@@ -584,11 +649,7 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
           title={style}
         >
           <div className="style-option-preview">
-            {qrParams && qrParams.qrMatrixInfo ? (
-              <MiniQRCanvas qrParams={qrParams} overrideParams={{ dotStyle: style, hideEyes: true }} />
-            ) : (
-              preview
-            )}
+            <MiniDotPreviewCanvas dotStyle={style} qrParams={qrParams} />
           </div>
         </button>
       ))}
