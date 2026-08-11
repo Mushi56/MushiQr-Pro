@@ -473,7 +473,7 @@ body {
   object-fit: contain;
   display: block;
   margin: 0 auto;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   animation: qrAppear 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -3541,7 +3541,7 @@ input[type="range"]::-moz-range-thumb {
   height: auto !important;
   max-width: 100%;
   display: block;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   animation: qrAppear 200ms ease;
 }
 
