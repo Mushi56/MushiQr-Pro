@@ -82,21 +82,22 @@ function MiniDotPreviewCanvas({ dotStyle, qrParams }) {
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, size, size);
 
-    // 2. Grid Dimensions (7x7 mini matrix)
-    const gridCount = 7;
+    // 2. Grid Dimensions (8x8 mini matrix for clean centering)
+    const gridCount = 8;
     const padding = 8;
     const availableSize = size - padding * 2;
     const cellSize = availableSize / gridCount;
 
-    // 3. Matrix with Secret Eye made ENTIRELY out of dots (top-left 5x5 dot ring + center dot)
+    // 3. Matrix with Secret Eye made of dots (centered horizontally, placed slightly down)
     const matrix = [
-      [1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 1, 1, 0],
-      [1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 1, 1, 1],
-      [1, 1, 1, 1, 1, 0, 1],
-      [0, 1, 0, 1, 0, 1, 0],
-      [1, 0, 1, 0, 1, 1, 1]
+      [1, 0, 1, 1, 1, 0, 1, 0], // Row 0: Top data dots
+      [0, 1, 1, 1, 1, 1, 0, 1], // Row 1: Top of Secret Eye
+      [1, 1, 0, 0, 0, 1, 1, 0], // Row 2: Left & right ring dots
+      [0, 1, 0, 1, 0, 1, 0, 1], // Row 3: Left ring, CENTER EYE DOT, right ring
+      [1, 1, 0, 0, 0, 1, 1, 0], // Row 4: Left & right ring dots
+      [0, 1, 1, 1, 1, 1, 0, 1], // Row 5: Bottom of Secret Eye
+      [1, 0, 1, 0, 1, 0, 1, 0], // Row 6: Bottom data dots
+      [0, 1, 0, 1, 0, 1, 1, 1]  // Row 7: Bottom data dots
     ];
 
     ctx.fillStyle = fgColor;
