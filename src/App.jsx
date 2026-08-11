@@ -903,6 +903,7 @@ function parseRawQRText(text) {
   };
 }
 export default function App() {
+  const [isBlocked, setIsBlocked] = useState(false);
   // ── Tab & Theme ──
   const location = useLocation();
   const navigate = useNavigate();
@@ -972,8 +973,7 @@ export default function App() {
         unsubProfile = onSnapshot(doc(db, 'app_users', user.uid), (docSnap) => {
           if (docSnap.exists() && docSnap.data().status === 'blocked') {
             signOut(auth);
-            alert('Your account has been blocked by an administrator.');
-            window.location.reload();
+            setIsBlocked(true);
           }
         });
       }
@@ -3350,6 +3350,42 @@ export default function App() {
   };
   return (
     <div className="app redesigned">
+      {/* ── Blocked User Overlay ── */}
+      {isBlocked && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24,
+          fontFamily: "'Outfit','Inter',sans-serif", color: '#fff', textAlign: 'center', padding: 32,
+        }}>
+          <div style={{
+            background: '#1A1A1F', border: '1px solid #333', borderRadius: '24px',
+            padding: '40px', maxWidth: '400px', width: '100%',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255, 59, 48, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Shield size={32} color="#FF3B30" />
+            </div>
+            <div>
+              <h2 style={{ fontSize: 24, fontWeight: 900, color: '#fff', marginBottom: 8, marginTop: 0 }}>Mushi QR Pro Says</h2>
+              <p style={{ fontSize: 15, color: '#A0A0A5', lineHeight: 1.5, margin: 0 }}>
+                Your account has been blocked by an administrator. You can no longer access this application.
+              </p>
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              style={{
+                background: '#FF3B30', color: '#fff', border: 'none', borderRadius: '12px',
+                padding: '14px 24px', fontSize: 16, fontWeight: 700, cursor: 'pointer', width: '100%',
+                marginTop: 8, fontFamily: 'inherit'
+              }}
+            >
+              Reload App
+            </button>
+          </div>
+        </div>
+      )}
       {/* ── Maintenance Mode Overlay ── */}
       {isMaintenanceMode && (
         <div style={{
