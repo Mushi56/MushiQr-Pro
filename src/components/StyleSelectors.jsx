@@ -70,9 +70,6 @@ function MiniDotPreviewCanvas({ dotStyle, qrParams }) {
   const canvasRef = useRef(null);
 
   const fgColor = qrParams?.fgColor || '#000000';
-  const eyeStyle = qrParams?.eyeStyle || EYE_STYLES.ROUNDED;
-  const eyeColor = qrParams?.eyeColor || fgColor;
-  const eyeOuterColor = qrParams?.eyeOuterColor || eyeColor;
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -91,46 +88,37 @@ function MiniDotPreviewCanvas({ dotStyle, qrParams }) {
     const availableSize = size - padding * 2;
     const cellSize = availableSize / gridCount;
 
-    // 3. Draw Top-Left Finder Eye (~30% area of the preview thumbnail)
-    const eyeX = padding;
-    const eyeY = padding;
-    const eyeSize = cellSize * 3;
-    drawEye(ctx, eyeX, eyeY, eyeSize, eyeStyle, eyeOuterColor, eyeColor);
-
-    // 4. Draw fake QR data dots in the remaining 70% area
-    // 0 = empty, 1 = active module
+    // 3. Matrix with Secret Eye made ENTIRELY out of dots (top-left 5x5 dot ring + center dot)
     const matrix = [
-      [0, 0, 0, 1, 0, 1, 1],
-      [0, 0, 0, 0, 1, 1, 0],
-      [0, 0, 0, 1, 1, 0, 1],
-      [1, 0, 1, 1, 0, 1, 1],
-      [0, 1, 1, 0, 1, 1, 0],
-      [1, 1, 0, 1, 1, 0, 1],
-      [1, 0, 1, 1, 0, 1, 1]
+      [1, 1, 1, 1, 1, 0, 1],
+      [1, 0, 0, 0, 1, 1, 0],
+      [1, 0, 1, 0, 1, 0, 1],
+      [1, 0, 0, 0, 1, 1, 1],
+      [1, 1, 1, 1, 1, 0, 1],
+      [0, 1, 0, 1, 0, 1, 0],
+      [1, 0, 1, 0, 1, 1, 1]
     ];
 
     ctx.fillStyle = fgColor;
 
     for (let r = 0; r < gridCount; r++) {
       for (let c = 0; c < gridCount; c++) {
-        // Skip top-left 3x3 eye area
-        if (r < 3 && c < 3) continue;
         if (!matrix[r][c]) continue;
 
         const x = padding + c * cellSize;
         const y = padding + r * cellSize;
 
         const neighbors = {
-          top: r > 0 && !(r - 1 < 3 && c < 3) && !!matrix[r - 1][c],
+          top: r > 0 && !!matrix[r - 1][c],
           bottom: r < gridCount - 1 && !!matrix[r + 1][c],
-          left: c > 0 && !(r < 3 && c - 1 < 3) && !!matrix[r][c - 1],
+          left: c > 0 && !!matrix[r][c - 1],
           right: c < gridCount - 1 && !!matrix[r][c + 1]
         };
 
         drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, qrParams || {}, r, c);
       }
     }
-  }, [dotStyle, fgColor, eyeStyle, eyeColor, eyeOuterColor, qrParams?.dotPadding]);
+  }, [dotStyle, fgColor, qrParams?.dotPadding]);
 
   return (
     <canvas 
