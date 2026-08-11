@@ -1622,15 +1622,15 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.CHERRY_BLOSSOM: {
-      // 1. Draw rounded corner square container for pupil (strong, high contrast, matching red/pink)
+      // 1. Strong dark container
       ctx.fillStyle = '#c9184a'; // Strong crimson cherry pink
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
-      // 2. Draw flower centered and perfectly fitted inside (r=4.5)
+      // 2. Darker petals so entire pupil reads as solid dark to binarizer
       const cx = 14, cy = 14, r = 4.5;
       const petalR = r * 0.55;
       const petalD = r * 0.45;
-      ctx.fillStyle = '#ff758f'; // Original pink petals
+      ctx.fillStyle = '#8b0027'; // Dark rose — darker than container
       for (let i = 0; i < 5; i++) {
         const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
         const px = cx + Math.cos(angle) * petalD;
@@ -1643,7 +1643,7 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
         ctx.arc(px + Math.cos(a2) * petalR * 0.5, py + Math.sin(a2) * petalR * 0.5, petalR * 0.5, angle + Math.PI, angle, true);
         ctx.closePath(); ctx.fill();
       }
-      ctx.fillStyle = '#ffe066'; // Original yellow center
+      ctx.fillStyle = '#a30040'; // Deep magenta center — still dark
       ctx.beginPath(); ctx.arc(cx, cy, r * 0.28, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       return;
@@ -1673,13 +1673,13 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
       return;
     }
     case EYE_STYLES.SUNFLOWER: {
-      // 1. Pupil container (strong dark brown, high contrast)
+      // 1. Strong dark container
       ctx.fillStyle = '#7f6000';
       drawRoundedRect(ctx, 8, 8, 12, 12, 3.5);
 
-      // 2. Scaled down Sunflower (r=4.5)
+      // 2. Darker petals so entire pupil reads as solid dark to binarizer
       const cx = 14, cy = 14, r = 4.5;
-      ctx.fillStyle = '#f1c232'; // Original yellow petals
+      ctx.fillStyle = '#b8860b'; // Dark golden amber — darker than container
       ctx.beginPath();
       const petalCount = 10;
       for (let i = 0; i < petalCount; i++) {
@@ -1693,7 +1693,7 @@ function drawEye(ctx, x, y, size, style, outerColor, innerColor) {
         ctx.quadraticCurveTo(tipX, tipY, cx + Math.cos(baseR) * bD, cy + Math.sin(baseR) * bD);
       }
       ctx.fill();
-      ctx.fillStyle = '#ffe066'; // Yellow center
+      ctx.fillStyle = '#4a3800'; // Very dark brown center — darkest element
       ctx.beginPath(); ctx.arc(cx, cy, r * 0.38, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       return;
