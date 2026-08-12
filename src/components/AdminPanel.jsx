@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 import * as DS from '../services/adminDataService';
-import { FEATURE_REGISTRY, CANONICAL_PLANS, DEFAULT_FREE_FEATURES, DEFAULT_PAID_FEATURES } from '../services/FeatureAccessManager';
+import { FEATURE_REGISTRY, FEATURE_CATEGORIES, CANONICAL_PLANS, DEFAULT_FREE_FEATURES, DEFAULT_PAID_FEATURES } from '../services/FeatureAccessManager';
 import { setFeatureFlagCloud, setPlanFeaturesCloud } from '../services/adminDataService';
 import { QR_TEMPLATES } from '../utils/qrTemplates';
 import { auth, googleProvider } from '../services/firebase';
@@ -3612,7 +3612,7 @@ function SubscriptionsPanel({ subscribers: initSubs }) {
     }
   };
 
-  const categories = ['core', 'export', 'design', 'generation', 'cloud', 'settings'];
+  const categories = Object.keys(FEATURE_CATEGORIES);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -3620,7 +3620,7 @@ function SubscriptionsPanel({ subscribers: initSubs }) {
       <div style={{ display: 'flex', gap: 8, borderBottom: `1px solid ${T.border}`, paddingBottom: 12 }}>
         {[
           ['plans', 'Subscription Plans (4)'],
-          ['matrix', 'Feature Management (16)'],
+          ['matrix', `Feature Registry (${FEATURE_REGISTRY.length})`],
           ['subscribers', 'Active Subscribers'],
         ].map(([id, label]) => (
           <button
@@ -3680,17 +3680,18 @@ function SubscriptionsPanel({ subscribers: initSubs }) {
         </div>
       )}
 
-      {/* ═══ TAB 2: GLOBAL FEATURE MANAGEMENT (16 CANONICAL FEATURES) ═══ */}
+      {/* ═══ TAB 2: GLOBAL FEATURE MANAGEMENT (78 CANONICAL FEATURES) ═══ */}
       {activeTab === 'matrix' && (
-        <AdminCard title="Canonical Feature Registry (16 Features)" subtitle="Toggle global enable/disable flags for application features">
+        <AdminCard title={`Canonical Feature Registry (${FEATURE_REGISTRY.length} Features)`} subtitle="Toggle global enable/disable flags for application features">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 12 }}>
             {categories.map(cat => {
+              const catInfo = FEATURE_CATEGORIES[cat] || { name: cat };
               const catFeats = FEATURE_REGISTRY.filter(f => f.category === cat);
               if (!catFeats.length) return null;
               return (
                 <div key={cat} style={{ background: T.bgEl, borderRadius: T.r.md, padding: 16, border: `1px solid ${T.border}` }}>
                   <div style={{ fontSize: 11, fontWeight: 800, color: T.accent, textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.8px' }}>
-                    {cat} FEATURES ({catFeats.length})
+                    {catInfo.name} ({catFeats.length})
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {catFeats.map(feat => {
@@ -3763,7 +3764,7 @@ function SubscriptionsPanel({ subscribers: initSubs }) {
                 return (
                   <div key={cat} style={{ background: T.bgEl, borderRadius: T.r.md, padding: 14, border: `1px solid ${T.border}` }}>
                     <div style={{ fontSize: 11, fontWeight: 800, color: T.accent, textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.8px' }}>
-                      {cat}
+                      {FEATURE_CATEGORIES[cat]?.name || cat}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                       {catFeats.map(feat => {
