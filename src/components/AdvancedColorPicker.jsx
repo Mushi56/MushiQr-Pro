@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Check, Plus, Minus, Hash, Pipette } from 'lucide-react';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 export default function AdvancedColorPicker({ isOpen, initialColor, onConfirm, onCancel, onChange, onEnterPipetteMode }) {
   const [tempColor, setTempColor] = useState(initialColor || '#ff0000');
@@ -171,7 +172,14 @@ export default function AdvancedColorPicker({ isOpen, initialColor, onConfirm, o
             <div className="picker-preview-old" style={{ backgroundColor: initialColor }} />
             <div className="picker-preview-new" style={{ backgroundColor: tempColor }} />
           </div>
-          <button className="picker-confirm" onClick={() => onConfirm(tempColor)}><Check size={20} /></button>
+          <button className="picker-confirm" onClick={() => {
+            const access = FeatureAccessManager.canUseFeature('custom_colors');
+            if (!access.allowed) {
+              alert('Custom Colors & Gradients feature is disabled or requires a plan upgrade.');
+              return;
+            }
+            onConfirm(tempColor);
+          }}><Check size={20} /></button>
         </header>
 
         <div className="picker-wheel-area">

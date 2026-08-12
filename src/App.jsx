@@ -5677,6 +5677,11 @@ export default function App() {
               navigateTo(page);
             }}
             onQuickCreate={(type) => {
+              const access = FeatureAccessManager.canUseFeature('qr_generator');
+              if (!access.allowed) {
+                showToast('QR Generator feature is disabled or requires a plan upgrade.', 'error');
+                return;
+              }
               resetGenerator();
               navigate('/generator', {
                 state: {
@@ -5689,6 +5694,11 @@ export default function App() {
               setActivePage('generator');
             }}
             onQuickCreateBarcode={(id) => {
+              const access = FeatureAccessManager.canUseFeature('barcode_generator');
+              if (!access.allowed) {
+                showToast('Barcode Generator feature is disabled or requires a plan upgrade.', 'error');
+                return;
+              }
               const defaults = {
                 ean13: '4006381333931',
                 upca: '012345678905',

@@ -3,6 +3,9 @@ import { getSaved, deleteFromSaved, clearSaved, clearSavedByRange } from '../uti
 import { Search, SearchX, Trash2, MoreVertical, Star, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, QrCode } from 'lucide-react';
 import { QR_TYPES } from '../utils/qrEngine';
 
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import { AlertCircle } from 'lucide-react';
+
 const TYPE_ICONS = {
   [QR_TYPES.URL]: <Link2 size={16} />,
   [QR_TYPES.WIFI]: <Wifi size={16} />,
@@ -17,6 +20,23 @@ const TYPE_ICONS = {
 };
 
 export default function SavedPage({ onLoadQR }) {
+  const access = FeatureAccessManager.canUseFeature('saved');
+
+  if (!access.allowed) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', background: '#09090f', color: '#f0f0f8', minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+          <AlertCircle size={32} />
+        </div>
+        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Saved Collection Unavailable</h2>
+        <p style={{ color: '#8b8fa8', maxWidth: 480, margin: 0, fontSize: 14, lineHeight: 1.5 }}>
+          {access.status === 'disabled_by_admin'
+            ? 'Saved QR Collection has been disabled globally by the Administrator.'
+            : 'Saved QR Collection requires an upgraded subscription plan.'}
+        </p>
+      </div>
+    );
+  }
   const [saved, setSaved] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');

@@ -1524,25 +1524,29 @@ function FeatureFlagsPanel({ flags, onSave }) {
   const total   = Object.keys(f).length;
 
   const groups = [
-    { title: 'Core Features', items: [
+    { title: 'Core Generator & Scanner', items: [
       { key: 'qr_generator',      label: 'QR Code Generator',      desc: 'Allow users to create QR codes' },
       { key: 'barcode_generator', label: 'Barcode Generator',       desc: 'Allow users to create barcodes' },
       { key: 'scanner',           label: 'QR & Barcode Scanner',    desc: 'Camera-based scanner feature' },
       { key: 'bulk_generation',   label: 'Bulk Generation',         desc: 'Create multiple codes at once' },
-      { key: 'templates',         label: 'Templates',               desc: 'Pre-designed QR templates' },
     ]},
-    { title: 'Data & History', items: [
-      { key: 'history', label: 'History',     desc: 'Save creation history locally' },
-      { key: 'saved',   label: 'Saved Items', desc: 'Allow bookmarking QR codes' },
+    { title: 'Data & Sync', items: [
+      { key: 'history',       label: 'History',                desc: 'Save creation history locally' },
+      { key: 'saved',         label: 'Saved Items',            desc: 'Allow bookmarking QR codes' },
+      { key: 'cloud_sync',    label: 'Cloud Sync',             desc: 'Cloud template saving & data sync' },
+      { key: 'save_location', label: 'Save Location',          desc: 'Custom save directory preference' },
     ]},
-    { title: 'Export Options', items: [
+    { title: 'Export Formats', items: [
       { key: 'export_png', label: 'Export PNG', desc: 'Download as PNG image' },
+      { key: 'export_jpg', label: 'Export JPG', desc: 'Download as JPG image' },
       { key: 'export_svg', label: 'Export SVG', desc: 'Download as SVG vector' },
       { key: 'export_pdf', label: 'Export PDF', desc: 'Download as PDF document' },
     ]},
-    { title: 'App Features', items: [
-      { key: 'dark_mode',   label: 'Dark Mode',          desc: 'Dark/light theme toggle' },
-      { key: 'pwa_install', label: 'PWA Install Prompt', desc: 'Show browser install prompt' },
+    { title: 'Design & Customization', items: [
+      { key: 'custom_logo',       label: 'Custom Logo Embed',    desc: 'Embed brand logo inside QR codes' },
+      { key: 'custom_colors',     label: 'Custom Colors',        desc: 'Custom colors and gradients' },
+      { key: 'custom_shapes',     label: 'Custom Eye & Dot Shapes', desc: 'Custom shapes for QR dots & eyes' },
+      { key: 'premium_templates', label: 'Premium Templates',   desc: 'Pre-designed premium QR templates' },
     ]},
   ];
 
@@ -3868,7 +3872,16 @@ function AdminPanelInner() {
     revenue:         <RevenuePanel />,
     users:           <UsersPanel />,
     subscriptions:   <SubscriptionsPanel plans={subscriptionPlans} premiumFeatures={premiumFeatures} subscribers={subscribers}
-      onSavePlans={async p => { await DS.saveSubscriptionPlans(p); setSubscriptionPlans(p); refreshAudit(); }}
+      onSavePlans={async p => {
+        const plansList = Array.isArray(p) ? p : Object.values(p);
+        for (const planObj of plansList) {
+          if (planObj.planId && Array.isArray(planObj.features)) {
+            await DS.setPlanFeaturesCloud(planObj.planId, planObj.features);
+          }
+        }
+        setSubscriptionPlans(p);
+        refreshAudit();
+      }}
       onSaveFeatures={async f => { await DS.savePremiumFeatures(f); setPremiumFeatures(f); refreshAudit(); }}
     />,
     analytics:       <AnalyticsPanel chartData={chartData} stats={stats} />,
@@ -3893,7 +3906,9 @@ function AdminPanelInner() {
       refreshAudit();
     }} />,
     'feature-flags': <FeatureFlagsPanel flags={featureFlags} onSave={async f => {
-      await DS.saveFeatureFlags(f);
+      for (const [featId, val] of Object.entries(f)) {
+        await DS.setFeatureFlagCloud(featId, Boolean(val));
+      }
       setFeatureFlags(f);
       refreshAudit();
     }} />,

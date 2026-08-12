@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { UploadCloud, X, CheckCircle2 } from 'lucide-react';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 export default function LogoUpload({ logo, onLogoChange, onLogoRemove }) {
   const [dragActive, setDragActive] = useState(false);
@@ -8,6 +9,12 @@ export default function LogoUpload({ logo, onLogoChange, onLogoRemove }) {
   const handleFile = useCallback((file) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) return;
+
+    const access = FeatureAccessManager.canUseFeature('custom_logo');
+    if (!access.allowed) {
+      alert('Custom Logo Embed feature is disabled or requires a plan upgrade.');
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {

@@ -665,14 +665,27 @@ const EYE_PREVIEWS = {
   ),
 };
 
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
+
 export function DotStyleSelector({ value, onChange, qrParams }) {
+  const handleDotChange = (style) => {
+    if (style !== 'square' && style !== 'rounded') {
+      const access = FeatureAccessManager.canUseFeature('custom_shapes');
+      if (!access.allowed) {
+        alert('Custom Dot & Eye Shapes feature is disabled or requires a plan upgrade.');
+        return;
+      }
+    }
+    onChange(style);
+  };
+
   return (
     <div className="style-grid">
       {Object.entries(DOT_PREVIEWS).map(([style, preview]) => (
         <button
           key={style}
           className={`style-option ${value === style ? 'active' : ''}`}
-          onClick={() => onChange(style)}
+          onClick={() => handleDotChange(style)}
           title={style}
         >
           <div className="style-option-preview">
@@ -685,6 +698,17 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
 }
 
 export function EyeStyleSelector({ value, onChange, qrParams }) {
+  const handleEyeChange = (style) => {
+    if (style !== 'square' && style !== 'rounded') {
+      const access = FeatureAccessManager.canUseFeature('custom_shapes');
+      if (!access.allowed) {
+        alert('Custom Dot & Eye Shapes feature is disabled or requires a plan upgrade.');
+        return;
+      }
+    }
+    onChange(style);
+  };
+
   return (
     <div className="style-grid eye-style-grid">
       {Object.keys(EYE_STYLES).map((styleKey) => {
@@ -693,7 +717,7 @@ export function EyeStyleSelector({ value, onChange, qrParams }) {
           <button
             key={style}
             className={`style-option ${value === style ? 'active' : ''}`}
-            onClick={() => onChange(style)}
+            onClick={() => handleEyeChange(style)}
             title={style}
           >
             <div className="style-option-preview">

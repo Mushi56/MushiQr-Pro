@@ -3,6 +3,9 @@ import { getHistory, deleteFromHistory, clearHistory, saveToSaved, getSaved, cle
 import { History as HistoryIcon, SearchX, Trash2, QrCode, Star, Clock, MoreVertical, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image } from 'lucide-react';
 import { QR_TYPES } from '../utils/qrEngine';
 
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import { AlertCircle } from 'lucide-react';
+
 const TYPE_ICONS = {
   [QR_TYPES.URL]: <Link2 size={14} />,
   [QR_TYPES.WIFI]: <Wifi size={14} />,
@@ -17,6 +20,29 @@ const TYPE_ICONS = {
 };
 
 export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All' }) {
+  const access = FeatureAccessManager.canUseFeature('history');
+
+  if (!access.allowed) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', background: '#09090f', color: '#f0f0f8', minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+          <AlertCircle size={32} />
+        </div>
+        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>History Tracking Unavailable</h2>
+        <p style={{ color: '#8b8fa8', maxWidth: 480, margin: 0, fontSize: 14, lineHeight: 1.5 }}>
+          {access.status === 'disabled_by_admin'
+            ? 'History tracking has been disabled globally by the Administrator.'
+            : 'History tracking requires an upgraded subscription plan.'}
+        </p>
+        <button
+          onClick={() => onNavigate && onNavigate('home')}
+          style={{ background: '#D60036', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', marginTop: 12 }}
+        >
+          Return to Home
+        </button>
+      </div>
+    );
+  }
   const [history, setHistory] = useState([]);
   const [activeFilter, setActiveFilter] = useState(initialFilter);
    const [swipedItemId, setSwipedItemId] = useState(null);

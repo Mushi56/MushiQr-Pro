@@ -1,4 +1,5 @@
 import bwipjs from 'bwip-js';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 export const BARCODE_STANDARDS = {
   'ean13': {
@@ -278,6 +279,19 @@ export const BARCODE_STANDARDS = {
  */
 export function renderBarcode(canvas, text, options = {}) {
   if (!canvas) return;
+
+  const access = FeatureAccessManager.canUseFeature('barcode_generator');
+  if (!access.allowed) {
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Barcode Generator Disabled', canvas.width / 2, canvas.height / 2);
+    }
+    return;
+  }
 
   const {
     bcid = 'code128',

@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { UploadCloud, X, CheckCircle2 } from 'lucide-react';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 const LOGO_PRESETS = [
   { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.avif' },
@@ -68,6 +69,11 @@ export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
   }, [onLogoChange]);
 
   const handleSelect = (slug, name, url) => {
+    const access = FeatureAccessManager.canUseFeature('custom_logo');
+    if (!access.allowed) {
+      alert('Custom Logo Embed feature is disabled or requires a plan upgrade.');
+      return;
+    }
     setLoading(slug);
     const img = new Image();
     img.crossOrigin = "anonymous";

@@ -1,5 +1,6 @@
 import { db, auth } from '../services/firebase';
 import { doc, setDoc, deleteDoc, collection, getDocs, getDoc, writeBatch } from 'firebase/firestore';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 const HISTORY_KEY = 'qrgen_history';
 const DRAFTS_KEY = 'qrgen_drafts';
@@ -8,6 +9,12 @@ const MAX_HISTORY = 50;
 const MAX_DRAFTS = 10;
 
 export function saveToHistory(entry) {
+  const access = FeatureAccessManager.canUseFeature('history');
+  if (!access.allowed) {
+    console.warn('[Storage] saveToHistory blocked: feature is disabled or restricted.');
+    return null;
+  }
+
   const history = getHistory();
   const existingIndex = entry.id ? history.findIndex(item => item.id === entry.id) : -1;
   
@@ -125,6 +132,12 @@ const SAVED_KEY = 'qrgen_saved';
 const MAX_SAVED = 100;
 
 export function saveToSaved(entry) {
+  const access = FeatureAccessManager.canUseFeature('saved');
+  if (!access.allowed) {
+    console.warn('[Storage] saveToSaved blocked: feature is disabled or restricted.');
+    return null;
+  }
+
   const saved = getSaved();
   
   const entryToSave = {
@@ -305,6 +318,12 @@ export function getPreferences() {
 export async function syncUserFirestoreData() {
   const user = auth.currentUser;
   if (!user) return;
+
+  const access = FeatureAccessManager.canUseFeature('cloud_sync');
+  if (!access.allowed) {
+    console.warn('[Storage] syncUserFirestoreData blocked: cloud_sync feature is disabled or restricted.');
+    return;
+  }
 
   try {
     const historyColRef = collection(db, 'users', user.uid, 'history');

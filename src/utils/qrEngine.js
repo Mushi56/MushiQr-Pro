@@ -1,4 +1,5 @@
 import qrcode from 'qrcode-generator';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 /**
  * QR Code Generation Engine
@@ -203,6 +204,12 @@ export const FRAME_STYLES = {
  */
 export function generateQRMatrix(text, ecLevel = 'H') {
   if (!text) return null;
+
+  const access = FeatureAccessManager.canUseFeature('qr_generator');
+  if (!access.allowed) {
+    console.warn('[qrEngine] generateQRMatrix blocked: qr_generator feature is disabled or restricted.');
+    return null;
+  }
   const typeNumber = 0; // auto-detect
   const errorCorrectionLevel = ecLevel;
   const qr = qrcode(typeNumber, errorCorrectionLevel);

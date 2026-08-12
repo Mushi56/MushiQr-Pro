@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Folder, Check, X, HardDrive, Sparkles } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }) {
   const [folderName, setFolderName] = useState(() => {
@@ -21,6 +22,12 @@ export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }
   };
 
   const handleSave = () => {
+    const access = FeatureAccessManager.canUseFeature('save_location');
+    if (!access.allowed) {
+      if (showToast) showToast('Custom Save Location feature is disabled or requires a plan upgrade.', 'error');
+      else alert('Custom Save Location feature is disabled or requires a plan upgrade.');
+      return;
+    }
     const clean = folderName.trim() || 'Pictures/Mushi QR Pro';
     const prefs = getPreferences();
     savePreferences({ ...prefs, saveLocation: clean });
