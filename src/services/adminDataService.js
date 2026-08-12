@@ -806,6 +806,20 @@ export async function savePromoCodes(codes) {
 }
 
 /**
+ * Call trusted Cloud Function to execute one-time Super Admin bootstrap for designated target UID
+ */
+export async function bootstrapSuperAdminCloud() {
+  try {
+    const fn = httpsCallable(functions, 'bootstrapSuperAdminOnce');
+    const res = await fn({});
+    return { ok: true, data: res.data };
+  } catch (e) {
+    console.error('[DS] bootstrapSuperAdminCloud:', e);
+    return { ok: false, error: friendlyError(e) };
+  }
+}
+
+/**
  * Call trusted Cloud Function to update global feature flag
  */
 export async function setFeatureFlagCloud(featureId, enabled) {

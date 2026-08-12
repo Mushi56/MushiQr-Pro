@@ -42,20 +42,9 @@ exports.setUserRole = onCall(async (request) => {
   const callerUid = request.auth.uid;
   const callerClaims = request.auth.token || {};
 
-  // 2. Authorize caller via custom claim (or bootstrap if no Super Admin exists yet)
-  const isCallerSuperAdmin = callerClaims.role === 'super_admin';
-
-  if (!isCallerSuperAdmin) {
-    const listResult = await admin.auth().listUsers(1000);
-    const existingSuperAdmins = listResult.users.filter(u => u.customClaims?.role === 'super_admin');
-    if (existingSuperAdmins.length > 0) {
-      throw new HttpsError('permission-denied', 'Only Super Admin users can assign or change user roles.');
-    }
-    // Zero Super Admins exist in system: bootstrap mode active
-    const { targetUid, newRole } = request.data || {};
-    if (targetUid !== callerUid || newRole !== 'super_admin') {
-      throw new HttpsError('permission-denied', 'Bootstrap mode: First user can only grant super_admin to themselves.');
-    }
+  // 2. Authorize caller via custom claim (Strict: must be super_admin)
+  if (callerClaims.role !== 'super_admin') {
+    throw new HttpsError('permission-denied', 'Only Super Admin users can assign or change user roles.');
   }
 
   const { targetUid, newRole } = request.data || {};
@@ -327,4 +316,51 @@ exports.updatePlanFeatures = onCall(async (request) => {
     featureCount: validatedFeatures.length,
   };
 });
+
+/**
+ * Cloud Function E: bootstrapSuperAdminOnce
+ * ONE-TIME Super Admin Bootstrap.
+ * Restricted strictly to target UID: dReErTCPtnO7AidJcakCASrjmEI2 ONLY.
+ * Preserves existing claims and sets role = "super_admin".
+ */
+exports.bootstrapSuperAdminOnce = onCall(async (request) => {
+  const targetUid = 'dReErTCPtnO7AidJcakCASrjmEI2';
+
+  if (!request.auth || request.auth.uid !== targetUid) {
+    throw new HttpsError('permission-denied', 'Unauthorized. Bootstrap is strictly restricted to designated target UID.');
+  }
+
+  let targetUser;
+  try {
+    targetUser = await admin.auth().getUser(targetUid);
+  } catch (e) {
+    throw new HttpsError('not-found', `Target user with UID ${targetUid} was not found.`);
+  }
+
+  const currentClaims = targetUser.customClaims || {};
+  const updatedClaims = { ...currentClaims, role: 'super_admin' };
+
+  await admin.auth().setCustomUserClaims(targetUid, updatedClaims);
+
+  // Update app_users profile doc in Firestore
+  await db.collection('app_users').doc(targetUid).set({
+    role: 'super_admin',
+    roleUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    roleUpdatedBy: 'bootstrapSuperAdminOnce',
+  }, { merge: true });
+
+  // Write immutable audit log
+  await writeAuditLog(targetUid, 'super_admin', 'SUPER_ADMIN_BOOTSTRAP_EXECUTED', targetUid, {
+    targetUid,
+    previousClaims: currentClaims,
+    newClaims: updatedClaims,
+  });
+
+  return {
+    success: true,
+    message: `Successfully bootstrapped Super Admin role for UID: ${targetUid}.`,
+    claims: updatedClaims,
+  };
+});
+
 
