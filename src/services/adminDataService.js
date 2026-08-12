@@ -3,7 +3,8 @@
 // All global config is stored in Firestore so any changes apply to all users.
 // Super-admin email: mabuneri143@gmail.com
 
-import { db } from './firebase';
+import { db, functions } from './firebase';
+import { httpsCallable } from 'firebase/functions';
 import {
   doc, getDoc, setDoc, deleteDoc, updateDoc,
   collection, getDocs, addDoc,
@@ -21,20 +22,11 @@ function friendlyError(e) {
   return e?.message || 'Unknown Firestore error';
 }
 
-// Helper to audit actions in Firestore
+// Helper to audit actions (Client-side logging only; authoritative audit records are written by backend Cloud Functions)
 async function _audit(action, meta = {}) {
-  try {
-    const logsRef = collection(db, 'global_audit_logs');
-    await addDoc(logsRef, {
-      action,
-      meta,
-      actor: 'super_admin',
-      ts: new Date().toISOString(),
-    });
-  } catch (e) {
-    // Audit failures are non-fatal — just log them
-    console.warn('[audit] Failed to write audit log:', e?.code, e?.message);
-  }
+  // Client-side direct writes to global_audit_logs are disabled by Security Rules.
+  // Trusted audit logs are created server-side by backend Cloud Functions.
+  console.log(`[audit] Action: ${action}`, meta);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -426,14 +418,27 @@ export async function getUserSubscription(uid) {
 
 export async function saveUserSubscription(uid, sub) {
   try {
-    await setDoc(doc(db, 'user_subscriptions', uid), {
-      ...sub,
-      _updatedAt: new Date().toISOString(),
+    const fn = httpsCallable(functions, 'updateUserSubscription');
+    const res = await fn({
+      targetUid: uid,
+      planId: sub?.planId || 'free',
+      isPro: Boolean(sub?.planId && sub?.planId !== 'free'),
+      durationDays: sub?.durationDays || null,
     });
-    await _audit('USER_SUBSCRIPTION_UPDATED', { uid, planId: sub.planId });
-    return sub;
+    return res.data;
   } catch (e) {
-    console.error('[DS] saveUserSubscription:', e?.code, e?.message);
+    console.error('[DS] saveUserSubscription error:', e);
+    throw new Error(friendlyError(e));
+  }
+}
+
+export async function setUserRole(targetUid, newRole) {
+  try {
+    const fn = httpsCallable(functions, 'setUserRole');
+    const res = await fn({ targetUid, newRole });
+    return res.data;
+  } catch (e) {
+    console.error('[DS] setUserRole error:', e);
     throw new Error(friendlyError(e));
   }
 }
@@ -751,15 +756,8 @@ export async function getRevenueAnalytics() {
  */
 export async function grantUserProAccess(uid, planId = 'pro_monthly') {
   try {
-    const ref = doc(db, 'app_users', uid);
-    await updateDoc(ref, {
-      isPro: true,
-      planId: planId,
-      status: 'active',
-      proGrantedAt: new Date().toISOString(),
-      proGrantedBy: 'superadmin',
-    });
-    await _audit('USER_GRANTED_PRO', { uid, planId });
+    const fn = httpsCallable(functions, 'updateUserSubscription');
+    await fn({ targetUid: uid, planId, isPro: true });
     return { ok: true };
   } catch (e) {
     console.error('[DS] grantUserProAccess:', e);
@@ -772,13 +770,8 @@ export async function grantUserProAccess(uid, planId = 'pro_monthly') {
  */
 export async function revokeUserProAccess(uid) {
   try {
-    const ref = doc(db, 'app_users', uid);
-    await updateDoc(ref, {
-      isPro: false,
-      planId: 'free',
-      proRevokedAt: new Date().toISOString(),
-    });
-    await _audit('USER_REVOKED_PRO', { uid });
+    const fn = httpsCallable(functions, 'updateUserSubscription');
+    await fn({ targetUid: uid, planId: 'free', isPro: false });
     return { ok: true };
   } catch (e) {
     console.error('[DS] revokeUserProAccess:', e);

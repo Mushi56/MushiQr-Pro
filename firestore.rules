@@ -34,9 +34,10 @@ service cloud.firestore {
     }
 
     // ── Audit Logs
-    // Only super-admin can read/write
+    // Only super-admin can read; write is disabled for clients (Cloud Functions / Admin SDK write only)
     match /global_audit_logs/{docId} {
-      allow read, create, update, delete: if isSuperAdmin();
+      allow read: if isSuperAdmin();
+      allow write: if false;
     }
 
     // ── Per-User Data
@@ -61,6 +62,14 @@ service cloud.firestore {
       allow get: if true;
       allow list: if isSuperAdmin();
       allow create, update: if true;
+    }
+
+    // ── Authoritative User Subscriptions
+    // Users can read ONLY their own subscription; write is disabled for clients (Cloud Functions / Admin SDK only)
+    match /user_subscriptions/{userId} {
+      allow get: if isOwner(userId) || isSuperAdmin();
+      allow list: if isSuperAdmin();
+      allow write: if false;
     }
 
     // ── Default Deny All Other Unmatched Paths
