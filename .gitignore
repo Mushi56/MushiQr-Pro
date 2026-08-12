@@ -25,3 +25,24 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Android Keystores & Secret Keys
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+*.idsig
+
+# Android APKs and Build Outputs
+*.apk
+*.aab
+first-commit-build/
+
+# Temporary Log Dumps & Audit Outputs
+build_*.txt
+lint_*.txt
+lint_results.json
+old_home.txt
+firestore-debug.log
+

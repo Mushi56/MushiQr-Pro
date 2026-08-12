@@ -6,7 +6,17 @@
 // Example:
 //   node scripts/setSuperAdmin.js abc123xyz456
 
-const admin = require('firebase-admin');
+let admin;
+try {
+  admin = require('firebase-admin');
+} catch (e) {
+  try {
+    admin = require('../functions/node_modules/firebase-admin');
+  } catch (err) {
+    console.error('\n❌ ERROR: firebase-admin module not found. Please run: npm --prefix functions install\n');
+    process.exit(1);
+  }
+}
 
 // Check arguments
 const targetUid = process.argv[2];
