@@ -1,45 +1,23 @@
 // src/services/premiumContext.jsx
 // ─── Premium Subscription Context ──────────────────────────────────────────
-// Provides premium status, plan info, and paywall control throughout the app.
+// Delegates entitlement and gating logic to FeatureAccessManager.
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
   getSubscriptionPlans,
-  getPremiumFeatures,
   getUserSubscription,
   saveUserSubscription,
 } from './adminDataService';
+import { FeatureAccessManager, FEATURE_REGISTRY, REASON } from './FeatureAccessManager';
 
 const PremiumCtx = createContext(null);
 
-// ─── Duration helpers (for auto-expiry) ────────────────────────────────────
-const PERIOD_MS = {
-  day:     24 * 60 * 60 * 1000,
-  week:    7  * 24 * 60 * 60 * 1000,
-  month:   30 * 24 * 60 * 60 * 1000,
-  year:    365 * 24 * 60 * 60 * 1000,
-  forever: Infinity,
-};
-
-function isSubscriptionActive(sub) {
-  if (!sub || sub.planId === 'free' || !sub.planId) return false;
-  if (sub.cancelled) return false;
-  if (!sub.startedAt) return false;
-  const period = sub.period || 'month';
-  const durationMs = PERIOD_MS[period] || PERIOD_MS.month;
-  if (durationMs === Infinity) return true;
-  const start = new Date(sub.startedAt).getTime();
-  return Date.now() < start + durationMs;
-}
-
-// ─── Provider ──────────────────────────────────────────────────────────────
 export function PremiumProvider({ children }) {
   const [user, setUser]                     = useState(null);
   const [subscription, setSubscription]     = useState(null);
   const [plans, setPlans]                   = useState([]);
-  const [premiumFeatures, setPremiumFeatures] = useState([]);
   const [paywallOpen, setPaywallOpen]       = useState(false);
   const [paywallFeature, setPaywallFeature] = useState(null);
   const [loading, setLoading]               = useState(true);
@@ -50,23 +28,18 @@ export function PremiumProvider({ children }) {
     return unsub;
   }, []);
 
-  // Load global config + user subscription
+  // Sync state with FeatureAccessManager
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const [p, f] = await Promise.all([
-          getSubscriptionPlans(),
-          getPremiumFeatures(),
-        ]);
-        if (!cancelled) {
-          setPlans(p);
-          setPremiumFeatures(f);
-        }
+        await FeatureAccessManager.refreshFeatureConfiguration();
+        const p = await getSubscriptionPlans();
+        if (!cancelled) setPlans(p);
       } catch (e) {
         console.error('[Premium] Failed to load config:', e);
       }
-      // Load user subscription
+
       if (user?.uid) {
         try {
           const sub = await getUserSubscription(user.uid);
@@ -84,22 +57,13 @@ export function PremiumProvider({ children }) {
   }, [user]);
 
   // Derived state
-  const isPremium = isSubscriptionActive(subscription);
-  const currentPlan = isPremium
-    ? plans.find(p => p.id === subscription?.planId) || null
-    : plans.find(p => p.id === 'free') || null;
+  const effectivePlan = FeatureAccessManager.getEffectivePlan();
+  const isPremium = effectivePlan === 'pro' || effectivePlan === 'lifetime';
+  const currentPlan = plans.find(p => p.id === effectivePlan) || plans.find(p => p.id === 'free') || null;
 
   const canAccess = useCallback((featureId) => {
-    // Super admin always has access
-    if (user?.email === 'mabuneri143@gmail.com') return true;
-    if (!featureId) return true;
-    const feature = premiumFeatures.find(f => f.id === featureId);
-    if (!feature) return true; // Feature not gated
-    if (!feature.plans || feature.plans.length === 0) return true; // No plan restriction
-    if (feature.plans.includes('free')) return true;
-    if (!isPremium || !subscription?.planId) return false;
-    return feature.plans.includes(subscription.planId);
-  }, [isPremium, subscription, premiumFeatures, user]);
+    return FeatureAccessManager.isFeatureAllowed(featureId);
+  }, []);
 
   const showPaywall = useCallback((featureId = null) => {
     setPaywallFeature(featureId);
@@ -111,37 +75,12 @@ export function PremiumProvider({ children }) {
     setPaywallFeature(null);
   }, []);
 
-  const subscribe = useCallback(async (planId) => {
-    if (!user?.uid) return;
-    const plan = plans.find(p => p.id === planId);
-    if (!plan) return;
-    const sub = {
-      planId,
-      period: plan.period,
-      startedAt: new Date().toISOString(),
-      cancelled: false,
-      userEmail: user.email || '',
-      userName: user.displayName || '',
-    };
-    await saveUserSubscription(user.uid, sub);
-    setSubscription(sub);
-    setPaywallOpen(false);
-    setPaywallFeature(null);
-  }, [user, plans]);
-
-  const cancelSubscription = useCallback(async () => {
-    if (!user?.uid || !subscription) return;
-    const updated = { ...subscription, cancelled: true, cancelledAt: new Date().toISOString() };
-    await saveUserSubscription(user.uid, updated);
-    setSubscription(updated);
-  }, [user, subscription]);
-
-  // Gate helper: returns true if accessible, otherwise opens paywall & returns false
   const requirePremium = useCallback((featureId) => {
-    if (canAccess(featureId)) return true;
+    const access = FeatureAccessManager.canAccess(featureId);
+    if (access.allowed) return true;
     showPaywall(featureId);
     return false;
-  }, [canAccess, showPaywall]);
+  }, [showPaywall]);
 
   const value = {
     user,
@@ -149,15 +88,13 @@ export function PremiumProvider({ children }) {
     currentPlan,
     subscription,
     plans,
-    premiumFeatures,
+    premiumFeatures: FEATURE_REGISTRY,
     canAccess,
     requirePremium,
     showPaywall,
     hidePaywall,
     paywallOpen,
     paywallFeature,
-    subscribe,
-    cancelSubscription,
     loading,
   };
 
@@ -167,7 +104,6 @@ export function PremiumProvider({ children }) {
 export function usePremium() {
   const ctx = useContext(PremiumCtx);
   if (!ctx) {
-    // Return safe fallback when not inside provider (e.g. admin panel)
     return {
       isPremium: true,
       currentPlan: null,
@@ -177,9 +113,10 @@ export function usePremium() {
       hidePaywall: () => {},
       paywallOpen: false,
       plans: [],
-      premiumFeatures: [],
+      premiumFeatures: FEATURE_REGISTRY,
       loading: false,
     };
   }
   return ctx;
 }
+
