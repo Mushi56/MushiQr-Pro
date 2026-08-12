@@ -19,6 +19,15 @@ export function PremiumProvider({ children }) {
   const [paywallFeature, setPaywallFeature] = useState(null);
   const [loading, setLoading]               = useState(true);
 
+  // Subscribe to real-time entitlement state changes from FeatureAccessManager
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const unsub = FeatureAccessManager.subscribe(() => {
+      setTick(t => t + 1);
+    });
+    return unsub;
+  }, []);
+
   // Listen to auth state
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, u => setUser(u));

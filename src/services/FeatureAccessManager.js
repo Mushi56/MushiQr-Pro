@@ -219,8 +219,24 @@ class FeatureAccessManagerService {
     this.unsubFlags = null;
     this.unsubPlans = null;
     this.unsubSub = null;
+    this.listeners = new Set();
 
     this.init();
+  }
+
+  subscribe(callback) {
+    if (typeof callback === 'function') {
+      this.listeners.add(callback);
+    }
+    return () => {
+      this.listeners.delete(callback);
+    };
+  }
+
+  notifyListeners() {
+    this.listeners.forEach(cb => {
+      try { cb(); } catch (e) { console.error('[FeatureAccessManager] Listener error:', e); }
+    });
   }
 
   init() {
@@ -240,6 +256,7 @@ class FeatureAccessManagerService {
         this.userSubscription = null;
         if (this.unsubSub) this.unsubSub();
       }
+      this.notifyListeners();
     });
 
     // 2. Real-time listener for global_config/featureFlags
@@ -247,7 +264,10 @@ class FeatureAccessManagerService {
       this.unsubFlags = onSnapshot(doc(db, 'global_config', 'featureFlags'), (docSnap) => {
         if (docSnap.exists()) {
           this.globalFlags = docSnap.data() || {};
+        } else {
+          this.globalFlags = {};
         }
+        this.notifyListeners();
       }, (err) => console.warn('[FeatureAccessManager] Global flags listener notice:', err.message));
     } catch (e) {
       console.warn('[FeatureAccessManager] Failed to init globalFlags listener:', e);
@@ -261,6 +281,7 @@ class FeatureAccessManagerService {
           plans[d.id] = d.data();
         });
         this.planConfigs = plans;
+        this.notifyListeners();
       }, (err) => console.warn('[FeatureAccessManager] Plans listener notice:', err.message));
     } catch (e) {
       console.warn('[FeatureAccessManager] Failed to init plans listener:', e);
@@ -276,11 +297,14 @@ class FeatureAccessManagerService {
         } else {
           this.userSubscription = null;
         }
+        this.notifyListeners();
       }, () => {
         this.userSubscription = null;
+        this.notifyListeners();
       });
     } catch (e) {
       this.userSubscription = null;
+      this.notifyListeners();
     }
   }
 
@@ -333,20 +357,8 @@ class FeatureAccessManagerService {
       };
     }
 
-    // 2. Super Admin Override
-    const isSuperAdmin = this.userClaims?.role === 'super_admin';
-    if (isSuperAdmin && featDef.allowSuperAdminOverride) {
-      return {
-        allowed: true,
-        reason: REASON.ALLOWED,
-        status: STATUS.ALLOWED,
-        featureId,
-        requiredPlan: 'free',
-        isSuperAdminOverride: true,
-      };
-    }
-
-    // 3. Check Global Feature Switch (global_config/featureFlags)
+    // 2. Check Global Feature Switch (global_config/featureFlags) FIRST
+    // Emergency global disable turns feature off application-wide for ALL users
     const flagVal = this.globalFlags[featureId];
     const isGloballyEnabled = flagVal !== undefined ? Boolean(flagVal) : featDef.defaultEnabled;
 
@@ -360,7 +372,7 @@ class FeatureAccessManagerService {
       };
     }
 
-    // 4. Check Authentication Requirement
+    // 3. Check Authentication Requirement
     if (featDef.requiresAuthentication && !this.currentUser) {
       return {
         allowed: false,
@@ -368,6 +380,20 @@ class FeatureAccessManagerService {
         status: STATUS.REQUIRES_AUTHENTICATION,
         featureId,
         requiredPlan: null,
+      };
+    }
+
+    // 4. Super Admin Plan Entitlement Override
+    // Super Admins bypass subscription plan paywalls for globally enabled features
+    const isSuperAdmin = this.userClaims?.role === 'super_admin';
+    if (isSuperAdmin && featDef.allowSuperAdminOverride) {
+      return {
+        allowed: true,
+        reason: REASON.ALLOWED,
+        status: STATUS.ALLOWED,
+        featureId,
+        requiredPlan: 'free',
+        isSuperAdminOverride: true,
       };
     }
 

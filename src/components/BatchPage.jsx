@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles, CheckCircle, FileArchive, Share2, QrCode, Barcode } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles, CheckCircle, FileArchive, Share2, QrCode, Barcode, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -76,6 +76,29 @@ export default function BatchPage({
   onEditBatchItemStyle,
   initialBatchType
 }) {
+  const access = FeatureAccessManager.canUseFeature('bulk_generation');
+
+  if (!access.allowed) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', background: '#09090f', color: '#f0f0f8', minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+          <AlertCircle size={32} />
+        </div>
+        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Bulk Batch Generation Unavailable</h2>
+        <p style={{ color: '#8b8fa8', maxWidth: 480, margin: 0, fontSize: 14, lineHeight: 1.5 }}>
+          {access.status === 'disabled_by_admin'
+            ? 'Bulk Batch Generation has been disabled globally by the Administrator.'
+            : 'Bulk Batch Generation requires an upgraded subscription plan.'}
+        </p>
+        <button
+          onClick={() => onNavigate && onNavigate('home')}
+          style={{ background: '#D60036', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', marginTop: 12 }}
+        >
+          Return to Home
+        </button>
+      </div>
+    );
+  }
   const [batchType, setBatchType] = useState(initialBatchType || 'QR'); // 'QR' | 'BARCODE'
   const [barcodeType, setBarcodeType] = useState('ean13');
   const [fileData, setFileData] = useState(null);
