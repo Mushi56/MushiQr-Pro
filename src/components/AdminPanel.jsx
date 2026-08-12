@@ -1498,80 +1498,282 @@ function BrandingPanel({ settings, onSave }) {
 // FEATURE FLAGS PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
-function FeatureFlagsPanel({ flags, onSave }) {
+function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
   const [f, setF] = useState(flags || {});
-  const [saved, setSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [p, setP] = useState(plans || {});
+  const [search, setSearch] = useState('');
+  const [selectedCat, setSelectedCat] = useState('ALL');
+  const [expandedCats, setExpandedCats] = useState(() => new Set(Object.keys(FEATURE_CATEGORIES)));
+  const [savingFeatureId, setSavingFeatureId] = useState(null);
+  const [savingPlanId, setSavingPlanId] = useState(null);
   const toast = useToast();
-  useEffect(() => { if (flags) setF(flags); }, [flags]);
 
-  const toggle = k => setF(p => ({ ...p, [k]: !p[k] }));
-  const handleSave = async () => {
-    setSaving(true);
+  useEffect(() => { if (flags) setF(flags); }, [flags]);
+  useEffect(() => { if (plans) setP(plans); }, [plans]);
+
+  const toggleCat = (catId) => {
+    setExpandedCats(prev => {
+      const next = new Set(prev);
+      if (next.has(catId)) next.delete(catId);
+      else next.add(catId);
+      return next;
+    });
+  };
+
+  const handleToggleGlobalFlag = async (featureId) => {
+    const currentVal = f[featureId] !== undefined ? f[featureId] : true;
+    const nextVal = !currentVal;
+    setF(prev => ({ ...prev, [featureId]: nextVal }));
+    setSavingFeatureId(featureId);
     try {
-      await onSave(f);
-      setSaved(true);
-      toast('Feature flags saved! Changes are now live for all users.', 'success');
-      setTimeout(() => setSaved(false), 2500);
+      const res = await setFeatureFlagCloud(featureId, nextVal);
+      if (res.ok) {
+        toast(`Updated global switch for ${featureId} → ${nextVal ? 'ON' : 'OFF'}`, 'success');
+      } else {
+        setF(prev => ({ ...prev, [featureId]: currentVal }));
+        toast(`Failed to update ${featureId}: ${res.error}`, 'error', 5000);
+      }
     } catch (e) {
-      toast('Failed to save flags: ' + (e.message || 'Unknown error'), 'error', 6000);
+      setF(prev => ({ ...prev, [featureId]: currentVal }));
+      toast(`Save error: ${e.message}`, 'error', 5000);
     } finally {
-      setSaving(false);
+      setSavingFeatureId(null);
     }
   };
 
-  const enabled = Object.values(f).filter(Boolean).length;
-  const total   = Object.keys(f).length;
+  const handleTogglePlanFeature = async (planId, featureId) => {
+    const planConfig = p[planId] || {};
+    const currentFeatures = planConfig.features || (planId === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
+    const hasFeature = currentFeatures.includes(featureId);
 
-  const groups = [
-    { title: 'Core Generator & Scanner', items: [
-      { key: 'qr_generator',      label: 'QR Code Generator',      desc: 'Allow users to create QR codes' },
-      { key: 'barcode_generator', label: 'Barcode Generator',       desc: 'Allow users to create barcodes' },
-      { key: 'scanner',           label: 'QR & Barcode Scanner',    desc: 'Camera-based scanner feature' },
-      { key: 'bulk_generation',   label: 'Bulk Generation',         desc: 'Create multiple codes at once' },
-    ]},
-    { title: 'Data & Sync', items: [
-      { key: 'history',       label: 'History',                desc: 'Save creation history locally' },
-      { key: 'saved',         label: 'Saved Items',            desc: 'Allow bookmarking QR codes' },
-      { key: 'cloud_sync',    label: 'Cloud Sync',             desc: 'Cloud template saving & data sync' },
-      { key: 'save_location', label: 'Save Location',          desc: 'Custom save directory preference' },
-    ]},
-    { title: 'Export Formats', items: [
-      { key: 'export_png', label: 'Export PNG', desc: 'Download as PNG image' },
-      { key: 'export_jpg', label: 'Export JPG', desc: 'Download as JPG image' },
-      { key: 'export_svg', label: 'Export SVG', desc: 'Download as SVG vector' },
-      { key: 'export_pdf', label: 'Export PDF', desc: 'Download as PDF document' },
-    ]},
-    { title: 'Design & Customization', items: [
-      { key: 'custom_logo',       label: 'Custom Logo Embed',    desc: 'Embed brand logo inside QR codes' },
-      { key: 'custom_colors',     label: 'Custom Colors',        desc: 'Custom colors and gradients' },
-      { key: 'custom_shapes',     label: 'Custom Eye & Dot Shapes', desc: 'Custom shapes for QR dots & eyes' },
-      { key: 'premium_templates', label: 'Premium Templates',   desc: 'Pre-designed premium QR templates' },
-    ]},
-  ];
+    const nextFeatures = hasFeature
+      ? currentFeatures.filter(id => id !== featureId)
+      : [...currentFeatures, featureId];
+
+    const updatedPlanObj = { ...planConfig, planId, features: nextFeatures };
+    setP(prev => ({ ...prev, [planId]: updatedPlanObj }));
+    setSavingPlanId(`${planId}_${featureId}`);
+
+    try {
+      const res = await setPlanFeaturesCloud(planId, nextFeatures);
+      if (res.ok) {
+        toast(`${planId.toUpperCase()} plan ${hasFeature ? 'removed' : 'granted'} ${featureId}`, 'success');
+      } else {
+        setP(prev => ({ ...prev, [planId]: planConfig }));
+        toast(`Failed to update ${planId} features: ${res.error}`, 'error', 5000);
+      }
+    } catch (e) {
+      setP(prev => ({ ...prev, [planId]: planConfig }));
+      toast(`Plan update error: ${e.message}`, 'error', 5000);
+    } finally {
+      setSavingPlanId(null);
+    }
+  };
+
+  // Filter features
+  const filteredFeatures = FEATURE_REGISTRY.filter(item => {
+    if (selectedCat !== 'ALL' && item.category !== selectedCat) return false;
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return item.displayName.toLowerCase().includes(q) ||
+      item.featureId.toLowerCase().includes(q) ||
+      item.description.toLowerCase().includes(q);
+  });
+
+  // Group features by category
+  const categoriesList = Object.keys(FEATURE_CATEGORIES);
+  const totalFeatures = FEATURE_REGISTRY.length;
+  const enabledGlobal = Object.keys(f).filter(k => f[k] !== false).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ fontSize: 13, color: T.textSec }}>{enabled} of {total} features enabled</div>
-          <div style={{ width: 100, height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
-            <div style={{ height: '100%', background: T.green, borderRadius: 2, width: `${total ? (enabled / total) * 100 : 0}%`, transition: 'width 0.3s' }} />
+      {/* Header controls & statistics */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, background: T.bgCard, padding: 18, borderRadius: 16, border: `1px solid ${T.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: T.text, margin: 0 }}>Granular Feature Registry & Access Control</h2>
+            <div style={{ fontSize: 12, color: T.textSec, marginTop: 4 }}>
+              Category-by-category management for all {totalFeatures} application capabilities
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: T.bgEl, padding: '6px 12px', borderRadius: 8, border: `1px solid ${T.border}` }}>
+              <CheckCircle size={14} color={T.green} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{enabledGlobal} Global ON</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: T.bgEl, padding: '6px 12px', borderRadius: 8, border: `1px solid ${T.border}` }}>
+              <XCircle size={14} color={T.red} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{totalFeatures - enabledGlobal} Global OFF</span>
+            </div>
           </div>
         </div>
-        <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-          {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Flags'}
-        </Btn>
+
+        {/* Search & Filter Toolbar */}
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240, position: 'relative' }}>
+            <Search size={16} color={T.textSec} style={{ position: 'absolute', left: 12, top: 12 }} />
+            <input
+              type="text"
+              placeholder="Search features by name, ID or description..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10,
+                background: T.bgEl, border: `1px solid ${T.border}`, color: T.text,
+                fontSize: 13, outline: 'none', boxSizing: 'border-box'
+              }}
+            />
+          </div>
+          <select
+            value={selectedCat}
+            onChange={e => setSelectedCat(e.target.value)}
+            style={{
+              padding: '10px 16px', borderRadius: 10, background: T.bgEl,
+              border: `1px solid ${T.border}`, color: T.text, fontSize: 13, fontWeight: 600, outline: 'none'
+            }}
+          >
+            <option value="ALL">All Categories ({categoriesList.length})</option>
+            {categoriesList.map(catKey => (
+              <option key={catKey} value={catKey}>{FEATURE_CATEGORIES[catKey].name}</option>
+            ))}
+          </select>
+        </div>
       </div>
-      {groups.map(g => (
-        <AdminCard key={g.title} title={g.title}>
-          {g.items.map((item, i, arr) => (
-            <div key={item.key} style={{ borderBottom: i < arr.length - 1 ? `1px solid ${T.border}` : 'none' }}>
-              <ToggleRow label={item.label} description={item.desc} checked={!!f[item.key]} onChange={() => toggle(item.key)} />
+
+      {/* Categories Accordions */}
+      {categoriesList.map(catKey => {
+        const catInfo = FEATURE_CATEGORIES[catKey];
+        const catFeatures = filteredFeatures.filter(item => item.category === catKey);
+        if (catFeatures.length === 0) return null;
+
+        const isExpanded = expandedCats.has(catKey);
+        const catEnabledCount = catFeatures.filter(item => f[item.featureId] !== false).length;
+
+        return (
+          <div key={catKey} style={{ background: T.bgCard, borderRadius: 14, border: `1px solid ${T.border}`, overflow: 'hidden' }}>
+            {/* Category Accordion Header */}
+            <div
+              onClick={() => toggleCat(catKey)}
+              style={{
+                padding: '14px 18px', background: T.bgEl, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                borderBottom: isExpanded ? `1px solid ${T.border}` : 'none',
+                userSelect: 'none'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{catInfo.name}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', color: T.textSec }}>
+                  {catFeatures.length} features
+                </span>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: catEnabledCount === catFeatures.length ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: catEnabledCount === catFeatures.length ? T.green : T.orange }}>
+                  {catEnabledCount} / {catFeatures.length} Active
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {isExpanded ? <ChevronDown size={18} color={T.textSec} /> : <ChevronRight size={18} color={T.textSec} />}
+              </div>
             </div>
-          ))}
-        </AdminCard>
-      ))}
+
+            {/* Category Features List */}
+            {isExpanded && (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {catFeatures.map((item, idx) => {
+                  const isGloballyOn = f[item.featureId] !== false;
+                  const isSavingThisFlag = savingFeatureId === item.featureId;
+
+                  return (
+                    <div
+                      key={item.featureId}
+                      style={{
+                        padding: '14px 18px',
+                        borderBottom: idx < catFeatures.length - 1 ? `1px solid ${T.border}` : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: 14,
+                        background: !isGloballyOn ? 'rgba(239, 68, 68, 0.03)' : 'transparent'
+                      }}
+                    >
+                      {/* Left side: Global Toggle + Info */}
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: '1 1 340px' }}>
+                        <button
+                          onClick={() => handleToggleGlobalFlag(item.featureId)}
+                          disabled={isSavingThisFlag}
+                          style={{
+                            width: 44, height: 24, borderRadius: 12,
+                            background: isGloballyOn ? T.green : '#333',
+                            border: 'none', cursor: 'pointer', position: 'relative',
+                            transition: 'background 0.2s', flexShrink: 0, marginTop: 2
+                          }}
+                        >
+                          <div style={{
+                            width: 18, height: 18, borderRadius: '50%', background: '#fff',
+                            position: 'absolute', top: 3, left: isGloballyOn ? 23 : 3,
+                            transition: 'left 0.2s'
+                          }} />
+                        </button>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: isGloballyOn ? T.text : T.textSec }}>
+                              {item.displayName}
+                            </span>
+                            <span style={{ fontSize: 10, fontFamily: 'monospace', padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.06)', color: T.accent }}>
+                              {item.featureId}
+                            </span>
+                            {!isGloballyOn && (
+                              <span style={{ fontSize: 10, fontWeight: 800, color: T.red, background: 'rgba(239,68,68,0.15)', padding: '1px 6px', borderRadius: 4 }}>
+                                GLOBAL OFF
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 11, color: T.textSec, marginTop: 3 }}>
+                            {item.description}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right side: Plan Entitlement Matrix */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: T.textMut, marginRight: 4 }}>Plan Access:</span>
+                        {['free', 'weekly', 'monthly', 'yearly'].map(planId => {
+                          const planFeatures = p[planId]?.features || (planId === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
+                          const hasPlanAccess = planFeatures.includes(item.featureId);
+                          const isSavingThisPlan = savingPlanId === `${planId}_${item.featureId}`;
+
+                          return (
+                            <button
+                              key={planId}
+                              onClick={() => handleTogglePlanFeature(planId, item.featureId)}
+                              disabled={isSavingThisPlan || !isGloballyOn}
+                              title={`${planId.toUpperCase()} plan ${hasPlanAccess ? 'has access' : 'blocked'}`}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: 6,
+                                border: hasPlanAccess ? `1px solid ${T.green}55` : `1px solid ${T.border}`,
+                                background: hasPlanAccess ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.03)',
+                                color: hasPlanAccess ? T.green : T.textMut,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                cursor: isGloballyOn ? 'pointer' : 'not-allowed',
+                                opacity: !isGloballyOn ? 0.35 : 1,
+                                transition: 'all 0.15s'
+                              }}
+                            >
+                              {planId.toUpperCase()} {hasPlanAccess ? '✓' : '✗'}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -3905,7 +4107,7 @@ function AdminPanelInner() {
       setRemoteConfig(c);
       refreshAudit();
     }} />,
-    'feature-flags': <FeatureFlagsPanel flags={featureFlags} onSave={async f => {
+    'feature-flags': <FeatureFlagsPanel flags={featureFlags} plans={subscriptionPlans} onSaveFlags={async f => {
       for (const [featId, val] of Object.entries(f)) {
         await DS.setFeatureFlagCloud(featId, Boolean(val));
       }

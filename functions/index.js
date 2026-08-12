@@ -180,24 +180,40 @@ exports.updateUserSubscription = onCall(async (request) => {
   };
 });
 
-// Canonical Feature Registry IDs for server-side validation
+// Canonical Feature Registry IDs for server-side validation (78 Granular Features + Legacy Compatibility)
 const CANONICAL_FEATURE_IDS = [
-  'qr_generator',
-  'barcode_generator',
-  'scanner',
-  'history',
-  'saved',
-  'cloud_sync',
-  'export_png',
-  'export_jpg',
-  'export_svg',
-  'export_pdf',
-  'custom_logo',
-  'custom_colors',
-  'custom_shapes',
-  'premium_templates',
-  'bulk_generation',
-  'save_location',
+  // 1. HOME
+  'home_view', 'home_recent_items', 'home_quick_qr', 'home_quick_barcode', 'home_scanner_shortcut', 'home_batch_shortcut',
+  // 2. QR_CONTENT
+  'qr_text', 'qr_url', 'qr_wifi', 'qr_email', 'qr_phone', 'qr_sms', 'qr_vcard', 'qr_location', 'qr_pdf', 'qr_image', 'qr_audio', 'qr_document', 'qr_event', 'qr_crypto', 'qr_whatsapp', 'qr_youtube', 'qr_instagram', 'qr_facebook', 'qr_x', 'qr_linkedin',
+  // 3. QR_ENGINE
+  'qr_matrix_engine', 'qr_error_correction', 'qr_quiet_zone', 'qr_center_text', 'qr_size_custom',
+  // 4. BARCODE_FORMATS
+  'barcode_code128', 'barcode_code39', 'barcode_ean13', 'barcode_ean8', 'barcode_upca', 'barcode_upce', 'barcode_itf14', 'barcode_i25', 'barcode_codabar', 'barcode_code93', 'barcode_code11', 'barcode_msi', 'barcode_datamatrix', 'barcode_pdf417', 'barcode_aztec', 'barcode_gs1databar', 'barcode_gs1128', 'barcode_postnet', 'barcode_planet', 'barcode_royalmail', 'barcode_telepen', 'barcode_pharmacode', 'barcode_maxicode', 'barcode_qrcode', 'barcode_microqrcode', 'barcode_hanxin', 'barcode_codablockf', 'barcode_code16k', 'barcode_code49', 'barcode_channelcode',
+  // 5. BARCODE_ENGINE
+  'barcode_custom_colors', 'barcode_dimension_controls', 'barcode_text_display',
+  // 6. SCANNER
+  'scanner_camera_live', 'scanner_image_upload', 'scanner_flashlight', 'scanner_zoom', 'scanner_barcode_detect', 'scanner_result_actions',
+  // 7. DESIGN
+  'custom_logo_upload', 'custom_logo_presets', 'custom_colors_solid', 'custom_colors_gradient', 'custom_dot_styles', 'custom_eye_styles', 'custom_frames',
+  // 8. TEMPLATES
+  'templates_browse', 'templates_free_apply', 'templates_premium_apply', 'templates_save_custom', 'templates_cloud_library',
+  // 9. EXPORT
+  'export_png', 'export_jpg', 'export_svg', 'export_pdf', 'export_native_share',
+  // 10. BATCH
+  'batch_view', 'batch_csv_import', 'batch_manual_input', 'batch_custom_style', 'batch_zip_export',
+  // 11. SAVED
+  'saved_view', 'saved_save_action', 'saved_delete_action', 'saved_search_filter',
+  // 12. HISTORY
+  'history_view', 'history_save_auto', 'history_delete_item', 'history_clear_all',
+  // 13. CLOUD
+  'cloud_sync_auto', 'cloud_firestore_mirror', 'cloud_template_upload', 'cloud_preferences_sync',
+  // 14. SETTINGS
+  'settings_view', 'settings_theme_toggle', 'settings_save_location', 'settings_haptics',
+  // 15. ACCOUNT
+  'account_view', 'account_google_signin', 'account_subscription_status', 'account_logout',
+  // Legacy 16 Compatibility IDs
+  'qr_generator', 'barcode_generator', 'scanner', 'history', 'saved', 'cloud_sync', 'custom_logo', 'custom_colors', 'custom_shapes', 'premium_templates', 'bulk_generation', 'save_location'
 ];
 
 /**

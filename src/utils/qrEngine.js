@@ -30,6 +30,12 @@ export const QR_TYPES = {
 };
 
 export function formatQRData(type, data) {
+  const featId = `qr_${type}`;
+  const access = FeatureAccessManager.canUseFeature(featId);
+  if (!access.allowed) {
+    console.warn(`[qrEngine] formatQRData blocked: ${featId} feature is disabled or restricted for current plan.`);
+    return '';
+  }
   switch (type) {
     case QR_TYPES.URL: {
       const rawUrl = (data.url || '').trim();
