@@ -244,17 +244,28 @@ function ToggleRow({ label, description, checked, onChange }) {
         <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{label}</div>
         {description && <div style={{ fontSize: 12, color: T.textSec, marginTop: 2 }}>{description}</div>}
       </div>
-      <button onClick={() => onChange(!checked)} style={{
-        width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
+      <Toggle checked={checked} onChange={() => onChange(!checked)} />
+    </div>
+  );
+}
+
+function Toggle({ checked, onChange, disabled }) {
+  return (
+    <button
+      type="button"
+      onClick={disabled ? undefined : onChange}
+      style={{
+        width: 44, height: 24, borderRadius: 12, border: 'none', cursor: disabled ? 'not-allowed' : 'pointer',
         background: checked ? T.accent : 'rgba(255,255,255,0.1)',
         position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-      }}>
-        <div style={{
-          width: 18, height: 18, borderRadius: 9, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
-          position: 'absolute', top: 3, left: checked ? 23 : 3, transition: 'left 0.2s',
-        }} />
-      </button>
-    </div>
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      <div style={{
+        width: 18, height: 18, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+        position: 'absolute', top: 3, left: checked ? 23 : 3, transition: 'left 0.2s',
+      }} />
+    </button>
   );
 }
 
