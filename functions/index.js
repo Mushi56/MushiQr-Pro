@@ -42,9 +42,20 @@ exports.setUserRole = onCall(async (request) => {
   const callerUid = request.auth.uid;
   const callerClaims = request.auth.token || {};
 
-  // 2. Authorize caller via custom claim
-  if (callerClaims.role !== 'super_admin') {
-    throw new HttpsError('permission-denied', 'Only Super Admin users can assign or change user roles.');
+  // 2. Authorize caller via custom claim (or bootstrap if no Super Admin exists yet)
+  const isCallerSuperAdmin = callerClaims.role === 'super_admin';
+
+  if (!isCallerSuperAdmin) {
+    const listResult = await admin.auth().listUsers(1000);
+    const existingSuperAdmins = listResult.users.filter(u => u.customClaims?.role === 'super_admin');
+    if (existingSuperAdmins.length > 0) {
+      throw new HttpsError('permission-denied', 'Only Super Admin users can assign or change user roles.');
+    }
+    // Zero Super Admins exist in system: bootstrap mode active
+    const { targetUid, newRole } = request.data || {};
+    if (targetUid !== callerUid || newRole !== 'super_admin') {
+      throw new HttpsError('permission-denied', 'Bootstrap mode: First user can only grant super_admin to themselves.');
+    }
   }
 
   const { targetUid, newRole } = request.data || {};
