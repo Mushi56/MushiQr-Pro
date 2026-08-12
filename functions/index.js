@@ -317,50 +317,5 @@ exports.updatePlanFeatures = onCall(async (request) => {
   };
 });
 
-/**
- * Cloud Function E: bootstrapSuperAdminOnce
- * ONE-TIME Super Admin Bootstrap.
- * Restricted strictly to target UID: dReErTCPtnO7AidJcakCASrjmEI2 ONLY.
- * Preserves existing claims and sets role = "super_admin".
- */
-exports.bootstrapSuperAdminOnce = onCall(async (request) => {
-  const targetUid = 'dReErTCPtnO7AidJcakCASrjmEI2';
-
-  if (!request.auth || request.auth.uid !== targetUid) {
-    throw new HttpsError('permission-denied', 'Unauthorized. Bootstrap is strictly restricted to designated target UID.');
-  }
-
-  let targetUser;
-  try {
-    targetUser = await admin.auth().getUser(targetUid);
-  } catch (e) {
-    throw new HttpsError('not-found', `Target user with UID ${targetUid} was not found.`);
-  }
-
-  const currentClaims = targetUser.customClaims || {};
-  const updatedClaims = { ...currentClaims, role: 'super_admin' };
-
-  await admin.auth().setCustomUserClaims(targetUid, updatedClaims);
-
-  // Update app_users profile doc in Firestore
-  await db.collection('app_users').doc(targetUid).set({
-    role: 'super_admin',
-    roleUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    roleUpdatedBy: 'bootstrapSuperAdminOnce',
-  }, { merge: true });
-
-  // Write immutable audit log
-  await writeAuditLog(targetUid, 'super_admin', 'SUPER_ADMIN_BOOTSTRAP_EXECUTED', targetUid, {
-    targetUid,
-    previousClaims: currentClaims,
-    newClaims: updatedClaims,
-  });
-
-  return {
-    success: true,
-    message: `Successfully bootstrapped Super Admin role for UID: ${targetUid}.`,
-    claims: updatedClaims,
-  };
-});
 
 
