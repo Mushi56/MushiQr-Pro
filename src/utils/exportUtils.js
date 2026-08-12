@@ -4,6 +4,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Media } from '@capacitor-community/media';
 import { getPreferences } from './storage';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 /**
  * Convert an ArrayBuffer to a base64 string (binary-safe, no btoa size limits).
@@ -20,7 +21,7 @@ function arrayBufferToBase64(buffer) {
 }
 
 /**
- * Convert a plain string to base64 in chunks (avoids call stack overflow on large SVGs).
+ * Convert a plain string to base64 in chunks.
  */
 function stringToBase64(str) {
   const encoder = new TextEncoder();
@@ -29,27 +30,13 @@ function stringToBase64(str) {
 }
 
 /**
-/**
  * Construct save path: {RootFolder}/{Category}/{Filename}
- *
- * New flat structure (no format subfolders):
- *   Pictures/Mushi QR Pro/QR Codes/qrcode_20260811.png
- *   Pictures/Mushi QR Pro/QR Codes/mushi-qr-batch.zip
- *   Pictures/Mushi QR Pro/Barcodes/barcode_ean13_20260811.pdf
- *   Pictures/Mushi QR Pro/Barcodes/mushi-barcode-batch.zip
- *
- * The root folder is user-configurable via Settings (defaults to
- * Pictures/Mushi QR Pro which maps to /storage/emulated/0/Pictures/Mushi QR Pro
- * on Android ExternalStorage).
  */
 export function getOrganizedFilePath(filename, category = 'QR Codes') {
   let prefs = {};
   try { prefs = getPreferences() || {}; } catch {}
   const rootFolder = prefs.saveLocation || 'Pictures/Mushi QR Pro';
 
-  // Only two top-level categories:
-  //   'QR Codes'  — all QR formats + bulk QR ZIPs
-  //   'Barcodes'  — all barcode formats + bulk barcode ZIPs
   const catLower = (category || '').toLowerCase();
   const categoryDir = catLower.includes('barcode') ? 'Barcodes' : 'QR Codes';
 
@@ -67,7 +54,6 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
   let isSavedToDocs = false;
   const targetDir = Capacitor.getPlatform() === 'android' ? Directory.ExternalStorage : Directory.Documents;
 
-  // 1. Save directly into organized directory (ExternalStorage on Android, Documents on iOS)
   try {
     const docFile = await Filesystem.writeFile({
       path: organizedPath,
@@ -78,7 +64,6 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
     fileUri = docFile.uri;
     isSavedToDocs = true;
   } catch (docErr) {
-    console.warn('Writing to ExternalStorage failed, trying Documents organized path:', docErr);
     try {
       const fallbackFile = await Filesystem.writeFile({
         path: organizedPath,
@@ -93,7 +78,6 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
     }
   }
 
-  // 2. Cache fallback if Documents write failed
   if (!fileUri) {
     try {
       const cacheFile = await Filesystem.writeFile({
@@ -106,7 +90,6 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
     } catch {}
   }
 
-  // 3. For image formats (PNG/JPG), attempt to copy to Media gallery
   if (filename.endsWith('.png') || filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
     try {
       await Media.requestPermissions();
@@ -118,9 +101,6 @@ async function saveFileNative(base64Data, filename, category = 'QR Codes') {
     }
   }
 
-  // 4. Removed automatic native Share sheet on save.
-  // The share action is now handled manually via the Success Modal.
-
   return { result: isSavedToDocs ? 'saved' : 'share', fileUri, filename, isNative: true };
 }
 
@@ -131,7 +111,16 @@ function triggerDownload(url, filename) {
   link.click();
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PROTECTED EXPORT FUNCTIONS (Enforces FeatureAccessManager at execution time)
+// ═══════════════════════════════════════════════════════════════════════════
+
 export async function downloadPNG(canvas, filename = 'qrcode', category = 'QR Codes') {
+  const check = FeatureAccessManager.canUseFeature('export_png');
+  if (!check.allowed) {
+    throw new Error(`Export PNG blocked: ${check.reason}`);
+  }
+
   const dataUrl = canvas.toDataURL('image/png');
   if (Capacitor.isNativePlatform()) {
     return await saveFileNative(dataUrl.split(',')[1], `${filename}.png`, category);
@@ -142,6 +131,11 @@ export async function downloadPNG(canvas, filename = 'qrcode', category = 'QR Co
 }
 
 export async function downloadJPG(canvas, filename = 'qrcode', category = 'QR Codes') {
+  const check = FeatureAccessManager.canUseFeature('export_jpg');
+  if (!check.allowed) {
+    throw new Error(`Export JPG blocked: ${check.reason}`);
+  }
+
   const tempCanvas = document.createElement('canvas');
   tempCanvas.width = canvas.width;
   tempCanvas.height = canvas.height;
@@ -160,6 +154,11 @@ export async function downloadJPG(canvas, filename = 'qrcode', category = 'QR Co
 }
 
 export async function downloadSVG(canvas, filename = 'qrcode', category = 'QR Codes') {
+  const check = FeatureAccessManager.canUseFeature('export_svg');
+  if (!check.allowed) {
+    throw new Error(`Export SVG blocked: ${check.reason}`);
+  }
+
   const pngBase64 = canvas.toDataURL('image/png').split(',')[1];
 
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -181,6 +180,11 @@ export async function downloadSVG(canvas, filename = 'qrcode', category = 'QR Co
 }
 
 export async function downloadPDF(canvas, filename = 'qrcode', category = 'QR Codes') {
+  const check = FeatureAccessManager.canUseFeature('export_pdf');
+  if (!check.allowed) {
+    throw new Error(`Export PDF blocked: ${check.reason}`);
+  }
+
   const imgData = canvas.toDataURL('image/png');
   const size = 210;
   const margin = 20;

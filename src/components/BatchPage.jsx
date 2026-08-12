@@ -10,6 +10,7 @@ import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
 import { jsPDF } from 'jspdf';
 import { getOrganizedFilePath } from '../utils/exportUtils';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 // Helper for mobile ZIP saving
 async function saveZipNative(base64Data, filename, category = 'QR Codes') {
@@ -374,6 +375,11 @@ export default function BatchPage({
 
   const generateZip = async () => {
     if (batchItems.length === 0) return;
+    const accessCheck = FeatureAccessManager.canUseFeature('bulk_generation');
+    if (!accessCheck.allowed) {
+      alert('Bulk batch generation requires a plan with bulk_generation enabled. Please upgrade your subscription.');
+      return;
+    }
     setIsExporting(true);
     setExportProgress(0);
 

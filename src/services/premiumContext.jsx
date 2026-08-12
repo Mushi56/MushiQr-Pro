@@ -6,9 +6,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
-  getSubscriptionPlans,
   getUserSubscription,
-  saveUserSubscription,
 } from './adminDataService';
 import { FeatureAccessManager, FEATURE_REGISTRY, REASON } from './FeatureAccessManager';
 
@@ -17,7 +15,6 @@ const PremiumCtx = createContext(null);
 export function PremiumProvider({ children }) {
   const [user, setUser]                     = useState(null);
   const [subscription, setSubscription]     = useState(null);
-  const [plans, setPlans]                   = useState([]);
   const [paywallOpen, setPaywallOpen]       = useState(false);
   const [paywallFeature, setPaywallFeature] = useState(null);
   const [loading, setLoading]               = useState(true);
@@ -32,14 +29,6 @@ export function PremiumProvider({ children }) {
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      try {
-        await FeatureAccessManager.refreshFeatureConfiguration();
-        const p = await getSubscriptionPlans();
-        if (!cancelled) setPlans(p);
-      } catch (e) {
-        console.error('[Premium] Failed to load config:', e);
-      }
-
       if (user?.uid) {
         try {
           const sub = await getUserSubscription(user.uid);
@@ -57,12 +46,11 @@ export function PremiumProvider({ children }) {
   }, [user]);
 
   // Derived state
-  const effectivePlan = FeatureAccessManager.getEffectivePlan();
-  const isPremium = effectivePlan === 'pro' || effectivePlan === 'lifetime';
-  const currentPlan = plans.find(p => p.id === effectivePlan) || plans.find(p => p.id === 'free') || null;
+  const userPlan = FeatureAccessManager.getUserPlan();
+  const isPremium = userPlan !== 'free';
 
   const canAccess = useCallback((featureId) => {
-    return FeatureAccessManager.isFeatureAllowed(featureId);
+    return FeatureAccessManager.canUseFeature(featureId).allowed;
   }, []);
 
   const showPaywall = useCallback((featureId = null) => {
@@ -76,7 +64,7 @@ export function PremiumProvider({ children }) {
   }, []);
 
   const requirePremium = useCallback((featureId) => {
-    const access = FeatureAccessManager.canAccess(featureId);
+    const access = FeatureAccessManager.canUseFeature(featureId);
     if (access.allowed) return true;
     showPaywall(featureId);
     return false;
@@ -85,9 +73,8 @@ export function PremiumProvider({ children }) {
   const value = {
     user,
     isPremium,
-    currentPlan,
+    currentPlan: userPlan,
     subscription,
-    plans,
     premiumFeatures: FEATURE_REGISTRY,
     canAccess,
     requirePremium,
@@ -106,17 +93,15 @@ export function usePremium() {
   if (!ctx) {
     return {
       isPremium: true,
-      currentPlan: null,
+      currentPlan: 'free',
       canAccess: () => true,
       requirePremium: () => true,
       showPaywall: () => {},
       hidePaywall: () => {},
       paywallOpen: false,
-      plans: [],
       premiumFeatures: FEATURE_REGISTRY,
       loading: false,
     };
   }
   return ctx;
 }
-

@@ -804,3 +804,31 @@ export async function savePromoCodes(codes) {
     return { ok: false, error: friendlyError(e) };
   }
 }
+
+/**
+ * Call trusted Cloud Function to update global feature flag
+ */
+export async function setFeatureFlagCloud(featureId, enabled) {
+  try {
+    const fn = httpsCallable(functions, 'updateFeatureFlag');
+    const res = await fn({ featureId, enabled });
+    return { ok: true, data: res.data };
+  } catch (e) {
+    console.error('[DS] setFeatureFlagCloud:', e);
+    return { ok: false, error: friendlyError(e) };
+  }
+}
+
+/**
+ * Call trusted Cloud Function to update plan feature assignments (free, weekly, monthly, yearly)
+ */
+export async function setPlanFeaturesCloud(planId, features) {
+  try {
+    const fn = httpsCallable(functions, 'updatePlanFeatures');
+    const res = await fn({ planId, features });
+    return { ok: true, data: res.data };
+  } catch (e) {
+    console.error('[DS] setPlanFeaturesCloud:', e);
+    return { ok: false, error: friendlyError(e) };
+  }
+}

@@ -1,243 +1,420 @@
 // src/services/FeatureAccessManager.js
-// ─── Centralized Feature Entitlement & Feature Flag Manager ─────────────────
-// Handles global feature toggle checks, maintenance modes, subscription entitlement verification,
-// plan hierarchy evaluation, and in-memory config caching.
+// ─── Phase 2 Centralized Feature Registry & Feature Access Manager ──────────
+// Authoritative single-client access decision layer. Evaluates canonical
+// Feature Registry, global feature flags, subscription plan assignments,
+// and real-time Firebase Firestore updates.
 
 import { auth, db } from './firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
-import { getUserSubscription } from './adminDataService';
+import { onIdTokenChanged } from 'firebase/auth';
+import { doc, onSnapshot, collection } from 'firebase/firestore';
 
-// ─── FEATURE REGISTRY (Discovered application features) ──────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. CANONICAL FEATURE REGISTRY (16 Real Application Features)
+// ═══════════════════════════════════════════════════════════════════════════
 export const FEATURE_REGISTRY = [
-  { id: 'qr_generator',      name: 'QR Code Generator',      category: 'core',       description: 'Create customizable standard & vCard QR codes', enabled: true, requiredPlan: 'free', maintenanceMode: false, visible: true },
-  { id: 'barcode_generator', name: 'Barcode Generator',     category: 'core',       description: 'Generate standard 1D/2D linear barcodes',       enabled: true, requiredPlan: 'free', maintenanceMode: false, visible: true },
-  { id: 'scanner',           name: 'QR & Barcode Scanner',   category: 'core',       description: 'Scan barcodes and QR codes via camera/file',    enabled: true, requiredPlan: 'free', maintenanceMode: false, visible: true },
-  { id: 'history',           name: 'History Tracking',       category: 'core',       description: 'Keep log of created and scanned QR items',       enabled: true, requiredPlan: 'free', maintenanceMode: false, visible: true },
-  { id: 'saved',             name: 'Saved QR Collection',    category: 'core',       description: 'Bookmark favorite QR codes locally',             enabled: true, requiredPlan: 'free', maintenanceMode: false, visible: true },
-  { id: 'export_png',        name: 'PNG Export',             category: 'export',     description: 'Export QR/Barcodes as high-res PNG images',     enabled: true, requiredPlan: 'free', maintenanceMode: false, visible: true },
-  { id: 'dark_mode',         name: 'Dark Mode UI',           category: 'app',        description: 'Toggle dark interface styling',                  enabled: true, requiredPlan: 'free', maintenanceMode: false, visible: true },
-  { id: 'pwa_install',       name: 'PWA / Offline Install',  category: 'app',        description: 'Install app to home screen for offline use',     enabled: true, requiredPlan: 'free', maintenanceMode: false, visible: true },
+  // CORE
+  {
+    featureId: 'qr_generator',
+    displayName: 'QR Code Generator',
+    category: 'core',
+    description: 'Create customizable standard, vCard & WiFi QR codes',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'barcode_generator',
+    displayName: 'Barcode Generator',
+    category: 'core',
+    description: 'Generate standard 1D and 2D linear barcodes',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'scanner',
+    displayName: 'QR & Barcode Scanner',
+    category: 'core',
+    description: 'Scan barcodes and QR codes via camera or image upload',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'history',
+    displayName: 'History Tracking',
+    category: 'core',
+    description: 'Keep log of created and scanned QR & Barcode items',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'saved',
+    displayName: 'Saved QR Collection',
+    category: 'core',
+    description: 'Bookmark favorite QR codes locally',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
 
-  // Premium Gated Features
-  { id: 'export_svg',        name: 'SVG Vector Export',      category: 'export',     description: 'Download scalable SVG vector QR codes',          enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'export_pdf',        name: 'PDF Document Export',    category: 'export',     description: 'Download printable PDF QR documents',            enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'bulk_generation',   name: 'Bulk Batch Generation',  category: 'generation', description: 'Batch process QR codes from CSV/Excel',          enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'cloud_sync',        name: 'Cloud Templates & Sync', category: 'cloud',      description: 'Sync QR templates across devices in cloud',       enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'custom_eyes',       name: 'Custom Eye Patterns',    category: 'design',     description: 'Use custom eye and corner shape styles',         enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'background_image',  name: 'Background Image Fill',  category: 'design',     description: 'Embed custom background image into QR codes',    enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'logo_upload',       name: 'Custom Logo Embed',      category: 'design',     description: 'Overlay custom logos in QR center',              enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'text_overlay',      name: 'Text Overlay',           category: 'design',     description: 'Add custom text banners inside QR codes',        enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'texture_effects',   name: 'Texture & Gradient Fill',category: 'design',     description: 'Apply artistic texture fills to QR modules',     enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'gradient_colors',   name: 'Gradient Colors',        category: 'design',     description: 'Apply multi-color gradients to QR matrix',       enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'custom_frames',     name: 'Custom Frames',          category: 'design',     description: 'Wrap QR codes in decorative outer frames',       enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true },
-  { id: 'ad_free',           name: 'Ad-Free Experience',     category: 'app',        description: 'Remove all advertisements from app',             enabled: true, requiredPlan: 'pro', maintenanceMode: false, visible: true }
+  // EXPORT
+  {
+    featureId: 'export_png',
+    displayName: 'PNG Image Export',
+    category: 'export',
+    description: 'Export QR & Barcode codes as PNG images',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'export_jpg',
+    displayName: 'JPG Image Export',
+    category: 'export',
+    description: 'Export QR & Barcode codes as JPG images',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'export_svg',
+    displayName: 'SVG Vector Export',
+    category: 'export',
+    description: 'Download scalable SVG vector QR & Barcode graphics',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'export_pdf',
+    displayName: 'PDF Document Export',
+    category: 'export',
+    description: 'Download printable PDF QR documents',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+
+  // DESIGN
+  {
+    featureId: 'custom_logo',
+    displayName: 'Custom Logo Embed',
+    category: 'design',
+    description: 'Overlay custom brand logos inside QR codes',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'custom_colors',
+    displayName: 'Custom Colors & Gradients',
+    category: 'design',
+    description: 'Apply custom color palettes & gradient fills',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'custom_shapes',
+    displayName: 'Custom Eye & Dot Shapes',
+    category: 'design',
+    description: 'Use custom dots, eye styles & outer frames',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+  {
+    featureId: 'premium_templates',
+    displayName: 'Premium Templates',
+    category: 'design',
+    description: 'Access curated premium QR design presets & templates',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+
+  // GENERATION
+  {
+    featureId: 'bulk_generation',
+    displayName: 'Bulk Batch Generation',
+    category: 'generation',
+    description: 'Batch process QR codes from CSV/Excel data',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
+
+  // CLOUD
+  {
+    featureId: 'cloud_sync',
+    displayName: 'Cloud Templates & Sync',
+    category: 'cloud',
+    description: 'Sync QR templates & projects across devices in cloud',
+    defaultEnabled: true,
+    requiresAuthentication: true,
+    allowSuperAdminOverride: true,
+  },
+
+  // SETTINGS
+  {
+    featureId: 'save_location',
+    displayName: 'Save Location Preference',
+    category: 'settings',
+    description: 'Customize export storage directory on device',
+    defaultEnabled: true,
+    requiresAuthentication: false,
+    allowSuperAdminOverride: true,
+  },
 ];
 
-// ─── PLAN HIERARCHY MAP ──────────────────────────────────────────────────────
-const PLAN_HIERARCHY = {
-  free: 0,
-  pro: 1,
-  daily: 1,
-  weekly: 1,
-  yearly: 1,
-  pro_monthly: 1,
-  pro_yearly: 1,
-  lifetime: 2,
-};
+// ═══════════════════════════════════════════════════════════════════════════
+// 2. SUBSCRIPTION PLAN DEFINITIONS (Exactly 4 Plans)
+// ═══════════════════════════════════════════════════════════════════════════
+export const CANONICAL_PLANS = ['free', 'weekly', 'monthly', 'yearly'];
 
-// ─── REASON CODES ────────────────────────────────────────────────────────────
+export const DEFAULT_FREE_FEATURES = [
+  'qr_generator',
+  'barcode_generator',
+  'scanner',
+  'history',
+  'saved',
+  'export_png',
+  'export_jpg',
+  'save_location',
+];
+
+export const DEFAULT_PAID_FEATURES = FEATURE_REGISTRY.map(f => f.featureId);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. REASON & STATUS CODES
+// ═══════════════════════════════════════════════════════════════════════════
 export const REASON = {
   ALLOWED: 'ALLOWED',
   FEATURE_DISABLED: 'FEATURE_DISABLED',
-  MAINTENANCE: 'MAINTENANCE',
   PLAN_REQUIRED: 'PLAN_REQUIRED',
-  SUBSCRIPTION_EXPIRED: 'SUBSCRIPTION_EXPIRED',
   UNAUTHENTICATED: 'UNAUTHENTICATED',
+  UNKNOWN_FEATURE: 'UNKNOWN_FEATURE',
 };
 
-// ─── IN-MEMORY CACHE STATE ───────────────────────────────────────────────────
+export const STATUS = {
+  ALLOWED: 'allowed',
+  DISABLED_BY_ADMIN: 'disabled_by_admin',
+  REQUIRES_PLAN: 'requires_plan',
+  REQUIRES_AUTHENTICATION: 'requires_authentication',
+  UNKNOWN_FEATURE: 'unknown_feature',
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. CENTRALIZED FEATURE ACCESS MANAGER CLASS
+// ═══════════════════════════════════════════════════════════════════════════
 class FeatureAccessManagerService {
   constructor() {
     this.currentUser = null;
+    this.userClaims = {};
     this.userSubscription = null;
-    this.featuresConfig = {};      // Map of featureId -> feature object from Firestore
-    this.isInitialized = false;
+    this.globalFlags = {};       // global_config/featureFlags doc
+    this.planConfigs = {};       // subscription_plans/{planId} docs
+    this.unsubFlags = null;
+    this.unsubPlans = null;
+    this.unsubSub = null;
 
-    // Listen to Firebase Auth state
-    onAuthStateChanged(auth, async (u) => {
-      this.currentUser = u;
-      await this.refreshFeatureConfiguration();
-    });
+    this.init();
   }
 
-  /**
-   * Initializes or refreshes cached configuration from Firestore global_config/features/{featureId}
-   */
-  async refreshFeatureConfiguration() {
-    try {
-      // Fetch Firestore feature collection overrides
-      const snap = await getDocs(collection(db, 'global_config', 'features', 'items')).catch(() => null);
-      const remoteFeatures = {};
-      if (snap) {
-        snap.forEach(doc => {
-          remoteFeatures[doc.id] = doc.data();
-        });
-      }
-
-      this.featuresConfig = remoteFeatures;
-
-      if (this.currentUser?.uid) {
-        this.userSubscription = await getUserSubscription(this.currentUser.uid);
+  init() {
+    // 1. Listen to Auth & Custom Claims
+    onIdTokenChanged(auth, async (u) => {
+      this.currentUser = u;
+      if (u) {
+        try {
+          const res = await u.getIdTokenResult();
+          this.userClaims = res.claims || {};
+        } catch {
+          this.userClaims = {};
+        }
+        this.listenUserSubscription(u.uid);
       } else {
+        this.userClaims = {};
         this.userSubscription = null;
+        if (this.unsubSub) this.unsubSub();
       }
-      this.isInitialized = true;
+    });
+
+    // 2. Real-time listener for global_config/featureFlags
+    try {
+      this.unsubFlags = onSnapshot(doc(db, 'global_config', 'featureFlags'), (docSnap) => {
+        if (docSnap.exists()) {
+          this.globalFlags = docSnap.data() || {};
+        }
+      }, (err) => console.warn('[FeatureAccessManager] Global flags listener notice:', err.message));
     } catch (e) {
-      console.warn('[FeatureAccessManager] Error refreshing config:', e);
-      if (!this.isInitialized) {
-        this.isInitialized = true;
-      }
+      console.warn('[FeatureAccessManager] Failed to init globalFlags listener:', e);
+    }
+
+    // 3. Real-time listener for subscription_plans collection
+    try {
+      this.unsubPlans = onSnapshot(collection(db, 'subscription_plans'), (colSnap) => {
+        const plans = {};
+        colSnap.forEach(d => {
+          plans[d.id] = d.data();
+        });
+        this.planConfigs = plans;
+      }, (err) => console.warn('[FeatureAccessManager] Plans listener notice:', err.message));
+    } catch (e) {
+      console.warn('[FeatureAccessManager] Failed to init plans listener:', e);
+    }
+  }
+
+  listenUserSubscription(uid) {
+    if (this.unsubSub) this.unsubSub();
+    try {
+      this.unsubSub = onSnapshot(doc(db, 'user_subscriptions', uid), (docSnap) => {
+        if (docSnap.exists()) {
+          this.userSubscription = docSnap.data();
+        } else {
+          this.userSubscription = null;
+        }
+      }, () => {
+        this.userSubscription = null;
+      });
+    } catch (e) {
+      this.userSubscription = null;
     }
   }
 
   /**
-   * Evaluates subscription validity and returns current plan ID
+   * Evaluates user's active plan ('free', 'weekly', 'monthly', 'yearly')
    */
-  getEffectivePlan() {
+  getUserPlan() {
     const sub = this.userSubscription;
     if (!sub) return 'free';
 
-    const planId = sub.planId || (sub.isPro ? 'pro' : 'free');
+    const rawPlan = (sub.planId || '').toLowerCase();
+    
+    // Map legacy 'pro' or 'pro_monthly'/'pro_yearly'/'lifetime' to new canonical plans
+    let plan = 'free';
+    if (CANONICAL_PLANS.includes(rawPlan)) {
+      plan = rawPlan;
+    } else if (sub.isPro || rawPlan === 'pro' || rawPlan === 'pro_monthly' || rawPlan === 'pro_yearly' || rawPlan === 'lifetime') {
+      plan = 'monthly'; // default legacy paid fallback
+    }
 
-    // Lifetime never expires
-    if (planId === 'lifetime') return 'lifetime';
-
-    // Verify expiry date if set
+    // Check expiration if applicable
     if (sub.expiryDate) {
-      const expiry = new Date(sub.expiryDate).getTime();
-      if (Date.now() > expiry) {
-        return 'free'; // Expired
+      const expTime = new Date(sub.expiryDate).getTime();
+      if (!isNaN(expTime) && Date.now() > expTime) {
+        return 'free';
       }
     }
 
-    if (sub.cancelled) return 'free';
+    if (sub.status === 'inactive' || sub.cancelled) {
+      return 'free';
+    }
 
-    return planId;
+    return plan;
   }
 
   /**
-   * Primary Entitlement Evaluation API: requireAccess(featureId)
+   * Primary Entitlement Access API
    */
-  requireAccess(featureId) {
-    const regFeature = FEATURE_REGISTRY.find(f => f.id === featureId);
-    const remoteFeature = this.featuresConfig[featureId] || {};
+  canUseFeature(featureId) {
+    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
 
-    const mergedFeature = {
-      id: featureId,
-      enabled: remoteFeature.enabled !== undefined ? remoteFeature.enabled : (regFeature ? regFeature.enabled : true),
-      maintenanceMode: remoteFeature.maintenanceMode !== undefined ? remoteFeature.maintenanceMode : (regFeature ? regFeature.maintenanceMode : false),
-      requiredPlan: remoteFeature.requiredPlan || regFeature?.requiredPlan || 'free',
-      visible: remoteFeature.visible !== undefined ? remoteFeature.visible : (regFeature ? regFeature.visible : true),
-    };
-
-    const currentPlan = this.getEffectivePlan();
-
-    // 1. Check Global Feature Switch
-    if (!mergedFeature.enabled) {
+    // 1. Validate feature exists in Registry
+    if (!featDef) {
       return {
         allowed: false,
-        reason: REASON.FEATURE_DISABLED,
+        reason: REASON.UNKNOWN_FEATURE,
+        status: STATUS.UNKNOWN_FEATURE,
         featureId,
-        requiredPlan: mergedFeature.requiredPlan,
-        currentPlan,
+        requiredPlan: null,
       };
     }
 
-    // 2. Check Maintenance Mode
-    if (mergedFeature.maintenanceMode) {
-      return {
-        allowed: false,
-        reason: REASON.MAINTENANCE,
-        featureId,
-        requiredPlan: mergedFeature.requiredPlan,
-        currentPlan,
-      };
-    }
-
-    // 3. Free features accessible to all
-    if (mergedFeature.requiredPlan === 'free') {
+    // 2. Super Admin Override
+    const isSuperAdmin = this.userClaims?.role === 'super_admin';
+    if (isSuperAdmin && featDef.allowSuperAdminOverride) {
       return {
         allowed: true,
         reason: REASON.ALLOWED,
+        status: STATUS.ALLOWED,
         featureId,
         requiredPlan: 'free',
-        currentPlan,
+        isSuperAdminOverride: true,
       };
     }
 
-    // 4. Check Authentication requirement
-    if (!this.currentUser && mergedFeature.requiredPlan !== 'free') {
+    // 3. Check Global Feature Switch (global_config/featureFlags)
+    const flagVal = this.globalFlags[featureId];
+    const isGloballyEnabled = flagVal !== undefined ? Boolean(flagVal) : featDef.defaultEnabled;
+
+    if (!isGloballyEnabled) {
+      return {
+        allowed: false,
+        reason: REASON.FEATURE_DISABLED,
+        status: STATUS.DISABLED_BY_ADMIN,
+        featureId,
+        requiredPlan: null,
+      };
+    }
+
+    // 4. Check Authentication Requirement
+    if (featDef.requiresAuthentication && !this.currentUser) {
       return {
         allowed: false,
         reason: REASON.UNAUTHENTICATED,
+        status: STATUS.REQUIRES_AUTHENTICATION,
         featureId,
-        requiredPlan: mergedFeature.requiredPlan,
-        currentPlan: 'free',
+        requiredPlan: null,
       };
     }
 
-    // 5. Evaluate Plan Hierarchy Level
-    const userLevel = PLAN_HIERARCHY[currentPlan] || 0;
-    const requiredLevel = PLAN_HIERARCHY[mergedFeature.requiredPlan] || 1;
+    // 5. Check User Subscription Plan Feature Assignment
+    const userPlan = this.getUserPlan();
+    const planConfig = this.planConfigs[userPlan];
+    const allowedFeatures = planConfig?.features || (userPlan === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
 
-    if (userLevel < requiredLevel) {
-      const isExpired = this.userSubscription && this.userSubscription.expiryDate &&
-        new Date(this.userSubscription.expiryDate).getTime() < Date.now();
-
+    if (!allowedFeatures.includes(featureId)) {
       return {
         allowed: false,
-        reason: isExpired ? REASON.SUBSCRIPTION_EXPIRED : REASON.PLAN_REQUIRED,
+        reason: REASON.PLAN_REQUIRED,
+        status: STATUS.REQUIRES_PLAN,
         featureId,
-        requiredPlan: mergedFeature.requiredPlan,
-        currentPlan,
+        requiredPlan: this.findMinimumPlanForFeature(featureId),
       };
     }
 
     return {
       allowed: true,
       reason: REASON.ALLOWED,
+      status: STATUS.ALLOWED,
       featureId,
-      requiredPlan: mergedFeature.requiredPlan,
-      currentPlan,
+      requiredPlan: userPlan,
     };
   }
 
-  /**
-   * Backwards compatible API: canAccess(featureId)
-   */
-  canAccess(featureId) {
-    return this.requireAccess(featureId);
+  requireAccess(featureId) {
+    return this.canUseFeature(featureId);
+  }
+
+  getFeatureState(featureId) {
+    return this.canUseFeature(featureId);
+  }
+
+  findMinimumPlanForFeature(featureId) {
+    for (const pId of ['weekly', 'monthly', 'yearly']) {
+      const feats = this.planConfigs[pId]?.features || DEFAULT_PAID_FEATURES;
+      if (feats.includes(featureId)) return pId;
+    }
+    return 'weekly';
   }
 
   isFeatureAllowed(featureId) {
-    return this.requireAccess(featureId).allowed;
-  }
-
-  getRequiredPlan(featureId) {
-    const res = this.requireAccess(featureId);
-    return res.requiredPlan;
-  }
-
-  getAllFeatureStates() {
-    const states = {};
-    FEATURE_REGISTRY.forEach(f => {
-      states[f.id] = this.requireAccess(f.id);
-    });
-    return states;
+    return this.canUseFeature(featureId).allowed;
   }
 }
 
 export const FeatureAccessManager = new FeatureAccessManagerService();
 export default FeatureAccessManager;
-

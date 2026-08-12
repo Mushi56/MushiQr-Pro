@@ -16,6 +16,7 @@ import qrNotFoundSvg from '../assets/qr-not-found.svg';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { renderBarcode } from '../utils/barcodeEngine';
 import AppIcon from './AppIcon';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 // ─── Barcode format metadata ──────────────────────────────────────────────────
 // Formats supported by html5-qrcode (ZXing) for live camera scanning
@@ -510,6 +511,12 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
   const startScanner = useCallback(async () => {
     if (busyRef.current) return;
+    const scannerCheck = FeatureAccessManager.canUseFeature('scanner');
+    if (!scannerCheck.allowed) {
+      setError('Scanner feature is disabled by administrator or requires plan entitlement.');
+      setStatus('ERROR');
+      return;
+    }
     busyRef.current = true;
     if (!mountedRef.current) return;
     scanHandledRef.current = false;

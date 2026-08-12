@@ -179,3 +179,141 @@ exports.updateUserSubscription = onCall(async (request) => {
     message: `Successfully updated subscription for UID: ${targetUid}.`,
   };
 });
+
+// Canonical Feature Registry IDs for server-side validation
+const CANONICAL_FEATURE_IDS = [
+  'qr_generator',
+  'barcode_generator',
+  'scanner',
+  'history',
+  'saved',
+  'cloud_sync',
+  'export_png',
+  'export_jpg',
+  'export_svg',
+  'export_pdf',
+  'custom_logo',
+  'custom_colors',
+  'custom_shapes',
+  'premium_templates',
+  'bulk_generation',
+  'save_location',
+];
+
+/**
+ * Cloud Function C: updateFeatureFlag
+ * Global feature enable/disable toggle.
+ * Restricted to Super Admin role only.
+ */
+exports.updateFeatureFlag = onCall(async (request) => {
+  if (!request.auth || !request.auth.uid) {
+    throw new HttpsError('unauthenticated', 'User must be authenticated.');
+  }
+
+  const callerUid = request.auth.uid;
+  const callerRole = request.auth.token?.role || 'user';
+
+  if (callerRole !== 'super_admin') {
+    throw new HttpsError('permission-denied', 'Only Super Admin users can modify feature flags.');
+  }
+
+  const { featureId, enabled } = request.data || {};
+
+  if (!featureId || !CANONICAL_FEATURE_IDS.includes(featureId)) {
+    throw new HttpsError('invalid-argument', `Invalid featureId '${featureId}'. Must be one of canonical Feature Registry.`);
+  }
+
+  if (typeof enabled !== 'boolean') {
+    throw new HttpsError('invalid-argument', 'Enabled parameter must be a boolean value.');
+  }
+
+  const flagsRef = db.collection('global_config').doc('featureFlags');
+  const snap = await flagsRef.get();
+  const currentFlags = snap.exists ? snap.data() : {};
+  const previousValue = currentFlags[featureId] !== undefined ? currentFlags[featureId] : true;
+
+  await flagsRef.set({
+    [featureId]: enabled,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedBy: callerUid,
+  }, { merge: true });
+
+  await writeAuditLog(callerUid, callerRole, 'FEATURE_FLAG_UPDATED', null, {
+    featureId,
+    previousValue,
+    newValue: enabled,
+  });
+
+  return {
+    success: true,
+    message: `Successfully updated feature flag '${featureId}' to ${enabled}.`,
+  };
+});
+
+/**
+ * Cloud Function D: updatePlanFeatures
+ * Updates feature list associated with a subscription plan (free, weekly, monthly, yearly).
+ * Restricted to Super Admin role only.
+ */
+exports.updatePlanFeatures = onCall(async (request) => {
+  if (!request.auth || !request.auth.uid) {
+    throw new HttpsError('unauthenticated', 'User must be authenticated.');
+  }
+
+  const callerUid = request.auth.uid;
+  const callerRole = request.auth.token?.role || 'user';
+
+  if (callerRole !== 'super_admin') {
+    throw new HttpsError('permission-denied', 'Only Super Admin users can modify plan feature assignments.');
+  }
+
+  const { planId, features } = request.data || {};
+  const allowedPlans = ['free', 'weekly', 'monthly', 'yearly'];
+
+  if (!planId || !allowedPlans.includes(planId)) {
+    throw new HttpsError('invalid-argument', `Invalid planId '${planId}'. Allowed plans: ${allowedPlans.join(', ')}.`);
+  }
+
+  if (!Array.isArray(features)) {
+    throw new HttpsError('invalid-argument', 'Features parameter must be an array of canonical feature IDs.');
+  }
+
+  // Validate every feature ID and check for duplicates
+  const validatedFeatures = [];
+  for (const fId of features) {
+    if (!CANONICAL_FEATURE_IDS.includes(fId)) {
+      throw new HttpsError('invalid-argument', `Unknown feature ID '${fId}' cannot be assigned to plan.`);
+    }
+    if (!validatedFeatures.includes(fId)) {
+      validatedFeatures.push(fId);
+    }
+  }
+
+  const planRef = db.collection('subscription_plans').doc(planId);
+  const snap = await planRef.get();
+  const previousData = snap.exists ? snap.data() : {};
+
+  const updatedData = {
+    planId,
+    name: planId.charAt(0).toUpperCase() + planId.slice(1),
+    enabled: true,
+    features: validatedFeatures,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedBy: callerUid,
+  };
+
+  await planRef.set(updatedData, { merge: true });
+
+  await writeAuditLog(callerUid, callerRole, 'PLAN_FEATURES_UPDATED', null, {
+    planId,
+    previousFeatures: previousData.features || [],
+    newFeatures: validatedFeatures,
+  });
+
+  return {
+    success: true,
+    message: `Successfully updated features for plan '${planId}'.`,
+    featureCount: validatedFeatures.length,
+  };
+});
+

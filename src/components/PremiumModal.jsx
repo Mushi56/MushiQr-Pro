@@ -1,40 +1,35 @@
 // src/components/PremiumModal.jsx
 // ─── Premium Paywall Modal ─────────────────────────────────────────────────
-// Beautiful glassmorphism upgrade modal with plan cards.
+// Glassmorphism upgrade modal showing Weekly, Monthly, and Yearly subscription plans.
 
 import { useState } from 'react';
 import { X, Check, Crown, Zap, Star, Shield, Sparkles } from 'lucide-react';
 import { usePremium } from '../services/premiumContext';
 
-const PERIOD_LABELS = {
-  day: '/day',
-  week: '/week',
-  month: '/mo',
-  year: '/year',
-  forever: '',
-};
+const CANONICAL_PAID_PLANS = [
+  { id: 'weekly', name: 'Weekly Pass', price: 2.99, period: '/wk', color: '#a855f7', desc: '7-day full pro access' },
+  { id: 'monthly', name: 'Monthly Pro', price: 7.99, period: '/mo', color: '#3b82f6', popular: true, desc: 'Full monthly access' },
+  { id: 'yearly', name: 'Yearly Pass', price: 49.99, period: '/yr', color: '#22c55e', desc: 'Best value for 1 full year' },
+];
 
 export default function PremiumModal() {
   const {
     paywallOpen, hidePaywall, paywallFeature,
-    plans, premiumFeatures, subscribe, isPremium, currentPlan,
+    premiumFeatures, isPremium, currentPlan,
   } = usePremium();
   const [subscribing, setSubscribing] = useState(null);
 
   if (!paywallOpen) return null;
 
-  const activePlans = plans
-    .filter(p => p.active && p.id !== 'free')
-    .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-
   const lockedFeature = paywallFeature
-    ? premiumFeatures.find(f => f.id === paywallFeature)
+    ? premiumFeatures.find(f => f.featureId === paywallFeature)
     : null;
 
   const handleSubscribe = async (planId) => {
     setSubscribing(planId);
     try {
-      await subscribe(planId);
+      // Direct user to subscription handler or contact admin
+      alert(`Selected ${planId} plan. In production, this initiates Google Play Billing / Stripe Checkout.`);
     } catch (e) {
       console.error('Subscribe error:', e);
     } finally {
@@ -58,14 +53,14 @@ export default function PremiumModal() {
           <h2 className="premium-modal-title">Upgrade to Pro</h2>
           <p className="premium-modal-subtitle">
             {lockedFeature
-              ? `Unlock "${lockedFeature.label}" and all premium features`
+              ? `Unlock "${lockedFeature.displayName}" and all premium features`
               : 'Unlock all premium features and take your QR codes to the next level'}
           </p>
         </div>
 
         {/* Plan Cards */}
         <div className="premium-plans-grid">
-          {activePlans.map(plan => (
+          {CANONICAL_PAID_PLANS.map(plan => (
             <div
               key={plan.id}
               className={`premium-plan-card ${plan.popular ? 'popular' : ''}`}
@@ -80,7 +75,7 @@ export default function PremiumModal() {
               <div className="premium-plan-price">
                 <span className="premium-plan-currency">$</span>
                 <span className="premium-plan-amount">{plan.price.toFixed(2)}</span>
-                <span className="premium-plan-period">{PERIOD_LABELS[plan.period] || ''}</span>
+                <span className="premium-plan-period">{plan.period}</span>
               </div>
               <button
                 className="premium-plan-subscribe-btn"
@@ -93,7 +88,7 @@ export default function PremiumModal() {
                 ) : (
                   <>
                     <Zap size={14} />
-                    {isPremium && currentPlan?.id === plan.id ? 'Current Plan' : 'Subscribe'}
+                    {isPremium && currentPlan === plan.id ? 'Current Plan' : 'Subscribe'}
                   </>
                 )}
               </button>
@@ -107,10 +102,10 @@ export default function PremiumModal() {
             <Sparkles size={14} /> Everything included:
           </div>
           <div className="premium-features-grid">
-            {premiumFeatures.filter(f => f.id !== 'ad_free').map(f => (
-              <div key={f.id} className="premium-feature-item">
+            {premiumFeatures.map(f => (
+              <div key={f.featureId} className="premium-feature-item">
                 <Check size={14} className="premium-feature-check" />
-                <span>{f.label}</span>
+                <span>{f.displayName}</span>
               </div>
             ))}
           </div>
@@ -146,27 +141,6 @@ export function ProBadge({ featureId, onClick, children, style }) {
         <Crown size={8} />
         <span>PRO</span>
       </button>
-    </div>
-  );
-}
-
-// ─── Premium Gate wrapper ──────────────────────────────────────────────────
-export function PremiumGate({ featureId, children, fallback }) {
-  const { canAccess, showPaywall } = usePremium();
-  
-  if (canAccess(featureId)) return children;
-  
-  return fallback || (
-    <div
-      className="pro-lock-overlay"
-      onClick={() => showPaywall(featureId)}
-      title="PRO feature — tap to upgrade"
-    >
-      {children}
-      <div className="pro-lock-badge">
-        <Crown size={12} />
-        <span>PRO</span>
-      </div>
     </div>
   );
 }

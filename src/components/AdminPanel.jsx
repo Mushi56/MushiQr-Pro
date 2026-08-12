@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 
 import * as DS from '../services/adminDataService';
+import { FEATURE_REGISTRY, CANONICAL_PLANS, DEFAULT_FREE_FEATURES, DEFAULT_PAID_FEATURES } from '../services/FeatureAccessManager';
+import { setFeatureFlagCloud, setPlanFeaturesCloud } from '../services/adminDataService';
 import { QR_TEMPLATES } from '../utils/qrTemplates';
 import { auth, googleProvider } from '../services/firebase';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
@@ -3313,228 +3315,289 @@ function RevenuePanel() {
   );
 }
 
-function SubscriptionsPanel({ plans: initPlans, premiumFeatures: initFeatures, subscribers: initSubs, onSavePlans, onSaveFeatures }) {
-  const [plans, setPlans] = useState(initPlans || []);
-  const [features, setFeatures] = useState(initFeatures || []);
-  const [subs] = useState(initSubs || []);
-  const [tab, setTab] = useState('plans');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [editingPlan, setEditingPlan] = useState(null);
-  const [newFeature, setNewFeature] = useState('');
+function SubscriptionsPanel({ subscribers: initSubs }) {
   const toast = useToast();
+  const [activeTab, setActiveTab] = useState('plans'); // 'plans' | 'matrix' | 'subscribers'
+  const [managingPlanId, setManagingPlanId] = useState(null);
+  const [modalFeatures, setModalFeatures] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [globalFlags, setGlobalFlags] = useState({});
+  const [planConfigs, setPlanConfigs] = useState({});
 
-  useEffect(() => { if (initPlans) setPlans(initPlans); }, [initPlans]);
-  useEffect(() => { if (initFeatures) setFeatures(initFeatures); }, [initFeatures]);
-
-  const PERIOD_OPTS = [
-    { value: 'forever', label: 'Forever (Free)' },
-    { value: 'day',     label: 'Daily' },
-    { value: 'week',    label: 'Weekly' },
-    { value: 'month',   label: 'Monthly' },
-    { value: 'year',    label: 'Yearly' },
+  // 4 Canonical Plans
+  const canonicalPlans = [
+    { id: 'free', name: 'Free', color: T.textSec, desc: 'Basic standard QR & Barcode creation' },
+    { id: 'weekly', name: 'Weekly', color: T.purple, desc: 'Short-term full pro access pass' },
+    { id: 'monthly', name: 'Monthly', color: T.blue, desc: 'Full monthly subscription entitlement' },
+    { id: 'yearly', name: 'Yearly', color: T.green, desc: 'Annual ultimate plan entitlement' },
   ];
 
-  // Plan CRUD
-  const updatePlan = (id, key, val) => setPlans(p => p.map(pl => pl.id === id ? { ...pl, [key]: val } : pl));
-  const deletePlan = (id) => { if (id === 'free') return; setPlans(p => p.filter(pl => pl.id !== id)); };
-  const addPlan = () => {
-    const id = 'plan_' + Date.now();
-    setPlans(p => [...p, { id, name: 'New Plan', price: 0, period: 'month', color: '#8b5cf6', active: true, popular: false, sortOrder: p.length }]);
-    setEditingPlan(id);
+  // Load plan features and global flags on mount
+  useEffect(() => {
+    async function load() {
+      try {
+        const { doc, getDoc, collection, getDocs } = await import('firebase/firestore');
+        const { db } = await import('../services/firebase');
+        
+        // Load global flags
+        const flagSnap = await getDoc(doc(db, 'global_config', 'featureFlags'));
+        if (flagSnap.exists()) setGlobalFlags(flagSnap.data() || {});
+
+        // Load plan configs
+        const plansSnap = await getDocs(collection(db, 'subscription_plans'));
+        const pConfigs = {};
+        plansSnap.forEach(d => { pConfigs[d.id] = d.data()?.features || []; });
+        setPlanConfigs(pConfigs);
+      } catch (e) {
+        console.warn('[SubscriptionsPanel] Load notice:', e.message);
+      }
+    }
+    load();
+  }, []);
+
+  const openManageFeatures = (planId) => {
+    const currentFeats = planConfigs[planId] || (planId === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
+    setModalFeatures([...currentFeats]);
+    setManagingPlanId(planId);
   };
 
-  // Feature CRUD
-  const updateFeature = (id, key, val) => setFeatures(f => f.map(ft => ft.id === id ? { ...ft, [key]: val } : ft));
-  const toggleFeaturePlan = (featureId, planId) => {
-    setFeatures(f => f.map(ft => {
-      if (ft.id !== featureId) return ft;
-      const has = (ft.plans || []).includes(planId);
-      return { ...ft, plans: has ? ft.plans.filter(p => p !== planId) : [...(ft.plans || []), planId] };
-    }));
-  };
-  const deleteFeature = (id) => setFeatures(f => f.filter(ft => ft.id !== id));
-  const addFeature = () => {
-    if (!newFeature.trim()) return;
-    const id = newFeature.trim().toLowerCase().replace(/\s+/g, '_');
-    if (features.find(f => f.id === id)) { toast('Feature ID already exists', 'warning'); return; }
-    setFeatures(f => [...f, { id, label: newFeature.trim(), description: '', plans: plans.filter(p => p.id !== 'free').map(p => p.id) }]);
-    setNewFeature('');
-  };
-
-  const handleSave = async () => {
+  const handleSaveModalFeatures = async () => {
+    if (!managingPlanId) return;
     setSaving(true);
     try {
-      if (tab === 'plans') { await onSavePlans(plans); toast('Subscription plans saved!', 'success'); }
-      else { await onSaveFeatures(features); toast('Premium features saved!', 'success'); }
-      setSaved(true); setTimeout(() => setSaved(false), 2500);
-    } catch (e) { toast('Save failed: ' + (e.message || ''), 'error', 6000); }
-    finally { setSaving(false); }
+      const res = await setPlanFeaturesCloud(managingPlanId, modalFeatures);
+      if (res.ok) {
+        setPlanConfigs(prev => ({ ...prev, [managingPlanId]: modalFeatures }));
+        toast(`Successfully saved ${modalFeatures.length} features for ${managingPlanId} plan!`, 'success');
+        setManagingPlanId(null);
+      } else {
+        toast(`Failed to save plan features: ${res.error}`, 'error');
+      }
+    } catch (e) {
+      toast(`Save error: ${e.message}`, 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // Stats
-  const paidSubs = subs.filter(s => s.planId && s.planId !== 'free' && !s.cancelled);
-  const planCounts = {};
-  paidSubs.forEach(s => { planCounts[s.planId] = (planCounts[s.planId] || 0) + 1; });
+  const handleToggleGlobalFlag = async (featureId, currentVal) => {
+    const newVal = !currentVal;
+    try {
+      const res = await setFeatureFlagCloud(featureId, newVal);
+      if (res.ok) {
+        setGlobalFlags(prev => ({ ...prev, [featureId]: newVal }));
+        toast(`Global feature '${featureId}' set to ${newVal ? 'ENABLED' : 'DISABLED'}!`, 'success');
+      } else {
+        toast(`Failed to toggle feature flag: ${res.error}`, 'error');
+      }
+    } catch (e) {
+      toast(`Error: ${e.message}`, 'error');
+    }
+  };
 
-  const paidPlans = plans.filter(p => p.id !== 'free');
+  const categories = ['core', 'export', 'design', 'generation', 'cloud', 'settings'];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Stats Row */}
-      <div className="ad-auto-grid">
-        <StatCard icon={CreditCard} label="Total Subscribers" value={paidSubs.length} color={T.purple} trendLabel="active paid" />
-        <StatCard icon={Users} label="Free Users" value={subs.length - paidSubs.length} color={T.textSec} trendLabel="no active plan" />
-        <StatCard icon={Zap} label="Active Plans" value={plans.filter(p => p.active).length} color={T.green} trendLabel={`of ${plans.length} total`} />
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 6 }}>
-        {[['plans', 'Plans'], ['features', 'Premium Features'], ['subscribers', 'Subscribers']].map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)} style={{
-            padding: '8px 16px', borderRadius: T.r.md, border: `1px solid ${tab === id ? T.accent : T.border}`,
-            background: tab === id ? T.accentLow : 'transparent', color: tab === id ? T.accent : T.textSec,
-            fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-          }}>{label}</button>
+      {/* Top Header Tabs */}
+      <div style={{ display: 'flex', gap: 8, borderBottom: `1px solid ${T.border}`, paddingBottom: 12 }}>
+        {[
+          ['plans', 'Subscription Plans (4)'],
+          ['matrix', 'Feature Management (16)'],
+          ['subscribers', 'Active Subscribers'],
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            style={{
+              padding: '8px 16px', borderRadius: T.r.md, border: `1px solid ${activeTab === id ? T.accent : T.border}`,
+              background: activeTab === id ? T.accentLow : 'transparent', color: activeTab === id ? T.accent : T.textSec,
+              fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            {label}
+          </button>
         ))}
       </div>
 
-      {/* ═══ PLANS TAB ═══ */}
-      {tab === 'plans' && (
-        <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Btn onClick={addPlan} icon={<Plus size={13} />} variant="ghost">Add Plan</Btn>
-            <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Plans'}
-            </Btn>
+      {/* ═══ TAB 1: SUBSCRIPTION PLANS (4 CANONICAL) ═══ */}
+      {activeTab === 'plans' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.5 }}>
+            Centralized Plan Feature Assignments. Super Admin controls which canonical features belong to Free, Weekly, Monthly, and Yearly plans.
           </div>
-          <div className="ad-auto-grid">
-            {plans.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(plan => (
-              <AdminCard key={plan.id} style={{ border: `1px solid ${plan.color}33` }}
-                right={plan.id !== 'free' && <button onClick={() => deletePlan(plan.id)} style={{ background: 'none', border: 'none', color: T.red, cursor: 'pointer', padding: 4 }}><Trash2 size={14} /></button>}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Badge color={plan.color}>{plan.name}</Badge>
-                    {plan.popular && <Badge color={T.orange}>Popular</Badge>}
-                    {!plan.active && <Badge color={T.red}>Inactive</Badge>}
-                  </div>
-                  <div style={{ fontSize: 26, fontWeight: 900, color: plan.color }}>
-                    ${typeof plan.price === 'number' ? plan.price.toFixed(2) : plan.price}
-                    <span style={{ fontSize: 12, color: T.textSec, fontWeight: 500 }}>/{plan.period}</span>
-                  </div>
-                  {editingPlan === plan.id ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      <FormInput label="Plan Name" value={plan.name} onChange={v => updatePlan(plan.id, 'name', v)} />
-                      <FormInput label="Price ($)" type="number" value={plan.price} onChange={v => updatePlan(plan.id, 'price', parseFloat(v) || 0)} />
-                      <FormSelect label="Billing Period" value={plan.period} onChange={v => updatePlan(plan.id, 'period', v)} options={PERIOD_OPTS} />
-                      <FormInput label="Color" type="color" value={plan.color} onChange={v => updatePlan(plan.id, 'color', v)} />
-                      <FormInput label="Sort Order" type="number" value={plan.sortOrder || 0} onChange={v => updatePlan(plan.id, 'sortOrder', parseInt(v) || 0)} />
-                      <ToggleRow label="Active" description="Show this plan to users" checked={!!plan.active} onChange={v => updatePlan(plan.id, 'active', v)} />
-                      <ToggleRow label="Popular" description="Highlight as the recommended plan" checked={!!plan.popular} onChange={v => updatePlan(plan.id, 'popular', v)} />
-                      <Btn onClick={() => setEditingPlan(null)} variant="ghost" icon={<Check size={13} />}>Done Editing</Btn>
+          <div className="ad-two-col">
+            {canonicalPlans.map(plan => {
+              const assignedFeats = planConfigs[plan.id] || (plan.id === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
+              return (
+                <AdminCard key={plan.id} style={{ border: `1px solid ${plan.color}44` }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Badge color={plan.color}>{plan.name} Plan</Badge>
+                      <span style={{ fontSize: 11, color: T.textMut, fontFamily: 'monospace' }}>ID: {plan.id}</span>
                     </div>
-                  ) : (
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <Btn onClick={() => setEditingPlan(plan.id)} variant="ghost" size="sm" icon={<Edit size={12} />}>Edit</Btn>
+
+                    <div style={{ fontSize: 13, color: T.textSec }}>{plan.desc}</div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: T.bgEl, padding: '10px 14px', borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
+                      <div style={{ fontSize: 22, fontWeight: 900, color: plan.color }}>
+                        {assignedFeats.length}
+                      </div>
+                      <div style={{ fontSize: 11, color: T.textSec }}>
+                        Canonical Features Assigned
+                      </div>
                     </div>
-                  )}
-                  {/* Subscriber count */}
-                  <div style={{ fontSize: 11, color: T.textMut, marginTop: 4 }}>
-                    {planCounts[plan.id] || 0} active subscriber{(planCounts[plan.id] || 0) !== 1 ? 's' : ''}
+
+                    <Btn
+                      onClick={() => openManageFeatures(plan.id)}
+                      icon={<Sliders size={14} />}
+                      style={{ background: plan.color, color: '#fff', fontWeight: 700 }}
+                    >
+                      Manage Features ({assignedFeats.length})
+                    </Btn>
                   </div>
-                </div>
-              </AdminCard>
-            ))}
+                </AdminCard>
+              );
+            })}
           </div>
-        </>
+        </div>
       )}
 
-      {/* ═══ FEATURES TAB ═══ */}
-      {tab === 'features' && (
-        <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Features'}
-            </Btn>
-          </div>
-
-          <AdminCard title="Feature × Plan Matrix" subtitle="Toggle which plans include each premium feature">
-            {/* Header Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: `1fr 60px repeat(${paidPlans.length}, 70px)`, gap: 4, alignItems: 'center', marginBottom: 8, paddingBottom: 8, borderBottom: `1px solid ${T.border}` }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Feature</div>
-              <div></div>
-              {paidPlans.map(p => (
-                <div key={p.id} style={{ fontSize: 10, fontWeight: 800, color: p.color, textAlign: 'center', textTransform: 'uppercase' }}>{p.name}</div>
-              ))}
-            </div>
-            {/* Feature Rows */}
-            {features.map((feat, i) => (
-              <div key={feat.id} style={{
-                display: 'grid', gridTemplateColumns: `1fr 60px repeat(${paidPlans.length}, 70px)`, gap: 4, alignItems: 'center',
-                padding: '8px 0', borderBottom: i < features.length - 1 ? `1px solid ${T.border}` : 'none',
-              }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{feat.label}</div>
-                  <div style={{ fontSize: 11, color: T.textMut }}>{feat.description}</div>
+      {/* ═══ TAB 2: GLOBAL FEATURE MANAGEMENT (16 CANONICAL FEATURES) ═══ */}
+      {activeTab === 'matrix' && (
+        <AdminCard title="Canonical Feature Registry (16 Features)" subtitle="Toggle global enable/disable flags for application features">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 12 }}>
+            {categories.map(cat => {
+              const catFeats = FEATURE_REGISTRY.filter(f => f.category === cat);
+              if (!catFeats.length) return null;
+              return (
+                <div key={cat} style={{ background: T.bgEl, borderRadius: T.r.md, padding: 16, border: `1px solid ${T.border}` }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: T.accent, textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.8px' }}>
+                    {cat} FEATURES ({catFeats.length})
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {catFeats.map(feat => {
+                      const enabled = globalFlags[feat.featureId] !== undefined ? Boolean(globalFlags[feat.featureId]) : feat.defaultEnabled;
+                      return (
+                        <div key={feat.featureId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: T.bgCard, borderRadius: T.r.sm, border: `1px solid ${T.border}` }}>
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>
+                              {feat.displayName} <span style={{ fontSize: 10, color: T.textMut, fontFamily: 'monospace', marginLeft: 6 }}>({feat.featureId})</span>
+                            </div>
+                            <div style={{ fontSize: 11, color: T.textSec, marginTop: 2 }}>{feat.description}</div>
+                          </div>
+                          <Toggle
+                            checked={enabled}
+                            onChange={() => handleToggleGlobalFlag(feat.featureId, enabled)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-                <button onClick={() => deleteFeature(feat.id)} style={{ background: 'none', border: 'none', color: T.red, cursor: 'pointer', padding: 4, justifySelf: 'center' }}>
-                  <Trash2 size={12} />
-                </button>
-                {paidPlans.map(p => {
-                  const included = (feat.plans || []).includes(p.id);
-                  return (
-                    <div key={p.id} style={{ display: 'flex', justifyContent: 'center' }}>
-                      <button onClick={() => toggleFeaturePlan(feat.id, p.id)} style={{
-                        width: 28, height: 28, borderRadius: 8, border: `1.5px solid ${included ? p.color : T.border}`,
-                        background: included ? `${p.color}20` : 'transparent', cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
-                      }}>
-                        {included && <Check size={14} color={p.color} />}
-                      </button>
-                    </div>
-                  );
-                })}
+              );
+            })}
+          </div>
+        </AdminCard>
+      )}
+
+      {/* ═══ TAB 3: SUBSCRIBERS ═══ */}
+      {activeTab === 'subscribers' && (
+        <AdminCard title="Active Subscribers" subtitle="User subscription state tracked in user_subscriptions">
+          <div style={{ padding: 16, textAlign: 'center', color: T.textSec, fontSize: 13 }}>
+            Use the Users Panel to view and manage individual user subscription entitlements.
+          </div>
+        </AdminCard>
+      )}
+
+      {/* ═══ MANAGE FEATURES MODAL ═══ */}
+      {managingPlanId && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: 20,
+        }}>
+          <div style={{
+            background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.xl,
+            maxWidth: 640, width: '100%', maxHeight: '85vh', display: 'flex', flexDirection: 'column',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.8)', overflow: 'hidden',
+          }}>
+            {/* Modal Header */}
+            <div style={{ padding: '20px 24px', borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: T.text, textTransform: 'capitalize' }}>
+                  Manage Features — {managingPlanId} Plan
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: 12, color: T.textSec }}>
+                  Select which canonical features are granted to users on the <strong>{managingPlanId}</strong> plan ({modalFeatures.length} selected).
+                </p>
               </div>
-            ))}
-            {/* Add Feature */}
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <input value={newFeature} onChange={e => setNewFeature(e.target.value)} placeholder="New feature name…"
-                onKeyDown={e => e.key === 'Enter' && addFeature()}
-                style={{ flex: 1, background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, color: T.text, fontSize: 13, padding: '8px 12px', outline: 'none', fontFamily: 'inherit' }}
-              />
-              <Btn onClick={addFeature} variant="ghost" icon={<Plus size={13} />}>Add</Btn>
+              <button onClick={() => setManagingPlanId(null)} style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
             </div>
-          </AdminCard>
-        </>
-      )}
 
-      {/* ═══ SUBSCRIBERS TAB ═══ */}
-      {tab === 'subscribers' && (
-        <AdminCard title="Active Subscribers" subtitle={`${paidSubs.length} paid subscriber${paidSubs.length !== 1 ? 's' : ''}`} noPadding>
-          {paidSubs.length === 0 ? (
-            <EmptyState icon={CreditCard} title="No subscribers yet" desc="When users subscribe to a premium plan, they will appear here." />
-          ) : (
-            <div>
-              {paidSubs.map((sub, i) => {
-                const plan = plans.find(p => p.id === sub.planId);
+            {/* Modal Content - Feature Selector Grouped by Category */}
+            <div style={{ padding: 24, overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {categories.map(cat => {
+                const catFeats = FEATURE_REGISTRY.filter(f => f.category === cat);
+                if (!catFeats.length) return null;
                 return (
-                  <div key={sub.uid || i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', borderBottom: i < paidSubs.length - 1 ? `1px solid ${T.border}` : 'none' }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: `${plan?.color || T.purple}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: plan?.color || T.purple, fontSize: 14, fontWeight: 800 }}>
-                      {(sub.userName || sub.userEmail || '?')[0].toUpperCase()}
+                  <div key={cat} style={{ background: T.bgEl, borderRadius: T.r.md, padding: 14, border: `1px solid ${T.border}` }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: T.accent, textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.8px' }}>
+                      {cat}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub.userName || sub.userEmail || sub.uid}</div>
-                      <div style={{ fontSize: 11, color: T.textMut }}>{sub.userEmail || sub.uid}</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      {catFeats.map(feat => {
+                        const checked = modalFeatures.includes(feat.featureId);
+                        return (
+                          <label
+                            key={feat.featureId}
+                            onClick={() => {
+                              if (checked) {
+                                setModalFeatures(modalFeatures.filter(f => f !== feat.featureId));
+                              } else {
+                                setModalFeatures([...modalFeatures, feat.featureId]);
+                              }
+                            }}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
+                              background: checked ? T.accentLow : T.bgCard,
+                              border: `1px solid ${checked ? T.accent : T.border}`,
+                              borderRadius: T.r.sm, cursor: 'pointer', userSelect: 'none',
+                              transition: 'all 0.15s ease',
+                            }}
+                          >
+                            <div style={{
+                              width: 18, height: 18, borderRadius: 4,
+                              border: `1.5px solid ${checked ? T.accent : T.border}`,
+                              background: checked ? T.accent : 'transparent',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+                            }}>
+                              {checked && <Check size={12} strokeWidth={3} />}
+                            </div>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: checked ? T.text : T.textSec }}>
+                              {feat.displayName}
+                            </span>
+                          </label>
+                        );
+                      })}
                     </div>
-                    <Badge color={plan?.color || T.purple}>{plan?.name || sub.planId}</Badge>
-                    <div style={{ fontSize: 11, color: T.textMut }}>{sub.startedAt ? new Date(sub.startedAt).toLocaleDateString() : '—'}</div>
                   </div>
                 );
               })}
             </div>
-          )}
-        </AdminCard>
+
+            {/* Modal Footer */}
+            <div style={{ padding: '16px 24px', borderTop: `1px solid ${T.border}`, display: 'flex', justifyContent: 'flex-end', gap: 12, background: T.bgEl }}>
+              <Btn onClick={() => setManagingPlanId(null)} variant="ghost">Cancel</Btn>
+              <Btn onClick={handleSaveModalFeatures} disabled={saving} icon={saving ? <RefreshCw className="spin" size={14} /> : <Save size={14} />}>
+                {saving ? 'Saving...' : 'Save Plan Features'}
+              </Btn>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

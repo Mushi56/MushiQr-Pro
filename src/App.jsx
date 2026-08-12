@@ -91,7 +91,6 @@ import { trackUserProfile, trackAnonymousVisitor, linkVisitorToUser } from './se
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import BatchPage from './components/BatchPage';
 import BarcodePage from './components/BarcodePage';
-import ScannerGunPage from './components/ScannerGunPage';
 import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
 import SaveLocationModal from './components/SaveLocationModal';
@@ -5774,8 +5773,6 @@ export default function App() {
             setTheme={setTheme}
             effectiveTheme={effectiveTheme}
           />
-        ) : activePage === 'scanner-gun' ? (
-          <ScannerGunPage onNavigate={navigateTo} />
         ) : activePage === 'settings' ? (
           <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
         ) : activePage === 'you' ? (
