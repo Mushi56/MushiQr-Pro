@@ -3614,6 +3614,7 @@ function SupportPanel() {
 // ─── Wrap the entire AdminPanel in the ToastProvider ──────────────────────
 function AdminPanelInner() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
 
   const [section, setSection]     = useState('dashboard');
@@ -3637,15 +3638,26 @@ function AdminPanelInner() {
   const [loading, setLoading]               = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      if (user) {
+        try {
+          const tokenResult = await user.getIdTokenResult();
+          setIsSuperAdmin(tokenResult.claims.role === 'super_admin');
+        } catch (e) {
+          setIsSuperAdmin(false);
+        }
+      } else {
+        setIsSuperAdmin(false);
+      }
       setAuthLoading(false);
     });
     return unsubscribe;
   }, []);
 
   useEffect(() => {
-    if (authLoading || !currentUser || currentUser.email !== 'mabuneri143@gmail.com') return;
+    // UI visibility guard — Real security enforcement is independently handled by Firestore Rules & Cloud Functions
+    if (authLoading || !currentUser || !isSuperAdmin) return;
 
     async function init() {
       try {
@@ -3667,7 +3679,7 @@ function AdminPanelInner() {
     const onResize = () => setIsMobile(window.innerWidth < 900);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, [authLoading, currentUser]);
+  }, [authLoading, currentUser, isSuperAdmin]);
 
   if (authLoading) {
     return (
@@ -3685,7 +3697,7 @@ function AdminPanelInner() {
     }
   };
 
-  if (!currentUser || currentUser.email !== 'mabuneri143@gmail.com') {
+  if (!currentUser || !isSuperAdmin) {
     return (
       <div style={{
         display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center',
@@ -3702,11 +3714,11 @@ function AdminPanelInner() {
             <Shield size={34} />
           </div>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 900, color: T.text, margin: 0 }}>Super Admin Access</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 900, color: T.text, margin: 0 }}>Super Admin Access Required</h1>
             <p style={{ color: T.textSec, fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
               {currentUser
-                ? `Signed in as (${currentUser.email}). Only mabuneri143@gmail.com is authorized.`
-                : 'Authentication required. Only mabuneri143@gmail.com has superadmin privileges.'}
+                ? `Signed in as (${currentUser.email}). Account lacks Super Admin custom claim privileges (role: "super_admin").`
+                : 'Authentication required. Only accounts possessing the super_admin custom claim can access this dashboard.'}
             </p>
           </div>
 

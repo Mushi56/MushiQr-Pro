@@ -7,12 +7,27 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid != null;
     }
     
-    function isSuperAdmin() {
+    function hasRole(r) {
       return isAuth() && 
              request.auth.token != null && 
-             request.auth.token.email != null &&
-             request.auth.token.email == 'mabuneri143@gmail.com' &&
-             (request.auth.token.email_verified == true || request.auth.provider_id == 'google.com');
+             request.auth.token.keys().contains('role') && 
+             request.auth.token.role == r;
+    }
+
+    function isSuperAdmin() {
+      return hasRole('super_admin');
+    }
+
+    function isAdmin() {
+      return hasRole('admin') || isSuperAdmin();
+    }
+
+    function isSupport() {
+      return hasRole('support') || isAdmin();
+    }
+
+    function isEditor() {
+      return hasRole('editor') || isAdmin();
     }
 
     function isOwner(userId) {

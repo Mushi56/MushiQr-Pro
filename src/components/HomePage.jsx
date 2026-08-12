@@ -6,6 +6,7 @@ import { renderBarcode } from '../utils/barcodeEngine';
 import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved } from '../utils/storage';
 import AppIcon from './AppIcon';
 import GoldenAdminBadge from './GoldenAdminBadge';
+import { useUserRole } from '../services/roleService';
 
 function HeroQRCanvas() {
   const canvasRef = useRef(null);
@@ -332,6 +333,7 @@ const getBarcodeIcon = (id) => {
 };
 
 export default function HomePage({ currentUser, onScrollChange, onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
+  const { isSuperAdmin } = useUserRole();
   const [recentItems, setRecentItems] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
   const [activeSlide, setActiveSlide] = useState(0);
@@ -549,7 +551,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     lineHeight: 1.2
                   }}>
                     <span>{currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}</span>
-                    {currentUser.email === 'mabuneri143@gmail.com' && (
+                    {isSuperAdmin && (
                       <GoldenAdminBadge size={20} />
                     )}
                   </div>

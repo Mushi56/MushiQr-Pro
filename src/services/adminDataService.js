@@ -1,7 +1,6 @@
 // src/services/adminDataService.js
 // ─── Firebase-Ready Data Abstraction Layer ─────────────────────────────────
-// All global config is stored in Firestore so any changes apply to all users.
-// Super-admin email: mabuneri143@gmail.com
+// All global config is stored in Firestore. Privileged operations require custom claim role: "super_admin".
 
 import { db, functions } from './firebase';
 import { httpsCallable } from 'firebase/functions';

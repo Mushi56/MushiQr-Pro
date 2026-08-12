@@ -84,6 +84,7 @@ import SettingsPage from './components/SettingsPage';
 import YouPage from './components/YouPage';
 import AuthDropdownPanel from './components/AuthDropdownPanel';
 import GoldenAdminBadge from './components/GoldenAdminBadge';
+import { useUserRole } from './services/roleService';
 import { auth, db } from './services/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { trackUserProfile, trackAnonymousVisitor, linkVisitorToUser } from './services/adminDataService';
@@ -921,6 +922,7 @@ export default function App() {
   };
   const [activeTab, setActiveTab] = useState('content');
   const [currentUser, setCurrentUser] = useState(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
   const [isEditingProfileName, setIsEditingProfileName] = useState(false);
   const [editProfileNameText, setEditProfileNameText] = useState('');
@@ -960,10 +962,16 @@ export default function App() {
     };
     checkRedirect();
     let unsubProfile = null;
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (unsubProfile) unsubProfile(); // cleanup previous listener
       setCurrentUser(user);
       if (user) {
+        try {
+          const tokenResult = await user.getIdTokenResult();
+          setIsSuperAdmin(tokenResult.claims.role === 'super_admin');
+        } catch (e) {
+          setIsSuperAdmin(false);
+        }
         syncUserFirestoreData();
         // Track user profile for admin panel visibility
         trackUserProfile(user);
@@ -976,6 +984,8 @@ export default function App() {
             setIsBlocked(true);
           }
         });
+      } else {
+        setIsSuperAdmin(false);
       }
     });
     // Track every app open as a visitor (even if not signed in)
@@ -3846,7 +3856,7 @@ export default function App() {
                       >
                         <Folder size={16} /> Save Location
                       </button>
-                      {currentUser?.email === 'mabuneri143@gmail.com' && (
+                      {isSuperAdmin && (
                         <>
                           <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
                           <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/admin'; }} style={{ color: '#D60036', fontWeight: 700 }}>
@@ -3900,7 +3910,7 @@ export default function App() {
                         {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
                       </div>
                     )}
-                    {currentUser.email === 'mabuneri143@gmail.com' && (
+                    {isSuperAdmin && (
                       <div style={{
                         position: 'absolute',
                         bottom: '-2px',
@@ -3944,7 +3954,7 @@ export default function App() {
                               {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
                             </div>
                           )}
-                          {currentUser.email === 'mabuneri143@gmail.com' && (
+                          {isSuperAdmin && (
                             <div style={{
                               position: 'absolute',
                               bottom: '-2px',
@@ -4014,7 +4024,7 @@ export default function App() {
                               <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {currentUser.displayName || 'Mushi User'}
                               </span>
-                              {currentUser.email === 'mabuneri143@gmail.com' && (
+                              {isSuperAdmin && (
                                 <GoldenAdminBadge size={15} />
                               )}
                             </div>
@@ -4100,7 +4110,7 @@ export default function App() {
                         <ChevronRight size={15} color="var(--text-muted)" />
                       </button>
                       {/* Super Admin Panel */}
-                      {currentUser.email === 'mabuneri143@gmail.com' && (
+                      {isSuperAdmin && (
                         <>
                           <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 12px' }} />
                           <button 
