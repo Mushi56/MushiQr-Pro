@@ -34,6 +34,14 @@ service cloud.firestore {
       return isAuth() && request.auth.uid == userId;
     }
 
+    function containsProtectedFields() {
+      return request.resource.data.keys().hasAny(['role', 'isAdmin', 'subscription', 'plan', 'entitlement', 'isPro', 'permissions', 'admin']);
+    }
+
+    function containsAppUserProtectedFields() {
+      return request.resource.data.keys().hasAny(['role', 'isPro', 'planId', 'subscriptionStatus', 'entitlement', 'permissions', 'admin', 'roleUpdatedAt', 'roleUpdatedBy', 'proGrantedAt', 'proGrantedBy']);
+    }
+
     // ── Global Config (appSettings, featureFlags, announcement, remoteConfig)
     // Anyone authenticated can READ, only super-admin can WRITE
     match /global_config/{docId} {
@@ -56,27 +64,29 @@ service cloud.firestore {
     }
 
     // ── Per-User Data
-    // Each user can read/write strictly their own sub-documents
+    // Each user can read/write strictly their own sub-documents (excluding protected security attributes)
     match /users/{userId}/{document=**} {
       allow read: if isOwner(userId) || isSuperAdmin();
-      allow write: if isOwner(userId);
+      allow write: if isOwner(userId) && !containsProtectedFields();
     }
 
     // ── App Users (profile tracking for admin visibility)
-    // Users can create/update their own profile, superadmin reads all
+    // Users can update non-privileged profile fields; Super Admin manages all fields
     match /app_users/{userId} {
       allow get: if isOwner(userId) || isSuperAdmin();
       allow list: if isSuperAdmin();
-      allow create, update: if isOwner(userId) || isSuperAdmin();
+      allow create: if isSuperAdmin() || (isOwner(userId) && !containsAppUserProtectedFields());
+      allow update: if isSuperAdmin() || (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isPro', 'planId', 'subscriptionStatus', 'entitlement', 'permissions', 'admin', 'roleUpdatedAt', 'roleUpdatedBy', 'proGrantedAt', 'proGrantedBy']));
       allow delete: if isSuperAdmin();
     }
 
     // ── App Visitors (anonymous device tracking)
-    // Any visitor can create/update their own device record, superadmin reads all
+    // Any visitor can register a device; updates are restricted to visitor telemetry attributes
     match /app_visitors/{deviceId} {
       allow get: if true;
       allow list: if isSuperAdmin();
-      allow create, update: if true;
+      allow create: if true;
+      allow update: if isSuperAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastVisitAt', 'visitCount', 'linkedUid', 'updatedAt', 'deviceInfo', 'userAgent', 'platform']);
     }
 
     // ── Authoritative User Subscriptions

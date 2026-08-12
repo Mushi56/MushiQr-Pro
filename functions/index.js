@@ -109,7 +109,7 @@ exports.setUserRole = onCall(async (request) => {
 /**
  * Cloud Function B: updateUserSubscription
  * Authoritative subscription updates in user_subscriptions/{targetUid}.
- * Restricted to Super Admin and Admin roles.
+ * Restricted to Super Admin role only.
  */
 exports.updateUserSubscription = onCall(async (request) => {
   // 1. Authenticate caller
