@@ -550,11 +550,15 @@ class FeatureAccessManagerService {
    * Evaluates if a subcategory is allowed/visible.
    * If the subcategory tab flag itself is disabled OR if all features in that subcategory are turned OFF globally, returns false.
    */
-  isSubcategoryAllowed(category, subcategory) {
-    const subcatFeatures = FEATURE_REGISTRY.filter(f => f.category === category && f.subcategory === subcategory);
+  isSubcategoryAllowed(category, subcategory, excludeFeatureId = null) {
+    const subcatFeatures = FEATURE_REGISTRY.filter(f => 
+      f.category === category && 
+      f.subcategory === subcategory && 
+      (!excludeFeatureId || f.featureId !== excludeFeatureId)
+    );
     if (subcatFeatures.length === 0) return true;
 
-    // Check if any feature in this subcategory is enabled globally
+    // Check if any child feature in this subcategory is enabled globally
     const hasAnyEnabled = subcatFeatures.some(f => {
       const flagVal = this.globalFlags[f.featureId];
       return flagVal !== undefined ? Boolean(flagVal) : f.defaultEnabled;
@@ -582,8 +586,8 @@ class FeatureAccessManagerService {
     // 1. If explicit tab flag is turned OFF by admin, hide immediately
     if (this.globalFlags[target.tabFlag] === false) return false;
 
-    // 2. If all subcategory features under this tab are turned OFF globally, hide tab
-    return this.isSubcategoryAllowed('QR_GENERATOR', target.subcat);
+    // 2. If all child features under this tab are turned OFF globally, hide tab
+    return this.isSubcategoryAllowed('QR_GENERATOR', target.subcat, target.tabFlag);
   }
 }
 
