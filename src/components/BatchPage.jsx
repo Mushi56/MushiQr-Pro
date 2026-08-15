@@ -119,11 +119,7 @@ export default function BatchPage({
   const [previewLimit, setPreviewLimit] = useState(50);
   const [activeImportMode, setActiveImportMode] = useState('upload'); // 'upload' | 'spreadsheet'
   const [sheetRows, setSheetRows] = useState([
-    { id: '1', data: 'https://example.com/item1', filename: 'Item-001' },
-    { id: '2', data: 'https://example.com/item2', filename: 'Item-002' },
-    { id: '3', data: 'https://example.com/item3', filename: 'Item-003' },
-    { id: '4', data: 'https://example.com/item4', filename: 'Item-004' },
-    { id: '5', data: 'https://example.com/item5', filename: 'Item-005' },
+    { id: '1', data: 'https://example.com', filename: 'Item-001' }
   ]);
 
   const isCancelledRef = useRef(false);
@@ -912,9 +908,7 @@ export default function BatchPage({
                   <button
                     onClick={() => {
                       setSheetRows([
-                        { id: '1', data: '', filename: 'Item-001' },
-                        { id: '2', data: '', filename: 'Item-002' },
-                        { id: '3', data: '', filename: 'Item-003' },
+                        { id: '1', data: '', filename: 'Item-001' }
                       ]);
                     }}
                     style={{
