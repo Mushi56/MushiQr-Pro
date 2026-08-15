@@ -196,65 +196,263 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
         </div>
       )}
 
-      <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',borderBottom:`1px solid ${C.border}`,background:C.bgEl,flexWrap:'wrap'}}>
-        <div style={{position:'relative',flex:'1 1 180px',minWidth:140}}>
-          <Search size={13} style={{position:'absolute',left:9,top:'50%',transform:'translateY(-50%)',color:C.textMut}}/>
-          <input type="text" placeholder="Search features, IDs, descriptions..." value={search}
-            onChange={e=>{setSearch(e.target.value);if(e.target.value){setSelectedCat(null);setSelectedSubcat(null);}}}
-            style={{width:'100%',boxSizing:'border-box',padding:'6px 9px 6px 28px',background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:7,color:C.text,fontSize:12,fontFamily:'Outfit,sans-serif',outline:'none'}}/>
-          {search&&<button onClick={()=>setSearch('')} style={{position:'absolute',right:7,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:C.textMut,padding:0}}><X size={11}/></button>}
+      {/* Decluttered Top Toolbar: Search + Dropdown Filters */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '10px 16px',
+        borderBottom: `1px solid ${C.border}`,
+        background: C.bgEl,
+        flexWrap: 'wrap'
+      }}>
+        {/* Search Input */}
+        <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 160 }}>
+          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.textMut }} />
+          <input
+            type="text"
+            placeholder="Search features by name, ID or keyword..."
+            value={search}
+            onChange={e => { setSearch(e.target.value); }}
+            style={{
+              width: '100%',
+              boxSizing: 'border-box',
+              padding: '7px 12px 7px 32px',
+              background: C.bgCard,
+              border: `1px solid ${C.border}`,
+              borderRadius: 8,
+              color: C.text,
+              fontSize: 12,
+              fontFamily: 'Outfit,sans-serif',
+              outline: 'none'
+            }}
+          />
+          {search && (
+            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.textMut, padding: 0 }}>
+              <X size={12} />
+            </button>
+          )}
         </div>
-        {[['all','All'],['enabled','Enabled'],['disabled','Disabled']].map(([v,l])=>(
-          <button key={v} onClick={()=>setStatFilt(v)} style={{padding:'4px 9px',borderRadius:6,fontSize:11,fontWeight:600,border:`1px solid ${statFilt===v?C.blue+'55':C.border}`,background:statFilt===v?C.blue+'18':'transparent',color:statFilt===v?C.blue:C.textSec,cursor:'pointer'}}>{l}</button>
-        ))}
-        {[['all','All Plans'],...CANONICAL_PLANS.map(p=>[p,PLAN_LABELS[p]])].map(([v,l])=>(
-          <button key={v} onClick={()=>setPlanFilt(v)} style={{padding:'4px 9px',borderRadius:6,fontSize:11,fontWeight:600,border:`1px solid ${planFilt===v?(PLAN_COLORS[v]||C.blue)+'55':C.border}`,background:planFilt===v?(PLAN_COLORS[v]||C.blue)+'18':'transparent',color:planFilt===v?(PLAN_COLORS[v]||C.blue):C.textSec,cursor:'pointer'}}>{l}</button>
-        ))}
+
+        {/* Clean Compact Filter: Status */}
+        <div style={{ display: 'flex', alignItems: 'center', background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 8, padding: '2px', gap: 2 }}>
+          {[['all', 'All Status'], ['enabled', 'Enabled'], ['disabled', 'Disabled']].map(([v, l]) => {
+            const isSel = statFilt === v;
+            return (
+              <button
+                key={v}
+                onClick={() => setStatFilt(v)}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: 6,
+                  fontSize: 11,
+                  fontWeight: isSel ? 700 : 500,
+                  border: 'none',
+                  background: isSel ? 'rgba(255,255,255,0.08)' : 'transparent',
+                  color: isSel ? C.text : C.textSec,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s'
+                }}
+              >
+                {l}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Clean Compact Filter: Plan Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <select
+            value={planFilt}
+            onChange={e => setPlanFilt(e.target.value)}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 8,
+              background: C.bgCard,
+              border: `1px solid ${C.border}`,
+              color: planFilt === 'all' ? C.textSec : (PLAN_COLORS[planFilt] || C.text),
+              fontSize: 11,
+              fontWeight: 700,
+              outline: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="all">All Plans (Access)</option>
+            {CANONICAL_PLANS.map(p => (
+              <option key={p} value={p}>{PLAN_LABELS[p]} Plan Only</option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      <div style={{display:'flex',flex:1,overflow:'hidden',minHeight:0}}>
-        {showCats&&!search&&(
-          <div className="fmp-sc" style={{width:isMobile?'100%':220,flexShrink:0,background:C.sidebar,borderRight:`1px solid ${C.border}`,overflowY:'auto',padding:'8px 0'}}>
-            <div style={{padding:'8px 14px 4px',fontSize:10,fontWeight:700,color:C.textMut,letterSpacing:1,textTransform:'uppercase'}}>Categories</div>
-            {Object.keys(CAT_META).map(cId=>{
-              const m=CAT_META[cId];const Icon=m.icon;const st=catStats[cId]||{total:0,enabled:0};const act=selectedCat===cId;
-              return(
-                <button key={cId} className="fmp-cat" onClick={()=>selectCategory(cId)} style={{width:'100%',display:'flex',alignItems:'center',gap:9,padding:'8px 14px',border:'none',cursor:'pointer',background:act?m.color+'15':'transparent',borderLeft:act?`3px solid ${m.color}`:'3px solid transparent',transition:'all 0.15s',textAlign:'left'}}>
-                  <div style={{width:26,height:26,borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',background:act?m.color+'25':'rgba(255,255,255,0.05)',flexShrink:0}}>
-                    <Icon size={13} color={act?m.color:C.textMut}/>
+      {/* ─── Horizontal Row Categories Bar ─── */}
+      {!search && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          borderBottom: `1px solid ${C.border}`,
+          background: C.sidebar,
+          padding: '10px 16px',
+          gap: 10
+        }}>
+          {/* Top Row Header & Quick Stats */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: C.textMut, letterSpacing: 0.8, textTransform: 'uppercase' }}>
+              Categories (Row View)
+            </span>
+            {selectedCat && (
+              <button
+                onClick={() => { setSelectedCat(null); setSelectedSubcat(null); }}
+                style={{ background: 'none', border: 'none', color: C.accent, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+              >
+                View All Categories ({FEATURE_REGISTRY.length} features)
+              </button>
+            )}
+          </div>
+
+          {/* Row of Category Buttons/Cards (Horizontal scroll / wrapping flex) */}
+          <div className="fmp-sc" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            overflowX: 'auto',
+            paddingBottom: 4,
+            WebkitOverflowScrolling: 'touch'
+          }}>
+            {/* "All" Category Pill */}
+            <button
+              onClick={() => { setSelectedCat(null); setSelectedSubcat(null); }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 14px',
+                borderRadius: 10,
+                border: `1px solid ${selectedCat === null ? C.accent : C.border}`,
+                background: selectedCat === null ? 'rgba(214,0,54,0.12)' : C.bgCard,
+                color: selectedCat === null ? C.text : C.textSec,
+                fontSize: 12,
+                fontWeight: selectedCat === null ? 800 : 600,
+                cursor: 'pointer',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s'
+              }}
+            >
+              <Layers size={14} color={selectedCat === null ? C.accent : C.textMut} />
+              <span>All Categories</span>
+              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 6, background: 'rgba(255,255,255,0.06)', color: C.textSec }}>
+                {FEATURE_REGISTRY.length}
+              </span>
+            </button>
+
+            {/* Individual 8 Categories as Horizontal Row Items */}
+            {Object.keys(CAT_META).map(cId => {
+              const m = CAT_META[cId];
+              const Icon = m.icon;
+              const st = catStats[cId] || { total: 0, enabled: 0 };
+              const act = selectedCat === cId;
+              return (
+                <button
+                  key={cId}
+                  className="fmp-cat"
+                  onClick={() => selectCategory(cId)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 14px',
+                    borderRadius: 10,
+                    border: `1px solid ${act ? m.color : C.border}`,
+                    background: act ? `${m.color}18` : C.bgCard,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  <div style={{ width: 22, height: 22, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', background: act ? m.color + '25' : 'rgba(255,255,255,0.05)', flexShrink: 0 }}>
+                    <Icon size={12} color={act ? m.color : C.textMut} />
                   </div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:12,fontWeight:act?700:500,color:act?C.text:C.textSec,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{m.name}</div>
-                    <div style={{fontSize:10,color:C.textMut}}><span style={{color:st.enabled===st.total?C.green:C.orange}}>{st.enabled}</span>/{st.total} on</div>
-                  </div>
-                  {isMobile&&<ChevronRight size={12} color={C.textMut}/>}
+                  <span style={{ fontSize: 12, fontWeight: act ? 800 : 600, color: act ? C.text : C.textSec }}>
+                    {m.name}
+                  </span>
+                  <span style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    padding: '1px 6px',
+                    borderRadius: 6,
+                    background: st.enabled === st.total ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
+                    color: st.enabled === st.total ? C.green : C.orange
+                  }}>
+                    {st.enabled}/{st.total}
+                  </span>
                 </button>
               );
             })}
           </div>
-        )}
 
-        {showSubcats&&(
-          <div className="fmp-sc" style={{width:isMobile?'100%':196,flexShrink:0,background:'#0e0e18',borderRight:`1px solid ${C.border}`,overflowY:'auto',padding:'8px 0'}}>
-            {isMobile&&<button onClick={()=>setMobileNav('categories')} style={{display:'flex',alignItems:'center',gap:5,padding:'9px 14px',background:'none',border:'none',cursor:'pointer',color:C.textSec,fontSize:12,width:'100%'}}><ChevronLeft size={13}/>Back</button>}
-            <div style={{padding:'8px 14px 4px',fontSize:10,fontWeight:700,color:C.textMut,letterSpacing:1,textTransform:'uppercase'}}>{CAT_META[selectedCat]?.name}</div>
-            {(CATEGORY_SUBCATEGORIES[selectedCat]||[]).map(sc=>{
-              const st=subcatStats[sc]||{total:0,enabled:0};const act=selectedSubcat===sc;const cc=CAT_META[selectedCat]?.color;
-              return(
-                <button key={sc} className="fmp-sub" onClick={()=>selectSubcat(sc)} style={{width:'100%',display:'flex',alignItems:'center',gap:9,padding:'8px 14px',border:'none',cursor:'pointer',background:act?cc+'12':'transparent',borderLeft:act?`3px solid ${cc}`:'3px solid transparent',transition:'all 0.15s',textAlign:'left'}}>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:12,fontWeight:act?700:500,color:act?C.text:C.textSec}}>{sc}</div>
-                    <div style={{fontSize:10,color:C.textMut}}>{st.total} feature{st.total!==1?'s':''}</div>
-                  </div>
-                  <span style={{fontSize:10,fontWeight:700,color:st.enabled===st.total?C.green:C.orange}}>{st.enabled}/{st.total}</span>
-                  {isMobile&&<ChevronRight size={12} color={C.textMut}/>}
-                </button>
-              );
-            })}
-          </div>
-        )}
+          {/* If a category is selected, show its subcategories as a secondary sub-row */}
+          {selectedCat && (CATEGORY_SUBCATEGORIES[selectedCat] || []).length > 1 && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              overflowX: 'auto',
+              paddingTop: 4,
+              borderTop: `1px dashed ${C.border}`,
+              WebkitOverflowScrolling: 'touch'
+            }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: C.textMut, marginRight: 4, textTransform: 'uppercase' }}>
+                Subcategories:
+              </span>
+              <button
+                onClick={() => setSelectedSubcat(null)}
+                style={{
+                  padding: '3px 10px',
+                  borderRadius: 6,
+                  border: `1px solid ${selectedSubcat === null ? CAT_META[selectedCat]?.color + '66' : 'transparent'}`,
+                  background: selectedSubcat === null ? CAT_META[selectedCat]?.color + '15' : 'transparent',
+                  color: selectedSubcat === null ? C.text : C.textSec,
+                  fontSize: 11,
+                  fontWeight: selectedSubcat === null ? 700 : 500,
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                All {CAT_META[selectedCat]?.name}
+              </button>
+              {(CATEGORY_SUBCATEGORIES[selectedCat] || []).map(sc => {
+                const isSubAct = selectedSubcat === sc;
+                const subColor = CAT_META[selectedCat]?.color || C.accent;
+                return (
+                  <button
+                    key={sc}
+                    onClick={() => selectSubcat(sc)}
+                    style={{
+                      padding: '3px 10px',
+                      borderRadius: 6,
+                      border: `1px solid ${isSubAct ? subColor + '66' : 'transparent'}`,
+                      background: isSubAct ? subColor + '18' : 'rgba(255,255,255,0.03)',
+                      color: isSubAct ? C.text : C.textSec,
+                      fontSize: 11,
+                      fontWeight: isSubAct ? 700 : 500,
+                      cursor: 'pointer',
+                      flexShrink: 0
+                    }}
+                  >
+                    {sc}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
-        {showFeats&&(
+      {/* ─── Main Content Area ─── */}
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+        {showFeats && (
           <div className="fmp-sc" style={{flex:1,overflowY:'auto',padding:14,minWidth:0}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12,gap:8,flexWrap:'wrap'}}>
               <div style={{display:'flex',alignItems:'center',gap:6}}>
