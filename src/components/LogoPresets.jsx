@@ -53,6 +53,11 @@ export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
 
   const handleFile = useCallback((file) => {
     if (!file || !file.type.startsWith('image/')) return;
+    const access = FeatureAccessManager.canUseFeature('custom_logo_upload');
+    if (!access.allowed) {
+      alert('Custom Logo Upload is a Premium feature. Upgrade your plan to unlock.');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
@@ -70,9 +75,9 @@ export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
   }, [onLogoChange]);
 
   const handleSelect = (slug, name, url) => {
-    const access = FeatureAccessManager.canUseFeature('custom_logo');
+    const access = FeatureAccessManager.canUseFeature('custom_logo_presets');
     if (!access.allowed) {
-      alert('Custom Logo Embed feature is disabled or requires a plan upgrade.');
+      alert('Logo Presets is a Premium feature. Upgrade your plan to unlock.');
       return;
     }
     setLoading(slug);

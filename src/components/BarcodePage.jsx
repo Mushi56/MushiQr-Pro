@@ -17,6 +17,7 @@ import AppIcon from './AppIcon';
 import AdvancedColorPicker from './AdvancedColorPicker';
 import BarcodeDataModal from './BarcodeDataModal';
 import ColorPicker from './ColorPicker';
+import PaidCrownBadge from './PaidCrownBadge';
 
 // ─── Color Presets ────────────────────────────────────────────────────────────
 const COLOR_PRESETS = [
@@ -586,12 +587,18 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                   className={`type-tab ${bcid === key ? 'active' : ''}`}
                   style={{ minHeight: '90px', padding: '8px 6px 30px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                   onClick={() => {
+                    const access = FeatureAccessManager.canUseFeature(`barcode_${key}`);
+                    if (!access.allowed) {
+                      showToast(`${standard.name} is a Premium Barcode format. Upgrade your plan to unlock.`, 'error');
+                      return;
+                    }
                     if (bcid !== key) {
                       setBcid(key);
                       setText(standard.defaultValue);
                     }
                   }}
                 >
+                  <PaidCrownBadge featureId={`barcode_${key}`} position="floating" size={9} />
                   {bcid === key && (
                     <>
                       <div 

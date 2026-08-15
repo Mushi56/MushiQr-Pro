@@ -95,6 +95,7 @@ import AdvancedColorPicker from './components/AdvancedColorPicker';
 import AppIcon from './components/AppIcon';
 import SaveLocationModal from './components/SaveLocationModal';
 import PremiumModal from './components/PremiumModal';
+import PaidCrownBadge from './components/PaidCrownBadge';
 import { usePremium } from './services/premiumContext';
 import { FeatureAccessManager } from './services/FeatureAccessManager';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
@@ -1244,6 +1245,11 @@ export default function App() {
     if (!tpl) {
       setSelectedTemplate(null);
       setTemplateHandleText('');
+      return;
+    }
+    const access = FeatureAccessManager.canUseFeature('template_presets');
+    if (!access.allowed) {
+      showToast('Templates is a Premium Feature. Please upgrade your plan to unlock.', 'error');
       return;
     }
     setSelectedTemplate(tpl);
@@ -4257,6 +4263,11 @@ export default function App() {
                     <QRTypeSelector
                       activeType={qrType}
                       onTypeChange={(type) => {
+                        const access = FeatureAccessManager.canUseFeature(`qr_${type.toLowerCase()}`);
+                        if (!access.allowed) {
+                          showToast(`${type.toUpperCase()} QR is a Premium feature. Upgrade your plan to unlock.`, 'error');
+                          return;
+                        }
                         setQrType(type);
                         generatorIsDirtyRef.current = true;
                         setIsDataModalOpen(true);
@@ -4364,6 +4375,7 @@ export default function App() {
                               padding: 0
                             }}
                           >
+                            <PaidCrownBadge featureId="template_presets" position="corner" size={9} />
                             <TemplatePreviewCanvas 
                               template={tpl} 
                               theme={effectiveTheme} 
@@ -5692,9 +5704,14 @@ export default function App() {
               navigateTo(page);
             }}
             onQuickCreate={(type) => {
-              const access = FeatureAccessManager.canUseFeature('qr_generator');
-              if (!access.allowed) {
+              const baseAccess = FeatureAccessManager.canUseFeature('qr_generator');
+              if (!baseAccess.allowed) {
                 showToast('QR Generator feature is disabled or requires a plan upgrade.', 'error');
+                return;
+              }
+              const typeAccess = FeatureAccessManager.canUseFeature(`qr_${type.toLowerCase()}`);
+              if (!typeAccess.allowed) {
+                showToast(`${type.toUpperCase()} QR is a Premium feature. Upgrade your plan to unlock.`, 'error');
                 return;
               }
               resetGenerator();
@@ -5709,9 +5726,14 @@ export default function App() {
               setActivePage('generator');
             }}
             onQuickCreateBarcode={(id) => {
-              const access = FeatureAccessManager.canUseFeature('barcode_generator');
-              if (!access.allowed) {
+              const baseAccess = FeatureAccessManager.canUseFeature('barcode_generator');
+              if (!baseAccess.allowed) {
                 showToast('Barcode Generator feature is disabled or requires a plan upgrade.', 'error');
+                return;
+              }
+              const typeAccess = FeatureAccessManager.canUseFeature(`barcode_${id.toLowerCase()}`);
+              if (!typeAccess.allowed) {
+                showToast(`${id.toUpperCase()} Barcode is a Premium feature. Upgrade your plan to unlock.`, 'error');
                 return;
               }
               const defaults = {
