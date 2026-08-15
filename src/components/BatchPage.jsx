@@ -894,6 +894,28 @@ export default function BatchPage({
             ) : (
               /* Sub-View B: Interactive Spreadsheet Grid */
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: '160px' }}>
+                {/* Information / Instruction Banner */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  padding: '10px 14px',
+                  borderRadius: '12px',
+                  background: 'rgba(214, 0, 54, 0.08)',
+                  border: '1px solid rgba(214, 0, 54, 0.2)',
+                  fontSize: '12px',
+                  color: 'var(--text-primary)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '240px' }}>
+                    <Sparkles size={16} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
+                    <span>
+                      <strong>Copy & Paste:</strong> Paste columns from Excel, Google Sheets, or text to auto-generate rows. Press <kbd style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace' }}>Enter</kbd> to jump between fields or add new rows!
+                    </span>
+                  </div>
+                </div>
+
                 {/* Spreadsheet Table */}
                 <div 
                   onPaste={(e) => {
