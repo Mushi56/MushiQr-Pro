@@ -1089,9 +1089,9 @@ export default function BatchPage({
                   </table>
                 </div>
 
-                {/* Spreadsheet Bottom Action Row: Add Row on left, Clear Table and Import Entries on right */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
-                  {/* Left: Add Row Button */}
+                {/* Spreadsheet Bottom Action Row: All 3 buttons in one single row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', width: '100%' }}>
+                  {/* Button 1: Add Row */}
                   <button
                     onClick={() => {
                       const newIndex = sheetRows.length;
@@ -1106,7 +1106,8 @@ export default function BatchPage({
                       }, 50);
                     }}
                     style={{
-                      padding: '10px 16px',
+                      flex: 1,
+                      padding: '11px 12px',
                       borderRadius: '10px',
                       border: '1px solid var(--border-color)',
                       background: 'var(--bg-hover)',
@@ -1116,85 +1117,91 @@ export default function BatchPage({
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      transition: 'all 0.2s ease'
+                      justifyContent: 'center',
+                      gap: '5px',
+                      transition: 'all 0.2s ease',
+                      whiteSpace: 'nowrap'
                     }}
                   >
                     <Plus size={15} color="var(--accent-primary)" /> Add Row
                   </button>
 
-                  {/* Right: Clear Table + Import Entries */}
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <button
-                      onClick={() => {
-                        setSheetRows([
-                          { id: '1', data: '', filename: 'Item-001' }
-                        ]);
-                      }}
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        border: '1px solid var(--border-color)',
-                        background: 'var(--bg-hover)',
-                        color: 'var(--text-secondary)',
-                        fontWeight: 700,
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      <Trash2 size={14} color="#EF4444" /> Clear
-                    </button>
+                  {/* Button 2: Clear Table */}
+                  <button
+                    onClick={() => {
+                      setSheetRows([
+                        { id: '1', data: '', filename: 'Item-001' }
+                      ]);
+                    }}
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-hover)',
+                      color: 'var(--text-secondary)',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      transition: 'all 0.2s ease',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <Trash2 size={14} color="#EF4444" /> Clear
+                  </button>
 
-                    <button
-                      onClick={() => {
-                        const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
-                        if (validRows.length === 0) {
-                          alert('Please fill at least one row with data.');
-                          return;
-                        }
+                  {/* Button 3: Import Entries */}
+                  <button
+                    onClick={() => {
+                      const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
+                      if (validRows.length === 0) {
+                        alert('Please fill at least one row with data.');
+                        return;
+                      }
 
-                        const defaultStyle = batchType === 'BARCODE' ? {
-                          bcid: barcodeType || 'code128',
-                          barColor: '#000000',
-                          bgColor: '#ffffff',
-                          barWidth: 2,
-                          height: 90,
-                          margin: 16,
-                          displayValue: true
-                        } : { ...activeGeneratorStyle };
+                      const defaultStyle = batchType === 'BARCODE' ? {
+                        bcid: barcodeType || 'code128',
+                        barColor: '#000000',
+                        bgColor: '#ffffff',
+                        barWidth: 2,
+                        height: 90,
+                        margin: 16,
+                        displayValue: true
+                      } : { ...activeGeneratorStyle };
 
-                        const newItems = validRows.map((r, i) => ({
-                          id: `sheet_${Date.now()}_${i}`,
-                          type: batchType,
-                          data: r.data.trim(),
-                          filename: r.filename.trim() || `item_${i + 1}`,
-                          style: defaultStyle
-                        }));
+                      const newItems = validRows.map((r, i) => ({
+                        id: `sheet_${Date.now()}_${i}`,
+                        type: batchType,
+                        data: r.data.trim(),
+                        filename: r.filename.trim() || `item_${i + 1}`,
+                        style: defaultStyle
+                      }));
 
-                        setBatchItems(newItems);
-                      }}
-                      style={{
-                        padding: '10px 18px',
-                        borderRadius: '10px',
-                        border: 'none',
-                        background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
-                        color: '#FFFFFF',
-                        fontWeight: 800,
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      <Play size={14} /> Import Entries ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})
-                    </button>
-                  </div>
+                      setBatchItems(newItems);
+                    }}
+                    style={{
+                      flex: 1.4,
+                      padding: '11px 14px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
+                      color: '#FFFFFF',
+                      fontWeight: 800,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <Play size={14} /> Import Entries ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})
+                  </button>
                 </div>
               </div>
             )}
