@@ -896,15 +896,15 @@ export default function BatchPage({
                 </div>
               </>
             ) : (
-              /* Sub-View B: Interactive Spreadsheet Grid */
-              <div className="glass-panel" style={{ borderRadius: '24px', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              /* Sub-View B: Interactive Spreadsheet Grid (Clean edge-to-edge responsive layout) */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <div>
-                    <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Table size={20} color="var(--accent-primary)" /> Spreadsheet Editor
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 2px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Table size={18} color="var(--accent-primary)" /> Spreadsheet Editor
                     </h3>
-                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
-                      Type or paste tabular data from Excel, Google Sheets, or any clipboard text.
+                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+                      Type or paste data directly from Excel or clipboard.
                     </p>
                   </div>
                   
@@ -918,21 +918,21 @@ export default function BatchPage({
                       ]);
                     }}
                     style={{
-                      padding: '8px 14px',
-                      borderRadius: '10px',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
                       border: '1px solid var(--border-color)',
                       background: 'var(--bg-hover)',
                       color: 'var(--text-secondary)',
                       fontWeight: 700,
-                      fontSize: '12px',
+                      fontSize: '11px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
+                      gap: '5px',
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    <Trash2 size={14} color="#EF4444" /> Clear Table
+                    <Trash2 size={13} color="#EF4444" /> Clear Table
                   </button>
                 </div>
 
@@ -982,25 +982,25 @@ export default function BatchPage({
                   style={{ 
                     overflowX: 'auto', 
                     border: '1px solid var(--border-color)', 
-                    borderRadius: '16px', 
+                    borderRadius: '14px', 
                     background: 'var(--bg-elevated)',
                     WebkitOverflowScrolling: 'touch'
                   }}
                 >
-                  <table style={{ width: '100%', minWidth: '420px', borderCollapse: 'collapse', fontSize: '14px', textAlign: 'left' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left', tableLayout: 'auto' }}>
                     <thead>
                       <tr style={{ background: 'var(--bg-hover)', borderBottom: '1px solid var(--border-color)' }}>
-                        <th style={{ padding: '14px 12px', width: '45px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center' }}>#</th>
-                        <th style={{ padding: '14px 14px', color: 'var(--text-primary)', fontWeight: 700 }}>{batchType === 'BARCODE' ? 'Barcode Value / Data' : 'QR Value / URL / Text'}</th>
-                        <th style={{ padding: '14px 14px', color: 'var(--text-primary)', fontWeight: 700, width: '190px' }}>Filename</th>
-                        <th style={{ padding: '14px 12px', width: '50px', textAlign: 'center' }}></th>
+                        <th style={{ padding: '10px 8px', width: '32px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center', fontSize: '12px' }}>#</th>
+                        <th style={{ padding: '10px 10px', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px' }}>Data</th>
+                        <th style={{ padding: '10px 10px', color: 'var(--text-primary)', fontWeight: 700, width: '130px', fontSize: '13px' }}>Filename</th>
+                        <th style={{ padding: '10px 6px', width: '38px', textAlign: 'center' }}></th>
                       </tr>
                     </thead>
                     <tbody>
                       {sheetRows.map((row, index) => (
                         <tr key={row.id || index} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                          <td style={{ padding: '12px 10px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center', fontSize: '13px' }}>{index + 1}</td>
-                          <td style={{ padding: '8px 10px' }}>
+                          <td style={{ padding: '8px 6px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center', fontSize: '12px' }}>{index + 1}</td>
+                          <td style={{ padding: '6px 6px' }}>
                             <input
                               type="text"
                               data-row-data={index}
@@ -1039,17 +1039,17 @@ export default function BatchPage({
                                   }
                                 }
                               }}
-                              placeholder={batchType === 'BARCODE' ? 'e.g. 7501031311309' : 'e.g. https://mybrand.com/qr1'}
+                              placeholder={batchType === 'BARCODE' ? '7501031311309' : 'https://example.com'}
                               style={{
                                 width: '100%',
                                 background: 'var(--bg-primary, rgba(255,255,255,0.03))',
-                                border: '1.5px solid var(--border-color)',
-                                borderRadius: '10px',
-                                padding: '12px 14px',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '8px',
+                                padding: '8px 10px',
                                 color: 'var(--text-primary)',
                                 outline: 'none',
-                                fontSize: '15px',
-                                minHeight: '46px',
+                                fontSize: '13px',
+                                minHeight: '38px',
                                 fontWeight: 500,
                                 boxSizing: 'border-box',
                                 transition: 'all 0.2s ease'
@@ -1064,7 +1064,7 @@ export default function BatchPage({
                               }}
                             />
                           </td>
-                          <td style={{ padding: '8px 10px' }}>
+                          <td style={{ padding: '6px 6px' }}>
                             <input
                               type="text"
                               data-row-filename={index}
@@ -1098,13 +1098,13 @@ export default function BatchPage({
                               style={{
                                 width: '100%',
                                 background: 'var(--bg-primary, rgba(255,255,255,0.03))',
-                                border: '1.5px solid var(--border-color)',
-                                borderRadius: '10px',
-                                padding: '12px 14px',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '8px',
+                                padding: '8px 10px',
                                 color: 'var(--text-primary)',
                                 outline: 'none',
-                                fontSize: '15px',
-                                minHeight: '46px',
+                                fontSize: '13px',
+                                minHeight: '38px',
                                 fontWeight: 500,
                                 boxSizing: 'border-box',
                                 transition: 'all 0.2s ease'
@@ -1119,7 +1119,7 @@ export default function BatchPage({
                               }}
                             />
                           </td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                          <td style={{ padding: '6px 4px', textAlign: 'center' }}>
                             <button
                               onClick={() => {
                                 if (sheetRows.length > 1) {
@@ -1132,9 +1132,9 @@ export default function BatchPage({
                                 border: 'none',
                                 color: sheetRows.length <= 1 ? 'var(--text-muted)' : '#EF4444',
                                 cursor: sheetRows.length <= 1 ? 'default' : 'pointer',
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '10px',
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '8px',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -1142,7 +1142,7 @@ export default function BatchPage({
                               }}
                               title="Delete row"
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={16} />
                             </button>
                           </td>
                         </tr>
@@ -1152,7 +1152,7 @@ export default function BatchPage({
                 </div>
 
                 {/* Spreadsheet Bottom Action Row: Add Row on left, Import Entries on right */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginTop: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '2px' }}>
                   {/* Lower Row: Add Row Button */}
                   <button
                     onClick={() => {
@@ -1168,24 +1168,24 @@ export default function BatchPage({
                       }, 50);
                     }}
                     style={{
-                      padding: '12px 18px',
-                      borderRadius: '12px',
+                      padding: '10px 16px',
+                      borderRadius: '10px',
                       border: '1px solid var(--border-color)',
                       background: 'var(--bg-hover)',
                       color: 'var(--text-primary)',
-                      fontSize: '13px',
+                      fontSize: '12px',
                       fontWeight: 700,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
+                      gap: '6px',
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    <Plus size={16} color="var(--accent-primary)" /> Add Row
+                    <Plus size={15} color="var(--accent-primary)" /> Add Row
                   </button>
 
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <button
                       onClick={() => {
                         const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
@@ -1215,13 +1215,13 @@ export default function BatchPage({
                         setBatchItems(newItems);
                       }}
                       style={{
-                        padding: '12px 20px',
-                        borderRadius: '12px',
+                        padding: '10px 18px',
+                        borderRadius: '10px',
                         border: 'none',
                         background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
                         color: '#FFFFFF',
                         fontWeight: 800,
-                        fontSize: '13px',
+                        fontSize: '12px',
                         cursor: 'pointer',
                         boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
                         display: 'flex',
@@ -1229,7 +1229,7 @@ export default function BatchPage({
                         gap: '6px'
                       }}
                     >
-                      <Play size={15} /> Import Entries ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})
+                      <Play size={14} /> Import Entries ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})
                     </button>
                   </div>
                 </div>
