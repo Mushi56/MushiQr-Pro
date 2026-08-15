@@ -112,7 +112,6 @@ exports.setUserRole = onCall(async (request) => {
  * Restricted to Super Admin role only.
  */
 exports.updateUserSubscription = onCall(async (request) => {
-  // 1. Authenticate caller
   if (!request.auth || !request.auth.uid) {
     throw new HttpsError('unauthenticated', 'User must be authenticated to update subscriptions.');
   }
@@ -120,44 +119,200 @@ exports.updateUserSubscription = onCall(async (request) => {
   const callerUid = request.auth.uid;
   const callerRole = request.auth.token?.role || 'user';
 
-  // 2. Authorize caller (Super Admin only)
   if (callerRole !== 'super_admin') {
     throw new HttpsError('permission-denied', 'Only Super Admin users can update user subscriptions.');
   }
 
-  const { targetUid, planId, isPro, durationDays } = request.data || {};
+  const { targetUid, planId, isPro, durationDays, reason } = request.data || {};
 
-  // 3. Input Validation
   if (!targetUid || typeof targetUid !== 'string') {
     throw new HttpsError('invalid-argument', 'Valid targetUid string must be provided.');
   }
 
-  const validPlanId = planId || (isPro ? 'pro_monthly' : 'free');
-  const proActive = Boolean(isPro);
+  const validPlanId = planId || (isPro ? 'monthly' : 'free');
+  const proActive = Boolean(isPro) || validPlanId !== 'free';
   const now = new Date();
   
   let expiryDate = null;
-  if (durationDays && typeof durationDays === 'number' && durationDays > 0) {
+  if (validPlanId === 'lifetime') {
+    expiryDate = null; // No expiry for lifetime
+  } else if (durationDays && typeof durationDays === 'number' && durationDays > 0) {
     expiryDate = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000).toISOString();
   }
 
-  // 4. Update authoritative user_subscriptions/{targetUid}
   const subRef = db.collection('user_subscriptions').doc(targetUid);
   const existingSubSnap = await subRef.get();
   const previousSub = existingSubSnap.exists ? existingSubSnap.data() : null;
 
   const newSubData = {
+    userId: targetUid,
     planId: validPlanId,
-    isPro: proActive,
-    status: proActive ? 'active' : 'inactive',
+    status: proActive ? 'ACTIVE' : 'FREE',
+    provider: 'manual_admin',
+    isTrial: false,
+    autoRenew: false,
     expiryDate,
+    lastVerifiedAt: admin.firestore.FieldValue.serverTimestamp(),
+    grantedBy: callerUid,
+    grantReason: reason || 'Manual Admin Update',
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedBy: callerUid,
   };
 
   await subRef.set(newSubData, { merge: true });
 
-  // 5. Sync non-authoritative profile metadata in app_users/{targetUid}
+  await db.collection('app_users').doc(targetUid).set({
+    planId: validPlanId,
+    subscriptionStatus: proActive ? 'ACTIVE' : 'FREE',
+    isPro: proActive,
+    proGrantedAt: proActive ? admin.firestore.FieldValue.serverTimestamp() : null,
+    proGrantedBy: proActive ? callerUid : null,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
+
+  await writeAuditLog(callerUid, 'super_admin', 'MANUAL_PREMIUM_GRANTED', targetUid, {
+    previousPlan: previousSub?.planId || 'free',
+    newPlan: validPlanId,
+    status: proActive ? 'ACTIVE' : 'FREE',
+    durationDays,
+    reason: reason || 'Manual Admin Update',
+  });
+
+  return {
+    success: true,
+    message: `Updated subscription for UID ${targetUid} to plan '${validPlanId}'.`,
+  };
+});
+
+/**
+ * Cloud Function C: publishMembershipConfig
+ * Authoritative global membership configuration publisher.
+ * Automatically validates schema, increments configVersion, and logs audit record.
+ */
+exports.publishMembershipConfig = onCall(async (request) => {
+  if (!request.auth || !request.auth.uid) {
+    throw new HttpsError('unauthenticated', 'User must be authenticated.');
+  }
+
+  const callerUid = request.auth.uid;
+  const callerRole = request.auth.token?.role || 'user';
+
+  if (callerRole !== 'super_admin') {
+    throw new HttpsError('permission-denied', 'Only Super Admin can publish membership configuration.');
+  }
+
+  const { plans, featureMatrix, featureLimits } = request.data || {};
+
+  if (!plans || typeof plans !== 'object') {
+    throw new HttpsError('invalid-argument', 'Valid plans map must be provided.');
+  }
+
+  const configRef = db.collection('global_config').doc('membership');
+  const snap = await configRef.get();
+  const currentVersion = snap.exists ? (snap.data().configVersion || 100) : 100;
+  const nextVersion = currentVersion + 1;
+
+  const payload = {
+    schemaVersion: 2,
+    configVersion: nextVersion,
+    plans: plans || {},
+    featureMatrix: featureMatrix || {},
+    featureLimits: featureLimits || {},
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedBy: callerUid,
+  };
+
+  await configRef.set(payload, { merge: true });
+
+  await writeAuditLog(callerUid, 'super_admin', 'MEMBERSHIP_CONFIG_PUBLISHED', null, {
+    configVersion: nextVersion,
+    planCount: Object.keys(plans).length,
+    matrixCount: Object.keys(featureMatrix || {}).length,
+  });
+
+  return {
+    success: true,
+    configVersion: nextVersion,
+    message: `Published membership configuration version ${nextVersion}.`,
+  };
+});
+
+/**
+ * Cloud Function D: verifyGooglePlayPurchase
+ * Server-side purchase verification stub / API handler.
+ * Authoritatively updates user_subscriptions and appends transaction ledger.
+ */
+exports.verifyGooglePlayPurchase = onCall(async (request) => {
+  if (!request.auth || !request.auth.uid) {
+    throw new HttpsError('unauthenticated', 'User must be authenticated.');
+  }
+
+  const userId = request.auth.uid;
+  const { productId, purchaseToken, orderId } = request.data || {};
+
+  if (!productId || !purchaseToken) {
+    throw new HttpsError('invalid-argument', 'productId and purchaseToken required.');
+  }
+
+  // Derive plan from store product ID
+  let planId = 'monthly';
+  let durationDays = 30;
+  if (productId.includes('weekly')) {
+    planId = 'weekly';
+    durationDays = 7;
+  } else if (productId.includes('yearly')) {
+    planId = 'yearly';
+    durationDays = 365;
+  } else if (productId.includes('lifetime')) {
+    planId = 'lifetime';
+    durationDays = null;
+  }
+
+  const now = new Date();
+  const expiryDate = durationDays ? new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000).toISOString() : null;
+
+  // 1. Authoritative user_subscriptions write
+  const subRef = db.collection('user_subscriptions').doc(userId);
+  await subRef.set({
+    userId,
+    planId,
+    status: 'ACTIVE',
+    provider: 'google_play',
+    providerProductId: productId,
+    startDate: admin.firestore.FieldValue.serverTimestamp(),
+    expiryDate,
+    autoRenew: true,
+    isTrial: false,
+    lastVerifiedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
+
+  // 2. Append idempotent transaction ledger entry (storing sensitive token here instead of user doc)
+  const txnId = orderId || `gplay_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  await db.collection('payment_transactions').doc(txnId).set({
+    transactionId: txnId,
+    userId,
+    provider: 'google_play',
+    productId,
+    purchaseToken,
+    eventType: 'INITIAL_PURCHASE',
+    status: 'VERIFIED',
+    processedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  await writeAuditLog(userId, 'user', 'SUBSCRIPTION_VERIFIED', userId, {
+    planId,
+    provider: 'google_play',
+    productId,
+  });
+
+  return {
+    success: true,
+    planId,
+    status: 'ACTIVE',
+    expiryDate,
+  };
+});
   await db.collection('app_users').doc(targetUid).set({
     isPro: proActive,
     planId: validPlanId,

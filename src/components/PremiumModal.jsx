@@ -10,6 +10,8 @@ import { SUPPORTED_CURRENCIES, detectUserCurrency, formatCurrencyPrice } from '.
 import { db } from '../services/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
+import { PaymentProvider } from '../services/payment/PaymentProvider';
+
 const FALLBACK_PLANS = [
   { id: 'weekly',  name: 'Weekly Pass', price: 4.99,  period: '/wk', color: '#8b5cf6', desc: '7-day full pro access pass' },
   { id: 'monthly', name: 'Monthly Pro', price: 14.99, period: '/mo', color: '#3b82f6', popular: true, desc: 'Full monthly access for creators' },
@@ -26,6 +28,7 @@ export default function PremiumModal() {
   const [selectedCurrency, setSelectedCurrency] = useState(() => detectUserCurrency());
   const [subscribing, setSubscribing] = useState(null);
   const [billingSuccess, setBillingSuccess] = useState(null);
+  const [restoring, setRestoring] = useState(false);
 
   // Subscribe to live subscription_plans in Firestore
   useEffect(() => {
@@ -91,14 +94,26 @@ export default function PremiumModal() {
   const handleSubscribe = async (plan) => {
     setSubscribing(plan.id);
     try {
+      const result = await PaymentProvider.purchase(plan, { currency: selectedCurrency });
       const priceText = formatCurrencyPrice(plan.price, selectedCurrency);
-      setTimeout(() => {
-        setBillingSuccess(`Thank you for choosing ${plan.name} (${priceText}${plan.period})! Your subscription is being activated.`);
-        setSubscribing(null);
-      }, 1000);
+      setBillingSuccess(`Thank you for choosing ${plan.name} (${priceText}${plan.period})! Your subscription is active.`);
+      setSubscribing(null);
     } catch (e) {
       console.error('Subscribe error:', e);
+      alert('Subscription flow interrupted: ' + (e.message || 'Payment cancelled'));
       setSubscribing(null);
+    }
+  };
+
+  const handleRestore = async () => {
+    setRestoring(true);
+    try {
+      await PaymentProvider.restorePurchases();
+      alert('Purchases checked. If an active subscription exists, your access has been refreshed.');
+    } catch (e) {
+      alert('Failed to restore purchases: ' + e.message);
+    } finally {
+      setRestoring(false);
     }
   };
 
@@ -267,10 +282,29 @@ export default function PremiumModal() {
               </div>
             </div>
 
-            {/* Billing Guarantees Footer */}
-            <div className="premium-modal-footer">
-              <Shield size={12} />
-              <span>Cancel anytime &middot; Secure regional checkout &middot; Instant access</span>
+            {/* Billing Guarantees & Restore Footer */}
+            <div className="premium-modal-footer" style={{ flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <Shield size={12} />
+                <span>Cancel anytime &middot; Secure checkout &middot; Instant access</span>
+              </div>
+              <button
+                onClick={handleRestore}
+                disabled={restoring}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  marginTop: 2,
+                }}
+              >
+                {restoring ? 'Restoring purchases...' : 'Restore Purchases'}
+              </button>
             </div>
           </>
         )}

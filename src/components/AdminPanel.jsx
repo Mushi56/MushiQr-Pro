@@ -28,6 +28,7 @@ import FeatureManagementPanel from './FeatureManagementPanel';
 import AdminDashboard from './admin/AdminDashboard';
 import FeatureRegistry from './admin/FeatureRegistry';
 import PlanManager from './admin/PlanManager';
+import FeatureMatrixManager from './admin/FeatureMatrixManager';
 import AuditLogPanel from './admin/AuditLogPanel';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────
@@ -154,8 +155,9 @@ const NAV = [
     { id: 'reports',       icon: FileText,        label: 'Reports' },
   ]},
   { section: 'MONETIZATION', items: [
-    { id: 'revenue',       icon: DollarSign,      label: 'Revenue & SaaS' },
-    { id: 'subscriptions', icon: CreditCard,      label: 'Subscriptions' },
+    { id: 'revenue',        icon: DollarSign,      label: 'Revenue & SaaS' },
+    { id: 'subscriptions',  icon: CreditCard,      label: 'Membership Plans' },
+    { id: 'feature-matrix', icon: Sliders,         label: 'Feature Matrix' },
   ]},
   { section: 'CONTENT', items: [
     { id: 'templates',  icon: Layers,  label: 'Templates' },
@@ -4265,11 +4267,12 @@ function AdminPanelInner() {
   };
 
   const PANELS = {
-    dashboard:       <AdminDashboard onNavigate={setSection} />,
-    revenue:         <RevenuePanel />,
-    users:           <UsersPanel />,
-    subscriptions:   <PlanManager />,
-    analytics:       <AnalyticsPanel chartData={chartData} stats={stats} />,
+    dashboard:        <AdminDashboard onNavigate={setSection} />,
+    revenue:          <RevenuePanel />,
+    users:            <UsersPanel />,
+    subscriptions:    <PlanManager />,
+    'feature-matrix': <FeatureMatrixManager />,
+    analytics:        <AnalyticsPanel chartData={chartData} stats={stats} />,
     reports:         <ReportsPanel history={history} />,
     templates:       <TemplatesPanel cloudTemplates={cloudTemplates} onRefresh={refreshTemplates} />,
     'qr-barcode':    <QRBarcodePanel stats={stats} history={history} />,

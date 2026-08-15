@@ -316,38 +316,27 @@ class FeatureAccessManagerService {
   }
 
   init() {
-    // 1. Listen to Auth & Custom Claims
-    onIdTokenChanged(auth, async (u) => {
-      this.currentUser = u;
-      if (u) {
+    // 1. Listen for Auth State & custom claims
+    onIdTokenChanged(auth, async (user) => {
+      this.currentUser = user;
+      if (user) {
         try {
-          const res = await u.getIdTokenResult();
-          this.userClaims = res.claims || {};
+          const tokenResult = await user.getIdTokenResult();
+          this.userClaims = tokenResult.claims || {};
         } catch {
           this.userClaims = {};
         }
-        this.listenUserSubscription(u.uid);
+        this.listenUserSubscription(user.uid);
       } else {
         this.userClaims = {};
         this.userSubscription = null;
-        try { localStorage.removeItem(STORAGE_KEYS.USER_SUB); } catch {}
         if (this.unsubSub) this.unsubSub();
-      }
-      this.notifyListeners();
-    });
-
-    // 2. Immediate direct fetch + Real-time listener for global_config/featureFlags
-    const flagsRef = doc(db, 'global_config', 'featureFlags');
-    getDoc(flagsRef).then((docSnap) => {
-      if (docSnap.exists()) {
-        this.globalFlags = { ...this.globalFlags, ...(docSnap.data() || {}) };
-        try {
-          localStorage.setItem(STORAGE_KEYS.GLOBAL_FLAGS, JSON.stringify(this.globalFlags));
-        } catch {}
         this.notifyListeners();
       }
-    }).catch(err => console.warn('[FeatureAccessManager] Initial getDoc flags warning:', err.message));
+    });
 
+    // 2. Real-time listener for global_config/featureFlags
+    const flagsRef = doc(db, 'global_config', 'featureFlags');
     try {
       this.unsubFlags = onSnapshot(flagsRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -362,36 +351,55 @@ class FeatureAccessManagerService {
       console.warn('[FeatureAccessManager] Failed to init globalFlags listener:', e);
     }
 
-    // 3. Immediate direct fetch + Real-time listener for subscription_plans collection
-    const plansCol = collection(db, 'subscription_plans');
-    getDocs(plansCol).then((colSnap) => {
-      const plans = {};
-      colSnap.forEach(d => {
-        plans[d.id] = d.data();
-      });
-      if (Object.keys(plans).length > 0) {
-        this.planConfigs = plans;
-        try {
-          localStorage.setItem(STORAGE_KEYS.PLAN_CONFIGS, JSON.stringify(this.planConfigs));
-        } catch {}
+    // 3. Real-time listener for global_config/membership (Global Membership Configuration)
+    const membershipRef = doc(db, 'global_config', 'membership');
+    try {
+      this.unsubMembership = onSnapshot(membershipRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data() || {};
+          this.membershipConfig = data;
+          this.configVersion = data.configVersion || 100;
+          this.lastSyncedAt = Date.now();
+          try {
+            localStorage.setItem('mushiqr_membership_config', JSON.stringify(data));
+            localStorage.setItem('mushiqr_config_version', String(this.configVersion));
+            localStorage.setItem('mushiqr_last_synced_at', String(this.lastSyncedAt));
+          } catch {}
+          if (data.plans) this.planConfigs = data.plans;
+        }
         this.notifyListeners();
-      }
-    }).catch(err => console.warn('[FeatureAccessManager] Initial getDocs plans warning:', err.message));
+      }, (err) => console.warn('[FeatureAccessManager] Membership config listener notice:', err.message));
+    } catch (e) {
+      console.warn('[FeatureAccessManager] Failed to init membership config listener:', e);
+    }
 
+    // 4. Backward compatible listener for subscription_plans collection
+    const plansCol = collection(db, 'subscription_plans');
     try {
       this.unsubPlans = onSnapshot(plansCol, (colSnap) => {
         const plans = {};
         colSnap.forEach(d => {
           plans[d.id] = d.data();
         });
-        this.planConfigs = plans;
-        try {
-          localStorage.setItem(STORAGE_KEYS.PLAN_CONFIGS, JSON.stringify(this.planConfigs));
-        } catch {}
+        if (Object.keys(plans).length > 0 && !this.membershipConfig?.plans) {
+          this.planConfigs = plans;
+        }
         this.notifyListeners();
       }, (err) => console.warn('[FeatureAccessManager] Plans listener notice:', err.message));
     } catch (e) {
       console.warn('[FeatureAccessManager] Failed to init plans listener:', e);
+    }
+
+    // 5. Network online/offline event listeners
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', () => {
+        this.isOnline = true;
+        this.notifyListeners();
+      });
+      window.addEventListener('offline', () => {
+        this.isOnline = false;
+        this.notifyListeners();
+      });
     }
   }
 
@@ -401,6 +409,7 @@ class FeatureAccessManagerService {
       this.unsubSub = onSnapshot(doc(db, 'user_subscriptions', uid), (docSnap) => {
         if (docSnap.exists()) {
           this.userSubscription = docSnap.data();
+          this.userSubscription.lastVerifiedClientAt = Date.now();
           try { localStorage.setItem(STORAGE_KEYS.USER_SUB, JSON.stringify(this.userSubscription)); } catch {}
         } else {
           this.userSubscription = null;
@@ -418,7 +427,8 @@ class FeatureAccessManagerService {
   }
 
   /**
-   * Evaluates user's active plan ('free', 'weekly', 'monthly', 'yearly')
+   * Evaluates user's active plan ('free', 'weekly', 'monthly', 'yearly', 'lifetime')
+   * with configurable offline grace window.
    */
   getUserPlan() {
     const sub = this.userSubscription;
@@ -426,15 +436,18 @@ class FeatureAccessManagerService {
 
     const rawPlan = (sub.planId || '').toLowerCase();
     
-    // Map legacy 'pro' or 'pro_monthly'/'pro_yearly'/'lifetime' to new canonical plans
-    let plan = 'free';
-    if (CANONICAL_PLANS.includes(rawPlan)) {
-      plan = rawPlan;
-    } else if (sub.isPro || rawPlan === 'pro' || rawPlan === 'pro_monthly' || rawPlan === 'pro_yearly' || rawPlan === 'lifetime') {
-      plan = 'monthly'; // default legacy paid fallback
+    // Status check
+    const status = (sub.status || '').toUpperCase();
+    if (status === 'EXPIRED' || status === 'CANCELLED' || status === 'REVOKED' || status === 'FREE' || sub.status === 'inactive') {
+      return 'free';
     }
 
-    // Check expiration if applicable
+    // Explicit lifetime protection — NEVER downgrade lifetime customers
+    if (rawPlan === 'lifetime' || sub.isLifetime) {
+      return 'lifetime';
+    }
+
+    // Check expiration timestamp for time-bound plans
     if (sub.expiryDate) {
       const expTime = new Date(sub.expiryDate).getTime();
       if (!isNaN(expTime) && Date.now() > expTime) {
@@ -442,15 +455,46 @@ class FeatureAccessManagerService {
       }
     }
 
-    if (sub.status === 'inactive' || sub.cancelled) {
-      return 'free';
+    // Offline Grace Window Check (Configurable, default 7 days = 604,800,000 ms)
+    const OFFLINE_GRACE_MS = (this.membershipConfig?.offlineGraceDays || 7) * 24 * 60 * 60 * 1000;
+    const lastVerified = sub.lastVerifiedClientAt || (sub.lastVerifiedAt?.toMillis ? sub.lastVerifiedAt.toMillis() : Date.now());
+    if (Date.now() - lastVerified > OFFLINE_GRACE_MS && typeof navigator !== 'undefined' && !navigator.onLine) {
+      return 'free'; // Offline grace window expired
     }
 
-    return plan;
+    if (CANONICAL_PLANS.includes(rawPlan)) {
+      return rawPlan;
+    }
+    
+    if (sub.isPro || rawPlan === 'pro' || rawPlan === 'pro_monthly') {
+      return 'monthly';
+    }
+    if (rawPlan === 'pro_yearly') {
+      return 'yearly';
+    }
+
+    return rawPlan || 'free';
+  }
+
+  /**
+   * Quantitative Limit Evaluator
+   */
+  getFeatureLimit(featureId) {
+    const userPlan = this.getUserPlan();
+    const limitsMap = this.membershipConfig?.featureLimits?.[featureId];
+    if (limitsMap && limitsMap[userPlan] !== undefined) {
+      return limitsMap[userPlan]; // e.g. 5, 100, -1 (unlimited)
+    }
+    // Default fallback
+    if (userPlan === 'free') return 5;
+    return -1; // unlimited for paid
   }
 
   /**
    * Primary Entitlement Access API
+   * Evaluated from TWO authoritative sources:
+   * Source 1: Global Membership Configuration (feature matrix & flags)
+   * Source 2: Verified User Entitlement (plan tier & status)
    */
   canUseFeature(featureId) {
     const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
@@ -467,7 +511,6 @@ class FeatureAccessManagerService {
     }
 
     // 2. Check Global Feature Switch (global_config/featureFlags) FIRST
-    // Emergency global disable turns feature off application-wide for ALL users
     const flagVal = this.globalFlags[featureId];
     const isGloballyEnabled = flagVal !== undefined ? Boolean(flagVal) : featDef.defaultEnabled;
 
@@ -493,7 +536,6 @@ class FeatureAccessManagerService {
     }
 
     // 4. Super Admin Plan Entitlement Override
-    // Super Admins bypass subscription plan paywalls for globally enabled features
     const isSuperAdmin = this.userClaims?.role === 'super_admin';
     if (isSuperAdmin && featDef.allowSuperAdminOverride) {
       return {
@@ -506,8 +548,43 @@ class FeatureAccessManagerService {
       };
     }
 
-    // 5. Check User Subscription Plan Feature Assignment
+    // 5. Evaluate Source 1 (Global Feature Matrix) + Source 2 (Verified User Entitlement)
     const userPlan = this.getUserPlan();
+    
+    // Check if user has lifetime plan (unlocked across all features)
+    if (userPlan === 'lifetime') {
+      return {
+        allowed: true,
+        reason: REASON.ALLOWED,
+        status: STATUS.ALLOWED,
+        featureId,
+        userPlan,
+      };
+    }
+
+    // Check global_config/membership featureMatrix
+    const matrixEntry = this.membershipConfig?.featureMatrix?.[featureId];
+    if (Array.isArray(matrixEntry)) {
+      if (matrixEntry.includes(userPlan)) {
+        return {
+          allowed: true,
+          reason: REASON.ALLOWED,
+          status: STATUS.ALLOWED,
+          featureId,
+          userPlan,
+        };
+      }
+      return {
+        allowed: false,
+        reason: REASON.PLAN_REQUIRED,
+        status: STATUS.REQUIRES_PLAN,
+        featureId,
+        requiredPlan: matrixEntry[0] || 'weekly',
+        userPlan,
+      };
+    }
+
+    // Fallback to Plan Configs / Canonical Defaults
     const planConfig = this.planConfigs[userPlan];
     const allowedFeatures = planConfig?.features || (userPlan === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
 
@@ -518,6 +595,7 @@ class FeatureAccessManagerService {
         status: STATUS.REQUIRES_PLAN,
         featureId,
         requiredPlan: this.findMinimumPlanForFeature(featureId),
+        userPlan,
       };
     }
 
@@ -526,7 +604,7 @@ class FeatureAccessManagerService {
       reason: REASON.ALLOWED,
       status: STATUS.ALLOWED,
       featureId,
-      requiredPlan: userPlan,
+      userPlan,
     };
   }
 
