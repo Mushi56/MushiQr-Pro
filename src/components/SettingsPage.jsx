@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { Moon, Sun, Info, Shield, FileText, ChevronRight, Folder, Settings as SettingsIcon } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import AppIcon from './AppIcon';
+import PaidCrownBadge from './PaidCrownBadge';
+import { usePremium } from '../services/premiumContext';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 import SaveLocationModal from './SaveLocationModal';
 
 export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
   const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const { showPaywall } = usePremium();
 
   const handleThemeChange = () => {
     let next;
@@ -20,6 +24,11 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
   };
 
   const handleChooseFolder = () => {
+    const access = FeatureAccessManager.canUseFeature('settings_save_location');
+    if (!access.allowed) {
+      showPaywall('settings_save_location');
+      return;
+    }
     setIsFolderModalOpen(true);
   };
 
@@ -43,7 +52,11 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
     },
     {
       id: 'saveLocation',
-      label: 'Save Location',
+      label: (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          Save Location <PaidCrownBadge featureId="settings_save_location" position="inline" size={9} />
+        </span>
+      ),
       icon: <Folder size={20} />,
       value: <span style={{ color: 'var(--accent-primary)', fontWeight: 'bold' }}>{saveLocation}</span>,
       onClick: handleChooseFolder

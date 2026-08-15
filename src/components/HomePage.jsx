@@ -594,6 +594,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
+              <PaidCrownBadge featureId="qr_generator" position="floating" size={10} />
               {/* Card Image */}
               <img 
                 src="/Qr Code.webp" 
@@ -728,6 +729,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
+              <PaidCrownBadge featureId="barcode_generator" position="floating" size={10} />
               {/* Card Image */}
               <img 
                 src="/Barcode.webp" 
@@ -867,6 +869,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
+            <PaidCrownBadge featureId="batch_view" position="floating" size={10} />
             {/* Card Image */}
             <img 
               src="/Bulk Ganaration.webp" 

@@ -4,6 +4,8 @@ import {
 } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import { usePremium } from '../services/premiumContext';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import PaidCrownBadge from './PaidCrownBadge';
 
 import SaveLocationModal from './SaveLocationModal';
 
@@ -30,6 +32,11 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
   };
 
   const handleChooseFolder = () => {
+    const access = FeatureAccessManager.canUseFeature('settings_save_location');
+    if (!access.allowed) {
+      showPaywall('settings_save_location');
+      return;
+    }
     setIsFolderModalOpen(true);
   };
 
@@ -179,7 +186,9 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
             <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}>
               <Folder size={18} />
             </div>
-            <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Save Location</div>
+            <div style={{ flex: 1, fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+              Save Location <PaidCrownBadge featureId="settings_save_location" position="inline" size={9} />
+            </div>
             <div style={{ marginRight: '12px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 'bold', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {saveLocation}
             </div>

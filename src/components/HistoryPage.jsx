@@ -4,6 +4,7 @@ import { History as HistoryIcon, SearchX, Trash2, QrCode, Star, Clock, MoreVerti
 import { QR_TYPES } from '../utils/qrEngine';
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import { usePremium } from '../services/premiumContext';
 import { AlertCircle } from 'lucide-react';
 
 const TYPE_ICONS = {
@@ -20,7 +21,8 @@ const TYPE_ICONS = {
 };
 
 export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All' }) {
-  const access = FeatureAccessManager.canUseFeature('history');
+  const { showPaywall } = usePremium();
+  const access = FeatureAccessManager.canUseFeature('history_view');
 
   if (!access.allowed) {
     return (
@@ -28,18 +30,28 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
           <AlertCircle size={32} />
         </div>
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>History Tracking Unavailable</h2>
+        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Creation & Scan History</h2>
         <p style={{ color: '#8b8fa8', maxWidth: 480, margin: 0, fontSize: 14, lineHeight: 1.5 }}>
           {access.status === 'disabled_by_admin'
             ? 'History tracking has been disabled globally by the Administrator.'
-            : 'History tracking requires an upgraded subscription plan.'}
+            : 'History tracking is a Pro feature. Upgrade your subscription plan to access your generation and scan activity log.'}
         </p>
-        <button
-          onClick={() => onNavigate && onNavigate('home')}
-          style={{ background: '#D60036', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', marginTop: 12 }}
-        >
-          Return to Home
-        </button>
+        <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+          {access.status !== 'disabled_by_admin' && (
+            <button
+              onClick={() => showPaywall('history_view')}
+              style={{ background: 'var(--accent-gradient)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(214,0,54,0.3)' }}
+            >
+              Unlock History Log
+            </button>
+          )}
+          <button
+            onClick={() => onNavigate && onNavigate('home')}
+            style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '12px 20px', borderRadius: 12, fontWeight: 600, cursor: 'pointer' }}
+          >
+            Return to Home
+          </button>
+        </div>
       </div>
     );
   }

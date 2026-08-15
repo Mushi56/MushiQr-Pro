@@ -4,6 +4,7 @@ import { Search, SearchX, Trash2, MoreVertical, Star, Link2, Wifi, User, Mail, P
 import { QR_TYPES } from '../utils/qrEngine';
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import { usePremium } from '../services/premiumContext';
 import { AlertCircle } from 'lucide-react';
 
 const TYPE_ICONS = {
@@ -20,7 +21,8 @@ const TYPE_ICONS = {
 };
 
 export default function SavedPage({ onLoadQR }) {
-  const access = FeatureAccessManager.canUseFeature('saved');
+  const { showPaywall } = usePremium();
+  const access = FeatureAccessManager.canUseFeature('saved_view');
 
   if (!access.allowed) {
     return (
@@ -28,12 +30,20 @@ export default function SavedPage({ onLoadQR }) {
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
           <AlertCircle size={32} />
         </div>
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Saved Collection Unavailable</h2>
+        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Saved QR Collection</h2>
         <p style={{ color: '#8b8fa8', maxWidth: 480, margin: 0, fontSize: 14, lineHeight: 1.5 }}>
           {access.status === 'disabled_by_admin'
             ? 'Saved QR Collection has been disabled globally by the Administrator.'
-            : 'Saved QR Collection requires an upgraded subscription plan.'}
+            : 'Saved QR Collection is a Pro feature. Upgrade your subscription plan to bookmark and manage your favorite QR codes.'}
         </p>
+        {access.status !== 'disabled_by_admin' && (
+          <button
+            onClick={() => showPaywall('saved_view')}
+            style={{ background: 'var(--accent-gradient)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(214,0,54,0.3)', marginTop: 12 }}
+          >
+            Unlock Saved Collection
+          </button>
+        )}
       </div>
     );
   }

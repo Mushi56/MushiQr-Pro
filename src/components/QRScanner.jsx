@@ -18,6 +18,8 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { renderBarcode } from '../utils/barcodeEngine';
 import AppIcon from './AppIcon';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import { usePremium } from '../services/premiumContext';
+import PaidCrownBadge from './PaidCrownBadge';
 
 // ─── Barcode format metadata ──────────────────────────────────────────────────
 // Formats supported by html5-qrcode (ZXing) for live camera scanning
@@ -102,7 +104,8 @@ const detectFormatFromText = (text) => {
 };
 
 export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
-  const access = FeatureAccessManager.canUseFeature('scanner');
+  const { showPaywall } = usePremium();
+  const access = FeatureAccessManager.canUseFeature('scanner_camera_live');
 
   if (!access.allowed) {
     return (
@@ -110,18 +113,28 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
           <AlertCircle size={32} />
         </div>
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>QR & Barcode Scanner Unavailable</h2>
+        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>QR & Barcode Scanner</h2>
         <p style={{ color: '#8b8fa8', maxWidth: 480, margin: 0, fontSize: 14, lineHeight: 1.5 }}>
           {access.status === 'disabled_by_admin'
             ? 'QR & Barcode Scanner has been disabled globally by the Administrator.'
             : 'QR & Barcode Scanner requires an upgraded subscription plan.'}
         </p>
-        <button
-          onClick={onBack}
-          style={{ background: '#D60036', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', marginTop: 12 }}
-        >
-          Return Back
-        </button>
+        <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+          {access.status !== 'disabled_by_admin' && (
+            <button
+              onClick={() => showPaywall('scanner_camera_live')}
+              style={{ background: 'var(--accent-gradient)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(214,0,54,0.3)' }}
+            >
+              Unlock Scanner
+            </button>
+          )}
+          <button
+            onClick={onBack}
+            style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '12px 20px', borderRadius: 12, fontWeight: 600, cursor: 'pointer' }}
+          >
+            Return Back
+          </button>
+        </div>
       </div>
     );
   }
@@ -1114,7 +1127,21 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
             <div className="qrs-shutter-btn-inner" style={{ background: status === 'DETECTED' ? '#ef4444' : '#fff' }} />
           </button>
 
-          <button className="qrs-side-btn" onClick={() => { triggerHapticFeedback(); fileInputRef.current?.click(); }} aria-label="Gallery">
+          <button 
+            className="qrs-side-btn" 
+            onClick={() => {
+              const access = FeatureAccessManager.canUseFeature('scanner_image_upload');
+              if (!access.allowed) {
+                showPaywall('scanner_image_upload');
+                return;
+              }
+              triggerHapticFeedback(); 
+              fileInputRef.current?.click(); 
+            }} 
+            aria-label="Gallery"
+            style={{ position: 'relative' }}
+          >
+            <PaidCrownBadge featureId="scanner_image_upload" position="floating" size={8} />
             <Image size={22} />
           </button>
         </div>
