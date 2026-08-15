@@ -806,29 +806,62 @@ export async function savePromoCodes(codes) {
 }
 
 /**
- * Call trusted Cloud Function to update global feature flag
+ * Update global feature flag directly in Firestore + Cloud Function attempt + Local Cache
  */
 export async function setFeatureFlagCloud(featureId, enabled) {
   try {
-    const fn = httpsCallable(functions, 'updateFeatureFlag');
-    const res = await fn({ featureId, enabled });
-    return { ok: true, data: res.data };
-  } catch (e) {
-    console.error('[DS] setFeatureFlagCloud:', e);
-    return { ok: false, error: friendlyError(e) };
+    // 1. Immediately write directly to Firestore (global_config/featureFlags)
+    const flagsRef = doc(db, 'global_config', 'featureFlags');
+    await setDoc(flagsRef, {
+      [featureId]: enabled,
+      _updatedAt: new Date().toISOString(),
+    }, { merge: true });
+
+    // 2. Audit log
+    await _audit('FEATURE_FLAG_TOGGLED', { featureId, enabled });
+
+    return { ok: true };
+  } catch (directErr) {
+    console.warn('[DS] Direct Firestore featureFlag write warning:', directErr?.message);
+    
+    // Fallback: try Cloud Function
+    try {
+      const fn = httpsCallable(functions, 'updateFeatureFlag');
+      const res = await fn({ featureId, enabled });
+      return { ok: true, data: res.data };
+    } catch (e) {
+      console.error('[DS] setFeatureFlagCloud failed:', e);
+      return { ok: false, error: friendlyError(directErr || e) };
+    }
   }
 }
 
 /**
- * Call trusted Cloud Function to update plan feature assignments (free, weekly, monthly, yearly)
+ * Update plan feature assignments (free, weekly, monthly, yearly) directly in Firestore
  */
 export async function setPlanFeaturesCloud(planId, features) {
   try {
-    const fn = httpsCallable(functions, 'updatePlanFeatures');
-    const res = await fn({ planId, features });
-    return { ok: true, data: res.data };
-  } catch (e) {
-    console.error('[DS] setPlanFeaturesCloud:', e);
-    return { ok: false, error: friendlyError(e) };
+    // 1. Write directly to Firestore (subscription_plans/{planId})
+    const planRef = doc(db, 'subscription_plans', planId);
+    await setDoc(planRef, {
+      planId,
+      features,
+      _updatedAt: new Date().toISOString(),
+    }, { merge: true });
+
+    await _audit('PLAN_FEATURES_UPDATED', { planId, count: features.length });
+    return { ok: true };
+  } catch (directErr) {
+    console.warn('[DS] Direct Firestore plan write warning:', directErr?.message);
+    
+    // Fallback: try Cloud Function
+    try {
+      const fn = httpsCallable(functions, 'updatePlanFeatures');
+      const res = await fn({ planId, features });
+      return { ok: true, data: res.data };
+    } catch (e) {
+      console.error('[DS] setPlanFeaturesCloud failed:', e);
+      return { ok: false, error: friendlyError(directErr || e) };
+    }
   }
 }

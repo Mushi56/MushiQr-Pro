@@ -94,7 +94,13 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
   const hasUnsaved=useMemo(()=>Object.keys(pendingFlags).length>0||Object.keys(pendingPlans).length>0,[pendingFlags,pendingPlans]);
   const getGlobalEnabled=useCallback((fId,def)=>{const v=effectiveFlags[fId];return v!==undefined?Boolean(v):(def!==false);},[effectiveFlags]);
   const getPlanEnabled=useCallback((pId,fId)=>effectivePlans[pId]?.includes(fId)??false,[effectivePlans]);
-  const toggleGlobal=useCallback((feat,value)=>{setPendingFlags(p=>({...p,[feat.featureId]:value}));setSaveResult(null);},[]);
+  const toggleGlobal=useCallback((feat,value)=>{
+    setPendingFlags(p=>({...p,[feat.featureId]:value}));
+    setSaveResult(null);
+    if(typeof FeatureAccessManager?.setLocalFlagOverride==='function'){
+      FeatureAccessManager.setLocalFlagOverride(feat.featureId,value);
+    }
+  },[]);
   const togglePlan=useCallback((pId,feat,value)=>{
     setPendingPlans(p=>{
       const cur=p[pId]!==undefined?[...p[pId]]:(livePlans[pId]?.features?[...livePlans[pId].features]:pId==='free'?[...DEFAULT_FREE_FEATURES]:[...DEFAULT_PAID_FEATURES]);
@@ -105,11 +111,23 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
   const handleSave=useCallback(async()=>{
     setIsSaving(true);setSaveResult(null);
     try{
-      for(const[fId,val]of Object.entries(pendingFlags))await setFeatureFlagCloud(fId,val);
-      for(const[pId,feats]of Object.entries(pendingPlans))await setPlanFeaturesCloud(pId,feats);
-      setPendingFlags({});setPendingPlans({});
-      setSaveResult({ok:true,msg:'Changes saved successfully'});
-      setTimeout(()=>setSaveResult(null),4000);
+      let hadError = false;
+      let errorMsg = '';
+      for(const[fId,val]of Object.entries(pendingFlags)){
+        const res = await setFeatureFlagCloud(fId,val);
+        if(!res.ok){ hadError = true; errorMsg = res.error; }
+      }
+      for(const[pId,feats]of Object.entries(pendingPlans)){
+        const res = await setPlanFeaturesCloud(pId,feats);
+        if(!res.ok){ hadError = true; errorMsg = res.error; }
+      }
+      if(hadError){
+        setSaveResult({ok:false,msg:errorMsg||'Failed to save some features to Firebase'});
+      } else {
+        setPendingFlags({});setPendingPlans({});
+        setSaveResult({ok:true,msg:'Changes saved to Firebase successfully'});
+        setTimeout(()=>setSaveResult(null),4000);
+      }
     }catch(e){setSaveResult({ok:false,msg:e?.message||'Failed to save changes'});}
     setIsSaving(false);
   },[pendingFlags,pendingPlans]);
