@@ -1131,8 +1131,9 @@ export default function BatchPage({
                               }}
                               onPaste={(e) => {
                                 const pasted = e.clipboardData.getData('text');
-                                if (pasted && (pasted.includes('\n') || pasted.includes('\t'))) {
+                                if (pasted && (pasted.includes('\n') || pasted.includes('\t') || (pasted.includes(',') && pasted.includes('\n')))) {
                                   e.preventDefault();
+                                  e.stopPropagation();
                                   const lines = pasted.split(/\r\n|\n|\r/).filter(l => l.trim().length > 0);
                                   if (lines.length > 0) {
                                     const parsedRows = lines.map((l, i) => {
