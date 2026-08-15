@@ -29,7 +29,7 @@ export const FEATURE_CATEGORIES = {
 
 // ─── SUBCATEGORY DEFINITIONS ─────────────────────────────────────────────
 export const CATEGORY_SUBCATEGORIES = {
-  QR_GENERATOR:      ['Content Types', 'QR Engine', 'Design & Styling', 'Templates', 'Export'],
+  QR_GENERATOR:      ['Content', 'Color', 'Style', 'Logo', 'Template', 'Text', 'Save & Export', 'QR Engine'],
   BARCODE_GENERATOR: ['1D Standards', '2D Standards', 'Barcode Appearance', 'Export'],
   BULK_GENERATOR:    ['Batch Screen', 'Input & Spreadsheet', 'Batch Styling', 'Bulk Export'],
   SCANNER:           ['Camera Lens', 'Detection', 'Scan Results'],
@@ -41,48 +41,74 @@ export const CATEGORY_SUBCATEGORIES = {
 
 export const FEATURE_REGISTRY = [
   // ── 1. QR CODE GENERATOR ──
-  { featureId: 'qr_text',      displayName: 'Plain Text QR',            category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate plain text QR code',        defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_url',       displayName: 'Website URL QR',           category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate website URL QR code',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_wifi',      displayName: 'Wi-Fi Network QR',         category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate Wi-Fi credentials QR',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_email',     displayName: 'Email Message QR',         category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate mailto QR code',            defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_phone',     displayName: 'Phone Call QR',            category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate tel QR code',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_sms',       displayName: 'SMS Text Message QR',      category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate smsto QR code',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_vcard',     displayName: 'vCard Contact QR',         category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate contact card QR',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_location',  displayName: 'Map Location QR',          category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate geo location QR',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'qr_pdf',       displayName: 'PDF Document Link QR',     category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate PDF file QR',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'qr_image',     displayName: 'Image Gallery Link QR',    category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate image link QR',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'qr_audio',     displayName: 'Audio File Link QR',       category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate audio link QR',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'qr_document',  displayName: 'Document Link QR',         category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate document file QR',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'qr_event',     displayName: 'Calendar Event QR',        category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate iCal event QR',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'qr_crypto',    displayName: 'Crypto Wallet QR',         category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate cryptocurrency QR',         defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'qr_whatsapp',  displayName: 'WhatsApp Direct Chat QR',  category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate WhatsApp QR',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_youtube',   displayName: 'YouTube Video QR',         category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate YouTube link QR',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_instagram', displayName: 'Instagram Profile QR',     category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate Instagram link QR',         defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_facebook',  displayName: 'Facebook Page QR',         category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate Facebook link QR',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_x',         displayName: 'X (Twitter) Profile QR',   category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate X profile QR',              defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_linkedin',  displayName: 'LinkedIn Profile QR',      category: 'QR_GENERATOR', subcategory: 'Content Types', description: 'Generate LinkedIn QR',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_matrix_engine',  displayName: 'Core QR Matrix Generator', category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Standard QR matrix creation',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_error_correction',displayName: 'Error Correction Levels',  category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Adjust L/M/Q/H error levels',         defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_quiet_zone',     displayName: 'Quiet Zone Slider',         category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Adjust margin padding around QR',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'qr_center_text',    displayName: 'Center Text & Fonts',       category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Embed text inside QR center',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'qr_size_custom',    displayName: 'Custom Canvas Size',         category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Adjust render resolution slider',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'custom_logo_upload',    displayName: 'Custom Brand Logo Upload',   category: 'QR_GENERATOR', subcategory: 'Design & Styling', description: 'Upload personal image inside QR',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'custom_logo_presets',   displayName: 'Brand Logo Presets Gallery', category: 'QR_GENERATOR', subcategory: 'Design & Styling', description: 'Select pre-installed social logos',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'custom_colors_solid',   displayName: 'Custom Solid Color Picker',  category: 'QR_GENERATOR', subcategory: 'Design & Styling', description: 'Advanced RGB/HSB solid picker',        defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'custom_colors_gradient',displayName: 'Dual-Color Gradient QR',     category: 'QR_GENERATOR', subcategory: 'Design & Styling', description: 'Linear gradient color fills',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'custom_dot_styles',     displayName: 'Custom Dot Module Shapes',   category: 'QR_GENERATOR', subcategory: 'Design & Styling', description: '20+ dot shapes (dots, leaf, etc)',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'custom_eye_styles',     displayName: 'Custom Eye Finder Shapes',   category: 'QR_GENERATOR', subcategory: 'Design & Styling', description: '20+ corner eye shapes',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'custom_frames',         displayName: 'Outer Frames & Badges',      category: 'QR_GENERATOR', subcategory: 'Design & Styling', description: 'Decorative QR frame borders',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'templates_browse',        displayName: 'Browse Templates Gallery',   category: 'QR_GENERATOR', subcategory: 'Templates',        description: 'Explore pre-designed QR designs',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'templates_free_apply',    displayName: 'Apply Standard Templates',   category: 'QR_GENERATOR', subcategory: 'Templates',        description: 'Use free standard templates',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'templates_premium_apply', displayName: 'Apply Premium Templates',   category: 'QR_GENERATOR', subcategory: 'Templates',        description: 'Use high-conversion premium templates',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'templates_save_custom',   displayName: 'Save Custom User Template', category: 'QR_GENERATOR', subcategory: 'Templates',        description: 'Save current design as template',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'templates_cloud_library', displayName: 'Cloud Template Library',    category: 'QR_GENERATOR', subcategory: 'Templates',        description: 'Access community cloud templates',          defaultEnabled: true, requiresAuthentication: true,  allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'export_png',         displayName: 'PNG Image Export',       category: 'QR_GENERATOR', subcategory: 'Export',           description: 'Download high-res PNG image',            defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'export_jpg',         displayName: 'JPG Image Export',       category: 'QR_GENERATOR', subcategory: 'Export',           description: 'Download compressed JPG image',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'export_svg',         displayName: 'SVG Vector Export',      category: 'QR_GENERATOR', subcategory: 'Export',           description: 'Download scalable SVG vector file',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'export_pdf',         displayName: 'PDF Document Export',    category: 'QR_GENERATOR', subcategory: 'Export',           description: 'Download print-ready A4 PDF',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'export_native_share',displayName: 'Native OS Share Sheet',  category: 'QR_GENERATOR', subcategory: 'Export',           description: 'Share file directly to social apps',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  // ── 1.1 Content Tab (Content Types & Formats) ──
+  { featureId: 'qr_text',      displayName: 'Plain Text QR',            category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate plain text QR code',        defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_url',       displayName: 'Website URL QR',           category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate website URL QR code',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_wifi',      displayName: 'Wi-Fi Network QR',         category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate Wi-Fi credentials QR',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_email',     displayName: 'Email Message QR',         category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate mailto QR code',            defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_phone',     displayName: 'Phone Call QR',            category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate tel QR code',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_sms',       displayName: 'SMS Text Message QR',      category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate smsto QR code',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_vcard',     displayName: 'vCard Contact QR',         category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate contact card QR',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_location',  displayName: 'Map Location QR',          category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate geo location QR',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_pdf',       displayName: 'PDF Document Link QR',     category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate PDF file QR',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_image',     displayName: 'Image Gallery Link QR',    category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate image link QR',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_audio',     displayName: 'Audio File Link QR',       category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate audio link QR',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_document',  displayName: 'Document Link QR',         category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate document file QR',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_event',     displayName: 'Calendar Event QR',        category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate iCal event QR',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_crypto',    displayName: 'Crypto Wallet QR',         category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate cryptocurrency QR',         defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_whatsapp',  displayName: 'WhatsApp Direct Chat QR',  category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate WhatsApp QR',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_youtube',   displayName: 'YouTube Video QR',         category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate YouTube link QR',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_instagram', displayName: 'Instagram Profile QR',     category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate Instagram link QR',         defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_facebook',  displayName: 'Facebook Page QR',         category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate Facebook link QR',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_x',         displayName: 'X (Twitter) Profile QR',   category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate X profile QR',              defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_linkedin',  displayName: 'LinkedIn Profile QR',      category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate LinkedIn QR',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+
+  // ── 1.2 Color Tab (Presets, Dots, Eyes, BG & Gradients) ──
+  { featureId: 'custom_colors_solid',   displayName: 'Solid Color Pickers (RGB/HSB)', category: 'QR_GENERATOR', subcategory: 'Color', description: 'Advanced RGB/HSB solid color pickers', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'custom_colors_gradient',displayName: 'Dual Gradient Color Fills',      category: 'QR_GENERATOR', subcategory: 'Color', description: 'Linear & radial gradient QR color fills', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_color_presets',      displayName: 'Color Theme Presets Gallery',   category: 'QR_GENERATOR', subcategory: 'Color', description: 'Pre-designed multi-color theme presets',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_color_eyes_custom',  displayName: 'Custom Eye Finder Colors',       category: 'QR_GENERATOR', subcategory: 'Color', description: 'Independent color tuning for finder eyes',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_bg_image_texture',   displayName: 'Background Image & Texture',    category: 'QR_GENERATOR', subcategory: 'Color', description: 'Custom canvas background texture patterns', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+
+  // ── 1.3 Style Tab (Dots, Eye Shapes, Background Cards & Sizing) ──
+  { featureId: 'custom_dot_styles',     displayName: 'Custom Dot Module Shapes (20+)', category: 'QR_GENERATOR', subcategory: 'Style', description: '20+ dot shapes (dots, leaf, diamond, etc)', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'custom_eye_styles',     displayName: 'Custom Eye Finder Shapes (20+)', category: 'QR_GENERATOR', subcategory: 'Style', description: '20+ corner eye frame & ball styles',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_background_shapes',  displayName: 'Background Shape Cards & Shields',category: 'QR_GENERATOR', subcategory: 'Style', description: 'Square, rounded, star & shield card backing',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'custom_frames',         displayName: 'Outer Frames & Badges',           category: 'QR_GENERATOR', subcategory: 'Style', description: 'Decorative scan-me frames & stamp badges', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_canvas_positioning', displayName: 'Canvas Positioning & Offsets',    category: 'QR_GENERATOR', subcategory: 'Style', description: 'Fine-grain X/Y matrix repositioning',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+
+  // ── 1.4 Logo Tab (Presets, Upload, Transforms & Background) ──
+  { featureId: 'custom_logo_presets',   displayName: 'Brand Logo Presets Gallery', category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Select pre-installed social & fintech logos',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'custom_logo_upload',    displayName: 'Custom Brand Logo Upload',   category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Upload personal image/photo inside QR',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_logo_transforms',    displayName: 'Logo Rotate, Size & Opacity',category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Rotate, scale, opacity & shadow tools',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_logo_bg_remover',    displayName: 'Logo Background Remover & Crop',category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Remove logo background & crop tools',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_logo_stroke_shadow', displayName: 'Logo Stroke & Drop Shadow',  category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Outline border & drop shadow effects',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+
+  // ── 1.5 Template Tab (Galleries, Premium & Cloud Library) ──
+  { featureId: 'templates_browse',        displayName: 'Browse Templates Gallery',   category: 'QR_GENERATOR', subcategory: 'Template', description: 'Explore pre-designed QR template styles',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'templates_free_apply',    displayName: 'Apply Standard Templates',   category: 'QR_GENERATOR', subcategory: 'Template', description: 'Use free standard pre-designed templates',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'templates_premium_apply', displayName: 'Apply Premium Pro Templates',category: 'QR_GENERATOR', subcategory: 'Template', description: 'Use high-conversion premium templates',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'templates_save_custom',   displayName: 'Save Custom User Template', category: 'QR_GENERATOR', subcategory: 'Template', description: 'Save active design as template',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'templates_cloud_library', displayName: 'Cloud Template Library',    category: 'QR_GENERATOR', subcategory: 'Template', description: 'Access community cloud template library', defaultEnabled: true, requiresAuthentication: true,  allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+
+  // ── 1.6 Text Tab (Center Text, Fonts, Styling & Rotation) ──
+  { featureId: 'qr_center_text',    displayName: 'Add Text & Center Text Embed',  category: 'QR_GENERATOR', subcategory: 'Text', description: 'Embed text inside QR center or badge',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_text_fonts',     displayName: 'Custom Google Fonts Typography', category: 'QR_GENERATOR', subcategory: 'Text', description: 'Outfit, Inter, Roboto & bespoke font library',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_text_styling',   displayName: 'Text Stroke, Color & Shadow',   category: 'QR_GENERATOR', subcategory: 'Text', description: 'Text outline, color & shadow styling',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_text_transforms',displayName: 'Text Rotate & Position Controls',category: 'QR_GENERATOR', subcategory: 'Text', description: 'Angle rotation & precise positioning',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+
+  // ── 1.7 Save & Export (File Downloads, Vectors & Sharing) ──
+  { featureId: 'export_png',         displayName: 'PNG Image Export',       category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Download high-res PNG image',            defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'export_jpg',         displayName: 'JPG Image Export',       category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Download compressed JPG image',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'export_svg',         displayName: 'SVG Vector Export',      category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Download scalable SVG vector file',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'export_pdf',         displayName: 'PDF Document Export',    category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Download print-ready A4 PDF',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'export_native_share',displayName: 'Native OS Share Sheet',  category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Share file directly to social apps',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+
+  // ── 1.8 QR Engine (Matrix Generator, Error Levels & Quiet Zone) ──
+  { featureId: 'qr_matrix_engine',    displayName: 'Core QR Matrix Generator', category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Standard QR matrix generation core',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_error_correction', displayName: 'Error Correction Levels',  category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Adjust L/M/Q/H error tolerance levels',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_quiet_zone',       displayName: 'Quiet Zone Margin Slider', category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Adjust margin padding around QR code',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_size_custom',      displayName: 'Custom Resolution Slider', category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Render high-density custom resolutions',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
   // ── 2. BARCODE GENERATOR ──
   { featureId: 'barcode_code128',    displayName: 'Code 128 Standard',         category: 'BARCODE_GENERATOR', subcategory: '1D Standards', description: 'Standard logistics 1D barcode',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -211,15 +237,34 @@ export const STATUS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 4. CENTRALIZED FEATURE ACCESS MANAGER CLASS
+// 4. CENTRALIZED FEATURE ACCESS MANAGER CLASS (Online & Offline Resilient)
 // ═══════════════════════════════════════════════════════════════════════════
+const STORAGE_KEYS = {
+  GLOBAL_FLAGS: 'mushiqr_cached_global_flags',
+  PLAN_CONFIGS: 'mushiqr_cached_plan_configs',
+  USER_SUB:     'mushiqr_cached_user_subscription'
+};
+
 class FeatureAccessManagerService {
   constructor() {
     this.currentUser = null;
     this.userClaims = {};
-    this.userSubscription = null;
-    this.globalFlags = {};       // global_config/featureFlags doc
-    this.planConfigs = {};       // subscription_plans/{planId} docs
+    
+    // Load local offline cached states immediately
+    let initialFlags = {};
+    let initialPlans = {};
+    let initialSub = null;
+    try {
+      initialFlags = JSON.parse(localStorage.getItem(STORAGE_KEYS.GLOBAL_FLAGS) || '{}');
+      initialPlans = JSON.parse(STORAGE_KEYS.PLAN_CONFIGS ? localStorage.getItem(STORAGE_KEYS.PLAN_CONFIGS) || '{}' : '{}');
+      initialSub = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SUB) || 'null');
+    } catch {
+      // Fallback if storage read fails
+    }
+
+    this.globalFlags = initialFlags;       // global_config/featureFlags doc
+    this.planConfigs = initialPlans;       // subscription_plans/{planId} docs
+    this.userSubscription = initialSub;
     this.unsubFlags = null;
     this.unsubPlans = null;
     this.unsubSub = null;
@@ -243,6 +288,19 @@ class FeatureAccessManagerService {
     });
   }
 
+  /**
+   * Immediately updates local cache and notifies all active components
+   */
+  setLocalFlagOverride(featureId, enabled) {
+    this.globalFlags = { ...this.globalFlags, [featureId]: enabled };
+    try {
+      localStorage.setItem(STORAGE_KEYS.GLOBAL_FLAGS, JSON.stringify(this.globalFlags));
+    } catch (e) {
+      console.warn('[FeatureAccessManager] Storage write error:', e);
+    }
+    this.notifyListeners();
+  }
+
   init() {
     // 1. Listen to Auth & Custom Claims
     onIdTokenChanged(auth, async (u) => {
@@ -258,18 +316,20 @@ class FeatureAccessManagerService {
       } else {
         this.userClaims = {};
         this.userSubscription = null;
+        try { localStorage.removeItem(STORAGE_KEYS.USER_SUB); } catch {}
         if (this.unsubSub) this.unsubSub();
       }
       this.notifyListeners();
     });
 
-    // 2. Real-time listener for global_config/featureFlags
+    // 2. Real-time listener for global_config/featureFlags + Local Offline Mirror
     try {
       this.unsubFlags = onSnapshot(doc(db, 'global_config', 'featureFlags'), (docSnap) => {
         if (docSnap.exists()) {
           this.globalFlags = docSnap.data() || {};
-        } else {
-          this.globalFlags = {};
+          try {
+            localStorage.setItem(STORAGE_KEYS.GLOBAL_FLAGS, JSON.stringify(this.globalFlags));
+          } catch {}
         }
         this.notifyListeners();
       }, (err) => console.warn('[FeatureAccessManager] Global flags listener notice:', err.message));
@@ -277,7 +337,7 @@ class FeatureAccessManagerService {
       console.warn('[FeatureAccessManager] Failed to init globalFlags listener:', e);
     }
 
-    // 3. Real-time listener for subscription_plans collection
+    // 3. Real-time listener for subscription_plans collection + Local Offline Mirror
     try {
       this.unsubPlans = onSnapshot(collection(db, 'subscription_plans'), (colSnap) => {
         const plans = {};
@@ -285,6 +345,9 @@ class FeatureAccessManagerService {
           plans[d.id] = d.data();
         });
         this.planConfigs = plans;
+        try {
+          localStorage.setItem(STORAGE_KEYS.PLAN_CONFIGS, JSON.stringify(this.planConfigs));
+        } catch {}
         this.notifyListeners();
       }, (err) => console.warn('[FeatureAccessManager] Plans listener notice:', err.message));
     } catch (e) {
@@ -298,8 +361,10 @@ class FeatureAccessManagerService {
       this.unsubSub = onSnapshot(doc(db, 'user_subscriptions', uid), (docSnap) => {
         if (docSnap.exists()) {
           this.userSubscription = docSnap.data();
+          try { localStorage.setItem(STORAGE_KEYS.USER_SUB, JSON.stringify(this.userSubscription)); } catch {}
         } else {
           this.userSubscription = null;
+          try { localStorage.removeItem(STORAGE_KEYS.USER_SUB); } catch {}
         }
         this.notifyListeners();
       }, () => {

@@ -1530,16 +1530,28 @@ function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
     const nextVal = !currentVal;
     setF(prev => ({ ...prev, [featureId]: nextVal }));
     setSavingFeatureId(featureId);
+    
+    // Immediately force local offline cache update for instant global enforcement
+    if (typeof FeatureAccessManager?.setLocalFlagOverride === 'function') {
+      FeatureAccessManager.setLocalFlagOverride(featureId, nextVal);
+    }
+
     try {
       const res = await setFeatureFlagCloud(featureId, nextVal);
       if (res.ok) {
         toast(`Updated global switch for ${featureId} → ${nextVal ? 'ON' : 'OFF'}`, 'success');
       } else {
         setF(prev => ({ ...prev, [featureId]: currentVal }));
+        if (typeof FeatureAccessManager?.setLocalFlagOverride === 'function') {
+          FeatureAccessManager.setLocalFlagOverride(featureId, currentVal);
+        }
         toast(`Failed to update ${featureId}: ${res.error}`, 'error', 5000);
       }
     } catch (e) {
       setF(prev => ({ ...prev, [featureId]: currentVal }));
+      if (typeof FeatureAccessManager?.setLocalFlagOverride === 'function') {
+        FeatureAccessManager.setLocalFlagOverride(featureId, currentVal);
+      }
       toast(`Save error: ${e.message}`, 'error', 5000);
     } finally {
       setSavingFeatureId(null);
