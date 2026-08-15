@@ -116,6 +116,7 @@ export default function BatchPage({
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
   const [processingMessage, setProcessingMessage] = useState('Processing...');
+  const [previewLimit, setPreviewLimit] = useState(50);
 
   useEffect(() => {
     if (initialBatchType) {
@@ -132,50 +133,9 @@ export default function BatchPage({
     'HQ': 4096
   };
 
-  const handleModeSwitch = async (newType) => {
+  const handleModeSwitch = (newType) => {
     if (batchType === newType || isProcessing) return;
-
-    if (batchItems.length > 0) {
-      setIsProcessing(true);
-      setBatchType(newType);
-      setProcessingMessage(`Converting items to Bulk ${newType === 'QR' ? 'QR Code' : 'Barcode'}...`);
-      setProcessingProgress(5);
-      await new Promise(r => setTimeout(r, 60));
-
-      const updated = [];
-      const total = batchItems.length;
-      const defaultStyle = newType === 'BARCODE' ? {
-        bcid: barcodeType || 'code128',
-        barColor: '#000000',
-        bgColor: '#ffffff',
-        barWidth: 2,
-        height: 90,
-        margin: 16,
-        displayValue: true
-      } : { ...activeGeneratorStyle };
-
-      const stepSize = Math.max(1, Math.floor(total / 20));
-      for (let idx = 0; idx < total; idx++) {
-        const item = batchItems[idx];
-        updated.push({
-          ...item,
-          type: newType,
-          style: defaultStyle
-        });
-
-        if (idx % stepSize === 0 || idx === total - 1) {
-          const pct = Math.round(((idx + 1) / total) * 100);
-          setProcessingProgress(pct);
-          setProcessingMessage(`Converting to ${newType === 'QR' ? 'QR' : 'Barcode'} (${pct}%)...`);
-          await new Promise(r => setTimeout(r, 10));
-        }
-      }
-
-      setBatchItems(updated);
-      setIsProcessing(false);
-    } else {
-      setBatchType(newType);
-    }
+    setBatchType(newType);
   };
 
   const handleFileUpload = (e) => {
@@ -629,7 +589,6 @@ export default function BatchPage({
         <div style={{ display: 'flex', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '14px', marginBottom: '20px' }}>
           <button 
             onClick={() => handleModeSwitch('QR')}
-            disabled={isProcessing}
             style={{
               flex: 1,
               padding: '12px',
@@ -639,53 +598,31 @@ export default function BatchPage({
               color: batchType === 'QR' ? '#FFFFFF' : 'var(--accent-primary)',
               fontWeight: 800,
               fontSize: '14px',
-              cursor: isProcessing ? 'default' : 'pointer',
+              cursor: 'pointer',
               boxShadow: batchType === 'QR' ? '0 4px 14px rgba(214, 0, 54, 0.35)' : 'none',
               transition: 'all 0.2s ease',
-              position: 'relative',
-              overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px'
             }}
           >
-            {isProcessing && batchType === 'QR' ? (
-              <>
-                <div style={{
-                  position: 'absolute',
-                  left: 0, top: 0, bottom: 0,
-                  width: `${processingProgress}%`,
-                  background: 'var(--accent-gradient)',
-                  transition: 'width 0.15s ease-out',
-                  zIndex: 0
-                }} />
-                <RefreshCw size={15} className="animate-spin" style={{ position: 'relative', zIndex: 1 }} />
-                <span style={{ position: 'relative', zIndex: 1 }}>
-                  Converting... {processingProgress}%
-                </span>
-              </>
-            ) : (
-              <>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '6px',
-                  borderRadius: '8px',
-                  background: batchType === 'QR' ? 'rgba(255,255,255,0.2)' : 'rgba(214, 0, 54, 0.1)',
-                  color: batchType === 'QR' ? '#ffffff' : 'var(--accent-primary)',
-                  transition: 'all 0.2s ease'
-                }}>
-                  <QrCode size={16} />
-                </div>
-                Bulk QR
-              </>
-            )}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '6px',
+              borderRadius: '8px',
+              background: batchType === 'QR' ? 'rgba(255,255,255,0.2)' : 'rgba(214, 0, 54, 0.1)',
+              color: batchType === 'QR' ? '#ffffff' : 'var(--accent-primary)',
+              transition: 'all 0.2s ease'
+            }}>
+              <QrCode size={16} />
+            </div>
+            Bulk QR
           </button>
           <button 
             onClick={() => handleModeSwitch('BARCODE')}
-            disabled={isProcessing}
             style={{
               flex: 1,
               padding: '12px',
@@ -695,49 +632,28 @@ export default function BatchPage({
               color: batchType === 'BARCODE' ? '#FFFFFF' : 'var(--accent-primary)',
               fontWeight: 800,
               fontSize: '14px',
-              cursor: isProcessing ? 'default' : 'pointer',
+              cursor: 'pointer',
               boxShadow: batchType === 'BARCODE' ? '0 4px 14px rgba(214, 0, 54, 0.35)' : 'none',
               transition: 'all 0.2s ease',
-              position: 'relative',
-              overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px'
             }}
           >
-            {isProcessing && batchType === 'BARCODE' ? (
-              <>
-                <div style={{
-                  position: 'absolute',
-                  left: 0, top: 0, bottom: 0,
-                  width: `${processingProgress}%`,
-                  background: 'var(--accent-gradient)',
-                  transition: 'width 0.15s ease-out',
-                  zIndex: 0
-                }} />
-                <RefreshCw size={15} className="animate-spin" style={{ position: 'relative', zIndex: 1 }} />
-                <span style={{ position: 'relative', zIndex: 1 }}>
-                  Converting... {processingProgress}%
-                </span>
-              </>
-            ) : (
-              <>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '6px',
-                  borderRadius: '8px',
-                  background: batchType === 'BARCODE' ? 'rgba(255,255,255,0.2)' : 'rgba(214, 0, 54, 0.1)',
-                  color: batchType === 'BARCODE' ? '#ffffff' : 'var(--accent-primary)',
-                  transition: 'all 0.2s ease'
-                }}>
-                  <Barcode size={16} />
-                </div>
-                Bulk Barcode
-              </>
-            )}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '6px',
+              borderRadius: '8px',
+              background: batchType === 'BARCODE' ? 'rgba(255,255,255,0.2)' : 'rgba(214, 0, 54, 0.1)',
+              color: batchType === 'BARCODE' ? '#ffffff' : 'var(--accent-primary)',
+              transition: 'all 0.2s ease'
+            }}>
+              <Barcode size={16} />
+            </div>
+            Bulk Barcode
           </button>
         </div>
 
@@ -1292,8 +1208,18 @@ export default function BatchPage({
 
             {/* Batch List Grid */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px 0' }}>Item Preview List</h4>
-              {batchItems.map((item, idx) => (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 4px 0' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 700, margin: 0 }}>
+                  Item Preview List ({batchItems.length})
+                </h4>
+                {batchItems.length > 50 && (
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    Showing first {Math.min(previewLimit, batchItems.length)} items
+                  </span>
+                )}
+              </div>
+
+              {batchItems.slice(0, previewLimit).map((item, idx) => (
                 <div 
                   key={item.id}
                   style={{
@@ -1386,6 +1312,25 @@ export default function BatchPage({
                   </div>
                 </div>
               ))}
+
+              {batchItems.length > previewLimit && (
+                <button
+                  onClick={() => setPreviewLimit(prev => prev + 50)}
+                  style={{
+                    background: 'var(--bg-hover)',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--text-primary)',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    marginTop: '4px'
+                  }}
+                >
+                  Load Next 50 Previews (Remaining: {batchItems.length - previewLimit})
+                </button>
+              )}
             </div>
           </div>
         )}
