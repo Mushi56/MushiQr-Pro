@@ -617,7 +617,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                 <button
                   key={key}
                   className={`type-tab ${bcid === key ? 'active' : ''}`}
-                  style={{ minHeight: '90px', padding: '8px 6px 30px', position: 'relative', overflow: 'visible', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                  style={{ minHeight: '90px', padding: '8px 6px 30px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                   onClick={() => {
                     const access = FeatureAccessManager.canUseFeature(`barcode_${key}`);
                     if (!access.allowed) {
@@ -630,7 +630,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                     }
                   }}
                 >
-                  <PaidCrownBadge featureId={`barcode_${key}`} position="corner" size={10} style={{ top: '4px', right: '4px' }} />
+                  <PaidCrownBadge featureId={`barcode_${key}`} position="floating" size={9} />
                   {bcid === key && (
                     <>
                       <div 

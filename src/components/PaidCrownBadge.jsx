@@ -8,10 +8,10 @@ import { FeatureAccessManager } from '../services/FeatureAccessManager';
  */
 export default function PaidCrownBadge({ 
   featureId, 
-  size = 11, 
+  size = 12, 
   style = {}, 
   showLabel = false,
-  position = 'corner' // 'inline', 'corner', 'floating'
+  position = 'inline' // 'inline', 'corner', 'floating'
 }) {
   const [, setTick] = useState(0);
 
@@ -41,19 +41,20 @@ export default function PaidCrownBadge({
     fontWeight: 800,
     fontSize: '9px',
     letterSpacing: '0.3px',
-    zIndex: 999,
+    zIndex: 10,
     pointerEvents: 'none',
-    border: 'none',
-    flexShrink: 0,
+    border: '1px solid rgba(255, 255, 255, 0.6)',
     ...(position === 'corner' ? {
       position: 'absolute',
       top: '8px',
       right: '8px',
+      zIndex: 20,
     } : {}),
     ...(position === 'floating' ? {
       position: 'absolute',
-      top: '6px',
-      right: '6px',
+      top: '8px',
+      right: '8px',
+      zIndex: 20,
     } : {}),
     ...style
   };
@@ -65,4 +66,3 @@ export default function PaidCrownBadge({
     </span>
   );
 }
-
