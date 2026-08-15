@@ -6,7 +6,7 @@
 
 import { auth, db } from './firebase';
 import { onIdTokenChanged } from 'firebase/auth';
-import { doc, onSnapshot, collection } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, collection, getDocs } from 'firebase/firestore';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. CANONICAL FEATURE REGISTRY (78 Granular User-Facing Capabilities)
@@ -332,9 +332,20 @@ class FeatureAccessManagerService {
       this.notifyListeners();
     });
 
-    // 2. Real-time listener for global_config/featureFlags + Local Offline Mirror
+    // 2. Immediate direct fetch + Real-time listener for global_config/featureFlags
+    const flagsRef = doc(db, 'global_config', 'featureFlags');
+    getDoc(flagsRef).then((docSnap) => {
+      if (docSnap.exists()) {
+        this.globalFlags = { ...this.globalFlags, ...(docSnap.data() || {}) };
+        try {
+          localStorage.setItem(STORAGE_KEYS.GLOBAL_FLAGS, JSON.stringify(this.globalFlags));
+        } catch {}
+        this.notifyListeners();
+      }
+    }).catch(err => console.warn('[FeatureAccessManager] Initial getDoc flags warning:', err.message));
+
     try {
-      this.unsubFlags = onSnapshot(doc(db, 'global_config', 'featureFlags'), (docSnap) => {
+      this.unsubFlags = onSnapshot(flagsRef, (docSnap) => {
         if (docSnap.exists()) {
           this.globalFlags = docSnap.data() || {};
           try {
@@ -347,9 +358,24 @@ class FeatureAccessManagerService {
       console.warn('[FeatureAccessManager] Failed to init globalFlags listener:', e);
     }
 
-    // 3. Real-time listener for subscription_plans collection + Local Offline Mirror
+    // 3. Immediate direct fetch + Real-time listener for subscription_plans collection
+    const plansCol = collection(db, 'subscription_plans');
+    getDocs(plansCol).then((colSnap) => {
+      const plans = {};
+      colSnap.forEach(d => {
+        plans[d.id] = d.data();
+      });
+      if (Object.keys(plans).length > 0) {
+        this.planConfigs = plans;
+        try {
+          localStorage.setItem(STORAGE_KEYS.PLAN_CONFIGS, JSON.stringify(this.planConfigs));
+        } catch {}
+        this.notifyListeners();
+      }
+    }).catch(err => console.warn('[FeatureAccessManager] Initial getDocs plans warning:', err.message));
+
     try {
-      this.unsubPlans = onSnapshot(collection(db, 'subscription_plans'), (colSnap) => {
+      this.unsubPlans = onSnapshot(plansCol, (colSnap) => {
         const plans = {};
         colSnap.forEach(d => {
           plans[d.id] = d.data();
