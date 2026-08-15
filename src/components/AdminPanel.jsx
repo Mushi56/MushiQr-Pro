@@ -1591,194 +1591,371 @@ function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
   const enabledGlobal = Object.keys(f).filter(k => f[k] !== false).length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header controls & statistics */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, background: T.bgCard, padding: 18, borderRadius: 16, border: `1px solid ${T.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* ─── Hero Overview Card ─── */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(214,0,54,0.08) 0%, rgba(20,20,30,0.95) 100%)',
+        padding: '24px 28px',
+        borderRadius: 20,
+        border: `1px solid ${T.borderHov}`,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 18,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: T.text, margin: 0 }}>Granular Feature Registry & Access Control</h2>
-            <div style={{ fontSize: 12, color: T.textSec, marginTop: 4 }}>
-              Category-by-category management for all {totalFeatures} application capabilities
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(214,0,54,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Flag size={20} color={T.accent} />
+              </div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: T.text, margin: 0, letterSpacing: '-0.3px' }}>
+                Feature Flags & Access Matrix
+              </h2>
+            </div>
+            <div style={{ fontSize: 13, color: T.textSec, marginTop: 6, lineHeight: 1.5 }}>
+              Granular remote feature switches across <strong>8 canonical app modules</strong> and 4 subscription tiers.
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: T.bgEl, padding: '6px 12px', borderRadius: 8, border: `1px solid ${T.border}` }}>
-              <CheckCircle size={14} color={T.green} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{enabledGlobal} Global ON</span>
+
+          {/* Quick Metrics */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)', padding: '8px 16px', borderRadius: 12 }}>
+              <CheckCircle size={16} color={T.green} />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: T.green }}>{enabledGlobal} Active</span>
+                <span style={{ fontSize: 10, color: T.textSec, fontWeight: 600 }}>Globally Enabled</span>
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: T.bgEl, padding: '6px 12px', borderRadius: 8, border: `1px solid ${T.border}` }}>
-              <XCircle size={14} color={T.red} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{totalFeatures - enabledGlobal} Global OFF</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', padding: '8px 16px', borderRadius: 12 }}>
+              <XCircle size={16} color={T.red} />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: T.red }}>{totalFeatures - enabledGlobal} Disabled</span>
+                <span style={{ fontSize: 10, color: T.textSec, fontWeight: 600 }}>Globally Muted</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Search & Filter Toolbar */}
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 240, position: 'relative' }}>
-            <Search size={16} color={T.textSec} style={{ position: 'absolute', left: 12, top: 12 }} />
+        {/* Search Bar & Filter Controls */}
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ flex: '1 1 320px', position: 'relative' }}>
+            <Search size={16} color={T.textSec} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
             <input
               type="text"
-              placeholder="Search features by name, ID or description..."
+              placeholder="Search features by name, ID, or description..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               style={{
-                width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10,
+                width: '100%', padding: '12px 14px 12px 42px', borderRadius: 12,
                 background: T.bgEl, border: `1px solid ${T.border}`, color: T.text,
-                fontSize: 13, outline: 'none', boxSizing: 'border-box'
+                fontSize: 13, outline: 'none', boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
               }}
             />
+            {search && (
+              <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: T.textSec, cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            )}
           </div>
-          <select
-            value={selectedCat}
-            onChange={e => setSelectedCat(e.target.value)}
-            style={{
-              padding: '10px 16px', borderRadius: 10, background: T.bgEl,
-              border: `1px solid ${T.border}`, color: T.text, fontSize: 13, fontWeight: 600, outline: 'none'
-            }}
-          >
-            <option value="ALL">All Categories ({categoriesList.length})</option>
-            {categoriesList.map(catKey => (
-              <option key={catKey} value={catKey}>{FEATURE_CATEGORIES[catKey].name}</option>
-            ))}
-          </select>
         </div>
       </div>
 
-      {/* Categories Accordions */}
-      {categoriesList.map(catKey => {
-        const catInfo = FEATURE_CATEGORIES[catKey];
-        const catFeatures = filteredFeatures.filter(item => item.category === catKey);
-        if (catFeatures.length === 0) return null;
-
-        const isExpanded = expandedCats.has(catKey);
-        const catEnabledCount = catFeatures.filter(item => f[item.featureId] !== false).length;
-
-        return (
-          <div key={catKey} style={{ background: T.bgCard, borderRadius: 14, border: `1px solid ${T.border}`, overflow: 'hidden' }}>
-            {/* Category Accordion Header */}
-            <div
-              onClick={() => toggleCat(catKey)}
-              style={{
-                padding: '14px 18px', background: T.bgEl, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                borderBottom: isExpanded ? `1px solid ${T.border}` : 'none',
-                userSelect: 'none'
-              }}
+      {/* ─── 8 Canonical Category Filter Cards ─── */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <span style={{ fontSize: 12, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+            Select Category Filter ({categoriesList.length} Categories)
+          </span>
+          {selectedCat !== 'ALL' && (
+            <button
+              onClick={() => setSelectedCat('ALL')}
+              style={{ background: 'none', border: 'none', color: T.accent, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{catInfo.name}</span>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', color: T.textSec }}>
-                  {catFeatures.length} features
-                </span>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: catEnabledCount === catFeatures.length ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: catEnabledCount === catFeatures.length ? T.green : T.orange }}>
-                  {catEnabledCount} / {catFeatures.length} Active
-                </span>
+              Show All Categories
+            </button>
+          )}
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 12
+        }}>
+          {/* ALL Categories Pill */}
+          <div
+            onClick={() => setSelectedCat('ALL')}
+            style={{
+              padding: '14px 16px',
+              borderRadius: 14,
+              border: `1px solid ${selectedCat === 'ALL' ? T.accent : T.border}`,
+              background: selectedCat === 'ALL' ? 'rgba(214,0,54,0.12)' : T.bgCard,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              transition: 'all 0.18s ease',
+              boxShadow: selectedCat === 'ALL' ? '0 4px 16px rgba(214,0,54,0.2)' : 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ width: 30, height: 30, borderRadius: 8, background: selectedCat === 'ALL' ? T.accent : 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Layers size={16} color={selectedCat === 'ALL' ? '#ffffff' : T.textSec} />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {isExpanded ? <ChevronDown size={18} color={T.textSec} /> : <ChevronRight size={18} color={T.textSec} />}
+              <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', color: T.textSec }}>
+                {totalFeatures}
+              </span>
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: selectedCat === 'ALL' ? T.text : T.textSec }}>
+                All Features
+              </div>
+              <div style={{ fontSize: 10, color: T.textMut, marginTop: 2 }}>
+                Full system registry
               </div>
             </div>
+          </div>
 
-            {/* Category Features List */}
-            {isExpanded && (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {catFeatures.map((item, idx) => {
-                  const isGloballyOn = f[item.featureId] !== false;
-                  const isSavingThisFlag = savingFeatureId === item.featureId;
+          {/* Individual Category Cards */}
+          {categoriesList.map(catKey => {
+            const catInfo = FEATURE_CATEGORIES[catKey];
+            const catFeats = FEATURE_REGISTRY.filter(item => item.category === catKey);
+            const activeCount = catFeats.filter(item => f[item.featureId] !== false).length;
+            const isSelected = selectedCat === catKey;
+            const catColor = catInfo.color || T.accent;
 
-                  return (
-                    <div
-                      key={item.featureId}
-                      style={{
-                        padding: '14px 18px',
-                        borderBottom: idx < catFeatures.length - 1 ? `1px solid ${T.border}` : 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        flexWrap: 'wrap',
-                        gap: 14,
-                        background: !isGloballyOn ? 'rgba(239, 68, 68, 0.03)' : 'transparent'
-                      }}
-                    >
-                      {/* Left side: Global Toggle + Info */}
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: '1 1 340px' }}>
-                        <button
-                          onClick={() => handleToggleGlobalFlag(item.featureId)}
-                          disabled={isSavingThisFlag}
-                          style={{
-                            width: 44, height: 24, borderRadius: 12,
-                            background: isGloballyOn ? T.green : '#333',
-                            border: 'none', cursor: 'pointer', position: 'relative',
-                            transition: 'background 0.2s', flexShrink: 0, marginTop: 2
-                          }}
-                        >
-                          <div style={{
-                            width: 18, height: 18, borderRadius: '50%', background: '#fff',
-                            position: 'absolute', top: 3, left: isGloballyOn ? 23 : 3,
-                            transition: 'left 0.2s'
-                          }} />
-                        </button>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: 14, fontWeight: 700, color: isGloballyOn ? T.text : T.textSec }}>
-                              {item.displayName}
-                            </span>
-                            <span style={{ fontSize: 10, fontFamily: 'monospace', padding: '1px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.06)', color: T.accent }}>
-                              {item.featureId}
-                            </span>
-                            {!isGloballyOn && (
-                              <span style={{ fontSize: 10, fontWeight: 800, color: T.red, background: 'rgba(239,68,68,0.15)', padding: '1px 6px', borderRadius: 4 }}>
-                                GLOBAL OFF
+            return (
+              <div
+                key={catKey}
+                onClick={() => setSelectedCat(catKey)}
+                style={{
+                  padding: '14px 16px',
+                  borderRadius: 14,
+                  border: `1px solid ${isSelected ? catColor : T.border}`,
+                  background: isSelected ? `${catColor}18` : T.bgCard,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                  transition: 'all 0.18s ease',
+                  boxShadow: isSelected ? `0 4px 16px ${catColor}33` : 'none'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ width: 30, height: 30, borderRadius: 8, background: isSelected ? catColor : `${catColor}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 14, fontWeight: 900, color: isSelected ? '#fff' : catColor }}>
+                      {catInfo.name.charAt(0)}
+                    </span>
+                  </div>
+                  <span style={{
+                    fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 8,
+                    background: activeCount === catFeats.length ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                    color: activeCount === catFeats.length ? T.green : T.orange
+                  }}>
+                    {activeCount}/{catFeats.length} ON
+                  </span>
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: isSelected ? T.text : T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {catInfo.name}
+                  </div>
+                  <div style={{ fontSize: 10, color: T.textMut, marginTop: 2 }}>
+                    {catFeats.length} capability flags
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ─── Category Accordions & Feature Cards ─── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {categoriesList.map(catKey => {
+          const catInfo = FEATURE_CATEGORIES[catKey];
+          const catFeatures = filteredFeatures.filter(item => item.category === catKey);
+          if (catFeatures.length === 0) return null;
+
+          const isExpanded = expandedCats.has(catKey);
+          const catEnabledCount = catFeatures.filter(item => f[item.featureId] !== false).length;
+          const catColor = catInfo.color || T.accent;
+
+          return (
+            <div key={catKey} style={{
+              background: T.bgCard,
+              borderRadius: 18,
+              border: `1px solid ${T.border}`,
+              overflow: 'hidden',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+            }}>
+              {/* Category Header */}
+              <div
+                onClick={() => toggleCat(catKey)}
+                style={{
+                  padding: '16px 22px',
+                  background: isExpanded ? 'rgba(255,255,255,0.02)' : T.bgEl,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderBottom: isExpanded ? `1px solid ${T.border}` : 'none',
+                  userSelect: 'none',
+                  transition: 'background 0.15s'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    background: `${catColor}20`,
+                    border: `1px solid ${catColor}44`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 900, color: catColor, fontSize: 15
+                  }}>
+                    {catInfo.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 16, fontWeight: 800, color: T.text }}>{catInfo.name}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', color: T.textSec }}>
+                        {catFeatures.length} features
+                      </span>
+                      <span style={{
+                        fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 8,
+                        background: catEnabledCount === catFeatures.length ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                        color: catEnabledCount === catFeatures.length ? T.green : T.orange
+                      }}>
+                        {catEnabledCount} / {catFeatures.length} Active
+                      </span>
+                    </div>
+                    {catInfo.desc && (
+                      <div style={{ fontSize: 12, color: T.textMut, marginTop: 3 }}>
+                        {catInfo.desc}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 8,
+                    background: 'rgba(255,255,255,0.04)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                    {isExpanded ? <ChevronDown size={18} color={T.textSec} /> : <ChevronRight size={18} color={T.textSec} />}
+                  </div>
+                </div>
+              </div>
+
+              {/* Feature List inside Category */}
+              {isExpanded && (
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {catFeatures.map((item, idx) => {
+                    const isGloballyOn = f[item.featureId] !== false;
+                    const isSavingThisFlag = savingFeatureId === item.featureId;
+
+                    return (
+                      <div
+                        key={item.featureId}
+                        style={{
+                          padding: '16px 22px',
+                          borderBottom: idx < catFeatures.length - 1 ? `1px solid ${T.border}` : 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: 16,
+                          background: !isGloballyOn ? 'rgba(239, 68, 68, 0.04)' : 'transparent',
+                          transition: 'background 0.15s'
+                        }}
+                      >
+                        {/* Left Info & Global Switch */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flex: '1 1 360px' }}>
+                          <button
+                            onClick={() => handleToggleGlobalFlag(item.featureId)}
+                            disabled={isSavingThisFlag}
+                            title={isGloballyOn ? 'Turn globally OFF' : 'Turn globally ON'}
+                            style={{
+                              width: 48, height: 26, borderRadius: 13,
+                              background: isGloballyOn ? T.green : '#333344',
+                              border: 'none', cursor: 'pointer', position: 'relative',
+                              transition: 'background 0.2s', flexShrink: 0, marginTop: 2
+                            }}
+                          >
+                            <div style={{
+                              width: 20, height: 20, borderRadius: '50%', background: '#fff',
+                              position: 'absolute', top: 3, left: isGloballyOn ? 25 : 3,
+                              transition: 'left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                            }} />
+                          </button>
+
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: 14, fontWeight: 700, color: isGloballyOn ? T.text : T.textSec }}>
+                                {item.displayName}
                               </span>
-                            )}
-                          </div>
-                          <div style={{ fontSize: 11, color: T.textSec, marginTop: 3 }}>
-                            {item.description}
+                              <span style={{ fontSize: 10, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 6, background: 'rgba(255,255,255,0.06)', color: T.accent }}>
+                                {item.featureId}
+                              </span>
+                              {item.subcategory && (
+                                <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 6, background: 'rgba(255,255,255,0.04)', color: T.textSec }}>
+                                  {item.subcategory}
+                                </span>
+                              )}
+                              {!isGloballyOn && (
+                                <span style={{ fontSize: 10, fontWeight: 800, color: T.red, background: 'rgba(239,68,68,0.15)', padding: '2px 6px', borderRadius: 6 }}>
+                                  DISABLED GLOBALLY
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: 12, color: T.textSec, marginTop: 4, lineHeight: 1.4 }}>
+                              {item.description}
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Right side: Plan Entitlement Matrix */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: T.textMut, marginRight: 4 }}>Plan Access:</span>
-                        {['free', 'weekly', 'monthly', 'yearly'].map(planId => {
-                          const planFeatures = p[planId]?.features || (planId === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
-                          const hasPlanAccess = planFeatures.includes(item.featureId);
-                          const isSavingThisPlan = savingPlanId === `${planId}_${item.featureId}`;
+                        {/* Right: Plan Access Buttons */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: T.textMut, marginRight: 2 }}>Plan Access:</span>
+                          {['free', 'weekly', 'monthly', 'yearly'].map(planId => {
+                            const planFeatures = p[planId]?.features || (planId === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
+                            const hasPlanAccess = planFeatures.includes(item.featureId);
+                            const isSavingThisPlan = savingPlanId === `${planId}_${item.featureId}`;
 
-                          return (
-                            <button
-                              key={planId}
-                              onClick={() => handleTogglePlanFeature(planId, item.featureId)}
-                              disabled={isSavingThisPlan || !isGloballyOn}
-                              title={`${planId.toUpperCase()} plan ${hasPlanAccess ? 'has access' : 'blocked'}`}
-                              style={{
-                                padding: '4px 10px',
-                                borderRadius: 6,
-                                border: hasPlanAccess ? `1px solid ${T.green}55` : `1px solid ${T.border}`,
-                                background: hasPlanAccess ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.03)',
-                                color: hasPlanAccess ? T.green : T.textMut,
-                                fontSize: 11,
-                                fontWeight: 700,
-                                cursor: isGloballyOn ? 'pointer' : 'not-allowed',
-                                opacity: !isGloballyOn ? 0.35 : 1,
-                                transition: 'all 0.15s'
-                              }}
-                            >
-                              {planId.toUpperCase()} {hasPlanAccess ? '✓' : '✗'}
-                            </button>
-                          );
-                        })}
+                            return (
+                              <button
+                                key={planId}
+                                onClick={() => handleTogglePlanFeature(planId, item.featureId)}
+                                disabled={isSavingThisPlan || !isGloballyOn}
+                                title={`${planId.toUpperCase()} plan ${hasPlanAccess ? 'has access' : 'blocked'}`}
+                                style={{
+                                  padding: '5px 11px',
+                                  borderRadius: 8,
+                                  border: hasPlanAccess ? `1px solid ${T.green}55` : `1px solid ${T.border}`,
+                                  background: hasPlanAccess ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.03)',
+                                  color: hasPlanAccess ? T.green : T.textMut,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  cursor: isGloballyOn ? 'pointer' : 'not-allowed',
+                                  opacity: !isGloballyOn ? 0.35 : 1,
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                {planId.toUpperCase()} {hasPlanAccess ? '✓' : '✗'}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      })}
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

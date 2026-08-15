@@ -1,4 +1,4 @@
-﻿// src/components/admin/AdminDashboard.jsx
+// src/components/admin/AdminDashboard.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { LayoutDashboard, CreditCard, CheckSquare, Shield, ChevronRight } from 'lucide-react';
 import { FEATURE_REGISTRY, CATEGORY_SUBCATEGORIES, CANONICAL_PLANS } from '../../services/FeatureAccessManager';
@@ -7,21 +7,14 @@ import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { T, ProgressBar } from './AdminUIKit';
 
 const CAT_META = {
-  HOME: { name: 'Home Screen', color: '#10b981' },
-  QR_CONTENT: { name: 'QR Content Types', color: '#D60036' },
-  QR_ENGINE: { name: 'QR Engine & Controls', color: '#ef4444' },
-  BARCODE_FORMATS: { name: 'Barcode Standards', color: '#8b5cf6' },
-  BARCODE_ENGINE: { name: 'Barcode Engine & Styling', color: '#7c3aed' },
-  SCANNER: { name: 'QR & Barcode Scanner', color: '#3b82f6' },
-  DESIGN: { name: 'Design & Customization', color: '#f59e0b' },
-  TEMPLATES: { name: 'Templates Library', color: '#06b6d4' },
-  EXPORT: { name: 'Export & Downloads', color: '#10b981' },
-  BATCH: { name: 'Batch & Bulk Operations', color: '#f97316' },
-  SAVED: { name: 'Saved Collection', color: '#ef4444' },
-  HISTORY: { name: 'History Tracking', color: '#6b7280' },
-  CLOUD: { name: 'Cloud & Data Sync', color: '#0ea5e9' },
-  SETTINGS: { name: 'Settings & Preferences', color: '#8b8fa8' },
-  ACCOUNT: { name: 'Account & Profile', color: '#a78bfa' }
+  QR_GENERATOR:      { name: 'QR Code Generator', color: '#D60036' },
+  BARCODE_GENERATOR: { name: 'Barcode Generator', color: '#3B82F6' },
+  BULK_GENERATOR:    { name: 'Bulk Generation',   color: '#8B5CF6' },
+  SCANNER:           { name: 'Scanner',           color: '#10B981' },
+  HOME:              { name: 'Home Screen',       color: '#F59E0B' },
+  SAVED:             { name: 'Saved',             color: '#EC4899' },
+  HISTORY:           { name: 'History',           color: '#06B6D4' },
+  SETTINGS:          { name: 'Settings',          color: '#64748B' }
 };
 
 export default function AdminDashboard({ onNavigate }) {

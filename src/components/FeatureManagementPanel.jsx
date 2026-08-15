@@ -1,4 +1,4 @@
-﻿// src/components/FeatureManagementPanel.jsx
+// src/components/FeatureManagementPanel.jsx
 // Phase 2.5 Premium Feature Management UI
 // 3-column: Category > Subcategory > Feature Cards
 // Unsaved changes, bulk actions, feature drawer, real-time sync
@@ -20,21 +20,14 @@ import { doc, onSnapshot, collection } from 'firebase/firestore';
 
 const C={bg:'#09090f',bgEl:'#10101a',bgCard:'#14141e',sidebar:'#0c0c15',border:'rgba(255,255,255,0.06)',accent:'#D60036',purple:'#8b5cf6',green:'#10b981',orange:'#f59e0b',blue:'#3b82f6',red:'#ef4444',text:'#f0f0f8',textSec:'#8b8fa8',textMut:'#44465a'};
 const CAT_META={
-  HOME:{icon:LayoutDashboard,color:'#10b981',name:'Home'},
-  QR_CONTENT:{icon:QrCode,color:'#D60036',name:'QR Generator'},
-  QR_ENGINE:{icon:Cpu,color:'#ef4444',name:'QR Engine'},
-  BARCODE_FORMATS:{icon:Barcode,color:'#8b5cf6',name:'Barcode Generator'},
-  BARCODE_ENGINE:{icon:Grid3x3,color:'#7c3aed',name:'Barcode Engine'},
-  SCANNER:{icon:ScanLine,color:'#3b82f6',name:'Scanner'},
-  DESIGN:{icon:Palette,color:'#f59e0b',name:'Design'},
-  TEMPLATES:{icon:Layers,color:'#06b6d4',name:'Templates'},
-  EXPORT:{icon:Download,color:'#10b981',name:'Export'},
-  BATCH:{icon:Package,color:'#f97316',name:'Batch Generation'},
-  SAVED:{icon:Heart,color:'#ef4444',name:'Saved'},
-  HISTORY:{icon:ClipboardList,color:'#6b7280',name:'History'},
-  CLOUD:{icon:Cloud,color:'#0ea5e9',name:'Cloud'},
-  SETTINGS:{icon:Settings,color:'#8b8fa8',name:'Settings'},
-  ACCOUNT:{icon:User,color:'#a78bfa',name:'Account'},
+  QR_GENERATOR:      {icon:QrCode,color:'#D60036',name:'QR Code Generator'},
+  BARCODE_GENERATOR: {icon:Barcode,color:'#3b82f6',name:'Barcode Generator'},
+  BULK_GENERATOR:    {icon:Package,color:'#8b5cf6',name:'Bulk Generation'},
+  SCANNER:           {icon:ScanLine,color:'#10b981',name:'Scanner'},
+  HOME:              {icon:LayoutDashboard,color:'#f59e0b',name:'Home Screen'},
+  SAVED:             {icon:Heart,color:'#ec4899',name:'Saved'},
+  HISTORY:           {icon:ClipboardList,color:'#06b6d4',name:'History'},
+  SETTINGS:          {icon:Settings,color:'#64748b',name:'Settings'},
 };
 const PLAN_COLORS={free:'#8b8fa8',weekly:'#8b5cf6',monthly:'#f59e0b',yearly:'#D60036'};
 const PLAN_LABELS={free:'Free',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly'};
