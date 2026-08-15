@@ -748,7 +748,7 @@ export default function BatchPage({
         {/* Step 1: Upload or SpreadSheet Grid */}
         {!fileData && batchItems.length === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Mode Tabs: Upload vs SpreadSheet Grid */}
+            {/* Mode Tabs: Upload vs Quick Sheet */}
             <div style={{ display: 'flex', background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '12px', gap: '4px' }}>
               <button
                 onClick={() => setActiveImportMode('upload')}
@@ -769,7 +769,7 @@ export default function BatchPage({
                   transition: 'all 0.2s ease'
                 }}
               >
-                <Upload size={16} /> Upload CSV / Excel
+                <Upload size={16} /> Upload File
               </button>
               <button
                 onClick={() => setActiveImportMode('spreadsheet')}
@@ -791,7 +791,7 @@ export default function BatchPage({
                   transition: 'all 0.2s ease'
                 }}
               >
-                <Table size={16} /> Interactive Spreadsheet
+                <Table size={16} /> Quick Sheet
               </button>
             </div>
 
@@ -892,45 +892,9 @@ export default function BatchPage({
                 </div>
               </>
             ) : (
-              /* Sub-View B: Interactive Spreadsheet Grid (Clean edge-to-edge responsive layout) */
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                  <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 2px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Table size={18} color="var(--accent-primary)" /> Spreadsheet Editor
-                    </h3>
-                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
-                      Type or paste data directly from Excel or clipboard.
-                    </p>
-                  </div>
-                  
-                  {/* Top Right: Clear Table with icon */}
-                  <button
-                    onClick={() => {
-                      setSheetRows([
-                        { id: '1', data: '', filename: 'Item-001' }
-                      ]);
-                    }}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-hover)',
-                      color: 'var(--text-secondary)',
-                      fontWeight: 700,
-                      fontSize: '11px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <Trash2 size={13} color="#EF4444" /> Clear Table
-                  </button>
-                </div>
-
-                {/* Spreadsheet Table with Smart Auto-Expansion on Paste */}
+              /* Sub-View B: Interactive Spreadsheet Grid */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: '160px' }}>
+                {/* Spreadsheet Table */}
                 <div 
                   onPaste={(e) => {
                     const clipboardText = e.clipboardData.getData('text');
@@ -984,7 +948,7 @@ export default function BatchPage({
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left', tableLayout: 'auto' }}>
                     <thead>
                       <tr style={{ background: 'var(--bg-hover)', borderBottom: '1px solid var(--border-color)' }}>
-                        <th style={{ padding: '10px 8px', width: '32px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center', fontSize: '12px' }}>#</th>
+                        <th style={{ padding: '10px 8px', width: '56px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Number</th>
                         <th style={{ padding: '10px 10px', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px' }}>Data</th>
                         <th style={{ padding: '10px 10px', color: 'var(--text-primary)', fontWeight: 700, width: '130px', fontSize: '13px' }}>Filename</th>
                         <th style={{ padding: '10px 6px', width: '38px', textAlign: 'center' }}></th>
@@ -1036,25 +1000,15 @@ export default function BatchPage({
                               placeholder={batchType === 'BARCODE' ? '7501031311309' : 'https://example.com'}
                               style={{
                                 width: '100%',
-                                background: 'var(--bg-primary, rgba(255,255,255,0.03))',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '8px',
+                                background: 'transparent',
+                                border: 'none',
                                 padding: '8px 10px',
                                 color: 'var(--text-primary)',
                                 outline: 'none',
                                 fontSize: '13px',
                                 minHeight: '38px',
                                 fontWeight: 500,
-                                boxSizing: 'border-box',
-                                transition: 'all 0.2s ease'
-                              }}
-                              onFocus={(e) => {
-                                e.target.style.borderColor = 'var(--accent-primary)';
-                                e.target.style.background = 'var(--bg-elevated)';
-                              }}
-                              onBlur={(e) => {
-                                e.target.style.borderColor = 'var(--border-color)';
-                                e.target.style.background = 'var(--bg-primary, rgba(255,255,255,0.03))';
+                                boxSizing: 'border-box'
                               }}
                             />
                           </td>
@@ -1091,25 +1045,15 @@ export default function BatchPage({
                               placeholder={`Item-${index + 1}`}
                               style={{
                                 width: '100%',
-                                background: 'var(--bg-primary, rgba(255,255,255,0.03))',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '8px',
+                                background: 'transparent',
+                                border: 'none',
                                 padding: '8px 10px',
                                 color: 'var(--text-primary)',
                                 outline: 'none',
                                 fontSize: '13px',
                                 minHeight: '38px',
                                 fontWeight: 500,
-                                boxSizing: 'border-box',
-                                transition: 'all 0.2s ease'
-                              }}
-                              onFocus={(e) => {
-                                e.target.style.borderColor = 'var(--accent-primary)';
-                                e.target.style.background = 'var(--bg-elevated)';
-                              }}
-                              onBlur={(e) => {
-                                e.target.style.borderColor = 'var(--border-color)';
-                                e.target.style.background = 'var(--bg-primary, rgba(255,255,255,0.03))';
+                                boxSizing: 'border-box'
                               }}
                             />
                           </td>
@@ -1145,9 +1089,9 @@ export default function BatchPage({
                   </table>
                 </div>
 
-                {/* Spreadsheet Bottom Action Row: Add Row on left, Import Entries on right */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '2px' }}>
-                  {/* Lower Row: Add Row Button */}
+                {/* Spreadsheet Bottom Action Row: Add Row on left, Clear Table and Import Entries on right */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                  {/* Left: Add Row Button */}
                   <button
                     onClick={() => {
                       const newIndex = sheetRows.length;
@@ -1179,7 +1123,32 @@ export default function BatchPage({
                     <Plus size={15} color="var(--accent-primary)" /> Add Row
                   </button>
 
+                  {/* Right: Clear Table + Import Entries */}
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                      onClick={() => {
+                        setSheetRows([
+                          { id: '1', data: '', filename: 'Item-001' }
+                        ]);
+                      }}
+                      style={{
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-hover)',
+                        color: 'var(--text-secondary)',
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <Trash2 size={14} color="#EF4444" /> Clear
+                    </button>
+
                     <button
                       onClick={() => {
                         const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
