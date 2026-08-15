@@ -9,7 +9,8 @@ import {
   Copy, ExternalLink, Share2, Star, Wifi, Mail,
   Phone, User, Globe, FileText, Minus, Plus, AlertCircle, RefreshCcw, Clock,
   ScanLine, Info, ShieldAlert, Barcode, X,
-  Pencil, MoreVertical, Tag, Hash, Calendar, ListPlus, Check, Sparkles, ShoppingCart
+  Pencil, MoreVertical, Tag, Hash, Calendar, ListPlus, Check, Sparkles, ShoppingCart,
+  Volume2, VolumeX
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
@@ -141,6 +142,13 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [showFormatsInfo, setShowFormatsInfo] = useState(false);
   const [scanDate, setScanDate] = useState('');
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('qrgen_scan_sound') !== 'false';
+    } catch {
+      return true;
+    }
+  });
 
   const qrScannerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -246,6 +254,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   }, []);
 
   const playBeep = useCallback(() => {
+    if (!soundEnabled) return;
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       
@@ -978,15 +987,48 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
           </div>
         </div>
 
-        {/* Mode Selector Tabs */}
+        {/* Mode Selector Tabs & Options */}
         <div className="qrs-mode-selector" style={{ position: 'relative', justifyContent: 'center' }}>
+          <button
+            style={{
+              position: 'absolute',
+              left: 16,
+              background: soundEnabled ? 'rgba(214, 0, 54, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+              border: `1px solid ${soundEnabled ? 'rgba(214, 0, 54, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+              color: soundEnabled ? 'var(--accent-primary, #D60036)' : 'var(--text-muted)',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 12,
+              fontWeight: 700,
+              padding: '6px 10px',
+              transition: 'all 0.2s ease'
+            }}
+            onClick={() => {
+              triggerHapticFeedback();
+              setSoundEnabled(prev => {
+                const next = !prev;
+                try { localStorage.setItem('qrgen_scan_sound', String(next)); } catch {}
+                return next;
+              });
+            }}
+            aria-label={soundEnabled ? 'Disable Scan Sound' : 'Enable Scan Sound'}
+          >
+            {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
+            <span>{soundEnabled ? 'Sound On' : 'Muted'}</span>
+          </button>
+
           <div className="qrs-mode-tab active" style={{ margin: 0 }}>
             Scan
             <div className="qrs-mode-dot" />
           </div>
+
           <button
             style={{ position: 'absolute', right: 16, background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, padding: '4px 8px' }}
             onClick={() => setShowFormatsInfo(v => !v)}
+            aria-label="View Supported Formats"
           >
             <Info size={14} />
             Supported Formats

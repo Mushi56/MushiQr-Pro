@@ -1487,6 +1487,86 @@ export default function BatchPage({
         </div>
       )}
 
+      {/* ── 0. Active Batch Export Progress Modal ── */}
+      {isExporting && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            background: 'rgba(9, 9, 15, 0.88)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div 
+            style={{
+              background: 'var(--bg-elevated, #0C0C14)',
+              border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
+              borderRadius: '24px',
+              padding: '32px 24px',
+              maxWidth: '380px',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7)'
+            }}
+          >
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(214, 0, 54, 0.12)',
+              color: 'var(--accent-primary, #D60036)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '18px',
+              border: '1px solid rgba(214, 0, 54, 0.25)'
+            }}>
+              <RefreshCw size={28} className="animate-spin" />
+            </div>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+              Generating Bulk Package
+            </h3>
+
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 20px 0', lineHeight: 1.5 }}>
+              Rendering {batchItems.length} codes & packaging files into ZIP archive...
+            </p>
+
+            {/* Progress Bar */}
+            <div style={{
+              width: '100%',
+              height: '10px',
+              borderRadius: '999px',
+              background: 'var(--bg-hover, rgba(255,255,255,0.08))',
+              overflow: 'hidden',
+              marginBottom: '12px',
+              position: 'relative'
+            }}>
+              <div style={{
+                height: '100%',
+                width: `${exportProgress}%`,
+                background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
+                borderRadius: '999px',
+                transition: 'width 0.15s ease-out'
+              }} />
+            </div>
+
+            <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--accent-primary, #D60036)', fontFamily: 'monospace' }}>
+              {exportProgress}% Completed
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ── 2. Export Success Modal Box ── */}
       {exportSuccessInfo && (
         <div 

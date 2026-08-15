@@ -24,6 +24,11 @@ import { QR_TEMPLATES } from '../utils/qrTemplates';
 import { auth, googleProvider } from '../services/firebase';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import GoldenAdminBadge from './GoldenAdminBadge';
+import FeatureManagementPanel from './FeatureManagementPanel';
+import AdminDashboard from './admin/AdminDashboard';
+import FeatureRegistry from './admin/FeatureRegistry';
+import PlanManager from './admin/PlanManager';
+import AuditLogPanel from './admin/AuditLogPanel';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────
 const T = {
@@ -4071,22 +4076,10 @@ function AdminPanelInner() {
   };
 
   const PANELS = {
-    dashboard:       <DashboardPanel stats={stats} history={history} featureFlags={featureFlags} announcement={announcement} subscribers={subscribers} revenueData={revenueData} appUsers={appUsers} onNavigate={setSection} onSaveFlags={async f => { await DS.saveFeatureFlags(f); setFeatureFlags(f); refreshAudit(); }} />,
+    dashboard:       <AdminDashboard onNavigate={setSection} />,
     revenue:         <RevenuePanel />,
     users:           <UsersPanel />,
-    subscriptions:   <SubscriptionsPanel plans={subscriptionPlans} premiumFeatures={premiumFeatures} subscribers={subscribers}
-      onSavePlans={async p => {
-        const plansList = Array.isArray(p) ? p : Object.values(p);
-        for (const planObj of plansList) {
-          if (planObj.planId && Array.isArray(planObj.features)) {
-            await DS.setPlanFeaturesCloud(planObj.planId, planObj.features);
-          }
-        }
-        setSubscriptionPlans(p);
-        refreshAudit();
-      }}
-      onSaveFeatures={async f => { await DS.savePremiumFeatures(f); setPremiumFeatures(f); refreshAudit(); }}
-    />,
+    subscriptions:   <PlanManager />,
     analytics:       <AnalyticsPanel chartData={chartData} stats={stats} />,
     reports:         <ReportsPanel history={history} />,
     templates:       <TemplatesPanel cloudTemplates={cloudTemplates} onRefresh={refreshTemplates} />,
@@ -4108,13 +4101,7 @@ function AdminPanelInner() {
       setRemoteConfig(c);
       refreshAudit();
     }} />,
-    'feature-flags': <FeatureFlagsPanel flags={featureFlags} plans={subscriptionPlans} onSaveFlags={async f => {
-      for (const [featId, val] of Object.entries(f)) {
-        await DS.setFeatureFlagCloud(featId, Boolean(val));
-      }
-      setFeatureFlags(f);
-      refreshAudit();
-    }} />,
+    'feature-flags': <FeatureRegistry />,
     maintenance:     <MaintenancePanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
@@ -4130,7 +4117,7 @@ function AdminPanelInner() {
     'activity-logs': <ActivityLogsPanel history={history} />,
     security:        <SecurityPanel />,
     backups:         <BackupsPanel />,
-    'audit-logs':    <AuditLogsPanel log={auditLog} />,
+    'audit-logs':    <AuditLogPanel />,
     'system-health': <SystemHealthPanel stats={stats} />,
     integrations:    <IntegrationsPanel />,
     developer:       <DeveloperPanel />,
@@ -4343,18 +4330,32 @@ function AdminPanelInner() {
         <div className={`ad-main-content${isMobile ? ' mobile' : ''}`}>
           <Header section={section} onMenuToggle={() => setSidebar(o => !o)} isMobile={isMobile} currentUser={currentUser} />
 
-          <main className="ad-scroll" style={{ flex: 1, overflowY: 'auto' }}>
-            <div className="ad-main-pad ad-section-anim" key={section}>
-              {loading ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 14 }}>
-                  <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
-                  <span style={{ fontSize: 14, color: T.textSec }}>Loading admin data...</span>
-                </div>
-              ) : (
-                PANELS[section] || PANELS.dashboard
-              )}
-            </div>
+          <main className="ad-scroll" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            {section === 'feature-flags' ? (
+              <div key={section} style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                {loading ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 14 }}>
+                    <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
+                    <span style={{ fontSize: 14, color: T.textSec }}>Loading admin data...</span>
+                  </div>
+                ) : (
+                  PANELS['feature-flags']
+                )}
+              </div>
+            ) : (
+              <div className="ad-main-pad ad-section-anim" key={section} style={{ flex: 1, overflowY: 'auto' }}>
+                {loading ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 14 }}>
+                    <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
+                    <span style={{ fontSize: 14, color: T.textSec }}>Loading admin data...</span>
+                  </div>
+                ) : (
+                  PANELS[section] || PANELS.dashboard
+                )}
+              </div>
+            )}
           </main>
+
 
           {/* Mobile Bottom Nav */}
           <nav className="ad-bottom-nav">
