@@ -948,7 +948,7 @@ export default function BatchPage({
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left', tableLayout: 'auto' }}>
                     <thead>
                       <tr style={{ background: 'var(--bg-hover)', borderBottom: '1px solid var(--border-color)' }}>
-                        <th style={{ padding: '10px 8px', width: '56px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Number</th>
+                        <th style={{ padding: '10px 8px', width: '38px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>No</th>
                         <th style={{ padding: '10px 10px', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px' }}>Data</th>
                         <th style={{ padding: '10px 10px', color: 'var(--text-primary)', fontWeight: 700, width: '130px', fontSize: '13px' }}>Filename</th>
                         <th style={{ padding: '10px 6px', width: '38px', textAlign: 'center' }}></th>
@@ -1000,15 +1000,25 @@ export default function BatchPage({
                               placeholder={batchType === 'BARCODE' ? '7501031311309' : 'https://example.com'}
                               style={{
                                 width: '100%',
-                                background: 'transparent',
-                                border: 'none',
+                                background: 'var(--bg-primary, rgba(255,255,255,0.03))',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '8px',
                                 padding: '8px 10px',
                                 color: 'var(--text-primary)',
                                 outline: 'none',
                                 fontSize: '13px',
                                 minHeight: '38px',
                                 fontWeight: 500,
-                                boxSizing: 'border-box'
+                                boxSizing: 'border-box',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.borderColor = 'var(--accent-primary)';
+                                e.target.style.background = 'var(--bg-elevated)';
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.borderColor = 'var(--border-color)';
+                                e.target.style.background = 'var(--bg-primary, rgba(255,255,255,0.03))';
                               }}
                             />
                           </td>
@@ -1045,15 +1055,25 @@ export default function BatchPage({
                               placeholder={`Item-${index + 1}`}
                               style={{
                                 width: '100%',
-                                background: 'transparent',
-                                border: 'none',
+                                background: 'var(--bg-primary, rgba(255,255,255,0.03))',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '8px',
                                 padding: '8px 10px',
                                 color: 'var(--text-primary)',
                                 outline: 'none',
                                 fontSize: '13px',
                                 minHeight: '38px',
                                 fontWeight: 500,
-                                boxSizing: 'border-box'
+                                boxSizing: 'border-box',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.borderColor = 'var(--accent-primary)';
+                                e.target.style.background = 'var(--bg-elevated)';
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.borderColor = 'var(--border-color)';
+                                e.target.style.background = 'var(--bg-primary, rgba(255,255,255,0.03))';
                               }}
                             />
                           </td>
