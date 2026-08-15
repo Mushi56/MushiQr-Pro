@@ -4423,7 +4423,7 @@ function AdminPanelInner() {
           .ad-template-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
           .ad-header-search { display: none; }
           .ad-header-subtitle { display: none; }
-          .ad-main-pad { padding: 10px 8px 90px; }
+          .ad-main-pad { padding: 10px 8px 120px; }
           .ad-stat-value { font-size: 16px !important; }
           .ad-card-title {
             font-size: 12px !important;
@@ -4441,7 +4441,7 @@ function AdminPanelInner() {
           .ad-three-col { grid-template-columns: 1fr; }
           .ad-auto-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
           .ad-template-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-          .ad-main-pad { padding: 8px 6px 90px; }
+          .ad-main-pad { padding: 8px 6px 120px; }
           .ad-stat-value { font-size: 15px !important; }
         }
 

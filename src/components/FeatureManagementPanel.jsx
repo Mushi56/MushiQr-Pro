@@ -1,8 +1,3 @@
-// src/components/FeatureManagementPanel.jsx
-// Phase 2.5 Premium Feature Management UI
-// 3-column: Category > Subcategory > Feature Cards
-// Unsaved changes, bulk actions, feature drawer, real-time sync
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   LayoutDashboard, QrCode, ScanLine, Palette, Layers,
@@ -12,6 +7,8 @@ import {
   Lock, Info, CheckSquare, Square, MinusSquare,
   Cpu, Grid3x3, Barcode,
   CheckCircle, XCircle, Loader, AlertCircle, Crown,
+  Type, Image, Sliders, Shield, Zap, Sparkles, Folder, FileSpreadsheet,
+  Camera, Eye, Tag, FileText, Bookmark, Clock, RefreshCw, Smartphone
 } from 'lucide-react';
 import { FEATURE_REGISTRY, CATEGORY_SUBCATEGORIES, CANONICAL_PLANS, DEFAULT_FREE_FEATURES, DEFAULT_PAID_FEATURES } from '../services/FeatureAccessManager';
 import { setFeatureFlagCloud, setPlanFeaturesCloud } from '../services/adminDataService';
@@ -19,6 +16,7 @@ import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 
 const C={bg:'#09090f',bgEl:'#10101a',bgCard:'#14141e',sidebar:'#0c0c15',border:'rgba(255,255,255,0.06)',accent:'#D60036',purple:'#8b5cf6',green:'#10b981',orange:'#f59e0b',blue:'#3b82f6',red:'#ef4444',text:'#f0f0f8',textSec:'#8b8fa8',textMut:'#44465a'};
+
 const CAT_META={
   QR_GENERATOR:      {icon:QrCode,color:'#D60036',name:'QR Code Generator'},
   BARCODE_GENERATOR: {icon:Barcode,color:'#3b82f6',name:'Barcode Generator'},
@@ -29,6 +27,56 @@ const CAT_META={
   HISTORY:           {icon:ClipboardList,color:'#06b6d4',name:'History'},
   SETTINGS:          {icon:Settings,color:'#64748b',name:'Settings'},
 };
+
+const SUBCAT_META = {
+  // QR Generator
+  'Content':               { icon: Type, color: '#D60036' },
+  'Color':                 { icon: Palette, color: '#8b5cf6' },
+  'Style':                 { icon: Grid3x3, color: '#ec4899' },
+  'Logo':                  { icon: Image, color: '#f59e0b' },
+  'Template':              { icon: Sparkles, color: '#3b82f6' },
+  'Text':                  { icon: Type, color: '#10b981' },
+  'Save & Export':         { icon: Download, color: '#06b6d4' },
+  'QR Engine':             { icon: Cpu, color: '#64748b' },
+
+  // Barcode Generator
+  '1D Standards':          { icon: Barcode, color: '#3b82f6' },
+  '2D Standards':          { icon: Grid3x3, color: '#8b5cf6' },
+  'Barcode Appearance':    { icon: Sliders, color: '#f59e0b' },
+  'Export':                { icon: Download, color: '#06b6d4' },
+
+  // Bulk Generator
+  'Batch Screen':          { icon: Layers, color: '#8b5cf6' },
+  'Input & Spreadsheet':   { icon: FileSpreadsheet, color: '#10b981' },
+  'Batch Styling':         { icon: Palette, color: '#ec4899' },
+  'Bulk Export':           { icon: Download, color: '#06b6d4' },
+
+  // Scanner
+  'Camera Lens':           { icon: Camera, color: '#10b981' },
+  'Detection':             { icon: ScanLine, color: '#3b82f6' },
+  'Scan Results':          { icon: CheckCircle, color: '#f59e0b' },
+
+  // Home
+  'Dashboard':             { icon: LayoutDashboard, color: '#f59e0b' },
+  'Quick Actions':         { icon: Zap, color: '#D60036' },
+
+  // Saved
+  'Collection':            { icon: Bookmark, color: '#ec4899' },
+  'Save / Remove':         { icon: Heart, color: '#D60036' },
+  'Search & Filter':       { icon: Search, color: '#3b82f6' },
+
+  // History
+  'History View':          { icon: History, color: '#06b6d4' },
+  'Automatic History':     { icon: RefreshCw, color: '#10b981' },
+  'History Management':    { icon: Clock, color: '#8b5cf6' },
+
+  // Settings
+  'General & Theme':       { icon: Palette, color: '#8b5cf6' },
+  'Storage':               { icon: Folder, color: '#ec4899' },
+  'Cloud & Sync':          { icon: Cloud, color: '#3b82f6' },
+  'Account & Security':    { icon: Shield, color: '#10b981' }
+};
+
 const PLAN_COLORS={free:'#8b8fa8',weekly:'#8b5cf6',monthly:'#f59e0b',yearly:'#D60036'};
 const PLAN_LABELS={free:'Free',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly'};
 
@@ -354,12 +402,12 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                padding: '8px 14px',
-                borderRadius: 10,
-                border: `1px solid ${selectedCat === null ? C.accent : C.border}`,
-                background: selectedCat === null ? 'rgba(214,0,54,0.12)' : C.bgCard,
+                padding: '9px 16px',
+                borderRadius: 12,
+                border: `1.5px solid ${selectedCat === null ? C.accent : C.border}`,
+                background: selectedCat === null ? 'rgba(214,0,54,0.14)' : C.bgCard,
                 color: selectedCat === null ? C.text : C.textSec,
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: selectedCat === null ? 800 : 600,
                 cursor: 'pointer',
                 flexShrink: 0,
@@ -367,9 +415,9 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
                 transition: 'all 0.15s'
               }}
             >
-              <Layers size={14} color={selectedCat === null ? C.accent : C.textMut} />
+              <Layers size={16} color={selectedCat === null ? C.accent : C.textMut} />
               <span>All Categories</span>
-              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 6, background: 'rgba(255,255,255,0.06)', color: C.textSec }}>
+              <span style={{ fontSize: 11, padding: '2px 7px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', color: C.textSec }}>
                 {FEATURE_REGISTRY.length}
               </span>
             </button>
@@ -389,27 +437,27 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
-                    padding: '8px 14px',
-                    borderRadius: 10,
-                    border: `1px solid ${act ? m.color : C.border}`,
-                    background: act ? `${m.color}18` : C.bgCard,
+                    padding: '9px 16px',
+                    borderRadius: 12,
+                    border: `1.5px solid ${act ? m.color : C.border}`,
+                    background: act ? `${m.color}20` : C.bgCard,
                     cursor: 'pointer',
                     flexShrink: 0,
                     whiteSpace: 'nowrap',
                     transition: 'all 0.15s'
                   }}
                 >
-                  <div style={{ width: 22, height: 22, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', background: act ? m.color + '25' : 'rgba(255,255,255,0.05)', flexShrink: 0 }}>
-                    <Icon size={12} color={act ? m.color : C.textMut} />
+                  <div style={{ width: 26, height: 26, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: act ? m.color + '30' : 'rgba(255,255,255,0.05)', flexShrink: 0 }}>
+                    <Icon size={15} color={act ? m.color : C.textMut} />
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: act ? 800 : 600, color: act ? C.text : C.textSec }}>
+                  <span style={{ fontSize: 13, fontWeight: act ? 800 : 600, color: act ? C.text : C.textSec }}>
                     {m.name}
                   </span>
                   <span style={{
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: 700,
-                    padding: '1px 6px',
-                    borderRadius: 6,
+                    padding: '2px 7px',
+                    borderRadius: 8,
                     background: st.enabled === st.total ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
                     color: st.enabled === st.total ? C.green : C.orange
                   }}>
@@ -425,51 +473,64 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
+              gap: 8,
               overflowX: 'auto',
-              paddingTop: 4,
+              paddingTop: 8,
+              paddingBottom: 4,
               borderTop: `1px dashed ${C.border}`,
               WebkitOverflowScrolling: 'touch'
             }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: C.textMut, marginRight: 4, textTransform: 'uppercase' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: C.textMut, marginRight: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Subcategories:
               </span>
               <button
                 onClick={() => setSelectedSubcat(null)}
                 style={{
-                  padding: '3px 10px',
-                  borderRadius: 6,
-                  border: `1px solid ${selectedSubcat === null ? CAT_META[selectedCat]?.color + '66' : 'transparent'}`,
-                  background: selectedSubcat === null ? CAT_META[selectedCat]?.color + '15' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 14px',
+                  borderRadius: 10,
+                  border: `1px solid ${selectedSubcat === null ? (CAT_META[selectedCat]?.color || C.accent) + '88' : C.border}`,
+                  background: selectedSubcat === null ? (CAT_META[selectedCat]?.color || C.accent) + '22' : 'rgba(255,255,255,0.03)',
                   color: selectedSubcat === null ? C.text : C.textSec,
-                  fontSize: 11,
-                  fontWeight: selectedSubcat === null ? 700 : 500,
+                  fontSize: 12,
+                  fontWeight: selectedSubcat === null ? 800 : 600,
                   cursor: 'pointer',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  transition: 'all 0.15s'
                 }}
               >
-                All {CAT_META[selectedCat]?.name}
+                <Grid3x3 size={13} color={selectedSubcat === null ? (CAT_META[selectedCat]?.color || C.accent) : C.textMut} />
+                <span>All {CAT_META[selectedCat]?.name}</span>
               </button>
               {(CATEGORY_SUBCATEGORIES[selectedCat] || []).map(sc => {
                 const isSubAct = selectedSubcat === sc;
-                const subColor = CAT_META[selectedCat]?.color || C.accent;
+                const meta = SUBCAT_META[sc] || { icon: Tag, color: CAT_META[selectedCat]?.color || C.accent };
+                const SubIcon = meta.icon;
+                const subColor = meta.color || CAT_META[selectedCat]?.color || C.accent;
                 return (
                   <button
                     key={sc}
                     onClick={() => selectSubcat(sc)}
                     style={{
-                      padding: '3px 10px',
-                      borderRadius: 6,
-                      border: `1px solid ${isSubAct ? subColor + '66' : 'transparent'}`,
-                      background: isSubAct ? subColor + '18' : 'rgba(255,255,255,0.03)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '6px 14px',
+                      borderRadius: 10,
+                      border: `1px solid ${isSubAct ? subColor + '88' : C.border}`,
+                      background: isSubAct ? subColor + '22' : 'rgba(255,255,255,0.03)',
                       color: isSubAct ? C.text : C.textSec,
-                      fontSize: 11,
-                      fontWeight: isSubAct ? 700 : 500,
+                      fontSize: 12,
+                      fontWeight: isSubAct ? 800 : 600,
                       cursor: 'pointer',
-                      flexShrink: 0
+                      flexShrink: 0,
+                      transition: 'all 0.15s'
                     }}
                   >
-                    {sc}
+                    <SubIcon size={13} color={isSubAct ? subColor : C.textMut} />
+                    <span>{sc}</span>
                   </button>
                 );
               })}
@@ -481,7 +542,7 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
       {/* ─── Main Content Area ─── */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
         {showFeats && (
-          <div className="fmp-sc" style={{flex:1,overflowY:'auto',padding:14,minWidth:0}}>
+          <div className="fmp-sc" style={{flex:1,overflowY:'auto',padding:'14px 14px 120px 14px',minWidth:0}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12,gap:8,flexWrap:'wrap'}}>
               <div style={{display:'flex',alignItems:'center',gap:6}}>
                 {isMobile&&!search&&<button onClick={()=>setMobileNav('subcategories')} style={{background:'none',border:'none',cursor:'pointer',color:C.textSec,padding:'3px 0',display:'flex',alignItems:'center',gap:4,fontSize:12}}><ChevronLeft size={13}/>Back</button>}
