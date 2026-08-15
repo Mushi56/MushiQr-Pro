@@ -916,6 +916,121 @@ export default function BatchPage({
                   </div>
                 </div>
 
+                {/* Top Action Row: All 3 buttons on top of the data input section */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                  {/* Button 1: Add Row */}
+                  <button
+                    onClick={() => {
+                      const newIndex = sheetRows.length;
+                      const nextId = String(newIndex + 1);
+                      setSheetRows(prev => [
+                        ...prev,
+                        { id: `${Date.now()}_${nextId}`, data: '', filename: `Item-${nextId.padStart(3, '0')}` }
+                      ]);
+                      setTimeout(() => {
+                        const nextDataInput = document.querySelector(`input[data-row-data="${newIndex}"]`);
+                        if (nextDataInput) nextDataInput.focus();
+                      }, 50);
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '11px 12px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-hover)',
+                      color: 'var(--text-primary)',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      transition: 'all 0.2s ease',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <Plus size={15} color="var(--accent-primary)" /> Add Row
+                  </button>
+
+                  {/* Button 2: Clear Table */}
+                  <button
+                    onClick={() => {
+                      setSheetRows([
+                        { id: '1', data: '', filename: 'Item-001' }
+                      ]);
+                    }}
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-hover)',
+                      color: 'var(--text-secondary)',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      transition: 'all 0.2s ease',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <Trash2 size={14} color="#EF4444" /> Clear Table
+                  </button>
+
+                  {/* Button 3: Import Entries */}
+                  <button
+                    onClick={() => {
+                      const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
+                      if (validRows.length === 0) {
+                        alert('Please fill at least one row with data.');
+                        return;
+                      }
+
+                      const defaultStyle = batchType === 'BARCODE' ? {
+                        bcid: barcodeType || 'code128',
+                        barColor: '#000000',
+                        bgColor: '#ffffff',
+                        barWidth: 2,
+                        height: 90,
+                        margin: 16,
+                        displayValue: true
+                      } : { ...activeGeneratorStyle };
+
+                      const newItems = validRows.map((r, i) => ({
+                        id: `sheet_${Date.now()}_${i}`,
+                        type: batchType,
+                        data: r.data.trim(),
+                        filename: r.filename.trim() || `item_${i + 1}`,
+                        style: defaultStyle
+                      }));
+
+                      setBatchItems(newItems);
+                    }}
+                    style={{
+                      flex: 1.4,
+                      padding: '11px 14px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
+                      color: '#FFFFFF',
+                      fontWeight: 800,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <Play size={14} /> Import Entries ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})
+                  </button>
+                </div>
+
                 {/* Spreadsheet Table */}
                 <div 
                   onPaste={(e) => {
@@ -1129,121 +1244,6 @@ export default function BatchPage({
                       ))}
                     </tbody>
                   </table>
-                </div>
-
-                {/* Spreadsheet Bottom Action Row: All 3 buttons in one single row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', width: '100%' }}>
-                  {/* Button 1: Add Row */}
-                  <button
-                    onClick={() => {
-                      const newIndex = sheetRows.length;
-                      const nextId = String(newIndex + 1);
-                      setSheetRows(prev => [
-                        ...prev,
-                        { id: `${Date.now()}_${nextId}`, data: '', filename: `Item-${nextId.padStart(3, '0')}` }
-                      ]);
-                      setTimeout(() => {
-                        const nextDataInput = document.querySelector(`input[data-row-data="${newIndex}"]`);
-                        if (nextDataInput) nextDataInput.focus();
-                      }, 50);
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: '11px 12px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-hover)',
-                      color: 'var(--text-primary)',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '5px',
-                      transition: 'all 0.2s ease',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    <Plus size={15} color="var(--accent-primary)" /> Add Row
-                  </button>
-
-                  {/* Button 2: Clear Table */}
-                  <button
-                    onClick={() => {
-                      setSheetRows([
-                        { id: '1', data: '', filename: 'Item-001' }
-                      ]);
-                    }}
-                    style={{
-                      padding: '11px 12px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-hover)',
-                      color: 'var(--text-secondary)',
-                      fontWeight: 700,
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '5px',
-                      transition: 'all 0.2s ease',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    <Trash2 size={14} color="#EF4444" /> Clear
-                  </button>
-
-                  {/* Button 3: Import Entries */}
-                  <button
-                    onClick={() => {
-                      const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
-                      if (validRows.length === 0) {
-                        alert('Please fill at least one row with data.');
-                        return;
-                      }
-
-                      const defaultStyle = batchType === 'BARCODE' ? {
-                        bcid: barcodeType || 'code128',
-                        barColor: '#000000',
-                        bgColor: '#ffffff',
-                        barWidth: 2,
-                        height: 90,
-                        margin: 16,
-                        displayValue: true
-                      } : { ...activeGeneratorStyle };
-
-                      const newItems = validRows.map((r, i) => ({
-                        id: `sheet_${Date.now()}_${i}`,
-                        type: batchType,
-                        data: r.data.trim(),
-                        filename: r.filename.trim() || `item_${i + 1}`,
-                        style: defaultStyle
-                      }));
-
-                      setBatchItems(newItems);
-                    }}
-                    style={{
-                      flex: 1.4,
-                      padding: '11px 14px',
-                      borderRadius: '10px',
-                      border: 'none',
-                      background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
-                      color: '#FFFFFF',
-                      fontWeight: 800,
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '5px',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    <Play size={14} /> Import Entries ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})
-                  </button>
                 </div>
               </div>
             )}
