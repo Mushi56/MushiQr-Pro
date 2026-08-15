@@ -6,6 +6,7 @@ import { renderBarcode } from '../utils/barcodeEngine';
 import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved } from '../utils/storage';
 import AppIcon from './AppIcon';
 import GoldenAdminBadge from './GoldenAdminBadge';
+import PaidCrownBadge from './PaidCrownBadge';
 import { useUserRole } from '../services/roleService';
 
 function HeroQRCanvas() {
@@ -963,8 +964,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 key={option.id}
                 onClick={() => onQuickCreate(option.id)}
                 className="quick-option-card"
-                style={{ width: '100%' }}
+                style={{ width: '100%', position: 'relative' }}
               >
+                <PaidCrownBadge featureId={`qr_${option.id}`} position="floating" size={10} />
                 <div className="quick-option-icon-wrapper" style={{ background: 'rgba(214, 0, 54, 0.08)', color: '#D60036' }}>
                   {React.cloneElement(option.icon, { size: 20 })}
                 </div>
@@ -1016,8 +1018,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 key={option.id}
                 onClick={() => onQuickCreateBarcode(option.id)}
                 className="quick-option-card"
-                style={{ width: '100%' }}
+                style={{ width: '100%', position: 'relative' }}
               >
+                <PaidCrownBadge featureId={`barcode_${option.id}`} position="floating" size={10} />
                 <div className="quick-option-icon-wrapper" style={{ background: 'rgba(214, 0, 54, 0.08)', color: '#D60036' }}>
                   {getBarcodeIcon(option.id)}
                 </div>

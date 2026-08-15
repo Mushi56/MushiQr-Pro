@@ -11,7 +11,7 @@ import {
   ToggleLeft, ToggleRight, Check, X, AlertTriangle, Save,
   Lock, Info, CheckSquare, Square, MinusSquare,
   Cpu, Grid3x3, Barcode,
-  CheckCircle, XCircle, Loader, AlertCircle,
+  CheckCircle, XCircle, Loader, AlertCircle, Crown,
 } from 'lucide-react';
 import { FEATURE_REGISTRY, CATEGORY_SUBCATEGORIES, CANONICAL_PLANS, DEFAULT_FREE_FEATURES, DEFAULT_PAID_FEATURES } from '../services/FeatureAccessManager';
 import { setFeatureFlagCloud, setPlanFeaturesCloud } from '../services/adminDataService';
@@ -548,8 +548,25 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
                           {sel?<CheckSquare size={13}/>:<Square size={13}/>}
                         </button>
                         <div style={{flex:1,minWidth:0}}>
-                          <div style={{display:'flex',alignItems:'center',gap:5,flexWrap:'wrap'}}>
+                          <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
                             <span style={{fontSize:13,fontWeight:700,color:C.text}}>{feat.displayName}</span>
+                            {!getPlanEnabled('free', feat.featureId) && (
+                              <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 3,
+                                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                color: '#000',
+                                padding: '1px 5px',
+                                borderRadius: 6,
+                                fontSize: 9,
+                                fontWeight: 800,
+                                boxShadow: '0 2px 6px rgba(255,170,0,0.35)',
+                                border: '1px solid rgba(255,255,255,0.4)'
+                              }}>
+                                <Crown size={9} fill="#000" color="#000" strokeWidth={2.5}/> PAID
+                              </span>
+                            )}
                             {locked&&<Lock size={9} color={C.orange} title="Security control"/>}
                           </div>
                           <div style={{display:'flex',alignItems:'center',gap:5,marginTop:2,flexWrap:'wrap'}}>

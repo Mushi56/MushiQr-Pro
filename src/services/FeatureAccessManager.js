@@ -547,6 +547,21 @@ class FeatureAccessManagerService {
   }
 
   /**
+   * Determines if a feature requires a paid subscription (is in paid plans and not free)
+   */
+  isPaidFeature(featureId) {
+    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
+    if (!featDef) return false;
+
+    // Check free plan features config
+    const freePlanFeats = this.planConfigs['free']?.features || DEFAULT_FREE_FEATURES;
+    const isFree = freePlanFeats.includes(featureId);
+
+    // If it is NOT in free plan, or if it requires paid plan by default/config
+    return !isFree;
+  }
+
+  /**
    * Evaluates if a subcategory is allowed/visible.
    * If the subcategory tab flag itself is disabled OR if all features in that subcategory are turned OFF globally, returns false.
    */

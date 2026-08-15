@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { UploadCloud, X, CheckCircle2 } from 'lucide-react';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import PaidCrownBadge from './PaidCrownBadge';
 
 const LOGO_PRESETS = [
   { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.avif' },
@@ -108,8 +109,9 @@ export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
           className={`logo-preset-btn upload-tile ${logo && !LOGO_PRESETS.some(p => p.url === logo.src) ? 'active' : ''}`}
           onClick={() => logo && !LOGO_PRESETS.some(p => p.url === logo.src) ? onLogoRemove() : inputRef.current?.click()}
           title="Upload Custom Logo"
-          style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)' }}
+          style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)', position: 'relative' }}
         >
+          <PaidCrownBadge featureId="custom_logo_upload" position="corner" size={9} />
           {logo && !LOGO_PRESETS.some(p => p.url === logo.src) ? (
             <div className="logo-preset-icon" style={{ position: 'relative' }}>
               <img src={logo.src} alt="Custom" style={{ opacity: 0.5 }} />
@@ -126,8 +128,9 @@ export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
             className={`logo-preset-btn ${loading === p.slug ? 'loading' : ''} ${logo?.src === p.url ? 'active' : ''}`}
             onClick={() => logo?.src === p.url ? onLogoRemove() : handleSelect(p.slug, p.name, p.url)}
             title={p.name}
-            style={{ '--brand-color': p.color }}
+            style={{ '--brand-color': p.color, position: 'relative' }}
           >
+            <PaidCrownBadge featureId="custom_logo_presets" position="corner" size={9} />
             <div className="logo-preset-icon" style={{ position: 'relative' }}>
               <img 
                 src={p.url} 

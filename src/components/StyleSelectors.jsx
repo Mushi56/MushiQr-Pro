@@ -666,13 +666,14 @@ const EYE_PREVIEWS = {
 };
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import PaidCrownBadge from './PaidCrownBadge';
 
 export function DotStyleSelector({ value, onChange, qrParams }) {
   const handleDotChange = (style) => {
     if (style !== 'square' && style !== 'rounded') {
-      const access = FeatureAccessManager.canUseFeature('custom_shapes');
+      const access = FeatureAccessManager.canUseFeature('custom_dot_styles');
       if (!access.allowed) {
-        alert('Custom Dot & Eye Shapes feature is disabled or requires a plan upgrade.');
+        alert('Custom Dot Module Shapes is a Premium Feature. Please upgrade your plan to unlock.');
         return;
       }
     }
@@ -687,7 +688,11 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
           className={`style-option ${value === style ? 'active' : ''}`}
           onClick={() => handleDotChange(style)}
           title={style}
+          style={{ position: 'relative' }}
         >
+          {style !== 'square' && style !== 'rounded' && (
+            <PaidCrownBadge featureId="custom_dot_styles" position="corner" size={9} />
+          )}
           <div className="style-option-preview">
             <MiniDotPreviewCanvas dotStyle={style} qrParams={qrParams} />
           </div>
@@ -700,9 +705,9 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
 export function EyeStyleSelector({ value, onChange, qrParams }) {
   const handleEyeChange = (style) => {
     if (style !== 'square' && style !== 'rounded') {
-      const access = FeatureAccessManager.canUseFeature('custom_shapes');
+      const access = FeatureAccessManager.canUseFeature('custom_eye_styles');
       if (!access.allowed) {
-        alert('Custom Dot & Eye Shapes feature is disabled or requires a plan upgrade.');
+        alert('Custom Finder Eyes is a Premium Feature. Please upgrade your plan to unlock.');
         return;
       }
     }
@@ -719,7 +724,11 @@ export function EyeStyleSelector({ value, onChange, qrParams }) {
             className={`style-option ${value === style ? 'active' : ''}`}
             onClick={() => handleEyeChange(style)}
             title={style}
+            style={{ position: 'relative' }}
           >
+            {style !== 'square' && style !== 'rounded' && (
+              <PaidCrownBadge featureId="custom_eye_styles" position="corner" size={9} />
+            )}
             <div className="style-option-preview">
               <MiniEyeCanvas eyeStyle={style} qrParams={qrParams} />
             </div>
