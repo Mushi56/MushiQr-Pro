@@ -33,17 +33,17 @@ export default function PaidCrownBadge({
     alignItems: 'center',
     justifyContent: 'center',
     gap: '3px',
-    background: 'linear-gradient(135deg, #FFE033 0%, #FF9500 100%)',
+    background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
     color: '#000',
-    borderRadius: '7px',
-    padding: showLabel ? '2px 6px' : '4px',
-    boxShadow: '0 3px 10px rgba(0, 0, 0, 0.7), 0 0 12px rgba(255, 180, 0, 0.65)',
-    fontWeight: 900,
+    borderRadius: '8px',
+    padding: showLabel ? '2px 6px' : '3px',
+    boxShadow: '0 2px 8px rgba(255, 170, 0, 0.45)',
+    fontWeight: 800,
     fontSize: '9px',
-    letterSpacing: '0.4px',
+    letterSpacing: '0.3px',
     zIndex: 999,
     pointerEvents: 'none',
-    border: '1.5px solid #FFFFFF',
+    border: 'none',
     flexShrink: 0,
     ...(position === 'corner' ? {
       position: 'absolute',
@@ -59,9 +59,9 @@ export default function PaidCrownBadge({
   };
 
   return (
-    <span className="paid-crown-badge" style={badgeStyle} title="PRO Paid Feature">
-      <Crown size={size} fill="#000" color="#000" strokeWidth={2.8} />
-      {showLabel && <span style={{ color: '#000', lineHeight: 1 }}>PRO</span>}
+    <span className="paid-crown-badge" style={badgeStyle} title="Premium Paid Feature">
+      <Crown size={size} fill="#000" color="#000" strokeWidth={2.5} />
+      {showLabel && <span>PRO</span>}
     </span>
   );
 }
