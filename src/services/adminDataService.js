@@ -865,3 +865,46 @@ export async function setPlanFeaturesCloud(planId, features) {
     }
   }
 }
+
+/**
+ * Save complete Subscription Plan with pricing, interval, discounts, active status, and custom features
+ */
+export async function savePlanFullCloud(planData) {
+  try {
+    const planId = planData.id || planData.planId;
+    if (!planId) throw new Error('Plan ID is required');
+
+    const planRef = doc(db, 'subscription_plans', planId);
+    const dataToSave = {
+      ...planData,
+      id: planId,
+      planId: planId,
+      _updatedAt: new Date().toISOString(),
+    };
+
+    await setDoc(planRef, dataToSave, { merge: true });
+    await _audit('PLAN_SAVED', { planId, name: planData.name, price: planData.price });
+    return { ok: true, data: dataToSave };
+  } catch (e) {
+    console.error('[DS] savePlanFullCloud failed:', e);
+    return { ok: false, error: friendlyError(e) };
+  }
+}
+
+/**
+ * Delete a custom Subscription Plan
+ */
+export async function deletePlanCloud(planId) {
+  try {
+    if (['free', 'weekly', 'monthly', 'yearly'].includes(planId)) {
+      throw new Error('Default system plans cannot be deleted. You can edit their pricing and features.');
+    }
+    const planRef = doc(db, 'subscription_plans', planId);
+    await deleteDoc(planRef);
+    await _audit('PLAN_DELETED', { planId });
+    return { ok: true };
+  } catch (e) {
+    console.error('[DS] deletePlanCloud failed:', e);
+    return { ok: false, error: friendlyError(e) };
+  }
+}
