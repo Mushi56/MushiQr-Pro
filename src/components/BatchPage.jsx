@@ -916,19 +916,18 @@ export default function BatchPage({
                   </div>
                 </div>
 
-                {/* Top Action Row: Clean, Seamless Floating Sticky Bar (Fixed at top: 0) */}
+                {/* Top Action Row: Fully Attached Flush to Upper Navbar (0px gap on scroll) */}
                 <div style={{
                   position: 'sticky',
-                  top: 0,
-                  zIndex: 30,
-                  background: 'var(--bg-primary, var(--bg-surface, #ffffff))',
-                  padding: '10px 0 12px 0',
-                  marginTop: '-4px',
+                  top: '-16px',
+                  zIndex: 35,
+                  background: 'var(--bg-primary, #0f172a)',
+                  padding: '12px 0 10px 0',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   width: '100%',
-                  boxShadow: '0 4px 12px -4px rgba(0,0,0,0.08)'
+                  boxShadow: '0 6px 14px -6px rgba(0,0,0,0.12)'
                 }}>
                   {/* Button 1: Add Row */}
                   <button
