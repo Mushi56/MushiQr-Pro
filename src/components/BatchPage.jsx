@@ -916,8 +916,22 @@ export default function BatchPage({
                   </div>
                 </div>
 
-                {/* Top Action Row: All 3 buttons on top of the data input section */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                {/* Top Action Row: Permanently Fixed/Sticky on top of the data input section */}
+                <div style={{
+                  position: 'sticky',
+                  top: '-8px',
+                  zIndex: 30,
+                  background: 'var(--bg-primary, #0f172a)',
+                  padding: '8px 0',
+                  marginTop: '-4px',
+                  borderBottom: '1px solid var(--border-color)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)'
+                }}>
                   {/* Button 1: Add Row */}
                   <button
                     onClick={() => {
