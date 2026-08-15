@@ -263,8 +263,10 @@ class FeatureAccessManagerService {
     let initialPlans = {};
     let initialSub = null;
     try {
-      initialFlags = JSON.parse(localStorage.getItem(STORAGE_KEYS.GLOBAL_FLAGS) || '{}');
-      initialPlans = JSON.parse(STORAGE_KEYS.PLAN_CONFIGS ? localStorage.getItem(STORAGE_KEYS.PLAN_CONFIGS) || '{}' : '{}');
+      const primaryFlags = JSON.parse(localStorage.getItem(STORAGE_KEYS.GLOBAL_FLAGS) || 'null');
+      const legacyFlags = JSON.parse(localStorage.getItem('qrgen_feature_flags') || 'null');
+      initialFlags = primaryFlags || legacyFlags || {};
+      initialPlans = JSON.parse(localStorage.getItem(STORAGE_KEYS.PLAN_CONFIGS) || '{}');
       initialSub = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SUB) || 'null');
     } catch {
       // Fallback if storage read fails

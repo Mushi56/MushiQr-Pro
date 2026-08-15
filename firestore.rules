@@ -43,16 +43,16 @@ service cloud.firestore {
     }
 
     // ── Global Config (appSettings, featureFlags, announcement, remoteConfig)
-    // Anyone authenticated can READ, only super-admin can WRITE
+    // Public READ so mobile apps/visitors receive feature flags immediately, super-admin WRITE
     match /global_config/{docId} {
-      allow read: if isAuth();
+      allow read: if true;
       allow write: if isSuperAdmin();
     }
 
     // ── Global Templates
-    // Anyone authenticated can READ, only super-admin can WRITE/DELETE
+    // Public READ so all users can view template catalog, super-admin WRITE/DELETE
     match /global_templates/{docId} {
-      allow read: if isAuth();
+      allow read: if true;
       allow create, update, delete: if isSuperAdmin();
     }
 
@@ -90,10 +90,10 @@ service cloud.firestore {
     }
 
     // ── Subscription Plan Configurations
-    // Authenticated users can read plan configurations; client writes are disabled (Cloud Functions / Admin SDK only)
+    // Public READ for plan tiers, super-admin WRITE
     match /subscription_plans/{planId} {
-      allow read: if isAuth();
-      allow write: if false;
+      allow read: if true;
+      allow write: if isSuperAdmin();
     }
 
     // ── Authoritative User Subscriptions
