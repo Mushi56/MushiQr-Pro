@@ -907,27 +907,32 @@ export default function BatchPage({
                       Type or paste tabular data from Excel, Google Sheets, or any clipboard text.
                     </p>
                   </div>
+                  
+                  {/* Top Right: Clear Table with icon */}
                   <button
                     onClick={() => {
-                      const newId = String(sheetRows.length + 1);
-                      setSheetRows(prev => [...prev, { id: `${Date.now()}_${newId}`, data: `https://example.com/item${newId}`, filename: `Item-${newId.padStart(3, '0')}` }]);
+                      setSheetRows([
+                        { id: '1', data: '', filename: 'Item-001' },
+                        { id: '2', data: '', filename: 'Item-002' },
+                        { id: '3', data: '', filename: 'Item-003' },
+                      ]);
                     }}
                     style={{
-                      padding: '12px 18px',
-                      borderRadius: '12px',
-                      border: 'none',
-                      background: 'var(--accent-primary)',
-                      color: '#FFFFFF',
-                      fontSize: '14px',
+                      padding: '8px 14px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-hover)',
+                      color: 'var(--text-secondary)',
                       fontWeight: 700,
+                      fontSize: '12px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 12px rgba(214,0,54,0.25)'
+                      gap: '6px',
+                      transition: 'all 0.2s ease'
                     }}
                   >
-                    <Plus size={16} /> Add Row
+                    <Trash2 size={14} color="#EF4444" /> Clear Table
                   </button>
                 </div>
 
@@ -998,10 +1003,18 @@ export default function BatchPage({
                           <td style={{ padding: '8px 10px' }}>
                             <input
                               type="text"
+                              data-row-data={index}
                               value={row.data}
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setSheetRows(prev => prev.map((r, i) => i === index ? { ...r, data: val } : r));
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const nextFilenameInput = document.querySelector(`input[data-row-filename="${index}"]`);
+                                  if (nextFilenameInput) nextFilenameInput.focus();
+                                }
                               }}
                               onPaste={(e) => {
                                 const pasted = e.clipboardData.getData('text');
@@ -1054,10 +1067,32 @@ export default function BatchPage({
                           <td style={{ padding: '8px 10px' }}>
                             <input
                               type="text"
+                              data-row-filename={index}
                               value={row.filename}
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setSheetRows(prev => prev.map((r, i) => i === index ? { ...r, filename: val } : r));
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  if (index < sheetRows.length - 1) {
+                                    const nextDataInput = document.querySelector(`input[data-row-data="${index + 1}"]`);
+                                    if (nextDataInput) nextDataInput.focus();
+                                  } else {
+                                    // Add a new row and focus its data input
+                                    const newIndex = sheetRows.length;
+                                    const nextId = String(newIndex + 1);
+                                    setSheetRows(prev => [
+                                      ...prev,
+                                      { id: `${Date.now()}_${nextId}`, data: '', filename: `Item-${nextId.padStart(3, '0')}` }
+                                    ]);
+                                    setTimeout(() => {
+                                      const nextDataInput = document.querySelector(`input[data-row-data="${newIndex}"]`);
+                                      if (nextDataInput) nextDataInput.focus();
+                                    }, 50);
+                                  }
+                                }
                               }}
                               placeholder={`Item-${index + 1}`}
                               style={{
@@ -1116,34 +1151,41 @@ export default function BatchPage({
                   </table>
                 </div>
 
-                {/* Spreadsheet Bottom Helper Note and Actions */}
+                {/* Spreadsheet Bottom Action Row: Add Row on left, Import Entries on right */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginTop: '4px' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
-                    💡 Tip: Paste multi-line data or Excel columns anywhere in this table to auto-generate rows!
-                  </span>
+                  {/* Lower Row: Add Row Button */}
+                  <button
+                    onClick={() => {
+                      const newIndex = sheetRows.length;
+                      const nextId = String(newIndex + 1);
+                      setSheetRows(prev => [
+                        ...prev,
+                        { id: `${Date.now()}_${nextId}`, data: '', filename: `Item-${nextId.padStart(3, '0')}` }
+                      ]);
+                      setTimeout(() => {
+                        const nextDataInput = document.querySelector(`input[data-row-data="${newIndex}"]`);
+                        if (nextDataInput) nextDataInput.focus();
+                      }, 50);
+                    }}
+                    style={{
+                      padding: '12px 18px',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-hover)',
+                      color: 'var(--text-primary)',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <Plus size={16} color="var(--accent-primary)" /> Add Row
+                  </button>
 
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <button
-                      onClick={() => {
-                        setSheetRows([
-                          { id: '1', data: '', filename: 'Item-001' },
-                          { id: '2', data: '', filename: 'Item-002' },
-                          { id: '3', data: '', filename: 'Item-003' },
-                        ]);
-                      }}
-                      style={{
-                        padding: '12px 18px',
-                        borderRadius: '12px',
-                        border: '1px solid var(--border-color)',
-                        background: 'var(--bg-hover)',
-                        color: 'var(--text-secondary)',
-                        fontWeight: 700,
-                        fontSize: '13px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Clear Table
-                    </button>
                     <button
                       onClick={() => {
                         const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
@@ -1173,21 +1215,21 @@ export default function BatchPage({
                         setBatchItems(newItems);
                       }}
                       style={{
-                        padding: '14px 24px',
+                        padding: '12px 20px',
                         borderRadius: '12px',
                         border: 'none',
                         background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
                         color: '#FFFFFF',
                         fontWeight: 800,
-                        fontSize: '14px',
+                        fontSize: '13px',
                         cursor: 'pointer',
                         boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '6px'
                       }}
                     >
-                      <Play size={16} /> Import into Batch ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length} items)
+                      <Play size={15} /> Import Entries ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})
                     </button>
                   </div>
                 </div>
