@@ -171,11 +171,21 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
     setBulkSelected(new Set());setBulkConfirm(null);
   },[bulkSelected,toggleGlobal,togglePlan]);
 
-  const selectCategory=(cId)=>{setSelectedCat(cId);const subs=CATEGORY_SUBCATEGORIES[cId]||[];setSelectedSubcat(subs[0]||null);setSearch('');setBulkSelected(new Set());setMobileNav('subcategories');};
-  const selectSubcat=(sc)=>{setSelectedSubcat(sc);setBulkSelected(new Set());setMobileNav('features');};
-  const showCats=!isMobile||mobileNav==='categories';
-  const showSubcats=(!isMobile||mobileNav==='subcategories')&&!!selectedCat&&!search;
-  const showFeats=!isMobile||mobileNav==='features'||!!search;
+  const selectCategory=(cId)=>{
+    setSelectedCat(cId);
+    setSelectedSubcat(null); // Default to showing all features of the selected category
+    setSearch('');
+    setBulkSelected(new Set());
+    setMobileNav('features');
+  };
+  const selectSubcat=(sc)=>{
+    setSelectedSubcat(sc);
+    setBulkSelected(new Set());
+    setMobileNav('features');
+  };
+  const showCats=true;
+  const showSubcats=!!selectedCat&&!search;
+  const showFeats=true;
 
   return(
     <div style={{display:'flex',flexDirection:'column',height:'100%',background:C.bg,fontFamily:'Outfit,sans-serif',position:'relative'}}>
