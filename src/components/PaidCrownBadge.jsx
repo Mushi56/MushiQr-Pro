@@ -8,10 +8,10 @@ import { FeatureAccessManager } from '../services/FeatureAccessManager';
  */
 export default function PaidCrownBadge({ 
   featureId, 
-  size = 12, 
+  size = 11, 
   style = {}, 
   showLabel = false,
-  position = 'inline' // 'inline', 'corner', 'floating'
+  position = 'corner' // 'inline', 'corner', 'floating'
 }) {
   const [, setTick] = useState(0);
 
@@ -33,34 +33,36 @@ export default function PaidCrownBadge({
     alignItems: 'center',
     justifyContent: 'center',
     gap: '3px',
-    background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+    background: 'linear-gradient(135deg, #FFE033 0%, #FF9500 100%)',
     color: '#000',
-    borderRadius: '8px',
-    padding: showLabel ? '2px 6px' : '3px',
-    boxShadow: '0 2px 8px rgba(255, 170, 0, 0.45)',
-    fontWeight: 800,
+    borderRadius: '7px',
+    padding: showLabel ? '2px 6px' : '4px',
+    boxShadow: '0 3px 10px rgba(0, 0, 0, 0.7), 0 0 12px rgba(255, 180, 0, 0.65)',
+    fontWeight: 900,
     fontSize: '9px',
-    letterSpacing: '0.3px',
-    zIndex: 10,
+    letterSpacing: '0.4px',
+    zIndex: 999,
     pointerEvents: 'none',
-    border: '1px solid rgba(255, 255, 255, 0.6)',
+    border: '1.5px solid #FFFFFF',
+    flexShrink: 0,
     ...(position === 'corner' ? {
       position: 'absolute',
-      top: '4px',
-      right: '4px',
+      top: '8px',
+      right: '8px',
     } : {}),
     ...(position === 'floating' ? {
       position: 'absolute',
-      top: '-6px',
-      right: '-6px',
+      top: '6px',
+      right: '6px',
     } : {}),
     ...style
   };
 
   return (
-    <span className="paid-crown-badge" style={badgeStyle} title="Premium Paid Feature">
-      <Crown size={size} fill="#000" color="#000" strokeWidth={2.5} />
-      {showLabel && <span>PRO</span>}
+    <span className="paid-crown-badge" style={badgeStyle} title="PRO Paid Feature">
+      <Crown size={size} fill="#000" color="#000" strokeWidth={2.8} />
+      {showLabel && <span style={{ color: '#000', lineHeight: 1 }}>PRO</span>}
     </span>
   );
 }
+

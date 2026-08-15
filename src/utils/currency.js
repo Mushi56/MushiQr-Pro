@@ -38,30 +38,229 @@ export function detectUserCurrency() {
       return saved;
     }
 
-    // Attempt detection via Intl
-    const locale = navigator.language || navigator.userLanguage || 'en-US';
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    // Collect all available language tags from the user's browser / system
+    const languages = (navigator.languages && navigator.languages.length) 
+      ? navigator.languages 
+      : [navigator.language || navigator.userLanguage || ''];
+      
+    const langString = languages.join(',').toLowerCase();
+    const timeZone = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').toLowerCase();
 
-    // Region mapping
-    if (timeZone.includes('Karachi') || locale.includes('ur-PK') || locale.includes('en-PK')) return 'PKR';
-    if (timeZone.includes('Calcutta') || timeZone.includes('Kolkata') || locale.includes('hi') || locale.includes('en-IN')) return 'INR';
-    if (timeZone.includes('London') || locale.includes('en-GB')) return 'GBP';
-    if (timeZone.includes('Dubai') || timeZone.includes('Abu_Dhabi')) return 'AED';
-    if (timeZone.includes('Riyadh')) return 'SAR';
-    if (timeZone.includes('Tokyo') || locale.includes('ja')) return 'JPY';
-    if (timeZone.includes('Sydney') || timeZone.includes('Melbourne') || locale.includes('en-AU')) return 'AUD';
-    if (timeZone.includes('Toronto') || timeZone.includes('Vancouver') || locale.includes('en-CA')) return 'CAD';
-    if (timeZone.includes('Paris') || timeZone.includes('Berlin') || timeZone.includes('Rome') || timeZone.includes('Madrid') || timeZone.includes('Amsterdam')) return 'EUR';
-    if (timeZone.includes('Seoul') || locale.includes('ko')) return 'KRW';
-    if (timeZone.includes('Kuala_Lumpur') || locale.includes('ms')) return 'MYR';
-    if (timeZone.includes('Jakarta') || locale.includes('id')) return 'IDR';
-    if (timeZone.includes('Manila') || locale.includes('fil')) return 'PHP';
-    if (timeZone.includes('Cairo') || locale.includes('ar-EG')) return 'EGP';
-    if (timeZone.includes('Lagos')) return 'NGN';
-    if (timeZone.includes('Johannesburg')) return 'ZAR';
-    if (timeZone.includes('Sao_Paulo') || locale.includes('pt-BR')) return 'BRL';
-    if (timeZone.includes('Istanbul') || locale.includes('tr')) return 'TRY';
-    if (timeZone.includes('Shanghai') || timeZone.includes('Beijing') || locale.includes('zh')) return 'CNY';
+    // 1. Pakistan (PKR)
+    if (
+      timeZone.includes('karachi') || 
+      timeZone.includes('pakistan') || 
+      langString.includes('-pk') || 
+      langString.includes('ur-') || 
+      langString.includes('pa-pk')
+    ) {
+      return 'PKR';
+    }
+
+    // 2. Malaysia (MYR)
+    if (
+      timeZone.includes('kuala_lumpur') || 
+      timeZone.includes('malaysia') || 
+      timeZone.includes('kuching') || 
+      langString.includes('-my') || 
+      langString.includes('ms-')
+    ) {
+      return 'MYR';
+    }
+
+    // 3. India (INR)
+    if (
+      timeZone.includes('calcutta') || 
+      timeZone.includes('kolkata') || 
+      timeZone.includes('india') || 
+      langString.includes('-in') || 
+      langString.includes('hi-') || 
+      langString.includes('ta-in') || 
+      langString.includes('te-in')
+    ) {
+      return 'INR';
+    }
+
+    // 4. UAE (AED)
+    if (
+      timeZone.includes('dubai') || 
+      timeZone.includes('abu_dhabi') || 
+      langString.includes('-ae')
+    ) {
+      return 'AED';
+    }
+
+    // 5. Saudi Arabia (SAR)
+    if (
+      timeZone.includes('riyadh') || 
+      langString.includes('-sa')
+    ) {
+      return 'SAR';
+    }
+
+    // 6. Indonesia (IDR)
+    if (
+      timeZone.includes('jakarta') || 
+      timeZone.includes('pontianak') || 
+      timeZone.includes('makassar') || 
+      timeZone.includes('jayapura') || 
+      langString.includes('-id') || 
+      langString.includes('id-')
+    ) {
+      return 'IDR';
+    }
+
+    // 7. Philippines (PHP)
+    if (
+      timeZone.includes('manila') || 
+      langString.includes('-ph') || 
+      langString.includes('fil') || 
+      langString.includes('tl-')
+    ) {
+      return 'PHP';
+    }
+
+    // 8. Singapore (SGD)
+    if (
+      timeZone.includes('singapore') || 
+      langString.includes('-sg')
+    ) {
+      return 'SGD';
+    }
+
+    // 9. Japan (JPY)
+    if (
+      timeZone.includes('tokyo') || 
+      langString.includes('-jp') || 
+      langString.includes('ja')
+    ) {
+      return 'JPY';
+    }
+
+    // 10. South Korea (KRW)
+    if (
+      timeZone.includes('seoul') || 
+      langString.includes('-kr') || 
+      langString.includes('ko')
+    ) {
+      return 'KRW';
+    }
+
+    // 11. Australia (AUD)
+    if (
+      timeZone.includes('sydney') || 
+      timeZone.includes('melbourne') || 
+      timeZone.includes('brisbane') || 
+      timeZone.includes('perth') || 
+      timeZone.includes('adelaide') || 
+      langString.includes('-au')
+    ) {
+      return 'AUD';
+    }
+
+    // 12. Canada (CAD)
+    if (
+      timeZone.includes('toronto') || 
+      timeZone.includes('vancouver') || 
+      timeZone.includes('montreal') || 
+      timeZone.includes('edmonton') || 
+      langString.includes('-ca')
+    ) {
+      return 'CAD';
+    }
+
+    // 13. United Kingdom (GBP) - check specifically for GB region or London timezone
+    if (
+      timeZone.includes('london') || 
+      langString.includes('-gb') || 
+      langString.includes('-uk')
+    ) {
+      return 'GBP';
+    }
+
+    // 14. Eurozone (EUR)
+    if (
+      timeZone.includes('paris') || 
+      timeZone.includes('berlin') || 
+      timeZone.includes('rome') || 
+      timeZone.includes('madrid') || 
+      timeZone.includes('amsterdam') || 
+      timeZone.includes('brussels') || 
+      timeZone.includes('vienna') || 
+      timeZone.includes('dublin') || 
+      timeZone.includes('helsinki') || 
+      timeZone.includes('athens') || 
+      timeZone.includes('lisbon') || 
+      langString.includes('-de') || 
+      langString.includes('-fr') || 
+      langString.includes('-it') || 
+      langString.includes('-es') || 
+      langString.includes('-nl')
+    ) {
+      return 'EUR';
+    }
+
+    // 15. Brazil (BRL)
+    if (
+      timeZone.includes('sao_paulo') || 
+      langString.includes('-br') || 
+      langString.includes('pt-br')
+    ) {
+      return 'BRL';
+    }
+
+    // 16. Turkey (TRY)
+    if (
+      timeZone.includes('istanbul') || 
+      langString.includes('-tr') || 
+      langString.includes('tr-')
+    ) {
+      return 'TRY';
+    }
+
+    // 17. Egypt (EGP)
+    if (
+      timeZone.includes('cairo') || 
+      langString.includes('-eg')
+    ) {
+      return 'EGP';
+    }
+
+    // 18. Nigeria (NGN)
+    if (
+      timeZone.includes('lagos') || 
+      langString.includes('-ng')
+    ) {
+      return 'NGN';
+    }
+
+    // 19. South Africa (ZAR)
+    if (
+      timeZone.includes('johannesburg') || 
+      langString.includes('-za')
+    ) {
+      return 'ZAR';
+    }
+
+    // 20. China (CNY)
+    if (
+      timeZone.includes('shanghai') || 
+      timeZone.includes('beijing') || 
+      timeZone.includes('chongqing') || 
+      langString.includes('-cn') || 
+      langString.includes('zh-')
+    ) {
+      return 'CNY';
+    }
+
+    // 21. Mexico (MXN)
+    if (
+      timeZone.includes('mexico_city') || 
+      langString.includes('-mx')
+    ) {
+      return 'MXN';
+    }
+
   } catch (e) {
     // fallback to USD
   }
