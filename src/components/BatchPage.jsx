@@ -897,55 +897,105 @@ export default function BatchPage({
               </>
             ) : (
               /* Sub-View B: Interactive Spreadsheet Grid */
-              <div className="glass-panel" style={{ borderRadius: '24px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="glass-panel" style={{ borderRadius: '24px', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
                     <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Table size={20} color="var(--accent-primary)" /> Spreadsheet Editor
                     </h3>
                     <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
-                      Type or paste your data directly. Edit filenames and payloads freely.
+                      Type or paste tabular data from Excel, Google Sheets, or any clipboard text.
                     </p>
                   </div>
                   <button
                     onClick={() => {
                       const newId = String(sheetRows.length + 1);
-                      setSheetRows(prev => [...prev, { id: newId, data: `https://example.com/item${newId}`, filename: `Item-${newId.padStart(3, '0')}` }]);
+                      setSheetRows(prev => [...prev, { id: `${Date.now()}_${newId}`, data: `https://example.com/item${newId}`, filename: `Item-${newId.padStart(3, '0')}` }]);
                     }}
                     style={{
-                      padding: '8px 14px',
-                      borderRadius: '10px',
+                      padding: '12px 18px',
+                      borderRadius: '12px',
                       border: 'none',
                       background: 'var(--accent-primary)',
                       color: '#FFFFFF',
-                      fontSize: '12px',
+                      fontSize: '14px',
                       fontWeight: 700,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(214,0,54,0.25)'
                     }}
                   >
-                    <Plus size={14} /> Add Row
+                    <Plus size={16} /> Add Row
                   </button>
                 </div>
 
-                {/* Spreadsheet Table */}
-                <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '14px', background: 'var(--bg-elevated)' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
+                {/* Spreadsheet Table with Smart Auto-Expansion on Paste */}
+                <div 
+                  onPaste={(e) => {
+                    const clipboardText = e.clipboardData.getData('text');
+                    if (!clipboardText || (!clipboardText.includes('\n') && !clipboardText.includes('\t') && !clipboardText.includes(','))) {
+                      return;
+                    }
+                    e.preventDefault();
+                    
+                    const lines = clipboardText.split(/\r\n|\n|\r/).filter(line => line.trim().length > 0);
+                    if (lines.length === 0) return;
+
+                    const newRows = lines.map((line, idx) => {
+                      let col1 = '';
+                      let col2 = '';
+                      if (line.includes('\t')) {
+                        const parts = line.split('\t');
+                        col1 = parts[0]?.trim() || '';
+                        col2 = parts[1]?.trim() || '';
+                      } else if (line.includes(',')) {
+                        const parts = line.split(',');
+                        col1 = parts[0]?.trim() || '';
+                        col2 = parts[1]?.trim() || '';
+                      } else {
+                        col1 = line.trim();
+                      }
+
+                      const rowNum = sheetRows.length + idx + 1;
+                      return {
+                        id: `paste_${Date.now()}_${idx}`,
+                        data: col1,
+                        filename: col2 || `Item-${String(rowNum).padStart(3, '0')}`
+                      };
+                    });
+
+                    // Replace if all current rows are empty, else append
+                    const isAllEmpty = sheetRows.every(r => !r.data || r.data.trim().length === 0);
+                    if (isAllEmpty) {
+                      setSheetRows(newRows);
+                    } else {
+                      setSheetRows(prev => [...prev, ...newRows]);
+                    }
+                  }}
+                  style={{ 
+                    overflowX: 'auto', 
+                    border: '1px solid var(--border-color)', 
+                    borderRadius: '16px', 
+                    background: 'var(--bg-elevated)',
+                    WebkitOverflowScrolling: 'touch'
+                  }}
+                >
+                  <table style={{ width: '100%', minWidth: '420px', borderCollapse: 'collapse', fontSize: '14px', textAlign: 'left' }}>
                     <thead>
                       <tr style={{ background: 'var(--bg-hover)', borderBottom: '1px solid var(--border-color)' }}>
-                        <th style={{ padding: '10px 14px', width: '50px', color: 'var(--text-secondary)', fontWeight: 700 }}>#</th>
-                        <th style={{ padding: '10px 14px', color: 'var(--text-primary)', fontWeight: 700 }}>{batchType === 'BARCODE' ? 'Barcode Value / Data' : 'QR Value / URL / Text'}</th>
-                        <th style={{ padding: '10px 14px', color: 'var(--text-primary)', fontWeight: 700, width: '180px' }}>Filename</th>
-                        <th style={{ padding: '10px 14px', width: '50px', textAlign: 'center' }}></th>
+                        <th style={{ padding: '14px 12px', width: '45px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center' }}>#</th>
+                        <th style={{ padding: '14px 14px', color: 'var(--text-primary)', fontWeight: 700 }}>{batchType === 'BARCODE' ? 'Barcode Value / Data' : 'QR Value / URL / Text'}</th>
+                        <th style={{ padding: '14px 14px', color: 'var(--text-primary)', fontWeight: 700, width: '190px' }}>Filename</th>
+                        <th style={{ padding: '14px 12px', width: '50px', textAlign: 'center' }}></th>
                       </tr>
                     </thead>
                     <tbody>
                       {sheetRows.map((row, index) => (
                         <tr key={row.id || index} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                          <td style={{ padding: '10px 14px', color: 'var(--text-secondary)', fontWeight: 600 }}>{index + 1}</td>
-                          <td style={{ padding: '8px 12px' }}>
+                          <td style={{ padding: '12px 10px', color: 'var(--text-secondary)', fontWeight: 700, textAlign: 'center', fontSize: '13px' }}>{index + 1}</td>
+                          <td style={{ padding: '8px 10px' }}>
                             <input
                               type="text"
                               value={row.data}
@@ -953,23 +1003,55 @@ export default function BatchPage({
                                 const val = e.target.value;
                                 setSheetRows(prev => prev.map((r, i) => i === index ? { ...r, data: val } : r));
                               }}
+                              onPaste={(e) => {
+                                const pasted = e.clipboardData.getData('text');
+                                if (pasted && (pasted.includes('\n') || pasted.includes('\t'))) {
+                                  e.preventDefault();
+                                  const lines = pasted.split(/\r\n|\n|\r/).filter(l => l.trim().length > 0);
+                                  if (lines.length > 0) {
+                                    const parsedRows = lines.map((l, i) => {
+                                      const parts = l.includes('\t') ? l.split('\t') : l.split(',');
+                                      return {
+                                        id: `paste_inp_${Date.now()}_${i}`,
+                                        data: parts[0]?.trim() || l.trim(),
+                                        filename: parts[1]?.trim() || `Item-${String(index + i + 1).padStart(3, '0')}`
+                                      };
+                                    });
+
+                                    setSheetRows(prev => {
+                                      const before = prev.slice(0, index);
+                                      const after = prev.slice(index + 1);
+                                      return [...before, ...parsedRows, ...after];
+                                    });
+                                  }
+                                }
+                              }}
                               placeholder={batchType === 'BARCODE' ? 'e.g. 7501031311309' : 'e.g. https://mybrand.com/qr1'}
                               style={{
                                 width: '100%',
-                                background: 'transparent',
-                                border: '1px solid transparent',
-                                borderRadius: '8px',
-                                padding: '8px 10px',
+                                background: 'var(--bg-primary, rgba(255,255,255,0.03))',
+                                border: '1.5px solid var(--border-color)',
+                                borderRadius: '10px',
+                                padding: '12px 14px',
                                 color: 'var(--text-primary)',
                                 outline: 'none',
-                                fontSize: '13px',
-                                boxSizing: 'border-box'
+                                fontSize: '15px',
+                                minHeight: '46px',
+                                fontWeight: 500,
+                                boxSizing: 'border-box',
+                                transition: 'all 0.2s ease'
                               }}
-                              onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
-                              onBlur={(e) => e.target.style.borderColor = 'transparent'}
+                              onFocus={(e) => {
+                                e.target.style.borderColor = 'var(--accent-primary)';
+                                e.target.style.background = 'var(--bg-elevated)';
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.borderColor = 'var(--border-color)';
+                                e.target.style.background = 'var(--bg-primary, rgba(255,255,255,0.03))';
+                              }}
                             />
                           </td>
-                          <td style={{ padding: '8px 12px' }}>
+                          <td style={{ padding: '8px 10px' }}>
                             <input
                               type="text"
                               value={row.filename}
@@ -980,20 +1062,29 @@ export default function BatchPage({
                               placeholder={`Item-${index + 1}`}
                               style={{
                                 width: '100%',
-                                background: 'transparent',
-                                border: '1px solid transparent',
-                                borderRadius: '8px',
-                                padding: '8px 10px',
+                                background: 'var(--bg-primary, rgba(255,255,255,0.03))',
+                                border: '1.5px solid var(--border-color)',
+                                borderRadius: '10px',
+                                padding: '12px 14px',
                                 color: 'var(--text-primary)',
                                 outline: 'none',
-                                fontSize: '13px',
-                                boxSizing: 'border-box'
+                                fontSize: '15px',
+                                minHeight: '46px',
+                                fontWeight: 500,
+                                boxSizing: 'border-box',
+                                transition: 'all 0.2s ease'
                               }}
-                              onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
-                              onBlur={(e) => e.target.style.borderColor = 'transparent'}
+                              onFocus={(e) => {
+                                e.target.style.borderColor = 'var(--accent-primary)';
+                                e.target.style.background = 'var(--bg-elevated)';
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.borderColor = 'var(--border-color)';
+                                e.target.style.background = 'var(--bg-primary, rgba(255,255,255,0.03))';
+                              }}
                             />
                           </td>
-                          <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                          <td style={{ padding: '8px 10px', textAlign: 'center' }}>
                             <button
                               onClick={() => {
                                 if (sheetRows.length > 1) {
@@ -1002,19 +1093,21 @@ export default function BatchPage({
                               }}
                               disabled={sheetRows.length <= 1}
                               style={{
-                                background: 'transparent',
+                                background: 'rgba(239, 68, 68, 0.08)',
                                 border: 'none',
                                 color: sheetRows.length <= 1 ? 'var(--text-muted)' : '#EF4444',
                                 cursor: sheetRows.length <= 1 ? 'default' : 'pointer',
-                                padding: '6px',
-                                borderRadius: '6px',
-                                display: 'flex',
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '10px',
+                                display: 'inline-flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                transition: 'all 0.2s ease'
                               }}
                               title="Delete row"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={18} />
                             </button>
                           </td>
                         </tr>
@@ -1023,74 +1116,80 @@ export default function BatchPage({
                   </table>
                 </div>
 
-                {/* Spreadsheet Actions */}
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
-                  <button
-                    onClick={() => {
-                      setSheetRows([
-                        { id: '1', data: '', filename: 'Item-001' },
-                        { id: '2', data: '', filename: 'Item-002' },
-                        { id: '3', data: '', filename: 'Item-003' },
-                      ]);
-                    }}
-                    style={{
-                      padding: '12px 18px',
-                      borderRadius: '12px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-hover)',
-                      color: 'var(--text-secondary)',
-                      fontWeight: 700,
-                      fontSize: '13px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Clear Table
-                  </button>
-                  <button
-                    onClick={() => {
-                      const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
-                      if (validRows.length === 0) {
-                        alert('Please fill at least one row with data.');
-                        return;
-                      }
+                {/* Spreadsheet Bottom Helper Note and Actions */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginTop: '4px' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
+                    💡 Tip: Paste multi-line data or Excel columns anywhere in this table to auto-generate rows!
+                  </span>
 
-                      const defaultStyle = batchType === 'BARCODE' ? {
-                        bcid: barcodeType || 'code128',
-                        barColor: '#000000',
-                        bgColor: '#ffffff',
-                        barWidth: 2,
-                        height: 90,
-                        margin: 16,
-                        displayValue: true
-                      } : { ...activeGeneratorStyle };
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <button
+                      onClick={() => {
+                        setSheetRows([
+                          { id: '1', data: '', filename: 'Item-001' },
+                          { id: '2', data: '', filename: 'Item-002' },
+                          { id: '3', data: '', filename: 'Item-003' },
+                        ]);
+                      }}
+                      style={{
+                        padding: '12px 18px',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-hover)',
+                        color: 'var(--text-secondary)',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Clear Table
+                    </button>
+                    <button
+                      onClick={() => {
+                        const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
+                        if (validRows.length === 0) {
+                          alert('Please fill at least one row with data.');
+                          return;
+                        }
 
-                      const newItems = validRows.map((r, i) => ({
-                        id: `sheet_${Date.now()}_${i}`,
-                        type: batchType,
-                        data: r.data.trim(),
-                        filename: r.filename.trim() || `item_${i + 1}`,
-                        style: defaultStyle
-                      }));
+                        const defaultStyle = batchType === 'BARCODE' ? {
+                          bcid: barcodeType || 'code128',
+                          barColor: '#000000',
+                          bgColor: '#ffffff',
+                          barWidth: 2,
+                          height: 90,
+                          margin: 16,
+                          displayValue: true
+                        } : { ...activeGeneratorStyle };
 
-                      setBatchItems(newItems);
-                    }}
-                    style={{
-                      padding: '12px 24px',
-                      borderRadius: '12px',
-                      border: 'none',
-                      background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
-                      color: '#FFFFFF',
-                      fontWeight: 800,
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}
-                  >
-                    <Play size={16} /> Import into Batch ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length} items)
-                  </button>
+                        const newItems = validRows.map((r, i) => ({
+                          id: `sheet_${Date.now()}_${i}`,
+                          type: batchType,
+                          data: r.data.trim(),
+                          filename: r.filename.trim() || `item_${i + 1}`,
+                          style: defaultStyle
+                        }));
+
+                        setBatchItems(newItems);
+                      }}
+                      style={{
+                        padding: '14px 24px',
+                        borderRadius: '12px',
+                        border: 'none',
+                        background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
+                        color: '#FFFFFF',
+                        fontWeight: 800,
+                        fontSize: '14px',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <Play size={16} /> Import into Batch ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length} items)
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
