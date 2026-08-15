@@ -916,23 +916,19 @@ export default function BatchPage({
                   </div>
                 </div>
 
-                {/* Top Action Row: Permanently Attached to Upper Navbar with Zero Padding Gap & Mobile Optimized */}
+                {/* Top Action Row: Clean, Seamless Floating Sticky Bar (Fixed at top: 0) */}
                 <div style={{
                   position: 'sticky',
-                  top: '-16px',
-                  zIndex: 40,
-                  background: 'var(--bg-primary, #0f172a)',
-                  padding: '10px var(--main-padding-x)',
-                  margin: '-16px calc(var(--main-padding-x) * -1) 8px',
-                  borderBottom: '1px solid var(--border-color)',
+                  top: 0,
+                  zIndex: 30,
+                  background: 'var(--bg-primary, var(--bg-surface, #ffffff))',
+                  padding: '10px 0 12px 0',
+                  marginTop: '-4px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  width: 'calc(100% + var(--main-padding-x) * 2)',
-                  boxSizing: 'border-box',
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)'
+                  gap: '8px',
+                  width: '100%',
+                  boxShadow: '0 4px 12px -4px rgba(0,0,0,0.08)'
                 }}>
                   {/* Button 1: Add Row */}
                   <button
@@ -951,23 +947,24 @@ export default function BatchPage({
                     style={{
                       flex: 1,
                       minWidth: 0,
-                      padding: '9px 6px',
-                      borderRadius: '8px',
+                      padding: '11px 10px',
+                      borderRadius: '12px',
                       border: '1px solid var(--border-color)',
-                      background: 'var(--bg-hover)',
+                      background: 'var(--bg-elevated)',
                       color: 'var(--text-primary)',
-                      fontSize: '11px',
+                      fontSize: '12px',
                       fontWeight: 700,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '4px',
+                      gap: '5px',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
                       transition: 'all 0.2s ease',
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    <Plus size={14} color="var(--accent-primary)" style={{ flexShrink: 0 }} /> <span>Add Row</span>
+                    <Plus size={15} color="var(--accent-primary)" style={{ flexShrink: 0 }} /> <span>Add Row</span>
                   </button>
 
                   {/* Button 2: Clear Table */}
@@ -980,23 +977,24 @@ export default function BatchPage({
                     style={{
                       flex: 1,
                       minWidth: 0,
-                      padding: '9px 6px',
-                      borderRadius: '8px',
+                      padding: '11px 10px',
+                      borderRadius: '12px',
                       border: '1px solid var(--border-color)',
-                      background: 'var(--bg-hover)',
+                      background: 'var(--bg-elevated)',
                       color: 'var(--text-secondary)',
                       fontWeight: 700,
-                      fontSize: '11px',
+                      fontSize: '12px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '4px',
+                      gap: '5px',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
                       transition: 'all 0.2s ease',
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    <Trash2 size={13} color="#EF4444" style={{ flexShrink: 0 }} /> <span>Clear Table</span>
+                    <Trash2 size={14} color="#EF4444" style={{ flexShrink: 0 }} /> <span>Clear Table</span>
                   </button>
 
                   {/* Button 3: Import Entries */}
@@ -1029,25 +1027,25 @@ export default function BatchPage({
                       setBatchItems(newItems);
                     }}
                     style={{
-                      flex: 1.25,
+                      flex: 1.3,
                       minWidth: 0,
-                      padding: '9px 8px',
-                      borderRadius: '8px',
+                      padding: '11px 12px',
+                      borderRadius: '12px',
                       border: 'none',
                       background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
                       color: '#FFFFFF',
                       fontWeight: 800,
-                      fontSize: '11px',
+                      fontSize: '12px',
                       cursor: 'pointer',
                       boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '4px',
+                      gap: '5px',
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    <Play size={13} style={{ flexShrink: 0 }} /> <span>Import ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})</span>
+                    <Play size={14} style={{ flexShrink: 0 }} /> <span>Import ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})</span>
                   </button>
                 </div>
 
@@ -1172,6 +1170,7 @@ export default function BatchPage({
                               onFocus={(e) => {
                                 e.target.style.borderColor = 'var(--accent-primary)';
                                 e.target.style.background = 'var(--bg-elevated)';
+                                e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                               }}
                               onBlur={(e) => {
                                 e.target.style.borderColor = 'var(--border-color)';
@@ -1227,6 +1226,7 @@ export default function BatchPage({
                               onFocus={(e) => {
                                 e.target.style.borderColor = 'var(--accent-primary)';
                                 e.target.style.background = 'var(--bg-elevated)';
+                                e.target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                               }}
                               onBlur={(e) => {
                                 e.target.style.borderColor = 'var(--border-color)';
