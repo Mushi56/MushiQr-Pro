@@ -41,6 +41,14 @@ export const CATEGORY_SUBCATEGORIES = {
 
 export const FEATURE_REGISTRY = [
   // ── 1. QR CODE GENERATOR ──
+  // ── 1.0 Subcategory Navigation Tabs (Bottom Navbar Modules) ──
+  { featureId: 'qr_tab_content',   displayName: 'Content Tab & Editor',     category: 'QR_GENERATOR', subcategory: 'Content', description: 'Enable Content tab in bottom navigation', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_tab_color',     displayName: 'Color Tab & Styling',      category: 'QR_GENERATOR', subcategory: 'Color',   description: 'Enable Color tab in bottom navigation',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_tab_style',     displayName: 'Style / Shapes Tab',       category: 'QR_GENERATOR', subcategory: 'Style',   description: 'Enable Style tab in bottom navigation',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_tab_logo',      displayName: 'Logo Tab & Branding',      category: 'QR_GENERATOR', subcategory: 'Logo',    description: 'Enable Logo tab in bottom navigation',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_tab_template',  displayName: 'Template Tab & Gallery',   category: 'QR_GENERATOR', subcategory: 'Template',description: 'Enable Template tab in bottom navigation',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_tab_text',      displayName: 'Text Tab & Typography',    category: 'QR_GENERATOR', subcategory: 'Text',    description: 'Enable Text tab in bottom navigation',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+
   // ── 1.1 Content Tab (Content Types & Formats) ──
   { featureId: 'qr_text',      displayName: 'Plain Text QR',            category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate plain text QR code',        defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_url',       displayName: 'Website URL QR',           category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate website URL QR code',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -508,6 +516,46 @@ class FeatureAccessManagerService {
 
   isFeatureAllowed(featureId) {
     return this.canUseFeature(featureId).allowed;
+  }
+
+  /**
+   * Evaluates if a subcategory is allowed/visible.
+   * If the subcategory tab flag itself is disabled OR if all features in that subcategory are turned OFF globally, returns false.
+   */
+  isSubcategoryAllowed(category, subcategory) {
+    const subcatFeatures = FEATURE_REGISTRY.filter(f => f.category === category && f.subcategory === subcategory);
+    if (subcatFeatures.length === 0) return true;
+
+    // Check if any feature in this subcategory is enabled globally
+    const hasAnyEnabled = subcatFeatures.some(f => {
+      const flagVal = this.globalFlags[f.featureId];
+      return flagVal !== undefined ? Boolean(flagVal) : f.defaultEnabled;
+    });
+
+    return hasAnyEnabled;
+  }
+
+  /**
+   * Helper specifically for QR Generator lower navbar tabs
+   */
+  isQRTabVisible(tabId) {
+    const tabMap = {
+      content:  { tabFlag: 'qr_tab_content',  subcat: 'Content' },
+      color:    { tabFlag: 'qr_tab_color',    subcat: 'Color' },
+      shapes:   { tabFlag: 'qr_tab_style',    subcat: 'Style' },
+      logo:     { tabFlag: 'qr_tab_logo',     subcat: 'Logo' },
+      template: { tabFlag: 'qr_tab_template', subcat: 'Template' },
+      text:     { tabFlag: 'qr_tab_text',     subcat: 'Text' },
+    };
+
+    const target = tabMap[tabId];
+    if (!target) return true;
+
+    // 1. If explicit tab flag is turned OFF by admin, hide immediately
+    if (this.globalFlags[target.tabFlag] === false) return false;
+
+    // 2. If all subcategory features under this tab are turned OFF globally, hide tab
+    return this.isSubcategoryAllowed('QR_GENERATOR', target.subcat);
   }
 }
 

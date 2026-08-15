@@ -1162,11 +1162,16 @@ export default function App() {
       setCustomTemplates(list);
       localStorage.setItem('qrgen_cloud_templates', JSON.stringify(list));
     });
+    const unsubFAM = FeatureAccessManager.subscribe(() => {
+      // Force instant re-render across App whenever FeatureAccessManager flags update
+      setFeatureFlags({ ...FeatureAccessManager.globalFlags });
+    });
     return () => {
       unsubSettings();
       unsubAnnounce();
       unsubFlags();
       unsubTemplates();
+      if (unsubFAM) unsubFAM();
     };
   }, []);
   // Maintenance mode flag (used in render)
@@ -3259,8 +3264,8 @@ export default function App() {
       window.removeEventListener('touchend', stopCanvasDrag);
     };
   }, [isDraggingCanvas, handleCanvasMove, stopCanvasDrag]);
-  // ── Tab definitions ──
-  const TABS = [
+  // ── Tab definitions (Dynamically filtered by FeatureAccessManager) ──
+  const ALL_TABS = [
     { id: 'content', label: 'Content', icon: Pencil },
     { id: 'color', label: 'Color', icon: Palette },
     { id: 'shapes', label: 'Style', icon: QRStyleIcon },
@@ -3269,6 +3274,15 @@ export default function App() {
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
     { id: 'text', label: 'Text', icon: Type },
   ];
+  const TABS = ALL_TABS.filter(tab => FeatureAccessManager.isQRTabVisible(tab.id));
+
+  // Automatically fall back to first visible tab if activeTab is disabled globally
+  useEffect(() => {
+    if (TABS.length > 0 && !TABS.some(t => t.id === activeTab)) {
+      setActiveTab(TABS[0].id);
+    }
+  }, [TABS, activeTab]);
+
   // ── Get the frame CSS class for the preview wrapper ──
   const getFrameClass = () => {
     switch (frameStyle) {
