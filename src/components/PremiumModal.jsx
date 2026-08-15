@@ -36,6 +36,8 @@ export default function PremiumModal() {
     }, () => {});
   }, []);
 
+  const [selectedPlanId, setSelectedPlanId] = useState('monthly');
+
   // Format plans list (excluding free plan from purchase modal)
   const displayPlans = useMemo(() => {
     const list = [];
@@ -89,38 +91,40 @@ export default function PremiumModal() {
   const handleSubscribe = async (plan) => {
     setSubscribing(plan.id);
     try {
-      // Formatted regional price
       const priceText = formatCurrencyPrice(plan.price, selectedCurrency);
-      
-      // Simulate Billing checkout or in-app billing trigger
       setTimeout(() => {
         setBillingSuccess(`Thank you for choosing ${plan.name} (${priceText}${plan.period})! Your subscription is being activated.`);
         setSubscribing(null);
-      }, 1200);
+      }, 1000);
     } catch (e) {
       console.error('Subscribe error:', e);
       setSubscribing(null);
     }
   };
 
+  const activeSelectedPlan = displayPlans.find(p => p.id === selectedPlanId) || displayPlans[0];
+
   return (
     <div className="premium-modal-overlay" onClick={hidePaywall}>
-      <div className="premium-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '640px' }}>
+      <div className="premium-modal" onClick={e => e.stopPropagation()}>
+        {/* Mobile Drag Indicator */}
+        <div className="premium-modal-handle" />
+
         {/* Close button */}
-        <button className="premium-modal-close" onClick={hidePaywall}>
+        <button className="premium-modal-close" onClick={hidePaywall} aria-label="Close modal">
           <X size={20} />
         </button>
 
         {/* Header */}
         <div className="premium-modal-header">
           <div className="premium-modal-icon">
-            <Crown size={32} />
+            <Crown size={28} />
           </div>
           <h2 className="premium-modal-title">Upgrade to Pro</h2>
           <p className="premium-modal-subtitle">
             {lockedFeature
-              ? `Unlock "${lockedFeature.displayName}" and all premium creator tools`
-              : 'Unlock unlimited high-resolution exports, custom shapes, templates & cloud sync'}
+              ? `Unlock "${lockedFeature.displayName}" and all premium tools`
+              : 'Unlock unlimited high-res exports, custom shapes, templates & cloud sync'}
           </p>
 
           {/* Regional Currency Selector Bar */}
@@ -128,18 +132,18 @@ export default function PremiumModal() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
-            marginTop: 16,
+            gap: 6,
+            marginTop: 12,
             background: 'rgba(255, 255, 255, 0.05)',
-            padding: '6px 14px',
+            padding: '5px 12px',
             borderRadius: 20,
             border: '1px solid rgba(255, 255, 255, 0.08)',
             width: 'fit-content',
             marginLeft: 'auto',
             marginRight: 'auto'
           }}>
-            <Globe size={14} color="#D60036" />
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>Region / Currency:</span>
+            <Globe size={13} color="#D60036" />
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>Region:</span>
             <select
               value={selectedCurrency}
               onChange={e => handleCurrencyChange(e.target.value)}
@@ -147,7 +151,7 @@ export default function PremiumModal() {
                 background: 'none',
                 border: 'none',
                 color: '#fff',
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 800,
                 outline: 'none',
                 cursor: 'pointer'
@@ -163,72 +167,74 @@ export default function PremiumModal() {
         </div>
 
         {billingSuccess ? (
-          <div style={{ padding: '30px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
-              <Check size={28} />
+          <div style={{ padding: '24px 16px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+              <Check size={26} />
             </div>
-            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#fff' }}>Subscription Initiated</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 13, maxWidth: 400, margin: 0, lineHeight: 1.5 }}>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#fff' }}>Subscription Activated</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 13, maxWidth: 360, margin: 0, lineHeight: 1.5 }}>
               {billingSuccess}
             </p>
             <button
               onClick={() => { setBillingSuccess(null); hidePaywall(); }}
-              style={{ background: 'var(--accent-gradient)', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: 10, fontWeight: 700, cursor: 'pointer', marginTop: 10 }}
+              style={{ background: 'var(--accent-gradient)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12, fontWeight: 800, cursor: 'pointer', marginTop: 10, width: '100%', maxWidth: 280 }}
             >
               Continue to App
             </button>
           </div>
         ) : (
           <>
-            {/* Plan Cards Grid with Real-time Currency Conversion */}
-            <div className="premium-plans-grid" style={{ gridTemplateColumns: `repeat(${displayPlans.length > 3 ? 2 : displayPlans.length}, 1fr)` }}>
+            {/* Mobile-Friendly Plan Cards */}
+            <div className="premium-plans-grid">
               {displayPlans.map(plan => {
+                const isSelected = selectedPlanId === plan.id;
                 const isCurrent = isPremium && currentPlan === plan.id;
                 const formattedPrice = formatCurrencyPrice(plan.price, selectedCurrency);
 
                 return (
                   <div
                     key={plan.id}
-                    className={`premium-plan-card ${plan.popular ? 'popular' : ''}`}
-                    style={{ '--plan-color': plan.color || '#D60036', position: 'relative' }}
+                    onClick={() => setSelectedPlanId(plan.id)}
+                    className={`premium-plan-card ${plan.popular ? 'popular' : ''} ${isSelected ? 'selected' : ''}`}
+                    style={{ '--plan-color': plan.color || '#D60036' }}
                   >
                     {plan.popular && (
                       <div className="premium-plan-popular-badge">
-                        <Star size={10} /> Most Popular
-                      </div>
-                    )}
-                    <div className="premium-plan-name">{plan.name}</div>
-                    
-                    {/* Localized Price */}
-                    <div className="premium-plan-price" style={{ margin: '10px 0' }}>
-                      <span className="premium-plan-amount" style={{ fontSize: '24px', fontWeight: 900 }}>
-                        {formattedPrice}
-                      </span>
-                      <span className="premium-plan-period" style={{ fontSize: '12px' }}>{plan.period}</span>
-                    </div>
-
-                    {selectedCurrency !== 'USD' && plan.price > 0 && (
-                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: 8 }}>
-                        (${plan.price.toFixed(2)} USD standard)
+                        <Star size={9} /> Best Value
                       </div>
                     )}
 
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: 14, minHeight: '28px', lineHeight: 1.3 }}>
-                      {plan.desc}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="premium-plan-name">
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: plan.color || '#D60036', display: 'inline-block' }} />
+                        {plan.name}
+                      </div>
+
+                      <div className="premium-plan-price">
+                        <span className="premium-plan-amount">{formattedPrice}</span>
+                        <span className="premium-plan-period">{plan.period}</span>
+                      </div>
+
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {plan.desc}
+                      </div>
                     </div>
 
                     <button
                       className="premium-plan-subscribe-btn"
                       disabled={subscribing === plan.id || isCurrent}
-                      onClick={() => handleSubscribe(plan)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSubscribe(plan);
+                      }}
                       style={{ background: plan.color || '#D60036' }}
                     >
                       {subscribing === plan.id ? (
                         <span className="premium-spinner" />
                       ) : (
                         <>
-                          <Zap size={14} />
-                          {isCurrent ? 'Current Plan' : 'Subscribe'}
+                          <Zap size={13} />
+                          {isCurrent ? 'Active' : 'Get Plan'}
                         </>
                       )}
                     </button>
@@ -240,21 +246,21 @@ export default function PremiumModal() {
             {/* Everything Included Feature Checklist */}
             <div className="premium-features-list">
               <div className="premium-features-title">
-                <Sparkles size={14} /> Everything included with Pro:
+                <Sparkles size={13} /> Everything included with Pro:
               </div>
               <div className="premium-features-grid">
                 {[
-                  'Unlimited 4K & Ultra-HD Resolution Exports',
-                  'SVG Vector & PDF Document Downloads',
-                  'Custom Dot Styles & Fluid Finder Eye Shapes',
-                  'Custom Logo Embedding & Color Presets',
-                  'Cloud Backup & History Synchronization',
+                  'Ultra-HD & 4K Resolution Downloads',
+                  'Vector SVG & High-Res PDF Exports',
+                  'Fluid Finder Eyes & Custom Dot Patterns',
+                  'Brand Logo Presets & Custom Eraser Tool',
+                  'Auto Cloud History Sync & Backup',
                   'Bulk Spreadsheet Generator & ZIP Bundles',
-                  'All 30+ 1D/2D Industrial Barcode Standards',
-                  'Offline License Verification & Priority Processing'
+                  'Industrial 1D & 2D Barcode Standards',
+                  'Offline License Gating & Priority Processing'
                 ].map((text, i) => (
                   <div key={i} className="premium-feature-item">
-                    <Check size={14} className="premium-feature-check" />
+                    <Check size={13} className="premium-feature-check" />
                     <span>{text}</span>
                   </div>
                 ))}
@@ -264,7 +270,7 @@ export default function PremiumModal() {
             {/* Billing Guarantees Footer */}
             <div className="premium-modal-footer">
               <Shield size={12} />
-              <span>Cancel anytime &middot; Multi-currency checkout &middot; Instant access</span>
+              <span>Cancel anytime &middot; Secure regional checkout &middot; Instant access</span>
             </div>
           </>
         )}
