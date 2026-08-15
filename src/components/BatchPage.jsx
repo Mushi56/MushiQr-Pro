@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles, CheckCircle, FileArchive, Share2, QrCode, Barcode, AlertCircle } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Edit3, Trash2, X, RefreshCw, FileImage, FileCode, FileText, Layers, Sparkles, CheckCircle, FileArchive, Share2, QrCode, Barcode, AlertCircle, Table, Plus, Play, Trash } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -117,6 +117,25 @@ export default function BatchPage({
   const [processingProgress, setProcessingProgress] = useState(0);
   const [processingMessage, setProcessingMessage] = useState('Processing...');
   const [previewLimit, setPreviewLimit] = useState(50);
+  const [activeImportMode, setActiveImportMode] = useState('upload'); // 'upload' | 'spreadsheet'
+  const [sheetRows, setSheetRows] = useState([
+    { id: '1', data: 'https://example.com/item1', filename: 'Item-001' },
+    { id: '2', data: 'https://example.com/item2', filename: 'Item-002' },
+    { id: '3', data: 'https://example.com/item3', filename: 'Item-003' },
+    { id: '4', data: 'https://example.com/item4', filename: 'Item-004' },
+    { id: '5', data: 'https://example.com/item5', filename: 'Item-005' },
+  ]);
+
+  const isCancelledRef = useRef(false);
+
+  // Clear batch entries automatically when leaving the batch page
+  useEffect(() => {
+    return () => {
+      if (setBatchItems) {
+        setBatchItems([]);
+      }
+    };
+  }, [setBatchItems]);
 
   useEffect(() => {
     if (initialBatchType) {
@@ -386,6 +405,7 @@ export default function BatchPage({
       alert('Bulk batch generation requires a plan with bulk_generation enabled. Please upgrade your subscription.');
       return;
     }
+    isCancelledRef.current = false;
     setIsExporting(true);
     setExportProgress(0);
 
@@ -426,6 +446,11 @@ export default function BatchPage({
     const total = batchItems.length;
 
     for (let idx = 0; idx < total; idx++) {
+      if (isCancelledRef.current) {
+        setIsExporting(false);
+        setExportProgress(0);
+        return;
+      }
       const item = batchItems[idx];
 
       // Ensure item has a unique filename in the ZIP output
@@ -724,101 +749,351 @@ export default function BatchPage({
           </button>
         </div>
 
-        {/* Step 1: Upload or Import */}
+        {/* Step 1: Upload or SpreadSheet Grid */}
         {!fileData && batchItems.length === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div 
-              onClick={() => !isProcessing && fileInputRef.current?.click()}
-              className="glass-panel"
-              style={{
-                border: '2px dashed var(--border-color)',
-                borderRadius: '24px',
-                padding: '40px 20px',
-                textAlign: 'center',
-                cursor: isProcessing ? 'default' : 'pointer',
-                transition: 'border-color 0.2s',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '12px'
-              }}
-              onMouseEnter={(e) => !isProcessing && (e.currentTarget.style.borderColor = 'var(--accent-primary)')}
-              onMouseLeave={(e) => !isProcessing && (e.currentTarget.style.borderColor = 'var(--border-color)')}
-            >
-              {isProcessing ? (
-                <>
-                  <div style={{
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '50%',
-                    background: 'rgba(214, 0, 54, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--accent-primary)'
-                  }}>
-                    <RefreshCw size={28} className="animate-spin text-accent" />
-                  </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Reading & Parsing File...</h3>
-                  <div style={{ width: '80%', height: '8px', background: 'var(--bg-hover)', borderRadius: '4px', overflow: 'hidden', margin: '8px 0', border: '1px solid var(--border-color)' }}>
-                    <div style={{ width: `${processingProgress}%`, height: '100%', background: 'var(--accent-gradient)', transition: 'width 0.15s ease-out' }} />
-                  </div>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--accent-primary)' }}>{processingProgress}%</span>
-                </>
-              ) : (
-                <>
-                  <div style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '20px',
-                    background: 'rgba(214, 0, 54, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--accent-primary)'
-                  }}>
-                    <Upload size={32} />
-                  </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Upload CSV or Excel</h3>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 max(20px, 10%)', lineHeight: '1.4' }}>
-                    Select a `.csv`, `.xlsx`, or `.xls` file containing your {batchType === 'BARCODE' ? 'barcode' : 'QR code'} values.
-                  </p>
-                  <input 
-                    ref={fileInputRef}
-                    type="file" 
-                    accept=".csv, .xlsx, .xls" 
-                    onChange={handleFileUpload} 
-                    style={{ display: 'none' }} 
-                  />
-                </>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button 
-                onClick={downloadSampleCSV}
+            {/* Mode Tabs: Upload vs SpreadSheet Grid */}
+            <div style={{ display: 'flex', background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '12px', gap: '4px' }}>
+              <button
+                onClick={() => setActiveImportMode('upload')}
                 style={{
-                  background: 'var(--bg-hover)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '16px',
-                  padding: '16px',
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  background: activeImportMode === 'upload' ? 'var(--bg-hover)' : 'transparent',
+                  color: activeImportMode === 'upload' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  color: 'var(--text-primary)',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textAlign: 'left'
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                <FileSpreadsheet size={24} className="text-accent" />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '14px' }}>Download Sample Template</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 400 }}>Get a template showing correctly structured data</div>
-                </div>
-                <Download size={18} style={{ opacity: 0.6 }} />
+                <Upload size={16} /> Upload CSV / Excel
+              </button>
+              <button
+                onClick={() => setActiveImportMode('spreadsheet')}
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  background: activeImportMode === 'spreadsheet' ? 'var(--accent-primary)' : 'transparent',
+                  color: activeImportMode === 'spreadsheet' ? '#FFFFFF' : 'var(--text-secondary)',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: activeImportMode === 'spreadsheet' ? '0 4px 12px rgba(214,0,54,0.3)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <Table size={16} /> Interactive Spreadsheet
               </button>
             </div>
+
+            {/* Sub-View A: Upload Mode */}
+            {activeImportMode === 'upload' ? (
+              <>
+                <div 
+                  onClick={() => !isProcessing && fileInputRef.current?.click()}
+                  className="glass-panel"
+                  style={{
+                    border: '2px dashed var(--border-color)',
+                    borderRadius: '24px',
+                    padding: '40px 20px',
+                    textAlign: 'center',
+                    cursor: isProcessing ? 'default' : 'pointer',
+                    transition: 'border-color 0.2s',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}
+                  onMouseEnter={(e) => !isProcessing && (e.currentTarget.style.borderColor = 'var(--accent-primary)')}
+                  onMouseLeave={(e) => !isProcessing && (e.currentTarget.style.borderColor = 'var(--border-color)')}
+                >
+                  {isProcessing ? (
+                    <>
+                      <div style={{
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '50%',
+                        background: 'rgba(214, 0, 54, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--accent-primary)'
+                      }}>
+                        <RefreshCw size={28} className="animate-spin text-accent" />
+                      </div>
+                      <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Reading & Parsing File...</h3>
+                      <div style={{ width: '80%', height: '8px', background: 'var(--bg-hover)', borderRadius: '4px', overflow: 'hidden', margin: '8px 0', border: '1px solid var(--border-color)' }}>
+                        <div style={{ width: `${processingProgress}%`, height: '100%', background: 'var(--accent-gradient)', transition: 'width 0.15s ease-out' }} />
+                      </div>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--accent-primary)' }}>{processingProgress}%</span>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '20px',
+                        background: 'rgba(214, 0, 54, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--accent-primary)'
+                      }}>
+                        <Upload size={32} />
+                      </div>
+                      <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Upload CSV or Excel</h3>
+                      <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 max(20px, 10%)', lineHeight: '1.4' }}>
+                        Select a `.csv`, `.xlsx`, or `.xls` file containing your {batchType === 'BARCODE' ? 'barcode' : 'QR code'} values.
+                      </p>
+                      <input 
+                        ref={fileInputRef}
+                        type="file" 
+                        accept=".csv, .xlsx, .xls" 
+                        onChange={handleFileUpload} 
+                        style={{ display: 'none' }} 
+                      />
+                    </>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <button 
+                    onClick={downloadSampleCSV}
+                    style={{
+                      background: 'var(--bg-hover)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '16px',
+                      padding: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      color: 'var(--text-primary)',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <FileSpreadsheet size={24} className="text-accent" />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px' }}>Download Sample Template</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 400 }}>Get a template showing correctly structured data</div>
+                    </div>
+                    <Download size={18} style={{ opacity: 0.6 }} />
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* Sub-View B: Interactive Spreadsheet Grid */
+              <div className="glass-panel" style={{ borderRadius: '24px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Table size={20} color="var(--accent-primary)" /> Spreadsheet Editor
+                    </h3>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
+                      Type or paste your data directly. Edit filenames and payloads freely.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const newId = String(sheetRows.length + 1);
+                      setSheetRows(prev => [...prev, { id: newId, data: `https://example.com/item${newId}`, filename: `Item-${newId.padStart(3, '0')}` }]);
+                    }}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'var(--accent-primary)',
+                      color: '#FFFFFF',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Plus size={14} /> Add Row
+                  </button>
+                </div>
+
+                {/* Spreadsheet Table */}
+                <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '14px', background: 'var(--bg-elevated)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--bg-hover)', borderBottom: '1px solid var(--border-color)' }}>
+                        <th style={{ padding: '10px 14px', width: '50px', color: 'var(--text-secondary)', fontWeight: 700 }}>#</th>
+                        <th style={{ padding: '10px 14px', color: 'var(--text-primary)', fontWeight: 700 }}>{batchType === 'BARCODE' ? 'Barcode Value / Data' : 'QR Value / URL / Text'}</th>
+                        <th style={{ padding: '10px 14px', color: 'var(--text-primary)', fontWeight: 700, width: '180px' }}>Filename</th>
+                        <th style={{ padding: '10px 14px', width: '50px', textAlign: 'center' }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sheetRows.map((row, index) => (
+                        <tr key={row.id || index} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td style={{ padding: '10px 14px', color: 'var(--text-secondary)', fontWeight: 600 }}>{index + 1}</td>
+                          <td style={{ padding: '8px 12px' }}>
+                            <input
+                              type="text"
+                              value={row.data}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setSheetRows(prev => prev.map((r, i) => i === index ? { ...r, data: val } : r));
+                              }}
+                              placeholder={batchType === 'BARCODE' ? 'e.g. 7501031311309' : 'e.g. https://mybrand.com/qr1'}
+                              style={{
+                                width: '100%',
+                                background: 'transparent',
+                                border: '1px solid transparent',
+                                borderRadius: '8px',
+                                padding: '8px 10px',
+                                color: 'var(--text-primary)',
+                                outline: 'none',
+                                fontSize: '13px',
+                                boxSizing: 'border-box'
+                              }}
+                              onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
+                              onBlur={(e) => e.target.style.borderColor = 'transparent'}
+                            />
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>
+                            <input
+                              type="text"
+                              value={row.filename}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setSheetRows(prev => prev.map((r, i) => i === index ? { ...r, filename: val } : r));
+                              }}
+                              placeholder={`Item-${index + 1}`}
+                              style={{
+                                width: '100%',
+                                background: 'transparent',
+                                border: '1px solid transparent',
+                                borderRadius: '8px',
+                                padding: '8px 10px',
+                                color: 'var(--text-primary)',
+                                outline: 'none',
+                                fontSize: '13px',
+                                boxSizing: 'border-box'
+                              }}
+                              onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
+                              onBlur={(e) => e.target.style.borderColor = 'transparent'}
+                            />
+                          </td>
+                          <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                            <button
+                              onClick={() => {
+                                if (sheetRows.length > 1) {
+                                  setSheetRows(prev => prev.filter((_, i) => i !== index));
+                                }
+                              }}
+                              disabled={sheetRows.length <= 1}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: sheetRows.length <= 1 ? 'var(--text-muted)' : '#EF4444',
+                                cursor: sheetRows.length <= 1 ? 'default' : 'pointer',
+                                padding: '6px',
+                                borderRadius: '6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Delete row"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Spreadsheet Actions */}
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                  <button
+                    onClick={() => {
+                      setSheetRows([
+                        { id: '1', data: '', filename: 'Item-001' },
+                        { id: '2', data: '', filename: 'Item-002' },
+                        { id: '3', data: '', filename: 'Item-003' },
+                      ]);
+                    }}
+                    style={{
+                      padding: '12px 18px',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-hover)',
+                      color: 'var(--text-secondary)',
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Clear Table
+                  </button>
+                  <button
+                    onClick={() => {
+                      const validRows = sheetRows.filter(r => r.data && r.data.trim().length > 0);
+                      if (validRows.length === 0) {
+                        alert('Please fill at least one row with data.');
+                        return;
+                      }
+
+                      const defaultStyle = batchType === 'BARCODE' ? {
+                        bcid: barcodeType || 'code128',
+                        barColor: '#000000',
+                        bgColor: '#ffffff',
+                        barWidth: 2,
+                        height: 90,
+                        margin: 16,
+                        displayValue: true
+                      } : { ...activeGeneratorStyle };
+
+                      const newItems = validRows.map((r, i) => ({
+                        id: `sheet_${Date.now()}_${i}`,
+                        type: batchType,
+                        data: r.data.trim(),
+                        filename: r.filename.trim() || `item_${i + 1}`,
+                        style: defaultStyle
+                      }));
+
+                      setBatchItems(newItems);
+                    }}
+                    style={{
+                      padding: '12px 24px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
+                      color: '#FFFFFF',
+                      fontWeight: 800,
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <Play size={16} /> Import into Batch ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length} items)
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1575,6 +1850,32 @@ export default function BatchPage({
             <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--accent-primary, #D60036)', fontFamily: 'monospace' }}>
               {exportProgress}% Completed
             </span>
+
+            {/* Cancel Button */}
+            <button
+              onClick={() => {
+                isCancelledRef.current = true;
+                setIsExporting(false);
+                setExportProgress(0);
+              }}
+              style={{
+                marginTop: '20px',
+                padding: '10px 24px',
+                borderRadius: '12px',
+                border: '1px solid var(--border-color, rgba(255,255,255,0.15))',
+                background: 'rgba(239, 68, 68, 0.1)',
+                color: '#EF4444',
+                fontWeight: 700,
+                fontSize: '13px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <X size={16} /> Cancel Generation
+            </button>
           </div>
         </div>
       )}
