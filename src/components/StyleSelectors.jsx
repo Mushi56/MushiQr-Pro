@@ -667,13 +667,16 @@ const EYE_PREVIEWS = {
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import PaidCrownBadge from './PaidCrownBadge';
+import { usePremium } from '../services/premiumContext';
 
 export function DotStyleSelector({ value, onChange, qrParams }) {
+  const { showPaywall } = usePremium();
+
   const handleDotChange = (style) => {
     if (style !== 'square' && style !== 'rounded') {
       const access = FeatureAccessManager.canUseFeature('custom_dot_styles');
       if (!access.allowed) {
-        alert('Custom Dot Module Shapes is a Premium Feature. Please upgrade your plan to unlock.');
+        showPaywall('custom_dot_styles');
         return;
       }
     }
@@ -703,11 +706,13 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
 }
 
 export function EyeStyleSelector({ value, onChange, qrParams }) {
+  const { showPaywall } = usePremium();
+
   const handleEyeChange = (style) => {
     if (style !== 'square' && style !== 'rounded') {
       const access = FeatureAccessManager.canUseFeature('custom_eye_styles');
       if (!access.allowed) {
-        alert('Custom Finder Eyes is a Premium Feature. Please upgrade your plan to unlock.');
+        showPaywall('custom_eye_styles');
         return;
       }
     }

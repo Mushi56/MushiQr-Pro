@@ -906,6 +906,7 @@ function parseRawQRText(text) {
 }
 export default function App() {
   const [isBlocked, setIsBlocked] = useState(false);
+  const { showPaywall } = usePremium();
   // ── Tab & Theme ──
   const location = useLocation();
   const navigate = useNavigate();
@@ -1249,7 +1250,7 @@ export default function App() {
     }
     const access = FeatureAccessManager.canUseFeature('template_presets');
     if (!access.allowed) {
-      showToast('Templates is a Premium Feature. Please upgrade your plan to unlock.', 'error');
+      showPaywall('template_presets');
       return;
     }
     setSelectedTemplate(tpl);
@@ -3651,16 +3652,21 @@ export default function App() {
                       <div className="dropdown-label" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Export Format</div>
                       <div className="format-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                         {[
-                          { label: 'PNG', Icon: FileImage },
-                          { label: 'SVG', Icon: FileCode },
-                          { label: 'PDF', Icon: FileText },
-                          { label: 'JPG', Icon: FileImage },
-                        ].map(({ label, Icon }) => (
+                          { label: 'PNG', featId: 'export_png', Icon: FileImage },
+                          { label: 'SVG', featId: 'export_svg', Icon: FileCode },
+                          { label: 'PDF', featId: 'export_pdf', Icon: FileText },
+                          { label: 'JPG', featId: 'export_jpg', Icon: FileImage },
+                        ].map(({ label, featId, Icon }) => (
                           <button
                             key={label}
                             className={`format-option ${selectedFormat === label ? 'active' : ''}`}
                             onClick={(e) => {
                               e.stopPropagation();
+                              const access = FeatureAccessManager.canUseFeature(featId);
+                              if (!access.allowed) {
+                                showPaywall(featId);
+                                return;
+                              }
                               setSelectedFormat(label);
                               setFormatDropdownOpen(false);
                               handleDownload(label, FORMAT_MAP[label]);
@@ -3679,9 +3685,11 @@ export default function App() {
                               borderRadius: '12px',
                               color: selectedFormat === label ? 'var(--accent-primary)' : 'var(--text-primary)',
                               cursor: 'pointer',
+                              position: 'relative',
                               transition: 'all 0.2s'
                             }}
                           >
+                            <PaidCrownBadge featureId={featId} position="floating" size={8} />
                             <Icon size={24} />
                             <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
                           </button>
@@ -3717,16 +3725,38 @@ export default function App() {
                           value={['Low', 'Medium', 'High', 'Ultra'].indexOf(exportQuality)}
                           onChange={(e) => {
                             const steps = ['Low', 'Medium', 'High', 'Ultra'];
+                            const featMap = {
+                              'Low': 'export_quality_low',
+                              'Medium': 'export_quality_medium',
+                              'High': 'export_quality_hd',
+                              'Ultra': 'export_quality_ultra'
+                            };
                             const selected = steps[parseInt(e.target.value)] || 'High';
+                            const targetFeat = featMap[selected];
+                            if (targetFeat) {
+                              const access = FeatureAccessManager.canUseFeature(targetFeat);
+                              if (!access.allowed) {
+                                showPaywall(targetFeat);
+                                return;
+                              }
+                            }
                             setExportQuality(selected);
                           }}
                           className="export-quality-slider"
                         />
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '9px', fontWeight: 600, color: 'var(--text-muted)' }}>
-                          <span>Low</span>
-                          <span>Normal</span>
-                          <span>HD</span>
-                          <span>4K</span>
+                          <span style={{ position: 'relative' }}>
+                            Low <PaidCrownBadge featureId="export_quality_low" position="floating" size={7} />
+                          </span>
+                          <span style={{ position: 'relative' }}>
+                            Normal <PaidCrownBadge featureId="export_quality_medium" position="floating" size={7} />
+                          </span>
+                          <span style={{ position: 'relative' }}>
+                            HD <PaidCrownBadge featureId="export_quality_hd" position="floating" size={7} />
+                          </span>
+                          <span style={{ position: 'relative' }}>
+                            4K <PaidCrownBadge featureId="export_quality_ultra" position="floating" size={7} />
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -4265,7 +4295,7 @@ export default function App() {
                       onTypeChange={(type) => {
                         const access = FeatureAccessManager.canUseFeature(`qr_${type.toLowerCase()}`);
                         if (!access.allowed) {
-                          showToast(`${type.toUpperCase()} QR is a Premium feature. Upgrade your plan to unlock.`, 'error');
+                          showPaywall(`qr_${type.toLowerCase()}`);
                           return;
                         }
                         setQrType(type);
@@ -5711,7 +5741,7 @@ export default function App() {
               }
               const typeAccess = FeatureAccessManager.canUseFeature(`qr_${type.toLowerCase()}`);
               if (!typeAccess.allowed) {
-                showToast(`${type.toUpperCase()} QR is a Premium feature. Upgrade your plan to unlock.`, 'error');
+                showPaywall(`qr_${type.toLowerCase()}`);
                 return;
               }
               resetGenerator();
@@ -5733,7 +5763,7 @@ export default function App() {
               }
               const typeAccess = FeatureAccessManager.canUseFeature(`barcode_${id.toLowerCase()}`);
               if (!typeAccess.allowed) {
-                showToast(`${id.toUpperCase()} Barcode is a Premium feature. Upgrade your plan to unlock.`, 'error');
+                showPaywall(`barcode_${id.toLowerCase()}`);
                 return;
               }
               const defaults = {

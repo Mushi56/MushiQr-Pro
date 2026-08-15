@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { UploadCloud, X, CheckCircle2 } from 'lucide-react';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import PaidCrownBadge from './PaidCrownBadge';
+import { usePremium } from '../services/premiumContext';
 
 const LOGO_PRESETS = [
   { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.avif' },
@@ -50,12 +51,26 @@ const LOGO_PRESETS = [
 export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
   const [loading, setLoading] = useState(null);
   const inputRef = useRef(null);
+  const { showPaywall } = usePremium();
+
+  const handleUploadClick = () => {
+    if (logo && !LOGO_PRESETS.some(p => p.url === logo.src)) {
+      onLogoRemove();
+      return;
+    }
+    const access = FeatureAccessManager.canUseFeature('custom_logo_upload');
+    if (!access.allowed) {
+      showPaywall('custom_logo_upload');
+      return;
+    }
+    inputRef.current?.click();
+  };
 
   const handleFile = useCallback((file) => {
     if (!file || !file.type.startsWith('image/')) return;
     const access = FeatureAccessManager.canUseFeature('custom_logo_upload');
     if (!access.allowed) {
-      alert('Custom Logo Upload is a Premium feature. Upgrade your plan to unlock.');
+      showPaywall('custom_logo_upload');
       return;
     }
     const reader = new FileReader();
@@ -72,12 +87,12 @@ export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
       img.src = e.target.result;
     };
     reader.readAsDataURL(file);
-  }, [onLogoChange]);
+  }, [onLogoChange, showPaywall]);
 
   const handleSelect = (slug, name, url) => {
     const access = FeatureAccessManager.canUseFeature('custom_logo_presets');
     if (!access.allowed) {
-      alert('Logo Presets is a Premium feature. Upgrade your plan to unlock.');
+      showPaywall('custom_logo_presets');
       return;
     }
     setLoading(slug);
@@ -112,7 +127,7 @@ export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
         {/* Upload Tile */}
         <button
           className={`logo-preset-btn upload-tile ${logo && !LOGO_PRESETS.some(p => p.url === logo.src) ? 'active' : ''}`}
-          onClick={() => logo && !LOGO_PRESETS.some(p => p.url === logo.src) ? onLogoRemove() : inputRef.current?.click()}
+          onClick={handleUploadClick}
           title="Upload Custom Logo"
           style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)', position: 'relative' }}
         >

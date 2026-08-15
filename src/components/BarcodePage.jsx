@@ -18,6 +18,7 @@ import AdvancedColorPicker from './AdvancedColorPicker';
 import BarcodeDataModal from './BarcodeDataModal';
 import ColorPicker from './ColorPicker';
 import PaidCrownBadge from './PaidCrownBadge';
+import { usePremium } from '../services/premiumContext';
 
 // ─── Color Presets ────────────────────────────────────────────────────────────
 const COLOR_PRESETS = [
@@ -61,6 +62,7 @@ function parseValueToFields(val, type) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, setLoadedBarcodeItem, theme, setTheme, effectiveTheme }) {
+  const { showPaywall } = usePremium();
   const access = FeatureAccessManager.canUseFeature('barcode_generator');
 
   if (!access.allowed) {
@@ -423,18 +425,23 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
               <div className="app-dropdown-menu save-as-dropdown fade-in" style={{ top: 'calc(100% + 12px)', right: 0, width: 280 }}>
                 <div style={{ padding: 12 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.5px' }}>Export Format</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                  <div className="format-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
                     {[
-                      { label: 'PNG', Icon: FileImage },
-                      { label: 'SVG', Icon: FileCode },
-                      { label: 'PDF', Icon: FileText },
-                      { label: 'JPG', Icon: FileImage }
-                    ].map(({ label, Icon }) => (
+                      { label: 'PNG', featId: 'export_png', Icon: FileImage },
+                      { label: 'SVG', featId: 'export_svg', Icon: FileCode },
+                      { label: 'PDF', featId: 'export_pdf', Icon: FileText },
+                      { label: 'JPG', featId: 'export_jpg', Icon: FileImage }
+                    ].map(({ label, featId, Icon }) => (
                       <button
                         key={label}
                         className={`format-option ${selectedFormat === label ? 'active' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
+                          const access = FeatureAccessManager.canUseFeature(featId);
+                          if (!access.allowed) {
+                            showPaywall(featId);
+                            return;
+                          }
                           setSelectedFormat(label);
                           setFormatDropdownOpen(false);
                           handleDownload(label);
@@ -453,9 +460,11 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                           borderRadius: '12px',
                           color: selectedFormat === label ? 'var(--accent-primary)' : 'var(--text-primary)',
                           cursor: 'pointer',
+                          position: 'relative',
                           transition: 'all 0.2s'
                         }}
                       >
+                        <PaidCrownBadge featureId={featId} position="floating" size={8} />
                         <Icon size={18} />
                         <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
                       </button>
@@ -478,10 +487,10 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                       border: '1px solid rgba(214, 0, 54, 0.15)',
                       letterSpacing: '0.5px'
                     }}>
-                      {exportQuality === 'Low' && '1x Scale'}
-                      {exportQuality === 'Medium' && '2x Scale'}
-                      {exportQuality === 'High' && '3x Scale'}
-                      {exportQuality === 'Ultra' && '4x Scale'}
+                      {exportQuality === 'Low' && '512px'}
+                      {exportQuality === 'Medium' && '1024px'}
+                      {exportQuality === 'High' && '2048px'}
+                      {exportQuality === 'Ultra' && '4096px'}
                     </span>
                   </div>
                   <div style={{ padding: '0 8px', marginTop: 12, marginBottom: 8 }}>
@@ -493,16 +502,39 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                       value={['Low', 'Medium', 'High', 'Ultra'].indexOf(exportQuality)}
                       onChange={(e) => {
                         const steps = ['Low', 'Medium', 'High', 'Ultra'];
+                        const featMap = {
+                          'Low': 'export_quality_low',
+                          'Medium': 'export_quality_medium',
+                          'High': 'export_quality_hd',
+                          'Ultra': 'export_quality_ultra'
+                        };
                         const selected = steps[parseInt(e.target.value)] || 'High';
+                        const targetFeat = featMap[selected];
+                        if (targetFeat) {
+                          const access = FeatureAccessManager.canUseFeature(targetFeat);
+                          if (!access.allowed) {
+                            showPaywall(targetFeat);
+                            return;
+                          }
+                        }
                         setExportQuality(selected);
                       }}
+                      className="export-quality-slider"
                       style={{ width: '100%', cursor: 'pointer' }}
                     />
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 9, fontWeight: 600, color: 'var(--text-muted)' }}>
-                      <span>Low</span>
-                      <span>Normal</span>
-                      <span>HD</span>
-                      <span>4K</span>
+                      <span style={{ position: 'relative' }}>
+                        Low <PaidCrownBadge featureId="export_quality_low" position="floating" size={7} />
+                      </span>
+                      <span style={{ position: 'relative' }}>
+                        Normal <PaidCrownBadge featureId="export_quality_medium" position="floating" size={7} />
+                      </span>
+                      <span style={{ position: 'relative' }}>
+                        HD <PaidCrownBadge featureId="export_quality_hd" position="floating" size={7} />
+                      </span>
+                      <span style={{ position: 'relative' }}>
+                        4K <PaidCrownBadge featureId="export_quality_ultra" position="floating" size={7} />
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -589,7 +621,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                   onClick={() => {
                     const access = FeatureAccessManager.canUseFeature(`barcode_${key}`);
                     if (!access.allowed) {
-                      showToast(`${standard.name} is a Premium Barcode format. Upgrade your plan to unlock.`, 'error');
+                      showPaywall(`barcode_${key}`);
                       return;
                     }
                     if (bcid !== key) {
