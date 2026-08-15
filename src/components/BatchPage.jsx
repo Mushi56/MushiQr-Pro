@@ -916,19 +916,21 @@ export default function BatchPage({
                   </div>
                 </div>
 
-                {/* Top Action Row: Permanently Fixed/Sticky on top of the data input section */}
+                {/* Top Action Row: Permanently Attached to Upper Navbar with Zero Padding Gap & Mobile Optimized */}
                 <div style={{
                   position: 'sticky',
-                  top: '-8px',
-                  zIndex: 30,
+                  top: '-16px',
+                  zIndex: 40,
                   background: 'var(--bg-primary, #0f172a)',
-                  padding: '8px 0',
-                  marginTop: '-4px',
+                  padding: '10px var(--main-padding-x)',
+                  margin: '-16px calc(var(--main-padding-x) * -1) 8px',
                   borderBottom: '1px solid var(--border-color)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  width: '100%',
+                  gap: '6px',
+                  width: 'calc(100% + var(--main-padding-x) * 2)',
+                  boxSizing: 'border-box',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
                   backdropFilter: 'blur(16px)',
                   WebkitBackdropFilter: 'blur(16px)'
                 }}>
@@ -948,23 +950,24 @@ export default function BatchPage({
                     }}
                     style={{
                       flex: 1,
-                      padding: '11px 12px',
-                      borderRadius: '10px',
+                      minWidth: 0,
+                      padding: '9px 6px',
+                      borderRadius: '8px',
                       border: '1px solid var(--border-color)',
                       background: 'var(--bg-hover)',
                       color: 'var(--text-primary)',
-                      fontSize: '12px',
+                      fontSize: '11px',
                       fontWeight: 700,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '5px',
+                      gap: '4px',
                       transition: 'all 0.2s ease',
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    <Plus size={15} color="var(--accent-primary)" /> Add Row
+                    <Plus size={14} color="var(--accent-primary)" style={{ flexShrink: 0 }} /> <span>Add Row</span>
                   </button>
 
                   {/* Button 2: Clear Table */}
@@ -975,23 +978,25 @@ export default function BatchPage({
                       ]);
                     }}
                     style={{
-                      padding: '11px 12px',
-                      borderRadius: '10px',
+                      flex: 1,
+                      minWidth: 0,
+                      padding: '9px 6px',
+                      borderRadius: '8px',
                       border: '1px solid var(--border-color)',
                       background: 'var(--bg-hover)',
                       color: 'var(--text-secondary)',
                       fontWeight: 700,
-                      fontSize: '12px',
+                      fontSize: '11px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '5px',
+                      gap: '4px',
                       transition: 'all 0.2s ease',
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    <Trash2 size={14} color="#EF4444" /> Clear Table
+                    <Trash2 size={13} color="#EF4444" style={{ flexShrink: 0 }} /> <span>Clear Table</span>
                   </button>
 
                   {/* Button 3: Import Entries */}
@@ -1024,24 +1029,25 @@ export default function BatchPage({
                       setBatchItems(newItems);
                     }}
                     style={{
-                      flex: 1.4,
-                      padding: '11px 14px',
-                      borderRadius: '10px',
+                      flex: 1.25,
+                      minWidth: 0,
+                      padding: '9px 8px',
+                      borderRadius: '8px',
                       border: 'none',
                       background: 'var(--accent-gradient, linear-gradient(135deg, #D60036, #FF3B62))',
                       color: '#FFFFFF',
                       fontWeight: 800,
-                      fontSize: '12px',
+                      fontSize: '11px',
                       cursor: 'pointer',
                       boxShadow: '0 4px 14px rgba(214, 0, 54, 0.35)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '5px',
+                      gap: '4px',
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    <Play size={14} /> Import Entries ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})
+                    <Play size={13} style={{ flexShrink: 0 }} /> <span>Import ({sheetRows.filter(r => r.data && r.data.trim().length > 0).length})</span>
                   </button>
                 </div>
 
