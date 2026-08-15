@@ -13,9 +13,9 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { PaymentProvider } from '../services/payment/PaymentProvider';
 
 const FALLBACK_PLANS = [
-  { id: 'weekly',  name: 'Weekly Pass', price: 4.99,  period: '/wk', color: '#8b5cf6', desc: '7-day full pro access pass' },
-  { id: 'monthly', name: 'Monthly Pro', price: 14.99, period: '/mo', color: '#3b82f6', popular: true, desc: 'Full monthly access for creators' },
-  { id: 'yearly',  name: 'Yearly VIP',  price: 99.99, period: '/yr', color: '#D60036', desc: 'Best value for 1 full year' },
+  { id: 'weekly',  name: 'Weekly Pass', price: 0.21,  period: '/wk', color: '#8b5cf6', desc: '7-day full pro access pass' },
+  { id: 'monthly', name: 'Monthly Pro', price: 1.06,  period: '/mo', color: '#3b82f6', popular: true, desc: 'Full monthly access for creators' },
+  { id: 'yearly',  name: 'Yearly VIP',  price: 12.75, period: '/yr', color: '#D60036', desc: 'Best value for 1 full year' },
 ];
 
 export default function PremiumModal() {

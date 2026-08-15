@@ -29,6 +29,7 @@ import AdminDashboard from './admin/AdminDashboard';
 import FeatureRegistry from './admin/FeatureRegistry';
 import PlanManager from './admin/PlanManager';
 import FeatureMatrixManager from './admin/FeatureMatrixManager';
+import MembershipDashboard from './admin/MembershipDashboard';
 import AuditLogPanel from './admin/AuditLogPanel';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────
@@ -4270,7 +4271,7 @@ function AdminPanelInner() {
     dashboard:        <AdminDashboard onNavigate={setSection} />,
     revenue:          <RevenuePanel />,
     users:            <UsersPanel />,
-    subscriptions:    <PlanManager />,
+    subscriptions:    <MembershipDashboard />,
     'feature-matrix': <FeatureMatrixManager />,
     analytics:        <AnalyticsPanel chartData={chartData} stats={stats} />,
     reports:         <ReportsPanel history={history} />,

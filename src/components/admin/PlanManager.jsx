@@ -14,9 +14,9 @@ import { T } from './AdminUIKit';
 
 const DEFAULT_PLAN_TEMPLATES = {
   free:    { id: 'free',    name: 'Free Starter',   price: 0,     period: '/lifetime', color: '#8b8fa8', desc: 'Basic standard QR & barcode features', popular: false, active: true },
-  weekly:  { id: 'weekly',  name: 'Weekly Pass',    price: 4.99,  period: '/wk',       color: '#8b5cf6', desc: '7-day full pro access pass',          popular: false, active: true },
-  monthly: { id: 'monthly', name: 'Monthly Pro',    price: 14.99, period: '/mo',       color: '#3b82f6', desc: 'Full monthly access for creators',    popular: true,  active: true },
-  yearly:  { id: 'yearly',  name: 'Yearly VIP',     price: 99.99, period: '/yr',       color: '#D60036', desc: 'Best value for high-volume teams',    popular: false, active: true },
+  weekly:  { id: 'weekly',  name: 'Weekly Pass',    price: 0.21,  period: '/wk',       color: '#8b5cf6', desc: '7-day full pro access pass',          popular: false, active: true },
+  monthly: { id: 'monthly', name: 'Monthly Pro',    price: 1.06,  period: '/mo',       color: '#3b82f6', desc: 'Full monthly access for creators',    popular: true,  active: true },
+  yearly:  { id: 'yearly',  name: 'Yearly VIP',     price: 12.75, period: '/yr',       color: '#D60036', desc: 'Best value for high-volume teams',    popular: false, active: true },
 };
 
 export default function PlanManager() {

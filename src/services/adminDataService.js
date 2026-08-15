@@ -868,26 +868,87 @@ export async function setPlanFeaturesCloud(planId, features) {
 
 /**
  * Save complete Subscription Plan with pricing, interval, discounts, active status, and custom features
+ * Uses publishMembershipConfig Cloud Function (server-authorized) with fallback.
  */
 export async function savePlanFullCloud(planData) {
-  try {
-    const planId = planData.id || planData.planId;
-    if (!planId) throw new Error('Plan ID is required');
+  const planId = planData.id || planData.planId;
+  if (!planId) throw new Error('Plan ID is required');
 
-    const planRef = doc(db, 'subscription_plans', planId);
-    const dataToSave = {
-      ...planData,
-      id: planId,
-      planId: planId,
-      _updatedAt: new Date().toISOString(),
+  const cleanPrice = Number(planData.price);
+  const validPrice = isNaN(cleanPrice) ? 0 : cleanPrice;
+
+  const dataToSave = {
+    ...planData,
+    id: planId,
+    planId: planId,
+    price: validPrice,
+    _updatedAt: new Date().toISOString(),
+  };
+
+  // 1. First attempt: Server-Authoritative Cloud Function (publishMembershipConfig)
+  try {
+    const publishFn = httpsCallable(functions, 'publishMembershipConfig');
+    
+    // Fetch current membership config to merge plans map
+    const membershipRef = doc(db, 'global_config', 'membership');
+    const snap = await getDoc(membershipRef);
+    const current = snap.exists() ? snap.data() : {};
+    const currentPlans = current.plans || {};
+    const currentMatrix = current.featureMatrix || {};
+    const currentLimits = current.featureLimits || {};
+
+    const updatedPlans = {
+      ...currentPlans,
+      [planId]: dataToSave,
     };
 
-    await setDoc(planRef, dataToSave, { merge: true });
-    await _audit('PLAN_SAVED', { planId, name: planData.name, price: planData.price });
-    return { ok: true, data: dataToSave };
-  } catch (e) {
-    console.error('[DS] savePlanFullCloud failed:', e);
-    return { ok: false, error: friendlyError(e) };
+    const res = await publishFn({
+      plans: updatedPlans,
+      featureMatrix: currentMatrix,
+      featureLimits: currentLimits,
+    });
+
+    // Also update individual subscription_plans/{planId} for legacy listeners if accessible
+    try {
+      await setDoc(doc(db, 'subscription_plans', planId), dataToSave, { merge: true });
+    } catch {}
+
+    await _audit('PLAN_SAVED_CLOUD', { planId, name: planData.name, price: validPrice });
+    return { ok: true, data: dataToSave, configVersion: res.data?.configVersion };
+  } catch (cloudErr) {
+    console.warn('[DS] publishMembershipConfig Cloud Function notice, trying direct write:', cloudErr?.message);
+    
+    // 2. Direct Firestore fallback (if client has super_admin custom claim on security rules)
+    try {
+      const planRef = doc(db, 'subscription_plans', planId);
+      await setDoc(planRef, dataToSave, { merge: true });
+
+      const membershipRef = doc(db, 'global_config', 'membership');
+      const snap = await getDoc(membershipRef);
+      const current = snap.exists() ? snap.data() : {};
+      const currentPlans = current.plans || {};
+      const nextVersion = (current.configVersion || 100) + 1;
+
+      await setDoc(membershipRef, {
+        configVersion: nextVersion,
+        plans: {
+          ...currentPlans,
+          [planId]: dataToSave,
+        },
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+
+      await _audit('PLAN_SAVED_DIRECT', { planId, name: planData.name, price: validPrice });
+      return { ok: true, data: dataToSave, configVersion: nextVersion };
+    } catch (directErr) {
+      console.error('[DS] Both Cloud Function and direct write failed:', { cloudErr, directErr });
+      
+      const isUnauth = cloudErr?.code === 'functions/unauthenticated' || directErr?.code === 'permission-denied';
+      if (isUnauth) {
+        throw new Error('You do not have Super Admin permissions, or your admin session has expired. Please refresh or sign in again.');
+      }
+      throw new Error(friendlyError(directErr || cloudErr));
+    }
   }
 }
 
@@ -895,16 +956,53 @@ export async function savePlanFullCloud(planData) {
  * Delete a custom Subscription Plan
  */
 export async function deletePlanCloud(planId) {
+  if (['free', 'weekly', 'monthly', 'yearly'].includes(planId)) {
+    throw new Error('Default system plans cannot be deleted. You can edit their pricing and features.');
+  }
+
   try {
-    if (['free', 'weekly', 'monthly', 'yearly'].includes(planId)) {
-      throw new Error('Default system plans cannot be deleted. You can edit their pricing and features.');
-    }
-    const planRef = doc(db, 'subscription_plans', planId);
-    await deleteDoc(planRef);
+    const publishFn = httpsCallable(functions, 'publishMembershipConfig');
+    const membershipRef = doc(db, 'global_config', 'membership');
+    const snap = await getDoc(membershipRef);
+    const current = snap.exists() ? snap.data() : {};
+    const nextPlans = { ...(current.plans || {}) };
+    delete nextPlans[planId];
+
+    await publishFn({
+      plans: nextPlans,
+      featureMatrix: current.featureMatrix || {},
+      featureLimits: current.featureLimits || {},
+    });
+
+    try {
+      await deleteDoc(doc(db, 'subscription_plans', planId));
+    } catch {}
+
     await _audit('PLAN_DELETED', { planId });
     return { ok: true };
-  } catch (e) {
-    console.error('[DS] deletePlanCloud failed:', e);
-    return { ok: false, error: friendlyError(e) };
+  } catch (cloudErr) {
+    try {
+      const planRef = doc(db, 'subscription_plans', planId);
+      await deleteDoc(planRef);
+
+      const membershipRef = doc(db, 'global_config', 'membership');
+      const snap = await getDoc(membershipRef);
+      if (snap.exists()) {
+        const current = snap.data();
+        const nextPlans = { ...(current.plans || {}) };
+        delete nextPlans[planId];
+        await setDoc(membershipRef, {
+          configVersion: (current.configVersion || 100) + 1,
+          plans: nextPlans,
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
+      }
+
+      await _audit('PLAN_DELETED', { planId });
+      return { ok: true };
+    } catch (directErr) {
+      console.error('[DS] deletePlanCloud failed:', directErr);
+      throw new Error(friendlyError(directErr || cloudErr));
+    }
   }
 }
