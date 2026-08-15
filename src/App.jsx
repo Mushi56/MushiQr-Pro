@@ -96,6 +96,7 @@ import AppIcon from './components/AppIcon';
 import SaveLocationModal from './components/SaveLocationModal';
 import PremiumModal from './components/PremiumModal';
 import { usePremium } from './services/premiumContext';
+import { FeatureAccessManager } from './services/FeatureAccessManager';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 const QRDotsIcon = ({ size = 24 }) => (
