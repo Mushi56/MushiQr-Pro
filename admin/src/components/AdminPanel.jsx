@@ -491,12 +491,10 @@ function Sidebar({ active, setActive, isMobile, open, onClose, isDark, themeMode
             justifyContent: 'center',
             flexShrink: 0,
             boxShadow: isDark ? '0 4px 14px rgba(245, 158, 11, 0.25)' : '0 4px 12px rgba(245, 158, 11, 0.2)',
-            overflow: 'hidden',
-            padding: 0
           }}>
             <img
-              src="/admin-logo.svg"
-              alt="Mushi QR Pro Admin"
+              src="/logo.webp"
+              alt="Mushi QR Pro"
               style={{
                 width: '100%',
                 height: '100%',
@@ -505,6 +503,24 @@ function Sidebar({ active, setActive, isMobile, open, onClose, isDark, themeMode
                 borderRadius: 9
               }}
             />
+            {/* Admin Shield Badge Overlay */}
+            <div style={{
+              position: 'absolute',
+              bottom: -4,
+              right: -4,
+              width: 18,
+              height: 18,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #FDE047 0%, #F59E0B 50%, #B45309 100%)',
+              border: `2px solid ${isDark ? '#0F1221' : '#FFFFFF'}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+              color: '#0F1221'
+            }}>
+              <Shield size={10} strokeWidth={3} fill="#0F1221" />
+            </div>
           </div>
 
           <div style={{ minWidth: 0 }}>
