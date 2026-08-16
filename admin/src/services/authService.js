@@ -105,7 +105,17 @@ export function useSuperAuthState() {
     return () => unsubscribe();
   }, []);
 
-  return { currentUser, isSuperAdmin, role, loading, authError, refreshClaims };
+  return { 
+    user: currentUser, 
+    currentUser, 
+    isSuperAdmin, 
+    role, 
+    loading, 
+    authError, 
+    refreshClaims, 
+    refreshSession: refreshClaims, 
+    bootstrap: bootstrapSuperAdmin 
+  };
 }
 
 /**
