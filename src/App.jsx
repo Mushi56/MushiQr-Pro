@@ -4079,7 +4079,9 @@ export default function App() {
                               )}
                             </div>
                           )}
-                          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '3px' }}>{currentUser.email}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '3px' }}>
+                            {currentUser.email || currentUser.providerData?.[0]?.email || 'User Account'}
+                          </div>
                         </div>
                       </div>
                     </div>

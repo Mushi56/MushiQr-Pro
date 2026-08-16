@@ -52,6 +52,49 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
     }}>
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px var(--main-padding-x) 100px' }}>
 
+        {/* ── User Profile Header Card ── */}
+        {currentUser ? (
+          <div style={{
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '18px',
+            padding: '16px 20px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
+          }}>
+            {currentUser.photoURL ? (
+              <img src={currentUser.photoURL} alt="" style={{ width: 46, height: 46, borderRadius: '50%', border: '2px solid var(--border-color)' }} />
+            ) : (
+              <div style={{
+                width: 46,
+                height: 46,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #D60036, #990024)',
+                color: '#fff',
+                fontWeight: 900,
+                fontSize: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                {(currentUser.displayName || currentUser.email || 'U')[0].toUpperCase()}
+              </div>
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {currentUser.displayName || 'Mushi QR User'}
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {currentUser.email || currentUser.providerData?.[0]?.email || 'No email associated'}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {/* ── Premium Subscription Card ── */}
         {!isPremium ? (
           <div
