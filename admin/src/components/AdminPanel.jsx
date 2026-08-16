@@ -909,27 +909,6 @@ function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTh
           {isDark ? <Sun size={17} /> : <Moon size={17} />}
         </button>
 
-        {/* Back to App Link */}
-        <a
-          href="/#/"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.05)',
-            border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
-            color: isDark ? '#94A3B8' : '#64748B',
-            borderRadius: 10,
-            padding: '7px 12px',
-            fontSize: 12,
-            fontWeight: 700,
-            textDecoration: 'none',
-          }}
-        >
-          <ArrowLeft size={13} />
-          <span>App</span>
-        </a>
-
         {/* User Profile Avatar */}
         <div style={{ position: 'relative' }}>
           <button

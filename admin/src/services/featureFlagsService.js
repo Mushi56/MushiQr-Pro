@@ -329,12 +329,23 @@ export function subscribeFeatureFlags(onSuccess, onError) {
       onSuccess(list);
     } catch (err) {
       console.error('[FeatureFlagsService] Snapshot error:', err);
-      if (onError) onError(err);
+      onSuccess(INITIAL_FEATURE_FLAGS);
     }
-  }, (error) => {
-    console.error('[FeatureFlagsService] Listener error:', error);
+  }, async (error) => {
+    console.warn('[FeatureFlagsService] Listener notice, falling back to cached/default flags:', error?.message);
+    try {
+      const globalSnap = await getDoc(doc(db, 'global_config', 'featureFlags'));
+      if (globalSnap.exists()) {
+        const globalData = globalSnap.data();
+        const merged = INITIAL_FEATURE_FLAGS.map(flag => ({
+          ...flag,
+          enabled: globalData[flag.key] !== undefined ? Boolean(globalData[flag.key]) : flag.enabled
+        }));
+        onSuccess(merged);
+        return;
+      }
+    } catch {}
     onSuccess(INITIAL_FEATURE_FLAGS);
-    if (onError) onError(error);
   });
 }
 

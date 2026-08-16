@@ -3907,14 +3907,6 @@ export default function App() {
                       >
                         <Folder size={16} /> Save Location
                       </button>
-                      {isSuperAdmin && (
-                        <>
-                          <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
-                          <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/admin'; }} style={{ color: '#D60036', fontWeight: 700 }}>
-                            <Settings size={16} /> Super Admin Panel
-                          </button>
-                        </>
-                      )}
                     </div>
                   </div>
                 )}
@@ -4162,31 +4154,6 @@ export default function App() {
                         </div>
                         <ChevronRight size={15} color="var(--text-muted)" />
                       </button>
-                      {/* Super Admin Panel */}
-                      {isSuperAdmin && (
-                        <>
-                          <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 12px' }} />
-                          <button 
-                            onClick={() => { setAuthDropdownOpen(false); window.location.hash = '#/admin'; }}
-                            style={{
-                              width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
-                              background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
-                              transition: 'background 0.2s ease'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                          >
-                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <Shield size={24} color="#F59E0B" />
-                            </div>
-                            <div style={{ flex: 1, overflow: 'hidden' }}>
-                              <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#FF007F' }}>Super Admin Panel</div>
-                              <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>Access admin dashboard</div>
-                            </div>
-                            <ChevronRight size={15} color="var(--text-muted)" />
-                          </button>
-                        </>
-                      )}
                       {/* Sign Out */}
                       <div style={{ height: '1px', background: 'var(--border-color)', margin: '6px 12px' }} />
                       <button
