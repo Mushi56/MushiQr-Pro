@@ -885,64 +885,59 @@ export async function savePlanFullCloud(planData) {
     _updatedAt: new Date().toISOString(),
   };
 
-  // 1. First attempt: Server-Authoritative Cloud Function (publishMembershipConfig)
+  // 1. Direct Firestore write (immediate UI update, authorized by Firestore Rules for super_admin & owner email)
   try {
-    const publishFn = httpsCallable(functions, 'publishMembershipConfig');
-    
-    // Fetch current membership config to merge plans map
+    const planRef = doc(db, 'subscription_plans', planId);
+    await setDoc(planRef, dataToSave, { merge: true });
+
     const membershipRef = doc(db, 'global_config', 'membership');
     const snap = await getDoc(membershipRef);
     const current = snap.exists() ? snap.data() : {};
     const currentPlans = current.plans || {};
-    const currentMatrix = current.featureMatrix || {};
-    const currentLimits = current.featureLimits || {};
+    const nextVersion = (current.configVersion || 100) + 1;
 
-    const updatedPlans = {
-      ...currentPlans,
-      [planId]: dataToSave,
-    };
+    await setDoc(membershipRef, {
+      configVersion: nextVersion,
+      plans: {
+        ...currentPlans,
+        [planId]: dataToSave,
+      },
+      updatedAt: new Date().toISOString(),
+    }, { merge: true });
 
-    const res = await publishFn({
-      plans: updatedPlans,
-      featureMatrix: currentMatrix,
-      featureLimits: currentLimits,
-    });
+    await _audit('PLAN_SAVED_DIRECT', { planId, name: planData.name, price: validPrice });
 
-    // Also update individual subscription_plans/{planId} for legacy listeners if accessible
+    // 2. Background sync to Cloud Function for authoritative server audit log
     try {
-      await setDoc(doc(db, 'subscription_plans', planId), dataToSave, { merge: true });
+      const publishFn = httpsCallable(functions, 'publishMembershipConfig');
+      publishFn({
+        plans: { ...currentPlans, [planId]: dataToSave },
+        featureMatrix: current.featureMatrix || {},
+        featureLimits: current.featureLimits || {},
+      }).catch(cfErr => console.log('[DS] Background Cloud Function audit notice:', cfErr?.message));
     } catch {}
 
-    await _audit('PLAN_SAVED_CLOUD', { planId, name: planData.name, price: validPrice });
-    return { ok: true, data: dataToSave, configVersion: res.data?.configVersion };
-  } catch (cloudErr) {
-    console.warn('[DS] publishMembershipConfig Cloud Function notice, trying direct write:', cloudErr?.message);
+    return { ok: true, data: dataToSave, configVersion: nextVersion };
+  } catch (directErr) {
+    console.warn('[DS] Direct write notice, attempting Cloud Function:', directErr?.message);
     
-    // 2. Direct Firestore fallback (if client has super_admin custom claim on security rules)
+    // Fallback: Cloud Function attempt if direct write was restricted
     try {
-      const planRef = doc(db, 'subscription_plans', planId);
-      await setDoc(planRef, dataToSave, { merge: true });
-
+      const publishFn = httpsCallable(functions, 'publishMembershipConfig');
       const membershipRef = doc(db, 'global_config', 'membership');
       const snap = await getDoc(membershipRef);
       const current = snap.exists() ? snap.data() : {};
       const currentPlans = current.plans || {};
-      const nextVersion = (current.configVersion || 100) + 1;
 
-      await setDoc(membershipRef, {
-        configVersion: nextVersion,
-        plans: {
-          ...currentPlans,
-          [planId]: dataToSave,
-        },
-        updatedAt: new Date().toISOString(),
-      }, { merge: true });
+      const res = await publishFn({
+        plans: { ...currentPlans, [planId]: dataToSave },
+        featureMatrix: current.featureMatrix || {},
+        featureLimits: current.featureLimits || {},
+      });
 
-      await _audit('PLAN_SAVED_DIRECT', { planId, name: planData.name, price: validPrice });
-      return { ok: true, data: dataToSave, configVersion: nextVersion };
-    } catch (directErr) {
-      console.error('[DS] Both Cloud Function and direct write failed:', { cloudErr, directErr });
-      
+      return { ok: true, data: dataToSave, configVersion: res.data?.configVersion };
+    } catch (cloudErr) {
+      console.error('[DS] Both direct write and Cloud Function failed:', { directErr, cloudErr });
       const isUnauth = cloudErr?.code === 'functions/unauthenticated' || directErr?.code === 'permission-denied';
       if (isUnauth) {
         throw new Error('You do not have Super Admin permissions, or your admin session has expired. Please refresh or sign in again.');

@@ -23,28 +23,26 @@ export const WebPaymentService = {
 
     try {
       const verifyFn = httpsCallable(functions, 'verifyGooglePlayPurchase');
+      const orderId = `WEB-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      const purchaseToken = `web_token_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
       const res = await verifyFn({
         productId: plan.storeProductId || `mushi_qr_${plan.id}`,
-        purchaseToken: `web_token_${Date.now()}`,
-        orderId: `WEB-${Date.now()}`,
+        purchaseToken,
+        orderId,
       });
 
-      return {
-        success: true,
-        data: res.data,
-        message: 'Web subscription activated successfully.'
-      };
-    } catch (e) {
-      console.warn('[WebPaymentService] Cloud Function verify notice, activating local client fallback:', e);
+      const serverData = res.data;
 
+      // Update local entitlement state after authoritative server verification
       const durationDays = plan.id === 'weekly' ? 7 : plan.id === 'yearly' ? 365 : 30;
       const subData = {
         userId: currentUser.uid,
-        planId: plan.id,
-        status: 'ACTIVE',
+        planId: serverData?.planId || plan.id,
+        status: serverData?.status || 'ACTIVE',
         provider: 'web',
         isPro: true,
-        expiryDate: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString(),
+        expiryDate: serverData?.expiryDate || new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString(),
         lastVerifiedClientAt: Date.now(),
       };
 
@@ -56,9 +54,12 @@ export const WebPaymentService = {
 
       return {
         success: true,
-        data: subData,
-        message: 'Subscription activated locally.'
+        data: serverData,
+        message: 'Subscription activated successfully.'
       };
+    } catch (e) {
+      console.error('[WebPaymentService] Payment verification failed:', e);
+      throw new Error(e.message || 'Payment verification failed. Please try again or contact support.');
     }
   },
 
@@ -66,3 +67,4 @@ export const WebPaymentService = {
     return { success: true, message: 'Web account active subscription checked.' };
   }
 };
+

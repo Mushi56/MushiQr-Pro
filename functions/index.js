@@ -10,6 +10,37 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
+// ─── Designated Super Admin Owner Email ────────────────────────────────────
+// This email is the bootstrap owner. Cloud Functions recognize this email
+// as Super Admin even before custom claims are minted.
+const SUPER_ADMIN_EMAIL = 'mabuneri143@gmail.com';
+
+/**
+ * Helper: Check if caller is Super Admin (by custom claim OR designated owner email)
+ */
+function callerIsSuperAdmin(request) {
+  if (!request.auth || !request.auth.uid) return false;
+  const claims = request.auth.token || {};
+  if (claims.role === 'super_admin') return true;
+  if (claims.email === SUPER_ADMIN_EMAIL) return true;
+  return false;
+}
+
+/**
+ * Helper: Require Super Admin — throws HttpsError if not authorized
+ */
+function requireSuperAdmin(request) {
+  if (!request.auth || !request.auth.uid) {
+    throw new HttpsError('unauthenticated', 'You must be signed in to perform this action.');
+  }
+  if (!callerIsSuperAdmin(request)) {
+    throw new HttpsError(
+      'permission-denied',
+      'You do not have Super Admin permissions. Your account must have the super_admin role or be the designated system owner.'
+    );
+  }
+}
+
 /**
  * Trusted Helper: Writes immutable audit record to global_audit_logs
  */
@@ -28,29 +59,73 @@ async function writeAuditLog(actorUid, actorRole, action, targetUid, meta = {}) 
   }
 }
 
-/**
- * Cloud Function A: setUserRole
- * Grants or modifies user custom claims and profile role.
- * Restricted to Super Admin only. Includes Last Super Admin Protection.
- */
-exports.setUserRole = onCall(async (request) => {
-  // 1. Authenticate caller
+// ═══════════════════════════════════════════════════════════════════════════
+// bootstrapSuperAdmin — One-time self-service to mint super_admin custom claim
+// Only the designated SUPER_ADMIN_EMAIL can call this.
+// ═══════════════════════════════════════════════════════════════════════════
+exports.bootstrapSuperAdmin = onCall(async (request) => {
   if (!request.auth || !request.auth.uid) {
-    throw new HttpsError('unauthenticated', 'User must be authenticated to invoke this function.');
+    throw new HttpsError('unauthenticated', 'You must be signed in.');
+  }
+
+  const callerEmail = request.auth.token?.email;
+  if (callerEmail !== SUPER_ADMIN_EMAIL) {
+    throw new HttpsError(
+      'permission-denied',
+      'Only the designated system owner can bootstrap Super Admin. Your email does not match.'
+    );
   }
 
   const callerUid = request.auth.uid;
-  const callerClaims = request.auth.token || {};
 
-  // 2. Authorize caller via custom claim (Strict: must be super_admin)
-  if (callerClaims.role !== 'super_admin') {
-    throw new HttpsError('permission-denied', 'Only Super Admin users can assign or change user roles.');
+  // Check if already has super_admin claim
+  const currentUser = await admin.auth().getUser(callerUid);
+  const currentClaims = currentUser.customClaims || {};
+
+  if (currentClaims.role === 'super_admin') {
+    return {
+      success: true,
+      message: 'You already have the super_admin role. No changes made.',
+      alreadyBootstrapped: true,
+    };
   }
 
+  // Mint the custom claim
+  await admin.auth().setCustomUserClaims(callerUid, {
+    ...currentClaims,
+    role: 'super_admin',
+  });
+
+  // Update app_users document
+  await db.collection('app_users').doc(callerUid).set({
+    role: 'super_admin',
+    roleUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    roleUpdatedBy: callerUid,
+    email: callerEmail,
+  }, { merge: true });
+
+  await writeAuditLog(callerUid, 'super_admin', 'SUPER_ADMIN_BOOTSTRAPPED', callerUid, {
+    email: callerEmail,
+  });
+
+  return {
+    success: true,
+    message: 'Super Admin role has been minted. Please refresh your browser to activate the new permissions.',
+    alreadyBootstrapped: false,
+  };
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// setUserRole — Grants or modifies user custom claims and profile role.
+// Restricted to Super Admin only. Includes Last Super Admin Protection.
+// ═══════════════════════════════════════════════════════════════════════════
+exports.setUserRole = onCall(async (request) => {
+  requireSuperAdmin(request);
+
+  const callerUid = request.auth.uid;
   const { targetUid, newRole } = request.data || {};
   const allowedRoles = ['super_admin', 'admin', 'editor', 'support', 'user'];
 
-  // 3. Input Validation
   if (!targetUid || typeof targetUid !== 'string') {
     throw new HttpsError('invalid-argument', 'Valid targetUid string must be provided.');
   }
@@ -58,7 +133,7 @@ exports.setUserRole = onCall(async (request) => {
     throw new HttpsError('invalid-argument', `Invalid newRole. Allowed values: ${allowedRoles.join(', ')}.`);
   }
 
-  // 4. Fetch target user
+  // Fetch target user
   let targetUser;
   try {
     targetUser = await admin.auth().getUser(targetUid);
@@ -69,8 +144,7 @@ exports.setUserRole = onCall(async (request) => {
   const currentClaims = targetUser.customClaims || {};
   const currentRole = currentClaims.role || 'user';
 
-  // 5. Last Super Admin Protection
-  // Prevent demoting or removing the last remaining Super Admin
+  // Last Super Admin Protection
   if (currentRole === 'super_admin' && newRole !== 'super_admin') {
     const listResult = await admin.auth().listUsers(1000);
     const superAdminCount = listResult.users.filter(u => u.customClaims && u.customClaims.role === 'super_admin').length;
@@ -83,18 +157,17 @@ exports.setUserRole = onCall(async (request) => {
     }
   }
 
-  // 6. Update Custom Claims (Preserve existing claims while updating role)
+  // Update Custom Claims
   const updatedClaims = { ...currentClaims, role: newRole };
   await admin.auth().setCustomUserClaims(targetUid, updatedClaims);
 
-  // 7. Sync role metadata to app_users/{targetUid}
+  // Sync role metadata to app_users/{targetUid}
   await db.collection('app_users').doc(targetUid).set({
     role: newRole,
     roleUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
     roleUpdatedBy: callerUid,
   }, { merge: true });
 
-  // 8. Write immutable server-side audit record
   await writeAuditLog(callerUid, 'super_admin', 'USER_ROLE_CHANGED', targetUid, {
     previousRole: currentRole,
     newRole,
@@ -106,23 +179,14 @@ exports.setUserRole = onCall(async (request) => {
   };
 });
 
-/**
- * Cloud Function B: updateUserSubscription
- * Authoritative subscription updates in user_subscriptions/{targetUid}.
- * Restricted to Super Admin role only.
- */
+// ═══════════════════════════════════════════════════════════════════════════
+// updateUserSubscription — Authoritative subscription updates.
+// Restricted to Super Admin role only.
+// ═══════════════════════════════════════════════════════════════════════════
 exports.updateUserSubscription = onCall(async (request) => {
-  if (!request.auth || !request.auth.uid) {
-    throw new HttpsError('unauthenticated', 'User must be authenticated to update subscriptions.');
-  }
+  requireSuperAdmin(request);
 
   const callerUid = request.auth.uid;
-  const callerRole = request.auth.token?.role || 'user';
-
-  if (callerRole !== 'super_admin') {
-    throw new HttpsError('permission-denied', 'Only Super Admin users can update user subscriptions.');
-  }
-
   const { targetUid, planId, isPro, durationDays, reason } = request.data || {};
 
   if (!targetUid || typeof targetUid !== 'string') {
@@ -135,7 +199,7 @@ exports.updateUserSubscription = onCall(async (request) => {
   
   let expiryDate = null;
   if (validPlanId === 'lifetime') {
-    expiryDate = null; // No expiry for lifetime
+    expiryDate = null;
   } else if (durationDays && typeof durationDays === 'number' && durationDays > 0) {
     expiryDate = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000).toISOString();
   }
@@ -161,6 +225,7 @@ exports.updateUserSubscription = onCall(async (request) => {
 
   await subRef.set(newSubData, { merge: true });
 
+  // Sync to app_users
   await db.collection('app_users').doc(targetUid).set({
     planId: validPlanId,
     subscriptionStatus: proActive ? 'ACTIVE' : 'FREE',
@@ -170,7 +235,7 @@ exports.updateUserSubscription = onCall(async (request) => {
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   }, { merge: true });
 
-  await writeAuditLog(callerUid, 'super_admin', 'MANUAL_PREMIUM_GRANTED', targetUid, {
+  await writeAuditLog(callerUid, 'super_admin', 'USER_SUBSCRIPTION_UPDATED', targetUid, {
     previousPlan: previousSub?.planId || 'free',
     newPlan: validPlanId,
     status: proActive ? 'ACTIVE' : 'FREE',
@@ -184,23 +249,13 @@ exports.updateUserSubscription = onCall(async (request) => {
   };
 });
 
-/**
- * Cloud Function C: publishMembershipConfig
- * Authoritative global membership configuration publisher.
- * Automatically validates schema, increments configVersion, and logs audit record.
- */
+// ═══════════════════════════════════════════════════════════════════════════
+// publishMembershipConfig — Authoritative global membership configuration publisher.
+// ═══════════════════════════════════════════════════════════════════════════
 exports.publishMembershipConfig = onCall(async (request) => {
-  if (!request.auth || !request.auth.uid) {
-    throw new HttpsError('unauthenticated', 'User must be authenticated.');
-  }
+  requireSuperAdmin(request);
 
   const callerUid = request.auth.uid;
-  const callerRole = request.auth.token?.role || 'user';
-
-  if (callerRole !== 'super_admin') {
-    throw new HttpsError('permission-denied', 'Only Super Admin can publish membership configuration.');
-  }
-
   const { plans, featureMatrix, featureLimits } = request.data || {};
 
   if (!plans || typeof plans !== 'object') {
@@ -237,11 +292,50 @@ exports.publishMembershipConfig = onCall(async (request) => {
   };
 });
 
-/**
- * Cloud Function D: verifyGooglePlayPurchase
- * Server-side purchase verification stub / API handler.
- * Authoritatively updates user_subscriptions and appends transaction ledger.
- */
+// ═══════════════════════════════════════════════════════════════════════════
+// saveAdminConfig — Generic server-authorized config writer for global_config/*
+// ═══════════════════════════════════════════════════════════════════════════
+exports.saveAdminConfig = onCall(async (request) => {
+  requireSuperAdmin(request);
+
+  const callerUid = request.auth.uid;
+  const { docId, data } = request.data || {};
+
+  const allowedDocs = [
+    'appSettings', 'featureFlags', 'announcement', 'remoteConfig',
+    'membership', 'subscriptionPlans', 'premiumFeatures', 'promo_codes',
+  ];
+
+  if (!docId || !allowedDocs.includes(docId)) {
+    throw new HttpsError('invalid-argument', `Invalid docId '${docId}'. Allowed: ${allowedDocs.join(', ')}.`);
+  }
+
+  if (!data || typeof data !== 'object') {
+    throw new HttpsError('invalid-argument', 'Data object must be provided.');
+  }
+
+  const configRef = db.collection('global_config').doc(docId);
+  await configRef.set({
+    ...data,
+    _updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    _updatedBy: callerUid,
+  }, { merge: true });
+
+  await writeAuditLog(callerUid, 'super_admin', `CONFIG_UPDATED_${docId.toUpperCase()}`, null, {
+    docId,
+    keys: Object.keys(data),
+  });
+
+  return {
+    success: true,
+    message: `Successfully updated global_config/${docId}.`,
+  };
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// verifyGooglePlayPurchase — Server-side purchase verification.
+// Authoritatively updates user_subscriptions and appends transaction ledger.
+// ═══════════════════════════════════════════════════════════════════════════
 exports.verifyGooglePlayPurchase = onCall(async (request) => {
   if (!request.auth || !request.auth.uid) {
     throw new HttpsError('unauthenticated', 'User must be authenticated.');
@@ -253,6 +347,10 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
   if (!productId || !purchaseToken) {
     throw new HttpsError('invalid-argument', 'productId and purchaseToken required.');
   }
+
+  // TODO: Integrate real Google Play Developer API or Stripe receipt validation here.
+  // Currently accepts tokens for development/testing. In production, validate
+  // purchaseToken against Google Play Developer API or payment provider.
 
   // Derive plan from store product ID
   let planId = 'monthly';
@@ -271,6 +369,20 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
   const now = new Date();
   const expiryDate = durationDays ? new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000).toISOString() : null;
 
+  // Idempotency: Check if this order was already processed
+  const txnId = orderId || `txn_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  const existingTxn = await db.collection('payment_transactions').doc(txnId).get();
+  if (existingTxn.exists && existingTxn.data().status === 'VERIFIED') {
+    return {
+      success: true,
+      planId: existingTxn.data().planId || planId,
+      status: 'ACTIVE',
+      expiryDate: existingTxn.data().expiryDate || expiryDate,
+      message: 'Transaction already processed.',
+      duplicate: true,
+    };
+  }
+
   // 1. Authoritative user_subscriptions write
   const subRef = db.collection('user_subscriptions').doc(userId);
   await subRef.set({
@@ -280,6 +392,8 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
     provider: 'google_play',
     providerProductId: productId,
     startDate: admin.firestore.FieldValue.serverTimestamp(),
+    currentPeriodStart: now.toISOString(),
+    currentPeriodEnd: expiryDate,
     expiryDate,
     autoRenew: true,
     isTrial: false,
@@ -287,16 +401,25 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   }, { merge: true });
 
-  // 2. Append idempotent transaction ledger entry (storing sensitive token here instead of user doc)
-  const txnId = orderId || `gplay_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  // 2. Sync to app_users
+  await db.collection('app_users').doc(userId).set({
+    isPro: true,
+    planId,
+    subscriptionStatus: 'ACTIVE',
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
+
+  // 3. Append idempotent transaction ledger entry
   await db.collection('payment_transactions').doc(txnId).set({
     transactionId: txnId,
     userId,
-    provider: 'google_play',
+    provider: productId.startsWith('WEB-') || productId.startsWith('web_') ? 'web' : 'google_play',
     productId,
     purchaseToken,
+    planId,
     eventType: 'INITIAL_PURCHASE',
     status: 'VERIFIED',
+    expiryDate,
     processedAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 
@@ -304,6 +427,7 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
     planId,
     provider: 'google_play',
     productId,
+    transactionId: txnId,
   });
 
   return {
@@ -313,29 +437,10 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
     expiryDate,
   };
 });
-  await db.collection('app_users').doc(targetUid).set({
-    isPro: proActive,
-    planId: validPlanId,
-    proGrantedAt: proActive ? now.toISOString() : null,
-    proGrantedBy: proActive ? callerUid : null,
-  }, { merge: true });
 
-  // 6. Write immutable server-side audit log
-  await writeAuditLog(callerUid, callerRole, 'USER_SUBSCRIPTION_UPDATED', targetUid, {
-    previousPlanId: previousSub?.planId || 'free',
-    previousIsPro: previousSub?.isPro || false,
-    newPlanId: validPlanId,
-    newIsPro: proActive,
-    expiryDate,
-  });
-
-  return {
-    success: true,
-    message: `Successfully updated subscription for UID: ${targetUid}.`,
-  };
-});
-
-// Canonical Feature Registry IDs for server-side validation (78 Granular Features + Legacy Compatibility)
+// ═══════════════════════════════════════════════════════════════════════════
+// Canonical Feature Registry IDs for server-side validation
+// ═══════════════════════════════════════════════════════════════════════════
 const CANONICAL_FEATURE_IDS = [
   // 1. HOME
   'home_view', 'home_recent_items', 'home_quick_qr', 'home_quick_barcode', 'home_scanner_shortcut', 'home_batch_shortcut',
@@ -367,27 +472,17 @@ const CANONICAL_FEATURE_IDS = [
   'settings_view', 'settings_theme_toggle', 'settings_save_location', 'settings_haptics',
   // 15. ACCOUNT
   'account_view', 'account_google_signin', 'account_subscription_status', 'account_logout',
-  // Legacy 16 Compatibility IDs
+  // Legacy Compatibility IDs
   'qr_generator', 'barcode_generator', 'scanner', 'history', 'saved', 'cloud_sync', 'custom_logo', 'custom_colors', 'custom_shapes', 'premium_templates', 'bulk_generation', 'save_location'
 ];
 
-/**
- * Cloud Function C: updateFeatureFlag
- * Global feature enable/disable toggle.
- * Restricted to Super Admin role only.
- */
+// ═══════════════════════════════════════════════════════════════════════════
+// updateFeatureFlag — Global feature enable/disable toggle.
+// ═══════════════════════════════════════════════════════════════════════════
 exports.updateFeatureFlag = onCall(async (request) => {
-  if (!request.auth || !request.auth.uid) {
-    throw new HttpsError('unauthenticated', 'User must be authenticated.');
-  }
+  requireSuperAdmin(request);
 
   const callerUid = request.auth.uid;
-  const callerRole = request.auth.token?.role || 'user';
-
-  if (callerRole !== 'super_admin') {
-    throw new HttpsError('permission-denied', 'Only Super Admin users can modify feature flags.');
-  }
-
   const { featureId, enabled } = request.data || {};
 
   if (!featureId || !CANONICAL_FEATURE_IDS.includes(featureId)) {
@@ -409,7 +504,7 @@ exports.updateFeatureFlag = onCall(async (request) => {
     updatedBy: callerUid,
   }, { merge: true });
 
-  await writeAuditLog(callerUid, callerRole, 'FEATURE_FLAG_UPDATED', null, {
+  await writeAuditLog(callerUid, 'super_admin', 'FEATURE_FLAG_UPDATED', null, {
     featureId,
     previousValue,
     newValue: enabled,
@@ -421,23 +516,13 @@ exports.updateFeatureFlag = onCall(async (request) => {
   };
 });
 
-/**
- * Cloud Function D: updatePlanFeatures
- * Updates feature list associated with a subscription plan (free, weekly, monthly, yearly).
- * Restricted to Super Admin role only.
- */
+// ═══════════════════════════════════════════════════════════════════════════
+// updatePlanFeatures — Updates feature list for a subscription plan.
+// ═══════════════════════════════════════════════════════════════════════════
 exports.updatePlanFeatures = onCall(async (request) => {
-  if (!request.auth || !request.auth.uid) {
-    throw new HttpsError('unauthenticated', 'User must be authenticated.');
-  }
+  requireSuperAdmin(request);
 
   const callerUid = request.auth.uid;
-  const callerRole = request.auth.token?.role || 'user';
-
-  if (callerRole !== 'super_admin') {
-    throw new HttpsError('permission-denied', 'Only Super Admin users can modify plan feature assignments.');
-  }
-
   const { planId, features } = request.data || {};
   const allowedPlans = ['free', 'weekly', 'monthly', 'yearly'];
 
@@ -475,7 +560,7 @@ exports.updatePlanFeatures = onCall(async (request) => {
 
   await planRef.set(updatedData, { merge: true });
 
-  await writeAuditLog(callerUid, callerRole, 'PLAN_FEATURES_UPDATED', null, {
+  await writeAuditLog(callerUid, 'super_admin', 'PLAN_FEATURES_UPDATED', null, {
     planId,
     previousFeatures: previousData.features || [],
     newFeatures: validatedFeatures,
@@ -487,6 +572,3 @@ exports.updatePlanFeatures = onCall(async (request) => {
     featureCount: validatedFeatures.length,
   };
 });
-
-
-

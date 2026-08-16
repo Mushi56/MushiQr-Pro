@@ -85,6 +85,7 @@ import YouPage from './components/YouPage';
 import AuthDropdownPanel from './components/AuthDropdownPanel';
 import GoldenAdminBadge from './components/GoldenAdminBadge';
 import { useUserRole } from './services/roleService';
+import { checkIsSuperAdmin } from './services/authService';
 import { auth, db } from './services/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { trackUserProfile, trackAnonymousVisitor, linkVisitorToUser } from './services/adminDataService';
@@ -969,8 +970,8 @@ export default function App() {
       setCurrentUser(user);
       if (user) {
         try {
-          const tokenResult = await user.getIdTokenResult();
-          setIsSuperAdmin(tokenResult.claims.role === 'super_admin');
+          const { isSuperAdmin: isSA } = await checkIsSuperAdmin(user);
+          setIsSuperAdmin(isSA);
         } catch (e) {
           setIsSuperAdmin(false);
         }

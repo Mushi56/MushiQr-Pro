@@ -23,6 +23,7 @@ import { setFeatureFlagCloud, setPlanFeaturesCloud } from '../services/adminData
 import { QR_TEMPLATES } from '../utils/qrTemplates';
 import { auth, googleProvider } from '../services/firebase';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { useAuthState, SUPER_ADMIN_EMAIL } from '../services/authService';
 import GoldenAdminBadge from './GoldenAdminBadge';
 import FeatureManagementPanel from './FeatureManagementPanel';
 import AdminDashboard from './admin/AdminDashboard';
@@ -4091,9 +4092,9 @@ function SupportPanel() {
 
 // ─── Wrap the entire AdminPanel in the ToastProvider ──────────────────────
 function AdminPanelInner() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
+  // ─── Centralized auth from authService (custom claim + owner email fallback) ─
+  const { user: currentUser, isSuperAdmin, loading: authLoading, needsBootstrap, refreshSession, bootstrap } = useAuthState();
+  const [bootstrapState, setBootstrapState] = useState({ loading: false, done: false, error: null });
 
   const [section, setSection]     = useState('dashboard');
   const [isMobile, setIsMobile]   = useState(window.innerWidth < 900);
@@ -4115,24 +4116,20 @@ function AdminPanelInner() {
   const [appUsers, setAppUsers]                   = useState([]);
   const [loading, setLoading]               = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      if (user) {
-        try {
-          const tokenResult = await user.getIdTokenResult();
-          const isSA = tokenResult.claims.role === 'super_admin' || user.email === 'mabuneri143@gmail.com';
-          setIsSuperAdmin(isSA);
-        } catch (e) {
-          setIsSuperAdmin(user.email === 'mabuneri143@gmail.com');
-        }
-      } else {
-        setIsSuperAdmin(false);
+  // Bootstrap handler — mints the super_admin custom claim for the owner
+  const handleBootstrap = async () => {
+    setBootstrapState({ loading: true, done: false, error: null });
+    try {
+      const result = await bootstrap();
+      if (result.success) {
+        setBootstrapState({ loading: false, done: true, error: null });
+        // Small delay then reload so new token is picked up
+        setTimeout(() => window.location.reload(), 1800);
       }
-      setAuthLoading(false);
-    });
-    return unsubscribe;
-  }, []);
+    } catch (e) {
+      setBootstrapState({ loading: false, done: false, error: e.message || 'Bootstrap failed.' });
+    }
+  };
 
   useEffect(() => {
     // UI visibility guard — Real security enforcement is independently handled by Firestore Rules & Cloud Functions
@@ -4177,6 +4174,7 @@ function AdminPanelInner() {
   };
 
   if (!currentUser || !isSuperAdmin) {
+    const isOwnerEmail = currentUser?.email === SUPER_ADMIN_EMAIL;
     return (
       <div style={{
         display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center',
@@ -4185,7 +4183,7 @@ function AdminPanelInner() {
       }}>
         <div style={{
           background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.xl,
-          padding: '40px 32px', maxWidth: 420, width: '100%',
+          padding: '40px 32px', maxWidth: 440, width: '100%',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
           boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
         }}>
@@ -4196,8 +4194,10 @@ function AdminPanelInner() {
             <h1 style={{ fontSize: 22, fontWeight: 900, color: T.text, margin: 0 }}>Super Admin Access Required</h1>
             <p style={{ color: T.textSec, fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
               {currentUser
-                ? `Signed in as (${currentUser.email}). Account lacks Super Admin custom claim privileges (role: "super_admin").`
-                : 'Authentication required. Only accounts possessing the super_admin custom claim can access this dashboard.'}
+                ? isOwnerEmail
+                  ? 'You are the system owner. Activate your Super Admin role below to access the dashboard.'
+                  : `Signed in as ${currentUser.email}. This account does not have Super Admin privileges.`
+                : 'Please sign in with the Super Admin account to access this dashboard.'}
             </p>
           </div>
 
@@ -4211,23 +4211,60 @@ function AdminPanelInner() {
                 </div>
               )}
               <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'Current User'}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'System Owner'}</div>
                 <div style={{ fontSize: 10, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
               </div>
             </div>
           )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 8 }}>
+          {/* Bootstrap button — only visible to designated owner who hasn't minted claims yet */}
+          {currentUser && isOwnerEmail && (
+            <div style={{ width: '100%' }}>
+              {bootstrapState.done ? (
+                <div style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid #10b98133', borderRadius: T.r.md, padding: '12px 16px', color: '#10b981', fontSize: 13, fontWeight: 600 }}>
+                  ✓ Super Admin role activated! Reloading dashboard...
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={handleBootstrap}
+                    disabled={bootstrapState.loading}
+                    style={{
+                      background: `linear-gradient(135deg, ${T.accent}, #ff4d6d)`, color: '#fff', border: 'none', padding: '13px 20px',
+                      borderRadius: T.r.md, cursor: bootstrapState.loading ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 14,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
+                      fontFamily: 'inherit', opacity: bootstrapState.loading ? 0.7 : 1,
+                    }}
+                  >
+                    {bootstrapState.loading ? <RefreshCw size={16} className="animate-spin" /> : <Key size={16} />}
+                    {bootstrapState.loading ? 'Activating Super Admin...' : 'Activate Super Admin Role'}
+                  </button>
+                  {bootstrapState.error && (
+                    <div style={{ marginTop: 8, color: T.red, fontSize: 12, textAlign: 'center' }}>
+                      {bootstrapState.error}
+                    </div>
+                  )}
+                  <p style={{ color: T.textMut, fontSize: 11, marginTop: 6, textAlign: 'center' }}>
+                    One-time setup: mints your super_admin role into Firebase Auth.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 4 }}>
             <button
               onClick={handleAdminSignIn}
               style={{
-                background: T.accent, color: '#fff', border: 'none', padding: '12px 20px',
-                borderRadius: T.r.md, cursor: 'pointer', fontWeight: 700, fontSize: 14,
+                background: currentUser && isOwnerEmail ? 'transparent' : T.accent,
+                color: currentUser && isOwnerEmail ? T.textSec : '#fff',
+                border: currentUser && isOwnerEmail ? `1px solid ${T.border}` : 'none',
+                padding: '12px 20px', borderRadius: T.r.md, cursor: 'pointer', fontWeight: 700, fontSize: 14,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
                 fontFamily: 'inherit'
               }}
             >
-              <Zap size={16} /> Sign In as Admin (Google)
+              <Zap size={16} /> {currentUser ? 'Switch Account (Google)' : 'Sign In with Google'}
             </button>
             {currentUser && (
               <button
@@ -4239,7 +4276,7 @@ function AdminPanelInner() {
                   fontFamily: 'inherit'
                 }}
               >
-                <LogOut size={14} /> Switch Account / Log Out
+                <LogOut size={14} /> Sign Out
               </button>
             )}
             <button

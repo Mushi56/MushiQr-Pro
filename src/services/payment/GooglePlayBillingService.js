@@ -37,23 +37,17 @@ export const GooglePlayBillingService = {
         orderId,
       });
 
-      return {
-        success: true,
-        data: res.data,
-        message: 'Google Play subscription verified successfully.'
-      };
-    } catch (e) {
-      console.warn('[GooglePlayBillingService] Cloud Function verify notice, activating local client fallback:', e);
+      const serverData = res.data;
 
-      // Graceful local client entitlement activation if Cloud Function has cold start or internal error
+      // Update local entitlement state after authoritative server verification
       const durationDays = plan.id === 'weekly' ? 7 : plan.id === 'yearly' ? 365 : 30;
       const subData = {
         userId: currentUser.uid,
-        planId: plan.id,
-        status: 'ACTIVE',
+        planId: serverData?.planId || plan.id,
+        status: serverData?.status || 'ACTIVE',
         provider: 'google_play',
         isPro: true,
-        expiryDate: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString(),
+        expiryDate: serverData?.expiryDate || new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString(),
         lastVerifiedClientAt: Date.now(),
       };
 
@@ -65,9 +59,12 @@ export const GooglePlayBillingService = {
 
       return {
         success: true,
-        data: subData,
-        message: 'Subscription activated locally.'
+        data: serverData,
+        message: 'Google Play subscription verified successfully.'
       };
+    } catch (e) {
+      console.error('[GooglePlayBillingService] Verification failed:', e);
+      throw new Error(e.message || 'Google Play purchase verification failed. Please try again.');
     }
   },
 
@@ -81,3 +78,4 @@ export const GooglePlayBillingService = {
     }
   }
 };
+

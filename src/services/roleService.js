@@ -1,11 +1,12 @@
 // src/services/roleService.js
 // ─── Firebase Custom Claim Role Authorization System ──────────────────────
-// Provides real-time custom claim role checking, ID token token refresh,
-// and React custom claim role hooks.
+// Provides real-time custom claim role checking, ID token refresh,
+// and React custom claim role hooks backed by centralized authService.
 
 import { useState, useEffect } from 'react';
 import { auth } from './firebase';
 import { onIdTokenChanged } from 'firebase/auth';
+import { checkIsSuperAdmin, getUserRole as authGetUserRole, refreshAuthSession } from './authService';
 
 /**
  * Custom React Hook: Listens to auth state and returns user custom claim role
@@ -32,9 +33,9 @@ export function useUserRole() {
         return;
       }
       try {
+        const { isSuperAdmin } = await checkIsSuperAdmin(u);
         const tokenResult = await u.getIdTokenResult();
-        const role = tokenResult.claims.role || 'user';
-        const isSuperAdmin = role === 'super_admin';
+        const role = isSuperAdmin ? 'super_admin' : (tokenResult.claims.role || 'user');
         const isAdmin = role === 'admin' || isSuperAdmin;
         setRoleState({
           user: u,
@@ -65,26 +66,13 @@ export function useUserRole() {
  * Utility: Fetch current custom claim role for a user
  */
 export async function getUserRole(user) {
-  if (!user) return 'user';
-  try {
-    const tokenResult = await user.getIdTokenResult();
-    return tokenResult.claims.role || 'user';
-  } catch (e) {
-    console.error('[roleService] getUserRole error:', e);
-    return 'user';
-  }
+  return authGetUserRole(user);
 }
 
 /**
  * Utility: Force refresh ID token to get latest custom claims from Firebase Auth
  */
 export async function refreshUserToken() {
-  if (!auth.currentUser) return null;
-  try {
-    const tokenResult = await auth.currentUser.getIdTokenResult(true);
-    return tokenResult.claims;
-  } catch (e) {
-    console.error('[roleService] refreshUserToken error:', e);
-    return null;
-  }
+  return refreshAuthSession();
 }
+
