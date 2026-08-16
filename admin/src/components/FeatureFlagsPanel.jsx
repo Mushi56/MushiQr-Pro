@@ -219,7 +219,12 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         : Boolean(f.defaultEnabled);
 
       const catMeta = CATEGORY_META[f.category] || CATEGORY_META.SETTINGS;
+      const subMeta = SUBCATEGORY_META[f.subcategory];
       const isPaid = checkIsPaidFeature(f.featureId, f.defaultPlan);
+
+      // Distinct Subcategory Icon & Color for granular visual recognition
+      const featureIcon = subMeta?.icon || catMeta.icon || Flag;
+      const featureColor = subMeta?.color || catMeta.color || '#FF4D9D';
 
       return {
         id: f.featureId,
@@ -231,9 +236,11 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         subcategory: f.subcategory || 'General',
         environment: 'Production',
         enabled: isEnabled,
-        icon: catMeta.icon,
-        iconColor: catMeta.color,
-        iconBg: `${catMeta.color}18`,
+        icon: featureIcon,
+        iconColor: featureColor,
+        iconBg: `${featureColor}18`,
+        categoryIcon: catMeta.icon,
+        categoryColor: catMeta.color,
         defaultPlan: f.defaultPlan || 'free',
         isPaid: isPaid,
         isCanonical: true,
