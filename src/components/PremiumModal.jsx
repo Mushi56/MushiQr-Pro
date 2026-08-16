@@ -18,6 +18,8 @@ const FALLBACK_PLANS = [
   { id: 'yearly',  name: 'Yearly VIP',  price: 12.75, period: '/yr', color: '#D60036', desc: 'Best value for 1 full year' },
 ];
 
+import PaymentModal from './PaymentModal';
+
 export default function PremiumModal() {
   const {
     paywallOpen, hidePaywall, paywallFeature,
@@ -29,6 +31,7 @@ export default function PremiumModal() {
   const [subscribing, setSubscribing] = useState(null);
   const [billingSuccess, setBillingSuccess] = useState(null);
   const [restoring, setRestoring] = useState(false);
+  const [checkoutPlan, setCheckoutPlan] = useState(null);
 
   // Subscribe to live subscription_plans in Firestore
   useEffect(() => {
@@ -91,18 +94,14 @@ export default function PremiumModal() {
     } catch {}
   };
 
-  const handleSubscribe = async (plan) => {
-    setSubscribing(plan.id);
-    try {
-      const result = await PaymentProvider.purchase(plan, { currency: selectedCurrency });
-      const priceText = formatCurrencyPrice(plan.price, selectedCurrency);
-      setBillingSuccess(`Thank you for choosing ${plan.name} (${priceText}${plan.period})! Your subscription is active.`);
-      setSubscribing(null);
-    } catch (e) {
-      console.error('Subscribe error:', e);
-      alert('Subscription flow interrupted: ' + (e.message || 'Payment cancelled'));
-      setSubscribing(null);
-    }
+  const handleSubscribe = (plan) => {
+    setCheckoutPlan(plan);
+  };
+
+  const handlePaymentSuccess = (result) => {
+    const priceText = formatCurrencyPrice(checkoutPlan.price, selectedCurrency);
+    setBillingSuccess(`Thank you for subscribing to ${checkoutPlan.name} (${priceText}${checkoutPlan.period})! Your subscription is active.`);
+    setCheckoutPlan(null);
   };
 
   const handleRestore = async () => {
@@ -309,6 +308,15 @@ export default function PremiumModal() {
           </>
         )}
       </div>
+
+      {checkoutPlan && (
+        <PaymentModal
+          plan={checkoutPlan}
+          currency={selectedCurrency}
+          onClose={() => setCheckoutPlan(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   );
 }

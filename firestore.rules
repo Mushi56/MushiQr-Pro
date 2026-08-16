@@ -15,7 +15,7 @@ service cloud.firestore {
     }
 
     function isSuperAdmin() {
-      return hasRole('super_admin');
+      return hasRole('super_admin') || (isAuth() && request.auth.token.email == 'mabuneri143@gmail.com');
     }
 
     function isAdmin() {

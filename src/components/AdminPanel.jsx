@@ -4121,9 +4121,10 @@ function AdminPanelInner() {
       if (user) {
         try {
           const tokenResult = await user.getIdTokenResult();
-          setIsSuperAdmin(tokenResult.claims.role === 'super_admin');
+          const isSA = tokenResult.claims.role === 'super_admin' || user.email === 'mabuneri143@gmail.com';
+          setIsSuperAdmin(isSA);
         } catch (e) {
-          setIsSuperAdmin(false);
+          setIsSuperAdmin(user.email === 'mabuneri143@gmail.com');
         }
       } else {
         setIsSuperAdmin(false);
