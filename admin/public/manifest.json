@@ -1,0 +1,22 @@
+{
+  "short_name": "Mushi Qr",
+  "name": "Mushi Qr Pro - Fast & Beautiful QR Generator",
+  "description": "Premium QR code generator and scanner with beautiful designs",
+  "icons": [
+    {
+      "src": "/logo.webp",
+      "type": "image/webp",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#030305",
+  "background_color": "#030305",
+  "categories": [
+    "utilities",
+    "productivity"
+  ]
+}

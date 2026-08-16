@@ -9,7 +9,6 @@ import './index.css';
 const About = lazy(() => import('./About.jsx'));
 const PrivacyPolicy = lazy(() => import('./PrivacyPolicy.jsx'));
 const Terms = lazy(() => import('./Terms.jsx'));
-const AdminPanel = lazy(() => import('./components/AdminPanel.jsx'));
 
 const RouteLoader = () => (
   <div style={{
@@ -59,8 +58,6 @@ createRoot(document.getElementById('root')).render(
             <Route path="/about" element={<About />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<Terms />} />
-            <Route path="/admin" element={<AdminPanel />} />
-            <Route path="/admin/*" element={<AdminPanel />} />
           </Routes>
         </Suspense>
       </PremiumProvider>
