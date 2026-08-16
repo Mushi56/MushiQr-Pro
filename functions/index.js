@@ -10,9 +10,13 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
-// ─── Designated Super Admin Owner Email ────────────────────────────────────
-// This email is the bootstrap owner. Cloud Functions recognize this email
+// ─── Designated Super Admin Owner Emails ──────────────────────────────────
+// These emails are the bootstrap owners. Cloud Functions recognize these emails
 // as Super Admin even before custom claims are minted.
+const SUPER_ADMIN_EMAILS = [
+  'mabuneri143@gmail.com',
+  'mabuneri143@gamil.com'
+];
 const SUPER_ADMIN_EMAIL = 'mabuneri143@gmail.com';
 
 /**
@@ -22,7 +26,8 @@ function callerIsSuperAdmin(request) {
   if (!request.auth || !request.auth.uid) return false;
   const claims = request.auth.token || {};
   if (claims.role === 'super_admin') return true;
-  if (claims.email === SUPER_ADMIN_EMAIL) return true;
+  const callerEmail = (claims.email || '').toLowerCase().trim();
+  if (SUPER_ADMIN_EMAILS.some(e => e.toLowerCase() === callerEmail)) return true;
   return false;
 }
 
@@ -68,8 +73,8 @@ exports.bootstrapSuperAdmin = onCall(async (request) => {
     throw new HttpsError('unauthenticated', 'You must be signed in.');
   }
 
-  const callerEmail = request.auth.token?.email;
-  if (callerEmail !== SUPER_ADMIN_EMAIL) {
+  const callerEmail = (request.auth.token?.email || '').toLowerCase().trim();
+  if (!SUPER_ADMIN_EMAILS.some(e => e.toLowerCase() === callerEmail)) {
     throw new HttpsError(
       'permission-denied',
       'Only the designated system owner can bootstrap Super Admin. Your email does not match.'

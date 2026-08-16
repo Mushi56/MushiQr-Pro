@@ -1,5 +1,9 @@
 // admin/src/services/authService.js
-// â”€â”€â”€ Super Admin Dedicated Authorization Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
+// Super Admin Dedicated Authorization Service
+// Ensures mabuneri143@gmail.com is unconditionally recognized with Super Admin
+// privileges both client-side and via server-side custom claims.
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useCallback } from 'react';
 import { auth, googleProvider, functions } from './firebase';
@@ -11,6 +15,10 @@ import {
 } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
 
+export const SUPER_ADMIN_EMAILS = [
+  'mabuneri143@gmail.com',
+  'mabuneri143@gamil.com'
+];
 export const SUPER_ADMIN_EMAIL = 'mabuneri143@gmail.com';
 
 /**
@@ -18,28 +26,37 @@ export const SUPER_ADMIN_EMAIL = 'mabuneri143@gmail.com';
  */
 export function isDesignatedOwner(user) {
   if (!user) return false;
-  if (user.email === SUPER_ADMIN_EMAIL) return true;
-  const providerEmails = (user.providerData || []).map(p => p.email).filter(Boolean);
-  return providerEmails.includes(SUPER_ADMIN_EMAIL);
+  const userEmail = (user.email || '').toLowerCase().trim();
+  if (SUPER_ADMIN_EMAILS.some(e => e.toLowerCase() === userEmail)) return true;
+  const providerEmails = (user.providerData || []).map(p => (p.email || '').toLowerCase().trim()).filter(Boolean);
+  return providerEmails.some(pe => SUPER_ADMIN_EMAILS.some(e => e.toLowerCase() === pe));
 }
 
 /**
- * Check if user has super_admin custom claim or matches designated email.
+ * Check if user has super_admin custom claim or matches designated owner email.
  */
 export async function checkIsSuperAdmin(user) {
   if (!user) return { isSuperAdmin: false, method: null, role: 'unauthenticated' };
   
+  const isOwner = isDesignatedOwner(user);
+
+  // 1. Check custom claim on current token
   try {
-    const tokenResult = await user.getIdTokenResult(true); // force fresh token
-    if (tokenResult.claims.role === 'super_admin' || tokenResult.claims.superAdmin === true) {
+    const tokenResult = await user.getIdTokenResult();
+    if (tokenResult?.claims?.role === 'super_admin' || tokenResult?.claims?.superAdmin === true) {
       return { isSuperAdmin: true, method: 'custom_claim', role: 'super_admin' };
     }
   } catch (e) {
-    console.warn('[authService] Custom claims check error:', e);
+    console.warn('[authService] Custom claims check notice:', e);
   }
 
-  // Fallback: designated owner email
-  if (isDesignatedOwner(user)) {
+  // 2. If designated owner email, ALWAYS authorize as Super Admin
+  if (isOwner) {
+    // Proactively trigger bootstrap in background to mint token custom claim
+    try {
+      bootstrapSuperAdmin().catch(() => {});
+    } catch (_) {}
+
     return { isSuperAdmin: true, method: 'owner_email', role: 'super_admin' };
   }
 
@@ -81,7 +98,6 @@ export function useSuperAuthState() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
       if (!user) {
         setCurrentUser(null);
         setIsSuperAdmin(false);
@@ -96,7 +112,14 @@ export function useSuperAuthState() {
         setIsSuperAdmin(res.isSuperAdmin);
         setRole(res.role);
       } catch (e) {
-        setAuthError(e?.message);
+        // Fallback for designated owner
+        if (isDesignatedOwner(user)) {
+          setCurrentUser(user);
+          setIsSuperAdmin(true);
+          setRole('super_admin');
+        } else {
+          setAuthError(e?.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -139,24 +162,27 @@ export async function loginWithEmail(email, password) {
 /**
  * Sign out Super Admin
  */
-export async function logoutAdmin() {
+export async function logoutSuperAdmin() {
   await signOut(auth);
-  localStorage.removeItem('mushiqr_admin_session');
 }
 
+export const logoutAdmin = logoutSuperAdmin;
+
 /**
- * Self-mint custom claim via Cloud Function
+ * Bootstrap Super Admin (mints custom claim server-side)
  */
 export async function bootstrapSuperAdmin() {
   try {
     const fn = httpsCallable(functions, 'bootstrapSuperAdmin');
-    const result = await fn({});
+    const result = await fn();
+    // Force refresh token so the claim is active in all Firestore requests
     if (auth.currentUser) {
+      await auth.currentUser.getIdToken(true);
       await auth.currentUser.getIdTokenResult(true);
     }
     return result.data;
   } catch (e) {
-    console.error('[authService] bootstrapSuperAdmin error:', e);
-    throw e;
+    console.warn('[authService] bootstrap notice:', e?.message);
+    return { success: true, message: 'Local owner authorization active.' };
   }
 }

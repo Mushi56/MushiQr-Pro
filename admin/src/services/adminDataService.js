@@ -423,7 +423,15 @@ export async function setFeatureFlagCloud(featureId, enabled) {
     await setDoc(flagsRef, { [featureId]: Boolean(enabled), _updatedAt: new Date().toISOString() }, { merge: true });
     return { ok: true };
   } catch (e) {
-    throw new Error(friendlyError(e));
+    console.warn('[DS] Direct Firestore write failed, trying Cloud Function fallback:', e?.message);
+    try {
+      const fn = httpsCallable(functions, 'setFeatureFlag');
+      const res = await fn({ featureId, enabled: Boolean(enabled) });
+      return { ok: true, via: 'cloud_function', data: res.data };
+    } catch (cfErr) {
+      console.error('[DS] Both direct and Cloud Function flag updates failed:', cfErr);
+      throw new Error(friendlyError(e));
+    }
   }
 }
 
@@ -433,7 +441,15 @@ export async function setPlanFeaturesCloud(planId, features) {
     await setDoc(planRef, { features, _updatedAt: new Date().toISOString() }, { merge: true });
     return { ok: true };
   } catch (e) {
-    throw new Error(friendlyError(e));
+    console.warn('[DS] Direct Firestore write failed, trying Cloud Function fallback:', e?.message);
+    try {
+      const fn = httpsCallable(functions, 'updatePlanFeatures');
+      const res = await fn({ planId, features });
+      return { ok: true, via: 'cloud_function', data: res.data };
+    } catch (cfErr) {
+      console.error('[DS] Both direct and Cloud Function plan updates failed:', cfErr);
+      throw new Error(friendlyError(e));
+    }
   }
 }
 
