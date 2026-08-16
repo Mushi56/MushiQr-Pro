@@ -10,12 +10,12 @@ service cloud.firestore {
     function hasRole(r) {
       return isAuth() && 
              request.auth.token != null && 
-             request.auth.token.keys().contains('role') && 
-             request.auth.token.role == r;
+             request.auth.token.get('role', '') == r;
     }
 
     function isSuperAdmin() {
-      return hasRole('super_admin') || (isAuth() && request.auth.token.email == 'mabuneri143@gmail.com');
+      return hasRole('super_admin') || 
+             (isAuth() && (request.auth.token.email == 'mabuneri143@gmail.com' || request.auth.token.email == 'mabuneri143@gamil.com'));
     }
 
     function isAdmin() {
