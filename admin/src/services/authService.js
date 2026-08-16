@@ -11,9 +11,13 @@ import {
   onAuthStateChanged, 
   signInWithPopup, 
   signInWithEmailAndPassword, 
-  signOut 
+  signOut,
+  GoogleAuthProvider,
+  signInWithCredential
 } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
+import { Capacitor } from '@capacitor/core';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 
 export const SUPER_ADMIN_EMAILS = [
   'mabuneri143@gmail.com',
@@ -142,12 +146,34 @@ export function useSuperAuthState() {
 }
 
 /**
- * Sign in Super Admin with Google
+ * Sign in Super Admin with Google (Native Play Services dialog in APK, popup on Web)
  */
 export async function loginWithGoogle() {
-  const cred = await signInWithPopup(auth, googleProvider);
-  const res = await checkIsSuperAdmin(cred.user);
-  return { user: cred.user, isSuperAdmin: res.isSuperAdmin };
+  let user;
+
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const result = await FirebaseAuthentication.signInWithGoogle({
+        useCredentialManager: false,
+      });
+      if (result.credential?.idToken) {
+        const credential = GoogleAuthProvider.credential(result.credential.idToken);
+        const cred = await signInWithCredential(auth, credential);
+        user = cred.user;
+      } else {
+        throw new Error('No idToken received from native Google Sign-In');
+      }
+    } catch (nativeErr) {
+      console.error('[authService] Native Google Sign-In failed:', nativeErr);
+      throw nativeErr;
+    }
+  } else {
+    const cred = await signInWithPopup(auth, googleProvider);
+    user = cred.user;
+  }
+
+  const res = await checkIsSuperAdmin(user);
+  return { user, isSuperAdmin: res.isSuperAdmin };
 }
 
 /**

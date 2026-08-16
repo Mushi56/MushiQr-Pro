@@ -1,6 +1,6 @@
 {
-  "appId": "com.mushiqr.pro.local",
-  "appName": "Mushi QR Pro Local",
+  "appId": "com.mushiqr.pro",
+  "appName": "Mushi QR Pro",
   "webDir": "dist",
   "plugins": {
     "StatusBar": {
@@ -20,11 +20,6 @@
   "android": {
     "allowMixedContent": true,
     "captureInput": false,
-    "webContentsDebuggingEnabled": false
-  },
-  "server": {
-    "url": "https://mushiqr-pro.vercel.app/",
-    "androidScheme": "https",
-    "cleartext": true
+    "webContentsDebuggingEnabled": true
   }
 }
