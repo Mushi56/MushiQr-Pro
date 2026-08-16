@@ -22,6 +22,7 @@ import {
   getTargetingLabel
 } from '../services/featureFlagsService';
 import { useAdminTheme } from './AdminUIKit';
+import FeatureManagementPanel from './FeatureRegistry';
 
 // Map icon names to Lucide icons
 const ICON_MAP = {
@@ -46,7 +47,10 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const theme = useAdminTheme();
   const isDark = propIsDark !== undefined ? propIsDark : (theme?.isDark ?? false);
 
-  // â”€â”€ States â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Tab State: 'canonical' (140+ Granular Features across 8 Categories) | 'rollout' (Rollout Flags)
+  const [mainTab, setMainTab] = useState('canonical');
+
+  // States
   const [flags, setFlags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -756,13 +760,14 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
       {/* Toast Notification */}
       {toastMessage && <Toast message={toastMessage} />}
 
-      {/* â”€â”€ Title & Create Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Title & Header ─────────────────────────────────────────────── */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 20,
-        gap: 12
+        marginBottom: 16,
+        gap: 12,
+        flexWrap: 'wrap'
       }}>
         <div>
           <h1 style={{
@@ -772,7 +777,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
             margin: 0,
             letterSpacing: '-0.3px'
           }}>
-            Feature Flags
+            Feature Flags & App Controls
           </h1>
           <p style={{
             fontSize: 12,
@@ -784,40 +789,113 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           </p>
         </div>
 
-        {/* Pink + Create Flag Button (Compact '+' on mobile, text on desktop) */}
+        {mainTab === 'rollout' && (
+          <button
+            onClick={openCreateModal}
+            style={{
+              background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
+              border: 'none',
+              borderRadius: 12,
+              color: '#FFFFFF',
+              padding: '10px 16px',
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)',
+              flexShrink: 0
+            }}
+          >
+            <Plus size={18} strokeWidth={2.6} />
+            <span className="ad-hide-mobile">Create Flag</span>
+          </button>
+        )}
+      </div>
+
+      {/* ── View Switcher Tabs ───────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.04)',
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'}`,
+        padding: 4,
+        borderRadius: 14,
+        marginBottom: 20,
+        width: 'fit-content',
+        maxWidth: '100%',
+        overflowX: 'auto',
+      }}>
         <button
-          onClick={openCreateModal}
+          type="button"
+          onClick={() => setMainTab('canonical')}
           style={{
-            background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
-            border: 'none',
-            borderRadius: 12,
-            color: '#FFFFFF',
-            padding: '10px 16px',
-            fontSize: 13,
-            fontWeight: 800,
-            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)',
-            flexShrink: 0
+            gap: 8,
+            padding: '9px 18px',
+            borderRadius: 10,
+            border: 'none',
+            cursor: 'pointer',
+            background: mainTab === 'canonical' ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : 'transparent',
+            color: mainTab === 'canonical' ? '#FFFFFF' : (isDark ? '#94A3B8' : '#64748B'),
+            fontWeight: 800,
+            fontSize: 13,
+            fontFamily: 'inherit',
+            transition: 'all 0.15s ease',
+            whiteSpace: 'nowrap',
+            boxShadow: mainTab === 'canonical' ? '0 2px 10px rgba(255, 77, 157, 0.3)' : 'none'
           }}
         >
-          <Plus size={18} strokeWidth={2.6} />
-          <span className="ad-hide-mobile">Create Flag</span>
+          <Sliders size={16} />
+          <span>8 Core App Modules (140+ Features)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMainTab('rollout')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '9px 18px',
+            borderRadius: 10,
+            border: 'none',
+            cursor: 'pointer',
+            background: mainTab === 'rollout' ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : 'transparent',
+            color: mainTab === 'rollout' ? '#FFFFFF' : (isDark ? '#94A3B8' : '#64748B'),
+            fontWeight: 800,
+            fontSize: 13,
+            fontFamily: 'inherit',
+            transition: 'all 0.15s ease',
+            whiteSpace: 'nowrap',
+            boxShadow: mainTab === 'rollout' ? '0 2px 10px rgba(255, 77, 157, 0.3)' : 'none'
+          }}
+        >
+          <Flag size={16} />
+          <span>Production Rollout Flags</span>
         </button>
       </div>
 
-      {/* â”€â”€ 4 Statistics Cards (2x2 Grid on Mobile, 4-col on Desktop) â”€â”€â”€â”€â”€â”€â”€ */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-        gap: 12,
-        marginBottom: 20
-      }}>
-        {/* Total Flags */}
-        <StatMiniCard
-          icon={Flag}
+      {/* Tab 1: 140+ Granular Features across 8 Categories & Subcategories */}
+      {mainTab === 'canonical' ? (
+        <div style={{ borderRadius: 16, overflow: 'hidden' }}>
+          <FeatureManagementPanel isDark={isDark} />
+        </div>
+      ) : (
+        <>
+          {/* ── 4 Statistics Cards (2x2 Grid on Mobile, 4-col on Desktop) ─────── */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: 12,
+            marginBottom: 20
+          }}>
+            {/* Total Flags */}
+            <StatMiniCard
+              icon={Flag}
           iconColor="#7B61FF"
           iconBg="rgba(123, 97, 255, 0.12)"
           title="Total Flags"
@@ -1247,6 +1325,8 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );
