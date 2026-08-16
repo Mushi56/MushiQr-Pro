@@ -49,6 +49,12 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
+    // ── Feature Flags Collection
+    match /featureFlags/{flagId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
     // ── Global Templates
     // Public READ so all users can view template catalog, super-admin WRITE/DELETE
     match /global_templates/{docId} {
