@@ -5,14 +5,16 @@
 // plus production rollout flags in the exact same sleek, modern mobile-first UI/UX.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Flag, Plus, Search, Filter, ChevronRight, ArrowLeft, MoreVertical,
   CheckCircle2, XCircle, AlertCircle, Clock, Copy, Check, Trash2, Edit3,
   Sliders, Globe, Users, Shield, Crown, BarChart2, Layers, Palette,
   Sparkles, Cpu, Download, Cloud, ScanLine, MapPin, FlaskConical,
   TrendingUp, RefreshCw, X, Radio, QrCode, Barcode, LayoutDashboard,
-  Bookmark, ClipboardList, Settings, Package, Zap, Save, CheckSquare, Square
+  Bookmark, ClipboardList, Settings, Package, Zap, Save, CheckSquare, Square,
+  Pencil, Image as ImageIcon, Type, Camera, Scan, Heart, History, HardDrive,
+  FileSpreadsheet, FileCheck
 } from 'lucide-react';
 import {
   FEATURE_REGISTRY,
@@ -39,7 +41,7 @@ import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { useAdminTheme } from './AdminUIKit';
 
-// Category metadata with icons & brand colors
+// ── 8 Core Category Metadata (Matching Main App Navbar & Brand Palette) ──
 const CATEGORY_META = {
   ALL:               { id: 'ALL',               name: 'All Features',       icon: Sliders,          color: '#FF4D9D' },
   QR_GENERATOR:      { id: 'QR_GENERATOR',      name: 'QR Generator',       icon: QrCode,           color: '#D60036' },
@@ -51,6 +53,56 @@ const CATEGORY_META = {
   HISTORY:           { id: 'HISTORY',           name: 'History',            icon: ClipboardList,    color: '#06B6D4' },
   SETTINGS:          { id: 'SETTINGS',          name: 'Settings',           icon: Settings,         color: '#64748B' },
   ROLLOUT:           { id: 'ROLLOUT',           name: 'Rollout Flags',      icon: Flag,             color: '#7B61FF' },
+};
+
+// ── Subcategory Metadata (Exact Icons Matching Main App Toolbar & Tabs) ──
+const SUBCATEGORY_META = {
+  // QR Generator Subcategories
+  'Content':            { icon: Pencil,          color: '#D60036', label: 'Content' },
+  'Color':              { icon: Palette,         color: '#F59E0B', label: 'Color' },
+  'Style':              { icon: Sliders,         color: '#8B5CF6', label: 'Style' },
+  'Logo':               { icon: ImageIcon,       color: '#EC4899', label: 'Logo' },
+  'Template':           { icon: Sparkles,        color: '#3B82F6', label: 'Template' },
+  'Text':               { icon: Type,            color: '#10B981', label: 'Text' },
+  'Save & Export':      { icon: Download,        color: '#06B6D4', label: 'Save & Export' },
+  'QR Engine':          { icon: Cpu,             color: '#64748B', label: 'QR Engine' },
+
+  // Barcode Generator Subcategories
+  '1D Standards':       { icon: Barcode,         color: '#3B82F6', label: '1D Standards' },
+  '2D Standards':       { icon: QrCode,          color: '#8B5CF6', label: '2D Standards' },
+  'Barcode Appearance': { icon: Palette,         color: '#F59E0B', label: 'Appearance' },
+  'Export':             { icon: Download,        color: '#06B6D4', label: 'Export' },
+
+  // Bulk Generator Subcategories
+  'Batch Screen':       { icon: Layers,          color: '#8B5CF6', label: 'Batch Screen' },
+  'Input & Spreadsheet':{ icon: FileSpreadsheet, color: '#10B981', label: 'Spreadsheet' },
+  'Batch Styling':      { icon: Sliders,         color: '#F59E0B', label: 'Batch Styling' },
+  'Bulk Export':        { icon: Download,        color: '#06B6D4', label: 'Bulk Export' },
+
+  // Scanner Subcategories
+  'Camera Lens':        { icon: Camera,          color: '#10B981', label: 'Camera Lens' },
+  'Detection':          { icon: Scan,            color: '#3B82F6', label: 'Detection' },
+  'Scan Results':       { icon: FileCheck,       color: '#8B5CF6', label: 'Scan Results' },
+
+  // Home Screen Subcategories
+  'Dashboard':          { icon: LayoutDashboard, color: '#F59E0B', label: 'Dashboard' },
+  'Quick Actions':      { icon: Zap,             color: '#D60036', label: 'Quick Actions' },
+
+  // Saved Subcategories
+  'Collection':         { icon: Bookmark,        color: '#EC4899', label: 'Collection' },
+  'Save / Remove':      { icon: Heart,           color: '#D60036', label: 'Save / Remove' },
+  'Search & Filter':    { icon: Search,          color: '#3B82F6', label: 'Search & Filter' },
+
+  // History Subcategories
+  'History View':       { icon: History,         color: '#06B6D4', label: 'History View' },
+  'Automatic History':  { icon: Clock,           color: '#8B5CF6', label: 'Auto History' },
+  'History Management': { icon: Trash2,          color: '#EF4444', label: 'Management' },
+
+  // Settings Subcategories
+  'General & Theme':    { icon: Palette,         color: '#64748B', label: 'Theme & UI' },
+  'Storage':            { icon: HardDrive,       color: '#3B82F6', label: 'Storage' },
+  'Cloud & Sync':       { icon: Cloud,           color: '#06B6D4', label: 'Cloud Sync' },
+  'Account & Security': { icon: Shield,          color: '#10B981', label: 'Security' },
 };
 
 const PLAN_COLORS = {
@@ -85,7 +137,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'enabled' | 'disabled'
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [selectedSubcategory, setSelectedSubcategory] = useState('ALL');
-  const [planFilter, setPlanFilter] = useState('all'); // 'all' | 'free' | 'weekly' | 'monthly' | 'yearly'
+  const [planFilter, setPlanFilter] = useState('all'); // 'all' | 'free' | 'paid' | 'weekly' | 'monthly' | 'yearly'
   const [envFilter, setEnvFilter] = useState('all');
 
   // Create / Edit Form State
@@ -146,6 +198,18 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  // ── Helper: Check if feature is in any paid plan ───────────────────────
+  const checkIsPaidFeature = (featureKey, defaultPlan) => {
+    const paidTiers = ['weekly', 'monthly', 'yearly'];
+    const isInLivePaid = paidTiers.some(pId => {
+      const feats = livePlans[pId]?.features || DEFAULT_PAID_FEATURES;
+      return feats.includes(featureKey);
+    });
+
+    if (isInLivePaid) return true;
+    return defaultPlan && defaultPlan !== 'free';
+  };
+
   // ── Unified 140+ Features List ─────────────────────────────────────────
   const allFeatures = useMemo(() => {
     // 1. Standard canonical registry features (140+ items across 8 categories)
@@ -155,6 +219,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         : Boolean(f.defaultEnabled);
 
       const catMeta = CATEGORY_META[f.category] || CATEGORY_META.SETTINGS;
+      const isPaid = checkIsPaidFeature(f.featureId, f.defaultPlan);
 
       return {
         id: f.featureId,
@@ -170,6 +235,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         iconColor: catMeta.color,
         iconBg: `${catMeta.color}18`,
         defaultPlan: f.defaultPlan || 'free',
+        isPaid: isPaid,
         isCanonical: true,
         targeting: 'all',
         rolloutPercentage: 100,
@@ -200,6 +266,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           iconColor: '#7B61FF',
           iconBg: 'rgba(123, 97, 255, 0.14)',
           defaultPlan: 'all',
+          isPaid: false,
           isCanonical: false,
           targeting: cf.targeting || 'all',
           rolloutPercentage: cf.rolloutPercentage ?? 100,
@@ -208,7 +275,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
       });
 
     return [...registryItems, ...rolloutItems];
-  }, [liveFlagsMap, customFlags]);
+  }, [liveFlagsMap, customFlags, livePlans]);
 
   // ── Filtered Features ──────────────────────────────────────────────────
   const filteredFeatures = useMemo(() => {
@@ -238,7 +305,12 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
       if (envFilter !== 'all' && f.environment !== envFilter) return false;
 
       // 6. Plan Filter
-      if (planFilter !== 'all') {
+      if (planFilter === 'paid') {
+        if (!f.isPaid) return false;
+      } else if (planFilter === 'free') {
+        const freeFeats = livePlans.free?.features || DEFAULT_FREE_FEATURES;
+        if (!freeFeats.includes(f.key)) return false;
+      } else if (planFilter !== 'all') {
         const planFeats = livePlans[planFilter]?.features || (planFilter === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
         if (!planFeats.includes(f.key)) return false;
       }
@@ -252,11 +324,11 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     const total = allFeatures.length;
     const enabled = allFeatures.filter(f => f.enabled).length;
     const disabled = total - enabled;
-    const categoriesCount = Object.keys(CATEGORY_META).length - 1;
+    const paidCount = allFeatures.filter(f => f.isPaid).length;
     const enabledPct = total > 0 ? ((enabled / total) * 100).toFixed(0) : '0';
     const disabledPct = total > 0 ? ((disabled / total) * 100).toFixed(0) : '0';
 
-    return { total, enabled, disabled, categoriesCount, enabledPct, disabledPct };
+    return { total, enabled, disabled, paidCount, enabledPct, disabledPct };
   }, [allFeatures]);
 
   // ── Category Counts ────────────────────────────────────────────────────
@@ -438,6 +510,9 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   // ═════════════════════════════════════════════════════════════════════════
   if (activeMode === 'details' && selectedFeature) {
     const IconComponent = selectedFeature.icon || Flag;
+    const subMeta = SUBCATEGORY_META[selectedFeature.subcategory];
+    const SubIcon = subMeta?.icon || Sliders;
+
     return (
       <div style={{ maxWidth: 840, margin: '0 auto', animation: 'adSlideIn 0.2s ease' }}>
         {toastMessage && <Toast message={toastMessage} />}
@@ -521,9 +596,31 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                 <IconComponent size={26} strokeWidth={2.4} />
               </div>
               <div>
-                <h2 style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
-                  {selectedFeature.name}
-                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <h2 style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
+                    {selectedFeature.name}
+                  </h2>
+                  {selectedFeature.isPaid ? (
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      padding: '2px 8px', borderRadius: 100,
+                      background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(214, 0, 54, 0.15))',
+                      color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.35)',
+                      fontSize: 10, fontWeight: 800
+                    }}>
+                      <Crown size={11} color="#F59E0B" strokeWidth={2.5} /> PRO TIER
+                    </span>
+                  ) : (
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      padding: '2px 8px', borderRadius: 100,
+                      background: 'rgba(139, 143, 168, 0.15)',
+                      color: '#8B8FA8', fontSize: 10, fontWeight: 700
+                    }}>
+                      FREE TIER
+                    </span>
+                  )}
+                </div>
                 <div style={{ fontSize: 13, color: 'var(--ad-text-sec)', marginTop: 4, lineHeight: 1.4 }}>
                   {selectedFeature.description || 'Controls runtime capability in Mushi QR Pro application.'}
                 </div>
@@ -562,17 +659,21 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
 
             {/* Category & Subcategory */}
             <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Category & Subcategory</div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: selectedFeature.iconColor }}>
-                {selectedFeature.categoryName} <span style={{ color: 'var(--ad-text-sec)', fontWeight: 500 }}>›</span> {selectedFeature.subcategory}
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Category &amp; Subcategory</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 800, color: selectedFeature.iconColor }}>
+                <SubIcon size={14} />
+                <span>{selectedFeature.categoryName}</span>
+                <span style={{ color: 'var(--ad-text-sec)', fontWeight: 500 }}>›</span>
+                <span>{selectedFeature.subcategory}</span>
               </div>
             </div>
 
             {/* Default Plan Tier */}
             <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Baseline Access</div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ad-text)' }}>
-                {PLAN_LABELS[selectedFeature.defaultPlan] || 'Free & Above'}
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Access Tier</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: selectedFeature.isPaid ? '#F59E0B' : 'var(--ad-text)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                {selectedFeature.isPaid && <Crown size={14} color="#F59E0B" />}
+                <span>{selectedFeature.isPaid ? 'Paid Subscription Required' : 'Free for All Users'}</span>
               </div>
             </div>
 
@@ -587,7 +688,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           <div>
             <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--ad-text)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
               <Crown size={16} color="#FF4D9D" />
-              <span>Subscription Plan Entitlements</span>
+              <span>Subscription Plan Entitlements (Toggle Access Tiers)</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
               {CANONICAL_PLANS.map(pId => {
@@ -609,8 +710,13 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: hasFeature ? color : 'var(--ad-text)' }}>
-                        {PLAN_LABELS[pId]}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: hasFeature ? color : 'var(--ad-text)' }}>
+                          {PLAN_LABELS[pId]}
+                        </span>
+                        {pId !== 'free' && hasFeature && (
+                          <Crown size={12} color={color} />
+                        )}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 2 }}>
                         {hasFeature ? 'Included in plan' : 'Locked for tier'}
@@ -815,7 +921,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
             margin: '4px 0 0',
             fontWeight: 500
           }}>
-            Control 140+ granular features across 8 categories in real-time
+            Control 140+ granular features across 8 categories with live paid plan badges
           </p>
         </div>
 
@@ -868,12 +974,12 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           subColor="#22C55E"
         />
         <StatMiniCard
-          icon={AlertCircle}
+          icon={Crown}
           iconColor="#F59E0B"
           iconBg="rgba(245, 158, 11, 0.12)"
-          title="Disabled"
-          value={stats.disabled}
-          subtitle={`${stats.disabledPct}% deactivated`}
+          title="Paid Pro Features"
+          value={stats.paidCount}
+          subtitle="Monetized capabilities"
           subColor="#F59E0B"
         />
         <StatMiniCard
@@ -944,7 +1050,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         })}
       </div>
 
-      {/* Subcategory Pills (When a category is active) */}
+      {/* Subcategory Filter Pills with Dedicated Main App Toolbar Icons */}
       {availableSubcategories.length > 0 && (
         <div style={{
           display: 'flex',
@@ -958,6 +1064,9 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           <button
             onClick={() => setSelectedSubcategory('ALL')}
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
               padding: '6px 12px',
               borderRadius: 20,
               border: `1px solid ${selectedSubcategory === 'ALL' ? '#FF4D9D' : 'var(--ad-border)'}`,
@@ -970,20 +1079,28 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
               flexShrink: 0
             }}
           >
-            All Subcategories
+            <Sliders size={12} />
+            <span>All Subcategories</span>
           </button>
           {availableSubcategories.map(sub => {
             const isSubActive = selectedSubcategory === sub;
+            const subMeta = SUBCATEGORY_META[sub];
+            const SubIcon = subMeta?.icon || Sliders;
+            const subColor = subMeta?.color || '#FF4D9D';
+
             return (
               <button
                 key={sub}
                 onClick={() => setSelectedSubcategory(sub)}
                 style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
                   padding: '6px 12px',
                   borderRadius: 20,
-                  border: `1px solid ${isSubActive ? '#FF4D9D' : 'var(--ad-border)'}`,
-                  background: isSubActive ? 'rgba(255, 77, 157, 0.14)' : 'transparent',
-                  color: isSubActive ? '#FF4D9D' : 'var(--ad-text-sec)',
+                  border: `1px solid ${isSubActive ? subColor : 'var(--ad-border)'}`,
+                  background: isSubActive ? `${subColor}18` : 'transparent',
+                  color: isSubActive ? subColor : 'var(--ad-text-sec)',
                   fontSize: 11,
                   fontWeight: 700,
                   cursor: 'pointer',
@@ -991,7 +1108,8 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                   flexShrink: 0
                 }}
               >
-                {sub}
+                <SubIcon size={12} strokeWidth={isSubActive ? 2.4 : 1.9} />
+                <span>{sub}</span>
               </button>
             );
           })}
@@ -1093,7 +1211,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
             <FilterPill label={statusFilter === 'enabled' ? 'Enabled Only' : 'Disabled Only'} onRemove={() => setStatusFilter('all')} />
           )}
           {planFilter !== 'all' && (
-            <FilterPill label={PLAN_LABELS[planFilter] || planFilter} onRemove={() => setPlanFilter('all')} />
+            <FilterPill label={planFilter === 'paid' ? 'Paid Pro Only' : (PLAN_LABELS[planFilter] || planFilter)} onRemove={() => setPlanFilter('all')} />
           )}
           <button onClick={clearAllFilters} style={{ background: 'none', border: 'none', color: '#FF4D9D', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
             Clear all
@@ -1134,6 +1252,8 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {filteredFeatures.map(feature => {
             const IconComp = feature.icon || Flag;
+            const subMeta = SUBCATEGORY_META[feature.subcategory];
+            const SubIcon = subMeta?.icon || Sliders;
 
             return (
               <div
@@ -1186,6 +1306,40 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                     }}>
                       {feature.key}
                     </span>
+
+                    {/* Paid Crown Badge */}
+                    {feature.isPaid ? (
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        fontSize: 10,
+                        fontWeight: 800,
+                        padding: '2px 8px',
+                        borderRadius: 100,
+                        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(214, 0, 54, 0.15))',
+                        color: '#F59E0B',
+                        border: '1px solid rgba(245, 158, 11, 0.35)',
+                        boxShadow: '0 1px 4px rgba(245, 158, 11, 0.12)'
+                      }}>
+                        <Crown size={11} color="#F59E0B" strokeWidth={2.5} />
+                        <span>PRO</span>
+                      </span>
+                    ) : (
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 3,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: '2px 7px',
+                        borderRadius: 100,
+                        background: 'rgba(139, 143, 168, 0.12)',
+                        color: '#8B8FA8'
+                      }}>
+                        <span>FREE</span>
+                      </span>
+                    )}
                   </div>
 
                   <div style={{
@@ -1200,8 +1354,12 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                     {feature.description}
                   </div>
 
+                  {/* Subcategory & Category Tags with Live Icons */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
                     <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
                       fontSize: 10,
                       fontWeight: 800,
                       padding: '2px 8px',
@@ -1209,10 +1367,14 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                       background: `${feature.iconColor}18`,
                       color: feature.iconColor
                     }}>
-                      {feature.categoryName}
+                      <IconComp size={10} />
+                      <span>{feature.categoryName}</span>
                     </span>
 
                     <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
                       fontSize: 10,
                       fontWeight: 700,
                       padding: '2px 8px',
@@ -1220,21 +1382,9 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                       background: 'var(--ad-input)',
                       color: 'var(--ad-text-sec)'
                     }}>
-                      {feature.subcategory}
+                      <SubIcon size={10} />
+                      <span>{feature.subcategory}</span>
                     </span>
-
-                    {feature.defaultPlan && (
-                      <span style={{
-                        fontSize: 10,
-                        fontWeight: 800,
-                        padding: '2px 8px',
-                        borderRadius: 100,
-                        background: feature.defaultPlan === 'free' ? 'rgba(139, 143, 168, 0.15)' : 'rgba(214, 0, 54, 0.15)',
-                        color: feature.defaultPlan === 'free' ? '#8B8FA8' : '#D60036'
-                      }}>
-                        {PLAN_LABELS[feature.defaultPlan] || feature.defaultPlan}
-                      </span>
-                    )}
                   </div>
                 </div>
 
@@ -1336,7 +1486,8 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                   borderRadius: 10, padding: '10px 12px', color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, outline: 'none'
                 }}
               >
-                <option value="all">All Plans</option>
+                <option value="all">All Features</option>
+                <option value="paid">👑 Paid Pro Plans Only</option>
                 <option value="free">Free Tier Included</option>
                 <option value="weekly">Weekly Pro Included</option>
                 <option value="monthly">Monthly Pro Included</option>
