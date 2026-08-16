@@ -4,19 +4,31 @@
   "description": "Super Admin Management Panel for Mushi QR Pro SaaS",
   "icons": [
     {
-      "src": "/admin-logo.svg",
-      "type": "image/svg+xml",
-      "sizes": "192x192 512x512",
+      "src": "/admin-logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/admin-logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/admin-logo.webp",
+      "type": "image/webp",
+      "sizes": "512x512",
       "purpose": "any maskable"
     },
     {
-      "src": "/logo.webp",
-      "type": "image/webp",
-      "sizes": "192x192 512x512",
-      "purpose": "any maskable"
+      "src": "/admin-logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#0F1221",
