@@ -9,7 +9,7 @@ export default defineConfig({
     host: true,
   },
   build: {
-    outDir: '../dist-admin',
+    outDir: 'dist',
     emptyOutDir: true,
   },
   resolve: {
