@@ -1639,31 +1639,33 @@ function Toast({ message }) {
   return (
     <div style={{
       position: 'fixed',
-      top: '50%',
+      bottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
       left: '50%',
-      transform: 'translate(-50%, -50%)',
+      transform: 'translateX(-50%)',
       zIndex: 999999,
       maxWidth: 'calc(100vw - 32px)',
       width: 'max-content',
       background: 'rgba(15, 18, 33, 0.96)',
       color: '#FFFFFF',
       border: '1.5px solid rgba(255, 77, 157, 0.75)',
-      borderRadius: 16,
-      padding: '13px 22px',
-      fontSize: 14,
+      borderRadius: 100,
+      padding: '11px 20px',
+      fontSize: 13,
       fontWeight: 800,
-      boxShadow: '0 20px 50px rgba(0,0,0,0.7), 0 0 30px rgba(255, 77, 157, 0.35)',
+      boxShadow: '0 12px 36px rgba(0,0,0,0.6), 0 0 24px rgba(255, 77, 157, 0.3)',
       display: 'flex',
       alignItems: 'center',
-      gap: 10,
-      animation: 'adPopCenter 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+      gap: 9,
+      animation: 'adSlideUpSnackbar 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
       pointerEvents: 'none',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
       textAlign: 'center'
     }}>
-      <Sparkles size={18} color="#FF4D9D" style={{ flexShrink: 0 }} />
-      <span style={{ wordBreak: 'break-word' }}>{message}</span>
+      <Sparkles size={16} color="#FF4D9D" style={{ flexShrink: 0 }} />
+      <span style={{ wordBreak: 'break-word', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {message}
+      </span>
     </div>
   );
 }

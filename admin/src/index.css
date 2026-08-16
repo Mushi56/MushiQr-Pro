@@ -46,6 +46,17 @@ input, textarea, select {
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
+@keyframes adSlideUpSnackbar {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
 .anim-fade {
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
