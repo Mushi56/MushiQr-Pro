@@ -1,8 +1,7 @@
 // src/components/admin/AdminUIKit.jsx
 // ─── Shared UI Kit & Theme System for QR Pro Super Admin ───────────────────
-// Matches the visual language of the reference dashboard with Light & Dark modes.
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import { 
   TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
   CheckCircle2, AlertCircle, XCircle, Clock
@@ -29,12 +28,19 @@ export const getTokens = (isDark = false) => ({
   warningOrange: '#F59E0B',
   infoBlue:      '#3B82F6',
   dangerRed:     '#EF4444',
+  accent:        '#FF4D9D',
+  accentLow:     'rgba(255, 77, 157, 0.15)',
+  purple:        '#7B61FF',
+  green:         '#22C55E',
+  orange:        '#F59E0B',
+  blue:          '#3B82F6',
+  red:           '#EF4444',
 
   // Gradient accents
   pinkPurpleGrad: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
   pinkSoftGrad:   'linear-gradient(135deg, rgba(255, 77, 157, 0.12) 0%, rgba(123, 97, 255, 0.12) 100%)',
 
-  // Sidebar (Always dark navy as in reference)
+  // Sidebar (Always deep dark navy)
   sidebarBg:      '#0F1221',
   sidebarBorder:  'rgba(255, 255, 255, 0.07)',
   sidebarText:    '#8E95A9',
@@ -48,6 +54,7 @@ export const getTokens = (isDark = false) => ({
   bgCard:         isDark ? '#151928' : '#FFFFFF',
   bgCardHover:    isDark ? '#1C2136' : '#FAFAFD',
   bgInput:        isDark ? '#0F1322' : '#F1F3F9',
+  bgEl:           isDark ? '#0F1322' : '#F1F3F9',
   border:         isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
   borderHov:      isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(15, 23, 42, 0.16)',
   
@@ -64,7 +71,7 @@ export const getTokens = (isDark = false) => ({
   r: { xs: 6, sm: 8, md: 12, lg: 16, xl: 20, pill: 9999 }
 });
 
-// Default static tokens (for backwards compatibility)
+// Default static tokens
 export const T = getTokens(false);
 
 // ── Badge Component ────────────────────────────────────────────────────────

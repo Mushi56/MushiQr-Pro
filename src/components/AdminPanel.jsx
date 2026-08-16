@@ -166,6 +166,8 @@ const LABELS = {
 
 const NAV_MAIN = [
   { id: 'dashboard',        icon: LayoutDashboard,    label: 'Dashboard' },
+  { id: 'feature-flags',    icon: Flag,               label: 'Feature Flags' },
+  { id: 'feature-matrix',   icon: Sliders,            label: 'Feature Matrix' },
   { id: 'users',            icon: Users,              label: 'Users' },
   { id: 'subscriptions',    icon: CreditCard,         label: 'Subscriptions' },
   { id: 'plans',            icon: Package,            label: 'Plans' },
@@ -180,27 +182,28 @@ const NAV_MAIN = [
   { id: 'app-settings',     icon: Settings,           label: 'Settings' },
   { id: 'admin-users',      icon: Shield,             label: 'Admins' },
   { id: 'audit-logs',       icon: ClipboardList,      label: 'Audit Logs' },
-  { id: 'branding',         icon: Sliders,            label: 'Appearance' },
+  { id: 'branding',         icon: SlidersHorizontal,  label: 'Appearance' },
   { id: 'remote-config',    icon: Cpu,                label: 'System Settings' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
-// MICRO COMPONENTS
+// MICRO COMPONENTS (Theme-Aware with CSS Variables)
 // ═══════════════════════════════════════════════════════════════════════════
 
-function Btn({ children, onClick, variant = 'primary', size = 'md', disabled, icon }) {
+function Btn({ children, onClick, variant = 'primary', size = 'md', disabled, icon, style }) {
   const base = {
     display: 'inline-flex', alignItems: 'center', gap: 6,
-    border: 'none', borderRadius: T.r.md, cursor: disabled ? 'not-allowed' : 'pointer',
+    border: 'none', borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer',
     fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.15s',
     opacity: disabled ? 0.5 : 1, whiteSpace: 'nowrap',
     ...(size === 'sm' ? { padding: '6px 12px', fontSize: 12 } : { padding: '9px 16px', fontSize: 13 }),
+    ...style
   };
   const variants = {
-    primary: { background: T.accent,  color: '#fff' },
-    ghost:   { background: 'transparent', color: T.textSec, border: `1px solid ${T.border}` },
-    danger:  { background: `${T.red}18`,  color: T.red,  border: `1px solid ${T.red}33` },
-    success: { background: `${T.green}18`, color: T.green, border: `1px solid ${T.green}33` },
+    primary: { background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)', color: '#fff' },
+    ghost:   { background: 'transparent', color: 'var(--ad-text-sec)', border: `1px solid var(--ad-border)` },
+    danger:  { background: `rgba(239, 68, 68, 0.12)`,  color: '#EF4444',  border: `1px solid rgba(239, 68, 68, 0.25)` },
+    success: { background: `rgba(34, 197, 94, 0.12)`, color: '#22C55E', border: `1px solid rgba(34, 197, 94, 0.25)` },
   };
   return (
     <button onClick={disabled ? undefined : onClick} style={{ ...base, ...variants[variant] }}>
@@ -209,30 +212,32 @@ function Btn({ children, onClick, variant = 'primary', size = 'md', disabled, ic
   );
 }
 
-function Badge({ children, color = T.purple }) {
+function Badge({ children, color = '#7B61FF', style }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 100,
-      fontSize: 10, fontWeight: 800, letterSpacing: '0.4px', textTransform: 'uppercase',
-      background: `${color}20`, color, lineHeight: 1, whiteSpace: 'nowrap',
+      fontSize: 11, fontWeight: 700,
+      background: `${color}18`, color, lineHeight: 1.2, whiteSpace: 'nowrap',
+      ...style
     }}>{children}</span>
   );
 }
 
-function StatCard({ icon: Icon, label, value, color = T.purple, trendLabel }) {
+function StatCard({ icon: Icon, label, value, color = '#7B61FF', trendLabel }) {
   return (
     <div style={{
-      background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.md,
-      padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'center', flex: 1, minWidth: 0,
+      background: 'var(--ad-card)', border: `1px solid var(--ad-border)`, borderRadius: 16,
+      padding: '16px 18px', display: 'flex', gap: 12, alignItems: 'center', flex: 1, minWidth: 0,
+      boxShadow: 'var(--ad-card-shadow)'
     }}>
-      <div style={{ width: 38, height: 38, borderRadius: T.r.sm, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <Icon size={19} color={color} />
+      <div style={{ width: 40, height: 40, borderRadius: 12, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon size={20} color={color} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 11, color: T.textSec, marginBottom: 2, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
-        <div className="ad-stat-value" style={{ fontSize: 20, fontWeight: 800, color: T.text, lineHeight: 1.1, letterSpacing: '-0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</div>
+        <div style={{ fontSize: 12, color: 'var(--ad-text-sec)', marginBottom: 2, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
+        <div className="ad-stat-value" style={{ fontSize: 22, fontWeight: 900, color: 'var(--ad-text)', lineHeight: 1.1, letterSpacing: '-0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</div>
         {trendLabel && (
-          <div style={{ fontSize: 10, color: T.textMut, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trendLabel}</div>
+          <div style={{ fontSize: 11, color: 'var(--ad-text-mut)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trendLabel}</div>
         )}
       </div>
     </div>
@@ -241,10 +246,10 @@ function StatCard({ icon: Icon, label, value, color = T.purple, trendLabel }) {
 
 function ToggleRow({ label, description, checked, onChange }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 0', borderBottom: `1px solid ${T.border}` }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 0', borderBottom: `1px solid var(--ad-border)` }}>
       <div style={{ flex: 1, paddingRight: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{label}</div>
-        {description && <div style={{ fontSize: 12, color: T.textSec, marginTop: 2 }}>{description}</div>}
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ad-text)' }}>{label}</div>
+        {description && <div style={{ fontSize: 12, color: 'var(--ad-text-sec)', marginTop: 2 }}>{description}</div>}
       </div>
       <Toggle checked={checked} onChange={() => onChange(!checked)} />
     </div>
@@ -258,13 +263,13 @@ function Toggle({ checked, onChange, disabled }) {
       onClick={disabled ? undefined : onChange}
       style={{
         width: 44, height: 24, borderRadius: 12, border: 'none', cursor: disabled ? 'not-allowed' : 'pointer',
-        background: checked ? T.accent : 'rgba(255,255,255,0.1)',
+        background: checked ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : 'var(--ad-input)',
         position: 'relative', transition: 'background 0.2s', flexShrink: 0,
         opacity: disabled ? 0.5 : 1,
       }}
     >
       <div style={{
-        width: 18, height: 18, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+        width: 18, height: 18, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
         position: 'absolute', top: 3, left: checked ? 23 : 3, transition: 'left 0.2s',
       }} />
     </button>
@@ -273,17 +278,17 @@ function Toggle({ checked, onChange, disabled }) {
 
 function AdminCard({ title, subtitle, right, children, noPadding, style: s }) {
   return (
-    <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.lg, overflow: 'hidden', ...s }}>
+    <div style={{ background: 'var(--ad-card)', border: `1px solid var(--ad-border)`, borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--ad-card-shadow)', ...s }}>
       {(title || right) && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${T.border}`, gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: `1px solid var(--ad-border)`, gap: 10 }}>
           <div style={{ minWidth: 0, flex: 1 }}>
-            {title && <div className="ad-card-title" style={{ fontSize: 13, fontWeight: 700, color: T.text, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>}
-            {subtitle && <div style={{ fontSize: 10, color: T.textSec, marginTop: 1, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</div>}
+            {title && <div className="ad-card-title" style={{ fontSize: 14, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>}
+            {subtitle && <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 2, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</div>}
           </div>
           {right && <div style={{ flexShrink: 0 }}>{right}</div>}
         </div>
       )}
-      <div style={noPadding ? {} : { padding: '14px 16px' }}>{children}</div>
+      <div style={noPadding ? {} : { padding: '16px 18px' }}>{children}</div>
     </div>
   );
 }
@@ -291,12 +296,12 @@ function AdminCard({ title, subtitle, right, children, noPadding, style: s }) {
 function EmptyState({ icon: Icon, title, desc, action }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '48px 24px', gap: 14 }}>
-      <div style={{ width: 64, height: 64, borderRadius: T.r.xl, background: `${T.purple}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Icon size={28} color={T.purple} />
+      <div style={{ width: 64, height: 64, borderRadius: 20, background: `rgba(255, 77, 157, 0.12)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF4D9D' }}>
+        <Icon size={28} />
       </div>
       <div>
-        <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 6 }}>{title}</div>
-        <div style={{ fontSize: 13, color: T.textSec, maxWidth: 340, lineHeight: 1.6 }}>{desc}</div>
+        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--ad-text)', marginBottom: 6 }}>{title}</div>
+        <div style={{ fontSize: 13, color: 'var(--ad-text-sec)', maxWidth: 340, lineHeight: 1.6 }}>{desc}</div>
       </div>
       {action}
     </div>
@@ -304,17 +309,16 @@ function EmptyState({ icon: Icon, title, desc, action }) {
 }
 
 function FormInput({ label, value, onChange, type = 'text', placeholder, disabled }) {
-  const [focused, setFocused] = useState(false);
   return (
     <div>
-      {label && <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>{label}</label>}
+      {label && <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 6 }}>{label}</label>}
       <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        disabled={disabled} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        disabled={disabled}
         style={{
-          width: '100%', boxSizing: 'border-box', background: T.bgEl,
-          border: `1px solid ${focused ? T.accent : T.border}`,
-          borderRadius: T.r.md, color: T.text, fontSize: 13,
-          padding: '9px 13px', outline: 'none', fontFamily: 'inherit',
+          width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
+          border: `1px solid var(--ad-border)`,
+          borderRadius: 10, color: 'var(--ad-text)', fontSize: 13, fontWeight: 600,
+          padding: '10px 14px', outline: 'none', fontFamily: 'inherit',
           transition: 'border-color 0.15s', opacity: disabled ? 0.5 : 1,
         }}
       />
@@ -323,17 +327,16 @@ function FormInput({ label, value, onChange, type = 'text', placeholder, disable
 }
 
 function FormTextarea({ label, value, onChange, rows = 4, placeholder }) {
-  const [focused, setFocused] = useState(false);
   return (
     <div>
-      {label && <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>{label}</label>}
+      {label && <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 6 }}>{label}</label>}
       <textarea rows={rows} value={value} onChange={e => onChange(e.target.value)}
-        placeholder={placeholder} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        placeholder={placeholder}
         style={{
-          width: '100%', boxSizing: 'border-box', background: T.bgEl,
-          border: `1px solid ${focused ? T.accent : T.border}`,
-          borderRadius: T.r.md, color: T.text, fontSize: 13,
-          padding: '9px 13px', outline: 'none', fontFamily: 'inherit',
+          width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
+          border: `1px solid var(--ad-border)`,
+          borderRadius: 10, color: 'var(--ad-text)', fontSize: 13,
+          padding: '10px 14px', outline: 'none', fontFamily: 'inherit',
           transition: 'border-color 0.15s', resize: 'vertical',
         }}
       />
@@ -344,12 +347,12 @@ function FormTextarea({ label, value, onChange, rows = 4, placeholder }) {
 function FormSelect({ label, value, onChange, options }) {
   return (
     <div>
-      {label && <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>{label}</label>}
+      {label && <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 6 }}>{label}</label>}
       <select value={value} onChange={e => onChange(e.target.value)}
         style={{
-          width: '100%', boxSizing: 'border-box', background: T.bgEl,
-          border: `1px solid ${T.border}`, borderRadius: T.r.md, color: T.text, fontSize: 13,
-          padding: '9px 13px', outline: 'none', fontFamily: 'inherit', cursor: 'pointer',
+          width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
+          border: `1px solid var(--ad-border)`, borderRadius: 10, color: 'var(--ad-text)', fontSize: 13,
+          padding: '10px 14px', outline: 'none', fontFamily: 'inherit', cursor: 'pointer', fontWeight: 600
         }}>
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
@@ -473,51 +476,53 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
         userSelect: 'none',
       }}
     >
-      {/* ── Brand Header (Matching Reference) ───────────────────────────── */}
+      {/* ── Brand Header (App Old Logo + Name Mushi QR Pro + Super Admin Badge) ── */}
       <div style={{
-        padding: '20px 18px 16px',
+        padding: '18px 16px 14px',
         borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        flexShrink: 0
+        flexShrink: 0,
+        background: 'linear-gradient(180deg, rgba(245, 158, 11, 0.04) 0%, transparent 100%)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          {/* Pink-to-Purple Logo Box */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+          {/* App Old Logo */}
           <div style={{
-            width: 38,
-            height: 38,
-            borderRadius: 10,
-            background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
+            position: 'relative',
+            width: 42,
+            height: 42,
+            borderRadius: 12,
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1.5px solid rgba(245, 158, 11, 0.45)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
             flexShrink: 0,
-            boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)'
+            boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+            overflow: 'hidden',
+            padding: 3
           }}>
-            <QrCode size={20} strokeWidth={2.4} />
+            <img src="/logo.webp" alt="Mushi QR Pro" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
 
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 15, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.3px' }}>
-                QR Pro Admin
-              </span>
-              <span style={{
-                fontSize: 10,
-                fontWeight: 800,
-                padding: '2px 6px',
-                borderRadius: 100,
-                background: 'rgba(255, 77, 157, 0.2)',
-                color: '#FF4D9D',
-                lineHeight: 1
-              }}>
-                v2.0
+              <span style={{ fontSize: 16, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Mushi QR Pro
               </span>
             </div>
-            <div style={{ fontSize: 10, color: '#8E95A9', marginTop: 2, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Modern & Mobile-First
+            <div style={{
+              fontSize: 10,
+              color: '#F59E0B',
+              marginTop: 2,
+              fontWeight: 800,
+              letterSpacing: '0.6px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}>
+              <GoldenAdminBadge size={12} /> SUPER ADMIN
             </div>
           </div>
         </div>
@@ -867,6 +872,26 @@ function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTh
             </div>
           )}
         </div>
+
+        {/* Theme Mode Toggle (Sun/Moon) */}
+        <button
+          onClick={toggleTheme}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.05)',
+            border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: isDark ? '#F59E0B' : '#7B61FF',
+            cursor: 'pointer',
+          }}
+        >
+          {isDark ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
 
         {/* Back to App Link */}
         <a
@@ -4642,6 +4667,27 @@ function AdminPanelInner() {
         @keyframes adSpin { to { transform: rotate(360deg); } }
         @keyframes adSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
+        .ad-theme-root {
+          --ad-bg: #F7F8FC;
+          --ad-card: #FFFFFF;
+          --ad-input: #F1F3F9;
+          --ad-border: rgba(15, 23, 42, 0.08);
+          --ad-text: #0F172A;
+          --ad-text-sec: #64748B;
+          --ad-text-mut: #94A3B8;
+          --ad-card-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+        }
+        .ad-theme-root.dark {
+          --ad-bg: #0B0E17;
+          --ad-card: #151928;
+          --ad-input: #0F1322;
+          --ad-border: rgba(255, 255, 255, 0.08);
+          --ad-text: #F8FAFC;
+          --ad-text-sec: #94A3B8;
+          --ad-text-mut: #64748B;
+          --ad-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
         /* Scrollbar */
         .ad-scroll::-webkit-scrollbar { width: 5px; }
         .ad-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -4708,7 +4754,7 @@ function AdminPanelInner() {
         }
       `}</style>
 
-      <div style={{
+      <div className={`ad-theme-root ${isDark ? 'dark' : ''}`} style={{
         position: 'fixed', inset: 0, zIndex: 9999,
         display: 'flex', background: T_THEME.bg, overflow: 'hidden',
         fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif",
