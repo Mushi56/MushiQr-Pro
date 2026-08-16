@@ -67,9 +67,8 @@ function ToastProvider({ children }) {
     <ToastCtx.Provider value={add}>
       {children}
       <div style={{
-        position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 99999,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, pointerEvents: 'none',
-        width: 'max-content', maxWidth: '92vw'
+        position: 'fixed', bottom: 24, right: 24, zIndex: 9999,
+        display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none',
       }}>
         {toasts.map(t => (
           <div key={t.id} style={{
