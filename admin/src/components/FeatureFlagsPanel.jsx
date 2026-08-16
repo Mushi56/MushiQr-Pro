@@ -956,12 +956,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
       </div>
 
       {/* 4 Top Stat Cards (2x2 on Mobile, 4-col on Desktop) */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-        gap: 12,
-        marginBottom: 20
-      }}>
+      <div className="ad-stat-grid" style={{ marginBottom: 20 }}>
         <StatMiniCard
           icon={Flag}
           iconColor="#FF4D9D"

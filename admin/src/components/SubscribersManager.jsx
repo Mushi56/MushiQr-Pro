@@ -90,14 +90,14 @@ export default function SubscribersManager() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, color: '#fff' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, color: 'var(--ad-text)' }}>
       {/* Header Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: T.bgCard, padding: '18px 22px', borderRadius: T.r.lg, border: `1px solid ${T.border}`, flexWrap: 'wrap', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--ad-card)', padding: '18px 22px', borderRadius: T.r.lg, border: `1px solid var(--ad-border)`, boxShadow: 'var(--ad-card-shadow)', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ad-text)' }}>
             <Users size={20} color={T.accent} /> Subscribers &amp; User Entitlements
           </h2>
-          <p style={{ fontSize: 12, color: T.textSec, margin: '4px 0 0' }}>
+          <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '4px 0 0' }}>
             Inspect active user memberships, verify payment providers, and grant manual administrative subscriptions.
           </p>
         </div>
@@ -105,7 +105,7 @@ export default function SubscribersManager() {
         <button
           onClick={() => setGrantModal(true)}
           style={{
-            background: T.accent,
+            background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
             color: '#fff',
             border: 'none',
             borderRadius: 10,
@@ -115,7 +115,8 @@ export default function SubscribersManager() {
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 6
+            gap: 6,
+            boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)'
           }}
         >
           <UserPlus size={14} /> Grant Premium
@@ -124,14 +125,14 @@ export default function SubscribersManager() {
 
       {/* Filter & Search Bar */}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.04)', padding: '8px 14px', borderRadius: 10, border: `1px solid ${T.border}`, flex: 1, minWidth: 220 }}>
-          <Search size={14} color="#8b8fa8" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--ad-input)', padding: '8px 14px', borderRadius: 10, border: `1px solid var(--ad-border)`, flex: 1, minWidth: 220 }}>
+          <Search size={14} color="var(--ad-text-sec)" />
           <input
             type="text"
             placeholder="Search by User UID or Provider..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ background: 'none', border: 'none', color: '#fff', outline: 'none', fontSize: 12, width: '100%' }}
+            style={{ background: 'none', border: 'none', color: 'var(--ad-text)', outline: 'none', fontSize: 12, width: '100%', fontFamily: 'inherit' }}
           />
         </div>
 
@@ -141,15 +142,16 @@ export default function SubscribersManager() {
               key={st}
               onClick={() => setStatusFilter(st)}
               style={{
-                background: statusFilter === st ? 'rgba(214,0,54,0.15)' : 'rgba(255,255,255,0.03)',
-                color: statusFilter === st ? T.accent : T.textSec,
-                border: `1px solid ${statusFilter === st ? T.accent : T.border}`,
+                background: statusFilter === st ? 'rgba(255, 77, 157, 0.14)' : 'var(--ad-input)',
+                color: statusFilter === st ? '#FF4D9D' : 'var(--ad-text-sec)',
+                border: `1px solid ${statusFilter === st ? '#FF4D9D' : 'var(--ad-border)'}`,
                 padding: '6px 12px',
                 borderRadius: 8,
                 fontSize: 11,
                 fontWeight: 700,
                 cursor: 'pointer',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                fontFamily: 'inherit'
               }}
             >
               {st}
@@ -159,23 +161,23 @@ export default function SubscribersManager() {
       </div>
 
       {/* Subscribers Table */}
-      <div style={{ background: T.bgCard, borderRadius: T.r.lg, border: `1px solid ${T.border}`, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--ad-card)', borderRadius: T.r.lg, border: `1px solid var(--ad-border)`, boxShadow: 'var(--ad-card-shadow)', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 680 }}>
             <thead>
-              <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${T.border}` }}>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>User UID</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Plan Tier</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Provider</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Expiry Date</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
+              <tr style={{ background: 'var(--ad-input)', borderBottom: `1px solid var(--ad-border)` }}>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>User UID</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Plan Tier</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Status</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Provider</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Expiry Date</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredSubscribers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: '40px 20px', textAlign: 'center', color: T.textSec, fontSize: 13 }}>
+                  <td colSpan={6} style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--ad-text-sec)', fontSize: 13 }}>
                     No subscription records found matching your filters.
                   </td>
                 </tr>
@@ -185,17 +187,17 @@ export default function SubscribersManager() {
                   const isGold = status === 'ACTIVE' || status === 'TRIAL';
 
                   return (
-                    <tr key={sub.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <tr key={sub.id} style={{ borderBottom: `1px solid var(--ad-border)` }}>
                       <td style={{ padding: '14px 18px' }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', fontFamily: 'monospace' }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ad-text)', fontFamily: 'monospace' }}>
                           {sub.userId || sub.id}
                         </div>
                         {sub.grantReason && (
-                          <div style={{ fontSize: 10, color: T.textSec, marginTop: 2 }}>Reason: {sub.grantReason}</div>
+                          <div style={{ fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 2 }}>Reason: {sub.grantReason}</div>
                         )}
                       </td>
                       <td style={{ padding: '14px 18px' }}>
-                        <span style={{ fontSize: 12, fontWeight: 800, textTransform: 'capitalize', color: sub.planId === 'yearly' ? '#D60036' : sub.planId === 'monthly' ? '#3b82f6' : '#fff' }}>
+                        <span style={{ fontSize: 12, fontWeight: 800, textTransform: 'capitalize', color: sub.planId === 'yearly' ? '#D60036' : sub.planId === 'monthly' ? '#3b82f6' : 'var(--ad-text)' }}>
                           {sub.planId || (sub.isPro ? 'Pro' : 'Free')}
                         </span>
                       </td>
@@ -211,11 +213,11 @@ export default function SubscribersManager() {
                           {status}
                         </span>
                       </td>
-                      <td style={{ padding: '14px 18px', fontSize: 12, color: T.textSec }}>
+                      <td style={{ padding: '14px 18px', fontSize: 12, color: 'var(--ad-text-sec)' }}>
                         {sub.provider || 'system'}
                       </td>
-                      <td style={{ padding: '14px 18px', fontSize: 12, color: T.textSec }}>
-                        {sub.expiryDate ? fmtDate(sub.expiryDate) : (sub.planId === 'lifetime' ? 'Lifetime' : 'â€”')}
+                      <td style={{ padding: '14px 18px', fontSize: 12, color: 'var(--ad-text-sec)' }}>
+                        {sub.expiryDate ? fmtDate(sub.expiryDate) : (sub.planId === 'lifetime' ? 'Lifetime' : '—')}
                       </td>
                       <td style={{ padding: '14px 18px', textAlign: 'right' }}>
                         <button
@@ -225,10 +227,10 @@ export default function SubscribersManager() {
                             setGrantModal(true);
                           }}
                           style={{
-                            background: 'rgba(255,255,255,0.06)',
-                            border: `1px solid ${T.border}`,
-                            color: '#fff',
-                            padding: '4px 10px',
+                            background: 'var(--ad-input)',
+                            border: `1px solid var(--ad-border)`,
+                            color: 'var(--ad-text)',
+                            padding: '6px 12px',
                             borderRadius: 6,
                             fontSize: 11,
                             fontWeight: 700,
@@ -250,10 +252,10 @@ export default function SubscribersManager() {
       {/* Grant / Modify Premium Modal */}
       {grantModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, width: '100%', maxWidth: 480, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${T.border}` }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Grant or Modify Subscription</h3>
-              <button onClick={() => setGrantModal(false)} style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer' }}><X size={20} /></button>
+          <div style={{ background: 'var(--ad-card)', border: `1px solid var(--ad-border)`, borderRadius: 16, width: '100%', maxWidth: 480, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.5)', color: 'var(--ad-text)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid var(--ad-border)` }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: 'var(--ad-text)' }}>Grant or Modify Subscription</h3>
+              <button onClick={() => setGrantModal(false)} style={{ background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
             <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -264,23 +266,23 @@ export default function SubscribersManager() {
               )}
 
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 4 }}>Target User UID</label>
+                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 4 }}>Target User UID</label>
                 <input
                   type="text"
                   placeholder="Paste Firebase Auth User UID"
                   value={targetUid}
                   onChange={e => setTargetUid(e.target.value)}
-                  style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 12, outline: 'none', fontFamily: 'monospace' }}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: 8, color: 'var(--ad-text)', fontSize: 12, outline: 'none', fontFamily: 'monospace' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 4 }}>Plan Tier</label>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 4 }}>Plan Tier</label>
                   <select
                     value={selectedPlan}
                     onChange={e => setSelectedPlan(e.target.value)}
-                    style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 12, outline: 'none' }}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: 8, color: 'var(--ad-text)', fontSize: 12, outline: 'none' }}
                   >
                     <option value="weekly">Weekly Pass</option>
                     <option value="monthly">Monthly Pro</option>
@@ -291,26 +293,26 @@ export default function SubscribersManager() {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 4 }}>Duration (Days)</label>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 4 }}>Duration (Days)</label>
                   <input
                     type="number"
                     min="1"
                     disabled={selectedPlan === 'lifetime' || selectedPlan === 'free'}
                     value={durationDays}
                     onChange={e => setDurationDays(e.target.value)}
-                    style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 12, outline: 'none' }}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: 8, color: 'var(--ad-text)', fontSize: 12, outline: 'none' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 4 }}>Reason / Notes</label>
+                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 4 }}>Reason / Notes</label>
                 <input
                   type="text"
                   placeholder="e.g. VIP Customer Promo, Refund compensation"
                   value={grantReason}
                   onChange={e => setGrantReason(e.target.value)}
-                  style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 12, outline: 'none' }}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: 8, color: 'var(--ad-text)', fontSize: 12, outline: 'none' }}
                 />
               </div>
 
@@ -322,9 +324,9 @@ export default function SubscribersManager() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', padding: '14px 20px', borderTop: `1px solid ${T.border}` }}>
-              <button onClick={() => setGrantModal(false)} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${T.border}`, background: 'transparent', color: T.textSec, cursor: 'pointer', fontSize: 12 }}>Cancel</button>
-              <button onClick={handleManualGrant} disabled={granting} style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: T.accent, color: '#fff', cursor: 'pointer', fontSize: 12, fontWeight: 800 }}>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', padding: '14px 20px', borderTop: `1px solid var(--ad-border)` }}>
+              <button onClick={() => setGrantModal(false)} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid var(--ad-border)`, background: 'transparent', color: 'var(--ad-text-sec)', cursor: 'pointer', fontSize: 12 }}>Cancel</button>
+              <button onClick={handleManualGrant} disabled={granting} style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)', color: '#fff', cursor: 'pointer', fontSize: 12, fontWeight: 800 }}>
                 {granting ? 'Granting...' : 'Confirm Update'}
               </button>
             </div>

@@ -1,8 +1,14 @@
 {
-  "short_name": "Mushi Qr",
-  "name": "Mushi Qr Pro - Fast & Beautiful QR Generator",
-  "description": "Premium QR code generator and scanner with beautiful designs",
+  "short_name": "Mushi Admin",
+  "name": "Mushi QR Pro — Super Admin Panel",
+  "description": "Super Admin Management Panel for Mushi QR Pro SaaS",
   "icons": [
+    {
+      "src": "/admin-logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    },
     {
       "src": "/logo.webp",
       "type": "image/webp",
@@ -13,10 +19,10 @@
   "start_url": ".",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#030305",
-  "background_color": "#030305",
+  "theme_color": "#0F1221",
+  "background_color": "#0F1221",
   "categories": [
-    "utilities",
-    "productivity"
+    "productivity",
+    "business"
   ]
 }

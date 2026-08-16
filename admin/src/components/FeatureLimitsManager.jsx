@@ -96,14 +96,14 @@ export default function FeatureLimitsManager() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, color: '#fff' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, color: 'var(--ad-text)' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: T.bgCard, padding: '18px 22px', borderRadius: T.r.lg, border: `1px solid ${T.border}`, flexWrap: 'wrap', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--ad-card)', padding: '18px 22px', borderRadius: T.r.lg, border: `1px solid var(--ad-border)`, boxShadow: 'var(--ad-card-shadow)', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ad-text)' }}>
             <Sliders size={20} color={T.accent} /> Quantitative Feature Limits
           </h2>
-          <p style={{ fontSize: 12, color: T.textSec, margin: '4px 0 0' }}>
+          <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '4px 0 0' }}>
             Define exact numerical quotas (e.g. batch size, daily exports, saved presets) for each membership tier.
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function FeatureLimitsManager() {
             onClick={handleSave}
             disabled={saving}
             style={{
-              background: T.accent,
+              background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
               color: '#fff',
               border: 'none',
               borderRadius: 10,
@@ -128,7 +128,8 @@ export default function FeatureLimitsManager() {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 6
+              gap: 6,
+              boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)'
             }}
           >
             <Save size={14} />
@@ -146,9 +147,10 @@ export default function FeatureLimitsManager() {
             <div
               key={def.id}
               style={{
-                background: T.bgCard,
+                background: 'var(--ad-card)',
                 borderRadius: T.r.lg,
-                border: `1px solid ${T.border}`,
+                border: `1px solid var(--ad-border)`,
+                boxShadow: 'var(--ad-card-shadow)',
                 padding: '20px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -156,8 +158,8 @@ export default function FeatureLimitsManager() {
               }}
             >
               <div>
-                <div style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>{def.name}</div>
-                <div style={{ fontSize: 12, color: T.textSec, marginTop: 2 }}>{def.desc} &middot; <span style={{ color: T.accent }}>{def.category}</span></div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--ad-text)' }}>{def.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--ad-text-sec)', marginTop: 2 }}>{def.desc} &middot; <span style={{ color: '#FF4D9D', fontWeight: 700 }}>{def.category}</span></div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
@@ -169,10 +171,10 @@ export default function FeatureLimitsManager() {
                     <div
                       key={plan.id}
                       style={{
-                        background: 'rgba(255,255,255,0.03)',
+                        background: 'var(--ad-input)',
                         borderRadius: 12,
                         padding: '12px 14px',
-                        border: `1px solid ${isUnlimited ? plan.color + '44' : 'rgba(255,255,255,0.06)'}`,
+                        border: `1px solid ${isUnlimited ? plan.color + '66' : 'var(--ad-border)'}`,
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 8
@@ -183,11 +185,11 @@ export default function FeatureLimitsManager() {
                         <button
                           onClick={() => toggleUnlimited(def.id, plan.id)}
                           style={{
-                            background: isUnlimited ? plan.color : 'rgba(255,255,255,0.08)',
-                            color: isUnlimited ? '#fff' : T.textSec,
+                            background: isUnlimited ? plan.color : 'rgba(255, 77, 157, 0.12)',
+                            color: isUnlimited ? '#fff' : '#FF4D9D',
                             border: 'none',
                             borderRadius: 6,
-                            padding: '2px 6px',
+                            padding: '3px 8px',
                             fontSize: 10,
                             fontWeight: 800,
                             cursor: 'pointer',
@@ -211,11 +213,11 @@ export default function FeatureLimitsManager() {
                           value={val}
                           onChange={e => handleLimitChange(def.id, plan.id, e.target.value)}
                           style={{
-                            background: T.bgEl,
-                            border: `1px solid ${T.border}`,
+                            background: 'var(--ad-card)',
+                            border: `1px solid var(--ad-border)`,
                             borderRadius: 8,
                             padding: '6px 10px',
-                            color: '#fff',
+                            color: 'var(--ad-text)',
                             fontSize: 14,
                             fontWeight: 700,
                             outline: 'none',

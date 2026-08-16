@@ -113,16 +113,16 @@ export default function FeatureMatrixManager({ onClose }) {
   };
 
   return (
-    <div style={{ background: '#13131d', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '24px', color: '#fff' }}>
+    <div style={{ background: 'var(--ad-card)', border: '1px solid var(--ad-border)', borderRadius: 20, padding: '24px', color: 'var(--ad-text)', boxShadow: 'var(--ad-card-shadow)' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <SlidersHorizontal size={20} color="#D60036" />
+          <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ad-text)' }}>
+            <SlidersHorizontal size={20} color="#FF4D9D" />
             Feature &times; Plan Entitlement Matrix
           </h2>
-          <p style={{ fontSize: 12, color: '#8b8fa8', margin: '4px 0 0' }}>
-            Control which subscription tier has access to each of the 78 canonical app capabilities.
+          <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '4px 0 0' }}>
+            Control which subscription tier has access to each of the canonical app capabilities.
           </p>
         </div>
 
@@ -136,7 +136,7 @@ export default function FeatureMatrixManager({ onClose }) {
             onClick={handleSave}
             disabled={saving}
             style={{
-              background: 'var(--accent-gradient, #D60036)',
+              background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
               color: '#fff',
               border: 'none',
               borderRadius: 10,
@@ -146,7 +146,8 @@ export default function FeatureMatrixManager({ onClose }) {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 6
+              gap: 6,
+              boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)'
             }}
           >
             <Save size={14} />
@@ -157,21 +158,21 @@ export default function FeatureMatrixManager({ onClose }) {
 
       {/* Controls Bar */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.04)', padding: '6px 12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', flex: 1, minWidth: 200 }}>
-          <Search size={14} color="#8b8fa8" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--ad-input)', padding: '6px 12px', borderRadius: 10, border: '1px solid var(--ad-border)', flex: 1, minWidth: 200 }}>
+          <Search size={14} color="var(--ad-text-sec)" />
           <input
             type="text"
             placeholder="Search features..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ background: 'none', border: 'none', color: '#fff', outline: 'none', fontSize: 12, width: '100%' }}
+            style={{ background: 'none', border: 'none', color: 'var(--ad-text)', outline: 'none', fontSize: 12, width: '100%', fontFamily: 'inherit' }}
           />
         </div>
 
         <select
           value={selectedCat}
           onChange={e => setSelectedCat(e.target.value)}
-          style={{ background: '#1c1c28', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: 10, fontSize: 12, outline: 'none' }}
+          style={{ background: 'var(--ad-input)', color: 'var(--ad-text)', border: '1px solid var(--ad-border)', padding: '6px 12px', borderRadius: 10, fontSize: 12, outline: 'none', fontFamily: 'inherit' }}
         >
           <option value="ALL">All Categories ({FEATURE_REGISTRY.length})</option>
           {Object.entries(FEATURE_CATEGORIES).map(([key, cat]) => (
@@ -181,12 +182,12 @@ export default function FeatureMatrixManager({ onClose }) {
       </div>
 
       {/* Matrix Table */}
-      <div style={{ overflowX: 'auto', borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ overflowX: 'auto', borderRadius: 14, border: '1px solid var(--ad-border)' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 640 }}>
           <thead>
-            <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: '#8b8fa8' }}>Feature Capability</th>
-              <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: '#8b8fa8' }}>Category</th>
+            <tr style={{ background: 'var(--ad-input)', borderBottom: '1px solid var(--ad-border)' }}>
+              <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)' }}>Feature Capability</th>
+              <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)' }}>Category</th>
               {CANONICAL_PLANS.map(plan => (
                 <th key={plan.id} style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: plan.color, textAlign: 'center' }}>
                   {plan.name}
@@ -198,12 +199,12 @@ export default function FeatureMatrixManager({ onClose }) {
             {filteredFeatures.map(feat => {
               const assignedPlans = matrix[feat.featureId] || [];
               return (
-                <tr key={feat.featureId} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <tr key={feat.featureId} style={{ borderBottom: '1px solid var(--ad-border)' }}>
                   <td style={{ padding: '12px 16px' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{feat.displayName}</div>
-                    <div style={{ fontSize: 10, color: '#8b8fa8', marginTop: 2 }}>{feat.featureId}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ad-text)' }}>{feat.displayName}</div>
+                    <div style={{ fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 2 }}>{feat.featureId}</div>
                   </td>
-                  <td style={{ padding: '12px 16px', fontSize: 11, color: '#8b8fa8' }}>
+                  <td style={{ padding: '12px 16px', fontSize: 11, color: 'var(--ad-text-sec)' }}>
                     {FEATURE_CATEGORIES[feat.category]?.name || feat.category}
                   </td>
                   {CANONICAL_PLANS.map(plan => {
@@ -216,9 +217,9 @@ export default function FeatureMatrixManager({ onClose }) {
                             width: 28,
                             height: 28,
                             borderRadius: 8,
-                            border: `1.5px solid ${isChecked ? plan.color : 'rgba(255,255,255,0.1)'}`,
+                            border: `1.5px solid ${isChecked ? plan.color : 'var(--ad-border)'}`,
                             background: isChecked ? `${plan.color}22` : 'transparent',
-                            color: isChecked ? plan.color : '#475569',
+                            color: isChecked ? plan.color : 'var(--ad-text-sec)',
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',

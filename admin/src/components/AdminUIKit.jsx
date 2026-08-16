@@ -167,7 +167,7 @@ export function TrendPill({ value = '+12.5%', isUp = true, period = 'from last m
   );
 }
 
-// â”€â”€ Top Stat Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Top Stat Card ────────────────────────────────────────────────────────────────
 export function StatCard({
   title,
   value,
@@ -181,27 +181,28 @@ export function StatCard({
 }) {
   const tokens = getTokens(isDark);
   return (
-    <div style={{
-      background: tokens.bgCard,
-      border: `1px solid ${tokens.border}`,
+    <div className="ad-stat-card" style={{
+      background: 'var(--ad-card)',
+      border: `1px solid var(--ad-border)`,
       borderRadius: 16,
-      padding: '20px 22px',
-      boxShadow: tokens.cardShadow,
+      padding: '16px 14px',
+      boxShadow: 'var(--ad-card-shadow)',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      gap: 14,
+      gap: 10,
+      minWidth: 0,
       transition: 'transform 0.15s, box-shadow 0.15s'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: tokens.textSec }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {title}
         </span>
         {Icon && (
           <div style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
+            width: 34,
+            height: 34,
+            borderRadius: 10,
             background: iconBg,
             display: 'flex',
             alignItems: 'center',
@@ -209,16 +210,16 @@ export function StatCard({
             color: iconColor,
             flexShrink: 0
           }}>
-            <Icon size={20} />
+            <Icon size={18} strokeWidth={2.4} />
           </div>
         )}
       </div>
 
-      <div>
-        <div style={{ fontSize: 26, fontWeight: 900, color: tokens.text, letterSpacing: '-0.5px' }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--ad-text)', letterSpacing: '-0.4px', lineHeight: 1.15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {value}
         </div>
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 6 }}>
           <TrendPill value={trend} isUp={isUp} period={period} isDark={isDark} />
         </div>
       </div>

@@ -200,28 +200,28 @@ export default function MembershipDashboard() {
       {activeTab === 'overview' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* KPI Statistics Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
-            <div style={{ background: T.bgCard, padding: '18px', borderRadius: T.r.lg, border: `1px solid ${T.border}` }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Total Registered Users</div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginTop: 4 }}>{subscribersCount || 'â€”'}</div>
+          <div className="ad-stat-grid">
+            <div style={{ background: 'var(--ad-card)', padding: '16px 14px', borderRadius: T.r.lg, border: `1px solid var(--ad-border)`, boxShadow: 'var(--ad-card-shadow)' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Total Registered Users</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--ad-text)', marginTop: 4, letterSpacing: '-0.4px' }}>{subscribersCount || '—'}</div>
               <div style={{ fontSize: 11, color: '#10b981', marginTop: 4, fontWeight: 700 }}>Real-time user count</div>
             </div>
 
-            <div style={{ background: T.bgCard, padding: '18px', borderRadius: T.r.lg, border: `1px solid ${T.border}` }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Active Premium Pass</div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: T.accent, marginTop: 4 }}>{activeProCount}</div>
+            <div style={{ background: 'var(--ad-card)', padding: '16px 14px', borderRadius: T.r.lg, border: `1px solid var(--ad-border)`, boxShadow: 'var(--ad-card-shadow)' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Active Premium Pass</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: T.accent, marginTop: 4, letterSpacing: '-0.4px' }}>{activeProCount}</div>
               <div style={{ fontSize: 11, color: '#10b981', marginTop: 4, fontWeight: 700 }}>Weekly / Monthly / Yearly / VIP</div>
             </div>
 
-            <div style={{ background: T.bgCard, padding: '18px', borderRadius: T.r.lg, border: `1px solid ${T.border}` }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Total Transactions</div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: '#3b82f6', marginTop: 4 }}>{txnCount}</div>
-              <div style={{ fontSize: 11, color: T.textSec, marginTop: 4 }}>Google Play &amp; Web checkouts</div>
+            <div style={{ background: 'var(--ad-card)', padding: '16px 14px', borderRadius: T.r.lg, border: `1px solid var(--ad-border)`, boxShadow: 'var(--ad-card-shadow)' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Total Transactions</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#3b82f6', marginTop: 4, letterSpacing: '-0.4px' }}>{txnCount}</div>
+              <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 4 }}>Google Play & Web checkouts</div>
             </div>
 
-            <div style={{ background: T.bgCard, padding: '18px', borderRadius: T.r.lg, border: `1px solid ${T.border}` }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Entitlement Sync State</div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: '#10b981', marginTop: 4 }}>100%</div>
+            <div style={{ background: 'var(--ad-card)', padding: '16px 14px', borderRadius: T.r.lg, border: `1px solid var(--ad-border)`, boxShadow: 'var(--ad-card-shadow)' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Entitlement Sync State</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#10b981', marginTop: 4, letterSpacing: '-0.4px' }}>100%</div>
               <div style={{ fontSize: 11, color: '#10b981', marginTop: 4, fontWeight: 700 }}>Two-Source Validation Active</div>
             </div>
           </div>

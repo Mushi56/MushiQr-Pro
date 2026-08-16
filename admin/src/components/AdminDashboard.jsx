@@ -164,12 +164,8 @@ export default function AdminDashboard({ onNavigate, stats = {}, revenueData = {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* â”€â”€ 1. Top 4 Statistic Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        gap: 16,
-      }}>
+      {/* ── 1. Top 4 Statistic Cards (4 cols desktop, strictly 2 cols mobile) ── */}
+      <div className="ad-stat-grid">
         <StatCard
           title="Total Users"
           value={totalUsersCount}
@@ -216,12 +212,8 @@ export default function AdminDashboard({ onNavigate, stats = {}, revenueData = {
         />
       </div>
 
-      {/* â”€â”€ 2. Charts Row: Revenue Overview & Subscription Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-        gap: 20,
-      }}>
+      {/* ── 2. Charts Row: Revenue Overview & Subscription Status ─────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: 16 }}>
         {/* Revenue Overview (Curved Line Chart) */}
         <div style={{
           background: T.bgCard,

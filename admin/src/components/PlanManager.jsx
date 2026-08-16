@@ -176,10 +176,10 @@ export default function PlanManager({ isDark = false }) {
         </button>
       </div>
 
-      {/* â”€â”€ Plans Grid / Cards (Matching Reference Layout) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Plans Grid / Cards (Matching Reference Layout) ────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
         gap: 16
       }}>
         {allPlansList.map((plan) => {
@@ -191,15 +191,15 @@ export default function PlanManager({ isDark = false }) {
             <div
               key={plan.id}
               style={{
-                background: T.bgCard,
-                border: `1px solid ${T.border}`,
+                background: 'var(--ad-card)',
+                border: `1px solid var(--ad-border)`,
                 borderRadius: 16,
-                padding: '20px 22px',
-                boxShadow: T.cardShadow,
+                padding: '18px 18px',
+                boxShadow: 'var(--ad-card-shadow)',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                gap: 16,
+                gap: 14,
                 position: 'relative'
               }}
             >

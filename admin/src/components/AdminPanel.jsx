@@ -444,26 +444,17 @@ function DonutSVG({ segments = [], size = 160 }) {
   );
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// SIDEBAR (Matching Reference: Dark #0F1221, Pink/Purple Active, Tech Badges)
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
+// SIDEBAR (Consistent Light/Dark Mode, 3-Option Theme Selector)
+// ═══════════════════════════════════════════════════════════════════════════
 
-function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDark, toggleTheme }) {
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      window.location.reload();
-    } catch (e) {
-      console.error('Logout error:', e);
-    }
-  };
-
+function Sidebar({ active, setActive, isMobile, open, onClose, isDark, themeMode, setThemeMode }) {
   return (
     <aside
       style={{
         width: 260,
-        background: '#0F1221',
-        borderRight: '1px solid rgba(255, 255, 255, 0.07)',
+        background: isDark ? '#0F1221' : '#FFFFFF',
+        borderRight: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
         display: 'flex',
         flexDirection: 'column',
         position: isMobile ? 'fixed' : 'relative',
@@ -471,45 +462,54 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
         top: 0,
         bottom: 0,
         zIndex: isMobile ? 50 : 10,
-        transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: isMobile && open ? '8px 0 36px rgba(0,0,0,0.6)' : 'none',
+        transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease, border-color 0.2s ease',
+        boxShadow: isMobile && open ? (isDark ? '8px 0 36px rgba(0,0,0,0.7)' : '8px 0 36px rgba(15,23,42,0.15)') : 'none',
         flexShrink: 0,
         userSelect: 'none',
       }}
     >
-      {/* â”€â”€ Brand Header (App Old Logo + Name Mushi QR Pro + Super Admin Badge) â”€â”€ */}
+      {/* Brand Header */}
       <div style={{
         padding: '18px 16px 14px',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
+        borderBottom: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexShrink: 0,
-        background: 'linear-gradient(180deg, rgba(245, 158, 11, 0.04) 0%, transparent 100%)'
+        background: isDark ? 'linear-gradient(180deg, rgba(245, 158, 11, 0.04) 0%, transparent 100%)' : 'linear-gradient(180deg, rgba(245, 158, 11, 0.08) 0%, transparent 100%)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-          {/* App Old Logo */}
           <div style={{
             position: 'relative',
             width: 42,
             height: 42,
-            borderRadius: 12,
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1.5px solid rgba(245, 158, 11, 0.45)',
+            borderRadius: 11,
+            background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.04)',
+            border: '1.5px solid rgba(245, 158, 11, 0.6)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+            boxShadow: isDark ? '0 4px 14px rgba(245, 158, 11, 0.25)' : '0 4px 12px rgba(245, 158, 11, 0.2)',
             overflow: 'hidden',
-            padding: 3
+            padding: 0
           }}>
-            <img src="/logo.webp" alt="Mushi QR Pro" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img
+              src="/admin-logo.svg"
+              alt="Mushi QR Pro Admin"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+                borderRadius: 9
+              }}
+            />
           </div>
 
           <div style={{ minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 16, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ fontSize: 16, fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Mushi QR Pro
               </span>
             </div>
@@ -532,10 +532,10 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.06)',
+              background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)',
               border: 'none',
               borderRadius: 8,
-              color: '#8E95A9',
+              color: isDark ? '#8E95A9' : '#64748B',
               cursor: 'pointer',
               padding: 6,
               display: 'flex',
@@ -548,7 +548,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
         )}
       </div>
 
-      {/* â”€â”€ 17 Clean Navigation Items â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Navigation Items */}
       <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
         {NAV_MAIN.map(({ id, icon: Icon, label, isNew }) => {
           const isActive = active === id;
@@ -566,9 +566,9 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
                 padding: '9px 12px',
                 borderRadius: 10,
                 border: 'none',
-                background: isActive ? 'linear-gradient(135deg, rgba(255, 77, 157, 0.16) 0%, rgba(123, 97, 255, 0.16) 100%)' : 'transparent',
+                background: isActive ? (isDark ? 'linear-gradient(135deg, rgba(255, 77, 157, 0.16) 0%, rgba(123, 97, 255, 0.16) 100%)' : 'linear-gradient(135deg, rgba(255, 77, 157, 0.12) 0%, rgba(123, 97, 255, 0.12) 100%)') : 'transparent',
                 borderLeft: isActive ? '3px solid #FF4D9D' : '3px solid transparent',
-                color: isActive ? '#FFFFFF' : '#8E95A9',
+                color: isActive ? (isDark ? '#FFFFFF' : '#0F172A') : (isDark ? '#8E95A9' : '#64748B'),
                 fontSize: 13,
                 fontWeight: isActive ? 800 : 600,
                 cursor: 'pointer',
@@ -580,18 +580,18 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
               }}
               onMouseEnter={e => {
                 if (!isActive) {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
-                  e.currentTarget.style.color = '#FFFFFF';
+                  e.currentTarget.style.background = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(15, 23, 42, 0.04)';
+                  e.currentTarget.style.color = isDark ? '#FFFFFF' : '#0F172A';
                 }
               }}
               onMouseLeave={e => {
                 if (!isActive) {
                   e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#8E95A9';
+                  e.currentTarget.style.color = isDark ? '#8E95A9' : '#64748B';
                 }
               }}
             >
-              <Icon size={17} color={isActive ? '#FF4D9D' : '#8E95A9'} strokeWidth={isActive ? 2.4 : 1.9} />
+              <Icon size={17} color={isActive ? '#FF4D9D' : (isDark ? '#8E95A9' : '#64748B')} strokeWidth={isActive ? 2.4 : 1.9} />
               <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {label}
               </span>
@@ -615,140 +615,135 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
         })}
       </div>
 
-      {/* â”€â”€ Sidebar Footer (Tech Badges, Dark Mode Switch, Super Admin Profile) â”€ */}
+      {/* Sidebar Footer with 3-Option Segmented Theme Control (Light, Dark, Auto) */}
       <div style={{
         padding: '14px 14px',
-        borderTop: '1px solid rgba(255, 255, 255, 0.07)',
+        borderTop: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
         display: 'flex',
         flexDirection: 'column',
-        gap: 12,
+        gap: 8,
         flexShrink: 0,
-        background: '#0B0D18'
+        background: isDark ? '#0B0D18' : '#F8FAFC',
+        transition: 'background 0.2s ease, border-color 0.2s ease'
       }}>
-        {/* Tech Stack Indicator Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 6, background: 'rgba(59, 130, 246, 0.15)', color: '#60A5FA' }}>
-            React
-          </span>
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 6, background: 'rgba(6, 182, 212, 0.15)', color: '#22D3EE' }}>
-            Tailwind CSS
-          </span>
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 6, background: 'rgba(245, 158, 11, 0.15)', color: '#FBBF24' }}>
-            Firebase
-          </span>
-        </div>
-
-        {/* Dark / Light Mode Toggle */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '8px 10px',
-          borderRadius: 10,
-          background: 'rgba(255, 255, 255, 0.04)',
-          border: '1px solid rgba(255, 255, 255, 0.06)'
+          fontSize: 11,
+          fontWeight: 800,
+          color: isDark ? '#94A3B8' : '#64748B',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {isDark ? <Moon size={15} color="#7B61FF" /> : <Sun size={15} color="#F59E0B" />}
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#FFFFFF' }}>Dark Mode</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={toggleTheme}
-            style={{
-              width: 38,
-              height: 22,
-              borderRadius: 12,
-              background: isDark ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : 'rgba(255,255,255,0.15)',
-              border: 'none',
-              cursor: 'pointer',
-              position: 'relative',
-              padding: 0,
-              outline: 'none',
-              transition: 'background 0.2s'
-            }}
-          >
-            <div style={{
-              width: 16,
-              height: 16,
-              borderRadius: '50%',
-              background: '#FFFFFF',
-              position: 'absolute',
-              top: 3,
-              left: isDark ? 19 : 3,
-              transition: 'left 0.2s',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
-            }} />
-          </button>
+          <span>Theme Mode</span>
+          <span style={{ fontSize: 10, color: '#FF4D9D', textTransform: 'capitalize', fontWeight: 800 }}>
+            {themeMode === 'auto' ? `Auto (${isDark ? 'Dark' : 'Light'})` : themeMode}
+          </span>
         </div>
 
-        {/* Super Admin Profile Card */}
-        {currentUser && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 10,
-            padding: '8px 10px',
-            borderRadius: 12,
-            background: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid rgba(255, 255, 255, 0.06)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              {currentUser.photoURL ? (
-                <img src={currentUser.photoURL} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                <div style={{
-                  width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
-                  color: '#fff', fontWeight: 900, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                }}>
-                  {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
-                </div>
-              )}
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {currentUser.displayName || 'Super Admin'}
-                </div>
-                <div style={{ fontSize: 10, color: '#8E95A9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {currentUser.email}
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={handleLogout}
-              title="Sign Out"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#8E95A9',
-                cursor: 'pointer',
-                padding: 4,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'color 0.15s'
-              }}
-              onMouseEnter={e => e.currentTarget.style.color = '#EF4444'}
-              onMouseLeave={e => e.currentTarget.style.color = '#8E95A9'}
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
-        )}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 4,
+          padding: 3,
+          borderRadius: 12,
+          background: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(15, 23, 42, 0.05)',
+          border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.08)'}`
+        }}>
+          {[
+            { id: 'light', label: 'Light', icon: Sun },
+            { id: 'dark',  label: 'Dark',  icon: Moon },
+            { id: 'auto',  label: 'Auto',  icon: Monitor },
+          ].map(({ id, label, icon: Icon }) => {
+            const active = themeMode === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setThemeMode(id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 5,
+                  padding: '7px 0',
+                  borderRadius: 9,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  fontSize: 11,
+                  fontWeight: active ? 800 : 600,
+                  background: active
+                    ? (isDark ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : '#FFFFFF')
+                    : 'transparent',
+                  color: active
+                    ? (isDark ? '#FFFFFF' : '#0F172A')
+                    : (isDark ? '#8E95A9' : '#64748B'),
+                  boxShadow: active
+                    ? (isDark ? '0 2px 8px rgba(255,77,157,0.35)' : '0 2px 6px rgba(15,23,42,0.08)')
+                    : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Icon size={13} strokeWidth={active ? 2.5 : 1.9} />
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </aside>
   );
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// HEADER (Matching Reference: Breadcrumb, Search, Notifications, Profile)
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
+// HEADER (Mobile-First Notifications, Search, Profile)
+// ═══════════════════════════════════════════════════════════════════════════
 
-function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTheme }) {
+function Header({ section, onMenuToggle, isMobile, currentUser, isDark }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: 'New Subscription',
+      desc: 'fatima@example.com upgraded to Business Pro plan.',
+      time: '5m ago',
+      unread: true,
+      icon: Zap,
+      color: '#FF4D9D'
+    },
+    {
+      id: 2,
+      title: 'Cloud Functions Live',
+      desc: 'Automated claim minting and token sync active.',
+      time: '1h ago',
+      unread: true,
+      icon: CheckCircle,
+      color: '#22C55E'
+    },
+    {
+      id: 3,
+      title: 'Security Rules Enforced',
+      desc: 'Firestore RBAC security audit completed successfully.',
+      time: '3h ago',
+      unread: false,
+      icon: Shield,
+      color: '#3B82F6'
+    },
+  ]);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
+
+  const dismissNotif = (id, e) => {
+    e.stopPropagation();
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
 
   return (
     <header style={{
@@ -758,14 +753,15 @@ function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTh
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 24px',
+      padding: '0 20px',
       position: 'sticky',
       top: 0,
       zIndex: 20,
       flexShrink: 0,
+      transition: 'background 0.2s ease, border-color 0.2s ease'
     }}>
       {/* Left: Mobile Hamburger & Page Title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {isMobile && (
           <button
             onClick={onMenuToggle}
@@ -799,9 +795,9 @@ function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTh
         </div>
       </div>
 
-      {/* Right: Search, Notifications, Theme Toggle, Profile */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {/* Search Bar */}
+      {/* Right: Search, Mobile-First Notifications, User Avatar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* Search Bar (Desktop only) */}
         <div style={{
           display: isMobile ? 'none' : 'flex',
           alignItems: 'center',
@@ -822,94 +818,278 @@ function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTh
               color: isDark ? '#F8FAFC' : '#0F172A',
               fontSize: 13,
               fontFamily: 'inherit',
-              width: 140
+              width: 130
             }}
           />
         </div>
 
-        {/* Notifications Icon with Badge */}
+        {/* Notifications Trigger Button */}
         <div style={{ position: 'relative' }}>
           <button
             onClick={() => setNotifOpen(prev => !prev)}
+            title="Notifications"
             style={{
-              width: 36,
-              height: 36,
+              width: 38,
+              height: 38,
               borderRadius: 10,
-              background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.05)',
-              border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
+              background: notifOpen
+                ? (isDark ? 'rgba(255, 77, 157, 0.15)' : 'rgba(255, 77, 157, 0.1)')
+                : (isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.05)'),
+              border: `1px solid ${notifOpen ? '#FF4D9D' : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)')}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: isDark ? '#F8FAFC' : '#0F172A',
+              color: notifOpen ? '#FF4D9D' : (isDark ? '#F8FAFC' : '#0F172A'),
               cursor: 'pointer',
-              position: 'relative'
+              position: 'relative',
+              transition: 'all 0.15s ease'
             }}
           >
-            <Bell size={16} />
-            <span style={{
-              position: 'absolute',
-              top: 6,
-              right: 6,
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              background: '#FF4D9D'
-            }} />
+            <Bell size={17} />
+            {unreadCount > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: 6,
+                right: 6,
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: '#FF4D9D',
+                boxShadow: '0 0 8px rgba(255, 77, 157, 0.8)'
+              }} />
+            )}
           </button>
 
-          {notifOpen && (
-            <div style={{
-              position: 'absolute',
-              top: 44,
-              right: 0,
-              width: 280,
-              background: isDark ? '#151928' : '#FFFFFF',
-              border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.1)'}`,
-              borderRadius: 14,
-              padding: 16,
-              boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
-              zIndex: 100,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 13, fontWeight: 800, color: isDark ? '#F8FAFC' : '#0F172A' }}>Notifications</span>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 100, background: 'rgba(255, 77, 157, 0.15)', color: '#FF4D9D' }}>3 New</span>
-              </div>
-              <div style={{ fontSize: 12, color: isDark ? '#94A3B8' : '#64748B', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ padding: '6px 8px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)' }}>
-                  ðŸŽ‰ New subscription from <strong>fatima@example.com</strong>
+          {/* Desktop Notifications Dropdown */}
+          {notifOpen && !isMobile && (
+            <>
+              {/* Click-away backdrop */}
+              <div
+                onClick={() => setNotifOpen(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 90 }}
+              />
+              <div style={{
+                position: 'absolute',
+                top: 48,
+                right: 0,
+                width: 320,
+                background: isDark ? '#151928' : '#FFFFFF',
+                border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.12)'}`,
+                borderRadius: 16,
+                boxShadow: '0 20px 50px rgba(0,0,0,0.35)',
+                zIndex: 100,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                animation: 'adSlideIn 0.2s ease'
+              }}>
+                <div style={{
+                  padding: '14px 16px',
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(15,23,42,0.02)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: isDark ? '#F8FAFC' : '#0F172A' }}>Notifications</span>
+                    {unreadCount > 0 && (
+                      <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 100, background: 'rgba(255, 77, 157, 0.15)', color: '#FF4D9D' }}>
+                        {unreadCount} New
+                      </span>
+                    )}
+                  </div>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={markAllAsRead}
+                      style={{ background: 'none', border: 'none', color: '#FF4D9D', fontSize: 11, fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                    >
+                      Mark read
+                    </button>
+                  )}
                 </div>
-                <div style={{ padding: '6px 8px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)' }}>
-                  âš¡ Cloud function deployed successfully.
+
+                <div style={{ padding: '8px 8px', maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {notifications.length === 0 ? (
+                    <div style={{ padding: '24px 0', textAlign: 'center', color: isDark ? '#94A3B8' : '#64748B', fontSize: 12 }}>
+                      No notifications
+                    </div>
+                  ) : (
+                    notifications.map(n => {
+                      const Icon = n.icon;
+                      return (
+                        <div
+                          key={n.id}
+                          style={{
+                            padding: '10px 12px',
+                            borderRadius: 12,
+                            background: n.unread
+                              ? (isDark ? 'rgba(255, 77, 157, 0.06)' : 'rgba(255, 77, 157, 0.04)')
+                              : 'transparent',
+                            border: `1px solid ${n.unread ? (isDark ? 'rgba(255, 77, 157, 0.2)' : 'rgba(255, 77, 157, 0.15)') : 'transparent'}`,
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: 10,
+                            position: 'relative'
+                          }}
+                        >
+                          <div style={{
+                            width: 30, height: 30, borderRadius: 8,
+                            background: `${n.color}18`,
+                            color: n.color,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0, marginTop: 2
+                          }}>
+                            <Icon size={15} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <span style={{ fontSize: 12, fontWeight: 800, color: isDark ? '#F8FAFC' : '#0F172A' }}>{n.title}</span>
+                              <span style={{ fontSize: 10, color: isDark ? '#94A3B8' : '#64748B' }}>{n.time}</span>
+                            </div>
+                            <div style={{ fontSize: 11, color: isDark ? '#94A3B8' : '#64748B', marginTop: 2, lineHeight: 1.4 }}>
+                              {n.desc}
+                            </div>
+                          </div>
+                          <button
+                            onClick={e => dismissNotif(n.id, e)}
+                            title="Dismiss"
+                            style={{ background: 'none', border: 'none', color: isDark ? '#64748B' : '#94A3B8', cursor: 'pointer', padding: 2, display: 'flex' }}
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
-            </div>
+            </>
           )}
         </div>
 
-        {/* Theme Mode Toggle (Sun/Moon) */}
-        <button
-          onClick={toggleTheme}
-          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.05)',
-            border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: isDark ? '#F59E0B' : '#7B61FF',
-            cursor: 'pointer',
-          }}
-        >
-          {isDark ? <Sun size={17} /> : <Moon size={17} />}
-        </button>
+        {/* Mobile-First Full Drawer / Bottom Sheet Notification Modal */}
+        {notifOpen && isMobile && (
+          <div
+            onClick={() => setNotifOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.7)',
+              backdropFilter: 'blur(5px)',
+              zIndex: 99999,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end',
+              animation: 'fadeIn 0.2s ease'
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: isDark ? '#151928' : '#FFFFFF',
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+                padding: '16px 20px 32px',
+                maxHeight: '80vh',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 14,
+                boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
+                animation: 'adSlideIn 0.25s ease',
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'}`
+              }}
+            >
+              {/* Drawer Top Grab Handle */}
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.2)', margin: '0 auto 4px' }} />
 
-        {/* User Profile Avatar */}
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Notifications</h3>
+                  {unreadCount > 0 && (
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 100, background: 'rgba(255, 77, 157, 0.15)', color: '#FF4D9D' }}>
+                      {unreadCount} New
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={markAllAsRead}
+                      style={{ background: 'none', border: 'none', color: '#FF4D9D', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      Mark Read
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setNotifOpen(false)}
+                    style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)', border: 'none', borderRadius: 8, color: isDark ? '#8E95A9' : '#64748B', padding: 6, cursor: 'pointer', display: 'flex' }}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Notification List */}
+              <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, maxHeight: '55vh' }}>
+                {notifications.length === 0 ? (
+                  <div style={{ padding: '36px 0', textAlign: 'center', color: isDark ? '#94A3B8' : '#64748B', fontSize: 13 }}>
+                    No notifications
+                  </div>
+                ) : (
+                  notifications.map(n => {
+                    const Icon = n.icon;
+                    return (
+                      <div
+                        key={n.id}
+                        style={{
+                          padding: '12px 14px',
+                          borderRadius: 14,
+                          background: n.unread
+                            ? (isDark ? 'rgba(255, 77, 157, 0.08)' : 'rgba(255, 77, 157, 0.05)')
+                            : (isDark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(15, 23, 42, 0.02)'),
+                          border: `1px solid ${n.unread ? (isDark ? 'rgba(255, 77, 157, 0.25)' : 'rgba(255, 77, 157, 0.18)') : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.04)')}`,
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 12
+                        }}
+                      >
+                        <div style={{
+                          width: 36, height: 36, borderRadius: 10,
+                          background: `${n.color}18`,
+                          color: n.color,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0, marginTop: 2
+                        }}>
+                          <Icon size={18} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: 13, fontWeight: 800, color: isDark ? '#F8FAFC' : '#0F172A' }}>{n.title}</span>
+                            <span style={{ fontSize: 10, color: isDark ? '#94A3B8' : '#64748B' }}>{n.time}</span>
+                          </div>
+                          <div style={{ fontSize: 12, color: isDark ? '#94A3B8' : '#64748B', marginTop: 3, lineHeight: 1.4 }}>
+                            {n.desc}
+                          </div>
+                        </div>
+                        <button
+                          onClick={e => dismissNotif(n.id, e)}
+                          title="Dismiss"
+                          style={{ background: 'none', border: 'none', color: isDark ? '#64748B' : '#94A3B8', cursor: 'pointer', padding: 4, display: 'flex' }}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* User Profile Avatar with Dropdown Menu */}
         <div style={{ position: 'relative' }}>
           <button
             onClick={() => setProfileOpen(prev => !prev)}
@@ -936,35 +1116,47 @@ function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTh
           </button>
 
           {profileOpen && (
-            <div style={{
-              position: 'absolute',
-              top: 44,
-              right: 0,
-              width: 200,
-              background: isDark ? '#151928' : '#FFFFFF',
-              border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.1)'}`,
-              borderRadius: 14,
-              padding: 12,
-              boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
-              zIndex: 100,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 6
-            }}>
-              <div style={{ padding: '4px 8px', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)'}`, marginBottom: 4 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: isDark ? '#F8FAFC' : '#0F172A' }}>{currentUser?.displayName || 'Super Admin'}</div>
-                <div style={{ fontSize: 10, color: isDark ? '#94A3B8' : '#64748B' }}>{currentUser?.email}</div>
+            <>
+              {/* Click-away backdrop */}
+              <div
+                onClick={() => setProfileOpen(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 90 }}
+              />
+              <div style={{
+                position: 'absolute',
+                top: 48,
+                right: 0,
+                width: 220,
+                background: isDark ? '#151928' : '#FFFFFF',
+                border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.12)'}`,
+                borderRadius: 14,
+                padding: 12,
+                boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+                zIndex: 100,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+                animation: 'adSlideIn 0.15s ease'
+              }}>
+                <div style={{ padding: '4px 8px', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)'}`, marginBottom: 4 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: isDark ? '#F8FAFC' : '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {currentUser?.displayName || 'Super Admin'}
+                  </div>
+                  <div style={{ fontSize: 10, color: isDark ? '#94A3B8' : '#64748B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {currentUser?.email}
+                  </div>
+                </div>
+                <button
+                  onClick={() => { signOut(auth); setProfileOpen(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none',
+                    color: '#EF4444', fontSize: 12, fontWeight: 700, padding: '6px 8px', borderRadius: 6, cursor: 'pointer', width: '100%'
+                  }}
+                >
+                  <LogOut size={14} /> Sign Out
+                </button>
               </div>
-              <button
-                onClick={() => { signOut(auth); setProfileOpen(false); }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none',
-                  color: '#EF4444', fontSize: 12, fontWeight: 700, padding: '6px 8px', borderRadius: 6, cursor: 'pointer'
-                }}
-              >
-                <LogOut size={14} /> Sign Out
-              </button>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -2446,15 +2638,18 @@ function RemoteConfigPanel({ config, onSave }) {
 // ANALYTICS PANEL
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-function AnalyticsPanel({ chartData, stats }) {
-  const si = DS.getStorageInfo();
+function AnalyticsPanel({ chartData = [], stats = {}, isDark = false }) {
+  const T = getTokens(isDark);
+  const si = DS.getStorageInfo() || {};
   const qr = stats?.qrCount || 0;
   const bc = stats?.barcodeCount || 0;
   const total = qr + bc;
+  const breakdown = si.breakdown || {};
+  const storageEntries = Object.entries(breakdown).filter(([k]) => k.startsWith('qrgen_')).sort((a, b) => b[1] - a[1]).slice(0, 6);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Analytics Stat Cards */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, color: 'var(--ad-text)' }}>
+      {/* Analytics Stat Cards - Consistent 2 cards per row on mobile, 4 on desktop */}
       <div className="ad-stat-grid">
         <StatCard icon={QrCode}    label="QR Codes Generated"  value={qr}                   color={T.purple} trendLabel={`${total ? Math.round((qr/total)*100) : 0}% of total`} />
         <StatCard icon={BarChart2} label="Barcodes Generated"  value={bc}                   color={T.green}  trendLabel={`${total ? Math.round((bc/total)*100) : 0}% of total`} />
@@ -2465,7 +2660,7 @@ function AnalyticsPanel({ chartData, stats }) {
       {/* Analytics Main Chart */}
       <AdminCard title="7-Day Generation Velocity & Trend" subtitle="Daily breakdown of generated QR codes vs Barcodes"
         right={
-          <div style={{ display: 'flex', gap: 14, fontSize: 11, color: T.textSec }}>
+          <div style={{ display: 'flex', gap: 14, fontSize: 11, color: 'var(--ad-text-sec)' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: T.purple, borderRadius: 2, display: 'inline-block' }} />QR Codes</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 3, background: T.green, borderRadius: 2, display: 'inline-block' }} />Barcodes</span>
           </div>
@@ -2485,10 +2680,10 @@ function AnalyticsPanel({ chartData, stats }) {
                 return (
                   <div key={s.l}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{s.l}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text)' }}>{s.l}</span>
                       <span style={{ fontSize: 12, fontWeight: 800, color: s.c }}>{s.v} ({pct}%)</span>
                     </div>
-                    <div style={{ height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3 }}>
+                    <div style={{ height: 6, background: 'var(--ad-input)', borderRadius: 3 }}>
                       <div style={{ height: '100%', background: s.c, borderRadius: 3, width: `${pct}%`, transition: 'width 0.4s' }} />
                     </div>
                   </div>
@@ -2500,17 +2695,21 @@ function AnalyticsPanel({ chartData, stats }) {
 
         <AdminCard title="Storage Quota Analytics" subtitle="Data breakdown in LocalStorage">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {Object.entries(si.breakdown).filter(([k]) => k.startsWith('qrgen_')).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([key, bytes]) => (
-              <div key={key}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                  <span style={{ fontSize: 11, color: T.textSec, fontFamily: 'monospace' }}>{key.replace('qrgen_', '')}</span>
-                  <span style={{ fontSize: 11, color: T.text, fontWeight: 700 }}>{fmtBytes(bytes)}</span>
+            {storageEntries.length === 0 ? (
+              <div style={{ fontSize: 12, color: 'var(--ad-text-sec)', padding: '12px 0' }}>Storage tracking active ({si.used || '0 KB'})</div>
+            ) : (
+              storageEntries.map(([key, bytes]) => (
+                <div key={key}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <span style={{ fontSize: 11, color: 'var(--ad-text-sec)', fontFamily: 'monospace' }}>{key.replace('qrgen_', '')}</span>
+                    <span style={{ fontSize: 11, color: 'var(--ad-text)', fontWeight: 700 }}>{fmtBytes(bytes)}</span>
+                  </div>
+                  <div style={{ height: 4, background: 'var(--ad-input)', borderRadius: 2 }}>
+                    <div style={{ height: '100%', background: T.purple, borderRadius: 2, width: `${si.totalBytes ? (bytes / si.totalBytes) * 100 : 0}%` }} />
+                  </div>
                 </div>
-                <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
-                  <div style={{ height: '100%', background: T.purple, borderRadius: 2, width: `${si.totalBytes ? (bytes / si.totalBytes) * 100 : 0}%` }} />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </AdminCard>
       </div>
@@ -2522,7 +2721,8 @@ function AnalyticsPanel({ chartData, stats }) {
 // REPORTS PANEL
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-function ReportsPanel({ history }) {
+function ReportsPanel({ history, isDark = false }) {
+  const T = getTokens(isDark);
   const [exporting, setExporting] = useState(false);
 
   const exportCSV = () => {
@@ -2553,7 +2753,8 @@ function ReportsPanel({ history }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div className="ad-auto-grid">
+      {/* Consistent 2 cards per row on mobile */}
+      <div className="ad-stat-grid">
         {[
           { icon: FileText, label: 'History CSV', desc: 'Export all creation history as CSV', color: T.green, action: exportCSV, btn: 'Export CSV' },
           { icon: Download,  label: 'Full Data Export', desc: 'All app data as JSON backup', color: T.blue, action: exportJSON, btn: exporting ? 'Exporting...' : 'Export JSON' },
@@ -2760,12 +2961,14 @@ function BackupsPanel() {
 // SYSTEM HEALTH PANEL
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-function SystemHealthPanel({ stats }) {
-  const si = DS.getStorageInfo();
+function SystemHealthPanel({ stats, isDark = false }) {
+  const T = getTokens(isDark);
+  const si = DS.getStorageInfo() || {};
+  const breakdown = si.breakdown || {};
   const checks = [
-    { label: 'localStorage Available', pass: typeof localStorage !== 'undefined',               detail: `${si.used} used` },
+    { label: 'localStorage Available', pass: typeof localStorage !== 'undefined',               detail: `${si.used || 'Active'} used` },
     { label: 'Service Worker',         pass: 'serviceWorker' in navigator,                      detail: 'PWA & offline support' },
-    { label: 'Secure Context',         pass: window.isSecureContext,                            detail: window.isSecureContext ? 'HTTPS confirmed' : 'HTTP â€” insecure' },
+    { label: 'Secure Context',         pass: window.isSecureContext,                            detail: window.isSecureContext ? 'HTTPS confirmed' : 'HTTP — insecure' },
     { label: 'PWA Manifest',           pass: !!document.querySelector('link[rel="manifest"]'), detail: 'manifest.json linked' },
     { label: 'Canvas API',             pass: !!document.createElement('canvas').getContext,     detail: 'Required for QR generation' },
     { label: 'Clipboard API',          pass: !!navigator.clipboard,                             detail: 'Required for copy feature' },
@@ -2774,10 +2977,12 @@ function SystemHealthPanel({ stats }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div className="ad-auto-grid-sm">
-        <StatCard icon={Database} label="Storage"   value={si.used}                color={T.green}  />
+      {/* Consistent 2 cards per row on mobile */}
+      <div className="ad-stat-grid">
+        <StatCard icon={Database} label="Storage"   value={si.used || '0 KB'}      color={T.green}  />
         <StatCard icon={QrCode}   label="QR Items"  value={stats?.historyCount || 0} color={T.purple} />
-        <StatCard icon={Server}   label="Config Keys" value={Object.keys(si.breakdown).filter(k => k.startsWith('qrgen_')).length} color={T.blue} />
+        <StatCard icon={Server}   label="Config Keys" value={Object.keys(breakdown).filter(k => k.startsWith('qrgen_')).length} color={T.blue} />
+        <StatCard icon={Zap}      label="PWA Engine" value="Active"                color={T.orange} trendLabel="Offline cached" />
       </div>
 
       <AdminCard title="Health Checks" subtitle="Component diagnostics">
@@ -2838,7 +3043,7 @@ function AuditLogsPanel({ log }) {
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: actionColors[entry.action] || T.textSec, flexShrink: 0, marginTop: 6 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: T.text, fontFamily: 'monospace' }}>{entry.action}</div>
-                <div style={{ fontSize: 11, color: T.textSec, marginTop: 1 }}>By {entry.actor} Â· {timeAgo(entry.ts)}</div>
+                <div style={{ fontSize: 11, color: T.textSec, marginTop: 1 }}>By {entry.actor} · {timeAgo(entry.ts)}</div>
               </div>
               <span style={{ fontSize: 10, color: T.textMut, whiteSpace: 'nowrap' }}>{fmtDate(entry.ts)}</span>
             </div>
@@ -2849,14 +3054,15 @@ function AuditLogsPanel({ log }) {
   );
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
 // QR & BARCODE PANEL
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
 
-function QRBarcodePanel({ stats, history }) {
+function QRBarcodePanel({ stats, history, isDark = false }) {
+  const T = getTokens(isDark);
   const byType = (arr, key) => {
     const map = {};
-    arr.forEach(h => { const k = h[key] || 'Unknown'; map[k] = (map[k] || 0) + 1; });
+    (arr || []).forEach(h => { const k = h[key] || 'Unknown'; map[k] = (map[k] || 0) + 1; });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
   };
 
@@ -2867,7 +3073,7 @@ function QRBarcodePanel({ stats, history }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div className="ad-auto-grid-sm">
+      <div className="ad-stat-grid">
         <StatCard icon={QrCode}    label="QR Codes"   value={stats?.qrCount || 0}      color={T.purple} />
         <StatCard icon={BarChart2} label="Barcodes"   value={stats?.barcodeCount || 0} color={T.green}  />
         <StatCard icon={Package}   label="Batch Jobs" value={stats?.batchCount || 0}   color={T.orange} />
@@ -2881,11 +3087,11 @@ function QRBarcodePanel({ stats, history }) {
               {qrTypes.map(([type, count]) => (
                 <div key={type}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <span style={{ fontSize: 12, color: T.textSec }}>{type}</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{count}</span>
+                    <span style={{ fontSize: 12, color: 'var(--ad-text-sec)' }}>{type}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text)' }}>{count}</span>
                   </div>
-                  <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
-                    <div style={{ height: '100%', background: T.purple, borderRadius: 2, width: `${(count / qrItems.length) * 100}%` }} />
+                  <div style={{ height: 4, background: 'var(--ad-input)', borderRadius: 2 }}>
+                    <div style={{ height: '100%', background: T.purple, borderRadius: 2, width: `${(count / Math.max(qrItems.length, 1)) * 100}%` }} />
                   </div>
                 </div>
               ))}
@@ -2899,11 +3105,11 @@ function QRBarcodePanel({ stats, history }) {
               {bcTypes.map(([type, count]) => (
                 <div key={type}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <span style={{ fontSize: 12, color: T.textSec }}>{type}</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{count}</span>
+                    <span style={{ fontSize: 12, color: 'var(--ad-text-sec)' }}>{type}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text)' }}>{count}</span>
                   </div>
-                  <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
-                    <div style={{ height: '100%', background: T.green, borderRadius: 2, width: `${(count / bcItems.length) * 100}%` }} />
+                  <div style={{ height: 4, background: 'var(--ad-input)', borderRadius: 2 }}>
+                    <div style={{ height: '100%', background: T.green, borderRadius: 2, width: `${(count / Math.max(bcItems.length, 1)) * 100}%` }} />
                   </div>
                 </div>
               ))}
@@ -2920,9 +3126,18 @@ function QRBarcodePanel({ stats, history }) {
 // ADMIN USERS PANEL
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-function AdminUsersPanel({ currentUser }) {
+function AdminUsersPanel({ currentUser, isDark = false }) {
+  const T = getTokens(isDark);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* 2-column mobile, 4-column desktop stat cards consistent with home screen */}
+      <div className="ad-stat-grid">
+        <StatCard icon={Shield}      label="Admin Role"     value="Super Admin" color={T.accent} trendLabel="Highest privilege tier" />
+        <StatCard icon={CheckCircle} label="Auth Status"    value="Active"      color={T.green}  trendLabel="Firebase Auth verified" />
+        <StatCard icon={Lock}        label="Security Rules" value="Enforced"    color={T.blue}   trendLabel="Firestore security rules" />
+        <StatCard icon={Zap}         label="Access Scope"   value="Global"      color={T.purple} trendLabel="Full system permissions" />
+      </div>
+
       <AdminCard title="Super Admin Account" subtitle="Active Super Admin user session from Firebase Auth" noPadding>
         <div style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -2930,12 +3145,12 @@ function AdminUsersPanel({ currentUser }) {
               <img src={currentUser.photoURL} alt="Admin" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${T.accent}` }} />
             ) : (
               <div style={{ width: 44, height: 44, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 16 }}>
-                SA
+                {(currentUser?.displayName || currentUser?.email || 'SA')[0].toUpperCase()}
               </div>
             )}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{currentUser?.displayName || 'Super Admin'}</div>
-              <div style={{ fontSize: 12, color: T.textSec, fontFamily: 'monospace' }}>{currentUser?.email || 'mabuneri143@gmail.com'}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--ad-text)' }}>{currentUser?.displayName || 'Super Admin'}</div>
+              <div style={{ fontSize: 12, color: 'var(--ad-text-sec)', fontFamily: 'monospace' }}>{currentUser?.email || 'mabuneri143@gmail.com'}</div>
             </div>
             <Badge color={T.accent}>Super Admin</Badge>
             <Badge color={T.green}>Live Auth</Badge>
@@ -2943,20 +3158,20 @@ function AdminUsersPanel({ currentUser }) {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${T.border}` }}>
             <div>
-              <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>User ID (UID)</div>
-              <div style={{ fontSize: 11, color: T.textSec, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser?.uid || 'â€”'}</div>
+              <div style={{ fontSize: 10, color: 'var(--ad-text-mut)', fontWeight: 700, textTransform: 'uppercase' }}>User ID (UID)</div>
+              <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser?.uid || '—'}</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>Provider</div>
-              <div style={{ fontSize: 11, color: T.textSec }}>{currentUser?.providerData?.[0]?.providerId || 'google.com'}</div>
+              <div style={{ fontSize: 10, color: 'var(--ad-text-mut)', fontWeight: 700, textTransform: 'uppercase' }}>Provider</div>
+              <div style={{ fontSize: 11, color: 'var(--ad-text-sec)' }}>{currentUser?.providerData?.[0]?.providerId || 'google.com'}</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>Account Created</div>
-              <div style={{ fontSize: 11, color: T.textSec }}>{fmtDate(currentUser?.metadata?.creationTime)}</div>
+              <div style={{ fontSize: 10, color: 'var(--ad-text-mut)', fontWeight: 700, textTransform: 'uppercase' }}>Account Created</div>
+              <div style={{ fontSize: 11, color: 'var(--ad-text-sec)' }}>{fmtDate(currentUser?.metadata?.creationTime)}</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>Last Sign In</div>
-              <div style={{ fontSize: 11, color: T.textSec }}>{fmtDate(currentUser?.metadata?.lastSignInTime)}</div>
+              <div style={{ fontSize: 10, color: 'var(--ad-text-mut)', fontWeight: 700, textTransform: 'uppercase' }}>Last Sign In</div>
+              <div style={{ fontSize: 11, color: 'var(--ad-text-sec)' }}>{fmtDate(currentUser?.metadata?.lastSignInTime)}</div>
             </div>
           </div>
         </div>
@@ -3030,7 +3245,8 @@ function SecurityPanel({ currentUser }) {
 // INTEGRATIONS PANEL
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-function IntegrationsPanel() {
+function IntegrationsPanel({ isDark = false }) {
+  const T = getTokens(isDark);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <AdminCard title="Firebase Integration" subtitle="Live connected services" right={<Badge color={T.green}>Connected</Badge>}>
@@ -3058,7 +3274,7 @@ function IntegrationsPanel() {
         </div>
       </AdminCard>
 
-      <div className="ad-auto-grid">
+      <div className="ad-stat-grid">
         {[
           { name: 'Firestore', icon: Database, desc: 'Real-time database', color: T.orange, status: 'Active' },
           { name: 'Firebase Auth', icon: Lock, desc: 'User accounts & security', color: T.blue, status: 'Active' },
@@ -3087,7 +3303,8 @@ function IntegrationsPanel() {
 // DEVELOPER PANEL
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-function DeveloperPanel({ currentUser }) {
+function DeveloperPanel({ currentUser, isDark = false }) {
+  const T = getTokens(isDark);
   const [copied, setCopied] = useState('');
   const keys = Object.keys(localStorage).filter(k => k.startsWith('qrgen_'));
 
@@ -3098,7 +3315,8 @@ function DeveloperPanel({ currentUser }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div className="ad-auto-grid">
+      {/* Consistent 2 cards per row on mobile */}
+      <div className="ad-stat-grid">
         {[
           { label: 'App Version',   value: '2.0.0' },
           { label: 'Environment',   value: 'Production' },
@@ -3142,7 +3360,8 @@ function DeveloperPanel({ currentUser }) {
 // SIMPLE FUNCTIONAL PANELS
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-function UsersPanel() {
+function UsersPanel({ isDark = false }) {
+  const T = getTokens(isDark);
   const toast = useToast();
   const [appUsers, setAppUsers] = useState([]);
   const [visitors, setVisitors] = useState([]);
@@ -3198,73 +3417,91 @@ function UsersPanel() {
     try {
       const stats = await DS.getUserActivityStats(user.uid);
       setUserStats(stats);
-    } catch { setUserStats({ historyCount: 0, savedCount: 0 }); }
-    setDetailLoading(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
-  // Block / Unblock
+  // Block/unblock user
   const toggleStatus = async (uid, currentStatus) => {
     setActionLoading(true);
+    const newStatus = currentStatus === 'blocked' ? 'active' : 'blocked';
     try {
-      const newStatus = currentStatus === 'blocked' ? 'active' : 'blocked';
       await DS.updateUserStatus(uid, newStatus);
+      toast?.(`User ${newStatus === 'blocked' ? 'blocked' : 'unblocked'} successfully`, 'success');
       setAppUsers(prev => prev.map(u => u.uid === uid ? { ...u, status: newStatus } : u));
       if (selectedUser?.uid === uid) setSelectedUser(prev => ({ ...prev, status: newStatus }));
-      toast?.(`User ${newStatus === 'blocked' ? 'blocked' : 'unblocked'}`, 'success');
     } catch (e) {
-      toast?.('Failed: ' + e.message, 'error');
+      toast?.('Failed to update status: ' + e.message, 'error');
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
-  // Delete user profile
+  // Delete user record from Firestore
   const handleDelete = async (uid) => {
-    if (!confirm('Remove this user from admin view? This does NOT delete their Firebase Auth account.')) return;
+    if (!confirm('Are you sure you want to remove this user profile? This will not delete their Firebase Auth account.')) return;
     setActionLoading(true);
     try {
       await DS.deleteUserProfile(uid);
+      toast?.('User record removed', 'info');
       setAppUsers(prev => prev.filter(u => u.uid !== uid));
       setSelectedUser(null);
-      toast?.('User profile removed', 'success');
     } catch (e) {
-      toast?.('Failed: ' + e.message, 'error');
+      toast?.('Failed to delete: ' + e.message, 'error');
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
-  // CSV export
+  // Export CSV
   const exportCSV = () => {
-    const header = 'Name,Email,Provider,Status,Joined,Last Active,Visits\n';
-    const rows = filteredUsers.map(u =>
-      `"${u.displayName || ''}","${u.email || ''}","${u.provider || ''}","${u.status || ''}","${u.createdAt || ''}","${u.lastActiveAt || ''}","${u.visitCount || 0}"`
-    ).join('\n');
-    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const headers = ['UID', 'Display Name', 'Email', 'Provider', 'Status', 'Is Pro', 'Created At', 'Last Active At', 'Visit Count'];
+    const rows = filteredUsers.map(u => [
+      u.uid || '',
+      `"${(u.displayName || '').replace(/"/g, '""')}"`,
+      u.email || '',
+      u.provider || '',
+      u.status || 'active',
+      u.isPro ? 'Yes' : 'No',
+      u.createdAt ? new Date(u.createdAt).toISOString() : '',
+      u.lastActiveAt ? new Date(u.lastActiveAt).toISOString() : '',
+      u.visitCount || 1,
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `mushiqr_users_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click(); URL.revokeObjectURL(url);
-    toast?.('CSV exported', 'success');
+    a.href = url;
+    a.download = `mushi_users_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast?.('Exported CSV successfully', 'success');
   };
 
-  // Filter & Sort
+  // Filter and sort
   const filteredUsers = appUsers
     .filter(u => {
-      if (filter === 'google') return u.provider === 'google';
-      if (filter === 'email') return u.provider === 'email';
-      if (filter === 'active') return u.status === 'active';
-      if (filter === 'blocked') return u.status === 'blocked';
-      return true;
-    })
-    .filter(u => {
-      if (!search) return true;
       const q = search.toLowerCase();
-      return (u.displayName || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+      const matchSearch = !search ||
+        (u.displayName || '').toLowerCase().includes(q) ||
+        (u.email || '').toLowerCase().includes(q) ||
+        (u.uid || '').toLowerCase().includes(q);
+      const matchFilter =
+        filter === 'all' ? true :
+        filter === 'google' ? u.provider === 'google' :
+        filter === 'email' ? u.provider === 'email' :
+        filter === 'active' ? u.status !== 'blocked' :
+        filter === 'blocked' ? u.status === 'blocked' : true;
+      return matchSearch && matchFilter;
     })
     .sort((a, b) => {
       if (sortBy === 'newest') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       if (sortBy === 'oldest') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
       if (sortBy === 'active') return new Date(b.lastActiveAt || 0) - new Date(a.lastActiveAt || 0);
-      if (sortBy === 'name') return (a.displayName || '').localeCompare(b.displayName || '');
+      if (sortBy === 'name') return (a.displayName || a.email || '').localeCompare(b.displayName || b.email || '');
       return 0;
     });
 
@@ -3279,15 +3516,15 @@ function UsersPanel() {
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 14 }}>
-        <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
-        <span style={{ fontSize: 14, color: T.textSec }}>Loading users...</span>
+        <div style={{ width: 36, height: 36, border: `3px solid var(--ad-card)`, borderTopColor: '#FF4D9D', borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
+        <span style={{ fontSize: 14, color: 'var(--ad-text-sec)' }}>Loading users...</span>
       </div>
     );
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* â”€â”€â”€ Stat Cards â”€â”€â”€ */}
+      {/* ─── Stat Cards (2 per row on mobile, 4 on desktop) ─── */}
       <div className="ad-stat-grid">
         <StatCard icon={Users} label="Total Users" value={appUsers.length} color={T.purple} trendLabel="registered accounts" />
         <StatCard icon={Activity} label="Active (7d)" value={activeCount} color={T.green} trendLabel="last 7 days" />
@@ -3295,7 +3532,7 @@ function UsersPanel() {
         <StatCard icon={TrendingUp} label="New (30d)" value={newCount} color={T.blue} trendLabel="last 30 days" />
       </div>
 
-      {/* â”€â”€â”€ Users Table Card â”€â”€â”€ */}
+      {/* ─── Users Table Card ─── */}
       <AdminCard
         title={`Registered Users (${filteredUsers.length})`}
         subtitle="All authenticated users tracked via Firebase Auth"
@@ -3308,23 +3545,23 @@ function UsersPanel() {
         noPadding
       >
         {/* Search & Filters */}
-        <div style={{ padding: '14px 20px', borderBottom: `1px solid ${T.border}`, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: '6px 12px', flex: 1, minWidth: 180 }}>
-            <Search size={14} color={T.textMut} />
+        <div style={{ padding: '14px 20px', borderBottom: `1px solid var(--ad-border)`, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: T.r.md, padding: '8px 14px', flex: 1, minWidth: 180 }}>
+            <Search size={14} color="var(--ad-text-sec)" />
             <input
               placeholder="Search by name or email..."
               value={search} onChange={e => setSearch(e.target.value)}
-              style={{ background: 'none', border: 'none', outline: 'none', color: T.text, fontSize: 12, fontFamily: 'inherit', width: '100%' }}
+              style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--ad-text)', fontSize: 13, fontFamily: 'inherit', width: '100%' }}
             />
             {search && (
-              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: T.textMut, cursor: 'pointer', padding: 0, lineHeight: 0 }}>
+              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer', padding: 0, lineHeight: 0 }}>
                 <X size={12} />
               </button>
             )}
           </div>
 
           {/* Filter pills */}
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {[
               { id: 'all', label: 'All' },
               { id: 'google', label: 'Google' },
@@ -3333,18 +3570,18 @@ function UsersPanel() {
               { id: 'blocked', label: 'Blocked' },
             ].map(f => (
               <button key={f.id} onClick={() => setFilter(f.id)} style={{
-                padding: '4px 12px', borderRadius: 100, border: 'none', cursor: 'pointer',
-                fontSize: 11, fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.12s',
-                background: filter === f.id ? T.accentLow : 'rgba(255,255,255,0.04)',
-                color: filter === f.id ? T.accent : T.textSec,
+                padding: '6px 14px', borderRadius: 100, border: `1px solid ${filter === f.id ? '#FF4D9D' : 'var(--ad-border)'}`, cursor: 'pointer',
+                fontSize: 12, fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.15s',
+                background: filter === f.id ? 'rgba(255, 77, 157, 0.14)' : 'var(--ad-input)',
+                color: filter === f.id ? '#FF4D9D' : 'var(--ad-text-sec)',
               }}>{f.label}</button>
             ))}
           </div>
 
           {/* Sort */}
           <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{
-            background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md,
-            color: T.text, fontSize: 11, fontWeight: 600, padding: '5px 10px', cursor: 'pointer', outline: 'none', fontFamily: 'inherit',
+            background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: T.r.md,
+            color: 'var(--ad-text)', fontSize: 12, fontWeight: 600, padding: '7px 12px', cursor: 'pointer', outline: 'none', fontFamily: 'inherit',
           }}>
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
@@ -3360,9 +3597,9 @@ function UsersPanel() {
           <div className="ad-table-wrap">
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
               <thead>
-                <tr style={{ borderBottom: `1px solid ${T.border}` }}>
+                <tr style={{ borderBottom: `1px solid var(--ad-border)`, background: 'var(--ad-input)' }}>
                   {['User', 'Provider', 'Status', 'Joined', 'Last Active', 'Visits'].map(h => (
-                    <th key={h} style={{ textAlign: 'left', padding: '10px 16px', fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                    <th key={h} style={{ textAlign: 'left', padding: '10px 16px', fontSize: 10, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -3370,8 +3607,8 @@ function UsersPanel() {
                 {filteredUsers.map(u => (
                   <tr key={u.uid}
                     onClick={() => openDetail(u)}
-                    style={{ borderBottom: `1px solid ${T.border}`, cursor: 'pointer', transition: 'background 0.1s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = T.bgHov}
+                    style={{ borderBottom: `1px solid var(--ad-border)`, cursor: 'pointer', transition: 'background 0.1s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--ad-input)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
                     {/* Avatar + Name + Email */}
@@ -3380,16 +3617,16 @@ function UsersPanel() {
                         {u.photoURL ? (
                           <img src={u.photoURL} alt="" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                         ) : (
-                          <div style={{ width: 34, height: 34, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 13, flexShrink: 0 }}>
+                          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255, 77, 157, 0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF4D9D', fontWeight: 900, fontSize: 13, flexShrink: 0 }}>
                             {(u.displayName || u.email || 'U')[0].toUpperCase()}
                           </div>
                         )}
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 240 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ad-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 240 }}>
                             {u.displayName || u.email?.split('@')[0] || 'User'}
                           </div>
-                          <div style={{ fontSize: 11, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 240, fontFamily: 'monospace' }}>
-                            {u.email || 'â€”'}
+                          <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 240, fontFamily: 'monospace' }}>
+                            {u.email || '—'}
                           </div>
                         </div>
                       </div>
@@ -3397,7 +3634,7 @@ function UsersPanel() {
 
                     {/* Provider */}
                     <td style={{ padding: '10px 16px' }}>
-                      <Badge color={u.provider === 'google' ? '#4285F4' : u.provider === 'email' ? T.purple : T.textMut}>
+                      <Badge color={u.provider === 'google' ? '#4285F4' : u.provider === 'email' ? T.purple : 'var(--ad-text-sec)'}>
                         <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block', flexShrink: 0 }} />
                         {u.provider === 'google' ? 'Google' : u.provider === 'email' ? 'Email' : u.provider || '?'}
                       </Badge>
@@ -3414,17 +3651,17 @@ function UsersPanel() {
                     </td>
 
                     {/* Joined */}
-                    <td style={{ padding: '10px 16px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '10px 16px', fontSize: 11, color: 'var(--ad-text-sec)', whiteSpace: 'nowrap' }}>
                       {fmtDate(u.createdAt)}
                     </td>
 
                     {/* Last Active */}
-                    <td style={{ padding: '10px 16px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '10px 16px', fontSize: 11, color: 'var(--ad-text-sec)', whiteSpace: 'nowrap' }}>
                       {timeAgo(u.lastActiveAt)}
                     </td>
 
                     {/* Visits */}
-                    <td style={{ padding: '10px 16px', fontSize: 12, fontWeight: 700, color: T.text }}>
+                    <td style={{ padding: '10px 16px', fontSize: 12, fontWeight: 700, color: 'var(--ad-text)' }}>
                       {u.visitCount || 1}
                     </td>
                   </tr>
@@ -3435,14 +3672,14 @@ function UsersPanel() {
         )}
       </AdminCard>
 
-      {/* â”€â”€â”€ Anonymous Visitors Section â”€â”€â”€ */}
+      {/* ─── Anonymous Visitors Section ─── */}
       <AdminCard
         title={`Anonymous Visitors (${visitors.length})`}
-        subtitle="Devices that opened the app â€” includes unregistered users"
+        subtitle="Devices that opened the app — includes unregistered users"
         right={
           <button onClick={() => setShowVisitors(v => !v)} style={{
-            background: 'none', border: `1px solid ${T.border}`, borderRadius: T.r.md,
-            color: T.textSec, cursor: 'pointer', padding: '5px 12px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
+            background: 'none', border: `1px solid var(--ad-border)`, borderRadius: T.r.md,
+            color: 'var(--ad-text-sec)', cursor: 'pointer', padding: '5px 12px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
             display: 'flex', alignItems: 'center', gap: 6,
           }}>
             {showVisitors ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
@@ -3450,42 +3687,42 @@ function UsersPanel() {
           </button>
         }
       >
-        {/* Summary always visible */}
-        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: showVisitors ? 16 : 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 40, height: 40, borderRadius: T.r.md, background: `${T.blue}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Summary always visible in 2-column mobile grid */}
+        <div className="ad-stat-grid" style={{ marginBottom: showVisitors ? 16 : 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--ad-input)', padding: '12px 14px', borderRadius: T.r.md, border: `1px solid var(--ad-border)` }}>
+            <div style={{ width: 36, height: 36, borderRadius: T.r.md, background: `${T.blue}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Globe size={18} color={T.blue} />
             </div>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: T.text }}>{visitors.length}</div>
-              <div style={{ fontSize: 10, color: T.textSec }}>Total Devices</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)' }}>{visitors.length}</div>
+              <div style={{ fontSize: 10, color: 'var(--ad-text-sec)' }}>Total Devices</div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 40, height: 40, borderRadius: T.r.md, background: `${T.green}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--ad-input)', padding: '12px 14px', borderRadius: T.r.md, border: `1px solid var(--ad-border)` }}>
+            <div style={{ width: 36, height: 36, borderRadius: T.r.md, background: `${T.green}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <CheckCircle size={18} color={T.green} />
             </div>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: T.text }}>{visitors.filter(v => v.isRegistered).length}</div>
-              <div style={{ fontSize: 10, color: T.textSec }}>Converted to Users</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)' }}>{visitors.filter(v => v.isRegistered).length}</div>
+              <div style={{ fontSize: 10, color: 'var(--ad-text-sec)' }}>Converted</div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 40, height: 40, borderRadius: T.r.md, background: `${T.orange}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--ad-input)', padding: '12px 14px', borderRadius: T.r.md, border: `1px solid var(--ad-border)` }}>
+            <div style={{ width: 36, height: 36, borderRadius: T.r.md, background: `${T.orange}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Monitor size={18} color={T.orange} />
             </div>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: T.text }}>{desktopVisitors}</div>
-              <div style={{ fontSize: 10, color: T.textSec }}>Desktop</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)' }}>{desktopVisitors}</div>
+              <div style={{ fontSize: 10, color: 'var(--ad-text-sec)' }}>Desktop</div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 40, height: 40, borderRadius: T.r.md, background: `${T.purple}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--ad-input)', padding: '12px 14px', borderRadius: T.r.md, border: `1px solid var(--ad-border)` }}>
+            <div style={{ width: 36, height: 36, borderRadius: T.r.md, background: `${T.purple}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Cpu size={18} color={T.purple} />
             </div>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: T.text }}>{mobileVisitors}</div>
-              <div style={{ fontSize: 10, color: T.textSec }}>Mobile</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)' }}>{mobileVisitors}</div>
+              <div style={{ fontSize: 10, color: 'var(--ad-text-sec)' }}>Mobile</div>
             </div>
           </div>
         </div>
@@ -3508,8 +3745,8 @@ function UsersPanel() {
                 ].map(s => (
                   <div key={s.l} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div style={{ width: 9, height: 9, borderRadius: '50%', background: s.c, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: T.textSec, minWidth: 130 }}>{s.l}</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{s.v}</span>
+                    <span style={{ fontSize: 12, color: 'var(--ad-text-sec)', minWidth: 130 }}>{s.l}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text)' }}>{s.v}</span>
                   </div>
                 ))}
               </div>
@@ -3519,19 +3756,19 @@ function UsersPanel() {
             <div className="ad-table-wrap" style={{ marginTop: 8 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
                 <thead>
-                  <tr style={{ borderBottom: `1px solid ${T.border}` }}>
+                  <tr style={{ borderBottom: `1px solid var(--ad-border)`, background: 'var(--ad-input)' }}>
                     {['Device ID', 'Platform', 'First Seen', 'Last Seen', 'Visits', 'Registered'].map(h => (
-                      <th key={h} style={{ textAlign: 'left', padding: '8px 14px', fontSize: 10, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                      <th key={h} style={{ textAlign: 'left', padding: '8px 14px', fontSize: 10, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {visitors.slice(0, 50).map(v => (
-                    <tr key={v.id || v.deviceId} style={{ borderBottom: `1px solid ${T.border}` }}
-                      onMouseEnter={e => e.currentTarget.style.background = T.bgHov}
+                    <tr key={v.id || v.deviceId} style={{ borderBottom: `1px solid var(--ad-border)` }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--ad-input)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
-                      <td style={{ padding: '8px 14px', fontSize: 11, color: T.textSec, fontFamily: 'monospace' }}>
+                      <td style={{ padding: '8px 14px', fontSize: 11, color: 'var(--ad-text-sec)', fontFamily: 'monospace' }}>
                         {(v.deviceId || v.id || '').slice(0, 20)}...
                       </td>
                       <td style={{ padding: '8px 14px' }}>
@@ -3539,20 +3776,20 @@ function UsersPanel() {
                           {v.deviceInfo?.isMobile ? 'Mobile' : 'Desktop'}
                         </Badge>
                       </td>
-                      <td style={{ padding: '8px 14px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '8px 14px', fontSize: 11, color: 'var(--ad-text-sec)', whiteSpace: 'nowrap' }}>
                         {fmtDate(v.firstSeenAt)}
                       </td>
-                      <td style={{ padding: '8px 14px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '8px 14px', fontSize: 11, color: 'var(--ad-text-sec)', whiteSpace: 'nowrap' }}>
                         {timeAgo(v.lastSeenAt)}
                       </td>
-                      <td style={{ padding: '8px 14px', fontSize: 12, fontWeight: 700, color: T.text }}>
+                      <td style={{ padding: '8px 14px', fontSize: 12, fontWeight: 700, color: 'var(--ad-text)' }}>
                         {v.visitCount || 1}
                       </td>
                       <td style={{ padding: '8px 14px' }}>
                         {v.isRegistered ? (
                           <Badge color={T.green}>Yes</Badge>
                         ) : (
-                          <Badge color={T.textMut}>No</Badge>
+                          <Badge color="var(--ad-text-sec)">No</Badge>
                         )}
                       </td>
                     </tr>
@@ -3560,7 +3797,7 @@ function UsersPanel() {
                 </tbody>
               </table>
               {visitors.length > 50 && (
-                <div style={{ padding: '12px 14px', fontSize: 11, color: T.textMut, textAlign: 'center' }}>
+                <div style={{ padding: '12px 14px', fontSize: 11, color: 'var(--ad-text-sec)', textAlign: 'center' }}>
                   Showing first 50 of {visitors.length} visitors
                 </div>
               )}
@@ -3569,20 +3806,20 @@ function UsersPanel() {
         )}
       </AdminCard>
 
-      {/* â”€â”€â”€ User Detail Modal â”€â”€â”€ */}
+      {/* ─── User Detail Modal ─── */}
       {selectedUser && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
           onClick={() => setSelectedUser(null)}
         >
           <div onClick={e => e.stopPropagation()} style={{
-            background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.xl,
+            background: 'var(--ad-card)', border: `1px solid var(--ad-border)`, borderRadius: T.r.xl,
             width: '100%', maxWidth: 520, maxHeight: '85vh', overflowY: 'auto',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.7)',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.7)', color: 'var(--ad-text)'
           }}>
             {/* Modal Header */}
-            <div style={{ padding: '20px 24px', borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>User Details</div>
-              <button onClick={() => setSelectedUser(null)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: T.textSec, cursor: 'pointer', borderRadius: T.r.sm, padding: 6, lineHeight: 0 }}>
+            <div style={{ padding: '20px 24px', borderBottom: `1px solid var(--ad-border)`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ad-text)' }}>User Details</div>
+              <button onClick={() => setSelectedUser(null)} style={{ background: 'var(--ad-input)', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer', borderRadius: T.r.sm, padding: 6, lineHeight: 0 }}>
                 <X size={16} />
               </button>
             </div>
@@ -3591,15 +3828,15 @@ function UsersPanel() {
               {/* Profile card */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
                 {selectedUser.photoURL ? (
-                  <img src={selectedUser.photoURL} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${T.accent}` }} />
+                  <img src={selectedUser.photoURL} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: `3px solid #FF4D9D` }} />
                 ) : (
-                  <div style={{ width: 64, height: 64, borderRadius: '50%', background: T.accentLow, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent, fontWeight: 900, fontSize: 24 }}>
+                  <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255, 77, 157, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF4D9D', fontWeight: 900, fontSize: 24 }}>
                     {(selectedUser.displayName || selectedUser.email || 'U')[0].toUpperCase()}
                   </div>
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: T.text }}>{selectedUser.displayName || 'Anonymous'}</div>
-                  <div style={{ fontSize: 13, color: T.textSec, fontFamily: 'monospace', marginTop: 2 }}>{selectedUser.email || 'â€”'}</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)' }}>{selectedUser.displayName || 'Anonymous'}</div>
+                  <div style={{ fontSize: 13, color: 'var(--ad-text-sec)', fontFamily: 'monospace', marginTop: 2 }}>{selectedUser.email || '—'}</div>
                   <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                     <Badge color={selectedUser.provider === 'google' ? '#4285F4' : T.purple}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block', flexShrink: 0 }} />
@@ -3618,37 +3855,37 @@ function UsersPanel() {
                   { icon: Calendar, label: 'Joined', value: fmtDate(selectedUser.createdAt), color: T.blue },
                   { icon: Clock, label: 'Last Active', value: timeAgo(selectedUser.lastActiveAt), color: T.green },
                   { icon: Eye, label: 'Total Visits', value: selectedUser.visitCount || 1, color: T.purple },
-                  { icon: Globe, label: 'Language', value: selectedUser.deviceInfo?.language || 'â€”', color: T.orange },
+                  { icon: Globe, label: 'Language', value: selectedUser.deviceInfo?.language || '—', color: T.orange },
                 ].map(item => (
-                  <div key={item.label} style={{ background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: 14 }}>
+                  <div key={item.label} style={{ background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: T.r.md, padding: 14 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                       <item.icon size={13} color={item.color} />
-                      <span style={{ fontSize: 10, fontWeight: 700, color: T.textMut, textTransform: 'uppercase' }}>{item.label}</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>{item.label}</span>
                     </div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{item.value}</div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--ad-text)' }}>{item.value}</div>
                   </div>
                 ))}
               </div>
 
               {/* Activity stats */}
-              <div style={{ background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: 16, marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.5px' }}>
+              <div style={{ background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: T.r.md, padding: 16, marginBottom: 24 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.5px' }}>
                   App Activity
                 </div>
                 {detailLoading ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: T.textSec, fontSize: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ad-text-sec)', fontSize: 12 }}>
                     <RefreshCw size={13} style={{ animation: 'adSpin 0.7s linear infinite' }} /> Loading...
                   </div>
                 ) : (
                   <div style={{ display: 'flex', gap: 20 }}>
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: 24, fontWeight: 900, color: T.purple }}>{userStats?.historyCount ?? 'â€”'}</div>
-                      <div style={{ fontSize: 10, color: T.textSec, marginTop: 2 }}>QR Codes Created</div>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: T.purple }}>{userStats?.historyCount ?? '—'}</div>
+                      <div style={{ fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 2 }}>QR Codes Created</div>
                     </div>
-                    <div style={{ width: 1, background: T.border }} />
+                    <div style={{ width: 1, background: 'var(--ad-border)' }} />
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: 24, fontWeight: 900, color: T.blue }}>{userStats?.savedCount ?? 'â€”'}</div>
-                      <div style={{ fontSize: 10, color: T.textSec, marginTop: 2 }}>Saved Items</div>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: T.blue }}>{userStats?.savedCount ?? '—'}</div>
+                      <div style={{ fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 2 }}>Saved Items</div>
                     </div>
                   </div>
                 )}
@@ -3656,19 +3893,19 @@ function UsersPanel() {
 
               {/* Device info */}
               {selectedUser.deviceInfo && (
-                <div style={{ background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: 16, marginBottom: 24 }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.5px' }}>
+                <div style={{ background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: T.r.md, padding: 16, marginBottom: 24 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.5px' }}>
                     Device Info
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {[
-                      { l: 'Platform', v: selectedUser.deviceInfo.platform || 'â€”' },
-                      { l: 'Screen', v: selectedUser.deviceInfo.screenWidth ? `${selectedUser.deviceInfo.screenWidth} Ã— ${selectedUser.deviceInfo.screenHeight}` : 'â€”' },
-                      { l: 'User Agent', v: (selectedUser.deviceInfo.userAgent || 'â€”').slice(0, 80) + (selectedUser.deviceInfo.userAgent?.length > 80 ? '...' : '') },
+                      { l: 'Platform', v: selectedUser.deviceInfo.platform || '—' },
+                      { l: 'Screen', v: selectedUser.deviceInfo.screenWidth ? `${selectedUser.deviceInfo.screenWidth} × ${selectedUser.deviceInfo.screenHeight}` : '—' },
+                      { l: 'User Agent', v: (selectedUser.deviceInfo.userAgent || '—').slice(0, 80) + (selectedUser.deviceInfo.userAgent?.length > 80 ? '...' : '') },
                     ].map(d => (
                       <div key={d.l} style={{ display: 'flex', gap: 10 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: T.textSec, minWidth: 80 }}>{d.l}</span>
-                        <span style={{ fontSize: 11, color: T.text, wordBreak: 'break-word' }}>{d.v}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', minWidth: 80 }}>{d.l}</span>
+                        <span style={{ fontSize: 11, color: 'var(--ad-text)', wordBreak: 'break-word' }}>{d.v}</span>
                       </div>
                     ))}
                   </div>
@@ -3676,12 +3913,12 @@ function UsersPanel() {
               )}
 
               {/* UID */}
-              <div style={{ background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: '10px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Key size={13} color={T.textMut} />
-                <span style={{ fontSize: 10, fontWeight: 700, color: T.textMut }}>UID</span>
-                <span style={{ fontSize: 11, color: T.textSec, fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedUser.uid}</span>
+              <div style={{ background: 'var(--ad-input)', border: `1px solid var(--ad-border)`, borderRadius: T.r.md, padding: '10px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Key size={13} color="var(--ad-text-sec)" />
+                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--ad-text-sec)' }}>UID</span>
+                <span style={{ fontSize: 11, color: 'var(--ad-text-sec)', fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedUser.uid}</span>
                 <button onClick={() => { navigator.clipboard.writeText(selectedUser.uid); toast?.('UID copied', 'info'); }}
-                  style={{ background: 'none', border: 'none', color: T.textMut, cursor: 'pointer', padding: 2, lineHeight: 0 }}>
+                  style={{ background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer', padding: 2, lineHeight: 0 }}>
                   <Copy size={13} />
                 </button>
               </div>
@@ -4376,20 +4613,42 @@ function AdminPanelInner() {
   const [sidebarOpen, setSidebar] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
-  const [isDark, setIsDark] = useState(() => {
+  const [themeMode, setThemeMode] = useState(() => {
     try {
-      return localStorage.getItem('mushiqr_admin_dark_mode') === 'true';
+      return localStorage.getItem('mushiqr_admin_theme_mode') || 'auto';
+    } catch {
+      return 'auto';
+    }
+  });
+
+  const [systemIsDark, setSystemIsDark] = useState(() => {
+    try {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     } catch {
       return false;
     }
   });
 
-  const toggleTheme = () => {
-    setIsDark(prev => {
-      const next = !prev;
-      try { localStorage.setItem('mushiqr_admin_dark_mode', String(next)); } catch {}
-      return next;
-    });
+  useEffect(() => {
+    try {
+      if (!window.matchMedia) return;
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = e => setSystemIsDark(e.matches);
+      mediaQuery.addEventListener('change', handler);
+      return () => mediaQuery.removeEventListener('change', handler);
+    } catch (e) {
+      console.warn('System dark mode detection error:', e);
+    }
+  }, []);
+
+  const isDark = themeMode === 'auto' ? systemIsDark : themeMode === 'dark';
+
+  const handleSetThemeMode = mode => {
+    setThemeMode(mode);
+    try {
+      localStorage.setItem('mushiqr_admin_theme_mode', mode);
+      localStorage.setItem('mushiqr_admin_dark_mode', String(mode === 'auto' ? systemIsDark : mode === 'dark'));
+    } catch {}
   };
 
   const T_THEME = getTokens(isDark);
@@ -4610,49 +4869,51 @@ function AdminPanelInner() {
     transactions:     <TransactionsManager isDark={isDark} />,
     'feature-matrix': <FeatureMatrixManager isDark={isDark} />,
     analytics:        <AnalyticsPanel chartData={chartData} stats={stats} isDark={isDark} />,
-    reports:         <ReportsPanel history={history} isDark={isDark} />,
-    templates:       <TemplatesPanel cloudTemplates={cloudTemplates} onRefresh={refreshTemplates} isDark={isDark} />,
+    reports:          <ReportsPanel history={history} isDark={isDark} />,
+    templates:        <TemplatesPanel cloudTemplates={cloudTemplates} onRefresh={refreshTemplates} isDark={isDark} />,
     'scan-analytics': <AnalyticsPanel chartData={chartData} stats={stats} isDark={isDark} />,
-    'qr-barcode':    <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
-    barcodes:        <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
-    categories:      <CategoriesPanel isDark={isDark} />,
-    bulk:            <BulkPanel history={history} isDark={isDark} />,
-    'app-settings':  <AppSettingsPanel settings={appSettings} onSave={async s => {
+    'qr-barcode':     <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
+    barcodes:         <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
+    scans:            <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
+    categories:       <CategoriesPanel isDark={isDark} />,
+    bulk:             <BulkPanel history={history} isDark={isDark} />,
+    'app-settings':   <AppSettingsPanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
       refreshAudit();
     }} isDark={isDark} />,
-    branding:        <BrandingPanel settings={appSettings} onSave={async s => {
+    branding:         <BrandingPanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
       refreshAudit();
     }} isDark={isDark} />,
-    'remote-config': <RemoteConfigPanel config={remoteConfig} onSave={async c => {
+    'remote-config':  <RemoteConfigPanel config={remoteConfig} onSave={async c => {
       await DS.saveRemoteConfig(c);
       setRemoteConfig(c);
       refreshAudit();
     }} isDark={isDark} />,
-    'feature-flags': <FeatureFlagsPanel currentUser={currentUser} isDark={isDark} />,
-    maintenance:     <MaintenancePanel settings={appSettings} onSave={async s => {
+    'feature-flags':  <FeatureFlagsPanel currentUser={currentUser} isDark={isDark} />,
+    maintenance:      <MaintenancePanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
       refreshAudit();
     }} isDark={isDark} />,
-    announcements:   <AnnouncementsPanel announcement={announcement} onSave={async a => {
+    announcements:    <AnnouncementsPanel announcement={announcement} onSave={async a => {
       await DS.saveAnnouncement(a);
       setAnnouncement(a);
       refreshAudit();
     }} isDark={isDark} />,
-    'admin-users':   <AdminUsersPanel isDark={isDark} />,
-    roles:           <RolesPanel isDark={isDark} />,
-    'activity-logs': <ActivityLogsPanel history={history} isDark={isDark} />,
-    security:        <SecurityPanel isDark={isDark} />,
-    backups:         <BackupsPanel isDark={isDark} />,
-    'audit-logs':    <AuditLogPanel isDark={isDark} />,
-    'system-health': <SystemHealthPanel stats={stats} isDark={isDark} />,
-    integrations:    <IntegrationsPanel isDark={isDark} />,
-    developer:       <DeveloperPanel isDark={isDark} />,
-    support:         <SupportPanel isDark={isDark} />,
+    'admin-users':    <AdminUsersPanel currentUser={currentUser} isDark={isDark} />,
+    admins:           <AdminUsersPanel currentUser={currentUser} isDark={isDark} />,
+    roles:            <RolesPanel isDark={isDark} />,
+    'activity-logs':  <ActivityLogsPanel history={history} isDark={isDark} />,
+    security:         <SecurityPanel currentUser={currentUser} isDark={isDark} />,
+    backups:          <BackupsPanel isDark={isDark} />,
+    'audit-logs':     <AuditLogsPanel log={auditLog} isDark={isDark} />,
+    'system-health':  <SystemHealthPanel stats={stats} isDark={isDark} />,
+    integrations:     <IntegrationsPanel isDark={isDark} />,
+    developer:        <DeveloperPanel currentUser={currentUser} isDark={isDark} />,
+    support:          <SupportPanel isDark={isDark} />,
   };
 
   return (
@@ -4702,6 +4963,25 @@ function AdminPanelInner() {
         }
         .ad-section-anim {
           animation: adSlideIn 0.18s ease both;
+        }
+
+        /* Unified 2-Column Mobile Stat Grid (4 on desktop, strictly 2 on mobile) */
+        .ad-stat-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 14px;
+        }
+        @media (max-width: 1024px) {
+          .ad-stat-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+          }
+        }
+        @media (max-width: 640px) {
+          .ad-stat-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 10px !important;
+          }
         }
 
         /* Mobile adjustments */
@@ -4772,9 +5052,9 @@ function AdminPanelInner() {
           isMobile={isMobile}
           open={isMobile ? sidebarOpen : true}
           onClose={() => setSidebar(false)}
-          currentUser={currentUser}
           isDark={isDark}
-          toggleTheme={toggleTheme}
+          themeMode={themeMode}
+          setThemeMode={handleSetThemeMode}
         />
 
         {/* Main Content Area */}
@@ -4785,7 +5065,6 @@ function AdminPanelInner() {
             isMobile={isMobile}
             currentUser={currentUser}
             isDark={isDark}
-            toggleTheme={toggleTheme}
           />
 
           <main className="ad-scroll" style={{ flex: 1, overflowY: 'auto' }}>

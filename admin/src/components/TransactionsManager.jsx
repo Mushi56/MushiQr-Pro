@@ -48,14 +48,14 @@ export default function TransactionsManager() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, color: '#fff' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, color: 'var(--ad-text)' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: T.bgCard, padding: '18px 22px', borderRadius: T.r.lg, border: `1px solid ${T.border}`, flexWrap: 'wrap', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--ad-card)', padding: '18px 22px', borderRadius: T.r.lg, border: `1px solid var(--ad-border)`, boxShadow: 'var(--ad-card-shadow)', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ad-text)' }}>
             <CreditCard size={20} color={T.accent} /> Payment Transactions Ledger
           </h2>
-          <p style={{ fontSize: 12, color: T.textSec, margin: '4px 0 0' }}>
+          <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '4px 0 0' }}>
             Authoritative, append-only historical record of all store purchases, web checkouts, and renewals.
           </p>
         </div>
@@ -63,14 +63,14 @@ export default function TransactionsManager() {
 
       {/* Filter & Search Bar */}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.04)', padding: '8px 14px', borderRadius: 10, border: `1px solid ${T.border}`, flex: 1, minWidth: 220 }}>
-          <Search size={14} color="#8b8fa8" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--ad-input)', padding: '8px 14px', borderRadius: 10, border: `1px solid var(--ad-border)`, flex: 1, minWidth: 220 }}>
+          <Search size={14} color="var(--ad-text-sec)" />
           <input
             type="text"
             placeholder="Search by Transaction ID, User UID, or Product..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ background: 'none', border: 'none', color: '#fff', outline: 'none', fontSize: 12, width: '100%' }}
+            style={{ background: 'none', border: 'none', color: 'var(--ad-text)', outline: 'none', fontSize: 12, width: '100%', fontFamily: 'inherit' }}
           />
         </div>
 
@@ -80,15 +80,16 @@ export default function TransactionsManager() {
               key={ev}
               onClick={() => setEventFilter(ev)}
               style={{
-                background: eventFilter === ev ? 'rgba(214,0,54,0.15)' : 'rgba(255,255,255,0.03)',
-                color: eventFilter === ev ? T.accent : T.textSec,
-                border: `1px solid ${eventFilter === ev ? T.accent : T.border}`,
+                background: eventFilter === ev ? 'rgba(255, 77, 157, 0.14)' : 'var(--ad-input)',
+                color: eventFilter === ev ? '#FF4D9D' : 'var(--ad-text-sec)',
+                border: `1px solid ${eventFilter === ev ? '#FF4D9D' : 'var(--ad-border)'}`,
                 padding: '6px 12px',
                 borderRadius: 8,
                 fontSize: 11,
                 fontWeight: 700,
                 cursor: 'pointer',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                fontFamily: 'inherit'
               }}
             >
               {ev}
@@ -98,34 +99,34 @@ export default function TransactionsManager() {
       </div>
 
       {/* Transactions Table */}
-      <div style={{ background: T.bgCard, borderRadius: T.r.lg, border: `1px solid ${T.border}`, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--ad-card)', borderRadius: T.r.lg, border: `1px solid var(--ad-border)`, boxShadow: 'var(--ad-card-shadow)', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 680 }}>
             <thead>
-              <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${T.border}` }}>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Transaction ID</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>User UID</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Event Type</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Provider</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Product ID</th>
-                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Date</th>
+              <tr style={{ background: 'var(--ad-input)', borderBottom: `1px solid var(--ad-border)` }}>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Transaction ID</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>User UID</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Event Type</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Provider</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Product ID</th>
+                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase' }}>Date</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: '40px 20px', textAlign: 'center', color: T.textSec, fontSize: 13 }}>
+                  <td colSpan={6} style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--ad-text-sec)', fontSize: 13 }}>
                     No payment transactions recorded yet.
                   </td>
                 </tr>
               ) : (
                 filtered.map(txn => (
-                  <tr key={txn.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontSize: 12, color: '#fff' }}>
+                  <tr key={txn.id} style={{ borderBottom: `1px solid var(--ad-border)` }}>
+                    <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontSize: 12, color: 'var(--ad-text)' }}>
                       {txn.transactionId || txn.id}
                     </td>
-                    <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontSize: 12, color: T.textSec }}>
-                      {txn.userId || 'â€”'}
+                    <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontSize: 12, color: 'var(--ad-text-sec)' }}>
+                      {txn.userId || '—'}
                     </td>
                     <td style={{ padding: '14px 18px' }}>
                       <span style={{
@@ -139,13 +140,13 @@ export default function TransactionsManager() {
                         {txn.eventType || 'PURCHASE'}
                       </span>
                     </td>
-                    <td style={{ padding: '14px 18px', fontSize: 12, color: T.textSec }}>
+                    <td style={{ padding: '14px 18px', fontSize: 12, color: 'var(--ad-text-sec)' }}>
                       {txn.provider || 'google_play'}
                     </td>
-                    <td style={{ padding: '14px 18px', fontSize: 12, color: '#fff' }}>
-                      {txn.productId || 'â€”'}
+                    <td style={{ padding: '14px 18px', fontSize: 12, color: 'var(--ad-text)' }}>
+                      {txn.productId || '—'}
                     </td>
-                    <td style={{ padding: '14px 18px', fontSize: 12, color: T.textSec }}>
+                    <td style={{ padding: '14px 18px', fontSize: 12, color: 'var(--ad-text-sec)' }}>
                       {fmtDate(txn.processedAt || txn.createdAt)}
                     </td>
                   </tr>
