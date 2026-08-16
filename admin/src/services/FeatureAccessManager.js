@@ -632,15 +632,29 @@ class FeatureAccessManagerService {
    * Determines if a feature requires a paid subscription (is in paid plans and not free)
    */
   isPaidFeature(featureId) {
-    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
-    if (!featDef) return false;
+    // 1. If feature matrix explicitly includes 'free', it is free -> never paid
+    const matrixEntry = this.membershipConfig?.featureMatrix?.[featureId];
+    if (Array.isArray(matrixEntry)) {
+      return !matrixEntry.includes('free');
+    }
 
-    // Check free plan features config
+    // 2. Check free plan features config
     const freePlanFeats = this.planConfigs['free']?.features || DEFAULT_FREE_FEATURES;
-    const isFree = freePlanFeats.includes(featureId);
+    if (freePlanFeats.includes(featureId)) {
+      return false;
+    }
 
-    // If it is NOT in free plan, or if it requires paid plan by default/config
-    return !isFree;
+    // 3. Check if in any paid plan
+    const paidTiers = ['weekly', 'monthly', 'yearly'];
+    const isInPaid = paidTiers.some(pId => {
+      const feats = this.planConfigs[pId]?.features || DEFAULT_PAID_FEATURES;
+      return feats.includes(featureId);
+    });
+
+    if (isInPaid) return true;
+
+    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
+    return Boolean(featDef && featDef.defaultPlan && featDef.defaultPlan !== 'free');
   }
 
   /**

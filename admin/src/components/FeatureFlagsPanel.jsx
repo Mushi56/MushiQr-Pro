@@ -198,8 +198,15 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // ── Helper: Check if feature is in any paid plan ───────────────────────
+  // ── Helper: Check if feature is in any paid plan (Free tier features are never PRO) ──
   const checkIsPaidFeature = (featureKey, defaultPlan) => {
+    // 1. If feature is included in the Free tier, it is FREE for all users -> Never show PRO badge
+    const freeFeatures = livePlans['free']?.features || DEFAULT_FREE_FEATURES;
+    if (freeFeatures.includes(featureKey)) {
+      return false;
+    }
+
+    // 2. Check if included in any paid tier (weekly, monthly, yearly)
     const paidTiers = ['weekly', 'monthly', 'yearly'];
     const isInLivePaid = paidTiers.some(pId => {
       const feats = livePlans[pId]?.features || DEFAULT_PAID_FEATURES;
@@ -207,7 +214,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     });
 
     if (isInLivePaid) return true;
-    return defaultPlan && defaultPlan !== 'free';
+    return Boolean(defaultPlan && defaultPlan !== 'free');
   };
 
   // ── Unified 140+ Features List ─────────────────────────────────────────
