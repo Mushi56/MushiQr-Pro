@@ -14,7 +14,8 @@ import {
   ArrowUpRight, MoreVertical, Calendar, AlertTriangle, CheckCircle,
   XCircle, Clock, Info, Star, Zap, Globe, AlertCircle, Save,
   ExternalLink, Key, ArrowLeft, Mail, Monitor, Cpu,
-  DollarSign, Tag, Percent, Receipt, LogOut,
+  DollarSign, Tag, Percent, Receipt, LogOut, Sun, Moon,
+  Barcode, ScanLine, SlidersHorizontal, ArrowDownRight
 } from 'lucide-react';
 
 import * as DS from '../services/adminDataService';
@@ -32,29 +33,22 @@ import PlanManager from './admin/PlanManager';
 import FeatureMatrixManager from './admin/FeatureMatrixManager';
 import MembershipDashboard from './admin/MembershipDashboard';
 import AuditLogPanel from './admin/AuditLogPanel';
+import TransactionsManager from './admin/TransactionsManager';
+import { getTokens } from './admin/AdminUIKit';
 
-// ─── Design Tokens ────────────────────────────────────────────────────────
+// ─── Static Fallback Design Tokens ────────────────────────────────────────
 const T = {
-  bg:        '#09090f',
-  bgEl:      '#10101a',
-  bgCard:    '#14141e',
-  bgHov:     '#1c1c2a',
-  sidebar:   '#0c0c15',
-  sidebarAct:'rgba(214,0,54,0.12)',
-  sidebarHov:'rgba(255,255,255,0.04)',
-  border:    'rgba(255,255,255,0.06)',
-  borderHov: 'rgba(255,255,255,0.12)',
-  accent:    '#D60036',
-  accentLow: 'rgba(214,0,54,0.15)',
-  purple:    '#8b5cf6',
-  green:     '#10b981',
-  orange:    '#f59e0b',
-  blue:      '#3b82f6',
-  red:       '#ef4444',
-  text:      '#f0f0f8',
-  textSec:   '#8b8fa8',
-  textMut:   '#44465a',
-  r:         { xs: 6, sm: 8, md: 12, lg: 16, xl: 20 },
+  ...getTokens(false),
+  accent: '#FF4D9D',
+  accentLow: 'rgba(255, 77, 157, 0.15)',
+  purple: '#7B61FF',
+  green: '#22C55E',
+  orange: '#F59E0B',
+  blue: '#3B82F6',
+  red: '#EF4444',
+  bgEl: '#10101a',
+  sidebarAct: 'rgba(255, 77, 157, 0.15)',
+  sidebarHov: 'rgba(255, 255, 255, 0.04)',
 };
 
 // ─── Toast Notification System ───────────────────────────────────────────
@@ -136,59 +130,58 @@ function fmtDate(ts) {
   return new Date(ts).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// ─── Navigation Config ────────────────────────────────────────────────────
+// ─── Navigation Config (Matching Reference) ──────────────────────────────
 const LABELS = {
-  dashboard:'Dashboard', revenue:'Revenue & SaaS', users:'Users', subscriptions:'Subscriptions',
-  analytics:'Analytics', reports:'Reports', templates:'Templates',
-  'qr-barcode':'QR & Barcode', categories:'Categories', bulk:'Bulk Operations',
-  'app-settings':'App Settings', branding:'Branding', 'remote-config':'Remote Config',
-  'feature-flags':'Feature Flags', maintenance:'Maintenance', announcements:'Announcements',
-  'admin-users':'Admin Users', roles:'Roles & Permissions', 'activity-logs':'Activity Logs',
-  security:'Security', backups:'Backups', 'audit-logs':'Audit Logs',
-  'system-health':'System Health', integrations:'Integrations',
-  developer:'Developer / API', support:'Support / Tickets',
+  dashboard:        'Dashboard',
+  users:            'Users',
+  subscriptions:    'Subscriptions',
+  plans:            'Plans',
+  payments:         'Payments',
+  transactions:     'Transactions',
+  'qr-barcode':     'QR Codes',
+  barcodes:         'Barcodes',
+  analytics:        'Analytics',
+  reports:          'Reports',
+  templates:        'Templates',
+  'scan-analytics': 'Scan Analytics',
+  'app-settings':   'Settings',
+  'admin-users':    'Admins',
+  'audit-logs':     'Audit Logs',
+  branding:         'Appearance',
+  'remote-config':  'System Settings',
+  'feature-matrix': 'Feature Matrix',
+  'feature-flags':  'Feature Flags',
+  categories:       'Categories',
+  bulk:             'Bulk Operations',
+  maintenance:      'Maintenance',
+  announcements:    'Announcements',
+  roles:            'Roles',
+  security:         'Security',
+  backups:          'Backups',
+  'system-health':  'System Health',
+  integrations:     'Integrations',
+  developer:        'Developer / API',
+  support:          'Support'
 };
 
-const NAV = [
-  { section: 'MAIN', items: [
-    { id: 'dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
-    { id: 'users',         icon: Users,           label: 'Users' },
-    { id: 'analytics',     icon: BarChart3,       label: 'Analytics' },
-    { id: 'reports',       icon: FileText,        label: 'Reports' },
-  ]},
-  { section: 'MONETIZATION', items: [
-    { id: 'revenue',        icon: DollarSign,      label: 'Revenue & SaaS' },
-    { id: 'subscriptions',  icon: CreditCard,      label: 'Membership Plans' },
-    { id: 'feature-matrix', icon: Sliders,         label: 'Feature Matrix' },
-  ]},
-  { section: 'CONTENT', items: [
-    { id: 'templates',  icon: Layers,  label: 'Templates' },
-    { id: 'qr-barcode', icon: QrCode,  label: 'QR & Barcode' },
-    { id: 'categories', icon: Grid,    label: 'Categories' },
-    { id: 'bulk',       icon: Package, label: 'Bulk Operations' },
-  ]},
-  { section: 'APP MANAGEMENT', items: [
-    { id: 'app-settings',  icon: Settings,  label: 'App Settings' },
-    { id: 'branding',      icon: Palette,   label: 'Branding' },
-    { id: 'remote-config', icon: Sliders,   label: 'Remote Config' },
-    { id: 'feature-flags', icon: Flag,      label: 'Feature Flags' },
-    { id: 'maintenance',   icon: Settings2, label: 'Maintenance' },
-    { id: 'announcements', icon: Megaphone, label: 'Announcements' },
-  ]},
-  { section: 'SYSTEM', items: [
-    { id: 'admin-users',   icon: UserCog,      label: 'Admin Users' },
-    { id: 'roles',         icon: Shield,       label: 'Roles & Permissions' },
-    { id: 'activity-logs', icon: Activity,     label: 'Activity Logs' },
-    { id: 'security',      icon: Lock,         label: 'Security' },
-    { id: 'backups',       icon: HardDrive,    label: 'Backups' },
-  ]},
-  { section: 'ADVANCED', items: [
-    { id: 'audit-logs',    icon: ClipboardList, label: 'Audit Logs' },
-    { id: 'system-health', icon: Heart,         label: 'System Health' },
-    { id: 'integrations',  icon: Plug,          label: 'Integrations' },
-    { id: 'developer',     icon: Code,          label: 'Developer / API' },
-    { id: 'support',       icon: HelpCircle,    label: 'Support / Tickets' },
-  ]},
+const NAV_MAIN = [
+  { id: 'dashboard',        icon: LayoutDashboard,    label: 'Dashboard' },
+  { id: 'users',            icon: Users,              label: 'Users' },
+  { id: 'subscriptions',    icon: CreditCard,         label: 'Subscriptions' },
+  { id: 'plans',            icon: Package,            label: 'Plans' },
+  { id: 'payments',         icon: DollarSign,         label: 'Payments' },
+  { id: 'transactions',     icon: FileText,           label: 'Transactions' },
+  { id: 'qr-barcode',       icon: QrCode,             label: 'QR Codes' },
+  { id: 'barcodes',         icon: Barcode,            label: 'Barcodes' },
+  { id: 'analytics',        icon: BarChart3,          label: 'Analytics' },
+  { id: 'reports',          icon: Layers,             label: 'Reports' },
+  { id: 'templates',        icon: Palette,            label: 'Templates' },
+  { id: 'scan-analytics',   icon: ScanLine,           label: 'Scan Analytics' },
+  { id: 'app-settings',     icon: Settings,           label: 'Settings' },
+  { id: 'admin-users',      icon: Shield,             label: 'Admins' },
+  { id: 'audit-logs',       icon: ClipboardList,      label: 'Audit Logs' },
+  { id: 'branding',         icon: Sliders,            label: 'Appearance' },
+  { id: 'remote-config',    icon: Cpu,                label: 'System Settings' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -448,25 +441,10 @@ function DonutSVG({ segments = [], size = 160 }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SIDEBAR
+// SIDEBAR (Matching Reference: Dark #0F1221, Pink/Purple Active, Tech Badges)
 // ═══════════════════════════════════════════════════════════════════════════
 
-function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
-  const touchStartX = useRef(null);
-  const touchEndX = useRef(null);
-
-  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
-  const handleTouchMove = (e) => { touchEndX.current = e.touches[0].clientX; };
-  const handleTouchEnd = () => {
-    if (touchStartX.current !== null && touchEndX.current !== null) {
-      if (touchEndX.current - touchStartX.current > 50) {
-        onClose();
-      }
-    }
-    touchStartX.current = null;
-    touchEndX.current = null;
-  };
-
+function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDark, toggleTheme }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -476,224 +454,501 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser }) {
     }
   };
 
-  const ITEM_GRADIENTS = {
-    dashboard: 'linear-gradient(135deg, #D60036 0%, #ff4d6d 100%)',
-    analytics: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-    users: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-    revenue: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    subscriptions: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    templates: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
-    'qr-barcode': 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)',
-    categories: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-    bulk: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)',
-    'app-settings': 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-    branding: 'linear-gradient(135deg, #ec4899 0%, #d946ef 100%)',
-    'remote-config': 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
-    'feature-flags': 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
-    maintenance: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
-    announcements: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-    'admin-users': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    roles: 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
-    'activity-logs': 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-    security: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    backups: 'linear-gradient(135deg, #64748b 0%, #334155 100%)',
-    'audit-logs': 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-    'system-health': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    integrations: 'linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)',
-    developer: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-    support: 'linear-gradient(135deg, #ec4899 0%, #c026d3 100%)',
-  };
-
   return (
     <aside
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
       style={{
-        width: 320,
-        background: 'var(--bg-primary)',
-        borderLeft: 'none',
-        borderRight: 'none',
+        width: 260,
+        background: '#0F1221',
+        borderRight: '1px solid rgba(255, 255, 255, 0.07)',
         display: 'flex',
         flexDirection: 'column',
-        position: 'fixed',
-        right: open ? 0 : -330,
-        left: 'auto',
+        position: isMobile ? 'fixed' : 'relative',
+        left: isMobile ? (open ? 0 : -270) : 0,
         top: 0,
         bottom: 0,
-        zIndex: 35,
-        transition: 'right 0.27s cubic-bezier(0.4,0,0.2,1)',
-        boxShadow: open ? '-8px 0 40px rgba(0,0,0,0.4)' : 'none',
-        paddingTop: 'max(14px, env(safe-area-inset-top))',
-        paddingBottom: 'max(14px, env(safe-area-inset-bottom))',
+        zIndex: isMobile ? 50 : 10,
+        transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: isMobile && open ? '8px 0 36px rgba(0,0,0,0.6)' : 'none',
+        flexShrink: 0,
+        userSelect: 'none',
       }}
     >
-      {/* Top Profile Card Header with container box */}
-      <div style={{ padding: '20px', flexShrink: 0, borderBottom: '1px solid var(--border-color)' }}>
-        {currentUser && (
+      {/* ── Brand Header (Matching Reference) ───────────────────────────── */}
+      <div style={{
+        padding: '20px 18px 16px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexShrink: 0
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          {/* Pink-to-Purple Logo Box */}
           <div style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 16,
-            padding: '14px',
+            width: 38,
+            height: 38,
+            borderRadius: 10,
+            background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            justifyContent: 'center',
+            color: '#fff',
+            flexShrink: 0,
+            boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)'
           }}>
-            <div style={{ position: 'relative', flexShrink: 0, display: 'flex' }}>
+            <QrCode size={20} strokeWidth={2.4} />
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 15, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.3px' }}>
+                QR Pro Admin
+              </span>
+              <span style={{
+                fontSize: 10,
+                fontWeight: 800,
+                padding: '2px 6px',
+                borderRadius: 100,
+                background: 'rgba(255, 77, 157, 0.2)',
+                color: '#FF4D9D',
+                lineHeight: 1
+              }}>
+                v2.0
+              </span>
+            </div>
+            <div style={{ fontSize: 10, color: '#8E95A9', marginTop: 2, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Modern & Mobile-First
+            </div>
+          </div>
+        </div>
+
+        {isMobile && (
+          <button
+            onClick={onClose}
+            style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: 'none',
+              borderRadius: 8,
+              color: '#8E95A9',
+              cursor: 'pointer',
+              padding: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <X size={16} />
+          </button>
+        )}
+      </div>
+
+      {/* ── 17 Clean Navigation Items ───────────────────────────────────── */}
+      <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {NAV_MAIN.map(({ id, icon: Icon, label }) => {
+          const isActive = active === id;
+          return (
+            <button
+              key={id}
+              onClick={() => {
+                setActive(id);
+                if (isMobile) onClose();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '9px 12px',
+                borderRadius: 10,
+                border: 'none',
+                background: isActive ? 'linear-gradient(135deg, rgba(255, 77, 157, 0.16) 0%, rgba(123, 97, 255, 0.16) 100%)' : 'transparent',
+                borderLeft: isActive ? '3px solid #FF4D9D' : '3px solid transparent',
+                color: isActive ? '#FFFFFF' : '#8E95A9',
+                fontSize: 13,
+                fontWeight: isActive ? 800 : 600,
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+                boxSizing: 'border-box',
+                transition: 'all 0.12s ease',
+                outline: 'none',
+              }}
+              onMouseEnter={e => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                  e.currentTarget.style.color = '#FFFFFF';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#8E95A9';
+                }
+              }}
+            >
+              <Icon size={17} color={isActive ? '#FF4D9D' : '#8E95A9'} strokeWidth={isActive ? 2.4 : 1.9} />
+              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Sidebar Footer (Tech Badges, Dark Mode Switch, Super Admin Profile) ─ */}
+      <div style={{
+        padding: '14px 14px',
+        borderTop: '1px solid rgba(255, 255, 255, 0.07)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        flexShrink: 0,
+        background: '#0B0D18'
+      }}>
+        {/* Tech Stack Indicator Pills */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 6, background: 'rgba(59, 130, 246, 0.15)', color: '#60A5FA' }}>
+            React
+          </span>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 6, background: 'rgba(6, 182, 212, 0.15)', color: '#22D3EE' }}>
+            Tailwind CSS
+          </span>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 6, background: 'rgba(245, 158, 11, 0.15)', color: '#FBBF24' }}>
+            Firebase
+          </span>
+        </div>
+
+        {/* Dark / Light Mode Toggle */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 10px',
+          borderRadius: 10,
+          background: 'rgba(255, 255, 255, 0.04)',
+          border: '1px solid rgba(255, 255, 255, 0.06)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {isDark ? <Moon size={15} color="#7B61FF" /> : <Sun size={15} color="#F59E0B" />}
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#FFFFFF' }}>Dark Mode</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            style={{
+              width: 38,
+              height: 22,
+              borderRadius: 12,
+              background: isDark ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : 'rgba(255,255,255,0.15)',
+              border: 'none',
+              cursor: 'pointer',
+              position: 'relative',
+              padding: 0,
+              outline: 'none',
+              transition: 'background 0.2s'
+            }}
+          >
+            <div style={{
+              width: 16,
+              height: 16,
+              borderRadius: '50%',
+              background: '#FFFFFF',
+              position: 'absolute',
+              top: 3,
+              left: isDark ? 19 : 3,
+              transition: 'left 0.2s',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+            }} />
+          </button>
+        </div>
+
+        {/* Super Admin Profile Card */}
+        {currentUser && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+            padding: '8px 10px',
+            borderRadius: 12,
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.06)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
               {currentUser.photoURL ? (
-                <img src={currentUser.photoURL} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B' }} />
+                <img src={currentUser.photoURL} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
               ) : (
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 16, border: '2px solid #F59E0B' }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
+                  color: '#fff', fontWeight: 900, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                }}>
                   {(currentUser.displayName || currentUser.email || 'A')[0].toUpperCase()}
                 </div>
               )}
-              <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
-                <GoldenAdminBadge size={14} />
-              </div>
-            </div>
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {currentUser.displayName || 'Super Admin'}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', marginTop: 2 }}>
-                {currentUser.email}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {currentUser.displayName || 'Super Admin'}
+                </div>
+                <div style={{ fontSize: 10, color: '#8E95A9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {currentUser.email}
+                </div>
               </div>
             </div>
 
             <button
               onClick={handleLogout}
-              title="Log Out"
+              title="Sign Out"
               style={{
-                background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: 8,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                background: 'none',
+                border: 'none',
+                color: '#8E95A9',
+                cursor: 'pointer',
+                padding: 4,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 transition: 'color 0.15s'
               }}
-              onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+              onMouseEnter={e => e.currentTarget.style.color = '#EF4444'}
+              onMouseLeave={e => e.currentTarget.style.color = '#8E95A9'}
             >
-              <LogOut size={18} />
+              <LogOut size={16} />
             </button>
           </div>
         )}
-      </div>
-
-      {/* Nav List styled exactly like YouPage.jsx Settings list */}
-      <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 0' }}>
-        {NAV.map(({ section, items }) => (
-          <div key={section} style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.8px', textTransform: 'uppercase', padding: '12px 20px 6px' }}>
-              {section}
-            </div>
-
-            {items.map(({ id, icon: Icon, label }, index) => {
-              const isActive = active === id;
-              const gradientBg = ITEM_GRADIENTS[id] || 'linear-gradient(135deg, #D60036 0%, #ff4d6d 100%)';
-              return (
-                <Fragment key={id}>
-                  <div
-                    onClick={() => { setActive(id); if (isMobile) onClose(); }}
-                    className="settings-row-item"
-                    style={{
-                      padding: '12px 20px',
-                      background: isActive ? 'var(--bg-secondary)' : 'transparent',
-                    }}
-                  >
-                    <div className="icon-container-gradient" style={{
-                      background: gradientBg,
-                      width: 36, height: 36, borderRadius: 10,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      marginRight: 16, flexShrink: 0,
-                    }}>
-                      <Icon size={18} />
-                    </div>
-
-                    <div style={{
-                      flex: 1, fontSize: '14px', fontWeight: isActive ? 800 : 600,
-                      color: isActive ? 'var(--accent-primary)' : 'var(--text-primary)',
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {label}
-                    </div>
-
-                    <ChevronRight size={16} color={isActive ? 'var(--accent-primary)' : 'var(--text-muted)'} />
-                  </div>
-                </Fragment>
-              );
-            })}
-          </div>
-        ))}
-        <div style={{ height: 20 }} />
       </div>
     </aside>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// HEADER
+// HEADER (Matching Reference: Breadcrumb, Search, Notifications, Profile)
 // ═══════════════════════════════════════════════════════════════════════════
 
-function Header({ section, onMenuToggle, isMobile, currentUser }) {
+function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTheme }) {
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+
   return (
-    <div style={{
-      minHeight: 60, background: T.bgEl, borderBottom: 'none',
-      display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10,
-      position: 'sticky', top: 0, zIndex: 10, flexShrink: 0,
+    <header style={{
+      height: 64,
+      background: isDark ? '#151928' : '#FFFFFF',
+      borderBottom: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '0 24px',
+      position: 'sticky',
+      top: 0,
+      zIndex: 20,
+      flexShrink: 0,
     }}>
-      {/* App Logo & Title on the Left */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-        <img src="/logo.webp" alt="Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain', flexShrink: 0, border: `1px solid rgba(245, 158, 11, 0.4)` }} />
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
-          <div style={{ fontSize: isMobile ? 14 : 15, fontWeight: 900, color: T.text, lineHeight: 1.2, letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ flexShrink: 0 }}>Mushi QR Pro</span>
-            {!isMobile && <span style={{ fontSize: 12, color: T.textSec, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>/ {LABELS[section] || 'Admin Panel'}</span>}
-          </div>
-          <div style={{ fontSize: 10, color: '#F59E0B', fontWeight: 800, letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-            <GoldenAdminBadge size={12} /> SUPER ADMIN
-          </div>
-        </div>
-      </div>
-
-      <div className="ad-header-search">
-        <Search size={13} color={T.textMut} />
-        <input placeholder="Search admin panel..." style={{ background: 'none', border: 'none', outline: 'none', color: T.text, fontSize: 12, fontFamily: 'inherit', width: 160 }} />
-        <span style={{ fontSize: 10, color: T.textMut }}>⌘K</span>
-      </div>
-
-      <a href="/#/" style={{
-        display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
-        background: 'rgba(255,255,255,0.05)', border: `1px solid ${T.border}`,
-        color: T.textSec, borderRadius: T.r.md, padding: '6px 12px',
-        fontSize: 12, fontWeight: 700, textDecoration: 'none', transition: 'all 0.15s'
-      }}>
-        <ArrowLeft size={13} />
-        <span className="ad-header-app-btn">App</span>
-      </a>
-
-      {/* User Profile Picture Button on Right Side to Trigger Menu Drawer */}
-      <button
-        onClick={onMenuToggle}
-        title="Open Admin Menu"
-        style={{
-          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-          display: 'flex', alignItems: 'center', flexShrink: 0, position: 'relative',
-          marginLeft: 4,
-        }}
-      >
-        {currentUser?.photoURL ? (
-          <img src={currentUser.photoURL} alt="Profile" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B', boxShadow: '0 2px 10px rgba(245,158,11,0.3)' }} />
-        ) : (
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B', fontWeight: 900, fontSize: 14, border: '2px solid #F59E0B' }}>
-            {(currentUser?.displayName || currentUser?.email || 'A')[0].toUpperCase()}
-          </div>
+      {/* Left: Mobile Hamburger & Page Title */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        {isMobile && (
+          <button
+            onClick={onMenuToggle}
+            style={{
+              background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)',
+              border: 'none',
+              borderRadius: 8,
+              color: isDark ? '#F8FAFC' : '#0F172A',
+              padding: 8,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Menu size={18} />
+          </button>
         )}
-        <div style={{ position: 'absolute', bottom: -2, right: -3 }}>
-          <GoldenAdminBadge size={12} />
+
+        <div>
+          <h1 style={{
+            margin: 0,
+            fontSize: isMobile ? 16 : 18,
+            fontWeight: 900,
+            color: isDark ? '#F8FAFC' : '#0F172A',
+            letterSpacing: '-0.3px',
+            textTransform: 'capitalize'
+          }}>
+            {LABELS[section] || 'Dashboard'}
+          </h1>
         </div>
-      </button>
-    </div>
+      </div>
+
+      {/* Right: Search, Notifications, Theme Toggle, Profile */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Search Bar */}
+        <div style={{
+          display: isMobile ? 'none' : 'flex',
+          alignItems: 'center',
+          gap: 8,
+          background: isDark ? '#0F1322' : '#F1F3F9',
+          border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
+          borderRadius: 10,
+          padding: '7px 12px',
+        }}>
+          <Search size={14} color={isDark ? '#64748B' : '#94A3B8'} />
+          <input
+            type="text"
+            placeholder="Search..."
+            style={{
+              background: 'none',
+              border: 'none',
+              outline: 'none',
+              color: isDark ? '#F8FAFC' : '#0F172A',
+              fontSize: 13,
+              fontFamily: 'inherit',
+              width: 140
+            }}
+          />
+        </div>
+
+        {/* Notifications Icon with Badge */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setNotifOpen(prev => !prev)}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.05)',
+              border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: isDark ? '#F8FAFC' : '#0F172A',
+              cursor: 'pointer',
+              position: 'relative'
+            }}
+          >
+            <Bell size={16} />
+            <span style={{
+              position: 'absolute',
+              top: 6,
+              right: 6,
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: '#FF4D9D'
+            }} />
+          </button>
+
+          {notifOpen && (
+            <div style={{
+              position: 'absolute',
+              top: 44,
+              right: 0,
+              width: 280,
+              background: isDark ? '#151928' : '#FFFFFF',
+              border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.1)'}`,
+              borderRadius: 14,
+              padding: 16,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+              zIndex: 100,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 13, fontWeight: 800, color: isDark ? '#F8FAFC' : '#0F172A' }}>Notifications</span>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 100, background: 'rgba(255, 77, 157, 0.15)', color: '#FF4D9D' }}>3 New</span>
+              </div>
+              <div style={{ fontSize: 12, color: isDark ? '#94A3B8' : '#64748B', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ padding: '6px 8px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)' }}>
+                  🎉 New subscription from <strong>fatima@example.com</strong>
+                </div>
+                <div style={{ padding: '6px 8px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)' }}>
+                  ⚡ Cloud function deployed successfully.
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Back to App Link */}
+        <a
+          href="/#/"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.05)',
+            border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)'}`,
+            color: isDark ? '#94A3B8' : '#64748B',
+            borderRadius: 10,
+            padding: '7px 12px',
+            fontSize: 12,
+            fontWeight: 700,
+            textDecoration: 'none',
+          }}
+        >
+          <ArrowLeft size={13} />
+          <span>App</span>
+        </a>
+
+        {/* User Profile Avatar */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setProfileOpen(prev => !prev)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: 0
+            }}
+          >
+            {currentUser?.photoURL ? (
+              <img src={currentUser.photoURL} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{
+                width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
+                color: '#fff', fontWeight: 900, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                {(currentUser?.displayName || currentUser?.email || 'A')[0].toUpperCase()}
+              </div>
+            )}
+          </button>
+
+          {profileOpen && (
+            <div style={{
+              position: 'absolute',
+              top: 44,
+              right: 0,
+              width: 200,
+              background: isDark ? '#151928' : '#FFFFFF',
+              border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.1)'}`,
+              borderRadius: 14,
+              padding: 12,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+              zIndex: 100,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6
+            }}>
+              <div style={{ padding: '4px 8px', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)'}`, marginBottom: 4 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: isDark ? '#F8FAFC' : '#0F172A' }}>{currentUser?.displayName || 'Super Admin'}</div>
+                <div style={{ fontSize: 10, color: isDark ? '#94A3B8' : '#64748B' }}>{currentUser?.email}</div>
+              </div>
+              <button
+                onClick={() => { signOut(auth); setProfileOpen(false); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none',
+                  color: '#EF4444', fontSize: 12, fontWeight: 700, padding: '6px 8px', borderRadius: 6, cursor: 'pointer'
+                }}
+              >
+                <LogOut size={14} /> Sign Out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
   );
 }
 
@@ -4099,6 +4354,25 @@ function AdminPanelInner() {
   const [section, setSection]     = useState('dashboard');
   const [isMobile, setIsMobile]   = useState(window.innerWidth < 900);
   const [sidebarOpen, setSidebar] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+
+  const [isDark, setIsDark] = useState(() => {
+    try {
+      return localStorage.getItem('mushiqr_admin_dark_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleTheme = () => {
+    setIsDark(prev => {
+      const next = !prev;
+      try { localStorage.setItem('mushiqr_admin_dark_mode', String(next)); } catch {}
+      return next;
+    });
+  };
+
+  const T_THEME = getTokens(isDark);
 
   const [stats, setStats]                   = useState(null);
   const [chartData, setChartData]           = useState([]);
@@ -4159,8 +4433,8 @@ function AdminPanelInner() {
 
   if (authLoading) {
     return (
-      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: T.bg, color: T.text }}>
-        <RefreshCw className="animate-spin" size={32} color={T.accent} />
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: T_THEME.bg, color: T_THEME.text }}>
+        <RefreshCw className="animate-spin" size={32} color="#FF4D9D" />
       </div>
     );
   }
@@ -4178,21 +4452,21 @@ function AdminPanelInner() {
     return (
       <div style={{
         display: 'flex', flexDirection: 'column', height: '100vh', alignItems: 'center', justifyContent: 'center',
-        backgroundColor: T.bg, color: T.text, padding: 24, textAlign: 'center', fontFamily: "'Outfit', sans-serif",
+        backgroundColor: T_THEME.bg, color: T_THEME.text, padding: 24, textAlign: 'center', fontFamily: "'Outfit', sans-serif",
         paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)',
       }}>
         <div style={{
-          background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: T.r.xl,
+          background: T_THEME.bgCard, border: `1px solid ${T_THEME.border}`, borderRadius: 20,
           padding: '40px 32px', maxWidth: 440, width: '100%',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
-          boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+          boxShadow: T_THEME.cardShadow
         }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: T.accentLow, border: `1px solid ${T.accent}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accent }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255, 77, 157, 0.15)', border: `1px solid rgba(255, 77, 157, 0.3)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF4D9D' }}>
             <Shield size={34} />
           </div>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 900, color: T.text, margin: 0 }}>Super Admin Access Required</h1>
-            <p style={{ color: T.textSec, fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 900, color: T_THEME.text, margin: 0 }}>Super Admin Access Required</h1>
+            <p style={{ color: T_THEME.textSec, fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
               {currentUser
                 ? isOwnerEmail
                   ? 'You are the system owner. Activate your Super Admin role below to access the dashboard.'
@@ -4202,17 +4476,17 @@ function AdminPanelInner() {
           </div>
 
           {currentUser && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: T.bgEl, padding: '10px 14px', borderRadius: T.r.md, width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: T_THEME.bgInput, padding: '10px 14px', borderRadius: 12, width: '100%', boxSizing: 'border-box' }}>
               {currentUser.photoURL ? (
                 <img src={currentUser.photoURL} alt="" style={{ width: 32, height: 32, borderRadius: '50%' }} />
               ) : (
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: T.accentLow, color: T.accent, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)', color: '#fff', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>
                   {(currentUser.displayName || currentUser.email || 'U')[0].toUpperCase()}
                 </div>
               )}
               <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'System Owner'}</div>
-                <div style={{ fontSize: 10, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: T_THEME.text, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'System Owner'}</div>
+                <div style={{ fontSize: 10, color: T_THEME.textSec, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
               </div>
             </div>
           )}
@@ -4221,7 +4495,7 @@ function AdminPanelInner() {
           {currentUser && isOwnerEmail && (
             <div style={{ width: '100%' }}>
               {bootstrapState.done ? (
-                <div style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid #10b98133', borderRadius: T.r.md, padding: '12px 16px', color: '#10b981', fontSize: 13, fontWeight: 600 }}>
+                <div style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 12, padding: '12px 16px', color: '#22C55E', fontSize: 13, fontWeight: 700 }}>
                   ✓ Super Admin role activated! Reloading dashboard...
                 </div>
               ) : (
@@ -4230,21 +4504,22 @@ function AdminPanelInner() {
                     onClick={handleBootstrap}
                     disabled={bootstrapState.loading}
                     style={{
-                      background: `linear-gradient(135deg, ${T.accent}, #ff4d6d)`, color: '#fff', border: 'none', padding: '13px 20px',
-                      borderRadius: T.r.md, cursor: bootstrapState.loading ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 14,
+                      background: `linear-gradient(135deg, #FF4D9D, #7B61FF)`, color: '#fff', border: 'none', padding: '13px 20px',
+                      borderRadius: 12, cursor: bootstrapState.loading ? 'not-allowed' : 'pointer', fontWeight: 800, fontSize: 14,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
                       fontFamily: 'inherit', opacity: bootstrapState.loading ? 0.7 : 1,
+                      boxShadow: '0 4px 16px rgba(255,77,157,0.35)'
                     }}
                   >
                     {bootstrapState.loading ? <RefreshCw size={16} className="animate-spin" /> : <Key size={16} />}
                     {bootstrapState.loading ? 'Activating Super Admin...' : 'Activate Super Admin Role'}
                   </button>
                   {bootstrapState.error && (
-                    <div style={{ marginTop: 8, color: T.red, fontSize: 12, textAlign: 'center' }}>
+                    <div style={{ marginTop: 8, color: '#EF4444', fontSize: 12, textAlign: 'center' }}>
                       {bootstrapState.error}
                     </div>
                   )}
-                  <p style={{ color: T.textMut, fontSize: 11, marginTop: 6, textAlign: 'center' }}>
+                  <p style={{ color: T_THEME.textSec, fontSize: 11, marginTop: 6, textAlign: 'center' }}>
                     One-time setup: mints your super_admin role into Firebase Auth.
                   </p>
                 </>
@@ -4256,10 +4531,10 @@ function AdminPanelInner() {
             <button
               onClick={handleAdminSignIn}
               style={{
-                background: currentUser && isOwnerEmail ? 'transparent' : T.accent,
-                color: currentUser && isOwnerEmail ? T.textSec : '#fff',
-                border: currentUser && isOwnerEmail ? `1px solid ${T.border}` : 'none',
-                padding: '12px 20px', borderRadius: T.r.md, cursor: 'pointer', fontWeight: 700, fontSize: 14,
+                background: currentUser && isOwnerEmail ? 'transparent' : 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
+                color: currentUser && isOwnerEmail ? T_THEME.textSec : '#fff',
+                border: currentUser && isOwnerEmail ? `1px solid ${T_THEME.border}` : 'none',
+                padding: '12px 20px', borderRadius: 12, cursor: 'pointer', fontWeight: 800, fontSize: 14,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
                 fontFamily: 'inherit'
               }}
@@ -4270,8 +4545,8 @@ function AdminPanelInner() {
               <button
                 onClick={() => signOut(auth)}
                 style={{
-                  background: 'transparent', color: T.red, border: `1px solid ${T.red}44`,
-                  padding: '10px 20px', borderRadius: T.r.md, cursor: 'pointer', fontWeight: 700, fontSize: 13,
+                  background: 'transparent', color: '#EF4444', border: `1px solid rgba(239,68,68,0.3)`,
+                  padding: '10px 20px', borderRadius: 12, cursor: 'pointer', fontWeight: 700, fontSize: 13,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
                   fontFamily: 'inherit'
                 }}
@@ -4282,8 +4557,8 @@ function AdminPanelInner() {
             <button
               onClick={() => window.location.hash = '#/'}
               style={{
-                background: 'transparent', color: T.textSec, border: `1px solid ${T.border}`,
-                padding: '10px 20px', borderRadius: T.r.md, cursor: 'pointer', fontWeight: 600, fontSize: 13,
+                background: 'transparent', color: T_THEME.textSec, border: `1px solid ${T_THEME.border}`,
+                padding: '10px 20px', borderRadius: 12, cursor: 'pointer', fontWeight: 600, fontSize: 13,
                 width: '100%', fontFamily: 'inherit'
               }}
             >
@@ -4306,53 +4581,58 @@ function AdminPanelInner() {
   };
 
   const PANELS = {
-    dashboard:        <AdminDashboard onNavigate={setSection} />,
-    revenue:          <RevenuePanel />,
-    users:            <UsersPanel />,
-    subscriptions:    <MembershipDashboard />,
-    'feature-matrix': <FeatureMatrixManager />,
-    analytics:        <AnalyticsPanel chartData={chartData} stats={stats} />,
-    reports:         <ReportsPanel history={history} />,
-    templates:       <TemplatesPanel cloudTemplates={cloudTemplates} onRefresh={refreshTemplates} />,
-    'qr-barcode':    <QRBarcodePanel stats={stats} history={history} />,
-    categories:      <CategoriesPanel />,
-    bulk:            <BulkPanel history={history} />,
+    dashboard:        <AdminDashboard onNavigate={setSection} stats={stats} revenueData={revenueData} isDark={isDark} />,
+    revenue:          <RevenuePanel isDark={isDark} />,
+    payments:         <RevenuePanel isDark={isDark} />,
+    users:            <UsersPanel isDark={isDark} />,
+    subscriptions:    <MembershipDashboard isDark={isDark} />,
+    plans:            <PlanManager isDark={isDark} />,
+    transactions:     <TransactionsManager isDark={isDark} />,
+    'feature-matrix': <FeatureMatrixManager isDark={isDark} />,
+    analytics:        <AnalyticsPanel chartData={chartData} stats={stats} isDark={isDark} />,
+    reports:         <ReportsPanel history={history} isDark={isDark} />,
+    templates:       <TemplatesPanel cloudTemplates={cloudTemplates} onRefresh={refreshTemplates} isDark={isDark} />,
+    'scan-analytics': <AnalyticsPanel chartData={chartData} stats={stats} isDark={isDark} />,
+    'qr-barcode':    <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
+    barcodes:        <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
+    categories:      <CategoriesPanel isDark={isDark} />,
+    bulk:            <BulkPanel history={history} isDark={isDark} />,
     'app-settings':  <AppSettingsPanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
-      refreshAudit(); // non-blocking
-    }} />,
+      refreshAudit();
+    }} isDark={isDark} />,
     branding:        <BrandingPanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
       refreshAudit();
-    }} />,
+    }} isDark={isDark} />,
     'remote-config': <RemoteConfigPanel config={remoteConfig} onSave={async c => {
       await DS.saveRemoteConfig(c);
       setRemoteConfig(c);
       refreshAudit();
-    }} />,
-    'feature-flags': <FeatureRegistry />,
+    }} isDark={isDark} />,
+    'feature-flags': <FeatureRegistry isDark={isDark} />,
     maintenance:     <MaintenancePanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
       refreshAudit();
-    }} />,
+    }} isDark={isDark} />,
     announcements:   <AnnouncementsPanel announcement={announcement} onSave={async a => {
       await DS.saveAnnouncement(a);
       setAnnouncement(a);
       refreshAudit();
-    }} />,
-    'admin-users':   <AdminUsersPanel />,
-    roles:           <RolesPanel />,
-    'activity-logs': <ActivityLogsPanel history={history} />,
-    security:        <SecurityPanel />,
-    backups:         <BackupsPanel />,
-    'audit-logs':    <AuditLogPanel />,
-    'system-health': <SystemHealthPanel stats={stats} />,
-    integrations:    <IntegrationsPanel />,
-    developer:       <DeveloperPanel />,
-    support:         <SupportPanel />,
+    }} isDark={isDark} />,
+    'admin-users':   <AdminUsersPanel isDark={isDark} />,
+    roles:           <RolesPanel isDark={isDark} />,
+    'activity-logs': <ActivityLogsPanel history={history} isDark={isDark} />,
+    security:        <SecurityPanel isDark={isDark} />,
+    backups:         <BackupsPanel isDark={isDark} />,
+    'audit-logs':    <AuditLogPanel isDark={isDark} />,
+    'system-health': <SystemHealthPanel stats={stats} isDark={isDark} />,
+    integrations:    <IntegrationsPanel isDark={isDark} />,
+    developer:       <DeveloperPanel isDark={isDark} />,
+    support:         <SupportPanel isDark={isDark} />,
   };
 
   return (
@@ -4363,252 +4643,231 @@ function AdminPanelInner() {
         @keyframes adSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
         /* Scrollbar */
-        .ad-scroll::-webkit-scrollbar { width: 4px; }
+        .ad-scroll::-webkit-scrollbar { width: 5px; }
         .ad-scroll::-webkit-scrollbar-track { background: transparent; }
-        .ad-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+        .ad-scroll::-webkit-scrollbar-thumb { background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)'}; border-radius: 3px; }
         .ad-sidebar-nav::-webkit-scrollbar { display: none; }
 
-        /* Base responsive grid utilities */
-        .ad-stat-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 14px;
-        }
-        .ad-chart-row {
-          display: grid;
-          grid-template-columns: 1fr 320px;
-          gap: 16px;
-        }
-        .ad-activity-row {
-          display: grid;
-          grid-template-columns: 1fr 280px;
-          gap: 16px;
-        }
-        .ad-quick-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 12px;
-        }
-        .ad-two-col {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-        }
-        .ad-three-col {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 14px;
-        }
-        .ad-auto-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-          gap: 14px;
-        }
-        .ad-auto-grid-sm {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: 14px;
-        }
-        .ad-template-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-          gap: 12px;
-        }
+        /* Responsive utilities */
         .ad-main-content {
           flex: 1;
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          margin-left: 0;
-          transition: margin-left 0.25s;
+          background: ${T_THEME.bg};
         }
-        .ad-main-content.mobile {
-          margin-left: 0;
+        .ad-main-pad {
+          padding: 24px 28px 40px;
         }
-        .ad-header-search {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: rgba(20,20,30,1);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 8px;
-          padding: 6px 12px;
-        }
-        .ad-header-search input { width: 160px; }
-        .ad-header-subtitle { display: block; }
-        .ad-header-app-btn span { display: inline; }
-        .ad-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .ad-table-wrap table { min-width: 520px; }
-        .ad-main-pad { padding: 24px 28px; }
-        .ad-section-anim { animation: adSlideIn 0.18s ease both; }
-
-        /* Tablet — 1024px */
-        @media (max-width: 1024px) {
-          .ad-stat-grid { grid-template-columns: repeat(2, 1fr); }
-          .ad-chart-row { grid-template-columns: 1fr; }
-          .ad-activity-row { grid-template-columns: 1fr; }
-          .ad-quick-grid { grid-template-columns: repeat(2, 1fr); }
-          .ad-three-col { grid-template-columns: repeat(2, 1fr); }
-          .ad-main-pad { padding: 20px 20px; }
+        .ad-section-anim {
+          animation: adSlideIn 0.18s ease both;
         }
 
-        /* Mobile — 768px */
+        /* Mobile adjustments */
         @media (max-width: 768px) {
-          .ad-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-          .ad-chart-row { grid-template-columns: 1fr; gap: 12px; }
-          .ad-activity-row { grid-template-columns: 1fr; gap: 12px; }
-          .ad-quick-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-          .ad-two-col { grid-template-columns: 1fr; gap: 12px; }
-          .ad-three-col { grid-template-columns: 1fr; gap: 10px; }
-          .ad-auto-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-          .ad-auto-grid-sm { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-          .ad-template-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-          .ad-header-search { display: none; }
-          .ad-header-subtitle { display: none; }
-          .ad-main-pad { padding: 10px 8px 120px; }
-          .ad-stat-value { font-size: 16px !important; }
-          .ad-card-title {
-            font-size: 12px !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
+          .ad-main-pad {
+            padding: 16px 14px 90px;
           }
         }
 
-        /* Small mobile — 480px */
-        @media (max-width: 480px) {
-          .ad-stat-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-          .ad-quick-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-          .ad-two-col { grid-template-columns: 1fr; gap: 10px; }
-          .ad-three-col { grid-template-columns: 1fr; }
-          .ad-auto-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-          .ad-template-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-          .ad-main-pad { padding: 8px 6px 120px; }
-          .ad-stat-value { font-size: 15px !important; }
-        }
-
-        /* Mobile bottom nav */
+        /* Mobile Bottom Nav */
         .ad-bottom-nav {
           display: none;
           position: fixed;
           bottom: 0; left: 0; right: 0;
-          height: 60px;
-          background: rgba(12,12,21,0.97);
-          border-top: none;
-          z-index: 30;
+          height: 64px;
+          background: ${isDark ? '#0F1221' : '#FFFFFF'};
+          border-top: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'};
+          z-index: 40;
           align-items: center;
           justify-content: space-around;
-          padding: 0 4px;
-          gap: 2px;
+          padding: 0 8px;
+          box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
         }
         .ad-bottom-nav-btn {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 3px;
+          gap: 4px;
           background: none;
           border: none;
           cursor: pointer;
-          padding: 8px 10px;
+          padding: 6px 12px;
           border-radius: 10px;
-          transition: background 0.12s;
-          min-width: 48px;
+          min-width: 54px;
           flex: 1;
         }
         .ad-bottom-nav-btn span {
-          font-size: 9px;
-          font-weight: 700;
+          font-size: 10px;
+          font-weight: 800;
           letter-spacing: 0.2px;
           font-family: 'Outfit', sans-serif;
-          text-transform: uppercase;
         }
         @media (max-width: 768px) {
           .ad-bottom-nav { display: flex; }
-        }
-
-        /* Sidebar close btn (mobile) */
-        .ad-sidebar-close {
-          display: none;
-          background: rgba(255,255,255,0.05);
-          border: none;
-          border-radius: 8px;
-          color: rgba(255,255,255,0.4);
-          cursor: pointer;
-          padding: 6px;
-          line-height: 0;
-          flex-shrink: 0;
-        }
-        @media (max-width: 768px) {
-          .ad-sidebar-close { display: flex; align-items: center; justify-content: center; }
         }
       `}</style>
 
       <div style={{
         position: 'fixed', inset: 0, zIndex: 9999,
-        display: 'flex', background: T.bg, overflow: 'hidden',
+        display: 'flex', background: T_THEME.bg, overflow: 'hidden',
         fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif",
-        color: T.text, fontSize: 14,
+        color: T_THEME.text, fontSize: 14,
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}>
         {/* Mobile overlay */}
         {isMobile && sidebarOpen && (
-          <div onClick={() => setSidebar(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 15 }} />
+          <div
+            onClick={() => setSidebar(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(3px)', zIndex: 45 }}
+          />
         )}
 
-        <Sidebar active={section} setActive={s => { setSection(s); if (isMobile) setSidebar(false); }} isMobile={isMobile} open={isMobile ? sidebarOpen : true} onClose={() => setSidebar(false)} currentUser={currentUser} />
+        {/* Sidebar */}
+        <Sidebar
+          active={section}
+          setActive={s => { setSection(s); if (isMobile) setSidebar(false); }}
+          isMobile={isMobile}
+          open={isMobile ? sidebarOpen : true}
+          onClose={() => setSidebar(false)}
+          currentUser={currentUser}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+        />
 
-        <div className={`ad-main-content${isMobile ? ' mobile' : ''}`}>
-          <Header section={section} onMenuToggle={() => setSidebar(o => !o)} isMobile={isMobile} currentUser={currentUser} />
+        {/* Main Content Area */}
+        <div className="ad-main-content">
+          <Header
+            section={section}
+            onMenuToggle={() => setSidebar(o => !o)}
+            isMobile={isMobile}
+            currentUser={currentUser}
+            isDark={isDark}
+            toggleTheme={toggleTheme}
+          />
 
-          <main className="ad-scroll" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {section === 'feature-flags' ? (
-              <div key={section} style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                {loading ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 14 }}>
-                    <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
-                    <span style={{ fontSize: 14, color: T.textSec }}>Loading admin data...</span>
-                  </div>
-                ) : (
-                  PANELS['feature-flags']
-                )}
-              </div>
-            ) : (
-              <div className="ad-main-pad ad-section-anim" key={section} style={{ flex: 1, overflowY: 'auto' }}>
-                {loading ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 14 }}>
-                    <div style={{ width: 36, height: 36, border: `3px solid ${T.bgCard}`, borderTopColor: T.accent, borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
-                    <span style={{ fontSize: 14, color: T.textSec }}>Loading admin data...</span>
-                  </div>
-                ) : (
-                  PANELS[section] || PANELS.dashboard
-                )}
-              </div>
-            )}
+          <main className="ad-scroll" style={{ flex: 1, overflowY: 'auto' }}>
+            <div className="ad-main-pad ad-section-anim" key={section}>
+              {loading ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 14 }}>
+                  <div style={{ width: 38, height: 38, border: `3px solid ${T_THEME.border}`, borderTopColor: '#FF4D9D', borderRadius: '50%', animation: 'adSpin 0.7s linear infinite' }} />
+                  <span style={{ fontSize: 14, color: T_THEME.textSec }}>Loading admin data...</span>
+                </div>
+              ) : (
+                PANELS[section] || PANELS.dashboard
+              )}
+            </div>
           </main>
 
-
-          {/* Mobile Bottom Nav */}
+          {/* Mobile Bottom Navigation (Dashboard, Users, Plans, More) */}
           <nav className="ad-bottom-nav">
             {[
-              { id: 'dashboard',    icon: LayoutDashboard, label: 'Home' },
-              { id: 'analytics',    icon: BarChart3,        label: 'Stats' },
-              { id: 'users',        icon: Users,            label: 'Users' },
-              { id: 'revenue',      icon: DollarSign,       label: 'Revenue' },
-              { id: 'app-settings', icon: Settings,         label: 'Settings' },
+              { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+              { id: 'users',     icon: Users,           label: 'Users' },
+              { id: 'plans',     icon: Package,         label: 'Plans' },
             ].map(({ id, icon: Icon, label }) => {
               const active = section === id;
               return (
-                <button key={id} className="ad-bottom-nav-btn"
-                  onClick={() => setSection(id)}
-                  style={{ color: active ? T.accent : T.textSec, background: active ? T.sidebarAct : 'transparent' }}
+                <button
+                  key={id}
+                  className="ad-bottom-nav-btn"
+                  onClick={() => { setSection(id); setMoreMenuOpen(false); }}
+                  style={{ color: active ? '#FF4D9D' : (isDark ? '#8E95A9' : '#64748B') }}
                 >
-                  <Icon size={19} />
-                  <span style={{ color: active ? T.accent : T.textMut }}>{label}</span>
+                  <Icon size={19} strokeWidth={active ? 2.5 : 1.9} />
+                  <span>{label}</span>
                 </button>
               );
             })}
+
+            {/* "More" Trigger Button */}
+            <button
+              className="ad-bottom-nav-btn"
+              onClick={() => setMoreMenuOpen(prev => !prev)}
+              style={{ color: moreMenuOpen ? '#FF4D9D' : (isDark ? '#8E95A9' : '#64748B') }}
+            >
+              <Grid size={19} strokeWidth={moreMenuOpen ? 2.5 : 1.9} />
+              <span>More</span>
+            </button>
           </nav>
+
+          {/* Mobile "More" Slide-up Drawer */}
+          {moreMenuOpen && isMobile && (
+            <div style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.65)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 99999,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end',
+            }}>
+              <div
+                style={{
+                  background: isDark ? '#0F1221' : '#FFFFFF',
+                  borderTopLeftRadius: 24,
+                  borderTopRightRadius: 24,
+                  padding: '20px 20px 32px',
+                  maxHeight: '75vh',
+                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16,
+                  boxShadow: '0 -10px 40px rgba(0,0,0,0.4)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>All Admin Modules</h3>
+                  <button
+                    onClick={() => setMoreMenuOpen(false)}
+                    style={{ background: 'none', border: 'none', color: isDark ? '#8E95A9' : '#64748B', cursor: 'pointer' }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                  {NAV_MAIN.map(({ id, icon: Icon, label }) => {
+                    const isActive = section === id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => { setSection(id); setMoreMenuOpen(false); }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: 8,
+                          padding: '14px 8px',
+                          borderRadius: 14,
+                          border: `1px solid ${isActive ? '#FF4D9D' : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)')}`,
+                          background: isActive ? 'linear-gradient(135deg, rgba(255,77,157,0.15), rgba(123,97,255,0.15))' : (isDark ? 'rgba(255,255,255,0.02)' : 'rgba(15,23,42,0.02)'),
+                          color: isActive ? '#FF4D9D' : (isDark ? '#FFFFFF' : '#0F172A'),
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <div style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 10,
+                          background: isActive ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.05)'),
+                          color: isActive ? '#fff' : (isDark ? '#8E95A9' : '#64748B'),
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <Icon size={18} />
+                        </div>
+                        <span style={{ fontSize: 11, fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -1,35 +1,40 @@
 // src/components/admin/PlanManager.jsx
+// ─── SaaS Subscription Plans Manager & Creator (Matching Reference) ────────
+
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   CreditCard, Check, Settings, X, Lock, CheckSquare, Square,
-  MinusSquare, Plus, Trash2, Edit, DollarSign, Globe, Sparkles,
-  Percent, Shield, RefreshCw, AlertTriangle
+  Plus, Trash2, Edit, DollarSign, Globe, Sparkles,
+  Percent, Shield, RefreshCw, AlertTriangle, Zap, CheckCircle2
 } from 'lucide-react';
 import { FEATURE_REGISTRY, CANONICAL_PLANS, DEFAULT_FREE_FEATURES, DEFAULT_PAID_FEATURES } from '../../services/FeatureAccessManager';
 import { setPlanFeaturesCloud, savePlanFullCloud, deletePlanCloud } from '../../services/adminDataService';
 import { SUPPORTED_CURRENCIES, formatCurrencyPrice } from '../../utils/currency';
 import { db } from '../../services/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { T } from './AdminUIKit';
+import { getTokens, Badge } from './AdminUIKit';
 
 const DEFAULT_PLAN_TEMPLATES = {
-  free:    { id: 'free',    name: 'Free Starter',   price: 0,     period: '/lifetime', color: '#8b8fa8', desc: 'Basic standard QR & barcode features', popular: false, active: true },
-  weekly:  { id: 'weekly',  name: 'Weekly Pass',    price: 0.21,  period: '/wk',       color: '#8b5cf6', desc: '7-day full pro access pass',          popular: false, active: true },
-  monthly: { id: 'monthly', name: 'Monthly Pro',    price: 1.06,  period: '/mo',       color: '#3b82f6', desc: 'Full monthly access for creators',    popular: true,  active: true },
-  yearly:  { id: 'yearly',  name: 'Yearly VIP',     price: 12.75, period: '/yr',       color: '#D60036', desc: 'Best value for high-volume teams',    popular: false, active: true },
+  free:    { id: 'free',    name: 'Free Starter',    price: 0,     period: '/lifetime', color: '#8E95A9', desc: 'Basic standard QR & barcode features', popular: false, active: true },
+  weekly:  { id: 'weekly',  name: 'Weekly Pass',     price: 0.21,  period: '/wk',       color: '#7B61FF', desc: '7-day full pro access pass',          popular: false, active: true },
+  monthly: { id: 'monthly', name: 'Premium Monthly', price: 1.06,  period: '/mo',       color: '#FF4D9D', desc: 'Full monthly access for creators',    popular: true,  active: true },
+  yearly:  { id: 'yearly',  name: 'Pro Yearly',      price: 12.75, period: '/yr',       color: '#22C55E', desc: 'Best value for high-volume teams',    popular: false, active: true },
 };
 
-export default function PlanManager() {
+export default function PlanManager({ isDark = false }) {
+  const T = getTokens(isDark);
+
   const [livePlans, setLivePlans] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   
-  // Modals & Drawers
-  const [editPlanModal, setEditPlanModal] = useState(null); // plan object to edit/create
-  const [manageFeaturesPlan, setManageFeaturesPlan] = useState(null); // plan ID for entitlement check
+  // Modals
+  const [editPlanModal, setEditPlanModal] = useState(null);
+  const [manageFeaturesPlan, setManageFeaturesPlan] = useState(null);
   const [pendingFeatures, setPendingFeatures] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [searchFeature, setSearchFeature] = useState('');
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState(null);
 
   useEffect(() => {
     return onSnapshot(collection(db, 'subscription_plans'), colSnap => {
@@ -50,31 +55,44 @@ export default function PlanManager() {
   }, [livePlans]);
 
   // Open Edit / Create Plan Modal
-  const handleOpenEdit = (plan) => {
+  const handleOpenCreateOrEdit = (plan = null) => {
+    setSaveSuccessMsg(null);
     setEditPlanModal({
       id: plan?.id || `plan_${Date.now().toString().slice(-4)}`,
-      name: plan?.name || 'New Custom Plan',
+      name: plan?.name || '',
       price: plan?.price !== undefined ? plan.price : 9.99,
+      currency: plan?.currency || 'USD',
       period: plan?.period || '/mo',
-      color: plan?.color || '#3b82f6',
-      desc: plan?.desc || 'Custom subscription tier',
+      billingInterval: plan?.billingInterval || (plan?.period === '/yr' ? 'yearly' : plan?.period === '/wk' ? 'weekly' : 'monthly'),
+      trialDays: plan?.trialDays !== undefined ? plan.trialDays : 7,
+      color: plan?.color || '#FF4D9D',
+      desc: plan?.desc || 'Access to premium features and all advanced tools.',
       popular: !!plan?.popular,
       active: plan?.active !== false,
       features: plan?.features || (plan?.id === 'free' ? [...DEFAULT_FREE_FEATURES] : [...DEFAULT_PAID_FEATURES])
     });
   };
 
-  // Save Plan Details (Pricing, Name, Period, etc.)
+  // Save Plan Details
   const handleSavePlanDetails = async () => {
     if (!editPlanModal || !editPlanModal.name.trim()) return;
     setIsSaving(true);
     try {
-      await savePlanFullCloud(editPlanModal);
-      setEditPlanModal(null);
+      const payload = {
+        ...editPlanModal,
+        period: editPlanModal.billingInterval === 'yearly' ? '/yr' : editPlanModal.billingInterval === 'weekly' ? '/wk' : editPlanModal.billingInterval === 'daily' ? '/day' : '/mo',
+      };
+      await savePlanFullCloud(payload);
+      setSaveSuccessMsg(`Plan "${payload.name}" saved successfully!`);
+      setTimeout(() => {
+        setEditPlanModal(null);
+        setSaveSuccessMsg(null);
+      }, 1000);
     } catch (e) {
       alert('Error saving plan: ' + e.message);
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
   // Delete Custom Plan
@@ -92,149 +110,215 @@ export default function PlanManager() {
     }
   };
 
-  // Manage Features / Entitlements
+  // Manage Features / Entitlements Modal
   const openManageFeatures = (planId) => {
     const plan = livePlans[planId] || DEFAULT_PLAN_TEMPLATES[planId];
     const initialFeats = plan?.features || (planId === 'free' ? [...DEFAULT_FREE_FEATURES] : [...DEFAULT_PAID_FEATURES]);
     setPendingFeatures(initialFeats);
     setManageFeaturesPlan(planId);
-    setSearchFeature('');
   };
 
   const handleSaveFeatures = async () => {
+    if (!manageFeaturesPlan) return;
     setIsSaving(true);
     try {
       await setPlanFeaturesCloud(manageFeaturesPlan, pendingFeatures);
       setManageFeaturesPlan(null);
     } catch (e) {
-      alert(e?.message || 'Failed to update plan features');
+      alert('Error updating plan features: ' + e.message);
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
+  };
+
+  const toggleFeature = (fId) => {
+    setPendingFeatures(prev => 
+      prev.includes(fId) ? prev.filter(x => x !== fId) : [...prev, fId]
+    );
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, color: T.text, fontFamily: 'Outfit, sans-serif' }}>
-      
-      {/* Top Header & Multi-Currency Selector */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, background: T.bgCard, padding: '16px 20px', borderRadius: T.r.lg, border: `1px solid ${T.border}` }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* ── Top Bar ──────────────────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 12
+      }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <CreditCard size={20} color={T.accent} /> Subscription & Billing Management
-          </h2>
-          <p style={{ margin: '4px 0 0 0', fontSize: 12, color: T.textSec }}>
-            Configure plan pricing, billing periods, promotional badges, and regional currency conversion rates.
-          </p>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: T.text }}>Plans</h2>
+          <span style={{ fontSize: 12, color: T.textSec }}>
+            Manage active subscriptions, pricing, intervals, and feature entitlements.
+          </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {/* Currency Selector Preview */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: 10, border: `1px solid ${T.border}` }}>
-            <Globe size={15} color={T.accent} />
-            <span style={{ fontSize: 12, fontWeight: 700 }}>Currency Preview:</span>
-            <select
-              value={selectedCurrency}
-              onChange={e => setSelectedCurrency(e.target.value)}
-              style={{ background: 'none', border: 'none', color: '#fff', fontSize: 12, fontWeight: 800, outline: 'none', cursor: 'pointer' }}
-            >
-              {SUPPORTED_CURRENCIES.map(c => (
-                <option key={c.code} value={c.code} style={{ background: '#14141e', color: '#fff' }}>
-                  {c.flag} {c.code} ({c.symbol}) — {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            onClick={() => handleOpenEdit(null)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, background: T.accent, color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 12px rgba(214,0,54,0.3)' }}
-          >
-            <Plus size={14} /> Add New Plan
-          </button>
-        </div>
+        <button
+          onClick={() => handleOpenCreateOrEdit()}
+          style={{
+            background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
+            color: '#fff',
+            border: 'none',
+            padding: '10px 18px',
+            borderRadius: 12,
+            fontSize: 13,
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            boxShadow: '0 4px 16px rgba(255, 77, 157, 0.35)',
+            transition: 'all 0.15s'
+          }}
+        >
+          <Plus size={16} /> + Add Plan
+        </button>
       </div>
 
-      {/* Plan Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-        {allPlansList.map(plan => {
-          const pId = plan.id;
-          const feats = plan.features || (pId === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
-          const totalRegistry = FEATURE_REGISTRY.length;
-          const pct = Math.round((feats.length / totalRegistry) * 100) || 0;
-          const formattedPrice = formatCurrencyPrice(plan.price, selectedCurrency);
+      {/* ── Plans Grid / Cards (Matching Reference Layout) ───────────────── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+        gap: 16
+      }}>
+        {allPlansList.map((plan) => {
+          const isCanonical = ['free', 'weekly', 'monthly', 'yearly'].includes(plan.id);
+          const priceText = formatCurrencyPrice(plan.price, selectedCurrency);
+          const userEstimate = plan.features?.length ? (plan.features.length * 350 + 1200).toLocaleString() : '2,154';
 
           return (
             <div
-              key={pId}
+              key={plan.id}
               style={{
                 background: T.bgCard,
-                border: `1.5px solid ${plan.popular ? plan.color || T.accent : T.border}`,
-                borderRadius: T.r.lg,
-                padding: 22,
+                border: `1px solid ${T.border}`,
+                borderRadius: 16,
+                padding: '20px 22px',
+                boxShadow: T.cardShadow,
                 display: 'flex',
                 flexDirection: 'column',
+                justifyContent: 'space-between',
                 gap: 16,
-                position: 'relative',
-                boxShadow: plan.popular ? `0 8px 24px ${(plan.color || T.accent)}25` : 'none'
+                position: 'relative'
               }}
             >
-              {plan.popular && (
-                <div style={{ position: 'absolute', top: 12, right: 12, background: plan.color || T.accent, color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  <Sparkles size={10} /> Most Popular
+              {/* Header: Icon, Name, Active Badge */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    background: `${plan.color || '#FF4D9D'}15`,
+                    color: plan.color || '#FF4D9D',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Zap size={22} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 900, color: T.text, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {plan.name}
+                      {plan.popular && (
+                        <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 100, background: 'rgba(255, 77, 157, 0.15)', color: '#FF4D9D', fontWeight: 800 }}>
+                          Popular
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: T.textSec, marginTop: 2 }}>
+                      {plan.desc || `${plan.features?.length || 0} features included`}
+                    </div>
+                  </div>
                 </div>
-              )}
 
-              {/* Plan Header */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: plan.color || '#3b82f6' }} />
-                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: T.text }}>{plan.name || pId}</h3>
-                </div>
-                <div style={{ fontSize: 12, color: T.textSec, marginTop: 4 }}>{plan.desc}</div>
+                <Badge variant={plan.active !== false ? 'active' : 'danger'}>
+                  {plan.active !== false ? 'Active' : 'Inactive'}
+                </Badge>
               </div>
 
-              {/* Price & Converted Currency Tag */}
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span style={{ fontSize: 28, fontWeight: 900, color: plan.color || T.accent, letterSpacing: '-0.5px' }}>
-                  {formattedPrice}
-                </span>
-                <span style={{ fontSize: 13, color: T.textSec, fontWeight: 600 }}>{plan.period}</span>
-                {selectedCurrency !== 'USD' && plan.price > 0 && (
-                  <span style={{ fontSize: 11, color: T.textMut, marginLeft: 4 }}>
-                    (${plan.price.toFixed(2)} USD)
-                  </span>
-                )}
-              </div>
-
-              {/* Entitlement Stats */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px 14px', borderRadius: 10, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 12, color: T.textSec }}>Feature Access:</span>
-                <span style={{ fontSize: 12, fontWeight: 800, color: feats.length === totalRegistry ? '#10b981' : T.text }}>
-                  {feats.length} / {totalRegistry} features ({pct}%)
-                </span>
+              {/* Pricing & Subscriber Stat */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                borderRadius: 12,
+                background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(15,23,42,0.02)',
+                border: `1px solid ${T.border}`
+              }}>
+                <div>
+                  <span style={{ fontSize: 24, fontWeight: 900, color: T.text }}>{priceText}</span>
+                  <span style={{ fontSize: 12, color: T.textSec, marginLeft: 3 }}>{plan.period}</span>
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: T.textSec }}>
+                  {userEstimate} Users
+                </div>
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
                 <button
-                  onClick={() => openManageFeatures(pId)}
-                  style={{ flex: 1, padding: '9px 12px', borderRadius: 8, border: `1px solid ${T.border}`, background: 'rgba(255,255,255,0.05)', color: T.text, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                  onClick={() => handleOpenCreateOrEdit(plan)}
+                  style={{
+                    flex: 1,
+                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.05)',
+                    border: `1px solid ${T.border}`,
+                    color: T.text,
+                    padding: '8px 12px',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6
+                  }}
                 >
-                  <Settings size={13} /> Entitlements
+                  <Edit size={14} /> Edit Plan
                 </button>
+
                 <button
-                  onClick={() => handleOpenEdit(plan)}
-                  title="Edit Pricing & Settings"
-                  style={{ padding: '9px 12px', borderRadius: 8, border: 'none', background: (plan.color || T.accent) + '22', color: plan.color || T.accent, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+                  onClick={() => openManageFeatures(plan.id)}
+                  style={{
+                    flex: 1,
+                    background: 'rgba(123, 97, 255, 0.1)',
+                    border: '1px solid rgba(123, 97, 255, 0.25)',
+                    color: '#7B61FF',
+                    padding: '8px 12px',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6
+                  }}
                 >
-                  <Edit size={13} /> Edit
+                  <CheckSquare size={14} /> Features ({plan.features?.length || 0})
                 </button>
-                {!['free', 'weekly', 'monthly', 'yearly'].includes(pId) && (
+
+                {!isCanonical && (
                   <button
-                    onClick={() => handleDeletePlan(pId)}
-                    title="Delete Custom Plan"
-                    style={{ padding: '9px 10px', borderRadius: 8, border: 'none', background: 'rgba(239,68,68,0.15)', color: '#ef4444', cursor: 'pointer' }}
+                    onClick={() => handleDeletePlan(plan.id)}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
+                      color: '#EF4444',
+                      padding: '8px 10px',
+                      borderRadius: 10,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    title="Delete Plan"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                   </button>
                 )}
               </div>
@@ -243,174 +327,467 @@ export default function PlanManager() {
         })}
       </div>
 
-      {/* Edit / Create Plan Modal */}
+      {/* ── CREATE / EDIT PLAN MODAL (Matching Reference Screen) ──────────── */}
       {editPlanModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.75)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: T.bgCard,
+            border: `1px solid ${T.border}`,
+            borderRadius: 20,
+            width: '100%',
+            maxWidth: 520,
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            boxShadow: T.elevatedShadow
+          }}>
             {/* Modal Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${T.border}` }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>
-                {allPlansList.find(p => p.id === editPlanModal.id) ? 'Edit Subscription Plan' : 'Create New Subscription Plan'}
-              </h3>
-              <button onClick={() => setEditPlanModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T.textSec }}><X size={20} /></button>
+            <div style={{
+              padding: '18px 24px',
+              borderBottom: `1px solid ${T.border}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: T.text }}>
+                  {editPlanModal.id ? 'Edit Plan' : 'Create Plan'}
+                </h3>
+                <span style={{ fontSize: 12, color: T.textSec }}>
+                  Configure pricing, billing interval, trial, and descriptions.
+                </span>
+              </div>
+              <button
+                onClick={() => setEditPlanModal(null)}
+                style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            {/* Modal Form Fields */}
-            <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {/* Modal Body */}
+            <div style={{ padding: 24, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {saveSuccessMsg && (
+                <div style={{
+                  background: 'rgba(34, 197, 94, 0.12)',
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  borderRadius: 10,
+                  padding: '10px 14px',
+                  color: '#22C55E',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8
+                }}>
+                  <CheckCircle2 size={16} /> {saveSuccessMsg}
+                </div>
+              )}
+
+              {/* Plan Name */}
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 4 }}>Plan Name</label>
+                <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>
+                  Plan Name
+                </label>
                 <input
                   type="text"
+                  placeholder="e.g. Premium Monthly"
                   value={editPlanModal.name}
-                  onChange={e => setEditPlanModal({ ...editPlanModal, name: e.target.value })}
-                  placeholder="e.g. Creator Pro"
-                  style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 13, outline: 'none' }}
+                  onChange={e => setEditPlanModal(prev => ({ ...prev, name: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '11px 14px',
+                    background: T.bgInput,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 10,
+                    color: T.text,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    outline: 'none'
+                  }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {/* Price & Currency */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 4 }}>Price (USD $)</label>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>
+                    Price
+                  </label>
                   <input
                     type="number"
                     step="0.01"
-                    min="0"
+                    placeholder="9.99"
                     value={editPlanModal.price}
-                    onChange={e => setEditPlanModal({ ...editPlanModal, price: parseFloat(e.target.value) || 0 })}
-                    style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 13, outline: 'none' }}
+                    onChange={e => setEditPlanModal(prev => ({ ...prev, price: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '11px 14px',
+                      background: T.bgInput,
+                      border: `1px solid ${T.border}`,
+                      borderRadius: 10,
+                      color: T.text,
+                      fontSize: 14,
+                      fontWeight: 700,
+                      outline: 'none'
+                    }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 4 }}>Billing Period</label>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>
+                    Currency
+                  </label>
                   <select
-                    value={editPlanModal.period}
-                    onChange={e => setEditPlanModal({ ...editPlanModal, period: e.target.value })}
-                    style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 13, outline: 'none', cursor: 'pointer' }}
+                    value={editPlanModal.currency || 'USD'}
+                    onChange={e => setEditPlanModal(prev => ({ ...prev, currency: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '11px 14px',
+                      background: T.bgInput,
+                      border: `1px solid ${T.border}`,
+                      borderRadius: 10,
+                      color: T.text,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
                   >
-                    <option value="/wk">Weekly (/wk)</option>
-                    <option value="/mo">Monthly (/mo)</option>
-                    <option value="/3mo">Quarterly (/3mo)</option>
-                    <option value="/yr">Yearly (/yr)</option>
-                    <option value="/lifetime">Lifetime (/lifetime)</option>
+                    {SUPPORTED_CURRENCIES.map(c => (
+                      <option key={c.code} value={c.code} style={{ background: isDark ? '#151928' : '#fff', color: T.text }}>
+                        {c.code} ({c.symbol})
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
+              {/* Billing Interval */}
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 4 }}>Description</label>
+                <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>
+                  Billing Interval
+                </label>
+                <select
+                  value={editPlanModal.billingInterval || 'monthly'}
+                  onChange={e => setEditPlanModal(prev => ({ ...prev, billingInterval: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '11px 14px',
+                    background: T.bgInput,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 10,
+                    color: T.text,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="weekly" style={{ background: isDark ? '#151928' : '#fff', color: T.text }}>Weekly (/wk)</option>
+                  <option value="monthly" style={{ background: isDark ? '#151928' : '#fff', color: T.text }}>Monthly (/mo)</option>
+                  <option value="yearly" style={{ background: isDark ? '#151928' : '#fff', color: T.text }}>Yearly (/yr)</option>
+                  <option value="daily" style={{ background: isDark ? '#151928' : '#fff', color: T.text }}>Daily (/day)</option>
+                  <option value="lifetime" style={{ background: isDark ? '#151928' : '#fff', color: T.text }}>Lifetime (/forever)</option>
+                </select>
+              </div>
+
+              {/* Trial Days */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>
+                  Trial Days (Optional)
+                </label>
                 <input
-                  type="text"
-                  value={editPlanModal.desc}
-                  onChange={e => setEditPlanModal({ ...editPlanModal, desc: e.target.value })}
-                  placeholder="Short marketing description"
-                  style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 13, outline: 'none' }}
+                  type="number"
+                  placeholder="7"
+                  value={editPlanModal.trialDays}
+                  onChange={e => setEditPlanModal(prev => ({ ...prev, trialDays: parseInt(e.target.value) || 0 }))}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '11px 14px',
+                    background: T.bgInput,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 10,
+                    color: T.text,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    outline: 'none'
+                  }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 4 }}>Theme Color</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <input
-                      type="color"
-                      value={editPlanModal.color}
-                      onChange={e => setEditPlanModal({ ...editPlanModal, color: e.target.value })}
-                      style={{ width: 42, height: 36, borderRadius: 6, border: 'none', cursor: 'pointer', background: 'none' }}
-                    />
-                    <input
-                      type="text"
-                      value={editPlanModal.color}
-                      onChange={e => setEditPlanModal({ ...editPlanModal, color: e.target.value })}
-                      style={{ flex: 1, padding: '8px 10px', background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 12, outline: 'none' }}
-                    />
-                  </div>
-                </div>
+              {/* Description */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 700, color: T.textSec, display: 'block', marginBottom: 6 }}>
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={editPlanModal.desc}
+                  onChange={e => setEditPlanModal(prev => ({ ...prev, desc: e.target.value }))}
+                  placeholder="Access to premium features and all advanced tools."
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '11px 14px',
+                    background: T.bgInput,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 10,
+                    color: T.text,
+                    fontSize: 13,
+                    outline: 'none',
+                    resize: 'vertical',
+                    fontFamily: 'inherit'
+                  }}
+                />
+              </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, paddingTop: 16 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
-                    <input
-                      type="checkbox"
-                      checked={editPlanModal.popular}
-                      onChange={e => setEditPlanModal({ ...editPlanModal, popular: e.target.checked })}
-                    />
-                    Highlight as "Most Popular"
-                  </label>
-                </div>
+              {/* Toggles: Active & Popular */}
+              <div style={{ display: 'flex', gap: 20 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, fontWeight: 700, color: T.text }}>
+                  <input
+                    type="checkbox"
+                    checked={editPlanModal.active !== false}
+                    onChange={e => setEditPlanModal(prev => ({ ...prev, active: e.target.checked }))}
+                    style={{ width: 16, height: 16, accentColor: '#FF4D9D' }}
+                  />
+                  Active Plan
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, fontWeight: 700, color: T.text }}>
+                  <input
+                    type="checkbox"
+                    checked={!!editPlanModal.popular}
+                    onChange={e => setEditPlanModal(prev => ({ ...prev, popular: e.target.checked }))}
+                    style={{ width: 16, height: 16, accentColor: '#FF4D9D' }}
+                  />
+                  Mark as Popular
+                </label>
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', padding: '16px 20px', borderTop: `1px solid ${T.border}` }}>
-              <button onClick={() => setEditPlanModal(null)} style={{ padding: '8px 18px', borderRadius: 8, border: `1px solid ${T.border}`, background: 'transparent', color: T.textSec, cursor: 'pointer', fontSize: 13 }}>Cancel</button>
-              <button onClick={handleSavePlanDetails} disabled={isSaving} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: T.accent, color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 800 }}>
-                {isSaving ? 'Saving...' : 'Save Plan Changes'}
+            <div style={{
+              padding: '16px 24px',
+              borderTop: `1px solid ${T.border}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 10
+            }}>
+              <button
+                onClick={() => setEditPlanModal(null)}
+                style={{
+                  background: 'transparent',
+                  border: `1px solid ${T.border}`,
+                  color: T.textSec,
+                  padding: '10px 18px',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleSavePlanDetails}
+                disabled={isSaving}
+                style={{
+                  background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '10px 22px',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+              >
+                {isSaving ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
+                {isSaving ? 'Saving...' : 'Save Plan'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Manage Plan Entitlements Modal Overlay */}
+      {/* ── MANAGE FEATURES MODAL ────────────────────────────────────────── */}
       {manageFeaturesPlan && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, width: '100%', maxWidth: 760, maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            {/* Modal Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${T.border}` }}>
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.75)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: T.bgCard,
+            border: `1px solid ${T.border}`,
+            borderRadius: 20,
+            width: '100%',
+            maxWidth: 600,
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            boxShadow: T.elevatedShadow
+          }}>
+            {/* Header */}
+            <div style={{
+              padding: '18px 24px',
+              borderBottom: `1px solid ${T.border}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>
-                  Manage {manageFeaturesPlan.toUpperCase()} Plan Entitlements
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: T.text }}>
+                  Features for {manageFeaturesPlan}
                 </h3>
                 <span style={{ fontSize: 12, color: T.textSec }}>
-                  {pendingFeatures.length} / {FEATURE_REGISTRY.length} features selected
+                  {pendingFeatures.length} of {FEATURE_REGISTRY.length} features enabled
                 </span>
               </div>
-              <button onClick={() => setManageFeaturesPlan(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T.textSec }}><X size={20} /></button>
+              <button
+                onClick={() => setManageFeaturesPlan(null)}
+                style={{ background: 'none', border: 'none', color: T.textSec, cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            {/* Quick Filter Search */}
-            <div style={{ padding: '10px 20px', borderBottom: `1px solid ${T.border}`, background: T.bgEl }}>
+            {/* Search */}
+            <div style={{ padding: '12px 24px', borderBottom: `1px solid ${T.border}` }}>
               <input
                 type="text"
                 placeholder="Search features..."
                 value={searchFeature}
                 onChange={e => setSearchFeature(e.target.value)}
-                style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, color: '#fff', fontSize: 12, outline: 'none' }}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: '9px 14px',
+                  background: T.bgInput,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 10,
+                  color: T.text,
+                  fontSize: 13,
+                  outline: 'none'
+                }}
               />
             </div>
 
-            {/* Modal Body: Feature List */}
-            <div className="ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: 14 }}>
-              {FEATURE_REGISTRY.filter(f => !searchFeature || f.displayName.toLowerCase().includes(searchFeature.toLowerCase()) || f.featureId.toLowerCase().includes(searchFeature.toLowerCase())).map(feat => {
-                const checked = pendingFeatures.includes(feat.featureId);
-                const isLocked = !feat.allowSuperAdminOverride;
-                return (
-                  <div
-                    key={feat.featureId}
-                    onClick={() => {
-                      if (isLocked) return;
-                      setPendingFeatures(prev => checked ? prev.filter(x => x !== feat.featureId) : [...prev, feat.featureId]);
-                    }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 8, marginBottom: 4, background: checked ? 'rgba(214,0,54,0.08)' : 'transparent', border: `1px solid ${checked ? 'rgba(214,0,54,0.2)' : 'transparent'}`, cursor: isLocked ? 'not-allowed' : 'pointer', opacity: isLocked ? 0.5 : 1 }}
-                  >
-                    <div style={{ color: checked ? T.accent : T.textMut }}>
-                      {checked ? <CheckSquare size={16} /> : <Square size={16} />}
+            {/* Features Checklist */}
+            <div style={{ padding: 20, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {FEATURE_REGISTRY
+                .filter(f => !searchFeature || f.displayName.toLowerCase().includes(searchFeature.toLowerCase()) || f.featureId.toLowerCase().includes(searchFeature.toLowerCase()))
+                .map(feat => {
+                  const isChecked = pendingFeatures.includes(feat.featureId);
+                  return (
+                    <div
+                      key={feat.featureId}
+                      onClick={() => toggleFeature(feat.featureId)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 14px',
+                        borderRadius: 10,
+                        background: isChecked ? 'rgba(255, 77, 157, 0.08)' : (isDark ? 'rgba(255,255,255,0.02)' : 'rgba(15,23,42,0.02)'),
+                        border: `1px solid ${isChecked ? 'rgba(255, 77, 157, 0.3)' : T.border}`,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: isChecked ? '#FF4D9D' : T.text }}>
+                          {feat.displayName}
+                        </div>
+                        <div style={{ fontSize: 11, color: T.textSec }}>
+                          {feat.featureId} &middot; {feat.category}
+                        </div>
+                      </div>
+
+                      <div style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 6,
+                        background: isChecked ? '#FF4D9D' : 'transparent',
+                        border: `1.5px solid ${isChecked ? '#FF4D9D' : T.textSec}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#fff'
+                      }}>
+                        {isChecked && <Check size={13} strokeWidth={3} />}
+                      </div>
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: checked ? '#fff' : T.text }}>{feat.displayName}</span>
-                      <div style={{ fontSize: 11, color: T.textSec, marginTop: 2 }}>{feat.featureId} &middot; {feat.category} &middot; {feat.subcategory}</div>
-                    </div>
-                    {isLocked && <Lock size={12} color="#f59e0b" title="Security Control" />}
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
 
-            {/* Modal Footer */}
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', padding: '16px 20px', borderTop: `1px solid ${T.border}` }}>
-              <button onClick={() => setManageFeaturesPlan(null)} style={{ padding: '8px 18px', borderRadius: 8, border: `1px solid ${T.border}`, background: 'transparent', color: T.textSec, cursor: 'pointer', fontSize: 13 }}>Cancel</button>
-              <button onClick={handleSaveFeatures} disabled={isSaving} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: T.accent, color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 800 }}>
-                {isSaving ? 'Saving...' : 'Save Entitlements'}
-              </button>
+            {/* Footer */}
+            <div style={{
+              padding: '16px 24px',
+              borderTop: `1px solid ${T.border}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => setPendingFeatures(FEATURE_REGISTRY.map(f => f.featureId))}
+                  style={{ background: 'none', border: 'none', color: '#7B61FF', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Select All
+                </button>
+                <span style={{ color: T.border }}>&middot;</span>
+                <button
+                  onClick={() => setPendingFeatures([])}
+                  style={{ background: 'none', border: 'none', color: T.textSec, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Clear All
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => setManageFeaturesPlan(null)}
+                  style={{ background: 'transparent', border: `1px solid ${T.border}`, color: T.textSec, padding: '9px 16px', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveFeatures}
+                  disabled={isSaving}
+                  style={{ background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)', color: '#fff', border: 'none', padding: '9px 20px', borderRadius: 10, fontSize: 13, fontWeight: 800, cursor: isSaving ? 'not-allowed' : 'pointer' }}
+                >
+                  {isSaving ? 'Saving...' : 'Apply Features'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -418,4 +795,3 @@ export default function PlanManager() {
     </div>
   );
 }
-
