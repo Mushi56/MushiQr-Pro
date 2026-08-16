@@ -45,3 +45,4 @@ lint_results.json
 old_home.txt
 firestore-debug.log
 
+.vercel

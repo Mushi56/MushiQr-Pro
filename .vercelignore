@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-admin
+android
+.git
+.vscode
+functions/node_modules
+admin/node_modules
+admin/dist
+first-commit-build
+*.keystore
+*.log
