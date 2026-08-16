@@ -520,388 +520,13 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     (envFilter !== 'all' ? 1 : 0);
 
   // ═════════════════════════════════════════════════════════════════════════
-  // RENDER: 1. DETAILS DRAWER / VIEW
+  // RENDER: MAIN UNIFIED OVERVIEW WITH MODAL POPUPS
   // ═════════════════════════════════════════════════════════════════════════
-  if (activeMode === 'details' && selectedFeature) {
-    const IconComponent = selectedFeature.icon || Flag;
-    const subMeta = SUBCATEGORY_META[selectedFeature.subcategory];
-    const SubIcon = subMeta?.icon || Sliders;
-
-    return (
-      <div style={{ maxWidth: 840, margin: '0 auto', animation: 'adSlideIn 0.2s ease' }}>
-        {toastMessage && <Toast message={toastMessage} />}
-
-        {/* Header Bar */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <button
-            onClick={() => setActiveMode('list')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: 'none', border: 'none', color: 'var(--ad-text)',
-              fontSize: 16, fontWeight: 800, cursor: 'pointer', padding: 0
-            }}
-          >
-            <ArrowLeft size={20} />
-            <span>Feature Details</span>
-          </button>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button
-              onClick={() => openEditModal(selectedFeature)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(255, 77, 157, 0.12)', color: '#FF4D9D',
-                border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer'
-              }}
-            >
-              <Edit3 size={14} /> Edit
-            </button>
-            {!selectedFeature.isCanonical && (
-              <button
-                onClick={() => setDeleteConfirm(true)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '8px 14px', borderRadius: 10,
-                  background: 'rgba(239, 68, 68, 0.12)', color: '#EF4444',
-                  border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer'
-                }}
-              >
-                <Trash2 size={14} /> Delete
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Delete Confirmation Modal */}
-        {deleteConfirm && (
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: 14, padding: 16, marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12
-          }}>
-            <div style={{ color: '#EF4444', fontSize: 13, fontWeight: 700 }}>
-              Are you sure you want to permanently delete this feature flag?
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => setDeleteConfirm(false)} style={{ padding: '6px 12px', borderRadius: 8, background: 'var(--ad-input)', border: 'none', color: 'var(--ad-text)', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
-                Cancel
-              </button>
-              <button onClick={handleDelete} style={{ padding: '6px 12px', borderRadius: 8, background: '#EF4444', border: 'none', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
-                Confirm Delete
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Main Details Card */}
-        <div style={{
-          background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-          borderRadius: 20, padding: 24, boxShadow: 'var(--ad-card-shadow)',
-          display: 'flex', flexDirection: 'column', gap: 20
-        }}>
-          {/* Header row */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{
-                width: 52, height: 52, borderRadius: 14,
-                background: selectedFeature.iconBg, color: selectedFeature.iconColor,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-              }}>
-                <IconComponent size={26} strokeWidth={2.4} />
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <h2 style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
-                    {selectedFeature.name}
-                  </h2>
-                  {selectedFeature.isPaid ? (
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '2px 8px', borderRadius: 100,
-                      background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(214, 0, 54, 0.15))',
-                      color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.35)',
-                      fontSize: 10, fontWeight: 800
-                    }}>
-                      <Crown size={11} color="#F59E0B" strokeWidth={2.5} /> PRO TIER
-                    </span>
-                  ) : (
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '2px 8px', borderRadius: 100,
-                      background: 'rgba(139, 143, 168, 0.15)',
-                      color: '#8B8FA8', fontSize: 10, fontWeight: 700
-                    }}>
-                      FREE TIER
-                    </span>
-                  )}
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--ad-text-sec)', marginTop: 4, lineHeight: 1.4 }}>
-                  {selectedFeature.description || 'Controls runtime capability in Mushi QR Pro application.'}
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleToggle(selectedFeature)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '6px 14px', borderRadius: 100, border: 'none',
-                background: selectedFeature.enabled ? 'rgba(34, 197, 94, 0.14)' : 'rgba(239, 68, 68, 0.14)',
-                color: selectedFeature.enabled ? '#22C55E' : '#EF4444',
-                fontSize: 13, fontWeight: 800, cursor: 'pointer'
-              }}
-            >
-              {selectedFeature.enabled ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-              <span>{selectedFeature.enabled ? 'Enabled Globally' : 'Disabled'}</span>
-            </button>
-          </div>
-
-          <div style={{ height: 1, background: 'var(--ad-border)' }} />
-
-          {/* Metadata Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-            {/* Feature Key */}
-            <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Feature Key</div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                <code style={{ fontSize: 13, fontWeight: 800, color: 'var(--ad-text)', fontFamily: 'monospace' }}>{selectedFeature.key}</code>
-                <button onClick={() => handleCopyKey(selectedFeature.key)} style={{ background: 'none', border: 'none', color: copiedKey ? '#22C55E' : 'var(--ad-text-sec)', cursor: 'pointer', padding: 2 }}>
-                  {copiedKey ? <Check size={14} /> : <Copy size={14} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Category & Subcategory */}
-            <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Category &amp; Subcategory</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 800, color: selectedFeature.iconColor }}>
-                <SubIcon size={14} />
-                <span>{selectedFeature.categoryName}</span>
-                <span style={{ color: 'var(--ad-text-sec)', fontWeight: 500 }}>›</span>
-                <span>{selectedFeature.subcategory}</span>
-              </div>
-            </div>
-
-            {/* Default Plan Tier */}
-            <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Access Tier</div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: selectedFeature.isPaid ? '#F59E0B' : 'var(--ad-text)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                {selectedFeature.isPaid && <Crown size={14} color="#F59E0B" />}
-                <span>{selectedFeature.isPaid ? 'Paid Subscription Required' : 'Free for All Users'}</span>
-              </div>
-            </div>
-
-            {/* Environment */}
-            <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Environment Scope</div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#22C55E' }}>Production Live</div>
-            </div>
-          </div>
-
-          {/* Plan Entitlements Matrix */}
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--ad-text)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Crown size={16} color="#FF4D9D" />
-              <span>Subscription Plan Entitlements (Toggle Access Tiers)</span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
-              {CANONICAL_PLANS.map(pId => {
-                const planFeatures = livePlans[pId]?.features || (pId === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
-                const hasFeature = planFeatures.includes(selectedFeature.key);
-                const color = PLAN_COLORS[pId] || '#FF4D9D';
-
-                return (
-                  <button
-                    key={pId}
-                    onClick={() => handleTogglePlan(pId, selectedFeature.key)}
-                    disabled={savingPlanId === pId}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '12px 14px', borderRadius: 12,
-                      background: hasFeature ? `${color}18` : 'var(--ad-input)',
-                      border: `1px solid ${hasFeature ? color : 'var(--ad-border)'}`,
-                      cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s'
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 13, fontWeight: 800, color: hasFeature ? color : 'var(--ad-text)' }}>
-                          {PLAN_LABELS[pId]}
-                        </span>
-                        {pId !== 'free' && hasFeature && (
-                          <Crown size={12} color={color} />
-                        )}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 2 }}>
-                        {hasFeature ? 'Included in plan' : 'Locked for tier'}
-                      </div>
-                    </div>
-                    {hasFeature ? <CheckSquare size={18} color={color} /> : <Square size={18} color="var(--ad-text-sec)" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ═════════════════════════════════════════════════════════════════════════
-  // RENDER: 2. CREATE / EDIT MODAL VIEW
-  // ═════════════════════════════════════════════════════════════════════════
-  if (activeMode === 'create' || activeMode === 'edit') {
-    const isEdit = activeMode === 'edit';
-    return (
-      <div style={{ maxWidth: 620, margin: '0 auto', animation: 'adSlideIn 0.2s ease' }}>
-        {toastMessage && <Toast message={toastMessage} />}
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <button
-            onClick={() => setActiveMode(isEdit ? 'details' : 'list')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              background: 'none', border: 'none', color: 'var(--ad-text)',
-              fontSize: 16, fontWeight: 800, cursor: 'pointer', padding: 0
-            }}
-          >
-            <ArrowLeft size={20} />
-            <span>{isEdit ? 'Edit Feature Flag' : 'Create Custom Feature Flag'}</span>
-          </button>
-        </div>
-
-        <form onSubmit={handleFormSubmit} style={{
-          background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-          borderRadius: 20, padding: 24, boxShadow: 'var(--ad-card-shadow)',
-          display: 'flex', flexDirection: 'column', gap: 18
-        }}>
-          {formErrors.submit && (
-            <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(239, 68, 68, 0.12)', color: '#EF4444', fontSize: 13, fontWeight: 700 }}>
-              {formErrors.submit}
-            </div>
-          )}
-
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-              Feature Name <span style={{ color: '#FF4D9D' }}>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. AI QR Enhancer"
-              value={formData.name}
-              onChange={e => {
-                const val = e.target.value;
-                setFormData(p => ({
-                  ...p,
-                  name: val,
-                  key: isEdit ? p.key : (p.key === '' || p.key === p.name.toLowerCase().replace(/[^a-z0-9_]/g, '_') ? val.toLowerCase().replace(/[^a-z0-9_]/g, '_') : p.key)
-                }));
-              }}
-              style={{
-                width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
-                border: `1px solid ${formErrors.name ? '#EF4444' : 'var(--ad-border)'}`,
-                borderRadius: 10, padding: '11px 14px', color: 'var(--ad-text)',
-                fontSize: 14, fontWeight: 600, outline: 'none'
-              }}
-            />
-            {formErrors.name && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 4 }}>{formErrors.name}</div>}
-          </div>
-
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-              Feature Key <span style={{ color: '#FF4D9D' }}>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. ai_qr_enhancer"
-              value={formData.key}
-              disabled={isEdit}
-              onChange={e => setFormData(p => ({ ...p, key: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_') }))}
-              style={{
-                width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
-                border: `1px solid ${formErrors.key ? '#EF4444' : 'var(--ad-border)'}`,
-                borderRadius: 10, padding: '11px 14px', color: 'var(--ad-text)',
-                fontSize: 14, fontWeight: 600, outline: 'none', fontFamily: 'monospace',
-                opacity: isEdit ? 0.6 : 1
-              }}
-            />
-            {formErrors.key && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 4 }}>{formErrors.key}</div>}
-          </div>
-
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-              Description
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Explain what this feature controls in the user application..."
-              value={formData.description}
-              onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
-              style={{
-                width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
-                border: '1px solid var(--ad-border)', borderRadius: 10, padding: '11px 14px',
-                color: 'var(--ad-text)', fontSize: 13, fontWeight: 500, outline: 'none', resize: 'vertical'
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-                Category
-              </label>
-              <select
-                value={formData.category}
-                onChange={e => setFormData(p => ({ ...p, category: e.target.value }))}
-                style={{
-                  width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
-                  borderRadius: 10, padding: '11px 12px', color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, outline: 'none'
-                }}
-              >
-                {Object.entries(CATEGORY_META).filter(([k]) => k !== 'ALL').map(([k, v]) => (
-                  <option key={k} value={k}>{v.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-                Initial Status
-              </label>
-              <div style={{ display: 'flex', alignItems: 'center', height: 42 }}>
-                <button
-                  type="button"
-                  onClick={() => setFormData(p => ({ ...p, enabled: !p.enabled }))}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                    borderRadius: 10, border: 'none', cursor: 'pointer',
-                    background: formData.enabled ? 'rgba(34, 197, 94, 0.14)' : 'rgba(239, 68, 68, 0.14)',
-                    color: formData.enabled ? '#22C55E' : '#EF4444', fontWeight: 800, fontSize: 13
-                  }}
-                >
-                  {formData.enabled ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-                  <span>{formData.enabled ? 'Enabled' : 'Disabled'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{
-              marginTop: 10, background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
-              color: '#fff', border: 'none', borderRadius: 12, padding: '14px',
-              fontSize: 14, fontWeight: 800, cursor: submitting ? 'not-allowed' : 'pointer',
-              boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)'
-            }}
-          >
-            {submitting ? 'Saving...' : (isEdit ? 'Save Changes' : 'Create Feature Flag')}
-          </button>
-        </form>
-      </div>
-    );
-  }
+  const closeModals = () => {
+    setActiveMode('list');
+    setSelectedFeature(null);
+    setDeleteConfirm(false);
+  };
 
   // ═════════════════════════════════════════════════════════════════════════
   // RENDER: 3. MAIN UNIFIED OVERVIEW (Matching Exact Mobile-First Reference)
@@ -1528,6 +1153,453 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           </div>
         </div>
       )}
+
+      {/* ═════════════════════════════════════════════════════════════════════════ */}
+      {/* 1. FEATURE DETAILS POPUP MODAL DIALOG                                     */}
+      {/* ═════════════════════════════════════════════════════════════════════════ */}
+      {activeMode === 'details' && selectedFeature && (() => {
+        const IconComponent = selectedFeature.icon || Flag;
+        const subMeta = SUBCATEGORY_META[selectedFeature.subcategory];
+        const SubIcon = subMeta?.icon || Sliders;
+
+        return (
+          <div
+            onClick={closeModals}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9998,
+              background: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              animation: 'adFadeIn 0.2s ease'
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: 'var(--ad-card)',
+                border: '1px solid var(--ad-border)',
+                borderRadius: 24,
+                padding: '24px',
+                maxWidth: 640,
+                width: '100%',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 18,
+                animation: 'adScaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                position: 'relative'
+              }}
+            >
+              {/* Header Bar */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Feature Details
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    onClick={() => openEditModal(selectedFeature)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      padding: '6px 12px', borderRadius: 8,
+                      background: 'rgba(255, 77, 157, 0.12)', color: '#FF4D9D',
+                      border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer'
+                    }}
+                  >
+                    <Edit3 size={13} /> Edit
+                  </button>
+                  {!selectedFeature.isCanonical && (
+                    <button
+                      onClick={() => setDeleteConfirm(true)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        padding: '6px 12px', borderRadius: 8,
+                        background: 'rgba(239, 68, 68, 0.12)', color: '#EF4444',
+                        border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer'
+                      }}
+                    >
+                      <Trash2 size={13} /> Delete
+                    </button>
+                  )}
+                  <button
+                    onClick={closeModals}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      width: 32, height: 32, borderRadius: 8,
+                      background: 'var(--ad-input)', color: 'var(--ad-text)',
+                      border: 'none', cursor: 'pointer'
+                    }}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Delete Confirmation Alert */}
+              {deleteConfirm && (
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: 14, padding: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12
+                }}>
+                  <div style={{ color: '#EF4444', fontSize: 13, fontWeight: 700 }}>
+                    Permanently delete this feature flag?
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => setDeleteConfirm(false)} style={{ padding: '6px 12px', borderRadius: 8, background: 'var(--ad-input)', border: 'none', color: 'var(--ad-text)', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                      Cancel
+                    </button>
+                    <button onClick={handleDelete} style={{ padding: '6px 12px', borderRadius: 8, background: '#EF4444', border: 'none', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                      Confirm Delete
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Feature Title Row */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{
+                    width: 50, height: 50, borderRadius: 14,
+                    background: selectedFeature.iconBg, color: selectedFeature.iconColor,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                  }}>
+                    <IconComponent size={24} strokeWidth={2.4} />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <h2 style={{ fontSize: 17, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
+                        {selectedFeature.name}
+                      </h2>
+                      {selectedFeature.isPaid ? (
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          padding: '2px 8px', borderRadius: 100,
+                          background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(214, 0, 54, 0.15))',
+                          color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.35)',
+                          fontSize: 10, fontWeight: 800
+                        }}>
+                          <Crown size={11} color="#F59E0B" strokeWidth={2.5} /> PRO TIER
+                        </span>
+                      ) : (
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          padding: '2px 8px', borderRadius: 100,
+                          background: 'rgba(139, 143, 168, 0.15)',
+                          color: '#8B8FA8', fontSize: 10, fontWeight: 700
+                        }}>
+                          FREE TIER
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--ad-text-sec)', marginTop: 4, lineHeight: 1.4 }}>
+                      {selectedFeature.description || 'Controls runtime capability in Mushi QR Pro application.'}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleToggle(selectedFeature)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    padding: '8px 14px', borderRadius: 100, border: 'none',
+                    background: selectedFeature.enabled ? 'rgba(34, 197, 94, 0.14)' : 'rgba(239, 68, 68, 0.14)',
+                    color: selectedFeature.enabled ? '#22C55E' : '#EF4444',
+                    fontSize: 12, fontWeight: 800, cursor: 'pointer'
+                  }}
+                >
+                  {selectedFeature.enabled ? <CheckCircle2 size={15} /> : <XCircle size={15} />}
+                  <span>{selectedFeature.enabled ? 'Enabled' : 'Disabled'}</span>
+                </button>
+              </div>
+
+              <div style={{ height: 1, background: 'var(--ad-border)' }} />
+
+              {/* Metadata Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10 }}>
+                {/* Feature Key */}
+                <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Feature Key</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                    <code style={{ fontSize: 11, fontWeight: 800, color: 'var(--ad-text)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedFeature.key}</code>
+                    <button onClick={() => handleCopyKey(selectedFeature.key)} style={{ background: 'none', border: 'none', color: copiedKey ? '#22C55E' : 'var(--ad-text-sec)', cursor: 'pointer', padding: 2 }}>
+                      {copiedKey ? <Check size={13} /> : <Copy size={13} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Category & Subcategory */}
+                <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Category &amp; Subcategory</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 800, color: selectedFeature.iconColor }}>
+                    <SubIcon size={13} />
+                    <span>{selectedFeature.categoryName}</span>
+                    <span style={{ color: 'var(--ad-text-sec)', fontWeight: 500 }}>›</span>
+                    <span>{selectedFeature.subcategory}</span>
+                  </div>
+                </div>
+
+                {/* Access Tier */}
+                <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Access Tier</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: selectedFeature.isPaid ? '#F59E0B' : 'var(--ad-text)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {selectedFeature.isPaid && <Crown size={12} color="#F59E0B" />}
+                    <span>{selectedFeature.isPaid ? 'Paid Subscription' : 'Free for All Users'}</span>
+                  </div>
+                </div>
+
+                {/* Environment */}
+                <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Environment Scope</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: '#22C55E' }}>Production Live</div>
+                </div>
+              </div>
+
+              {/* Plan Entitlements Matrix */}
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Crown size={14} color="#FF4D9D" />
+                  <span>Subscription Plan Entitlements (Click to Toggle)</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
+                  {CANONICAL_PLANS.map(pId => {
+                    const planFeatures = livePlans[pId]?.features || (pId === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
+                    const hasFeature = planFeatures.includes(selectedFeature.key);
+                    const color = PLAN_COLORS[pId] || '#FF4D9D';
+
+                    return (
+                      <button
+                        key={pId}
+                        onClick={() => handleTogglePlan(pId, selectedFeature.key)}
+                        disabled={savingPlanId === pId}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '8px 10px', borderRadius: 10,
+                          background: hasFeature ? `${color}18` : 'var(--ad-input)',
+                          border: `1px solid ${hasFeature ? color : 'var(--ad-border)'}`,
+                          cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s'
+                        }}
+                      >
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span style={{ fontSize: 11, fontWeight: 800, color: hasFeature ? color : 'var(--ad-text)' }}>
+                              {PLAN_LABELS[pId]}
+                            </span>
+                            {pId !== 'free' && hasFeature && (
+                              <Crown size={10} color={color} />
+                            )}
+                          </div>
+                          <div style={{ fontSize: 9, color: 'var(--ad-text-sec)', marginTop: 2 }}>
+                            {hasFeature ? 'Granted' : 'Locked'}
+                          </div>
+                        </div>
+                        {hasFeature ? <CheckSquare size={15} color={color} /> : <Square size={15} color="var(--ad-text-sec)" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ═════════════════════════════════════════════════════════════════════════ */}
+      {/* 2. CREATE / EDIT FEATURE MODAL DIALOG                                     */}
+      {/* ═════════════════════════════════════════════════════════════════════════ */}
+      {(activeMode === 'create' || activeMode === 'edit') && (() => {
+        const isEdit = activeMode === 'edit';
+        return (
+          <div
+            onClick={closeModals}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9998,
+              background: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              animation: 'adFadeIn 0.2s ease'
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: 'var(--ad-card)',
+                border: '1px solid var(--ad-border)',
+                borderRadius: 24,
+                padding: '24px',
+                maxWidth: 580,
+                width: '100%',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 16,
+                animation: 'adScaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                position: 'relative'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{ fontSize: 16, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
+                  {isEdit ? 'Edit Feature Flag' : 'Create Custom Feature Flag'}
+                </h3>
+                <button
+                  onClick={closeModals}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 32, height: 32, borderRadius: 8,
+                    background: 'var(--ad-input)', color: 'var(--ad-text)',
+                    border: 'none', cursor: 'pointer'
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {formErrors.submit && (
+                  <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(239, 68, 68, 0.12)', color: '#EF4444', fontSize: 12, fontWeight: 700 }}>
+                    {formErrors.submit}
+                  </div>
+                )}
+
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
+                    Feature Name <span style={{ color: '#FF4D9D' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. AI QR Enhancer"
+                    value={formData.name}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setFormData(p => ({
+                        ...p,
+                        name: val,
+                        key: isEdit ? p.key : (p.key === '' || p.key === p.name.toLowerCase().replace(/[^a-z0-9_]/g, '_') ? val.toLowerCase().replace(/[^a-z0-9_]/g, '_') : p.key)
+                      }));
+                    }}
+                    style={{
+                      width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
+                      border: `1px solid ${formErrors.name ? '#EF4444' : 'var(--ad-border)'}`,
+                      borderRadius: 10, padding: '10px 12px', color: 'var(--ad-text)',
+                      fontSize: 13, fontWeight: 600, outline: 'none'
+                    }}
+                  />
+                  {formErrors.name && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 4 }}>{formErrors.name}</div>}
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
+                    Feature Key <span style={{ color: '#FF4D9D' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. ai_qr_enhancer"
+                    value={formData.key}
+                    disabled={isEdit}
+                    onChange={e => setFormData(p => ({ ...p, key: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_') }))}
+                    style={{
+                      width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
+                      border: `1px solid ${formErrors.key ? '#EF4444' : 'var(--ad-border)'}`,
+                      borderRadius: 10, padding: '10px 12px', color: 'var(--ad-text)',
+                      fontSize: 13, fontWeight: 600, outline: 'none', fontFamily: 'monospace',
+                      opacity: isEdit ? 0.6 : 1
+                    }}
+                  />
+                  {formErrors.key && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 4 }}>{formErrors.key}</div>}
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
+                    Description
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="Explain what this feature controls..."
+                    value={formData.description}
+                    onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
+                    style={{
+                      width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
+                      border: '1px solid var(--ad-border)', borderRadius: 10, padding: '10px 12px',
+                      color: 'var(--ad-text)', fontSize: 12, fontWeight: 500, outline: 'none', resize: 'vertical'
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
+                      Category
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={e => setFormData(p => ({ ...p, category: e.target.value }))}
+                      style={{
+                        width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
+                        borderRadius: 10, padding: '10px 12px', color: 'var(--ad-text)', fontSize: 12, fontWeight: 600, outline: 'none'
+                      }}
+                    >
+                      {Object.entries(CATEGORY_META).filter(([k]) => k !== 'ALL').map(([k, v]) => (
+                        <option key={k} value={k}>{v.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
+                      Initial Status
+                    </label>
+                    <div style={{ display: 'flex', alignItems: 'center', height: 38 }}>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(p => ({ ...p, enabled: !p.enabled }))}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px',
+                          borderRadius: 8, border: 'none', cursor: 'pointer',
+                          background: formData.enabled ? 'rgba(34, 197, 94, 0.14)' : 'rgba(239, 68, 68, 0.14)',
+                          color: formData.enabled ? '#22C55E' : '#EF4444', fontWeight: 800, fontSize: 12
+                        }}
+                      >
+                        {formData.enabled ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                        <span>{formData.enabled ? 'Enabled' : 'Disabled'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  style={{
+                    marginTop: 6, background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
+                    color: '#fff', border: 'none', borderRadius: 10, padding: '12px',
+                    fontSize: 13, fontWeight: 800, cursor: submitting ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)'
+                  }}
+                >
+                  {submitting ? 'Saving...' : (isEdit ? 'Save Changes' : 'Create Feature Flag')}
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -1627,11 +1699,26 @@ function FilterPill({ label, onRemove }) {
 function Toast({ message }) {
   return (
     <div style={{
-      position: 'fixed', top: 20, right: 20, zIndex: 9999,
-      background: '#0F1221', color: '#FFFFFF', border: '1px solid rgba(255, 77, 157, 0.4)',
-      borderRadius: 12, padding: '10px 16px', fontSize: 13, fontWeight: 700,
-      boxShadow: '0 8px 24px rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', gap: 8,
-      animation: 'adSlideIn 0.2s ease'
+      position: 'fixed',
+      top: 24,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 99999,
+      background: '#0F1221',
+      color: '#FFFFFF',
+      border: '1px solid rgba(255, 77, 157, 0.4)',
+      borderRadius: 12,
+      padding: '10px 20px',
+      fontSize: 13,
+      fontWeight: 700,
+      boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      animation: 'adSlideIn 0.2s ease',
+      maxWidth: '92vw',
+      textAlign: 'center',
+      pointerEvents: 'none'
     }}>
       <Sparkles size={16} color="#FF4D9D" />
       <span>{message}</span>
