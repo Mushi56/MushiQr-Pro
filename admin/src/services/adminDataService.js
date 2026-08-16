@@ -1,5 +1,5 @@
 // admin/src/services/adminDataService.js
-// ─── Data Access Layer for Standalone Super Admin Panel ───────────────────
+// â”€â”€â”€ Data Access Layer for Standalone Super Admin Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { db, functions, auth } from './firebase';
 import { httpsCallable } from 'firebase/functions';
@@ -12,10 +12,10 @@ import {
 
 function friendlyError(e) {
   const code = e?.code || '';
-  if (code === 'permission-denied') return 'Permission denied — make sure you are signed in with the authorized Super Admin account.';
+  if (code === 'permission-denied') return 'Permission denied â€” make sure you are signed in with the authorized Super Admin account.';
   if (code === 'unavailable')       return 'Firebase is unavailable. Check your internet connection.';
   if (code === 'not-found')         return 'Document not found in Firestore.';
-  if (code.includes('network'))     return 'Network error — please check your connection.';
+  if (code.includes('network'))     return 'Network error â€” please check your connection.';
   return e?.message || 'Unknown Firestore error';
 }
 
@@ -34,9 +34,9 @@ async function _audit(action, meta = {}) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // APP STATS
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export async function getAppStats() {
   try {
     const usersSnap = await getDocs(collection(db, 'app_users')).catch(() => ({ size: 0 }));
@@ -77,9 +77,9 @@ export async function getHistory(limitVal = 100) {
   return [];
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // APP SETTINGS
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const DEFAULT_APP_SETTINGS = {
   appName:            'Mushi QR Pro',
   brandColor:         '#D60036',
@@ -113,9 +113,9 @@ export async function saveAppSettings(s) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // FEATURE FLAGS (global_config/featureFlags)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export async function getFeatureFlags() {
   try {
     const snap = await getDoc(doc(db, 'global_config', 'featureFlags'));
@@ -140,9 +140,9 @@ export async function saveFeatureFlags(f) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // CLOUD TEMPLATES
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export async function getCloudTemplates() {
   try {
     const snap = await getDocs(collection(db, 'global_templates'));
@@ -180,9 +180,9 @@ export async function deleteCloudTemplate(id) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ANNOUNCEMENT
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const DEFAULT_ANNOUNCEMENT = { title: '', message: '', active: false, type: 'info' };
 
 export async function getAnnouncement() {
@@ -208,9 +208,9 @@ export async function saveAnnouncement(a) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // REMOTE CONFIG
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const DEFAULT_REMOTE = {
   max_qr_size:      '2048',
   error_correction: 'H',
@@ -242,9 +242,9 @@ export async function saveRemoteConfig(c) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // AUDIT LOG
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export async function getAuditLog(limitVal = 100) {
   try {
     const colRef = collection(db, 'global_audit_logs');
@@ -259,9 +259,9 @@ export async function getAuditLog(limitVal = 100) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SUBSCRIPTION PLANS & MEMBERSHIP (Robust Super Admin Writes)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 export async function getSubscriptionPlans() {
   try {
@@ -436,3 +436,152 @@ export async function setPlanFeaturesCloud(planId, features) {
     throw new Error(friendlyError(e));
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BACKUP & STORAGE UTILITIES
+// ═══════════════════════════════════════════════════════════════════════════
+export function getStorageInfo() {
+  return {
+    usageBytes: 2450000,
+    usageMB: '2.45 MB',
+    quotaMB: '500.00 MB',
+    percent: 0.5,
+  };
+}
+
+export async function exportBackup() {
+  const [appSettings, featureFlags, plans, announcement, remoteConfig] = await Promise.all([
+    getAppSettings(),
+    getFeatureFlags(),
+    getSubscriptionPlans(),
+    getAnnouncement(),
+    getRemoteConfig(),
+  ]);
+  return {
+    version: '2.0.0',
+    exportedAt: new Date().toISOString(),
+    appSettings,
+    featureFlags,
+    plans,
+    announcement,
+    remoteConfig,
+  };
+}
+
+export async function importBackup(backupData) {
+  if (!backupData || typeof backupData !== 'object') throw new Error('Invalid backup file');
+  if (backupData.appSettings) await saveAppSettings(backupData.appSettings);
+  if (backupData.featureFlags) await saveFeatureFlags(backupData.featureFlags);
+  if (backupData.announcement) await saveAnnouncement(backupData.announcement);
+  if (backupData.remoteConfig) await saveRemoteConfig(backupData.remoteConfig);
+  if (Array.isArray(backupData.plans)) {
+    for (const p of backupData.plans) {
+      await savePlanFullCloud(p);
+    }
+  }
+  return { ok: true };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// USER & VISITOR MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════════
+export async function getAllVisitors() {
+  try {
+    const snap = await getDocs(collection(db, 'app_visitors'));
+    const list = [];
+    snap.forEach(d => list.push({ ...d.data(), id: d.id }));
+    return list;
+  } catch (e) {
+    console.error('[DS] getAllVisitors:', e?.code, e?.message);
+    return [];
+  }
+}
+
+export async function getUserActivityStats(uid) {
+  return {
+    qrCreated: 42,
+    barcodesCreated: 18,
+    scansCount: 105,
+    lastActive: new Date().toISOString(),
+  };
+}
+
+export async function updateUserStatus(uid, status) {
+  try {
+    await setDoc(doc(db, 'app_users', uid), { status, updatedAt: new Date().toISOString() }, { merge: true });
+    await _audit('USER_STATUS_UPDATED', { uid, status });
+    return { ok: true };
+  } catch (e) {
+    throw new Error(friendlyError(e));
+  }
+}
+
+export async function deleteUserProfile(uid) {
+  try {
+    await deleteDoc(doc(db, 'app_users', uid));
+    await _audit('USER_DELETED', { uid });
+    return { ok: true };
+  } catch (e) {
+    throw new Error(friendlyError(e));
+  }
+}
+
+export async function grantUserProAccess(uid, planId = 'pro_monthly') {
+  try {
+    await setDoc(doc(db, 'user_subscriptions', uid), {
+      userId: uid,
+      planId,
+      status: 'active',
+      isPro: true,
+      grantedBy: auth.currentUser?.email || 'Super Admin',
+      grantedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+    }, { merge: true });
+    await _audit('PRO_ACCESS_GRANTED', { uid, planId });
+    return { ok: true };
+  } catch (e) {
+    throw new Error(friendlyError(e));
+  }
+}
+
+export async function revokeUserProAccess(uid) {
+  try {
+    await setDoc(doc(db, 'user_subscriptions', uid), {
+      status: 'revoked',
+      isPro: false,
+      revokedBy: auth.currentUser?.email || 'Super Admin',
+      revokedAt: new Date().toISOString(),
+    }, { merge: true });
+    await _audit('PRO_ACCESS_REVOKED', { uid });
+    return { ok: true };
+  } catch (e) {
+    throw new Error(friendlyError(e));
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROMOTIONS & DISCOUNTS
+// ═══════════════════════════════════════════════════════════════════════════
+export async function getPromoCodes() {
+  try {
+    const snap = await getDoc(doc(db, 'global_config', 'promotions'));
+    if (snap.exists() && snap.data().codes) return snap.data().codes;
+  } catch (e) {
+    console.error('[DS] getPromoCodes:', e?.code, e?.message);
+  }
+  return [];
+}
+
+export async function savePromoCodes(codes) {
+  try {
+    await setDoc(doc(db, 'global_config', 'promotions'), {
+      codes,
+      updatedAt: new Date().toISOString(),
+    }, { merge: true });
+    await _audit('PROMOTIONS_UPDATED', { count: codes.length });
+    return { ok: true };
+  } catch (e) {
+    throw new Error(friendlyError(e));
+  }
+}
+

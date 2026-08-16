@@ -1,5 +1,5 @@
 // src/components/admin/PromotionsManager.jsx
-// ─── Promotions & Discount Campaigns Architecture ─────────────────────────
+// â”€â”€â”€ Promotions & Discount Campaigns Architecture â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Dedicated management workspace for promotional discounts, trial codes, and temporary perks.
 
 import React from 'react';

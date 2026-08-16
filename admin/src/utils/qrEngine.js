@@ -1034,7 +1034,7 @@ export function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = 
       ctx.fill();
       break;
     }
-    // ── Floral / Decorative Dot Styles (9 premium flower shapes) ──
+    // â”€â”€ Floral / Decorative Dot Styles (9 premium flower shapes) â”€â”€
     case DOT_STYLES.CHERRY_BLOSSOM: {
       const cx = x + size / 2, cy = y + size / 2;
       const r = size * (isLarge ? 0.75 : 0.45);
@@ -1480,7 +1480,7 @@ export function drawDotModule(ctx, x, y, size, style, neighbors = {}, options = 
       ctx.restore();
       break;
     }
-    // ── NEW ICON DOT STYLES ──────────────────────────────────────────────────
+    // â”€â”€ NEW ICON DOT STYLES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case DOT_STYLES.COFFEE_BEAN: {
       ctx.save();
       ctx.fillStyle = '#6f3d11';
@@ -1886,7 +1886,7 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
       const cx = 14, cy = 14, r = 4.5;
       const petalR = r * 0.55;
       const petalD = r * 0.45;
-      ctx.fillStyle = '#8b0027'; // Dark rose — darker than container
+      ctx.fillStyle = '#8b0027'; // Dark rose â€” darker than container
       for (let i = 0; i < 5; i++) {
         const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
         const px = cx + Math.cos(angle) * petalD;
@@ -1899,7 +1899,7 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
         ctx.arc(px + Math.cos(a2) * petalR * 0.5, py + Math.sin(a2) * petalR * 0.5, petalR * 0.5, angle + Math.PI, angle, true);
         ctx.closePath(); ctx.fill();
       }
-      ctx.fillStyle = '#a30040'; // Deep magenta center — still dark
+      ctx.fillStyle = '#a30040'; // Deep magenta center â€” still dark
       ctx.beginPath(); ctx.arc(cx, cy, r * 0.28, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       return;
@@ -2025,7 +2025,7 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
 
       // 2. Darker petals so entire pupil reads as solid dark to binarizer
       const cx = 14, cy = 14, r = 4.5;
-      ctx.fillStyle = '#b8860b'; // Dark golden amber — darker than container
+      ctx.fillStyle = '#b8860b'; // Dark golden amber â€” darker than container
       ctx.beginPath();
       const petalCount = 10;
       for (let i = 0; i < petalCount; i++) {
@@ -2039,7 +2039,7 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
         ctx.quadraticCurveTo(tipX, tipY, cx + Math.cos(baseR) * bD, cy + Math.sin(baseR) * bD);
       }
       ctx.fill();
-      ctx.fillStyle = '#4a3800'; // Very dark brown center — darkest element
+      ctx.fillStyle = '#4a3800'; // Very dark brown center â€” darkest element
       ctx.beginPath(); ctx.arc(cx, cy, r * 0.38, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       return;
@@ -2156,7 +2156,7 @@ export function drawEye(ctx, x, y, size, style, outerColor, innerColor, eyeType 
   ctx.fillStyle = innerColor;
   ctx.fill();
 
-  // ── NEW ICON EYE STYLES ──────────────────────────────────────────────────
+  // â”€â”€ NEW ICON EYE STYLES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // (handled below as draw-after-restore since they use multi-color icons)
 }
 

@@ -1,5 +1,5 @@
 // src/components/admin/FeatureLimitsManager.jsx
-// ─── Quantitative Feature Limits Manager ──────────────────────────────────
+// â”€â”€â”€ Quantitative Feature Limits Manager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Allows Super Admin to configure numerical and quantitative usage limits per plan tier.
 
 import React, { useState, useEffect } from 'react';

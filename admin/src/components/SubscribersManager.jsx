@@ -1,5 +1,5 @@
 // src/components/admin/SubscribersManager.jsx
-// ─── Subscribers & Manual Entitlements Manager ─────────────────────────────
+// â”€â”€â”€ Subscribers & Manual Entitlements Manager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Real-time table of user subscriptions, status filtering, and Super Admin manual grant modal.
 
 import React, { useState, useEffect } from 'react';
@@ -80,7 +80,7 @@ export default function SubscribersManager() {
   };
 
   const fmtDate = (d) => {
-    if (!d) return '—';
+    if (!d) return 'â€”';
     try {
       const date = d.toDate ? d.toDate() : new Date(d);
       return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
@@ -215,7 +215,7 @@ export default function SubscribersManager() {
                         {sub.provider || 'system'}
                       </td>
                       <td style={{ padding: '14px 18px', fontSize: 12, color: T.textSec }}>
-                        {sub.expiryDate ? fmtDate(sub.expiryDate) : (sub.planId === 'lifetime' ? 'Lifetime' : '—')}
+                        {sub.expiryDate ? fmtDate(sub.expiryDate) : (sub.planId === 'lifetime' ? 'Lifetime' : 'â€”')}
                       </td>
                       <td style={{ padding: '14px 18px', textAlign: 'right' }}>
                         <button

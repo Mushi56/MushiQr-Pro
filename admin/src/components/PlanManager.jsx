@@ -1,5 +1,5 @@
 // src/components/admin/PlanManager.jsx
-// ─── SaaS Subscription Plans Manager & Creator (Matching Reference) ────────
+// â”€â”€â”€ SaaS Subscription Plans Manager & Creator (Matching Reference) â”€â”€â”€â”€â”€â”€â”€â”€
 
 import React, { useState, useEffect, useMemo } from 'react';
 import {
@@ -139,7 +139,7 @@ export default function PlanManager({ isDark = false }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* ── Top Bar ──────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Top Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -176,7 +176,7 @@ export default function PlanManager({ isDark = false }) {
         </button>
       </div>
 
-      {/* ── Plans Grid / Cards (Matching Reference Layout) ───────────────── */}
+      {/* â”€â”€ Plans Grid / Cards (Matching Reference Layout) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
@@ -327,7 +327,7 @@ export default function PlanManager({ isDark = false }) {
         })}
       </div>
 
-      {/* ── CREATE / EDIT PLAN MODAL (Matching Reference Screen) ──────────── */}
+      {/* â”€â”€ CREATE / EDIT PLAN MODAL (Matching Reference Screen) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {editPlanModal && (
         <div style={{
           position: 'fixed',
@@ -631,7 +631,7 @@ export default function PlanManager({ isDark = false }) {
         </div>
       )}
 
-      {/* ── MANAGE FEATURES MODAL ────────────────────────────────────────── */}
+      {/* â”€â”€ MANAGE FEATURES MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {manageFeaturesPlan && (
         <div style={{
           position: 'fixed',

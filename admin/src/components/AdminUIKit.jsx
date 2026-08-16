@@ -1,5 +1,5 @@
 // src/components/admin/AdminUIKit.jsx
-// ─── Shared UI Kit & Theme System for QR Pro Super Admin ───────────────────
+// â”€â”€â”€ Shared UI Kit & Theme System for QR Pro Super Admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import React, { createContext, useContext } from 'react';
 import { 
@@ -7,7 +7,7 @@ import {
   CheckCircle2, AlertCircle, XCircle, Clock
 } from 'lucide-react';
 
-// ── Theme Context ──────────────────────────────────────────────────────────
+// â”€â”€ Theme Context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const AdminThemeContext = createContext({
   isDark: false,
   toggleTheme: () => {},
@@ -18,7 +18,7 @@ export function useAdminTheme() {
   return useContext(AdminThemeContext);
 }
 
-// ── Color Tokens ───────────────────────────────────────────────────────────
+// â”€â”€ Color Tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const getTokens = (isDark = false) => ({
   isDark,
   // Brand accents matching reference
@@ -74,7 +74,7 @@ export const getTokens = (isDark = false) => ({
 // Default static tokens
 export const T = getTokens(false);
 
-// ── Badge Component ────────────────────────────────────────────────────────
+// â”€â”€ Badge Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function Badge({ children, variant = 'neutral', color, bg, style }) {
   let finalColor = color;
   let finalBg = bg;
@@ -138,7 +138,7 @@ export function Badge({ children, variant = 'neutral', color, bg, style }) {
   );
 }
 
-// ── Trend Pill ─────────────────────────────────────────────────────────────
+// â”€â”€ Trend Pill â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function TrendPill({ value = '+12.5%', isUp = true, period = 'from last month', isDark = false }) {
   const color = isUp ? '#22C55E' : '#EF4444';
   const Icon = isUp ? TrendingUp : TrendingDown;
@@ -167,7 +167,7 @@ export function TrendPill({ value = '+12.5%', isUp = true, period = 'from last m
   );
 }
 
-// ── Top Stat Card ──────────────────────────────────────────────────────────
+// â”€â”€ Top Stat Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function StatCard({
   title,
   value,
@@ -226,7 +226,7 @@ export function StatCard({
   );
 }
 
-// ── Progress Bar ───────────────────────────────────────────────────────────
+// â”€â”€ Progress Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function ProgressBar({ val, max, color = '#FF4D9D', isDark = false }) {
   const pct = Math.min(Math.max((val / (max || 1)) * 100, 0), 100);
   return (

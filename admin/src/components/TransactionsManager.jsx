@@ -1,5 +1,5 @@
 // src/components/admin/TransactionsManager.jsx
-// ─── Payment Transactions Ledger ──────────────────────────────────────────
+// â”€â”€â”€ Payment Transactions Ledger â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Displays immutable historical payment events from payment_transactions.
 
 import React, { useState, useEffect } from 'react';
@@ -38,7 +38,7 @@ export default function TransactionsManager() {
   });
 
   const fmtDate = (d) => {
-    if (!d) return '—';
+    if (!d) return 'â€”';
     try {
       const date = d.toDate ? d.toDate() : new Date(d);
       return date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -125,7 +125,7 @@ export default function TransactionsManager() {
                       {txn.transactionId || txn.id}
                     </td>
                     <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontSize: 12, color: T.textSec }}>
-                      {txn.userId || '—'}
+                      {txn.userId || 'â€”'}
                     </td>
                     <td style={{ padding: '14px 18px' }}>
                       <span style={{
@@ -143,7 +143,7 @@ export default function TransactionsManager() {
                       {txn.provider || 'google_play'}
                     </td>
                     <td style={{ padding: '14px 18px', fontSize: 12, color: '#fff' }}>
-                      {txn.productId || '—'}
+                      {txn.productId || 'â€”'}
                     </td>
                     <td style={{ padding: '14px 18px', fontSize: 12, color: T.textSec }}>
                       {fmtDate(txn.processedAt || txn.createdAt)}

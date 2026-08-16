@@ -1,5 +1,5 @@
 // src/components/admin/AdminDashboard.jsx
-// ─── Main Admin Dashboard Screen (Matching Reference Design) ───────────────
+// â”€â”€â”€ Main Admin Dashboard Screen (Matching Reference Design) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
@@ -164,7 +164,7 @@ export default function AdminDashboard({ onNavigate, stats = {}, revenueData = {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* ── 1. Top 4 Statistic Cards ─────────────────────────────────────── */}
+      {/* â”€â”€ 1. Top 4 Statistic Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -216,7 +216,7 @@ export default function AdminDashboard({ onNavigate, stats = {}, revenueData = {
         />
       </div>
 
-      {/* ── 2. Charts Row: Revenue Overview & Subscription Status ─────────── */}
+      {/* â”€â”€ 2. Charts Row: Revenue Overview & Subscription Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
@@ -390,7 +390,7 @@ export default function AdminDashboard({ onNavigate, stats = {}, revenueData = {
         </div>
       </div>
 
-      {/* ── 3. Bottom Row: Recent Transactions & Top Plans ─────────────────── */}
+      {/* â”€â”€ 3. Bottom Row: Recent Transactions & Top Plans â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',

@@ -1,5 +1,5 @@
 // src/components/admin/FeatureMatrixManager.jsx
-// ─── Visual Feature × Plan Matrix Manager ──────────────────────────────────
+// â”€â”€â”€ Visual Feature Ã— Plan Matrix Manager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Allows Super Admin to dynamically assign any of the 78 canonical features to specific plans.
 
 import React, { useState, useEffect, useMemo } from 'react';

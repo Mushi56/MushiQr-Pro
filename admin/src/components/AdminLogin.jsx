@@ -1,5 +1,5 @@
 // admin/src/components/AdminLogin.jsx
-// ─── Dedicated Super Admin Login Page ───────────────────────────────────────
+// â”€â”€â”€ Dedicated Super Admin Login Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import React, { useState } from 'react';
 import { 
@@ -220,7 +220,7 @@ export default function AdminLogin({ onLoginSuccess }) {
               <Lock size={16} color="#8E95A9" />
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••••••"
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 style={{
@@ -267,7 +267,7 @@ export default function AdminLogin({ onLoginSuccess }) {
 
         {/* Footer Security Notice */}
         <div style={{ textAlign: 'center', fontSize: 11, color: '#64748B', lineHeight: 1.4 }}>
-          🔒 Restricted portal. All logins, queries, and administrative actions are logged in authoritative server audit records.
+          ðŸ”’ Restricted portal. All logins, queries, and administrative actions are logged in authoritative server audit records.
         </div>
       </div>
     </div>

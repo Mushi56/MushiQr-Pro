@@ -67,7 +67,7 @@ export default function AuditLogPanel() {
                 <tr key={log.id} style={{ borderBottom: `1px solid ${T.border}` }}>
                   <td style={{ padding: 12, fontWeight: 700 }}>{log.action}</td>
                   <td style={{ padding: 12, fontFamily: 'monospace' }}>{log.actorUid} ({log.actorRole})</td>
-                  <td style={{ padding: 12, fontFamily: 'monospace' }}>{log.targetUid || '—'}</td>
+                  <td style={{ padding: 12, fontFamily: 'monospace' }}>{log.targetUid || 'â€”'}</td>
                   <td style={{ padding: 12 }}>{log.ts?.toDate ? log.ts.toDate().toLocaleString() : 'Just now'}</td>
                 </tr>
               ))}

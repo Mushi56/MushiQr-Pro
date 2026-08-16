@@ -1,4 +1,4 @@
-// ─── QR Code Vector Templates (1080x1350 Centered Social Media Pro Cards) ──────────
+// â”€â”€â”€ QR Code Vector Templates (1080x1350 Centered Social Media Pro Cards) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const imgCache = {};
 function getPresetImage(src) {
@@ -33,7 +33,7 @@ function drawRoundedRect(ctx, x, y, w, h, r) {
   }
 }
 
-// ── Master Centered Social Template Factory ──────────────────
+// â”€â”€ Master Centered Social Template Factory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function createSocialTemplate({
   id,
   name,
@@ -180,7 +180,7 @@ function createSocialTemplate({
   };
 }
 
-// ─── Exported 1080x1350 Social Media Templates Array ──────────────────────────
+// â”€â”€â”€ Exported 1080x1350 Social Media Templates Array â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const QR_TEMPLATES = [
   createSocialTemplate({
     id: 'sm_instagram_pro',
@@ -413,7 +413,7 @@ export const QR_TEMPLATES = [
   })
 ];
 
-// ─── Cloud/Custom Templates Integration ─────────────────────────────────────
+// â”€â”€â”€ Cloud/Custom Templates Integration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function getUserTemplates() {
   try {
     const raw = localStorage.getItem('qrgen_cloud_templates');

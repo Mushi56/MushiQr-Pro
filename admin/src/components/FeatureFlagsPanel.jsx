@@ -1,5 +1,5 @@
 // src/components/admin/FeatureFlagsPanel.jsx
-// ─── Mobile-First Feature Flags Management System ──────────────────────────
+// â”€â”€â”€ Mobile-First Feature Flags Management System â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Matches the provided reference mockup across 320px mobile up to 4K desktop.
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -46,7 +46,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const theme = useAdminTheme();
   const isDark = propIsDark !== undefined ? propIsDark : (theme?.isDark ?? false);
 
-  // ── States ───────────────────────────────────────────────────────────────
+  // â”€â”€ States â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [flags, setFlags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -80,7 +80,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // ── Real-time Firestore Subscription ─────────────────────────────────────
+  // â”€â”€ Real-time Firestore Subscription â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     setLoading(true);
     const unsubscribe = subscribeFeatureFlags(
@@ -103,7 +103,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // ── Computed Statistics ──────────────────────────────────────────────────
+  // â”€â”€ Computed Statistics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const stats = useMemo(() => {
     const total = flags.length;
     const enabled = flags.filter(f => f.enabled).length;
@@ -116,7 +116,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     return { total, enabled, disabled, targeted, enabledPct, disabledPct, targetedPct };
   }, [flags]);
 
-  // ── Filtered Flags ───────────────────────────────────────────────────────
+  // â”€â”€ Filtered Flags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const filteredFlags = useMemo(() => {
     return flags.filter(flag => {
       // Search
@@ -156,7 +156,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     setFilterOpen(false);
   };
 
-  // ── Actions ──────────────────────────────────────────────────────────────
+  // â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleToggle = async (e, flag) => {
     e.stopPropagation();
     try {
@@ -286,7 +286,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  // ── Render Sub-views ─────────────────────────────────────────────────────
+  // â”€â”€ Render Sub-views â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   // 1. Details Sub-view
   if (activeMode === 'details' && selectedFlag) {
@@ -756,7 +756,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
       {/* Toast Notification */}
       {toastMessage && <Toast message={toastMessage} />}
 
-      {/* ── Title & Create Button ────────────────────────────────────────── */}
+      {/* â”€â”€ Title & Create Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -808,7 +808,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         </button>
       </div>
 
-      {/* ── 4 Statistics Cards (2x2 Grid on Mobile, 4-col on Desktop) ─────── */}
+      {/* â”€â”€ 4 Statistics Cards (2x2 Grid on Mobile, 4-col on Desktop) â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
@@ -860,7 +860,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         />
       </div>
 
-      {/* ── Search & Filter Toolbar ───────────────────────────────────────── */}
+      {/* â”€â”€ Search & Filter Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -954,7 +954,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         </div>
       )}
 
-      {/* ── Feature Flag Cards List ───────────────────────────────────────── */}
+      {/* â”€â”€ Feature Flag Cards List â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[1, 2, 3, 4].map(i => (
@@ -1142,7 +1142,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         </div>
       )}
 
-      {/* ── Filter Bottom Sheet / Modal ────────────────────────────────────── */}
+      {/* â”€â”€ Filter Bottom Sheet / Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {filterOpen && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 1000,
@@ -1252,7 +1252,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   );
 }
 
-// ── Micro Sub-Components ───────────────────────────────────────────────────
+// â”€â”€ Micro Sub-Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function StatMiniCard({ icon: Icon, iconColor, iconBg, title, value, subtitle, subColor }) {
   return (

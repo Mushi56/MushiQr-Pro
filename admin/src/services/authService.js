@@ -1,5 +1,5 @@
 // admin/src/services/authService.js
-// ─── Super Admin Dedicated Authorization Service ───────────────────────────
+// â”€â”€â”€ Super Admin Dedicated Authorization Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useState, useEffect, useCallback } from 'react';
 import { auth, googleProvider, functions } from './firebase';

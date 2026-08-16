@@ -1,5 +1,5 @@
 // admin/src/services/featureFlagsService.js
-// ─── Centralized Real-time Feature Flags Service ────────────────────────────
+// â”€â”€â”€ Centralized Real-time Feature Flags Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Manages Firestore 'featureFlags' collection, synchronizes global_config/featureFlags,
 // logs admin audit trails, and provides isFeatureEnabled evaluation.
 
@@ -39,7 +39,7 @@ export const TARGETING_OPTIONS = [
   { id: 'specific',   label: 'Specific Users',   desc: 'Explicit whitelist of user IDs or emails' },
 ];
 
-// ── Initial Seed Data (Matches Reference Mockup & Core App Capabilities) ─────
+// â”€â”€ Initial Seed Data (Matches Reference Mockup & Core App Capabilities) â”€â”€â”€â”€â”€
 export const INITIAL_FEATURE_FLAGS = [
   {
     id: 'premium_features',

@@ -1,5 +1,5 @@
 // admin/src/App.jsx
-// ─── Super Admin Standalone Application Root ────────────────────────────────
+// â”€â”€â”€ Super Admin Standalone Application Root â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import React, { useState } from 'react';
 import { useSuperAuthState, logoutAdmin, SUPER_ADMIN_EMAIL } from './services/authService';

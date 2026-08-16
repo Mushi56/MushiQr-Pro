@@ -361,7 +361,7 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
         </div>
       </div>
 
-      {/* ─── Horizontal Row Categories Bar ─── */}
+      {/* â”€â”€â”€ Horizontal Row Categories Bar â”€â”€â”€ */}
       {!search && (
         <div style={{
           display: 'flex',
@@ -539,7 +539,7 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
         </div>
       )}
 
-      {/* ─── Main Content Area ─── */}
+      {/* â”€â”€â”€ Main Content Area â”€â”€â”€ */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
         {showFeats && (
           <div className="fmp-sc" style={{flex:1,overflowY:'auto',padding:'14px 14px 120px 14px',minWidth:0}}>
@@ -633,7 +633,7 @@ export default function FeatureManagementPanel({initialPlanFilter=null}){
                           <div style={{display:'flex',alignItems:'center',gap:5,marginTop:2,flexWrap:'wrap'}}>
                             <code style={{fontSize:10,color:C.textMut,background:'rgba(255,255,255,0.05)',padding:'1px 5px',borderRadius:4}}>{feat.featureId}</code>
                             {cm.color&&<span style={{fontSize:10,color:cm.color,fontWeight:600}}>{cm.name}</span>}
-                            {feat.subcategory&&<><span style={{fontSize:10,color:C.textMut}}>›</span><span style={{fontSize:10,color:C.textMut}}>{feat.subcategory}</span></>}
+                            {feat.subcategory&&<><span style={{fontSize:10,color:C.textMut}}>â€º</span><span style={{fontSize:10,color:C.textMut}}>{feat.subcategory}</span></>}
                           </div>
                         </div>
                         <GlobalToggle enabled={gOn} onChange={v=>toggleGlobal(feat,v)} disabled={locked}/>
@@ -696,7 +696,7 @@ function FeatureDrawer({feat,globalEnabled,planEnabled,onGlobalToggle,onPlanTogg
         </div>
         {feat.description&&<p style={{fontSize:12,color:'#8b8fa8',margin:'0 0 16px',lineHeight:1.6}}>{feat.description}</p>}
         <div style={{display:'flex',flexDirection:'column',gap:7,marginBottom:18}}>
-          {[['Default Plan',feat.defaultPlan?(feat.defaultPlan.charAt(0).toUpperCase()+feat.defaultPlan.slice(1)):'—'],['Requires Auth',feat.requiresAuthentication?'Yes':'No'],['Super Admin Override',feat.allowSuperAdminOverride?'Allowed':'Locked (Security)']].map(([k,v])=>(
+          {[['Default Plan',feat.defaultPlan?(feat.defaultPlan.charAt(0).toUpperCase()+feat.defaultPlan.slice(1)):'â€”'],['Requires Auth',feat.requiresAuthentication?'Yes':'No'],['Super Admin Override',feat.allowSuperAdminOverride?'Allowed':'Locked (Security)']].map(([k,v])=>(
             <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
               <span style={{fontSize:11,color:'#44465a'}}>{k}</span>
               <span style={{fontSize:11,color:'#8b8fa8',fontWeight:600}}>{v}</span>
@@ -709,7 +709,7 @@ function FeatureDrawer({feat,globalEnabled,planEnabled,onGlobalToggle,onPlanTogg
             <GlobalToggle enabled={globalEnabled} onChange={onGlobalToggle} disabled={locked}/>
           </div>
           {!globalEnabled&&<div style={{display:'flex',alignItems:'center',gap:5,padding:'5px 9px',background:'rgba(239,68,68,0.12)',borderRadius:6,border:'1px solid rgba(239,68,68,0.22)'}}><AlertCircle size={10} color={'#ef4444'}/><span style={{fontSize:10,color:'#ef4444'}}>OFF for ALL users globally</span></div>}
-          {locked&&<div style={{display:'flex',alignItems:'center',gap:5,padding:'5px 9px',background:'rgba(245,158,11,0.12)',borderRadius:6,border:'1px solid rgba(245,158,11,0.22)',marginTop:5}}><Lock size={10} color={'#f59e0b'}/><span style={{fontSize:10,color:'#f59e0b'}}>Security control — cannot be remotely disabled</span></div>}
+          {locked&&<div style={{display:'flex',alignItems:'center',gap:5,padding:'5px 9px',background:'rgba(245,158,11,0.12)',borderRadius:6,border:'1px solid rgba(245,158,11,0.22)',marginTop:5}}><Lock size={10} color={'#f59e0b'}/><span style={{fontSize:10,color:'#f59e0b'}}>Security control â€” cannot be remotely disabled</span></div>}
         </div>
         <div style={{padding:13,borderRadius:10,background:'#14141e',border:'1px solid rgba(255,255,255,0.06)'}}>
           <div style={{fontSize:12,fontWeight:700,color:'#f0f0f8',marginBottom:10}}>Plan Access</div>

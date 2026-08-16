@@ -1,5 +1,5 @@
 // src/components/admin/MembershipDashboard.jsx
-// ─── Unified SaaS Membership Management Dashboard ──────────────────────────
+// â”€â”€â”€ Unified SaaS Membership Management Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Houses 8 sub-sections: Overview, Plans, Feature Access, Feature Limits,
 // Subscribers, Transactions, Promotions, and Audit Logs with Live Version Status.
 
@@ -90,7 +90,7 @@ export default function MembershipDashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, color: '#fff', fontFamily: 'Outfit, sans-serif' }}>
-      {/* ─── Top Global Configuration Status Banner ───────────────────────── */}
+      {/* â”€â”€â”€ Top Global Configuration Status Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(20,20,30,0.85), rgba(12,12,20,0.95))',
         backdropFilter: 'blur(12px)',
@@ -144,7 +144,7 @@ export default function MembershipDashboard() {
         </div>
       </div>
 
-      {/* ─── Secondary Sub-Navigation Bar ─────────────────────────────────── */}
+      {/* â”€â”€â”€ Secondary Sub-Navigation Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div style={{
         display: 'flex',
         gap: 6,
@@ -196,14 +196,14 @@ export default function MembershipDashboard() {
         })}
       </div>
 
-      {/* ─── Active Sub-Tab View ───────────────────────────────────────────── */}
+      {/* â”€â”€â”€ Active Sub-Tab View â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeTab === 'overview' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* KPI Statistics Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
             <div style={{ background: T.bgCard, padding: '18px', borderRadius: T.r.lg, border: `1px solid ${T.border}` }}>
               <div style={{ fontSize: 11, fontWeight: 800, color: T.textSec, textTransform: 'uppercase' }}>Total Registered Users</div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginTop: 4 }}>{subscribersCount || '—'}</div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginTop: 4 }}>{subscribersCount || 'â€”'}</div>
               <div style={{ fontSize: 11, color: '#10b981', marginTop: 4, fontWeight: 700 }}>Real-time user count</div>
             </div>
 

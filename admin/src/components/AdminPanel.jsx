@@ -1,6 +1,6 @@
 // src/components/AdminPanel.jsx
-// Mushi QR Pro — Super Admin Panel (SaaS-grade)
-// ═══════════════════════════════════════════════════════════════════════
+// Mushi QR Pro â€” Super Admin Panel (SaaS-grade)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import React, { Fragment, useState, useEffect, useRef, useContext, createContext, useCallback } from 'react';
 import {
@@ -37,7 +37,7 @@ import AuditLogPanel from './AuditLogPanel';
 import TransactionsManager from './TransactionsManager';
 import { getTokens } from './AdminUIKit';
 
-// ─── Static Fallback Design Tokens ────────────────────────────────────────
+// â”€â”€â”€ Static Fallback Design Tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const T = {
   ...getTokens(false),
   accent: '#FF4D9D',
@@ -52,7 +52,7 @@ const T = {
   sidebarHov: 'rgba(255, 255, 255, 0.04)',
 };
 
-// ─── Toast Notification System ───────────────────────────────────────────
+// â”€â”€â”€ Toast Notification System â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ToastCtx = createContext(null);
 
 function ToastProvider({ children }) {
@@ -81,7 +81,7 @@ function ToastProvider({ children }) {
             pointerEvents: 'auto',
           }}>
             <span style={{ marginRight: 8 }}>
-              {t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : t.type === 'warning' ? '⚠️' : 'ℹ️'}
+              {t.type === 'success' ? 'âœ…' : t.type === 'error' ? 'âŒ' : t.type === 'warning' ? 'âš ï¸' : 'â„¹ï¸'}
             </span>
             {t.msg}
           </div>
@@ -95,7 +95,7 @@ function useToast() {
   return useContext(ToastCtx);
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Safely convert any qrData value (string, {url}, {text}, {phone}, etc.) to a display string
 function safeStr(val) {
   if (val === null || val === undefined) return '';
@@ -117,7 +117,7 @@ function fmtBytes(b) {
   return (b / 1048576).toFixed(2) + ' MB';
 }
 function timeAgo(ts) {
-  if (!ts) return '—';
+  if (!ts) return 'â€”';
   const diff = Date.now() - new Date(ts).getTime();
   const m = Math.floor(diff / 60000);
   if (m < 1) return 'just now';
@@ -127,11 +127,11 @@ function timeAgo(ts) {
   return new Date(ts).toLocaleDateString('en', { month: 'short', day: 'numeric' });
 }
 function fmtDate(ts) {
-  if (!ts) return '—';
+  if (!ts) return 'â€”';
   return new Date(ts).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// ─── Navigation Config (Matching Reference) ──────────────────────────────
+// â”€â”€â”€ Navigation Config (Matching Reference) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const LABELS = {
   dashboard:        'Dashboard',
   users:            'Users',
@@ -187,9 +187,9 @@ const NAV_MAIN = [
   { id: 'remote-config',    icon: Cpu,                label: 'System Settings' },
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MICRO COMPONENTS (Theme-Aware with CSS Variables)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function Btn({ children, onClick, variant = 'primary', size = 'md', disabled, icon, style }) {
   const base = {
@@ -361,9 +361,9 @@ function FormSelect({ label, value, onChange, options }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SVG CHARTS
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function LineChartSVG({ data = [], series = [], height = 180 }) {
   if (!data.length) return (
@@ -444,9 +444,9 @@ function DonutSVG({ segments = [], size = 160 }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SIDEBAR (Matching Reference: Dark #0F1221, Pink/Purple Active, Tech Badges)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDark, toggleTheme }) {
   const handleLogout = async () => {
@@ -477,7 +477,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
         userSelect: 'none',
       }}
     >
-      {/* ── Brand Header (App Old Logo + Name Mushi QR Pro + Super Admin Badge) ── */}
+      {/* â”€â”€ Brand Header (App Old Logo + Name Mushi QR Pro + Super Admin Badge) â”€â”€ */}
       <div style={{
         padding: '18px 16px 14px',
         borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
@@ -548,7 +548,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
         )}
       </div>
 
-      {/* ── 17 Clean Navigation Items ───────────────────────────────────── */}
+      {/* â”€â”€ 17 Clean Navigation Items â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
         {NAV_MAIN.map(({ id, icon: Icon, label, isNew }) => {
           const isActive = active === id;
@@ -615,7 +615,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
         })}
       </div>
 
-      {/* ── Sidebar Footer (Tech Badges, Dark Mode Switch, Super Admin Profile) ─ */}
+      {/* â”€â”€ Sidebar Footer (Tech Badges, Dark Mode Switch, Super Admin Profile) â”€ */}
       <div style={{
         padding: '14px 14px',
         borderTop: '1px solid rgba(255, 255, 255, 0.07)',
@@ -742,9 +742,9 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // HEADER (Matching Reference: Breadcrumb, Search, Notifications, Profile)
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTheme }) {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -879,10 +879,10 @@ function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTh
               </div>
               <div style={{ fontSize: 12, color: isDark ? '#94A3B8' : '#64748B', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ padding: '6px 8px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)' }}>
-                  🎉 New subscription from <strong>fatima@example.com</strong>
+                  ðŸŽ‰ New subscription from <strong>fatima@example.com</strong>
                 </div>
                 <div style={{ padding: '6px 8px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)' }}>
-                  ⚡ Cloud function deployed successfully.
+                  âš¡ Cloud function deployed successfully.
                 </div>
               </div>
             </div>
@@ -993,9 +993,9 @@ function Header({ section, onMenuToggle, isMobile, currentUser, isDark, toggleTh
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DASHBOARD PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function DashboardPanel({ stats, history, featureFlags, announcement, subscribers, revenueData, appUsers, onNavigate, onSaveFlags }) {
   const si = DS.getStorageInfo();
@@ -1120,10 +1120,10 @@ function DashboardPanel({ stats, history, featureFlags, announcement, subscriber
                       </td>
                       <td style={{ padding: '10px 20px', fontSize: 12, color: T.text, maxWidth: 180 }}>
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {safeStr(item.qrData) || safeStr(item.data) || item.qrType || '—'}
+                          {safeStr(item.qrData) || safeStr(item.data) || item.qrType || 'â€”'}
                         </div>
                       </td>
-                      <td style={{ padding: '10px 20px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>{item.qrType || item.barcodeType || '—'}</td>
+                      <td style={{ padding: '10px 20px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>{item.qrType || item.barcodeType || 'â€”'}</td>
                       <td style={{ padding: '10px 20px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>{timeAgo(item.timestamp)}</td>
                     </tr>
                   ))}
@@ -1152,9 +1152,9 @@ function DashboardPanel({ stats, history, featureFlags, announcement, subscriber
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// TEMPLATE EDITOR — CANVAS PREVIEW
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// TEMPLATE EDITOR â€” CANVAS PREVIEW
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 const DEFAULT_TPL = {
   name: '', category: 'Social',
@@ -1174,7 +1174,7 @@ function TemplateCanvas({ form, size = 280 }) {
     const s = size;
     ctx.clearRect(0, 0, s, s);
 
-    // ── Background ──
+    // â”€â”€ Background â”€â”€
     const cr = Math.min(form.cornerRadius || 0, s / 2);
     const fillPath = () => { ctx.beginPath(); ctx.roundRect(0, 0, s, s, cr); };
 
@@ -1200,14 +1200,14 @@ function TemplateCanvas({ form, size = 280 }) {
       if (cr > 0) { fillPath(); ctx.fill(); } else ctx.fillRect(0,0,s,s);
     }
 
-    // ── QR area ──
+    // â”€â”€ QR area â”€â”€
     const qsz = Math.max(0.1, Math.min(0.92, form.qrSize || 0.5)) * s;
     const qx  = Math.max(0, Math.min(s - qsz, (form.qrX || 0.5) * s - qsz / 2));
     const qy  = Math.max(0, Math.min(s - qsz, (form.qrY || 0.5) * s - qsz / 2));
     const bgQ = form.bgTransparent ? null : (form.bgQrColor || '#000000');
     if (bgQ) { ctx.fillStyle = bgQ; ctx.fillRect(qx, qy, qsz, qsz); }
 
-    // QR dot grid (7×7 simplified)
+    // QR dot grid (7Ã—7 simplified)
     const cells = 9;
     const cs2 = qsz / cells;
     const qc  = form.qrColor || '#ffffff';
@@ -1229,7 +1229,7 @@ function TemplateCanvas({ form, size = 280 }) {
       }
     }));
 
-    // Eye markers (3×3 corners)
+    // Eye markers (3Ã—3 corners)
     const ec = form.syncEyes ? qc : (form.eyeColor || qc);
     const drawEye = (ex, ey) => {
       const ew = cs2 * 3;
@@ -1268,13 +1268,13 @@ function TemplateCanvas({ form, size = 280 }) {
   return <canvas ref={ref} width={size} height={size} style={{ borderRadius: 10, display: 'block', width: '100%', aspectRatio: '1' }} />;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // TEMPLATE EDITOR MODAL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 const DOT_STYLES   = ['square','rounded','dots','extra-rounded','classy','classy-rounded','cherry-blossom','violet-flower','sunflower','rose','daisy','tulip','lotus','forget-me-not','pansy','dollar-coin','cute-emoticon','lavender','monstera','coffee-bean','raindrop','cactus-plant','basketball-dot','chess-pawn','bow-ribbon'];
 const EYE_STYLES   = ['square','rounded','circle','leaf','extra-rounded','dollar-coin','cute-emoticon','cherry-blossom','lotus','sunflower','lavender','rose','monstera','daisy','coffee-bean-eye','raindrop-eye','cactus-eye','basketball-eye','chess-eye','bow-eye','violet-flower-eye','tulip-eye','forget-me-not-eye','pansy-eye'];
-const GRAD_DIRS    = [{ v:'diagonal', l:'↘ Diagonal' },{ v:'horizontal', l:'→ Horizontal' },{ v:'vertical', l:'↓ Vertical' },{ v:'radial', l:'◎ Radial' }];
+const GRAD_DIRS    = [{ v:'diagonal', l:'â†˜ Diagonal' },{ v:'horizontal', l:'â†’ Horizontal' },{ v:'vertical', l:'â†“ Vertical' },{ v:'radial', l:'â—Ž Radial' }];
 const TPL_CATS     = ['Social','Business','Hot','Creative','Minimal','Event','Retail','Custom'];
 
 function ColorRow({ label, value, onChange }) {
@@ -1336,11 +1336,11 @@ function TemplateEditorModal({ form, setForm, editId, onSave, onClose, saving })
 
         {/* Header */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', borderBottom:`1px solid ${T.border}`, flexShrink:0 }}>
-          <div style={{ fontSize:15, fontWeight:800, color:T.text }}>{editId ? '✏️ Edit Template' : '✨ New Template'}</div>
+          <div style={{ fontSize:15, fontWeight:800, color:T.text }}>{editId ? 'âœï¸ Edit Template' : 'âœ¨ New Template'}</div>
           <div style={{ display:'flex', gap:8 }}>
             <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
             <Btn onClick={onSave} disabled={saving || !form.name?.trim()} icon={<Check size={13} />}>
-              {saving ? 'Saving…' : 'Save Template'}
+              {saving ? 'Savingâ€¦' : 'Save Template'}
             </Btn>
           </div>
         </div>
@@ -1355,14 +1355,14 @@ function TemplateEditorModal({ form, setForm, editId, onSave, onClose, saving })
               <TemplateCanvas form={form} size={260} />
             </div>
             <div style={{ fontSize:10, color:T.textMut, textAlign:'center', lineHeight:1.5 }}>
-              Red dashes = QR bounds · Red dot = center point
+              Red dashes = QR bounds Â· Red dot = center point
             </div>
             {/* Quick info */}
             <div style={{ background:T.bgCard, borderRadius:8, padding:12, border:`1px solid ${T.border}` }}>
               <div style={{ fontSize:11, fontWeight:700, color:T.text, marginBottom:8 }}>{form.name || 'Untitled Template'}</div>
               {[
                 ['Category', form.category],
-                ['Position', `X ${(form.qrX*100).toFixed(0)}% · Y ${(form.qrY*100).toFixed(0)}%`],
+                ['Position', `X ${(form.qrX*100).toFixed(0)}% Â· Y ${(form.qrY*100).toFixed(0)}%`],
                 ['QR Size', `${(form.qrSize*100).toFixed(0)}%`],
                 ['Dot Style', form.dotStyle],
                 ['Eye Style', form.eyeStyle],
@@ -1391,7 +1391,7 @@ function TemplateEditorModal({ form, setForm, editId, onSave, onClose, saving })
             <div style={{ display:'flex', flexDirection:'column', gap:12, paddingTop:16, borderTop:`1px solid ${T.border}` }}>
               <div style={{ fontSize:12, fontWeight:800, color:T.textMut, textTransform:'uppercase', letterSpacing:'0.5px' }}>Background</div>
               <div style={{ display:'flex', gap:0, background:T.bgEl, borderRadius:8, padding:3, border:`1px solid ${T.border}`, width:'fit-content' }}>
-                {[['solid','■ Solid'],['gradient','⬛ Gradient'],['transparent','▢ Transparent']].map(([v,l]) => (
+                {[['solid','â–  Solid'],['gradient','â¬› Gradient'],['transparent','â–¢ Transparent']].map(([v,l]) => (
                   <button key={v} onClick={() => set('bgType', v)} style={{
                     padding:'6px 14px', borderRadius:6, border:'none', cursor:'pointer', fontFamily:'inherit',
                     background: form.bgType === v ? T.accent : 'transparent',
@@ -1433,7 +1433,7 @@ function TemplateEditorModal({ form, setForm, editId, onSave, onClose, saving })
                   display:'flex', alignItems:'center', gap:6, background:'none', border:`1px solid ${T.border}`,
                   borderRadius:6, color: form.bgTransparent ? T.accent : T.textSec, cursor:'pointer', padding:'5px 10px', fontSize:11, fontWeight:700, fontFamily:'inherit',
                 }}>
-                  {form.bgTransparent ? '✓ Transparent' : '□ Transparent'}
+                  {form.bgTransparent ? 'âœ“ Transparent' : 'â–¡ Transparent'}
                 </button>
               </div>
               {!form.bgTransparent && (
@@ -1445,7 +1445,7 @@ function TemplateEditorModal({ form, setForm, editId, onSave, onClose, saving })
                   display:'flex', alignItems:'center', gap:6, background:'none', border:`1px solid ${T.border}`,
                   borderRadius:6, color: form.syncEyes ? T.green : T.textSec, cursor:'pointer', padding:'5px 10px', fontSize:11, fontWeight:700, fontFamily:'inherit',
                 }}>
-                  {form.syncEyes ? '⟳ Same as QR' : '⊙ Custom'}
+                  {form.syncEyes ? 'âŸ³ Same as QR' : 'âŠ™ Custom'}
                 </button>
               </div>
               {!form.syncEyes && (
@@ -1473,9 +1473,9 @@ function TemplateEditorModal({ form, setForm, editId, onSave, onClose, saving })
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // TEMPLATES PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function TemplatesPanel({ cloudTemplates, onRefresh }) {
   const [tab, setTab]           = useState('builtin');
@@ -1574,7 +1574,7 @@ function TemplatesPanel({ cloudTemplates, onRefresh }) {
 
       {/* Built-in tab */}
       {tab === 'builtin' && (
-        <AdminCard title="Built-in Templates" subtitle="Pre-installed templates — view only. Clone to create an editable copy.">
+        <AdminCard title="Built-in Templates" subtitle="Pre-installed templates â€” view only. Clone to create an editable copy.">
           <div className="ad-template-grid">
             {QR_TEMPLATES.map(tpl => (
               <div key={tpl.id} style={{ background:T.bgEl, borderRadius:T.r.md, overflow:'hidden', border:`1px solid ${T.border}`, display:'flex', flexDirection:'column' }}>
@@ -1609,7 +1609,7 @@ function TemplatesPanel({ cloudTemplates, onRefresh }) {
                     marginTop:4, background:T.accentLow, border:`1px solid rgba(214,0,54,0.2)`,
                     borderRadius:6, color:T.accent, cursor:'pointer', padding:'5px 0', fontSize:10,
                     fontWeight:700, fontFamily:'inherit', transition:'all 0.12s',
-                  }}>Clone &amp; Customize →</button>
+                  }}>Clone &amp; Customize â†’</button>
                 </div>
               </div>
             ))}
@@ -1651,11 +1651,11 @@ function TemplatesPanel({ cloudTemplates, onRefresh }) {
                       <button onClick={() => openEdit(tpl)} style={{
                         flex:1, background:T.bgCard, border:`1px solid ${T.border}`, borderRadius:6,
                         color:T.text, cursor:'pointer', padding:'5px 0', fontSize:10, fontWeight:700, fontFamily:'inherit',
-                      }}>✏️ Edit</button>
+                      }}>âœï¸ Edit</button>
                       <button onClick={() => handleDelete(tpl.id)} style={{
                         background:`${T.red}10`, border:`1px solid ${T.red}30`, borderRadius:6,
                         color:T.red, cursor:'pointer', padding:'5px 8px', fontSize:10, fontWeight:700, fontFamily:'inherit',
-                      }}>🗑</button>
+                      }}>ðŸ—‘</button>
                     </div>
                   </div>
                 </div>
@@ -1668,9 +1668,9 @@ function TemplatesPanel({ cloudTemplates, onRefresh }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // APP SETTINGS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function AppSettingsPanel({ settings, onSave }) {
   const [form, setForm] = useState(settings || {});
@@ -1710,7 +1710,7 @@ function AppSettingsPanel({ settings, onSave }) {
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 8 }}>
             <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Settings'}
+              {saving ? 'Savingâ€¦' : saved ? 'Saved!' : 'Save Settings'}
             </Btn>
           </div>
         </div>
@@ -1719,9 +1719,9 @@ function AppSettingsPanel({ settings, onSave }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // BRANDING PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function BrandingPanel({ settings, onSave }) {
   const [form, setForm] = useState(settings || {});
@@ -1771,7 +1771,7 @@ function BrandingPanel({ settings, onSave }) {
           <FormInput label="App Display Name" value={form.appName || 'Mushi QR Pro'} onChange={v => set('appName', v)} />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Branding'}
+              {saving ? 'Savingâ€¦' : saved ? 'Saved!' : 'Save Branding'}
             </Btn>
           </div>
         </div>
@@ -1799,11 +1799,11 @@ function BrandingPanel({ settings, onSave }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// FEATURE FLAGS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// LEGACY FEATURE FLAGS MATRIX
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
+function LegacyFeatureFlagsMatrix({ flags, plans, onSaveFlags, onSavePlans }) {
   const [f, setF] = useState(flags || {});
   const [p, setP] = useState(plans || {});
   const [search, setSearch] = useState('');
@@ -1839,7 +1839,7 @@ function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
     try {
       const res = await setFeatureFlagCloud(featureId, nextVal);
       if (res.ok) {
-        toast(`Updated global switch for ${featureId} → ${nextVal ? 'ON' : 'OFF'}`, 'success');
+        toast(`Updated global switch for ${featureId} â†’ ${nextVal ? 'ON' : 'OFF'}`, 'success');
       } else {
         setF(prev => ({ ...prev, [featureId]: currentVal }));
         if (typeof FeatureAccessManager?.setLocalFlagOverride === 'function') {
@@ -1904,7 +1904,7 @@ function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* ─── Hero Overview Card ─── */}
+      {/* â”€â”€â”€ Hero Overview Card â”€â”€â”€ */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(214,0,54,0.08) 0%, rgba(20,20,30,0.95) 100%)',
         padding: '24px 28px',
@@ -1974,7 +1974,7 @@ function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
         </div>
       </div>
 
-      {/* ─── 8 Canonical Category Filter Cards ─── */}
+      {/* â”€â”€â”€ 8 Canonical Category Filter Cards â”€â”€â”€ */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <span style={{ fontSize: 12, fontWeight: 800, color: T.textMut, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
@@ -2082,7 +2082,7 @@ function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
         </div>
       </div>
 
-      {/* ─── Category Accordions & Feature Cards ─── */}
+      {/* â”€â”€â”€ Category Accordions & Feature Cards â”€â”€â”€ */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {categoriesList.map(catKey => {
           const catInfo = FEATURE_CATEGORIES[catKey];
@@ -2254,7 +2254,7 @@ function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
                                   transition: 'all 0.15s ease'
                                 }}
                               >
-                                {planId.toUpperCase()} {hasPlanAccess ? '✓' : '✗'}
+                                {planId.toUpperCase()} {hasPlanAccess ? 'âœ“' : 'âœ—'}
                               </button>
                             );
                           })}
@@ -2272,9 +2272,9 @@ function FeatureFlagsPanel({ flags, plans, onSaveFlags, onSavePlans }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAINTENANCE PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function MaintenancePanel({ settings, onSave }) {
   const [form, setForm] = useState(settings || {});
@@ -2289,7 +2289,7 @@ function MaintenancePanel({ settings, onSave }) {
     try {
       await onSave(form);
       setSaved(true);
-      toast(form.maintenanceMode ? '⚠️ Maintenance mode is now ACTIVE!' : 'Maintenance settings saved.', form.maintenanceMode ? 'warning' : 'success');
+      toast(form.maintenanceMode ? 'âš ï¸ Maintenance mode is now ACTIVE!' : 'Maintenance settings saved.', form.maintenanceMode ? 'warning' : 'success');
       setTimeout(() => setSaved(false), 2500);
     } catch (e) {
       toast('Failed to save: ' + (e.message || 'Unknown error'), 'error', 6000);
@@ -2303,7 +2303,7 @@ function MaintenancePanel({ settings, onSave }) {
       {form.maintenanceMode && (
         <div style={{ background: `${T.red}0d`, border: `1px solid ${T.red}33`, borderRadius: T.r.md, padding: '12px 16px', display: 'flex', gap: 10, alignItems: 'center' }}>
           <AlertTriangle size={15} color={T.red} />
-          <span style={{ fontSize: 13, color: T.red, fontWeight: 600 }}>Maintenance mode is ACTIVE — users will see the maintenance screen.</span>
+          <span style={{ fontSize: 13, color: T.red, fontWeight: 600 }}>Maintenance mode is ACTIVE â€” users will see the maintenance screen.</span>
         </div>
       )}
       <AdminCard title="Maintenance Mode" subtitle="Take the app offline for scheduled maintenance">
@@ -2313,7 +2313,7 @@ function MaintenancePanel({ settings, onSave }) {
             placeholder="We are performing scheduled maintenance. Please check back soon." />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Settings'}
+              {saving ? 'Savingâ€¦' : saved ? 'Saved!' : 'Save Settings'}
             </Btn>
           </div>
         </div>
@@ -2322,9 +2322,9 @@ function MaintenancePanel({ settings, onSave }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ANNOUNCEMENTS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function AnnouncementsPanel({ announcement, onSave }) {
   const [form, setForm] = useState(announcement || { title: '', message: '', active: false, type: 'info' });
@@ -2339,7 +2339,7 @@ function AnnouncementsPanel({ announcement, onSave }) {
     try {
       await onSave(form);
       setSaved(true);
-      toast(form.active ? '📢 Announcement published to all users!' : 'Announcement saved (not active).', 'success');
+      toast(form.active ? 'ðŸ“¢ Announcement published to all users!' : 'Announcement saved (not active).', 'success');
       setTimeout(() => setSaved(false), 2500);
     } catch (e) {
       toast('Failed to publish: ' + (e.message || 'Unknown error'), 'error', 6000);
@@ -2349,10 +2349,10 @@ function AnnouncementsPanel({ announcement, onSave }) {
   };
 
   const types = [
-    { value: 'info',    label: '💬 Info',     color: T.blue },
-    { value: 'success', label: '✅ Success',  color: T.green },
-    { value: 'warning', label: '⚠️ Warning',  color: T.orange },
-    { value: 'error',   label: '🚨 Critical', color: T.red },
+    { value: 'info',    label: 'ðŸ’¬ Info',     color: T.blue },
+    { value: 'success', label: 'âœ… Success',  color: T.green },
+    { value: 'warning', label: 'âš ï¸ Warning',  color: T.orange },
+    { value: 'error',   label: 'ðŸš¨ Critical', color: T.red },
   ];
   const curType = types.find(t => t.value === form.type) || types[0];
 
@@ -2378,7 +2378,7 @@ function AnnouncementsPanel({ announcement, onSave }) {
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Btn onClick={handleSave} disabled={saving} icon={saved ? <Check size={13} /> : <Save size={13} />} variant={saved ? 'success' : 'primary'}>
-              {saving ? 'Publishing…' : saved ? 'Published!' : 'Publish Announcement'}
+              {saving ? 'Publishingâ€¦' : saved ? 'Published!' : 'Publish Announcement'}
             </Btn>
           </div>
         </div>
@@ -2399,9 +2399,9 @@ function AnnouncementsPanel({ announcement, onSave }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // REMOTE CONFIG PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function RemoteConfigPanel({ config, onSave }) {
   const [pairs, setPairs] = useState([]);
@@ -2434,7 +2434,7 @@ function RemoteConfigPanel({ config, onSave }) {
         right={
           <div style={{ display: 'flex', gap: 8 }}>
             <Btn variant="ghost" size="sm" icon={<Plus size={12} />} onClick={() => setPairs(p => [...p, { k: '', v: '' }])}>Add Key</Btn>
-            <Btn size="sm" onClick={handleSave} disabled={saving} icon={saved ? <Check size={12} /> : <Save size={12} />} variant={saved ? 'success' : 'primary'}>{saving ? 'Saving…' : saved ? 'Saved!' : 'Save'}</Btn>
+            <Btn size="sm" onClick={handleSave} disabled={saving} icon={saved ? <Check size={12} /> : <Save size={12} />} variant={saved ? 'success' : 'primary'}>{saving ? 'Savingâ€¦' : saved ? 'Saved!' : 'Save'}</Btn>
           </div>
         }
       >
@@ -2463,9 +2463,9 @@ function RemoteConfigPanel({ config, onSave }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ANALYTICS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function AnalyticsPanel({ chartData, stats }) {
   const si = DS.getStorageInfo();
@@ -2539,9 +2539,9 @@ function AnalyticsPanel({ chartData, stats }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // REPORTS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function ReportsPanel({ history }) {
   const [exporting, setExporting] = useState(false);
@@ -2611,8 +2611,8 @@ function ReportsPanel({ history }) {
                 {(history || []).slice(0, 50).map((item, i) => (
                   <tr key={i} style={{ borderBottom: `1px solid ${T.border}` }}>
                     <td style={{ padding: '9px 20px' }}><Badge color={item.barcodeType ? T.green : T.purple}>{item.barcodeType ? 'Barcode' : 'QR'}</Badge></td>
-                    <td style={{ padding: '9px 20px', fontSize: 12, color: T.text, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{safeStr(item.qrData) || safeStr(item.data) || '—'}</td>
-                    <td style={{ padding: '9px 20px', fontSize: 11, color: T.textSec }}>{item.qrType || item.barcodeType || '—'}</td>
+                    <td style={{ padding: '9px 20px', fontSize: 12, color: T.text, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{safeStr(item.qrData) || safeStr(item.data) || 'â€”'}</td>
+                    <td style={{ padding: '9px 20px', fontSize: 11, color: T.textSec }}>{item.qrType || item.barcodeType || 'â€”'}</td>
                     <td style={{ padding: '9px 20px', fontSize: 11, color: T.textSec, whiteSpace: 'nowrap' }}>{fmtDate(item.timestamp)}</td>
                   </tr>
                 ))}
@@ -2625,9 +2625,9 @@ function ReportsPanel({ history }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ACTIVITY LOGS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function ActivityLogsPanel({ history }) {
   const [search, setSearch] = useState('');
@@ -2663,7 +2663,7 @@ function ActivityLogsPanel({ history }) {
                   {safeStr(item.qrData) || safeStr(item.data) || item.qrType || 'Unknown'}
                 </div>
                 <div style={{ fontSize: 11, color: T.textSec, marginTop: 2 }}>
-                  {item.qrType || item.barcodeType || 'General'} · {timeAgo(item.timestamp)}
+                  {item.qrType || item.barcodeType || 'General'} Â· {timeAgo(item.timestamp)}
                 </div>
               </div>
               <Badge color={item.barcodeType ? T.green : T.purple}>{item.barcodeType ? 'Barcode' : 'QR'}</Badge>
@@ -2675,9 +2675,9 @@ function ActivityLogsPanel({ history }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // BACKUPS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function BackupsPanel() {
   const [exporting, setExporting] = useState(false);
@@ -2777,16 +2777,16 @@ function BackupsPanel() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SYSTEM HEALTH PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function SystemHealthPanel({ stats }) {
   const si = DS.getStorageInfo();
   const checks = [
     { label: 'localStorage Available', pass: typeof localStorage !== 'undefined',               detail: `${si.used} used` },
     { label: 'Service Worker',         pass: 'serviceWorker' in navigator,                      detail: 'PWA & offline support' },
-    { label: 'Secure Context',         pass: window.isSecureContext,                            detail: window.isSecureContext ? 'HTTPS confirmed' : 'HTTP — insecure' },
+    { label: 'Secure Context',         pass: window.isSecureContext,                            detail: window.isSecureContext ? 'HTTPS confirmed' : 'HTTP â€” insecure' },
     { label: 'PWA Manifest',           pass: !!document.querySelector('link[rel="manifest"]'), detail: 'manifest.json linked' },
     { label: 'Canvas API',             pass: !!document.createElement('canvas').getContext,     detail: 'Required for QR generation' },
     { label: 'Clipboard API',          pass: !!navigator.clipboard,                             detail: 'Required for copy feature' },
@@ -2821,8 +2821,8 @@ function SystemHealthPanel({ stats }) {
           {[
             { label: 'Display Mode', value: window.matchMedia('(display-mode: standalone)').matches ? 'PWA App' : 'Browser' },
             { label: 'Language', value: navigator.language },
-            { label: 'Screen', value: `${window.screen.width}×${window.screen.height}` },
-            { label: 'Viewport', value: `${window.innerWidth}×${window.innerHeight}` },
+            { label: 'Screen', value: `${window.screen.width}Ã—${window.screen.height}` },
+            { label: 'Viewport', value: `${window.innerWidth}Ã—${window.innerHeight}` },
             { label: 'Platform', value: navigator.platform || 'Unknown' },
             { label: 'Online', value: navigator.onLine ? 'Yes' : 'No' },
           ].map(({ label, value }) => (
@@ -2837,9 +2837,9 @@ function SystemHealthPanel({ stats }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // AUDIT LOGS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function AuditLogsPanel({ log }) {
   const actionColors = {
@@ -2859,7 +2859,7 @@ function AuditLogsPanel({ log }) {
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: actionColors[entry.action] || T.textSec, flexShrink: 0, marginTop: 6 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: T.text, fontFamily: 'monospace' }}>{entry.action}</div>
-                <div style={{ fontSize: 11, color: T.textSec, marginTop: 1 }}>By {entry.actor} · {timeAgo(entry.ts)}</div>
+                <div style={{ fontSize: 11, color: T.textSec, marginTop: 1 }}>By {entry.actor} Â· {timeAgo(entry.ts)}</div>
               </div>
               <span style={{ fontSize: 10, color: T.textMut, whiteSpace: 'nowrap' }}>{fmtDate(entry.ts)}</span>
             </div>
@@ -2870,9 +2870,9 @@ function AuditLogsPanel({ log }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // QR & BARCODE PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function QRBarcodePanel({ stats, history }) {
   const byType = (arr, key) => {
@@ -2936,10 +2936,10 @@ function QRBarcodePanel({ stats, history }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ADMIN USERS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function AdminUsersPanel({ currentUser }) {
   return (
@@ -2965,7 +2965,7 @@ function AdminUsersPanel({ currentUser }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${T.border}` }}>
             <div>
               <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>User ID (UID)</div>
-              <div style={{ fontSize: 11, color: T.textSec, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser?.uid || '—'}</div>
+              <div style={{ fontSize: 11, color: T.textSec, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser?.uid || 'â€”'}</div>
             </div>
             <div>
               <div style={{ fontSize: 10, color: T.textMut, fontWeight: 700, textTransform: 'uppercase' }}>Provider</div>
@@ -2986,9 +2986,9 @@ function AdminUsersPanel({ currentUser }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ROLES & PERMISSIONS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function RolesPanel() {
   const roles = [
@@ -3017,9 +3017,9 @@ function RolesPanel() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SECURITY PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function SecurityPanel({ currentUser }) {
   const provider = currentUser?.providerData?.[0]?.providerId || 'google.com';
@@ -3047,9 +3047,9 @@ function SecurityPanel({ currentUser }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // INTEGRATIONS PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function IntegrationsPanel() {
   return (
@@ -3104,9 +3104,9 @@ function IntegrationsPanel() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DEVELOPER PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function DeveloperPanel({ currentUser }) {
   const [copied, setCopied] = useState('');
@@ -3159,9 +3159,9 @@ function DeveloperPanel({ currentUser }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SIMPLE FUNCTIONAL PANELS
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function UsersPanel() {
   const toast = useToast();
@@ -3308,7 +3308,7 @@ function UsersPanel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* ─── Stat Cards ─── */}
+      {/* â”€â”€â”€ Stat Cards â”€â”€â”€ */}
       <div className="ad-stat-grid">
         <StatCard icon={Users} label="Total Users" value={appUsers.length} color={T.purple} trendLabel="registered accounts" />
         <StatCard icon={Activity} label="Active (7d)" value={activeCount} color={T.green} trendLabel="last 7 days" />
@@ -3316,7 +3316,7 @@ function UsersPanel() {
         <StatCard icon={TrendingUp} label="New (30d)" value={newCount} color={T.blue} trendLabel="last 30 days" />
       </div>
 
-      {/* ─── Users Table Card ─── */}
+      {/* â”€â”€â”€ Users Table Card â”€â”€â”€ */}
       <AdminCard
         title={`Registered Users (${filteredUsers.length})`}
         subtitle="All authenticated users tracked via Firebase Auth"
@@ -3410,7 +3410,7 @@ function UsersPanel() {
                             {u.displayName || u.email?.split('@')[0] || 'User'}
                           </div>
                           <div style={{ fontSize: 11, color: T.textSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 240, fontFamily: 'monospace' }}>
-                            {u.email || '—'}
+                            {u.email || 'â€”'}
                           </div>
                         </div>
                       </div>
@@ -3456,10 +3456,10 @@ function UsersPanel() {
         )}
       </AdminCard>
 
-      {/* ─── Anonymous Visitors Section ─── */}
+      {/* â”€â”€â”€ Anonymous Visitors Section â”€â”€â”€ */}
       <AdminCard
         title={`Anonymous Visitors (${visitors.length})`}
-        subtitle="Devices that opened the app — includes unregistered users"
+        subtitle="Devices that opened the app â€” includes unregistered users"
         right={
           <button onClick={() => setShowVisitors(v => !v)} style={{
             background: 'none', border: `1px solid ${T.border}`, borderRadius: T.r.md,
@@ -3590,7 +3590,7 @@ function UsersPanel() {
         )}
       </AdminCard>
 
-      {/* ─── User Detail Modal ─── */}
+      {/* â”€â”€â”€ User Detail Modal â”€â”€â”€ */}
       {selectedUser && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
           onClick={() => setSelectedUser(null)}
@@ -3620,7 +3620,7 @@ function UsersPanel() {
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 18, fontWeight: 900, color: T.text }}>{selectedUser.displayName || 'Anonymous'}</div>
-                  <div style={{ fontSize: 13, color: T.textSec, fontFamily: 'monospace', marginTop: 2 }}>{selectedUser.email || '—'}</div>
+                  <div style={{ fontSize: 13, color: T.textSec, fontFamily: 'monospace', marginTop: 2 }}>{selectedUser.email || 'â€”'}</div>
                   <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                     <Badge color={selectedUser.provider === 'google' ? '#4285F4' : T.purple}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block', flexShrink: 0 }} />
@@ -3639,7 +3639,7 @@ function UsersPanel() {
                   { icon: Calendar, label: 'Joined', value: fmtDate(selectedUser.createdAt), color: T.blue },
                   { icon: Clock, label: 'Last Active', value: timeAgo(selectedUser.lastActiveAt), color: T.green },
                   { icon: Eye, label: 'Total Visits', value: selectedUser.visitCount || 1, color: T.purple },
-                  { icon: Globe, label: 'Language', value: selectedUser.deviceInfo?.language || '—', color: T.orange },
+                  { icon: Globe, label: 'Language', value: selectedUser.deviceInfo?.language || 'â€”', color: T.orange },
                 ].map(item => (
                   <div key={item.label} style={{ background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: T.r.md, padding: 14 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -3663,12 +3663,12 @@ function UsersPanel() {
                 ) : (
                   <div style={{ display: 'flex', gap: 20 }}>
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: 24, fontWeight: 900, color: T.purple }}>{userStats?.historyCount ?? '—'}</div>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: T.purple }}>{userStats?.historyCount ?? 'â€”'}</div>
                       <div style={{ fontSize: 10, color: T.textSec, marginTop: 2 }}>QR Codes Created</div>
                     </div>
                     <div style={{ width: 1, background: T.border }} />
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: 24, fontWeight: 900, color: T.blue }}>{userStats?.savedCount ?? '—'}</div>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: T.blue }}>{userStats?.savedCount ?? 'â€”'}</div>
                       <div style={{ fontSize: 10, color: T.textSec, marginTop: 2 }}>Saved Items</div>
                     </div>
                   </div>
@@ -3683,9 +3683,9 @@ function UsersPanel() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {[
-                      { l: 'Platform', v: selectedUser.deviceInfo.platform || '—' },
-                      { l: 'Screen', v: selectedUser.deviceInfo.screenWidth ? `${selectedUser.deviceInfo.screenWidth} × ${selectedUser.deviceInfo.screenHeight}` : '—' },
-                      { l: 'User Agent', v: (selectedUser.deviceInfo.userAgent || '—').slice(0, 80) + (selectedUser.deviceInfo.userAgent?.length > 80 ? '...' : '') },
+                      { l: 'Platform', v: selectedUser.deviceInfo.platform || 'â€”' },
+                      { l: 'Screen', v: selectedUser.deviceInfo.screenWidth ? `${selectedUser.deviceInfo.screenWidth} Ã— ${selectedUser.deviceInfo.screenHeight}` : 'â€”' },
+                      { l: 'User Agent', v: (selectedUser.deviceInfo.userAgent || 'â€”').slice(0, 80) + (selectedUser.deviceInfo.userAgent?.length > 80 ? '...' : '') },
                     ].map(d => (
                       <div key={d.l} style={{ display: 'flex', gap: 10 }}>
                         <span style={{ fontSize: 11, fontWeight: 700, color: T.textSec, minWidth: 80 }}>{d.l}</span>
@@ -3750,9 +3750,9 @@ function UsersPanel() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // REVENUE & MONETIZATION PANEL
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function RevenuePanel() {
   const [data, setData] = useState(null);
@@ -3902,7 +3902,7 @@ function RevenuePanel() {
             <AdminCard title="Monetization Benchmarks" subtitle="SaaS conversion metrics">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ padding: 12, background: T.bgEl, borderRadius: T.r.md, border: `1px solid ${T.border}` }}>
-                  <div style={{ fontSize: 11, color: T.textSec }}>Conversion Rate (Free → Pro)</div>
+                  <div style={{ fontSize: 11, color: T.textSec }}>Conversion Rate (Free â†’ Pro)</div>
                   <div style={{ fontSize: 18, fontWeight: 800, color: T.accent, marginTop: 2 }}>{data?.conversionRate}%</div>
                   <div style={{ fontSize: 10, color: T.textMut, marginTop: 2 }}>Target: 5.0% or higher</div>
                 </div>
@@ -4131,7 +4131,7 @@ function SubscriptionsPanel({ subscribers: initSubs }) {
         ))}
       </div>
 
-      {/* ═══ TAB 1: SUBSCRIPTION PLANS (4 CANONICAL) ═══ */}
+      {/* â•â•â• TAB 1: SUBSCRIPTION PLANS (4 CANONICAL) â•â•â• */}
       {activeTab === 'plans' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.5 }}>
@@ -4174,7 +4174,7 @@ function SubscriptionsPanel({ subscribers: initSubs }) {
         </div>
       )}
 
-      {/* ═══ TAB 2: GLOBAL FEATURE MANAGEMENT (78 CANONICAL FEATURES) ═══ */}
+      {/* â•â•â• TAB 2: GLOBAL FEATURE MANAGEMENT (78 CANONICAL FEATURES) â•â•â• */}
       {activeTab === 'matrix' && (
         <AdminCard title={`Canonical Feature Registry (${FEATURE_REGISTRY.length} Features)`} subtitle="Toggle global enable/disable flags for application features">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 12 }}>
@@ -4213,7 +4213,7 @@ function SubscriptionsPanel({ subscribers: initSubs }) {
         </AdminCard>
       )}
 
-      {/* ═══ TAB 3: SUBSCRIBERS ═══ */}
+      {/* â•â•â• TAB 3: SUBSCRIBERS â•â•â• */}
       {activeTab === 'subscribers' && (
         <AdminCard title="Active Subscribers" subtitle="User subscription state tracked in user_subscriptions">
           <div style={{ padding: 16, textAlign: 'center', color: T.textSec, fontSize: 13 }}>
@@ -4222,7 +4222,7 @@ function SubscriptionsPanel({ subscribers: initSubs }) {
         </AdminCard>
       )}
 
-      {/* ═══ MANAGE FEATURES MODAL ═══ */}
+      {/* â•â•â• MANAGE FEATURES MODAL â•â•â• */}
       {managingPlanId && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -4239,7 +4239,7 @@ function SubscriptionsPanel({ subscribers: initSubs }) {
             <div style={{ padding: '20px 24px', borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: T.text, textTransform: 'capitalize' }}>
-                  Manage Features — {managingPlanId} Plan
+                  Manage Features â€” {managingPlanId} Plan
                 </h3>
                 <p style={{ margin: '4px 0 0', fontSize: 12, color: T.textSec }}>
                   Select which canonical features are granted to users on the <strong>{managingPlanId}</strong> plan ({modalFeatures.length} selected).
@@ -4382,13 +4382,13 @@ function SupportPanel() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN ADMIN PANEL — ROOT COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// MAIN ADMIN PANEL â€” ROOT COMPONENT
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// ─── Wrap the entire AdminPanel in the ToastProvider ──────────────────────
+// â”€â”€â”€ Wrap the entire AdminPanel in the ToastProvider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AdminPanelInner() {
-  // ─── Centralized auth from authService (custom claim + owner email fallback) ─
+  // â”€â”€â”€ Centralized auth from authService (custom claim + owner email fallback) â”€
   const { user: currentUser, isSuperAdmin, loading: authLoading, needsBootstrap, refreshSession, bootstrap } = useAuthState();
   const [bootstrapState, setBootstrapState] = useState({ loading: false, done: false, error: null });
 
@@ -4431,7 +4431,7 @@ function AdminPanelInner() {
   const [appUsers, setAppUsers]                   = useState([]);
   const [loading, setLoading]               = useState(true);
 
-  // Bootstrap handler — mints the super_admin custom claim for the owner
+  // Bootstrap handler â€” mints the super_admin custom claim for the owner
   const handleBootstrap = async () => {
     setBootstrapState({ loading: true, done: false, error: null });
     try {
@@ -4447,7 +4447,7 @@ function AdminPanelInner() {
   };
 
   useEffect(() => {
-    // UI visibility guard — Real security enforcement is independently handled by Firestore Rules & Cloud Functions
+    // UI visibility guard â€” Real security enforcement is independently handled by Firestore Rules & Cloud Functions
     if (authLoading || !currentUser || !isSuperAdmin) return;
 
     async function init() {
@@ -4532,12 +4532,12 @@ function AdminPanelInner() {
             </div>
           )}
 
-          {/* Bootstrap button — only visible to designated owner who hasn't minted claims yet */}
+          {/* Bootstrap button â€” only visible to designated owner who hasn't minted claims yet */}
           {currentUser && isOwnerEmail && (
             <div style={{ width: '100%' }}>
               {bootstrapState.done ? (
                 <div style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 12, padding: '12px 16px', color: '#22C55E', fontSize: 13, fontWeight: 700 }}>
-                  ✓ Super Admin role activated! Reloading dashboard...
+                  âœ“ Super Admin role activated! Reloading dashboard...
                 </div>
               ) : (
                 <>
@@ -4936,7 +4936,7 @@ function AdminPanelInner() {
   );
 }
 
-// ─── Default export wraps everything in the ToastProvider ────────────────────
+// â”€â”€â”€ Default export wraps everything in the ToastProvider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function AdminPanel() {
   return (
     <ToastProvider>
