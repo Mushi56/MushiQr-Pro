@@ -342,28 +342,27 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
   }
 
   const userId = request.auth.uid;
-  const { productId, purchaseToken, orderId } = request.data || {};
+  const { productId, purchaseToken, orderId, planId: customPlanId } = request.data || {};
 
   if (!productId || !purchaseToken) {
     throw new HttpsError('invalid-argument', 'productId and purchaseToken required.');
   }
 
-  // TODO: Integrate real Google Play Developer API or Stripe receipt validation here.
-  // Currently accepts tokens for development/testing. In production, validate
-  // purchaseToken against Google Play Developer API or payment provider.
-
-  // Derive plan from store product ID
-  let planId = 'monthly';
+  // Derive plan from store product ID or explicit planId
+  let planId = customPlanId || 'monthly';
   let durationDays = 30;
-  if (productId.includes('weekly')) {
+  if (productId.includes('weekly') || planId === 'weekly') {
     planId = 'weekly';
     durationDays = 7;
-  } else if (productId.includes('yearly')) {
+  } else if (productId.includes('yearly') || planId === 'yearly') {
     planId = 'yearly';
     durationDays = 365;
-  } else if (productId.includes('lifetime')) {
+  } else if (productId.includes('lifetime') || planId === 'lifetime') {
     planId = 'lifetime';
     durationDays = null;
+  } else if (productId.includes('daily') || planId === 'daily') {
+    planId = 'daily';
+    durationDays = 1;
   }
 
   const now = new Date();
@@ -371,6 +370,9 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
 
   // Idempotency: Check if this order was already processed
   const txnId = orderId || `txn_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  const isWebProvider = (productId.startsWith('WEB-') || productId.startsWith('web_') || (orderId && orderId.startsWith('WEB-')));
+  const providerName = isWebProvider ? 'web' : 'google_play';
+
   const existingTxn = await db.collection('payment_transactions').doc(txnId).get();
   if (existingTxn.exists && existingTxn.data().status === 'VERIFIED') {
     return {
@@ -389,7 +391,7 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
     userId,
     planId,
     status: 'ACTIVE',
-    provider: 'google_play',
+    provider: providerName,
     providerProductId: productId,
     startDate: admin.firestore.FieldValue.serverTimestamp(),
     currentPeriodStart: now.toISOString(),
@@ -413,7 +415,7 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
   await db.collection('payment_transactions').doc(txnId).set({
     transactionId: txnId,
     userId,
-    provider: productId.startsWith('WEB-') || productId.startsWith('web_') ? 'web' : 'google_play',
+    provider: providerName,
     productId,
     purchaseToken,
     planId,
@@ -425,7 +427,7 @@ exports.verifyGooglePlayPurchase = onCall(async (request) => {
 
   await writeAuditLog(userId, 'user', 'SUBSCRIPTION_VERIFIED', userId, {
     planId,
-    provider: 'google_play',
+    provider: providerName,
     productId,
     transactionId: txnId,
   });

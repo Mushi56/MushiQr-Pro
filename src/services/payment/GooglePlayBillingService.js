@@ -33,6 +33,7 @@ export const GooglePlayBillingService = {
       const verifyFn = httpsCallable(functions, 'verifyGooglePlayPurchase');
       const res = await verifyFn({
         productId,
+        planId: plan.id,
         purchaseToken,
         orderId,
       });
@@ -40,18 +41,19 @@ export const GooglePlayBillingService = {
       const serverData = res.data;
 
       // Update local entitlement state after authoritative server verification
-      const durationDays = plan.id === 'weekly' ? 7 : plan.id === 'yearly' ? 365 : 30;
+      const durationDays = plan.id === 'weekly' ? 7 : plan.id === 'yearly' ? 365 : plan.id === 'daily' ? 1 : 30;
       const subData = {
         userId: currentUser.uid,
         planId: serverData?.planId || plan.id,
         status: serverData?.status || 'ACTIVE',
         provider: 'google_play',
         isPro: true,
-        expiryDate: serverData?.expiryDate || new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString(),
+        expiryDate: serverData?.expiryDate || (plan.id === 'lifetime' ? null : new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString()),
         lastVerifiedClientAt: Date.now(),
       };
 
       try {
+        localStorage.setItem('mushiqr_cached_user_subscription', JSON.stringify(subData));
         localStorage.setItem('mushi_qr_pro_user_subscription', JSON.stringify(subData));
         FeatureAccessManager.userSubscription = subData;
         FeatureAccessManager.notifyListeners();

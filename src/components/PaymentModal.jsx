@@ -3,30 +3,57 @@
 // Allows users to select their payment method (Google Play, Credit/Debit Card, Stripe/Web, PayPal)
 // and complete secure transactions.
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, Shield, Lock, CheckCircle2, ArrowRight, 
-  X, AlertCircle, Sparkles, Smartphone, Globe
+  X, AlertCircle, Sparkles, Smartphone, Globe, User, Zap, RefreshCw
 } from 'lucide-react';
 import { formatCurrencyPrice } from '../utils/currency';
 import { PaymentProvider } from '../services/payment/PaymentProvider';
+import { auth, googleProvider } from '../services/firebase';
+import { onAuthStateChanged, signInWithPopup } from 'firebase/auth';
 
 export default function PaymentModal({ plan, currency, onClose, onSuccess }) {
+  const [user, setUser] = useState(auth.currentUser);
   const [method, setMethod] = useState(PaymentProvider.isNativeAndroid() ? 'gplay' : 'card');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
   const [cardName, setCardName] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    return onAuthStateChanged(auth, u => setUser(u));
+  }, []);
 
   if (!plan) return null;
 
   const formattedPrice = formatCurrencyPrice(plan.price, currency);
 
+  const handleSignInGoogle = async () => {
+    setSigningIn(true);
+    setError(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      console.error('[PaymentModal] Sign in error:', err);
+      setError('Google Sign-In was cancelled or failed. Please try again.');
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
   const handlePay = async (e) => {
     e.preventDefault();
     setError(null);
+
+    if (!user) {
+      setError('Please sign in with Google or Email above to link your subscription.');
+      return;
+    }
+
     setProcessing(true);
 
     try {
@@ -118,6 +145,63 @@ export default function PaymentModal({ plan, currency, onClose, onSuccess }) {
             }}>
               <AlertCircle size={15} style={{ flexShrink: 0 }} />
               <span>{error}</span>
+            </div>
+          )}
+
+          {/* User Account Linking Banner */}
+          {!user ? (
+            <div style={{
+              background: 'rgba(214,0,54,0.08)',
+              border: '1px solid rgba(214,0,54,0.25)',
+              borderRadius: 12,
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#f0f0f8', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <User size={14} color="#D60036" /> Sign in to Link Your Subscription
+              </div>
+              <div style={{ fontSize: 11, color: '#8b8fa8', lineHeight: 1.4 }}>
+                Link your purchase to your account so you can restore Pro features across any browser or device.
+              </div>
+              <button
+                type="button"
+                onClick={handleSignInGoogle}
+                disabled={signingIn}
+                style={{
+                  background: 'linear-gradient(135deg, #D60036, #990024)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '9px 14px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: signingIn ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6
+                }}
+              >
+                {signingIn ? <RefreshCw size={13} className="animate-spin" /> : <Zap size={13} />}
+                {signingIn ? 'Signing in with Google...' : 'Sign in with Google'}
+              </button>
+            </div>
+          ) : (
+            <div style={{
+              background: 'rgba(16,185,129,0.08)',
+              border: '1px solid rgba(16,185,129,0.2)',
+              borderRadius: 10,
+              padding: '8px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8
+            }}>
+              <CheckCircle2 size={15} color="#10b981" />
+              <div style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>
+                Subscription will be linked to: <span style={{ color: '#fff' }}>{user.email}</span>
+              </div>
             </div>
           )}
 
