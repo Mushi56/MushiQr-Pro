@@ -1,15 +1,27 @@
 // src/components/admin/FeatureFlagsPanel.jsx
-// â”€â”€â”€ Mobile-First Feature Flags Management System â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Matches the provided reference mockup across 320px mobile up to 4K desktop.
+// ─────────────────────────────────────────────────────────────────────────────
+// Mobile-First Feature Flags & App Capabilities Management System
+// Controls all 140+ granular features across the 8 pure core categories & subcategories
+// plus production rollout flags in the exact same sleek, modern mobile-first UI/UX.
+// ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Flag, Plus, Search, Filter, ChevronRight, ArrowLeft, MoreVertical,
   CheckCircle2, XCircle, AlertCircle, Clock, Copy, Check, Trash2, Edit3,
   Sliders, Globe, Users, Shield, Crown, BarChart2, Layers, Palette,
   Sparkles, Cpu, Download, Cloud, ScanLine, MapPin, FlaskConical,
-  TrendingUp, RefreshCw, X, Radio
+  TrendingUp, RefreshCw, X, Radio, QrCode, Barcode, LayoutDashboard,
+  Bookmark, ClipboardList, Settings, Package, Zap, Save, CheckSquare, Square
 } from 'lucide-react';
+import {
+  FEATURE_REGISTRY,
+  FEATURE_CATEGORIES,
+  CATEGORY_SUBCATEGORIES,
+  CANONICAL_PLANS,
+  DEFAULT_FREE_FEATURES,
+  DEFAULT_PAID_FEATURES
+} from '../services/FeatureAccessManager';
 import {
   subscribeFeatureFlags,
   toggleFeatureFlag,
@@ -19,58 +31,70 @@ import {
   FLAG_CATEGORIES,
   ENVIRONMENTS,
   TARGETING_OPTIONS,
-  getTargetingLabel
+  getTargetingLabel,
+  INITIAL_FEATURE_FLAGS
 } from '../services/featureFlagsService';
+import { setFeatureFlagCloud, setPlanFeaturesCloud } from '../services/adminDataService';
+import { db } from '../services/firebase';
+import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { useAdminTheme } from './AdminUIKit';
-import FeatureManagementPanel from './FeatureRegistry';
 
-// Map icon names to Lucide icons
-const ICON_MAP = {
-  Crown: Crown,
-  Grid: BarChart2,
-  Barcode: ScanLine,
-  Layers: Layers,
-  Sparkles: Sparkles,
-  Palette: Palette,
-  Download: Download,
-  Cloud: Cloud,
-  Cpu: Cpu,
-  ScanLine: ScanLine,
-  Shield: Shield,
-  MapPin: MapPin,
-  Flag: Flag,
-  FlaskConical: FlaskConical,
-  CheckCircle: CheckCircle2
+// Category metadata with icons & brand colors
+const CATEGORY_META = {
+  ALL:               { id: 'ALL',               name: 'All Features',       icon: Sliders,          color: '#FF4D9D' },
+  QR_GENERATOR:      { id: 'QR_GENERATOR',      name: 'QR Generator',       icon: QrCode,           color: '#D60036' },
+  BARCODE_GENERATOR: { id: 'BARCODE_GENERATOR', name: 'Barcode Generator',  icon: Barcode,          color: '#3B82F6' },
+  BULK_GENERATOR:    { id: 'BULK_GENERATOR',    name: 'Bulk Generation',    icon: Layers,           color: '#8B5CF6' },
+  SCANNER:           { id: 'SCANNER',           name: 'Scanner',            icon: ScanLine,         color: '#10B981' },
+  HOME:              { id: 'HOME',              name: 'Home Screen',        icon: LayoutDashboard,  color: '#F59E0B' },
+  SAVED:             { id: 'SAVED',             name: 'Saved',              icon: Bookmark,         color: '#EC4899' },
+  HISTORY:           { id: 'HISTORY',           name: 'History',            icon: ClipboardList,    color: '#06B6D4' },
+  SETTINGS:          { id: 'SETTINGS',          name: 'Settings',           icon: Settings,         color: '#64748B' },
+  ROLLOUT:           { id: 'ROLLOUT',           name: 'Rollout Flags',      icon: Flag,             color: '#7B61FF' },
+};
+
+const PLAN_COLORS = {
+  free:    '#8B8FA8',
+  weekly:  '#8B5CF6',
+  monthly: '#F59E0B',
+  yearly:  '#D60036'
+};
+
+const PLAN_LABELS = {
+  free:    'Free Tier',
+  weekly:  'Weekly Pro',
+  monthly: 'Monthly Pro',
+  yearly:  'Yearly Pro'
 };
 
 export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const theme = useAdminTheme();
   const isDark = propIsDark !== undefined ? propIsDark : (theme?.isDark ?? false);
 
-  // Tab State: 'canonical' (140+ Granular Features across 8 Categories) | 'rollout' (Rollout Flags)
-  const [mainTab, setMainTab] = useState('canonical');
-
-  // States
-  const [flags, setFlags] = useState([]);
+  // ── States ─────────────────────────────────────────────────────────────
+  const [liveFlagsMap, setLiveFlagsMap] = useState({});
+  const [customFlags, setCustomFlags] = useState([]);
+  const [livePlans, setLivePlans] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeMode, setActiveMode] = useState('list'); // 'list' | 'details' | 'create' | 'edit' | 'stats'
-  const [selectedFlag, setSelectedFlag] = useState(null);
+  const [activeMode, setActiveMode] = useState('list'); // 'list' | 'details' | 'create' | 'edit'
+  const [selectedFeature, setSelectedFeature] = useState(null);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'enabled' | 'disabled'
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('ALL');
+  const [planFilter, setPlanFilter] = useState('all'); // 'all' | 'free' | 'weekly' | 'monthly' | 'yearly'
   const [envFilter, setEnvFilter] = useState('all');
-  const [targetingFilter, setTargetingFilter] = useState('all');
 
-  // Form State (Create / Edit)
+  // Create / Edit Form State
   const [formData, setFormData] = useState({
     name: '',
     key: '',
     description: '',
-    category: 'Core Feature',
+    category: 'QR_GENERATOR',
+    subcategory: 'General',
     environment: 'Production',
     enabled: true,
     targeting: 'all',
@@ -83,108 +107,232 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const [copiedKey, setCopiedKey] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+  const [savingPlanId, setSavingPlanId] = useState(null);
 
-  // â”€â”€ Real-time Firestore Subscription â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Real-time Firestore Subscriptions ──────────────────────────────────
   useEffect(() => {
     setLoading(true);
-    const unsubscribe = subscribeFeatureFlags(
-      (data) => {
-        setFlags(data);
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        setError(err?.message || 'Failed to load feature flags.');
-        setLoading(false);
+
+    // 1. Listen to global_config/featureFlags map
+    const unsubGlobal = onSnapshot(doc(db, 'global_config', 'featureFlags'), snap => {
+      if (snap.exists()) {
+        setLiveFlagsMap(snap.data() || {});
       }
-    );
-    return () => unsubscribe && unsubscribe();
+      setLoading(false);
+    }, () => setLoading(false));
+
+    // 2. Listen to standalone featureFlags collection (custom flags & rollouts)
+    const unsubCollection = subscribeFeatureFlags(data => {
+      setCustomFlags(data || []);
+      setLoading(false);
+    }, () => setLoading(false));
+
+    // 3. Listen to subscription_plans to observe active plan entitlements
+    const unsubPlans = onSnapshot(collection(db, 'subscription_plans'), colSnap => {
+      const plans = {};
+      colSnap.forEach(d => { plans[d.id] = d.data(); });
+      setLivePlans(plans);
+    }, () => {});
+
+    return () => {
+      unsubGlobal?.();
+      unsubCollection?.();
+      unsubPlans?.();
+    };
   }, []);
 
-  // Show temporary toast helper
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // â”€â”€ Computed Statistics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const stats = useMemo(() => {
-    const total = flags.length;
-    const enabled = flags.filter(f => f.enabled).length;
-    const disabled = total - enabled;
-    const targeted = flags.filter(f => f.targeting && f.targeting !== 'all').length;
-    const enabledPct = total > 0 ? ((enabled / total) * 100).toFixed(1) : '0.0';
-    const disabledPct = total > 0 ? ((disabled / total) * 100).toFixed(1) : '0.0';
-    const targetedPct = total > 0 ? ((targeted / total) * 100).toFixed(1) : '0.0';
+  // ── Unified 140+ Features List ─────────────────────────────────────────
+  const allFeatures = useMemo(() => {
+    // 1. Standard canonical registry features (140+ items across 8 categories)
+    const registryItems = FEATURE_REGISTRY.map(f => {
+      const isEnabled = liveFlagsMap[f.featureId] !== undefined 
+        ? Boolean(liveFlagsMap[f.featureId]) 
+        : Boolean(f.defaultEnabled);
 
-    return { total, enabled, disabled, targeted, enabledPct, disabledPct, targetedPct };
-  }, [flags]);
+      const catMeta = CATEGORY_META[f.category] || CATEGORY_META.SETTINGS;
 
-  // â”€â”€ Filtered Flags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const filteredFlags = useMemo(() => {
-    return flags.filter(flag => {
-      // Search
-      const query = searchQuery.trim().toLowerCase();
-      if (query) {
-        const matchName = flag.name?.toLowerCase().includes(query);
-        const matchKey = flag.key?.toLowerCase().includes(query);
-        const matchDesc = flag.description?.toLowerCase().includes(query);
-        if (!matchName && !matchKey && !matchDesc) return false;
+      return {
+        id: f.featureId,
+        key: f.featureId,
+        name: f.displayName,
+        description: f.description || '',
+        category: f.category,
+        categoryName: catMeta.name,
+        subcategory: f.subcategory || 'General',
+        environment: 'Production',
+        enabled: isEnabled,
+        icon: catMeta.icon,
+        iconColor: catMeta.color,
+        iconBg: `${catMeta.color}18`,
+        defaultPlan: f.defaultPlan || 'free',
+        isCanonical: true,
+        targeting: 'all',
+        rolloutPercentage: 100,
+        requiresAuthentication: f.requiresAuthentication,
+        updatedAt: liveFlagsMap._updatedAt || null,
+      };
+    });
+
+    // 2. Additional custom & rollout flags from collection
+    const rolloutItems = customFlags
+      .filter(cf => !FEATURE_REGISTRY.some(r => r.featureId === (cf.key || cf.id)))
+      .map(cf => {
+        const isEnabled = cf.enabled !== undefined 
+          ? Boolean(cf.enabled) 
+          : (liveFlagsMap[cf.key] !== undefined ? Boolean(liveFlagsMap[cf.key]) : true);
+
+        return {
+          id: cf.id,
+          key: cf.key || cf.id,
+          name: cf.name || cf.id,
+          description: cf.description || '',
+          category: 'ROLLOUT',
+          categoryName: 'Rollout Flags',
+          subcategory: cf.category || 'Production',
+          environment: cf.environment || 'Production',
+          enabled: isEnabled,
+          icon: Flag,
+          iconColor: '#7B61FF',
+          iconBg: 'rgba(123, 97, 255, 0.14)',
+          defaultPlan: 'all',
+          isCanonical: false,
+          targeting: cf.targeting || 'all',
+          rolloutPercentage: cf.rolloutPercentage ?? 100,
+          updatedAt: cf.updatedAt || cf.createdAt,
+        };
+      });
+
+    return [...registryItems, ...rolloutItems];
+  }, [liveFlagsMap, customFlags]);
+
+  // ── Filtered Features ──────────────────────────────────────────────────
+  const filteredFeatures = useMemo(() => {
+    return allFeatures.filter(f => {
+      // 1. Search filter (name, key, description, category, subcategory)
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = (f.name || '').toLowerCase().includes(q);
+        const matchKey = (f.key || '').toLowerCase().includes(q);
+        const matchDesc = (f.description || '').toLowerCase().includes(q);
+        const matchCat = (f.categoryName || '').toLowerCase().includes(q);
+        const matchSub = (f.subcategory || '').toLowerCase().includes(q);
+        if (!matchName && !matchKey && !matchDesc && !matchCat && !matchSub) return false;
       }
 
-      // Status
-      if (statusFilter === 'enabled' && !flag.enabled) return false;
-      if (statusFilter === 'disabled' && flag.enabled) return false;
+      // 2. Category filter
+      if (selectedCategory !== 'ALL' && f.category !== selectedCategory) return false;
 
-      // Category
-      if (categoryFilter !== 'all' && flag.category !== categoryFilter) return false;
+      // 3. Subcategory filter
+      if (selectedSubcategory !== 'ALL' && f.subcategory !== selectedSubcategory) return false;
 
-      // Environment
-      if (envFilter !== 'all' && flag.environment !== envFilter) return false;
+      // 4. Status filter
+      if (statusFilter === 'enabled' && !f.enabled) return false;
+      if (statusFilter === 'disabled' && f.enabled) return false;
 
-      // Targeting
-      if (targetingFilter !== 'all' && flag.targeting !== targetingFilter) return false;
+      // 5. Environment filter
+      if (envFilter !== 'all' && f.environment !== envFilter) return false;
+
+      // 6. Plan Filter
+      if (planFilter !== 'all') {
+        const planFeats = livePlans[planFilter]?.features || (planFilter === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
+        if (!planFeats.includes(f.key)) return false;
+      }
 
       return true;
     });
-  }, [flags, searchQuery, statusFilter, categoryFilter, envFilter, targetingFilter]);
+  }, [allFeatures, searchQuery, selectedCategory, selectedSubcategory, statusFilter, envFilter, planFilter, livePlans]);
 
-  const hasActiveFilters = statusFilter !== 'all' || categoryFilter !== 'all' || envFilter !== 'all' || targetingFilter !== 'all' || searchQuery.trim() !== '';
+  // ── Overall Statistics ─────────────────────────────────────────────────
+  const stats = useMemo(() => {
+    const total = allFeatures.length;
+    const enabled = allFeatures.filter(f => f.enabled).length;
+    const disabled = total - enabled;
+    const categoriesCount = Object.keys(CATEGORY_META).length - 1;
+    const enabledPct = total > 0 ? ((enabled / total) * 100).toFixed(0) : '0';
+    const disabledPct = total > 0 ? ((disabled / total) * 100).toFixed(0) : '0';
 
-  const clearAllFilters = () => {
-    setStatusFilter('all');
-    setCategoryFilter('all');
-    setEnvFilter('all');
-    setTargetingFilter('all');
-    setSearchQuery('');
-    setFilterOpen(false);
-  };
+    return { total, enabled, disabled, categoriesCount, enabledPct, disabledPct };
+  }, [allFeatures]);
 
-  // â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const handleToggle = async (e, flag) => {
-    e.stopPropagation();
+  // ── Category Counts ────────────────────────────────────────────────────
+  const categoryCounts = useMemo(() => {
+    const counts = { ALL: allFeatures.length };
+    Object.keys(CATEGORY_META).forEach(k => {
+      if (k === 'ALL') return;
+      counts[k] = allFeatures.filter(f => f.category === k).length;
+    });
+    return counts;
+  }, [allFeatures]);
+
+  // ── Available Subcategories for Active Category ────────────────────────
+  const availableSubcategories = useMemo(() => {
+    if (selectedCategory === 'ALL' || selectedCategory === 'ROLLOUT') return [];
+    return CATEGORY_SUBCATEGORIES[selectedCategory] || [];
+  }, [selectedCategory]);
+
+  // ── Toggle Switch Handler ──────────────────────────────────────────────
+  const handleToggle = async (feature, e) => {
+    if (e) e.stopPropagation();
+    const nextState = !feature.enabled;
+
+    // 1. Optimistic UI update
+    setLiveFlagsMap(prev => ({ ...prev, [feature.key]: nextState }));
+
     try {
-      const nextState = !flag.enabled;
-      // Optimistic update
-      setFlags(prev => prev.map(f => f.id === flag.id ? { ...f, enabled: nextState } : f));
-      if (selectedFlag && selectedFlag.id === flag.id) {
-        setSelectedFlag(prev => ({ ...prev, enabled: nextState }));
+      // 2. Persist to Firestore global config
+      await setFeatureFlagCloud(feature.key, nextState);
+
+      // 3. If it is also a standalone collection doc, update it too
+      if (!feature.isCanonical) {
+        await toggleFeatureFlag(feature.id, nextState, currentUser);
       }
-      await toggleFeatureFlag(flag.id, nextState, currentUser);
-      showToast(`${flag.name} ${nextState ? 'enabled' : 'disabled'}`);
+
+      showToast(`"${feature.name}" is now ${nextState ? 'ENABLED' : 'DISABLED'}`);
     } catch (err) {
-      showToast('Error updating flag: ' + (err.message || 'Check permissions'));
-      // Rollback
-      setFlags(prev => prev.map(f => f.id === flag.id ? { ...f, enabled: flag.enabled } : f));
+      // Revert optimistic update on failure
+      setLiveFlagsMap(prev => ({ ...prev, [feature.key]: feature.enabled }));
+      showToast(`Failed to update ${feature.name}: ${err?.message}`);
     }
   };
 
+  // ── Toggle Plan Entitlement Handler ────────────────────────────────────
+  const handleTogglePlan = async (planId, featureId) => {
+    setSavingPlanId(planId);
+    try {
+      const currentFeatures = livePlans[planId]?.features || (planId === 'free' ? [...DEFAULT_FREE_FEATURES] : [...DEFAULT_PAID_FEATURES]);
+      const hasFeature = currentFeatures.includes(featureId);
+      const nextFeatures = hasFeature 
+        ? currentFeatures.filter(id => id !== featureId)
+        : [...new Set([...currentFeatures, featureId])];
+
+      await setPlanFeaturesCloud(planId, nextFeatures);
+      showToast(`${hasFeature ? 'Removed from' : 'Added to'} ${PLAN_LABELS[planId] || planId}`);
+    } catch (err) {
+      showToast(`Error updating plan: ${err?.message}`);
+    } finally {
+      setSavingPlanId(null);
+    }
+  };
+
+  // ── Open Details Drawer ────────────────────────────────────────────────
+  const openDetails = (feat) => {
+    setSelectedFeature(feat);
+    setActiveMode('details');
+  };
+
+  // ── Open Create / Edit Modal ───────────────────────────────────────────
   const openCreateModal = () => {
     setFormData({
       name: '',
       key: '',
       description: '',
-      category: 'Core Feature',
+      category: selectedCategory !== 'ALL' ? selectedCategory : 'QR_GENERATOR',
+      subcategory: selectedSubcategory !== 'ALL' ? selectedSubcategory : 'General',
       environment: 'Production',
       enabled: true,
       targeting: 'all',
@@ -196,27 +344,23 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     setActiveMode('create');
   };
 
-  const openEditModal = (flag) => {
-    setSelectedFlag(flag);
+  const openEditModal = (feat) => {
+    setSelectedFeature(feat);
     setFormData({
-      name: flag.name || '',
-      key: flag.key || flag.id,
-      description: flag.description || '',
-      category: flag.category || 'Core Feature',
-      environment: flag.environment || 'Production',
-      enabled: Boolean(flag.enabled),
-      targeting: flag.targeting || 'all',
-      rolloutPercentage: Number(flag.rolloutPercentage ?? 100),
-      icon: flag.icon || 'Flag',
-      iconColor: flag.iconColor || '#FF4D9D',
+      name: feat.name || '',
+      key: feat.key || feat.id,
+      description: feat.description || '',
+      category: feat.category || 'QR_GENERATOR',
+      subcategory: feat.subcategory || 'General',
+      environment: feat.environment || 'Production',
+      enabled: Boolean(feat.enabled),
+      targeting: feat.targeting || 'all',
+      rolloutPercentage: Number(feat.rolloutPercentage ?? 100),
+      icon: 'Flag',
+      iconColor: feat.iconColor || '#FF4D9D',
     });
     setFormErrors({});
     setActiveMode('edit');
-  };
-
-  const openDetails = (flag) => {
-    setSelectedFlag(flag);
-    setActiveMode('details');
   };
 
   const handleCopyKey = (key) => {
@@ -229,15 +373,13 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const errors = {};
-
     if (!formData.name.trim()) errors.name = 'Flag name is required.';
     if (activeMode === 'create') {
       const cleanKey = formData.key.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
-      if (!cleanKey) errors.key = 'Valid flag key is required (e.g. premium_features).';
-      else if (cleanKey.length < 3) errors.key = 'Key must be at least 3 characters.';
+      if (!cleanKey) errors.key = 'Valid flag key is required.';
+      else if (cleanKey.length < 2) errors.key = 'Key must be at least 2 characters.';
       formData.key = cleanKey;
     }
-
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
@@ -246,280 +388,254 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     setSubmitting(true);
     try {
       if (activeMode === 'create') {
-        const res = await createFeatureFlag(formData, currentUser);
-        showToast(`Created flag "${formData.name}" successfully!`);
-        if (res.flag) setSelectedFlag(res.flag);
-      } else if (activeMode === 'edit') {
-        await updateFeatureFlag(selectedFlag.id, formData, currentUser);
-        showToast(`Updated flag "${formData.name}"!`);
-        setSelectedFlag(prev => ({ ...prev, ...formData }));
+        await createFeatureFlag(formData, currentUser);
+        await setFeatureFlagCloud(formData.key, formData.enabled);
+        showToast(`Feature flag "${formData.name}" created successfully!`);
+      } else {
+        await updateFeatureFlag(selectedFeature.id, formData, currentUser);
+        await setFeatureFlagCloud(formData.key, formData.enabled);
+        showToast(`Feature flag "${formData.name}" updated!`);
       }
       setActiveMode('list');
     } catch (err) {
-      setFormErrors({ submit: err.message || 'Failed to save feature flag.' });
+      setFormErrors({ submit: err?.message || 'Failed to save feature flag.' });
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!selectedFlag) return;
-    setSubmitting(true);
+    if (!selectedFeature) return;
     try {
-      await deleteFeatureFlag(selectedFlag.id, currentUser);
-      showToast(`Deleted flag "${selectedFlag.name}"`);
-      setDeleteConfirm(false);
-      setSelectedFlag(null);
+      await deleteFeatureFlag(selectedFeature.id, currentUser);
+      await setFeatureFlagCloud(selectedFeature.key, false);
+      showToast(`Flag "${selectedFeature.name}" deleted.`);
       setActiveMode('list');
+      setDeleteConfirm(false);
     } catch (err) {
-      showToast('Failed to delete: ' + err.message);
-    } finally {
-      setSubmitting(false);
+      showToast(`Failed to delete: ${err?.message}`);
     }
   };
 
-  // Helper for relative time
-  const formatTimeAgo = (dateStr) => {
-    if (!dateStr) return 'Recently';
-    const date = new Date(dateStr);
-    const diff = (Date.now() - date.getTime()) / 1000;
-    if (diff < 60) return 'Just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setSelectedCategory('ALL');
+    setSelectedSubcategory('ALL');
+    setPlanFilter('all');
+    setEnvFilter('all');
+    setFilterOpen(false);
   };
 
-  // â”€â”€ Render Sub-views â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const activeFiltersCount = (statusFilter !== 'all' ? 1 : 0) +
+    (selectedCategory !== 'ALL' ? 1 : 0) +
+    (selectedSubcategory !== 'ALL' ? 1 : 0) +
+    (planFilter !== 'all' ? 1 : 0) +
+    (envFilter !== 'all' ? 1 : 0);
 
-  // 1. Details Sub-view
-  if (activeMode === 'details' && selectedFlag) {
-    const IconComp = ICON_MAP[selectedFlag.icon] || Flag;
+  // ═════════════════════════════════════════════════════════════════════════
+  // RENDER: 1. DETAILS DRAWER / VIEW
+  // ═════════════════════════════════════════════════════════════════════════
+  if (activeMode === 'details' && selectedFeature) {
+    const IconComponent = selectedFeature.icon || Flag;
     return (
-      <div style={{ maxWidth: 640, margin: '0 auto', animation: 'adSlideIn 0.2s ease' }}>
-        {/* Toast */}
+      <div style={{ maxWidth: 840, margin: '0 auto', animation: 'adSlideIn 0.2s ease' }}>
         {toastMessage && <Toast message={toastMessage} />}
 
-        {/* Top Header */}
+        {/* Header Bar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <button
             onClick={() => setActiveMode('list')}
             style={{
-              display: 'flex', alignItems: 'center', gap: 6,
+              display: 'flex', alignItems: 'center', gap: 8,
               background: 'none', border: 'none', color: 'var(--ad-text)',
               fontSize: 16, fontWeight: 800, cursor: 'pointer', padding: 0
             }}
           >
             <ArrowLeft size={20} />
-            <span>Feature Flag Details</span>
+            <span>Feature Details</span>
           </button>
 
-          <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
-              onClick={() => setDeleteConfirm(prev => !prev)}
+              onClick={() => openEditModal(selectedFeature)}
               style={{
-                width: 36, height: 36, borderRadius: 10,
-                background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--ad-text-sec)', cursor: 'pointer'
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 14px', borderRadius: 10,
+                background: 'rgba(255, 77, 157, 0.12)', color: '#FF4D9D',
+                border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer'
               }}
             >
-              <MoreVertical size={18} />
+              <Edit3 size={14} /> Edit
             </button>
-
-            {deleteConfirm && (
-              <div style={{
-                position: 'absolute', right: 0, top: 44, width: 180,
-                background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-                borderRadius: 12, padding: 8, boxShadow: 'var(--ad-card-shadow)', zIndex: 100
-              }}>
-                <button
-                  onClick={handleDelete}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-                    padding: '8px 12px', background: 'none', border: 'none',
-                    color: '#EF4444', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                    borderRadius: 8, textAlign: 'left'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                >
-                  <Trash2 size={15} /> Delete Flag
-                </button>
-              </div>
+            {!selectedFeature.isCanonical && (
+              <button
+                onClick={() => setDeleteConfirm(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '8px 14px', borderRadius: 10,
+                  background: 'rgba(239, 68, 68, 0.12)', color: '#EF4444',
+                  border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer'
+                }}
+              >
+                <Trash2 size={14} /> Delete
+              </button>
             )}
           </div>
         </div>
 
-        {/* Details Card */}
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: 14, padding: 16, marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12
+          }}>
+            <div style={{ color: '#EF4444', fontSize: 13, fontWeight: 700 }}>
+              Are you sure you want to permanently delete this feature flag?
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setDeleteConfirm(false)} style={{ padding: '6px 12px', borderRadius: 8, background: 'var(--ad-input)', border: 'none', color: 'var(--ad-text)', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={handleDelete} style={{ padding: '6px 12px', borderRadius: 8, background: '#EF4444', border: 'none', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                Confirm Delete
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Main Details Card */}
         <div style={{
           background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-          borderRadius: 20, padding: '24px 20px', boxShadow: 'var(--ad-card-shadow)',
+          borderRadius: 20, padding: 24, boxShadow: 'var(--ad-card-shadow)',
           display: 'flex', flexDirection: 'column', gap: 20
         }}>
-          {/* Main Info Header */}
+          {/* Header row */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{
-                width: 48, height: 48, borderRadius: 14,
-                background: selectedFlag.iconBg || 'rgba(255, 77, 157, 0.12)',
-                color: selectedFlag.iconColor || '#FF4D9D',
+                width: 52, height: 52, borderRadius: 14,
+                background: selectedFeature.iconBg, color: selectedFeature.iconColor,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
               }}>
-                <IconComp size={24} />
+                <IconComponent size={26} strokeWidth={2.4} />
               </div>
               <div>
                 <h2 style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
-                  {selectedFlag.name}
+                  {selectedFeature.name}
                 </h2>
                 <div style={{ fontSize: 13, color: 'var(--ad-text-sec)', marginTop: 4, lineHeight: 1.4 }}>
-                  {selectedFlag.description || 'No description provided.'}
+                  {selectedFeature.description || 'Controls runtime capability in Mushi QR Pro application.'}
                 </div>
               </div>
             </div>
 
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 800,
-              background: selectedFlag.enabled ? 'rgba(34, 197, 94, 0.14)' : 'rgba(239, 68, 68, 0.12)',
-              color: selectedFlag.enabled ? '#22C55E' : '#EF4444'
-            }}>
-              {selectedFlag.enabled ? 'Enabled' : 'Disabled'}
-            </span>
+            <button
+              onClick={() => handleToggle(selectedFeature)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '6px 14px', borderRadius: 100, border: 'none',
+                background: selectedFeature.enabled ? 'rgba(34, 197, 94, 0.14)' : 'rgba(239, 68, 68, 0.14)',
+                color: selectedFeature.enabled ? '#22C55E' : '#EF4444',
+                fontSize: 13, fontWeight: 800, cursor: 'pointer'
+              }}
+            >
+              {selectedFeature.enabled ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+              <span>{selectedFeature.enabled ? 'Enabled Globally' : 'Disabled'}</span>
+            </button>
           </div>
 
           <div style={{ height: 1, background: 'var(--ad-border)' }} />
 
-          {/* Details Metadata Grid */}
+          {/* Metadata Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-            {/* Key with Copy */}
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Key</div>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                background: 'var(--ad-input)', padding: '6px 10px', borderRadius: 8,
-                border: '1px solid var(--ad-border)', width: 'fit-content'
-              }}>
-                <code style={{ fontSize: 13, fontWeight: 700, color: 'var(--ad-text)' }}>{selectedFlag.key}</code>
-                <button
-                  onClick={() => handleCopyKey(selectedFlag.key)}
-                  title="Copy Key"
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: copiedKey ? '#22C55E' : 'var(--ad-text-sec)' }}
-                >
+            {/* Feature Key */}
+            <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Feature Key</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                <code style={{ fontSize: 13, fontWeight: 800, color: 'var(--ad-text)', fontFamily: 'monospace' }}>{selectedFeature.key}</code>
+                <button onClick={() => handleCopyKey(selectedFeature.key)} style={{ background: 'none', border: 'none', color: copiedKey ? '#22C55E' : 'var(--ad-text-sec)', cursor: 'pointer', padding: 2 }}>
                   {copiedKey ? <Check size={14} /> : <Copy size={14} />}
                 </button>
               </div>
             </div>
 
-            {/* Status Switch */}
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Status</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Toggle
-                  checked={selectedFlag.enabled}
-                  onChange={(e) => handleToggle(e, selectedFlag)}
-                />
-                <span style={{ fontSize: 13, fontWeight: 700, color: selectedFlag.enabled ? '#22C55E' : 'var(--ad-text-sec)' }}>
-                  {selectedFlag.enabled ? 'Enabled' : 'Disabled'}
-                </span>
+            {/* Category & Subcategory */}
+            <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Category & Subcategory</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: selectedFeature.iconColor }}>
+                {selectedFeature.categoryName} <span style={{ color: 'var(--ad-text-sec)', fontWeight: 500 }}>›</span> {selectedFeature.subcategory}
+              </div>
+            </div>
+
+            {/* Default Plan Tier */}
+            <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Baseline Access</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ad-text)' }}>
+                {PLAN_LABELS[selectedFeature.defaultPlan] || 'Free & Above'}
               </div>
             </div>
 
             {/* Environment */}
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Environment</div>
-              <span style={{
-                display: 'inline-flex', padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 700,
-                background: 'rgba(34, 197, 94, 0.12)', color: '#22C55E'
-              }}>
-                {selectedFlag.environment || 'Production'}
-              </span>
-            </div>
-
-            {/* Category */}
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Category</div>
-              <span style={{
-                display: 'inline-flex', padding: '4px 10px', borderRadius: 100, fontSize: 12, fontWeight: 700,
-                background: 'rgba(123, 97, 255, 0.12)', color: '#7B61FF'
-              }}>
-                {selectedFlag.category || 'Core Feature'}
-              </span>
-            </div>
-
-            {/* Targeting */}
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Targeting</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ad-text)' }}>
-                {getTargetingLabel(selectedFlag.targeting, selectedFlag.rolloutPercentage)}
-              </div>
-            </div>
-
-            {/* Created */}
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Created</div>
-              <div style={{ fontSize: 13, color: 'var(--ad-text)', fontWeight: 600 }}>
-                {selectedFlag.createdAt ? new Date(selectedFlag.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'May 10, 2025'}
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--ad-text-sec)' }}>
-                by {selectedFlag.createdBy || 'Super Admin'}
-              </div>
-            </div>
-
-            {/* Last Updated */}
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Last Updated</div>
-              <div style={{ fontSize: 13, color: 'var(--ad-text)', fontWeight: 600 }}>
-                {selectedFlag.updatedAt ? new Date(selectedFlag.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'May 14, 2025'}
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--ad-text-sec)' }}>
-                by {selectedFlag.updatedBy || 'Super Admin'}
-              </div>
+            <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '12px 14px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)', marginBottom: 4 }}>Environment Scope</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#22C55E' }}>Production Live</div>
             </div>
           </div>
 
-          {/* Rollout Progress */}
+          {/* Plan Entitlements Matrix */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text-sec)' }}>Rollout Percentage</span>
-              <span style={{ fontSize: 13, fontWeight: 800, color: '#FF4D9D' }}>{selectedFlag.rolloutPercentage ?? 100}%</span>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--ad-text)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Crown size={16} color="#FF4D9D" />
+              <span>Subscription Plan Entitlements</span>
             </div>
-            <div style={{ height: 8, background: 'var(--ad-input)', borderRadius: 4, overflow: 'hidden' }}>
-              <div style={{
-                width: `${selectedFlag.rolloutPercentage ?? 100}%`, height: '100%',
-                background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)', borderRadius: 4
-              }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
+              {CANONICAL_PLANS.map(pId => {
+                const planFeatures = livePlans[pId]?.features || (pId === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
+                const hasFeature = planFeatures.includes(selectedFeature.key);
+                const color = PLAN_COLORS[pId] || '#FF4D9D';
+
+                return (
+                  <button
+                    key={pId}
+                    onClick={() => handleTogglePlan(pId, selectedFeature.key)}
+                    disabled={savingPlanId === pId}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '12px 14px', borderRadius: 12,
+                      background: hasFeature ? `${color}18` : 'var(--ad-input)',
+                      border: `1px solid ${hasFeature ? color : 'var(--ad-border)'}`,
+                      cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: hasFeature ? color : 'var(--ad-text)' }}>
+                        {PLAN_LABELS[pId]}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 2 }}>
+                        {hasFeature ? 'Included in plan' : 'Locked for tier'}
+                      </div>
+                    </div>
+                    {hasFeature ? <CheckSquare size={18} color={color} /> : <Square size={18} color="var(--ad-text-sec)" />}
+                  </button>
+                );
+              })}
             </div>
           </div>
-
-          {/* Edit Flag Button */}
-          <button
-            onClick={() => openEditModal(selectedFlag)}
-            style={{
-              width: '100%', padding: '13px 20px', borderRadius: 12,
-              background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
-              border: 'none', color: '#FFFFFF', fontSize: 14, fontWeight: 800,
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              boxShadow: '0 4px 16px rgba(255, 77, 157, 0.35)', marginTop: 10
-            }}
-          >
-            <Edit3 size={16} />
-            Edit Flag
-          </button>
         </div>
       </div>
     );
   }
 
-  // 2. Create / Edit Form Sub-view
+  // ═════════════════════════════════════════════════════════════════════════
+  // RENDER: 2. CREATE / EDIT MODAL VIEW
+  // ═════════════════════════════════════════════════════════════════════════
   if (activeMode === 'create' || activeMode === 'edit') {
     const isEdit = activeMode === 'edit';
     return (
-      <div style={{ maxWidth: 600, margin: '0 auto', animation: 'adSlideIn 0.2s ease' }}>
-        {/* Toast */}
+      <div style={{ maxWidth: 620, margin: '0 auto', animation: 'adSlideIn 0.2s ease' }}>
         {toastMessage && <Toast message={toastMessage} />}
 
-        {/* Top Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <button
             onClick={() => setActiveMode(isEdit ? 'details' : 'list')}
@@ -530,14 +646,13 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
             }}
           >
             <ArrowLeft size={20} />
-            <span>{isEdit ? 'Edit Feature Flag' : 'Create Feature Flag'}</span>
+            <span>{isEdit ? 'Edit Feature Flag' : 'Create Custom Feature Flag'}</span>
           </button>
         </div>
 
-        {/* Form Card */}
         <form onSubmit={handleFormSubmit} style={{
           background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-          borderRadius: 20, padding: '24px 20px', boxShadow: 'var(--ad-card-shadow)',
+          borderRadius: 20, padding: 24, boxShadow: 'var(--ad-card-shadow)',
           display: 'flex', flexDirection: 'column', gap: 18
         }}>
           {formErrors.submit && (
@@ -546,21 +661,19 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
             </div>
           )}
 
-          {/* Flag Name */}
           <div>
             <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-              Flag Name <span style={{ color: '#FF4D9D' }}>*</span>
+              Feature Name <span style={{ color: '#FF4D9D' }}>*</span>
             </label>
             <input
               type="text"
-              placeholder="e.g. Premium Features"
+              placeholder="e.g. AI QR Enhancer"
               value={formData.name}
               onChange={e => {
                 const val = e.target.value;
                 setFormData(p => ({
                   ...p,
                   name: val,
-                  // auto-generate key only on create if key is empty or touched
                   key: isEdit ? p.key : (p.key === '' || p.key === p.name.toLowerCase().replace(/[^a-z0-9_]/g, '_') ? val.toLowerCase().replace(/[^a-z0-9_]/g, '_') : p.key)
                 }));
               }}
@@ -571,648 +684,566 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                 fontSize: 14, fontWeight: 600, outline: 'none'
               }}
             />
-            {formErrors.name && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 4, fontWeight: 600 }}>{formErrors.name}</div>}
+            {formErrors.name && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 4 }}>{formErrors.name}</div>}
           </div>
 
-          {/* Flag Key */}
           <div>
             <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-              Flag Key <span style={{ color: '#FF4D9D' }}>*</span>
+              Feature Key <span style={{ color: '#FF4D9D' }}>*</span>
             </label>
             <input
               type="text"
-              placeholder="e.g. premium_features"
+              placeholder="e.g. ai_qr_enhancer"
               value={formData.key}
               disabled={isEdit}
               onChange={e => setFormData(p => ({ ...p, key: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_') }))}
               style={{
-                width: '100%', boxSizing: 'border-box', background: isEdit ? 'rgba(0,0,0,0.05)' : 'var(--ad-input)',
+                width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
                 border: `1px solid ${formErrors.key ? '#EF4444' : 'var(--ad-border)'}`,
                 borderRadius: 10, padding: '11px 14px', color: 'var(--ad-text)',
-                fontSize: 14, fontWeight: 700, outline: 'none', opacity: isEdit ? 0.7 : 1
+                fontSize: 14, fontWeight: 600, outline: 'none', fontFamily: 'monospace',
+                opacity: isEdit ? 0.6 : 1
               }}
             />
-            <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 4 }}>
-              {isEdit ? 'Key is protected and cannot be modified.' : 'Use lowercase letters, numbers and underscores.'}
-            </div>
-            {formErrors.key && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 4, fontWeight: 600 }}>{formErrors.key}</div>}
+            {formErrors.key && <div style={{ color: '#EF4444', fontSize: 11, marginTop: 4 }}>{formErrors.key}</div>}
           </div>
 
-          {/* Description */}
           <div>
             <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-              Description (Optional)
+              Description
             </label>
             <textarea
               rows={3}
-              placeholder="Describe what this feature flag controls..."
+              placeholder="Explain what this feature controls in the user application..."
               value={formData.description}
               onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
               style={{
                 width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
-                border: '1px solid var(--ad-border)', borderRadius: 10,
-                padding: '11px 14px', color: 'var(--ad-text)', fontSize: 13,
-                outline: 'none', resize: 'vertical'
+                border: '1px solid var(--ad-border)', borderRadius: 10, padding: '11px 14px',
+                color: 'var(--ad-text)', fontSize: 13, fontWeight: 500, outline: 'none', resize: 'vertical'
               }}
             />
           </div>
 
-          {/* Category Dropdown */}
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-              Category
-            </label>
-            <select
-              value={formData.category}
-              onChange={e => setFormData(p => ({ ...p, category: e.target.value }))}
-              style={{
-                width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
-                border: '1px solid var(--ad-border)', borderRadius: 10,
-                padding: '11px 14px', color: 'var(--ad-text)', fontSize: 13,
-                fontWeight: 700, outline: 'none', cursor: 'pointer'
-              }}
-            >
-              {FLAG_CATEGORIES.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Environment Dropdown */}
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-              Environment
-            </label>
-            <select
-              value={formData.environment}
-              onChange={e => setFormData(p => ({ ...p, environment: e.target.value }))}
-              style={{
-                width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
-                border: '1px solid var(--ad-border)', borderRadius: 10,
-                padding: '11px 14px', color: 'var(--ad-text)', fontSize: 13,
-                fontWeight: 700, outline: 'none', cursor: 'pointer'
-              }}
-            >
-              {ENVIRONMENTS.map(env => (
-                <option key={env.id} value={env.id}>{env.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Status Radio Buttons (Enabled vs Disabled matching mockup) */}
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 8 }}>
-              Status
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <button
-                type="button"
-                onClick={() => setFormData(p => ({ ...p, enabled: true }))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
+                Category
+              </label>
+              <select
+                value={formData.category}
+                onChange={e => setFormData(p => ({ ...p, category: e.target.value }))}
                 style={{
-                  padding: '12px 14px', borderRadius: 12,
-                  border: `1.5px solid ${formData.enabled ? '#22C55E' : 'var(--ad-border)'}`,
-                  background: formData.enabled ? 'rgba(34, 197, 94, 0.12)' : 'var(--ad-input)',
-                  color: formData.enabled ? '#22C55E' : 'var(--ad-text-sec)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  fontSize: 13, fontWeight: 800, cursor: 'pointer'
+                  width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
+                  borderRadius: 10, padding: '11px 12px', color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, outline: 'none'
                 }}
               >
-                <CheckCircle2 size={16} /> Enabled
-              </button>
+                {Object.entries(CATEGORY_META).filter(([k]) => k !== 'ALL').map(([k, v]) => (
+                  <option key={k} value={k}>{v.name}</option>
+                ))}
+              </select>
+            </div>
 
-              <button
-                type="button"
-                onClick={() => setFormData(p => ({ ...p, enabled: false }))}
-                style={{
-                  padding: '12px 14px', borderRadius: 12,
-                  border: `1.5px solid ${!formData.enabled ? '#EF4444' : 'var(--ad-border)'}`,
-                  background: !formData.enabled ? 'rgba(239, 68, 68, 0.12)' : 'var(--ad-input)',
-                  color: !formData.enabled ? '#EF4444' : 'var(--ad-text-sec)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  fontSize: 13, fontWeight: 800, cursor: 'pointer'
-                }}
-              >
-                <XCircle size={16} /> Disabled
-              </button>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
+                Initial Status
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', height: 42 }}>
+                <button
+                  type="button"
+                  onClick={() => setFormData(p => ({ ...p, enabled: !p.enabled }))}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
+                    borderRadius: 10, border: 'none', cursor: 'pointer',
+                    background: formData.enabled ? 'rgba(34, 197, 94, 0.14)' : 'rgba(239, 68, 68, 0.14)',
+                    color: formData.enabled ? '#22C55E' : '#EF4444', fontWeight: 800, fontSize: 13
+                  }}
+                >
+                  {formData.enabled ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                  <span>{formData.enabled ? 'Enabled' : 'Disabled'}</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Targeting Dropdown */}
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 6 }}>
-              Targeting
-            </label>
-            <select
-              value={formData.targeting}
-              onChange={e => setFormData(p => ({ ...p, targeting: e.target.value }))}
-              style={{
-                width: '100%', boxSizing: 'border-box', background: 'var(--ad-input)',
-                border: '1px solid var(--ad-border)', borderRadius: 10,
-                padding: '11px 14px', color: 'var(--ad-text)', fontSize: 13,
-                fontWeight: 700, outline: 'none', cursor: 'pointer'
-              }}
-            >
-              {TARGETING_OPTIONS.map(opt => (
-                <option key={opt.id} value={opt.id}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Rollout Percentage (when relevant) */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)' }}>Rollout Percentage</label>
-              <span style={{ fontSize: 13, fontWeight: 800, color: '#FF4D9D' }}>{formData.rolloutPercentage}%</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={formData.rolloutPercentage}
-              onChange={e => setFormData(p => ({ ...p, rolloutPercentage: Number(e.target.value) }))}
-              style={{ width: '100%', accentColor: '#FF4D9D', cursor: 'pointer' }}
-            />
-          </div>
-
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={submitting}
             style={{
-              width: '100%', padding: '14px 20px', borderRadius: 12,
-              background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
-              border: 'none', color: '#FFFFFF', fontSize: 14, fontWeight: 800,
-              cursor: submitting ? 'not-allowed' : 'pointer',
-              boxShadow: '0 4px 16px rgba(255, 77, 157, 0.35)', marginTop: 8,
-              opacity: submitting ? 0.7 : 1
+              marginTop: 10, background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
+              color: '#fff', border: 'none', borderRadius: 12, padding: '14px',
+              fontSize: 14, fontWeight: 800, cursor: submitting ? 'not-allowed' : 'pointer',
+              boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)'
             }}
           >
-            {submitting ? (isEdit ? 'Saving...' : 'Creating...') : (isEdit ? 'Save Changes' : 'Create Flag')}
+            {submitting ? 'Saving...' : (isEdit ? 'Save Changes' : 'Create Feature Flag')}
           </button>
         </form>
       </div>
     );
   }
 
-  // 3. Main Overview View (Matching Primary Mobile Reference)
+  // ═════════════════════════════════════════════════════════════════════════
+  // RENDER: 3. MAIN UNIFIED OVERVIEW (Matching Exact Mobile-First Reference)
+  // ═════════════════════════════════════════════════════════════════════════
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', animation: 'adSlideIn 0.2s ease' }}>
-      {/* Toast Notification */}
       {toastMessage && <Toast message={toastMessage} />}
 
-      {/* ── Title & Header ─────────────────────────────────────────────── */}
+      {/* Title & Top Action */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 16,
+        marginBottom: 18,
         gap: 12,
         flexWrap: 'wrap'
       }}>
         <div>
           <h1 style={{
-            fontSize: 20,
+            fontSize: 22,
             fontWeight: 900,
             color: 'var(--ad-text)',
             margin: 0,
-            letterSpacing: '-0.3px'
+            letterSpacing: '-0.4px'
           }}>
-            Feature Flags & App Controls
+            Feature Flags &amp; App Capabilities
           </h1>
           <p style={{
             fontSize: 12,
             color: 'var(--ad-text-sec)',
-            margin: '3px 0 0',
+            margin: '4px 0 0',
             fontWeight: 500
           }}>
-            Manage and control application features in real-time
+            Control 140+ granular features across 8 categories in real-time
           </p>
         </div>
 
-        {mainTab === 'rollout' && (
-          <button
-            onClick={openCreateModal}
-            style={{
-              background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
-              border: 'none',
-              borderRadius: 12,
-              color: '#FFFFFF',
-              padding: '10px 16px',
-              fontSize: 13,
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)',
-              flexShrink: 0
-            }}
-          >
-            <Plus size={18} strokeWidth={2.6} />
-            <span className="ad-hide-mobile">Create Flag</span>
-          </button>
-        )}
+        <button
+          onClick={openCreateModal}
+          style={{
+            background: 'linear-gradient(135deg, #FF4D9D 0%, #7B61FF 100%)',
+            border: 'none',
+            borderRadius: 12,
+            color: '#FFFFFF',
+            padding: '10px 16px',
+            fontSize: 13,
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            boxShadow: '0 4px 14px rgba(255, 77, 157, 0.35)',
+            flexShrink: 0
+          }}
+        >
+          <Plus size={18} strokeWidth={2.6} />
+          <span>Create Flag</span>
+        </button>
       </div>
 
-      {/* ── View Switcher Tabs ───────────────────────────────────────────── */}
+      {/* 4 Top Stat Cards (2x2 on Mobile, 4-col on Desktop) */}
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.04)',
-        border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'}`,
-        padding: 4,
-        borderRadius: 14,
-        marginBottom: 20,
-        width: 'fit-content',
-        maxWidth: '100%',
-        overflowX: 'auto',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+        gap: 12,
+        marginBottom: 20
       }}>
-        <button
-          type="button"
-          onClick={() => setMainTab('canonical')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '9px 18px',
-            borderRadius: 10,
-            border: 'none',
-            cursor: 'pointer',
-            background: mainTab === 'canonical' ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : 'transparent',
-            color: mainTab === 'canonical' ? '#FFFFFF' : (isDark ? '#94A3B8' : '#64748B'),
-            fontWeight: 800,
-            fontSize: 13,
-            fontFamily: 'inherit',
-            transition: 'all 0.15s ease',
-            whiteSpace: 'nowrap',
-            boxShadow: mainTab === 'canonical' ? '0 2px 10px rgba(255, 77, 157, 0.3)' : 'none'
-          }}
-        >
-          <Sliders size={16} />
-          <span>8 Core App Modules (140+ Features)</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setMainTab('rollout')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '9px 18px',
-            borderRadius: 10,
-            border: 'none',
-            cursor: 'pointer',
-            background: mainTab === 'rollout' ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : 'transparent',
-            color: mainTab === 'rollout' ? '#FFFFFF' : (isDark ? '#94A3B8' : '#64748B'),
-            fontWeight: 800,
-            fontSize: 13,
-            fontFamily: 'inherit',
-            transition: 'all 0.15s ease',
-            whiteSpace: 'nowrap',
-            boxShadow: mainTab === 'rollout' ? '0 2px 10px rgba(255, 77, 157, 0.3)' : 'none'
-          }}
-        >
-          <Flag size={16} />
-          <span>Production Rollout Flags</span>
-        </button>
-      </div>
-
-      {/* Tab 1: 140+ Granular Features across 8 Categories & Subcategories */}
-      {mainTab === 'canonical' ? (
-        <div style={{ borderRadius: 16, overflow: 'hidden' }}>
-          <FeatureManagementPanel isDark={isDark} />
-        </div>
-      ) : (
-        <>
-          {/* ── 4 Statistics Cards (2x2 Grid on Mobile, 4-col on Desktop) ─────── */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: 12,
-            marginBottom: 20
-          }}>
-            {/* Total Flags */}
-            <StatMiniCard
-              icon={Flag}
-          iconColor="#7B61FF"
-          iconBg="rgba(123, 97, 255, 0.12)"
-          title="Total Flags"
+        <StatMiniCard
+          icon={Flag}
+          iconColor="#FF4D9D"
+          iconBg="rgba(255, 77, 157, 0.12)"
+          title="Total Features"
           value={stats.total}
-          subtitle="All feature flags"
+          subtitle="All app capabilities"
           subColor="var(--ad-text-sec)"
         />
-
-        {/* Enabled */}
         <StatMiniCard
           icon={CheckCircle2}
           iconColor="#22C55E"
           iconBg="rgba(34, 197, 94, 0.12)"
           title="Enabled"
           value={stats.enabled}
-          subtitle={`${stats.enabledPct}% of total`}
+          subtitle={`${stats.enabledPct}% active`}
           subColor="#22C55E"
         />
-
-        {/* Disabled */}
         <StatMiniCard
           icon={AlertCircle}
           iconColor="#F59E0B"
           iconBg="rgba(245, 158, 11, 0.12)"
           title="Disabled"
           value={stats.disabled}
-          subtitle={`${stats.disabledPct}% of total`}
+          subtitle={`${stats.disabledPct}% deactivated`}
           subColor="#F59E0B"
         />
-
-        {/* Targeted */}
         <StatMiniCard
-          icon={Users}
-          iconColor="#3B82F6"
-          iconBg="rgba(59, 130, 246, 0.12)"
-          title="Targeted"
-          value={stats.targeted}
-          subtitle="Flags with targeting"
-          subColor="#3B82F6"
+          icon={Sliders}
+          iconColor="#8B5CF6"
+          iconBg="rgba(139, 92, 246, 0.12)"
+          title="Core Modules"
+          value="8 Categories"
+          subtitle="Full Mushi QR ecosystem"
+          subColor="#8B5CF6"
         />
       </div>
 
-      {/* â”€â”€ Search & Filter Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* 8 Categories Filter Carousel Bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        overflowX: 'auto',
+        paddingBottom: 6,
+        marginBottom: 16,
+        scrollbarWidth: 'none'
+      }}>
+        {Object.entries(CATEGORY_META).map(([key, cat]) => {
+          const isActive = selectedCategory === key;
+          const IconComp = cat.icon;
+          const count = categoryCounts[key] || 0;
+
+          return (
+            <button
+              key={key}
+              onClick={() => {
+                setSelectedCategory(key);
+                setSelectedSubcategory('ALL');
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 14px',
+                borderRadius: 12,
+                border: `1px solid ${isActive ? cat.color : 'var(--ad-border)'}`,
+                background: isActive ? `${cat.color}18` : 'var(--ad-card)',
+                color: isActive ? cat.color : 'var(--ad-text-sec)',
+                fontSize: 12,
+                fontWeight: isActive ? 800 : 600,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                transition: 'all 0.15s ease',
+                boxShadow: isActive ? `0 2px 10px ${cat.color}25` : 'none'
+              }}
+            >
+              <IconComp size={15} strokeWidth={isActive ? 2.5 : 1.9} />
+              <span>{cat.name}</span>
+              <span style={{
+                fontSize: 10,
+                padding: '2px 6px',
+                borderRadius: 10,
+                background: isActive ? cat.color : 'var(--ad-input)',
+                color: isActive ? '#fff' : 'var(--ad-text-sec)',
+                fontWeight: 800
+              }}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Subcategory Pills (When a category is active) */}
+      {availableSubcategories.length > 0 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          overflowX: 'auto',
+          paddingBottom: 8,
+          marginBottom: 16,
+          scrollbarWidth: 'none'
+        }}>
+          <button
+            onClick={() => setSelectedSubcategory('ALL')}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 20,
+              border: `1px solid ${selectedSubcategory === 'ALL' ? '#FF4D9D' : 'var(--ad-border)'}`,
+              background: selectedSubcategory === 'ALL' ? 'rgba(255, 77, 157, 0.14)' : 'transparent',
+              color: selectedSubcategory === 'ALL' ? '#FF4D9D' : 'var(--ad-text-sec)',
+              fontSize: 11,
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            All Subcategories
+          </button>
+          {availableSubcategories.map(sub => {
+            const isSubActive = selectedSubcategory === sub;
+            return (
+              <button
+                key={sub}
+                onClick={() => setSelectedSubcategory(sub)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 20,
+                  border: `1px solid ${isSubActive ? '#FF4D9D' : 'var(--ad-border)'}`,
+                  background: isSubActive ? 'rgba(255, 77, 157, 0.14)' : 'transparent',
+                  color: isSubActive ? '#FF4D9D' : 'var(--ad-text-sec)',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}
+              >
+                {sub}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Search & Filter Toolbar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         gap: 10,
         marginBottom: 16
       }}>
-        {/* Search Bar */}
+        {/* Search Input */}
         <div style={{
           flex: 1,
+          position: 'relative',
           display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          background: 'var(--ad-card)',
-          border: '1px solid var(--ad-border)',
-          borderRadius: 12,
-          padding: '10px 14px',
-          boxShadow: 'var(--ad-card-shadow)'
+          alignItems: 'center'
         }}>
-          <Search size={16} color="var(--ad-text-sec)" />
+          <Search size={16} style={{ position: 'absolute', left: 14, color: 'var(--ad-text-sec)' }} />
           <input
             type="text"
-            placeholder="Search flags..."
+            placeholder="Search 140+ features by name, key, description..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             style={{
               width: '100%',
-              background: 'none',
-              border: 'none',
-              outline: 'none',
+              boxSizing: 'border-box',
+              background: 'var(--ad-card)',
+              border: '1px solid var(--ad-border)',
+              borderRadius: 12,
+              padding: '11px 36px 11px 38px',
               color: 'var(--ad-text)',
               fontSize: 13,
-              fontFamily: 'inherit',
-              fontWeight: 600
+              fontWeight: 600,
+              outline: 'none',
+              boxShadow: 'var(--ad-card-shadow)'
             }}
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              style={{ background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer', padding: 0 }}
+              style={{
+                position: 'absolute', right: 12, background: 'none', border: 'none',
+                color: 'var(--ad-text-sec)', cursor: 'pointer', padding: 2
+              }}
             >
-              <X size={14} />
+              <X size={15} />
             </button>
           )}
         </div>
 
-        {/* Filter Button */}
+        {/* Filter Button with Active Badge */}
         <button
           onClick={() => setFilterOpen(true)}
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            background: hasActiveFilters ? 'rgba(255, 77, 157, 0.15)' : 'var(--ad-card)',
-            border: `1px solid ${hasActiveFilters ? '#FF4D9D' : 'var(--ad-border)'}`,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            color: hasActiveFilters ? '#FF4D9D' : 'var(--ad-text)',
+            gap: 6,
+            background: activeFiltersCount > 0 ? 'rgba(255, 77, 157, 0.12)' : 'var(--ad-card)',
+            border: `1px solid ${activeFiltersCount > 0 ? '#FF4D9D' : 'var(--ad-border)'}`,
+            borderRadius: 12,
+            padding: '11px 16px',
+            color: activeFiltersCount > 0 ? '#FF4D9D' : 'var(--ad-text)',
+            fontSize: 13,
+            fontWeight: 800,
             cursor: 'pointer',
-            flexShrink: 0,
-            boxShadow: 'var(--ad-card-shadow)'
+            boxShadow: 'var(--ad-card-shadow)',
+            flexShrink: 0
           }}
-          title="Filter flags"
         >
-          <Filter size={18} />
+          <Filter size={16} />
+          <span>Filters</span>
+          {activeFiltersCount > 0 && (
+            <span style={{
+              width: 18, height: 18, borderRadius: '50%',
+              background: '#FF4D9D', color: '#fff',
+              fontSize: 10, fontWeight: 900,
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              {activeFiltersCount}
+            </span>
+          )}
         </button>
       </div>
 
-      {/* Active filter badges indicator */}
-      {hasActiveFilters && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-          <span style={{ fontSize: 11, color: 'var(--ad-text-sec)', fontWeight: 600 }}>Active filters:</span>
+      {/* Active Filter Pills Bar */}
+      {activeFiltersCount > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)' }}>Active:</span>
+          {selectedCategory !== 'ALL' && (
+            <FilterPill label={CATEGORY_META[selectedCategory]?.name || selectedCategory} onRemove={() => setSelectedCategory('ALL')} />
+          )}
+          {selectedSubcategory !== 'ALL' && (
+            <FilterPill label={selectedSubcategory} onRemove={() => setSelectedSubcategory('ALL')} />
+          )}
           {statusFilter !== 'all' && (
-            <FilterPill label={`Status: ${statusFilter}`} onRemove={() => setStatusFilter('all')} />
+            <FilterPill label={statusFilter === 'enabled' ? 'Enabled Only' : 'Disabled Only'} onRemove={() => setStatusFilter('all')} />
           )}
-          {categoryFilter !== 'all' && (
-            <FilterPill label={`Category: ${categoryFilter}`} onRemove={() => setCategoryFilter('all')} />
+          {planFilter !== 'all' && (
+            <FilterPill label={PLAN_LABELS[planFilter] || planFilter} onRemove={() => setPlanFilter('all')} />
           )}
-          {envFilter !== 'all' && (
-            <FilterPill label={`Env: ${envFilter}`} onRemove={() => setEnvFilter('all')} />
-          )}
-          {targetingFilter !== 'all' && (
-            <FilterPill label={`Target: ${targetingFilter}`} onRemove={() => setTargetingFilter('all')} />
-          )}
-          <button
-            onClick={clearAllFilters}
-            style={{ background: 'none', border: 'none', color: '#FF4D9D', fontSize: 11, fontWeight: 700, cursor: 'pointer', padding: '2px 6px' }}
-          >
+          <button onClick={clearAllFilters} style={{ background: 'none', border: 'none', color: '#FF4D9D', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
             Clear all
           </button>
         </div>
       )}
 
-      {/* â”€â”€ Feature Flag Cards List â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} style={{
-              height: 100, borderRadius: 16, background: 'var(--ad-card)',
-              border: '1px solid var(--ad-border)', opacity: 0.5, animation: 'adSpin 1.5s infinite alternate'
-            }} />
-          ))}
-        </div>
-      ) : error ? (
+      {/* ── Feature Flags Card List ──────────────────────────────────────── */}
+      {filteredFeatures.length === 0 ? (
         <div style={{
           background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-          borderRadius: 16, padding: '32px 20px', textAlign: 'center'
+          borderRadius: 20, padding: '48px 24px', textAlign: 'center',
+          boxShadow: 'var(--ad-card-shadow)'
         }}>
-          <AlertCircle size={32} color="#EF4444" style={{ margin: '0 auto 10px' }} />
-          <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--ad-text)' }}>{error}</div>
+          <div style={{
+            width: 56, height: 56, borderRadius: '50%', background: 'rgba(255, 77, 157, 0.1)',
+            color: '#FF4D9D', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px'
+          }}>
+            <Search size={26} />
+          </div>
+          <h3 style={{ fontSize: 16, fontWeight: 800, color: 'var(--ad-text)', margin: '0 0 6px' }}>
+            No matching features found
+          </h3>
+          <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '0 0 16px' }}>
+            Try adjusting your search query or removing active filters.
+          </p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={clearAllFilters}
             style={{
-              marginTop: 12, padding: '8px 16px', borderRadius: 8,
-              background: '#FF4D9D', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer'
+              padding: '8px 16px', borderRadius: 10, background: 'var(--ad-input)',
+              border: '1px solid var(--ad-border)', color: 'var(--ad-text)', fontSize: 12, fontWeight: 700, cursor: 'pointer'
             }}
           >
-            Retry
+            Reset Filters
           </button>
-        </div>
-      ) : filteredFlags.length === 0 ? (
-        <div style={{
-          background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-          borderRadius: 16, padding: '48px 20px', textAlign: 'center'
-        }}>
-          <Flag size={36} color="#FF4D9D" style={{ margin: '0 auto 12px', opacity: 0.8 }} />
-          <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ad-text)', marginBottom: 4 }}>
-            No feature flags found
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--ad-text-sec)', maxWidth: 320, margin: '0 auto 16px' }}>
-            {hasActiveFilters ? 'No feature flags match your search filters.' : 'Create your first feature flag to control application capabilities.'}
-          </div>
-          {hasActiveFilters ? (
-            <button
-              onClick={clearAllFilters}
-              style={{
-                padding: '9px 18px', borderRadius: 10, background: 'var(--ad-input)',
-                border: '1px solid var(--ad-border)', color: 'var(--ad-text)', fontSize: 13, fontWeight: 700, cursor: 'pointer'
-              }}
-            >
-              Clear Filters
-            </button>
-          ) : (
-            <button
-              onClick={openCreateModal}
-              style={{
-                padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
-                border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer'
-              }}
-            >
-              + Create Flag
-            </button>
-          )}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {filteredFlags.map(flag => {
-            const IconComp = ICON_MAP[flag.icon] || Flag;
+          {filteredFeatures.map(feature => {
+            const IconComp = feature.icon || Flag;
+
             return (
               <div
-                key={flag.id}
-                onClick={() => openDetails(flag)}
+                key={feature.key}
+                onClick={() => openDetails(feature)}
                 style={{
                   background: 'var(--ad-card)',
                   border: '1px solid var(--ad-border)',
                   borderRadius: 16,
                   padding: '14px 16px',
-                  boxShadow: 'var(--ad-card-shadow)',
-                  cursor: 'pointer',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10,
-                  transition: 'transform 0.12s ease, border-color 0.12s ease'
+                  alignItems: 'center',
+                  gap: 14,
+                  cursor: 'pointer',
+                  boxShadow: 'var(--ad-card-shadow)',
+                  transition: 'all 0.15s ease'
                 }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255, 77, 157, 0.4)'}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255, 77, 157, 0.35)'}
                 onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--ad-border)'}
               >
-                {/* Top Row: Icon + Title/Desc + Toggle Switch */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-                    {/* Icon Box */}
-                    <div style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 10,
-                      background: flag.iconBg || 'rgba(255, 77, 157, 0.12)',
-                      color: flag.iconColor || '#FF4D9D',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <IconComp size={19} />
-                    </div>
+                {/* Left Colored Icon */}
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: feature.iconBg,
+                  color: feature.iconColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <IconComp size={22} strokeWidth={2.3} />
+                </div>
 
-                    {/* Title and Short Description */}
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{
-                        fontSize: 14,
-                        fontWeight: 800,
-                        color: 'var(--ad-text)',
-                        letterSpacing: '-0.2px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {flag.name}
-                      </div>
-                      <div style={{
-                        fontSize: 12,
-                        color: 'var(--ad-text-sec)',
-                        marginTop: 2,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {flag.description || `Key: ${flag.key}`}
-                      </div>
-                    </div>
+                {/* Center Content */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--ad-text)' }}>
+                      {feature.name}
+                    </span>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: 'var(--ad-text-mut)',
+                      background: 'var(--ad-input)',
+                      padding: '2px 6px',
+                      borderRadius: 6,
+                      fontFamily: 'monospace'
+                    }}>
+                      {feature.key}
+                    </span>
                   </div>
 
-                  {/* Toggle & Chevron */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                    <Toggle
-                      checked={flag.enabled}
-                      onChange={(e) => handleToggle(e, flag)}
-                    />
-                    <ChevronRight size={18} color="var(--ad-text-sec)" style={{ opacity: 0.6 }} />
+                  <div style={{
+                    fontSize: 12,
+                    color: 'var(--ad-text-sec)',
+                    marginTop: 3,
+                    lineHeight: 1.35,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {feature.description}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: 100,
+                      background: `${feature.iconColor}18`,
+                      color: feature.iconColor
+                    }}>
+                      {feature.categoryName}
+                    </span>
+
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: 100,
+                      background: 'var(--ad-input)',
+                      color: 'var(--ad-text-sec)'
+                    }}>
+                      {feature.subcategory}
+                    </span>
+
+                    {feature.defaultPlan && (
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        padding: '2px 8px',
+                        borderRadius: 100,
+                        background: feature.defaultPlan === 'free' ? 'rgba(139, 143, 168, 0.15)' : 'rgba(214, 0, 54, 0.15)',
+                        color: feature.defaultPlan === 'free' ? '#8B8FA8' : '#D60036'
+                      }}>
+                        {PLAN_LABELS[feature.defaultPlan] || feature.defaultPlan}
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Bottom Row: Environment, Category, Targeting, Relative Time */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  flexWrap: 'wrap',
-                  fontSize: 11,
-                  fontWeight: 700
-                }}>
-                  {/* Environment Badge */}
-                  <span style={{
-                    padding: '2px 8px',
-                    borderRadius: 100,
-                    background: flag.environment === 'Production' ? 'rgba(34, 197, 94, 0.12)' : 'rgba(59, 130, 246, 0.12)',
-                    color: flag.environment === 'Production' ? '#22C55E' : '#3B82F6'
-                  }}>
-                    {flag.environment || 'Production'}
-                  </span>
-
-                  {/* Category Badge */}
-                  <span style={{
-                    padding: '2px 8px',
-                    borderRadius: 100,
-                    background: 'rgba(123, 97, 255, 0.12)',
-                    color: '#7B61FF'
-                  }}>
-                    {flag.category || 'Core Feature'}
-                  </span>
-
-                  {/* Targeting Badge */}
-                  <span style={{
-                    padding: '2px 8px',
-                    borderRadius: 100,
-                    background: 'var(--ad-input)',
-                    color: 'var(--ad-text-sec)'
-                  }}>
-                    {getTargetingLabel(flag.targeting, flag.rolloutPercentage)}
-                  </span>
-
-                  {/* Timestamp */}
-                  <span style={{ marginLeft: 'auto', color: 'var(--ad-text-mut)', fontWeight: 500, fontSize: 11 }}>
-                    {formatTimeAgo(flag.updatedAt || flag.createdAt)}
-                  </span>
+                {/* Right iOS Toggle Switch */}
+                <div onClick={e => e.stopPropagation()}>
+                  <IOSSwitch
+                    checked={feature.enabled}
+                    onChange={() => handleToggle(feature)}
+                  />
                 </div>
               </div>
             );
@@ -1220,94 +1251,105 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         </div>
       )}
 
-      {/* â”€â”€ Filter Bottom Sheet / Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Filter Bottom Sheet Modal ────────────────────────────────────── */}
       {filterOpen && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(3px)',
+          background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(3px)',
           display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
         }} onClick={() => setFilterOpen(false)}>
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              width: '100%', maxWidth: 480, maxHeight: '80vh', overflowY: 'auto',
+              width: '100%', maxWidth: 480, maxHeight: '85vh', overflowY: 'auto',
               background: 'var(--ad-card)', borderTopLeftRadius: 24, borderTopRightRadius: 24,
-              padding: '24px 20px', border: '1px solid var(--ad-border)',
-              display: 'flex', flexDirection: 'column', gap: 16,
-              boxShadow: '0 -10px 40px rgba(0,0,0,0.4)', animation: 'adSlideIn 0.2s ease'
+              padding: '24px 20px 36px', boxShadow: '0 -10px 40px rgba(0,0,0,0.4)',
+              display: 'flex', flexDirection: 'column', gap: 18,
+              animation: 'adSlideIn 0.2s ease'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--ad-text)' }}>Filter Flags</div>
-              <button
-                onClick={() => setFilterOpen(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer', padding: 4 }}
-              >
+              <h3 style={{ fontSize: 17, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
+                Filter 140+ Features
+              </h3>
+              <button onClick={() => setFilterOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer', padding: 4 }}>
                 <X size={18} />
               </button>
             </div>
 
             {/* Status Filter */}
             <div>
-              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 6 }}>Status</label>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 8 }}>
+                Status
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                 {['all', 'enabled', 'disabled'].map(s => (
                   <button
                     key={s}
-                    type="button"
                     onClick={() => setStatusFilter(s)}
                     style={{
-                      flex: 1, padding: '8px 10px', borderRadius: 8,
+                      padding: '8px 12px', borderRadius: 10,
                       border: `1px solid ${statusFilter === s ? '#FF4D9D' : 'var(--ad-border)'}`,
-                      background: statusFilter === s ? 'rgba(255, 77, 157, 0.12)' : 'var(--ad-input)',
+                      background: statusFilter === s ? 'rgba(255, 77, 157, 0.14)' : 'var(--ad-input)',
                       color: statusFilter === s ? '#FF4D9D' : 'var(--ad-text)',
-                      fontSize: 12, fontWeight: 700, cursor: 'pointer', textTransform: 'capitalize'
+                      fontSize: 12, fontWeight: 800, cursor: 'pointer', textTransform: 'capitalize'
                     }}
                   >
-                    {s}
+                    {s === 'all' ? 'All' : (s === 'enabled' ? 'Active' : 'Disabled')}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Environment Filter */}
+            {/* Category Selector */}
             <div>
-              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 6 }}>Environment</label>
+              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 8 }}>
+                Category
+              </label>
               <select
-                value={envFilter}
-                onChange={e => setEnvFilter(e.target.value)}
+                value={selectedCategory}
+                onChange={e => {
+                  setSelectedCategory(e.target.value);
+                  setSelectedSubcategory('ALL');
+                }}
                 style={{
                   width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
                   borderRadius: 10, padding: '10px 12px', color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, outline: 'none'
                 }}
               >
-                <option value="all">All Environments</option>
-                {ENVIRONMENTS.map(e => <option key={e.id} value={e.id}>{e.label}</option>)}
+                {Object.entries(CATEGORY_META).map(([k, v]) => (
+                  <option key={k} value={k}>{v.name} ({categoryCounts[k] || 0})</option>
+                ))}
               </select>
             </div>
 
-            {/* Category Filter */}
+            {/* Plan Tier Filter */}
             <div>
-              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 6 }}>Category</label>
+              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 8 }}>
+                Subscription Plan Access
+              </label>
               <select
-                value={categoryFilter}
-                onChange={e => setCategoryFilter(e.target.value)}
+                value={planFilter}
+                onChange={e => setPlanFilter(e.target.value)}
                 style={{
                   width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
                   borderRadius: 10, padding: '10px 12px', color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, outline: 'none'
                 }}
               >
-                <option value="all">All Categories</option>
-                {FLAG_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                <option value="all">All Plans</option>
+                <option value="free">Free Tier Included</option>
+                <option value="weekly">Weekly Pro Included</option>
+                <option value="monthly">Monthly Pro Included</option>
+                <option value="yearly">Yearly Pro Included</option>
               </select>
             </div>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
               <button
                 onClick={clearAllFilters}
                 style={{
-                  flex: 1, padding: '12px', borderRadius: 10, background: 'var(--ad-input)',
+                  flex: 1, padding: 12, borderRadius: 10, background: 'var(--ad-input)',
                   border: '1px solid var(--ad-border)', color: 'var(--ad-text)', fontSize: 13, fontWeight: 700, cursor: 'pointer'
                 }}
               >
@@ -1316,7 +1358,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
               <button
                 onClick={() => setFilterOpen(false)}
                 style={{
-                  flex: 1, padding: '12px', borderRadius: 10, background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
+                  flex: 1, padding: 12, borderRadius: 10, background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
                   border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer'
                 }}
               >
@@ -1326,13 +1368,13 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           </div>
         </div>
       )}
-        </>
-      )}
     </div>
   );
 }
 
-// â”€â”€ Micro Sub-Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ═════════════════════════════════════════════════════════════════════════
+// MICRO SUB-COMPONENTS
+// ═════════════════════════════════════════════════════════════════════════
 
 function StatMiniCard({ icon: Icon, iconColor, iconBg, title, value, subtitle, subColor }) {
   return (
@@ -1340,48 +1382,51 @@ function StatMiniCard({ icon: Icon, iconColor, iconBg, title, value, subtitle, s
       background: 'var(--ad-card)',
       border: '1px solid var(--ad-border)',
       borderRadius: 16,
-      padding: '14px 14px',
+      padding: '14px',
       boxShadow: 'var(--ad-card-shadow)',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between',
-      gap: 8
+      gap: 6
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{
-          width: 32, height: 32, borderRadius: 8,
+          width: 34, height: 34, borderRadius: 10,
           background: iconBg, color: iconColor,
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
-          <Icon size={16} />
+          <Icon size={18} strokeWidth={2.4} />
         </div>
-        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)' }}>{title}</span>
       </div>
-
-      <div>
-        <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--ad-text)', letterSpacing: '-0.3px', lineHeight: 1.1 }}>
-          {value}
-        </div>
-        <div style={{ fontSize: 10, fontWeight: 700, color: subColor, marginTop: 4 }}>
+      <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--ad-text)', letterSpacing: '-0.3px', marginTop: 4 }}>
+        {value}
+      </div>
+      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ad-text)' }}>
+        {title}
+      </div>
+      {subtitle && (
+        <div style={{ fontSize: 11, fontWeight: 600, color: subColor || 'var(--ad-text-sec)' }}>
           {subtitle}
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
-function Toggle({ checked, onChange, disabled }) {
+function IOSSwitch({ checked, onChange, disabled }) {
   return (
     <button
       type="button"
-      onClick={disabled ? undefined : onChange}
+      role="switch"
+      aria-checked={checked}
+      onClick={onChange}
+      disabled={disabled}
       style={{
-        width: 42,
-        height: 24,
-        borderRadius: 12,
+        width: 44,
+        height: 26,
+        borderRadius: 100,
         border: 'none',
+        background: checked ? 'linear-gradient(135deg, #FF4D9D, #7B61FF)' : 'rgba(148, 163, 184, 0.3)',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        background: checked ? '#22C55E' : 'rgba(120, 120, 140, 0.25)',
         position: 'relative',
         transition: 'background 0.2s',
         flexShrink: 0,
@@ -1391,11 +1436,11 @@ function Toggle({ checked, onChange, disabled }) {
       }}
     >
       <div style={{
-        width: 18,
-        height: 18,
+        width: 20,
+        height: 20,
         borderRadius: '50%',
         background: '#FFFFFF',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
         position: 'absolute',
         top: 3,
         left: checked ? 21 : 3,
