@@ -28,6 +28,7 @@ import { useAuthState, SUPER_ADMIN_EMAIL } from '../services/authService';
 import GoldenAdminBadge from './GoldenAdminBadge';
 import FeatureManagementPanel from './FeatureManagementPanel';
 import AdminDashboard from './admin/AdminDashboard';
+import FeatureFlagsPanel from './admin/FeatureFlagsPanel';
 import FeatureRegistry from './admin/FeatureRegistry';
 import PlanManager from './admin/PlanManager';
 import FeatureMatrixManager from './admin/FeatureMatrixManager';
@@ -166,7 +167,7 @@ const LABELS = {
 
 const NAV_MAIN = [
   { id: 'dashboard',        icon: LayoutDashboard,    label: 'Dashboard' },
-  { id: 'feature-flags',    icon: Flag,               label: 'Feature Flags' },
+  { id: 'feature-flags',    icon: Flag,               label: 'Feature Flags', isNew: true },
   { id: 'feature-matrix',   icon: Sliders,            label: 'Feature Matrix' },
   { id: 'users',            icon: Users,              label: 'Users' },
   { id: 'subscriptions',    icon: CreditCard,         label: 'Subscriptions' },
@@ -549,7 +550,7 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
 
       {/* ── 17 Clean Navigation Items ───────────────────────────────────── */}
       <div className="ad-sidebar-nav ad-scroll" style={{ flex: 1, overflowY: 'auto', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {NAV_MAIN.map(({ id, icon: Icon, label }) => {
+        {NAV_MAIN.map(({ id, icon: Icon, label, isNew }) => {
           const isActive = active === id;
           return (
             <button
@@ -594,6 +595,21 @@ function Sidebar({ active, setActive, isMobile, open, onClose, currentUser, isDa
               <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {label}
               </span>
+              {isNew && (
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 800,
+                  padding: '2px 6px',
+                  borderRadius: 100,
+                  background: 'rgba(255, 77, 157, 0.2)',
+                  color: '#FF4D9D',
+                  lineHeight: 1,
+                  letterSpacing: '0.3px',
+                  flexShrink: 0
+                }}>
+                  New
+                </span>
+              )}
             </button>
           );
         })}
@@ -4637,7 +4653,7 @@ function AdminPanelInner() {
       setRemoteConfig(c);
       refreshAudit();
     }} isDark={isDark} />,
-    'feature-flags': <FeatureRegistry isDark={isDark} />,
+    'feature-flags': <FeatureFlagsPanel currentUser={currentUser} isDark={isDark} />,
     maintenance:     <MaintenancePanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
