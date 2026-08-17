@@ -5627,7 +5627,7 @@ export default function App() {
                                           position: 'relative'
                                         }}
                                       >
-                                        <PaidCrownBadge featureId={featId} fallbackFeatureId="qr_background_shapes" position="corner" size={9} />
+                                        <PaidCrownBadge featureId={featId} position="corner" size={9} />
                                         <MiniQRCanvasBg 
                                           qrParams={{
                                             dotStyle,

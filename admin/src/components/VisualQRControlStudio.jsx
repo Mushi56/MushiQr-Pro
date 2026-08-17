@@ -14,7 +14,7 @@ import {
   Send, AtSign, CheckCircle2, SlidersHorizontal, ChevronRight, Eye,
   Grid, Box, Wand2, ArrowRightLeft, Lock, Unlock, EyeOff, LayoutGrid,
   FileCheck, Star, Heart, Bookmark, UploadCloud, Brush, Layers2,
-  Eraser, Paintbrush
+  Eraser, Paintbrush, Maximize
 } from 'lucide-react';
 import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
@@ -105,7 +105,7 @@ export const ALL_EYE_STYLES = [
 ];
 
 export const ALL_LOGO_PRESETS = [
-  { slug: 'custom-icon', name: 'Mushi App Icon', color: '#D60036', url: '/presets/Icon.avif' },
+  { slug: 'custom-icon', name: 'Custom App Icon', color: '#D60036', url: '/presets/Icon.avif' },
   { slug: 'facebook', name: 'Facebook', color: '#1877F2', url: '/presets/facebook.avif' },
   { slug: 'whatsapp', name: 'WhatsApp', color: '#25D366', url: '/presets/whatsapp.avif' },
   { slug: 'instagram', name: 'Instagram', color: '#E4405F', url: '/presets/instagram.avif' },
@@ -130,12 +130,34 @@ export const ALL_LOGO_PRESETS = [
   { slug: 'chatting', name: 'Direct Chat', color: '#4CAF50', url: '/presets/chatting.avif' },
   { slug: 'dribbble', name: 'Dribbble Design', color: '#EA4C89', url: '/presets/dribbble.avif' },
   { slug: 'behance', name: 'Behance Portfolio', color: '#1769FF', url: '/presets/behance.avif' },
+  { slug: 'whatsapp-1', name: 'WhatsApp Secondary', color: '#25D366', url: '/presets/whatsapp (1).avif' },
+  { slug: 'gmail-1', name: 'Gmail Secondary', color: '#EA4335', url: '/presets/gmail (1).avif' },
+  { slug: 'messenger-1', name: 'Messenger Secondary', color: '#0084FF', url: '/presets/messenger (1).avif' },
+  { slug: 'wifi-1', name: 'Wi-Fi Secondary', color: '#2196F3', url: '/presets/wifi (1).avif' },
+  { slug: 'youtube-1', name: 'YouTube Secondary', color: '#FF0000', url: '/presets/youtube (1).avif' },
   { slug: 'google-calendar', name: 'Google Calendar', color: '#4285F4', url: '/presets/google-calendar.avif' },
   { slug: 'google-maps', name: 'Google Maps GPS', color: '#34A853', url: '/presets/google-maps.avif' },
   { slug: 'google-play', name: 'Google Play Store', color: '#4285F4', url: '/presets/google-play.avif' },
+  { slug: 'internet-connection', name: 'Internet Connection', color: '#2196F3', url: '/presets/internet-connection.avif' },
+  { slug: 'january', name: 'Calendar Date', color: '#E91E63', url: '/presets/january.avif' },
+  { slug: 'picture', name: 'Image Gallery Badge', color: '#9C27B0', url: '/presets/picture.avif' },
   { slug: 'skype', name: 'Skype Video', color: '#00AFF0', url: '/presets/skype.avif' },
+  { slug: 'social', name: 'Social Group', color: '#3F51B5', url: '/presets/social.avif' },
+  { slug: 'tik-tok', name: 'TikTok Secondary', color: '#000000', url: '/presets/tik-tok.avif' },
   { slug: 'viber', name: 'Viber Messenger', color: '#7360F2', url: '/presets/viber.avif' },
   { slug: 'vimeo', name: 'Vimeo Video', color: '#1AB7EA', url: '/presets/vimeo.avif' }
+];
+
+export const SOCIAL_TEXTURES = [
+  { slug: 'facebook', name: 'Facebook', color: '#1877F2', url: '/textures/facebook_texture.webp' },
+  { slug: 'whatsapp', name: 'WhatsApp', color: '#25D366', url: '/textures/whatsapp_texture.webp' },
+  { slug: 'instagram', name: 'Instagram', color: '#E4405F', url: '/textures/instagram_texture.webp' },
+  { slug: 'youtube', name: 'YouTube', color: '#FF0000', url: '/textures/youtube_texture.webp' },
+  { slug: 'tiktok', name: 'TikTok', color: '#000000', url: '/textures/tiktok_texture.webp' },
+  { slug: 'snapchat', name: 'Snapchat', color: '#FFFC00', url: '/textures/snapchat_texture.webp' },
+  { slug: 'twitter', name: 'Twitter / X', color: '#1DA1F2', url: '/textures/twitter_texture.webp' },
+  { slug: 'telegram', name: 'Telegram', color: '#0088CC', url: '/textures/telegram_texture.webp' },
+  { slug: 'spotify', name: 'Spotify', color: '#1DB954', url: '/textures/spotify_texture.webp' }
 ];
 
 export const ALL_TEXTURES = [
@@ -196,70 +218,169 @@ export const ALL_COLOR_TOOLS = [
 
 export const ALL_COLOR_THEME_PRESETS = [
   { id: 'classic', name: 'Classic B&W', qr: '#000000', bg: '#FFFFFF', desc: 'Standard high-contrast' },
-  { id: 'ocean', name: 'Ocean Blue', qr: '#0055ff', bg: '#eef4ff', desc: 'Calm electric ocean hue' },
-  { id: 'forest', name: 'Forest Green', qr: '#008844', bg: '#f0fff4', desc: 'Fresh organic green' },
-  { id: 'sunset', name: 'Sunset Orange', qr: '#ff4400', bg: '#fff5f0', desc: 'Warm glowing sunset' },
-  { id: 'purple', name: 'Royal Purple', qr: '#8800cc', bg: '#faf0ff', desc: 'Vibrant majesty purple' },
-  { id: 'dark', name: 'Dark Cyberpunk', qr: '#00ffff', bg: '#111122', desc: 'Neon cyan on dark navy' },
-  { id: 'monochrome', name: 'Monochrome Inverted', qr: '#ffffff', bg: '#000000', desc: 'White matrix on black' },
-  { id: 'cyberpunk', name: 'Cyberpunk Yellow', qr: '#ffff00', bg: '#110022', desc: 'Neon yellow on deep purple' },
-  { id: 'crimson', name: 'Crimson Passion', qr: '#D60036', bg: '#fff0f3', desc: 'Passionate brand crimson' },
-  { id: 'emerald', name: 'Emerald Mint', qr: '#10B981', bg: '#ECFDF5', desc: 'Vibrant clean emerald' }
+  { id: 'midnight', name: 'Midnight Dark', qr: '#FFFFFF', bg: '#030305', desc: 'Sleek dark theme' },
+  { id: 'vibrant_red', name: 'Vibrant Red', qr: '#FF3B30', bg: '#FFFFFF', desc: 'Bright fiery red' },
+  { id: 'electric_blue', name: 'Electric Blue', qr: '#007AFF', bg: '#FFFFFF', desc: 'Pure vivid iOS blue' },
+  { id: 'emerald', name: 'Emerald Green', qr: '#34C759', bg: '#FFFFFF', desc: 'Vibrant clean emerald' },
+  { id: 'sunny', name: 'Sunny Gold', qr: '#FFCC00', bg: '#FFFFFF', desc: 'Golden sunshine yellow' },
+  { id: 'purple_neon', name: 'Purple Neon', qr: '#AF52DE', bg: '#0F0F1A', desc: 'Cyber violet glow' },
+  { id: 'orange_glow', name: 'Orange Glow', qr: '#FF9500', bg: '#FFFFFF', desc: 'Warm glowing orange' },
+  { id: 'indigo', name: 'Indigo Deep', qr: '#5856D6', bg: '#FFFFFF', desc: 'Modern deep indigo' },
+  { id: 'pink_punch', name: 'Pink Punch', qr: '#FF2D55', bg: '#FFFFFF', desc: 'Punchy vibrant pink' },
+  { id: 'cyan_neon', name: 'Cyan Neon', qr: '#00F0FF', bg: '#0A0A0F', desc: 'Futuristic aqua cyan' },
+  { id: 'rose_gold', name: 'Rose Gold', qr: '#E91E63', bg: '#FFF1F2', desc: 'Elegant rose pastel' },
+  { id: 'deep_ocean', name: 'Deep Ocean', qr: '#1A237E', bg: '#E8EAF6', desc: 'Deep navy maritime' },
+  { id: 'forest', name: 'Forest Green', qr: '#1B5E20', bg: '#E8F5E9', desc: 'Fresh organic canopy' },
+  { id: 'hot_chili', name: 'Hot Chili', qr: '#B71C1C', bg: '#FFEBEE', desc: 'Spicy ruby crimson' },
+  { id: 'amber', name: 'Amber Glow', qr: '#FF6F00', bg: '#FFF8E1', desc: 'Rich glowing amber' },
+  { id: 'teal_mist', name: 'Teal Mist', qr: '#004D40', bg: '#E0F2F1', desc: 'Subtle calming teal' },
+  { id: 'slate', name: 'Slate Gray', qr: '#263238', bg: '#ECEFF1', desc: 'Executive slate' },
+  { id: 'royal_purple', name: 'Royal Purple', qr: '#4A148C', bg: '#F3E5F5', desc: 'Majestic deep purple' },
+  { id: 'lemonade', name: 'Lemonade', qr: '#FBC02D', bg: '#FFFDE7', desc: 'Zesty lemon yellow' },
+  { id: 'cyberpunk', name: 'Cyberpunk', qr: '#FFFF00', bg: '#FF00FF', desc: 'High energy cyberpunk' },
+  { id: 'matrix', name: 'Matrix Green', qr: '#00FF00', bg: '#000000', desc: 'Terminal matrix green' },
+  { id: 'blood_orange', name: 'Blood Orange', qr: '#FF3D00', bg: '#FBE9E7', desc: 'Bold citrus orange' },
+  { id: 'space_grey', name: 'Space Grey', qr: '#9E9E9E', bg: '#212121', desc: 'Stealth industrial gray' },
+  { id: 'mint_leaf', name: 'Mint Leaf', qr: '#00B894', bg: '#E8FDF9', desc: 'Refreshing crisp mint' },
+  { id: 'grape', name: 'Grape Violet', qr: '#6C5CE7', bg: '#EFEEFE', desc: 'Rich grape violet' },
+  { id: 'sky_high', name: 'Sky High', qr: '#0984E3', bg: '#EBF5FF', desc: 'Open sky blue' },
+  { id: 'coral', name: 'Coral Red', qr: '#D63031', bg: '#FFFAFA', desc: 'Warm coral tone' },
+  { id: 'golden_hour', name: 'Golden Hour', qr: '#F39C12', bg: '#1A1A1A', desc: 'Sunset golden glow' },
+  { id: 'tropical', name: 'Tropical Aqua', qr: '#00D1B2', bg: '#F5FFFA', desc: 'Exotic lagoon teal' },
+  { id: 'volcano', name: 'Volcano Flame', qr: '#E74C3C', bg: '#34495E', desc: 'Lava on dark slate' },
+  { id: 'amethyst', name: 'Amethyst', qr: '#9B59B6', bg: '#F4ECF7', desc: 'Pastel jewel amethyst' },
+  { id: 'cobalt', name: 'Cobalt Blue', qr: '#2980B9', bg: '#EBF5FB', desc: 'Deep brilliant cobalt' },
+  { id: 'pumpkin', name: 'Pumpkin Orange', qr: '#D35400', bg: '#FBEEE6', desc: 'Autumn pumpkin hue' },
+  { id: 'asbestos', name: 'Asbestos Mineral', qr: '#7F8C8D', bg: '#F2F4F4', desc: 'Neutral smooth gray' },
+  { id: 'belize', name: 'Belize Blue', qr: '#2980B9', bg: '#2C3E50', desc: 'Caribbean dark ocean' },
+  { id: 'carrot', name: 'Carrot Sunset', qr: '#E67E22', bg: '#1A1A1A', desc: 'Dark amber carrot' },
+  { id: 'sunflower', name: 'Sunflower Yellow', qr: '#F1C40F', bg: '#2C3E50', desc: 'Sunflower on midnight' },
+  { id: 'turquoise', name: 'Turquoise Calm', qr: '#1ABC9C', bg: '#16A085', desc: 'Monochrome turquoise' },
+  { id: 'wet_asphalt', name: 'Wet Asphalt', qr: '#ECF0F1', bg: '#34495E', desc: 'Minimalist street grey' },
+  { id: 'alizarin', name: 'Alizarin Crimson', qr: '#E74C3C', bg: '#FFFFFF', desc: 'Pure artistic crimson' },
+  { id: 'wisteria', name: 'Wisteria Bloom', qr: '#8E44AD', bg: '#FFFFFF', desc: 'Lavender floral purple' },
+  { id: 'silver', name: 'Silver Slate', qr: '#2C3E50', bg: '#BDC3C7', desc: 'Modern metallic silver' },
+  { id: 'concrete', name: 'Concrete Clean', qr: '#FFFFFF', bg: '#95A5A6', desc: 'Clean architectural' },
+  { id: 'green_sea', name: 'Green Sea', qr: '#FFFFFF', bg: '#16A085', desc: 'Deep maritime sea' },
+  { id: 'shadow', name: 'Dark Shadow', qr: '#34495E', bg: '#2C3E50', desc: 'Dark stealth minimal' },
+  { id: 'midnight_blue', name: 'Midnight Blue', qr: '#2C3E50', bg: '#FFFFFF', desc: 'Corporate deep navy' },
+  { id: 'soft_pink', name: 'Soft Pink', qr: '#FF80AB', bg: '#FCE4EC', desc: 'Delicate pastel pink' },
+  { id: 'cool_mint', name: 'Cool Mint', qr: '#1DE9B6', bg: '#E0F2F1', desc: 'Icy cool mint' },
+  { id: 'light_blue', name: 'Light Blue', qr: '#00B0FF', bg: '#E1F5FE', desc: 'Clear daylight blue' },
+  { id: 'warm_amber', name: 'Warm Amber', qr: '#FFAB00', bg: '#FFF8E1', desc: 'Golden warm honey' },
+  { id: 'deep_purple', name: 'Deep Purple', qr: '#6200EA', bg: '#EDE7F6', desc: 'Intense ultraviolet' }
 ];
 
 export const ALL_LOGO_CONTROLS = [
   { id: 'custom_logo_upload', name: 'Custom Brand Logo Upload', desc: 'Upload personal image/photo logo inside QR center', icon: UploadCloud, defaultPlan: 'weekly' },
-  { id: 'custom_logo_presets', name: 'Brand Logo Presets Gallery', desc: 'Pre-installed library of 40+ social, fintech & tech brand logos', icon: Image, defaultPlan: 'free' },
-  { id: 'qr_logo_bg_remover', name: 'AI Logo Background Remover & Crop', desc: 'Remove image backgrounds and custom crop logos', icon: Eraser, defaultPlan: 'weekly' },
-  { id: 'qr_logo_stroke_shadow', name: 'Logo Stroke, Shadow & Card', desc: 'Custom outline borders, badge card backings & drop shadows', icon: Paintbrush, defaultPlan: 'free' }
+  { id: 'custom_logo_presets', name: 'Brand Logo Presets Gallery', desc: 'Pre-installed library of 41 social, fintech & tech brand logos', icon: Image, defaultPlan: 'free' },
+  { id: 'qr_logo_transforms', name: 'Logo Transforms (Size, Rotate, Opacity)', desc: 'Full transform suite: scale percentage, rotation angle & opacity slider', icon: Sliders, defaultPlan: 'free' },
+  { id: 'qr_logo_stroke_shadow', name: 'Logo Stroke, Shadow & Card Backing', desc: 'Custom outline stroke color, card badge shapes & drop shadow styling', icon: Paintbrush, defaultPlan: 'free' },
+  { id: 'qr_logo_bg_remover', name: 'AI Logo Background Remover & Crop', desc: 'Automatic 1-click AI transparency cutout and square/circle image cropper', icon: Eraser, defaultPlan: 'weekly' },
+  { id: 'qr_color_texture', name: 'Logo Texture Overlay & Cards', desc: 'Apply brand texture pattern overlays and contrast card frames', icon: Layers, defaultPlan: 'weekly' }
 ];
 
 export const ALL_TEXT_CONTROLS = [
   { id: 'qr_center_text', name: 'Center Text Watermark Embed', desc: 'Custom text banner embedded directly inside the QR code center', icon: Type, defaultPlan: 'weekly' },
   { id: 'qr_text_frame', name: 'CTA Frame Text (Top / Bottom)', desc: 'Call to action text rendered inside the frame badge header/footer', icon: LayoutGrid, defaultPlan: 'free' },
+  { id: 'qr_text_transforms', name: 'Text Transforms (Size, Position, Rotate)', desc: 'Fine-grain scaling slider, 3x3 alignment positioning grid & 360-degree rotation', icon: Sliders, defaultPlan: 'free' },
+  { id: 'qr_text_styling', name: 'Text Colors, Stroke & Drop Shadow', desc: 'Custom typography font colors, gradient fill, outline stroke & shadow glow', icon: Palette, defaultPlan: 'free' },
   { id: 'qr_custom_font_upload', name: 'Custom TTF / OTF Font Upload', desc: 'Upload proprietary brand font files directly to QR matrix', icon: UploadCloud, defaultPlan: 'weekly' },
-  { id: 'qr_text_styling', name: 'Text Colors, Stroke & Drop Shadow', desc: 'Fine-tune typography colors, outlines, glow and drop shadows', icon: Palette, defaultPlan: 'free' }
+  { id: 'qr_text_fonts', name: 'Google Fonts Typography Suite', desc: 'Master access switch for all 30 curated Google fonts', icon: Type, defaultPlan: 'free' }
+];
+
+export const ALL_TEXT_SHAPES = [
+  { id: 'solid', name: 'Solid Box', desc: 'Solid filled container card badge' },
+  { id: 'rounded', name: 'Rounded Box', desc: 'Soft curved corner card badge' },
+  { id: 'pill', name: 'Pill Box', desc: 'Capsule stadium pill shape' },
+  { id: 'outline', name: 'Outline Box', desc: 'Border outline neon box' },
+  { id: 'underline', name: 'Underline Ribbon', desc: 'Lower text underline bar' },
+  { id: 'ribbon', name: 'Badge Ribbon', desc: 'Decorative ribbon badge banner' },
+  { id: 'glow', name: 'Glow Effect Card', desc: 'Ambient neon glow backing' },
+  { id: 'brackets', name: 'Focus Brackets', desc: 'Corner camera focus brackets' },
+  { id: 'hexagon', name: 'Hexagon Badge', desc: '6-sided cyber polygon shape' },
+  { id: 'dots', name: 'Dotted Box', desc: 'Ticket perforated dotted outline' }
 ];
 
 export const ALL_EXPORT_FORMATS = [
-  { id: 'export_png', name: 'PNG Image Export', desc: 'Download high-res PNG image', defaultPlan: 'free' },
-  { id: 'export_jpg', name: 'JPG Image Export', desc: 'Download compressed JPG image', defaultPlan: 'free' },
-  { id: 'export_svg', name: 'SVG Vector Export', desc: 'Download scalable SVG vector file', defaultPlan: 'weekly' },
-  { id: 'export_pdf', name: 'PDF Document Export', desc: 'Download print-ready A4 PDF', defaultPlan: 'weekly' }
+  { id: 'export_png', name: 'PNG Image Export', desc: 'Download high-res PNG image', icon: Image, defaultPlan: 'free' },
+  { id: 'export_jpg', name: 'JPG Image Export', desc: 'Download compressed JPG image', icon: Image, defaultPlan: 'free' },
+  { id: 'export_svg', name: 'SVG Vector Export', desc: 'Download scalable SVG vector file', icon: Box, defaultPlan: 'weekly' },
+  { id: 'export_pdf', name: 'PDF Document Export', desc: 'Download print-ready A4 PDF', icon: FileText, defaultPlan: 'weekly' }
 ];
 
 export const ALL_EXPORT_QUALITIES = [
-  { id: 'export_quality_low', name: 'Quality: Low (512px)', desc: 'Export standard low resolution (512px)', defaultPlan: 'free' },
-  { id: 'export_quality_medium', name: 'Quality: Normal (1024px)', desc: 'Export normal resolution (1024px)', defaultPlan: 'free' },
-  { id: 'export_quality_hd', name: 'Quality: HD (2048px)', desc: 'Export crisp HD resolution (2048px)', defaultPlan: 'weekly' },
-  { id: 'export_quality_ultra', name: 'Quality: 4K Ultra (4096px)', desc: 'Export ultra 4K resolution (4096px)', defaultPlan: 'weekly' },
-  { id: 'export_native_share', name: 'Native OS Share Sheet', desc: 'Share file directly to social apps', defaultPlan: 'free' }
+  { id: 'export_quality_low', name: 'Quality: Low (512px)', desc: 'Export standard low resolution (512px)', icon: Sliders, defaultPlan: 'free' },
+  { id: 'export_quality_medium', name: 'Quality: Normal (1024px)', desc: 'Export normal resolution (1024px)', icon: Sliders, defaultPlan: 'free' },
+  { id: 'export_quality_hd', name: 'Quality: HD (2048px)', desc: 'Export crisp HD resolution (2048px)', icon: Sparkles, defaultPlan: 'weekly' },
+  { id: 'export_quality_ultra', name: 'Quality: 4K Ultra (4096px)', desc: 'Export ultra 4K resolution (4096px)', icon: Crown, defaultPlan: 'weekly' },
+  { id: 'export_native_share', name: 'Native OS Share Sheet', desc: 'Share file directly to social apps', icon: Share2, defaultPlan: 'free' }
 ];
 
 export const ALL_GRADIENTS = [
-  { id: 'sunset_glow', name: 'Sunset Glow', from: '#FF512F', to: '#DD2476' },
-  { id: 'ocean_breeze', name: 'Ocean Breeze', from: '#00c6ff', to: '#0072ff' },
-  { id: 'neon_violet', name: 'Neon Violet', from: '#7F00FF', to: '#E100FF' },
-  { id: 'lush_emerald', name: 'Lush Emerald', from: '#11998e', to: '#38ef7d' },
-  { id: 'midnight_gold', name: 'Midnight Gold', from: '#F59E0B', to: '#D97706' },
-  { id: 'cyberpunk_aqua', name: 'Cyberpunk Aqua', from: '#00F0FF', to: '#7000FF' },
-  { id: 'fire_phoenix', name: 'Fire Phoenix', from: '#f12711', to: '#f5af19' },
-  { id: 'royal_amethyst', name: 'Royal Amethyst', from: '#654ea3', to: '#eaafc8' },
-  { id: 'deep_space', name: 'Deep Space', from: '#000428', to: '#004e92' },
-  { id: 'sweet_candy', name: 'Sweet Candy', from: '#FF007F', to: '#7928CA' },
-  { id: 'electric_blue', name: 'Electric Blue', from: '#4facfe', to: '#00f2fe' },
-  { id: 'citrus_lime', name: 'Citrus Lime', from: '#0ba360', to: '#3cba92' }
+  { id: 'sunset', name: 'Sunset Glow', from: '#FF512F', to: '#DD2476' },
+  { id: 'ocean', name: 'Ocean Breeze', from: '#2193b0', to: '#6dd5ed' },
+  { id: 'neon_night', name: 'Neon Night', from: '#00F0FF', to: '#7000FF' },
+  { id: 'lush', name: 'Lush Forest', from: '#56ab2f', to: '#a8e063' },
+  { id: 'midnight', name: 'Midnight Carbon', from: '#232526', to: '#414345' },
+  { id: 'candy', name: 'Sweet Candy', from: '#ee9ca7', to: '#ffdde1' },
+  { id: 'skyline', name: 'Skyline Blue', from: '#1488CC', to: '#2B32B2' },
+  { id: 'royal', name: 'Royal Steel', from: '#16222A', to: '#3A6073' },
+  { id: 'sunrise', name: 'Morning Sunrise', from: '#f12711', to: '#f5af19' },
+  { id: 'purple_love', name: 'Purple Love', from: '#cc2b5e', to: '#753a88' },
+  { id: 'deep_sea', name: 'Deep Sea Depth', from: '#2C3E50', to: '#4CA1AF' },
+  { id: 'fire', name: 'Blazing Fire', from: '#f83600', to: '#f9d423' },
+  { id: 'peach', name: 'Sweet Peach', from: '#ED4264', to: '#FFEDBC' },
+  { id: 'violet', name: 'Neon Violet', from: '#7F00FF', to: '#E100FF' },
+  { id: 'emerald', name: 'Emerald Clean', from: '#00b09b', to: '#96c93d' },
+  { id: 'bora_bora', name: 'Bora Bora', from: '#2BC0E4', to: '#EAECC6' },
+  { id: 'misty', name: 'Misty Blue', from: '#E0EAFC', to: '#CFDEF3' },
+  { id: 'steel', name: 'Brushed Steel', from: '#1F1C2C', to: '#928DAB' },
+  { id: 'juicy', name: 'Juicy Orange', from: '#FF8008', to: '#FFC837' },
+  { id: 'pinky', name: 'Pinky Flare', from: '#DD5E89', to: '#F7BB97' },
+  { id: 'seaweed', name: 'Seaweed Dark', from: '#4b6cb7', to: '#182848' },
+  { id: 'cherry', name: 'Cherry Blossom', from: '#EB3349', to: '#F45C43' },
+  { id: 'mojito', name: 'Fresh Mojito', from: '#48c6ef', to: '#6f86d6' },
+  { id: 'aqua', name: 'Electric Aqua', from: '#00c6ff', to: '#0072ff' },
+  { id: 'blueberry', name: 'Blueberry Pop', from: '#6a11cb', to: '#2575fc' },
+  { id: 'bloody_mary', name: 'Bloody Mary', from: '#FF512F', to: '#DD2476' },
+  { id: 'rose', name: 'Soft Rose', from: '#e91e63', to: '#ff8a80' },
+  { id: 'gold', name: 'Metallic Gold', from: '#D4AF37', to: '#F9E29C' },
+  { id: 'mint', name: 'Clean Mint', from: '#00b09b', to: '#96c93d' },
+  { id: 'indigo_grad', name: 'Indigo Stream', from: '#396afc', to: '#2948ff' },
+  { id: 'lime', name: 'Citrus Lime', from: '#a8ff78', to: '#78ffd6' },
+  { id: 'flamingo', name: 'Flamingo Feather', from: '#ff4b2b', to: '#ff416c' },
+  { id: 'galaxy', name: 'Cosmic Galaxy', from: '#240b36', to: '#c31432' },
+  { id: 'space', name: 'Deep Space', from: '#0f0c29', to: '#302b63' },
+  { id: 'cloudy', name: 'Cloudy Horizon', from: '#fdfbfb', to: '#ebedee' },
+  { id: 'forest_grad', name: 'Deep Forest', from: '#5a3f37', to: '#2c7744' },
+  { id: 'wine', name: 'Wine Velvet', from: '#af2d2d', to: '#631010' },
+  { id: 'magic', name: 'Magic Spell', from: '#5f2c82', to: '#49a09d' },
+  { id: 'plum', name: 'Soft Plum', from: '#ada996', to: '#f2f2f2' },
+  { id: 'steel_blue', name: 'Steel Blue', from: '#3a7bd5', to: '#00d2ff' },
+  { id: 'turquoise_grad', name: 'Turquoise Gem', from: '#136a8a', to: '#267871' },
+  { id: 'venice', name: 'Venice Water', from: '#085078', to: '#85D8CE' },
+  { id: 'horizon', name: 'Desert Horizon', from: '#003973', to: '#E5E5BE' },
+  { id: 'electric', name: 'Electric Spark', from: '#6a11cb', to: '#2575fc' },
+  { id: 'lava', name: 'Lava Stream', from: '#f12711', to: '#f5af19' },
+  { id: 'toxic', name: 'Toxic Glow', from: '#11998e', to: '#38ef7d' },
+  { id: 'citrus', name: 'Citrus Burst', from: '#FDC830', to: '#F37335' },
+  { id: 'frost', name: 'Arctic Frost', from: '#000428', to: '#004e92' },
+  { id: 'coal', name: 'Coal Carbon', from: '#000000', to: '#434343' },
+  { id: 'titanium', name: 'Titanium Pure', from: '#283048', to: '#859398' }
 ];
 
 export const ALL_BG_SHAPES = [
-  { id: 'solid', name: 'Solid Rectangle Card', desc: 'Standard rectangular card backing' },
-  { id: 'rounded', name: 'Rounded Card', desc: 'Smooth curved card backing' },
-  { id: 'circle', name: 'Circular Shield Badge', desc: 'Concentric circular backing' },
-  { id: 'pill', name: 'Horizontal Pill Capsule', desc: 'Capsule shaped backing' },
-  { id: 'ribbon', name: 'Banner Ribbon Card', desc: 'Flagged decorative banner' },
-  { id: 'glow', name: 'Ambient Radiant Glow', desc: 'Soft neon blur shadow backing' },
-  { id: 'hexagon', name: 'Cyber Hexagon Badge', desc: '6-sided polygon backing' },
-  { id: 'brackets', name: 'Camera Focus Brackets', desc: 'Camera lens corner framing' }
+  { id: 'full', name: 'Full Canvas Backing', desc: 'Standard solid square canvas backing', defaultPlan: 'free' },
+  { id: 'rounded', name: 'Rounded Box Card', desc: 'Curved rectangle card backing', defaultPlan: 'free' },
+  { id: 'squircle', name: 'Squircle Box Backing', desc: 'Super-ellipse rounded backing', defaultPlan: 'weekly' },
+  { id: 'cut', name: 'Cut / Beveled Shape', desc: 'Chamfered beveled polygon corner backing', defaultPlan: 'weekly' },
+  { id: 'leaf', name: 'Organic Leaf Shape', desc: 'Botanical diagonal leaf contour', defaultPlan: 'weekly' },
+  { id: 'circle', name: 'Circle Shield Badge', desc: 'Concentric circular badge backing', defaultPlan: 'weekly' },
+  { id: 'shield', name: 'Security Knight Shield', desc: 'Defensive crest shield backing', defaultPlan: 'weekly' },
+  { id: 'hexagon', name: 'Cyber Hexagon Badge', desc: '6-sided futuristic polygon backing', defaultPlan: 'weekly' },
+  { id: 'octagon', name: 'Industrial Octagon', desc: '8-sided industrial octagon backing', defaultPlan: 'weekly' },
+  { id: 'diamond', name: 'Precious Diamond', desc: '45-degree angled diamond backing', defaultPlan: 'weekly' }
 ];
 
 export const ALL_FONTS = [
@@ -293,21 +414,6 @@ export const ALL_FONTS = [
   { id: 'Orbitron', name: 'Orbitron', category: 'Futuristic Sci-Fi' },
   { id: 'Quicksand', name: 'Quicksand', category: 'Soft Rounded' },
   { id: 'Satisfy', name: 'Satisfy', category: 'Signature Script' }
-];
-
-export const ALL_FRAMES = [
-  { id: 'none', name: 'No Outer Frame', desc: 'Raw borderless QR matrix' },
-  { id: 'solid', name: 'Solid Border Card', desc: 'Crisp bounding box card' },
-  { id: 'rounded', name: 'Rounded Shield Frame', desc: 'Curved corners container' },
-  { id: 'pill', name: 'Bottom "SCAN ME" Pill', desc: 'Modern high-conversion CTA pill' },
-  { id: 'outline', name: 'Neon Outline Frame', desc: 'Glow outline frame' },
-  { id: 'underline', name: 'Bottom Ribbon Banner', desc: 'Lower text ribbon banner' },
-  { id: 'ribbon', name: 'Badge Stamp Ribbon', desc: 'Diagonal corner ribbon' },
-  { id: 'glow', name: 'Ambient Neon Glow', desc: 'Radiant shadow glow' },
-  { id: 'brackets', name: 'Camera Focus Brackets', desc: 'Lens finder corners' },
-  { id: 'hexagon', name: 'Cyber Hexagon Badge', desc: '6-sided geometric frame' },
-  { id: 'dots', name: 'Perforated Dot Border', desc: 'Ticket stamp border' },
-  { id: 'stamp', name: 'Official Verified Stamp', desc: 'Seal stamp backing' }
 ];
 
 export const ALL_TEMPLATES = QR_TEMPLATES;
@@ -528,6 +634,174 @@ function MiniEyeCanvas({ eyeStyle, color = '#D60036' }) {
   );
 }
 
+// ─── SHAPE THUMBNAIL RENDERER (Matching Mushi QR Pro App.jsx) ──────────────
+export const renderShapeThumbnail = (shapeId, color = '#D60036') => {
+  switch (shapeId) {
+    case 'full':
+    case 'solid':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <rect x="5" y="5" width="44" height="44" fill={color} />
+        </svg>
+      );
+    case 'rounded':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <rect x="5" y="5" width="44" height="44" rx="12" fill={color} />
+        </svg>
+      );
+    case 'squircle':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <rect x="5" y="5" width="44" height="44" rx="18" fill={color} />
+        </svg>
+      );
+    case 'cut':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <polygon points="12,5 42,5 49,12 49,42 42,49 12,49 5,42 5,12" fill={color} />
+        </svg>
+      );
+    case 'leaf':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <path d="M5,22 C5,10 15,5 27,5 L49,5 L49,32 C49,44 39,49 27,49 L5,49 Z" fill={color} />
+        </svg>
+      );
+    case 'circle':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <circle cx="27" cy="27" r="22" fill={color} />
+        </svg>
+      );
+    case 'shield':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <path d="M7,7 L47,7 L47,30 C47,42 27,48 27,48 C27,48 7,42 7,30 Z" fill={color} />
+        </svg>
+      );
+    case 'hexagon':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <polygon points="14,6 40,6 50,27 40,48 14,48 4,27" fill={color} />
+        </svg>
+      );
+    case 'octagon':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <polygon points="16,5 38,5 49,16 49,38 38,49 16,49 5,38 5,16" fill={color} />
+        </svg>
+      );
+    case 'diamond':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <polygon points="27,4 50,27 27,50 4,27" fill={color} />
+        </svg>
+      );
+    case 'pill':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <rect x="4" y="12" width="46" height="30" rx="15" fill={color} />
+        </svg>
+      );
+    case 'ribbon':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <path d="M5,10 L49,10 L43,27 L49,44 L5,44 L11,27 Z" fill={color} />
+        </svg>
+      );
+    case 'glow':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <defs>
+            <filter id="glow-thumb-admin" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+          <rect x="8" y="8" width="38" height="38" rx="8" fill={color} filter="url(#glow-thumb-admin)" />
+        </svg>
+      );
+    case 'brackets':
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <path d="M12 18 V12 H18 M36 12 H42 V18 M42 36 V42 H36 M18 42 H12 V36" stroke={color} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    default:
+      return (
+        <svg width="36" height="36" viewBox="0 0 54 54" style={{ display: 'block' }}>
+          <rect x="7" y="7" width="40" height="40" rx="8" fill={color} />
+        </svg>
+      );
+  }
+};
+
+// ─── CUSTOM SVG ICONS (Matching Mushi QR Pro Generator) ────────────────────
+export const QRDotsIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="mushi-pro-wide-dots">
+    <path d="M12 4 L13 8.5 L17.5 9.5 L13 10.5 L12 15 L11 10.5 L6.5 9.5 L11 8.5 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
+    <circle cx="6.5" cy="15.5" r="3" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+    <circle cx="17.5" cy="15.5" r="3" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+  </svg>
+);
+
+export const QREyesIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="qr-eye-heavy-bold">
+    <path fillRule="evenodd" d="M3 7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7zm4-1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7z" clipRule="evenodd" />
+    <rect x="8" y="8" width="8" height="8" rx="1.5" />
+  </svg>
+);
+
+export const QRStyleIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="2 2 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mushi-qr-star-all-circles">
+    <rect x="3" y="3" width="7" height="7" rx="1.5" style={{ fill: 'transparent' }} />
+    <circle cx="6.5" cy="6.5" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" style={{ fill: 'transparent' }} />
+    <circle cx="17.5" cy="6.5" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" style={{ fill: 'transparent' }} />
+    <circle cx="6.5" cy="17.5" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+    <path d="M17 12l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+    <circle cx="15" cy="20" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+    <circle cx="19.5" cy="20" r="1.5" style={{ fill: 'currentColor', fillOpacity: 1, stroke: 'none' }} />
+  </svg>
+);
+
+export const QRGradientIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <defs>
+      <linearGradient id="qr-icon-grad-admin" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="currentColor" stopOpacity="1" />
+        <stop offset="100%" stopColor="currentColor" stopOpacity="0.15" />
+      </linearGradient>
+    </defs>
+    <circle cx="12" cy="12" r="9" fill="url(#qr-icon-grad-admin)" />
+  </svg>
+);
+
+export const QRBgIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="shape-square">
+    <rect x="3" y="3" width="18" height="18" rx="4" style={{ fill: 'currentColor', fillOpacity: 1 }} />
+  </svg>
+);
+
+export const QRSizeIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-size-expand">
+    <path d="M15 3h6v6" />
+    <path d="M21 3l-7 7" />
+    <path d="M9 21H3v-6" />
+    <path d="M3 21l7-7" />
+  </svg>
+);
+
+export const ALL_STYLE_TOOLS = [
+  { id: 'custom_dot_styles', name: 'Dots Module Shapes Tool', desc: 'Bottom toolbar button for 37 custom dot module styles', icon: QRDotsIcon, defaultPlan: 'weekly' },
+  { id: 'custom_eye_styles', name: 'Eyes Corner Finder Tool', desc: 'Bottom toolbar button for 35 corner eye frame & pupil shapes', icon: QREyesIcon, defaultPlan: 'weekly' },
+  { id: 'custom_background_shapes', name: 'Background Shapes Master Tool', desc: 'Bottom toolbar button for 10 custom card & shield backings', icon: QRBgIcon, defaultPlan: 'weekly' },
+  { id: 'qr_size_custom', name: 'QR Code Size Scale Slider', desc: 'Adjust scaling percentage (20% to 100%) of QR matrix', icon: QRSizeIcon, defaultPlan: 'free' },
+  { id: 'qr_canvas_positioning', name: 'Matrix 3x3 Position Grid', desc: '9-point alignment & fine-grain X/Y repositioning inside canvas', icon: Maximize, defaultPlan: 'free' }
+];
+
 // ─── ICON MAPPINGS FOR 18 CONTENT FORMATS ──────────────────────────────────
 const QR_CONTENT_FORMAT_ICONS = {
   qr_text: FileText,
@@ -669,11 +943,11 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
   // 7 Main Navbar Sub-Navigation Tabs
   const TABS = [
     { id: 'content', label: '1. Content', count: 18, icon: QrCode },
-    { id: 'color', label: '2. Color', count: ALL_COLOR_TOOLS.length + ALL_COLOR_THEME_PRESETS.length + ALL_TEXTURES.length, icon: Palette },
-    { id: 'style', label: '3. Style', count: ALL_DOT_STYLES.length + ALL_EYE_STYLES.length + ALL_BG_SHAPES.length + ALL_GRADIENTS.length, icon: Grid },
+    { id: 'color', label: '2. Color', count: ALL_COLOR_THEME_PRESETS.length + ALL_GRADIENTS.length + ALL_TEXTURES.length + ALL_COLOR_TOOLS.length, icon: Palette },
+    { id: 'style', label: '3. Style', count: ALL_DOT_STYLES.length + ALL_EYE_STYLES.length + ALL_BG_SHAPES.length + 6, icon: Grid },
     { id: 'logo', label: '4. Logo', count: ALL_LOGO_CONTROLS.length + ALL_LOGO_PRESETS.length, icon: Image },
-    { id: 'template', label: '5. Template', count: ALL_TEMPLATES.length + ALL_FRAMES.length, icon: Sparkles },
-    { id: 'text', label: '6. Text', count: ALL_TEXT_CONTROLS.length + ALL_FONTS.length, icon: Type },
+    { id: 'template', label: '5. Template', count: ALL_TEMPLATES.length, icon: Sparkles },
+    { id: 'text', label: '6. Text', count: ALL_TEXT_CONTROLS.length + ALL_TEXT_SHAPES.length + ALL_FONTS.length, icon: Type },
     { id: 'export', label: '7. Save & Export', count: ALL_EXPORT_FORMATS.length + ALL_EXPORT_QUALITIES.length, icon: Download }
   ];
 
@@ -820,39 +1094,48 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
       {/* ── TAB 2: COLOR (Presets, Dots, Eyes, BG Color, BG Image, Texture) ───── */}
       {activeTab === 'color' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Subcategory 1: Presets Toolbar */}
+          {/* Subcategory 1: Presets Toolbar & Swatches (Solid 50 + Gradient 50) */}
           <SectionCatalog
-            title="Presets: 10 Solid Theme Presets (Live Dual Swatches)"
-            subtitle="Pre-designed color palette swatches and presets gallery access."
+            title="1. Presets: Solid Theme Swatches (50 Presets)"
+            subtitle="Pre-designed high-contrast solid color palette swatches with 1-click Free/Pro & Active toggles."
             icon={Bookmark}
-            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_presets', ...ALL_COLOR_THEME_PRESETS.map(p => `qr_color_preset_${p.id}`)])}
-            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_presets', ...ALL_COLOR_THEME_PRESETS.map(p => `qr_color_preset_${p.id}`)])}
-            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_presets', name: 'Color Presets Gallery' }, ...ALL_COLOR_THEME_PRESETS.map(p => ({ key: `qr_color_preset_${p.id}`, name: p.name }))], 'Presets')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_presets', name: 'Color Presets Gallery' }, ...ALL_COLOR_THEME_PRESETS.map(p => ({ key: `qr_color_preset_${p.id}`, name: p.name }))], 'Presets')}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_presets', 'qr_color_presets_solid', ...ALL_COLOR_THEME_PRESETS.map(p => `qr_color_preset_${p.id}`)])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_presets', 'qr_color_presets_solid', ...ALL_COLOR_THEME_PRESETS.map(p => `qr_color_preset_${p.id}`)])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'qr_color_presets', name: 'Color Presets Gallery Master' },
+              { key: 'qr_color_presets_solid', name: 'Solid Color Presets' },
+              ...ALL_COLOR_THEME_PRESETS.map(p => ({ key: `qr_color_preset_${p.id}`, name: p.name }))
+            ], 'Presets')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'qr_color_presets', name: 'Color Presets Gallery Master' },
+              { key: 'qr_color_presets_solid', name: 'Solid Color Presets' },
+              ...ALL_COLOR_THEME_PRESETS.map(p => ({ key: `qr_color_preset_${p.id}`, name: p.name }))
+            ], 'Presets')}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
-              {(() => {
-                const state = getItemState('qr_color_presets', true, 'free');
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10, marginBottom: 12 }}>
+              {[
+                { key: 'qr_color_presets', name: 'Color Presets Gallery Master', desc: 'Master toolbar button to open the color presets drawer', defaultPlan: 'free', icon: Bookmark },
+                { key: 'qr_color_presets_solid', name: 'Solid Color Presets Tab', desc: 'Enable / disable the Solid presets tab in the generator', defaultPlan: 'free', icon: Palette }
+              ].map(item => {
+                const state = getItemState(item.key, true, item.defaultPlan);
+                const Icon = item.icon;
                 return (
                   <ItemControlTile
-                    key="qr_color_presets"
-                    name="Color Presets Gallery"
-                    desc="Master toolbar preset gallery tool"
-                    badge="qr_color_presets"
-                    customPreview={
-                      <div style={{ width: 38, height: 38, borderRadius: 10, background: state.isPaid ? 'rgba(245,158,11,0.2)' : 'rgba(16,185,129,0.2)', border: `1.5px solid ${state.isPaid ? '#F59E0B' : '#10B981'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: state.isPaid ? '#F59E0B' : '#10B981' }}>
-                        <Bookmark size={20} />
-                      </div>
-                    }
+                    key={item.key}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.key}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={Bookmark}
-                    updating={updatingKey === 'qr_color_presets'}
-                    onToggleEnable={() => handleToggleEnable('qr_color_presets', 'Color Presets Gallery', 'Presets')}
-                    onToggleTier={() => handleToggleTier('qr_color_presets', 'Color Presets Gallery')}
+                    icon={Icon}
+                    updating={updatingKey === item.key}
+                    onToggleEnable={() => handleToggleEnable(item.key, item.name, 'Presets')}
+                    onToggleTier={() => handleToggleTier(item.key, item.name)}
                   />
                 );
-              })()}
+              })}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
               {ALL_COLOR_THEME_PRESETS
                 .filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.id.includes(searchQuery.toLowerCase()))
                 .map(preset => {
@@ -881,28 +1164,99 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             </div>
           </SectionCatalog>
 
-          {/* Subcategory 2: Dots Color Toolbar */}
+          {/* Subcategory 1.1: Gradient Presets (50 Gradients) */}
           <SectionCatalog
-            title="Dots: Custom Color & Gradients"
-            subtitle="Control solid hex color pickers and dual gradient fills for QR dots."
-            icon={Grid}
-            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_dots', 'custom_colors_solid', 'custom_colors_gradient'])}
-            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_dots', 'custom_colors_solid', 'custom_colors_gradient'])}
+            title="1.1 Presets: Dual Gradient Swatches (50 Presets)"
+            subtitle="Trending multi-color dual linear and radial gradient presets for QR matrix and styling."
+            icon={Wand2}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_presets_gradient', ...ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`)])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_presets_gradient', ...ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`)])}
             onEnableAll={() => handleBatchActiveTabEnable(true, [
-              { key: 'qr_color_dots', name: 'Dots Color Tool' },
+              { key: 'qr_color_presets_gradient', name: 'Gradient Presets Tab' },
+              ...ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name }))
+            ], 'Presets Gradient')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'qr_color_presets_gradient', name: 'Gradient Presets Tab' },
+              ...ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name }))
+            ], 'Presets Gradient')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10, marginBottom: 12 }}>
+              {(() => {
+                const state = getItemState('qr_color_presets_gradient', true, 'weekly');
+                return (
+                  <ItemControlTile
+                    key="qr_color_presets_gradient"
+                    name="Gradient Presets Tab"
+                    desc="Enable / disable the Gradient presets tab in the generator"
+                    badge="qr_color_presets_gradient"
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={Wand2}
+                    updating={updatingKey === 'qr_color_presets_gradient'}
+                    onToggleEnable={() => handleToggleEnable('qr_color_presets_gradient', 'Gradient Presets Tab', 'Presets Gradient')}
+                    onToggleTier={() => handleToggleTier('qr_color_presets_gradient', 'Gradient Presets Tab')}
+                  />
+                );
+              })()}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
+              {ALL_GRADIENTS
+                .filter(g => !searchQuery || g.name.toLowerCase().includes(searchQuery.toLowerCase()) || g.id.includes(searchQuery.toLowerCase()))
+                .map(grad => {
+                  const key = `qr_gradient_${grad.id}`;
+                  const state = getItemState(key, true, 'weekly');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={grad.name}
+                      desc={`${grad.from} → ${grad.to}`}
+                      badge={grad.id}
+                      customPreview={
+                        <div style={{ width: 38, height: 38, borderRadius: 10, background: `linear-gradient(135deg, ${grad.from}, ${grad.to})`, border: '1.5px solid var(--ad-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.15)', flexShrink: 0 }} />
+                      }
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Wand2}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, grad.name, 'Presets Gradient')}
+                      onToggleTier={() => handleToggleTier(key, grad.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 2: Dots Color Toolbar (Solid Swatches, Gradients & Manual Pickers) */}
+          <SectionCatalog
+            title="2. Dots: Custom Colors, Gradients & Manual Color Picker"
+            subtitle="Granular control for solid swatches, dual gradient tools and custom RGB/Hex color pickers."
+            icon={QRDotsIcon}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_dots', 'qr_color_dots_solid', 'qr_color_dots_gradient', 'qr_color_dots_picker', 'custom_colors_solid', 'custom_colors_gradient'])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_dots', 'qr_color_dots_solid', 'qr_color_dots_gradient', 'qr_color_dots_picker', 'custom_colors_solid', 'custom_colors_gradient'])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'qr_color_dots', name: 'Dots Color Tool Master' },
+              { key: 'qr_color_dots_solid', name: 'Dots Solid Color Swatches' },
+              { key: 'qr_color_dots_gradient', name: 'Dots Dual Gradient Fills' },
+              { key: 'qr_color_dots_picker', name: 'Dots Advanced Color Picker' },
               { key: 'custom_colors_solid', name: 'Solid Color Pickers' },
               { key: 'custom_colors_gradient', name: 'Dual Gradient Color Fills' }
             ], 'Dots Color')}
             onDisableAll={() => handleBatchActiveTabEnable(false, [
-              { key: 'qr_color_dots', name: 'Dots Color Tool' },
+              { key: 'qr_color_dots', name: 'Dots Color Tool Master' },
+              { key: 'qr_color_dots_solid', name: 'Dots Solid Color Swatches' },
+              { key: 'qr_color_dots_gradient', name: 'Dots Dual Gradient Fills' },
+              { key: 'qr_color_dots_picker', name: 'Dots Advanced Color Picker' },
               { key: 'custom_colors_solid', name: 'Solid Color Pickers' },
               { key: 'custom_colors_gradient', name: 'Dual Gradient Color Fills' }
             ], 'Dots Color')}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
               {[
-                { key: 'qr_color_dots', name: 'Dots Color Tool Master', desc: 'Toolbar button for dot module color customization', defaultPlan: 'free', icon: Grid },
-                { key: 'custom_colors_solid', name: 'Solid Color Pickers (RGB/HSB)', desc: 'Advanced RGB/HSB/Hex solid color pickers', defaultPlan: 'free', icon: Palette },
+                { key: 'qr_color_dots', name: 'Dots Color Master Tool', desc: 'Bottom toolbar module for adjusting QR dots color & gradient', defaultPlan: 'free', icon: QRDotsIcon },
+                { key: 'qr_color_dots_solid', name: 'Dots: Solid Color Swatches', desc: 'Quick 16 solid color swatches grid for dot modules', defaultPlan: 'free', icon: Palette },
+                { key: 'qr_color_dots_gradient', name: 'Dots: Gradient Dual Fills', desc: 'Dual gradient color sliders & connecting track tool for dots', defaultPlan: 'weekly', icon: Wand2 },
+                { key: 'qr_color_dots_picker', name: 'Dots: Advanced Eyedropper & Picker', desc: 'RGB, HSB & hex eyedropper pipette manual color picker', defaultPlan: 'free', icon: Paintbrush },
+                { key: 'custom_colors_solid', name: 'Solid Color Pickers (RGB/HSB)', desc: 'Advanced RGB/HSB solid color pickers', defaultPlan: 'free', icon: Palette },
                 { key: 'custom_colors_gradient', name: 'Dual Gradient Color Fills', desc: 'Linear & radial gradient QR color fills', defaultPlan: 'weekly', icon: Wand2 }
               ].map(item => {
                 const state = getItemState(item.key, true, item.defaultPlan);
@@ -927,20 +1281,30 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
 
           {/* Subcategory 3: Eyes Color Toolbar */}
           <SectionCatalog
-            title="Eyes: Independent Color Customizer"
-            subtitle="Independent color tuning for finder corner eye frame & inner pupil."
-            icon={Eye}
-            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_eyes', 'qr_color_eyes_custom'])}
-            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_eyes', 'qr_color_eyes_custom'])}
-            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_eyes', name: 'Eyes Color Tool' }, { key: 'qr_color_eyes_custom', name: 'Custom Eye Finder Colors' }], 'Eyes Color')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_eyes', name: 'Eyes Color Tool' }, { key: 'qr_color_eyes_custom', name: 'Custom Eye Finder Colors' }], 'Eyes Color')}
+            title="3. Eyes: Independent Color Customizer & Sync"
+            subtitle="Independent color tuning for finder corner eye frame & inner pupil, plus dot sync."
+            icon={QREyesIcon}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_eyes', 'qr_color_eyes_custom', 'qr_color_eyes_sync'])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_eyes', 'qr_color_eyes_custom', 'qr_color_eyes_sync'])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'qr_color_eyes', name: 'Eyes Color Tool Master' },
+              { key: 'qr_color_eyes_custom', name: 'Custom Eye Finder Colors' },
+              { key: 'qr_color_eyes_sync', name: 'Sync Eyes with Dots' }
+            ], 'Eyes Color')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'qr_color_eyes', name: 'Eyes Color Tool Master' },
+              { key: 'qr_color_eyes_custom', name: 'Custom Eye Finder Colors' },
+              { key: 'qr_color_eyes_sync', name: 'Sync Eyes with Dots' }
+            ], 'Eyes Color')}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
               {[
-                { key: 'qr_color_eyes', name: 'Eyes Color Tool Master', desc: 'Toolbar button for eye color tuning', defaultPlan: 'free' },
-                { key: 'qr_color_eyes_custom', name: 'Independent Inner & Outer Colors', desc: 'Dual pickers for eye outer frame & inner pupil', defaultPlan: 'free' }
+                { key: 'qr_color_eyes', name: 'Eyes Color Master Tool', desc: 'Bottom toolbar button for finder eyes color customization', defaultPlan: 'free', icon: QREyesIcon },
+                { key: 'qr_color_eyes_custom', name: 'Independent Inner & Outer Colors', desc: 'Dual pickers for independent outer frame & inner pupil tuning', defaultPlan: 'free', icon: EyeOff },
+                { key: 'qr_color_eyes_sync', name: 'Sync Eyes with Dots Toggle', desc: 'One-click toggle to lock finder eye colors to dot matrix color', defaultPlan: 'free', icon: RefreshCw }
               ].map(item => {
                 const state = getItemState(item.key, true, item.defaultPlan);
+                const Icon = item.icon;
                 return (
                   <ItemControlTile
                     key={item.key}
@@ -949,7 +1313,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                     badge={item.key}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={Eye}
+                    icon={Icon}
                     updating={updatingKey === item.key}
                     onToggleEnable={() => handleToggleEnable(item.key, item.name, 'Eyes Color')}
                     onToggleTier={() => handleToggleTier(item.key, item.name)}
@@ -959,79 +1323,173 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             </div>
           </SectionCatalog>
 
-          {/* Subcategory 4: BG Color Toolbar */}
+          {/* Subcategory 4: BG Color Toolbar (Solid, Gradient, Picker & Transparency) */}
           <SectionCatalog
-            title="BG Color: Background Color & Transparency"
-            subtitle="Canvas background color pickers and transparent background mode."
-            icon={Palette}
-            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_bg'])}
-            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_bg'])}
-            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_bg', name: 'Background Color & Transparency' }], 'BG Color')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_bg', name: 'Background Color & Transparency' }], 'BG Color')}
+            title="4. BG Color: Background Solid, Gradient, Picker & Transparency"
+            subtitle="Canvas background color pickers, dual gradient fills and transparent canvas export support."
+            icon={Paintbrush}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_bg', 'qr_color_bg_solid', 'qr_color_bg_gradient', 'qr_color_bg_picker', 'qr_color_bg_transparency'])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_bg', 'qr_color_bg_solid', 'qr_color_bg_gradient', 'qr_color_bg_picker', 'qr_color_bg_transparency'])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'qr_color_bg', name: 'Background Color Master' },
+              { key: 'qr_color_bg_solid', name: 'BG Solid Swatches' },
+              { key: 'qr_color_bg_gradient', name: 'BG Gradient Fills' },
+              { key: 'qr_color_bg_picker', name: 'BG Color Picker' },
+              { key: 'qr_color_bg_transparency', name: 'BG Transparent Alpha' }
+            ], 'BG Color')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'qr_color_bg', name: 'Background Color Master' },
+              { key: 'qr_color_bg_solid', name: 'BG Solid Swatches' },
+              { key: 'qr_color_bg_gradient', name: 'BG Gradient Fills' },
+              { key: 'qr_color_bg_picker', name: 'BG Color Picker' },
+              { key: 'qr_color_bg_transparency', name: 'BG Transparent Alpha' }
+            ], 'BG Color')}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
-              {(() => {
-                const state = getItemState('qr_color_bg', true, 'free');
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
+              {[
+                { key: 'qr_color_bg', name: 'Background Color Master Tool', desc: 'Bottom toolbar button for adjusting QR canvas background color', defaultPlan: 'free', icon: Paintbrush },
+                { key: 'qr_color_bg_solid', name: 'BG: Solid Color Swatches', desc: 'Solid color swatches for quick background application', defaultPlan: 'free', icon: Grid },
+                { key: 'qr_color_bg_gradient', name: 'BG: Gradient Fills', desc: 'Linear & radial dual gradient canvas background fills', defaultPlan: 'weekly', icon: Wand2 },
+                { key: 'qr_color_bg_picker', name: 'BG: Advanced Color Picker', desc: 'Eyedropper and hex/RGB color picker for background', defaultPlan: 'free', icon: Paintbrush },
+                { key: 'qr_color_bg_transparency', name: 'BG: Transparent Alpha Export', desc: 'Export QR code with 100% transparent PNG/SVG background', defaultPlan: 'free', icon: Box }
+              ].map(item => {
+                const state = getItemState(item.key, true, item.defaultPlan);
+                const Icon = item.icon;
                 return (
                   <ItemControlTile
-                    key="qr_color_bg"
-                    name="Background Color & Transparency"
-                    desc="Canvas background solid color picker and transparent canvas toggle"
-                    badge="qr_color_bg"
+                    key={item.key}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.key}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={Palette}
-                    updating={updatingKey === 'qr_color_bg'}
-                    onToggleEnable={() => handleToggleEnable('qr_color_bg', 'Background Color & Transparency', 'BG Color')}
-                    onToggleTier={() => handleToggleTier('qr_color_bg', 'Background Color & Transparency')}
+                    icon={Icon}
+                    updating={updatingKey === item.key}
+                    onToggleEnable={() => handleToggleEnable(item.key, item.name, 'BG Color')}
+                    onToggleTier={() => handleToggleTier(item.key, item.name)}
                   />
                 );
-              })()}
+              })}
             </div>
           </SectionCatalog>
 
-          {/* Subcategory 5: BG Image Toolbar */}
+          {/* Subcategory 5: BG Image Toolbar (Presets & Custom Upload) */}
           <SectionCatalog
-            title="BG Image: Background Photo & Dimming Overlay"
-            subtitle="Custom background photo upload, scannability dimming slider & contrast card."
+            title="5. BG Image: Presets Library & Custom Photo Upload"
+            subtitle="Pre-designed background images, custom photo upload, dimming overlay and container card."
             icon={Image}
-            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_bg_image'])}
-            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_bg_image'])}
-            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_bg_image', name: 'Background Image & Overlay' }], 'BG Image')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_bg_image', name: 'Background Image & Overlay' }], 'BG Image')}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_bg_image', 'qr_bg_image_presets', 'qr_bg_image_upload', 'qr_bg_image_texture', ...SOCIAL_TEXTURES.map(t => `qr_bg_img_${t.slug}`)])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_bg_image', 'qr_bg_image_presets', 'qr_bg_image_upload', 'qr_bg_image_texture', ...SOCIAL_TEXTURES.map(t => `qr_bg_img_${t.slug}`)])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'qr_color_bg_image', name: 'Background Image Master' },
+              { key: 'qr_bg_image_presets', name: 'BG Image Presets Library' },
+              { key: 'qr_bg_image_upload', name: 'Custom Photo Upload' },
+              { key: 'qr_bg_image_texture', name: 'Dimming Overlay & Card' },
+              ...SOCIAL_TEXTURES.map(t => ({ key: `qr_bg_img_${t.slug}`, name: `${t.name} BG Preset` }))
+            ], 'BG Image')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'qr_color_bg_image', name: 'Background Image Master' },
+              { key: 'qr_bg_image_presets', name: 'BG Image Presets Library' },
+              { key: 'qr_bg_image_upload', name: 'Custom Photo Upload' },
+              { key: 'qr_bg_image_texture', name: 'Dimming Overlay & Card' },
+              ...SOCIAL_TEXTURES.map(t => ({ key: `qr_bg_img_${t.slug}`, name: `${t.name} BG Preset` }))
+            ], 'BG Image')}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
-              {(() => {
-                const state = getItemState('qr_color_bg_image', true, 'weekly');
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10, marginBottom: 12 }}>
+              {[
+                { key: 'qr_color_bg_image', name: 'Background Image Master Tool', desc: 'Master toolbar button for background photo and presets', defaultPlan: 'weekly', icon: Image },
+                { key: 'qr_bg_image_upload', name: 'Custom Photo Upload Button', desc: 'Allow users to upload camera/gallery images as QR backgrounds', defaultPlan: 'weekly', icon: UploadCloud },
+                { key: 'qr_bg_image_presets', name: 'Background Presets Gallery', desc: 'Pre-installed high-definition background artwork presets', defaultPlan: 'free', icon: LayoutGrid },
+                { key: 'qr_bg_image_texture', name: 'Dimming Overlay & Card Protection', desc: 'Dimming opacity slider, blur slider and contrast container card', defaultPlan: 'weekly', icon: Shield }
+              ].map(item => {
+                const state = getItemState(item.key, true, item.defaultPlan);
+                const Icon = item.icon;
                 return (
                   <ItemControlTile
-                    key="qr_color_bg_image"
-                    name="Background Image & Overlay"
-                    desc="Custom canvas background photo upload, dimming opacity slider & contrast container"
-                    badge="qr_color_bg_image"
+                    key={item.key}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.key}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={Image}
-                    updating={updatingKey === 'qr_color_bg_image'}
-                    onToggleEnable={() => handleToggleEnable('qr_color_bg_image', 'Background Image & Overlay', 'BG Image')}
-                    onToggleTier={() => handleToggleTier('qr_color_bg_image', 'Background Image & Overlay')}
+                    icon={Icon}
+                    updating={updatingKey === item.key}
+                    onToggleEnable={() => handleToggleEnable(item.key, item.name, 'BG Image')}
+                    onToggleTier={() => handleToggleTier(item.key, item.name)}
                   />
                 );
-              })()}
+              })}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
+              {SOCIAL_TEXTURES
+                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.slug.includes(searchQuery.toLowerCase()))
+                .map(tex => {
+                  const key = `qr_bg_img_${tex.slug}`;
+                  const state = getItemState(key, true, 'free');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={`${tex.name} BG`}
+                      desc={`Pre-set ${tex.name} background art`}
+                      imageUrl={tex.url}
+                      badge={tex.slug}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Image}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, `${tex.name} BG`, 'BG Image')}
+                      onToggleTier={() => handleToggleTier(key, `${tex.name} BG`)}
+                    />
+                  );
+                })}
             </div>
           </SectionCatalog>
 
-          {/* Subcategory 6: Texture Toolbar */}
+          {/* Subcategory 6: Texture Toolbar (Social Presets & Upload) */}
           <SectionCatalog
-            title="Texture: 10 Social & Pattern Textures"
-            subtitle="WhatsApp, Instagram, TikTok, YouTube, Spotify textures, plus custom texture uploads."
-            icon={Brush}
-            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_texture', ...ALL_TEXTURES.map(t => `qr_texture_${t.slug}`)])}
-            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_texture', ...ALL_TEXTURES.map(t => `qr_texture_${t.slug}`)])}
-            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_texture', name: 'Texture Tool Master' }, ...ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name }))], 'Texture')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_texture', name: 'Texture Tool Master' }, ...ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name }))], 'Texture')}
+            title="6. Texture: Social Brand Presets & Custom Texture Upload"
+            subtitle="WhatsApp, Instagram, TikTok, YouTube textures, custom pattern upload and eye synchronization."
+            icon={Layers}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_texture', 'qr_texture_presets', 'qr_texture_upload', ...ALL_TEXTURES.map(t => `qr_texture_${t.slug}`)])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_texture', 'qr_texture_presets', 'qr_texture_upload', ...ALL_TEXTURES.map(t => `qr_texture_${t.slug}`)])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'qr_color_texture', name: 'Texture Master Tool' },
+              { key: 'qr_texture_presets', name: 'Texture Presets Library' },
+              { key: 'qr_texture_upload', name: 'Custom Texture Upload' },
+              ...ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name }))
+            ], 'Texture')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'qr_color_texture', name: 'Texture Master Tool' },
+              { key: 'qr_texture_presets', name: 'Texture Presets Library' },
+              { key: 'qr_texture_upload', name: 'Custom Texture Upload' },
+              ...ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name }))
+            ], 'Texture')}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10, marginBottom: 12 }}>
+              {[
+                { key: 'qr_color_texture', name: 'Texture Master Tool', desc: 'Toolbar button for matrix texture and pattern masks', defaultPlan: 'weekly', icon: Layers },
+                { key: 'qr_texture_upload', name: 'Custom Pattern Upload', desc: 'Allow users to upload custom image files as matrix texture mask', defaultPlan: 'weekly', icon: UploadCloud },
+                { key: 'qr_texture_presets', name: 'Social Texture Presets Gallery', desc: 'Pre-designed social brand pattern textures', defaultPlan: 'weekly', icon: Layers }
+              ].map(item => {
+                const state = getItemState(item.key, true, item.defaultPlan);
+                const Icon = item.icon;
+                return (
+                  <ItemControlTile
+                    key={item.key}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.key}
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={Icon}
+                    updating={updatingKey === item.key}
+                    onToggleEnable={() => handleToggleEnable(item.key, item.name, 'Texture')}
+                    onToggleTier={() => handleToggleTier(item.key, item.name)}
+                  />
+                );
+              })}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
               {ALL_TEXTURES
                 .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()))
                 .map(tex => {
@@ -1059,19 +1517,44 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </div>
       )}
 
-      {/* ── TAB 3: STYLE (Dots, Eyes, Background Shapes, Gradients) ─────────── */}
+      {/* ── TAB 3: STYLE (Dots, Eyes, Background, Size & Position) ─────────── */}
       {activeTab === 'style' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Subcategory 1: Dots (37 Dot Shapes) */}
+          {/* Subcategory 1: Dots (37 Dot Shapes + Master Dots Tool) */}
           <SectionCatalog
-            title="Dots: 37 Custom QR Dot Module Shapes"
-            subtitle="Every dot shape renders its actual canvas drawing pattern. Click to toggle Free/Pro & Active state."
-            icon={Grid}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_DOT_STYLES.map(d => ({ key: `qr_dot_${d.id}`, name: d.name })), 'Dots')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_DOT_STYLES.map(d => ({ key: `qr_dot_${d.id}`, name: d.name })), 'Dots')}
+            title="1. Dots: 37 Custom QR Dot Module Shapes"
+            subtitle="Master dots tool and 37 live canvas module shapes. Click to toggle Free/Pro & Active state."
+            icon={QRDotsIcon}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['custom_dot_styles', ...ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`)])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['custom_dot_styles', ...ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`)])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'custom_dot_styles', name: 'Dots Module Master Tool' },
+              ...ALL_DOT_STYLES.map(d => ({ key: `qr_dot_${d.id}`, name: d.name }))
+            ], 'Dots')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'custom_dot_styles', name: 'Dots Module Master Tool' },
+              ...ALL_DOT_STYLES.map(d => ({ key: `qr_dot_${d.id}`, name: d.name }))
+            ], 'Dots')}
           >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10, marginBottom: 12 }}>
+              {(() => {
+                const state = getItemState('custom_dot_styles', true, 'weekly');
+                return (
+                  <ItemControlTile
+                    key="custom_dot_styles"
+                    name="Dots Module Shapes Master Tool"
+                    desc="Bottom toolbar button for accessing 37 dot matrix modules"
+                    badge="custom_dot_styles"
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={QRDotsIcon}
+                    updating={updatingKey === 'custom_dot_styles'}
+                    onToggleEnable={() => handleToggleEnable('custom_dot_styles', 'Dots Module Shapes Tool', 'Dots')}
+                    onToggleTier={() => handleToggleTier('custom_dot_styles', 'Dots Module Shapes Tool')}
+                  />
+                );
+              })()}
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
               {ALL_DOT_STYLES
                 .filter(d => !searchQuery || d.name.toLowerCase().includes(searchQuery.toLowerCase()) || d.id.includes(searchQuery.toLowerCase()))
@@ -1087,7 +1570,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                       customPreview={<MiniDotCanvas dotStyle={dot.id} color={state.isPaid ? '#F59E0B' : '#10B981'} />}
                       enabled={state.enabled}
                       isPaid={state.isPaid}
-                      icon={Grid}
+                      icon={QRDotsIcon}
                       updating={updatingKey === key}
                       onToggleEnable={() => handleToggleEnable(key, dot.name, 'Dots')}
                       onToggleTier={() => handleToggleTier(key, dot.name)}
@@ -1097,16 +1580,41 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             </div>
           </SectionCatalog>
 
-          {/* Subcategory 2: Eyes (35 Eye Shapes) */}
+          {/* Subcategory 2: Eyes (35 Eye Shapes + Master Eyes Tool) */}
           <SectionCatalog
-            title="Eyes: 35 Corner Eye Finder Shapes"
-            subtitle="Every eye frame renders its actual corner contour. Click to toggle Free/Pro & Active state."
-            icon={Eye}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_EYE_STYLES.map(e => ({ key: `qr_eye_${e.id}`, name: e.name })), 'Eyes')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_EYE_STYLES.map(e => ({ key: `qr_eye_${e.id}`, name: e.name })), 'Eyes')}
+            title="2. Eyes: 35 Corner Eye Finder Shapes"
+            subtitle="Master eye finder tool and 35 live corner contours & pupils. Click to toggle Free/Pro & Active state."
+            icon={QREyesIcon}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['custom_eye_styles', ...ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`)])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['custom_eye_styles', ...ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`)])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'custom_eye_styles', name: 'Eyes Shape Master Tool' },
+              ...ALL_EYE_STYLES.map(e => ({ key: `qr_eye_${e.id}`, name: e.name }))
+            ], 'Eyes')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'custom_eye_styles', name: 'Eyes Shape Master Tool' },
+              ...ALL_EYE_STYLES.map(e => ({ key: `qr_eye_${e.id}`, name: e.name }))
+            ], 'Eyes')}
           >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10, marginBottom: 12 }}>
+              {(() => {
+                const state = getItemState('custom_eye_styles', true, 'weekly');
+                return (
+                  <ItemControlTile
+                    key="custom_eye_styles"
+                    name="Eyes Corner Finder Master Tool"
+                    desc="Bottom toolbar button for accessing 35 eye corner finder styles"
+                    badge="custom_eye_styles"
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={QREyesIcon}
+                    updating={updatingKey === 'custom_eye_styles'}
+                    onToggleEnable={() => handleToggleEnable('custom_eye_styles', 'Eyes Corner Finder Tool', 'Eyes')}
+                    onToggleTier={() => handleToggleTier('custom_eye_styles', 'Eyes Corner Finder Tool')}
+                  />
+                );
+              })()}
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
               {ALL_EYE_STYLES
                 .filter(e => !searchQuery || e.name.toLowerCase().includes(searchQuery.toLowerCase()) || e.id.includes(searchQuery.toLowerCase()))
@@ -1122,7 +1630,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                       customPreview={<MiniEyeCanvas eyeStyle={eye.id} color={state.isPaid ? '#F59E0B' : '#10B981'} />}
                       enabled={state.enabled}
                       isPaid={state.isPaid}
-                      icon={Eye}
+                      icon={QREyesIcon}
                       updating={updatingKey === key}
                       onToggleEnable={() => handleToggleEnable(key, eye.name, 'Eyes')}
                       onToggleTier={() => handleToggleTier(key, eye.name)}
@@ -1132,31 +1640,73 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             </div>
           </SectionCatalog>
 
-          {/* Subcategory 3: Background (8 Background Shapes) */}
+          {/* Subcategory 3: Background (10 Background Shapes & Transparent Backing) */}
           <SectionCatalog
-            title="Background: 8 QR Background Shapes & Shield Backings"
-            subtitle="Solid, Rounded, Circle Badge, Pill Capsule, Ribbon, Neon Glow, Cyber Hexagon, etc."
-            icon={Box}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BG_SHAPES.map(s => `qr_bgshape_${s.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BG_SHAPES.map(s => `qr_bgshape_${s.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BG_SHAPES.map(s => ({ key: `qr_bgshape_${s.id}`, name: s.name })), 'Background')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BG_SHAPES.map(s => ({ key: `qr_bgshape_${s.id}`, name: s.name })), 'Background')}
+            title="3. Background: 10 QR Background Shapes & Transparent Backing"
+            subtitle="Full, Rounded Box, Squircle, Cut Beveled, Leaf, Circle, Shield, Hexagon, Octagon & Diamond Backings."
+            icon={QRBgIcon}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['custom_background_shapes', 'qr_bg_transparent', ...ALL_BG_SHAPES.map(s => `qr_bg_${s.id}`)])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['custom_background_shapes', 'qr_bg_transparent', ...ALL_BG_SHAPES.map(s => `qr_bg_${s.id}`)])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'custom_background_shapes', name: 'Background Shapes Master' },
+              { key: 'qr_bg_transparent', name: 'Transparent Background Toggle' },
+              ...ALL_BG_SHAPES.map(s => ({ key: `qr_bg_${s.id}`, name: s.name }))
+            ], 'Background')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'custom_background_shapes', name: 'Background Shapes Master' },
+              { key: 'qr_bg_transparent', name: 'Transparent Background Toggle' },
+              ...ALL_BG_SHAPES.map(s => ({ key: `qr_bg_${s.id}`, name: s.name }))
+            ], 'Background')}
           >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10, marginBottom: 12 }}>
+              {[
+                { key: 'custom_background_shapes', name: 'Background Shapes Master Tool', desc: 'Bottom toolbar button for accessing 10 background backing shapes', defaultPlan: 'weekly', icon: QRBgIcon },
+                { key: 'qr_bg_transparent', name: 'Transparent Background Toggle', desc: 'Toggle 100% transparent canvas background in generator', defaultPlan: 'free', icon: Box }
+              ].map(item => {
+                const state = getItemState(item.key, true, item.defaultPlan);
+                const Icon = item.icon;
+                return (
+                  <ItemControlTile
+                    key={item.key}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.key}
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={Icon}
+                    updating={updatingKey === item.key}
+                    onToggleEnable={() => handleToggleEnable(item.key, item.name, 'Background')}
+                    onToggleTier={() => handleToggleTier(item.key, item.name)}
+                  />
+                );
+              })}
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
               {ALL_BG_SHAPES
-                .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.id.includes(searchQuery.toLowerCase()))
                 .map(shape => {
-                  const key = `qr_bgshape_${shape.id}`;
-                  const state = getItemState(key, true, shape.id === 'solid' || shape.id === 'rounded' ? 'free' : 'weekly');
+                  const key = `qr_bg_${shape.id}`;
+                  const state = getItemState(key, true, shape.defaultPlan || (shape.id === 'full' || shape.id === 'rounded' ? 'free' : 'weekly'));
+                  const themeColor = state.isPaid ? '#F59E0B' : '#10B981';
                   return (
                     <ItemControlTile
                       key={key}
                       name={shape.name}
                       desc={shape.desc}
-                      badge={shape.id}
+                      badge={key}
+                      customPreview={
+                        <div style={{
+                          width: 38, height: 38, borderRadius: 10,
+                          background: state.isPaid ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.12)',
+                          border: `1.5px solid ${themeColor}`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                        }}>
+                          {renderShapeThumbnail(shape.id, themeColor)}
+                        </div>
+                      }
                       enabled={state.enabled}
                       isPaid={state.isPaid}
-                      icon={Box}
+                      icon={QRBgIcon}
                       updating={updatingKey === key}
                       onToggleEnable={() => handleToggleEnable(key, shape.name, 'Background')}
                       onToggleTier={() => handleToggleTier(key, shape.name)}
@@ -1166,38 +1716,85 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             </div>
           </SectionCatalog>
 
-          {/* Subcategory 4: Gradients (12 Dual Gradients) */}
+          {/* Subcategory 4: Size & Scale Controls */}
           <SectionCatalog
-            title="Gradients: 12 Dual Gradient Color Schemes"
-            subtitle="Sunset Glow, Ocean Breeze, Cyberpunk Aqua, Neon Violet, Midnight Gold, etc."
-            icon={Wand2}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name })), 'Gradients')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name })), 'Gradients')}
+            title="4. Size: QR Code Matrix Scale Slider & Reset"
+            subtitle="Custom scaling percentage from 20% to 100% and 1-click 100% reset action button."
+            icon={QRSizeIcon}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_size_custom', 'qr_size_reset'])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_size_custom', 'qr_size_reset'])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'qr_size_custom', name: 'QR Size Slider Master' },
+              { key: 'qr_size_reset', name: 'Reset Size Button' }
+            ], 'Size')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'qr_size_custom', name: 'QR Size Slider Master' },
+              { key: 'qr_size_reset', name: 'Reset Size Button' }
+            ], 'Size')}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-              {ALL_GRADIENTS
-                .filter(g => !searchQuery || g.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(grad => {
-                  const key = `qr_gradient_${grad.id}`;
-                  const state = getItemState(key, true, 'weekly');
-                  return (
-                    <ItemControlTile
-                      key={key}
-                      name={grad.name}
-                      desc={`${grad.from} → ${grad.to}`}
-                      gradientFill={`linear-gradient(135deg, ${grad.from}, ${grad.to})`}
-                      badge={grad.id}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      icon={Wand2}
-                      updating={updatingKey === key}
-                      onToggleEnable={() => handleToggleEnable(key, grad.name, 'Gradients')}
-                      onToggleTier={() => handleToggleTier(key, grad.name)}
-                    />
-                  );
-                })}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
+              {[
+                { key: 'qr_size_custom', name: 'QR Code Size Scale Tool', desc: 'Bottom toolbar button and interactive slider for matrix scale (20%–100%)', defaultPlan: 'free', icon: QRSizeIcon },
+                { key: 'qr_size_reset', name: 'Reset Size Action Button', desc: '1-click button to reset QR scale back to 100% default', defaultPlan: 'free', icon: RefreshCw }
+              ].map(item => {
+                const state = getItemState(item.key, true, item.defaultPlan);
+                const Icon = item.icon;
+                return (
+                  <ItemControlTile
+                    key={item.key}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.key}
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={Icon}
+                    updating={updatingKey === item.key}
+                    onToggleEnable={() => handleToggleEnable(item.key, item.name, 'Size')}
+                    onToggleTier={() => handleToggleTier(item.key, item.name)}
+                  />
+                );
+              })}
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 5: Positioning & Alignment Controls */}
+          <SectionCatalog
+            title="5. Position: Matrix 3x3 Alignment Grid & Offset Centering"
+            subtitle="9-point alignment matrix, custom X/Y positioning and 1-click center reset action."
+            icon={Maximize}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_canvas_positioning', 'qr_position_reset'])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_canvas_positioning', 'qr_position_reset'])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'qr_canvas_positioning', name: '3x3 Position Grid Tool' },
+              { key: 'qr_position_reset', name: 'Reset Position Action' }
+            ], 'Position')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'qr_canvas_positioning', name: '3x3 Position Grid Tool' },
+              { key: 'qr_position_reset', name: 'Reset Position Action' }
+            ], 'Position')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
+              {[
+                { key: 'qr_canvas_positioning', name: 'Matrix 3x3 Position Tool', desc: 'Bottom toolbar button for 9-point positional alignment grid', defaultPlan: 'free', icon: Maximize },
+                { key: 'qr_position_reset', name: 'Reset Position Center Button', desc: '1-click action to reset QR matrix back to canvas center (0.5, 0.5)', defaultPlan: 'free', icon: RefreshCw }
+              ].map(item => {
+                const state = getItemState(item.key, true, item.defaultPlan);
+                const Icon = item.icon;
+                return (
+                  <ItemControlTile
+                    key={item.key}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.key}
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={Icon}
+                    updating={updatingKey === item.key}
+                    onToggleEnable={() => handleToggleEnable(item.key, item.name, 'Position')}
+                    onToggleTier={() => handleToggleTier(item.key, item.name)}
+                  />
+                );
+              })}
             </div>
           </SectionCatalog>
         </div>
@@ -1238,9 +1835,9 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             </div>
           </SectionCatalog>
 
-          {/* Subcategory 2: 40 Brand Logos */}
+          {/* Subcategory 2: 41 Brand Logos */}
           <SectionCatalog
-            title="40 Pre-installed Brand Logos"
+            title="41 Pre-installed Brand Logos"
             subtitle="Social icons, fintech logos, communication badges, and media brands."
             icon={Image}
             onMakeFree={() => handleBatchActiveTabTier('free', ALL_LOGO_PRESETS.map(l => `qr_logo_${l.slug}`))}
@@ -1276,12 +1873,12 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </div>
       )}
 
-      {/* ── TAB 5: TEMPLATE (Template Gallery & 12 Frames) ────────────────────── */}
+      {/* ── TAB 5: TEMPLATE (10 Pro Poster Templates) ────────────────────── */}
       {activeTab === 'template' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Subcategory 1: Templates Gallery */}
+          {/* 10 Pro Poster Templates */}
           <SectionCatalog
-            title="Marketing & Social Template Posters"
+            title="10 Marketing & Social Template Posters"
             subtitle="Pre-styled 1080x1350 vertical posters for Instagram, Facebook, WhatsApp, YouTube, TikTok, etc."
             icon={LayoutGrid}
             onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEMPLATES.map(t => `qr_template_${t.id}`))}
@@ -1309,50 +1906,16 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                 })}
             </div>
           </SectionCatalog>
-
-          {/* Subcategory 2: 12 Scan-Me Frames */}
-          <SectionCatalog
-            title="12 Scan-Me Frames & Badge Backings"
-            subtitle="Pill frames, ribbons, neon glow, camera brackets, official verified stamps, etc."
-            icon={Sparkles}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_FRAMES.map(fr => `qr_frame_${fr.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_FRAMES.map(fr => `qr_frame_${fr.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_FRAMES.map(fr => ({ key: `qr_frame_${fr.id}`, name: fr.name })), 'Frames')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_FRAMES.map(fr => ({ key: `qr_frame_${fr.id}`, name: fr.name })), 'Frames')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 12 }}>
-              {ALL_FRAMES
-                .filter(fr => !searchQuery || fr.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(frame => {
-                  const key = `qr_frame_${frame.id}`;
-                  const state = getItemState(key, true, frame.id === 'none' || frame.id === 'solid' ? 'free' : 'weekly');
-                  return (
-                    <ItemControlTile
-                      key={key}
-                      name={frame.name}
-                      desc={frame.desc}
-                      badge={frame.id}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      icon={Sparkles}
-                      updating={updatingKey === key}
-                      onToggleEnable={() => handleToggleEnable(key, frame.name, 'Frames')}
-                      onToggleTier={() => handleToggleTier(key, frame.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
         </div>
       )}
 
-      {/* ── TAB 6: TEXT (Center Text, Frame Text & 30 Google Fonts) ───────────── */}
+      {/* ── TAB 6: TEXT (Controls, Shapes & 30 Google Fonts) ───────────────── */}
       {activeTab === 'text' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Subcategory 1: Center Text & Frame Text Controls */}
+          {/* Subcategory 1: Text Tools & Feature Controls */}
           <SectionCatalog
-            title="Center Text & Frame Text Capabilities"
-            subtitle="Custom text embeds inside the QR matrix center and CTA frame ribbons."
+            title="Text Capabilities & Feature Tools"
+            subtitle="Granular switches for Center Text, Frame Text, Typography Transforms, Outline Stroke & Shadow styling."
             icon={Type}
             onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEXT_CONTROLS.map(c => c.id))}
             onMakePro={() => handleBatchActiveTabTier('paid', ALL_TEXT_CONTROLS.map(c => c.id))}
@@ -1381,7 +1944,41 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             </div>
           </SectionCatalog>
 
-          {/* Subcategory 2: Fonts (30 Google Typography Fonts) */}
+          {/* Subcategory 2: 10 Text Shapes & Container Backings */}
+          <SectionCatalog
+            title="10 Text Card & Ribbon Shape Badges"
+            subtitle="Solid boxes, rounded cards, stadium pills, neon outline boxes, ribbons, glow effects and brackets."
+            icon={LayoutGrid}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEXT_SHAPES.map(s => `qr_text_shape_${s.id}`))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_TEXT_SHAPES.map(s => `qr_text_shape_${s.id}`))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_TEXT_SHAPES.map(s => ({ key: `qr_text_shape_${s.id}`, name: s.name })), 'Text Shapes')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_TEXT_SHAPES.map(s => ({ key: `qr_text_shape_${s.id}`, name: s.name })), 'Text Shapes')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+              {ALL_TEXT_SHAPES
+                .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(shape => {
+                  const key = `qr_text_shape_${shape.id}`;
+                  const state = getItemState(key, true, shape.id === 'solid' || shape.id === 'rounded' ? 'free' : 'weekly');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={shape.name}
+                      desc={shape.desc}
+                      badge={shape.id}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={LayoutGrid}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, shape.name, 'Text Shapes')}
+                      onToggleTier={() => handleToggleTier(key, shape.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 3: Fonts (30 Google Typography Fonts) */}
           <SectionCatalog
             title="Fonts: 30 Google Typography Fonts"
             subtitle="Outfit, Inter, Montserrat, Playfair Display, Pacifico, Orbitron, Bebas Neue, etc."
@@ -1433,6 +2030,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
               {ALL_EXPORT_FORMATS.map(item => {
                 const state = getItemState(item.id, true, item.defaultPlan);
+                const Icon = item.icon || Download;
                 return (
                   <ItemControlTile
                     key={item.id}
@@ -1441,7 +2039,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                     badge={item.id}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={Download}
+                    icon={Icon}
                     updating={updatingKey === item.id}
                     onToggleEnable={() => handleToggleEnable(item.id, item.name, 'Export Formats')}
                     onToggleTier={() => handleToggleTier(item.id, item.name)}
@@ -1464,6 +2062,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
               {ALL_EXPORT_QUALITIES.map(item => {
                 const state = getItemState(item.id, true, item.defaultPlan);
+                const Icon = item.icon || Sliders;
                 return (
                   <ItemControlTile
                     key={item.id}
@@ -1472,7 +2071,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                     badge={item.id}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={Sliders}
+                    icon={Icon}
                     updating={updatingKey === item.id}
                     onToggleEnable={() => handleToggleEnable(item.id, item.name, 'Quality & Share')}
                     onToggleTier={() => handleToggleTier(item.id, item.name)}
