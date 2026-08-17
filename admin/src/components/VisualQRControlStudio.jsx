@@ -1697,6 +1697,8 @@ function TemplateItemControlTile({ tpl, enabled, isPaid, updating, onToggleEnabl
 // ═════════════════════════════════════════════════════════════════════════
 
 function SectionCatalog({ title, subtitle, icon: Icon, onMakeFree, onMakePro, onEnableAll, onDisableAll, children }) {
+  const isDarkMode = typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false;
+
   return (
     <div style={{
       background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
@@ -1731,27 +1733,31 @@ function SectionCatalog({ title, subtitle, icon: Icon, onMakeFree, onMakePro, on
           </div>
         </div>
 
-        {/* Section Quick Batch Actions (Mobile-First 4-Pill Action Bar) */}
+        {/* Section Quick Batch Actions (Mobile-First 4-Pill Action Bar - Crystal Clear in Light & Dark Mode) */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
           gap: 6,
           width: '100%',
           padding: '6px',
-          background: 'rgba(0, 0, 0, 0.25)',
+          background: 'var(--ad-input)',
           borderRadius: 12,
           border: '1px solid var(--ad-border)',
           boxSizing: 'border-box'
         }}>
+          {/* 1. Free All Button */}
           <button
             type="button"
             onClick={onMakeFree}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
               padding: '6px 4px', minHeight: 32,
-              borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)',
-              border: '1px solid rgba(16, 185, 129, 0.35)',
-              color: '#10B981', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              borderRadius: 8,
+              background: isDarkMode ? 'rgba(16, 185, 129, 0.18)' : '#ECFDF5',
+              border: `1.5px solid ${isDarkMode ? 'rgba(16, 185, 129, 0.45)' : '#A7F3D0'}`,
+              color: isDarkMode ? '#34D399' : '#047857',
+              fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              boxShadow: isDarkMode ? 'none' : '0 1px 2px rgba(4,120,87,0.06)',
               transition: 'all 0.15s ease'
             }}
           >
@@ -1759,15 +1765,19 @@ function SectionCatalog({ title, subtitle, icon: Icon, onMakeFree, onMakePro, on
             <span style={{ whiteSpace: 'nowrap' }}>Free All</span>
           </button>
 
+          {/* 2. Pro All Button */}
           <button
             type="button"
             onClick={onMakePro}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
               padding: '6px 4px', minHeight: 32,
-              borderRadius: 8, background: 'rgba(245, 158, 11, 0.15)',
-              border: '1px solid rgba(245, 158, 11, 0.35)',
-              color: '#F59E0B', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              borderRadius: 8,
+              background: isDarkMode ? 'rgba(245, 158, 11, 0.18)' : '#FFFBEB',
+              border: `1.5px solid ${isDarkMode ? 'rgba(245, 158, 11, 0.45)' : '#FDE68A'}`,
+              color: isDarkMode ? '#FBBF24' : '#B45309',
+              fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              boxShadow: isDarkMode ? 'none' : '0 1px 2px rgba(180,83,9,0.06)',
               transition: 'all 0.15s ease'
             }}
           >
@@ -1775,15 +1785,19 @@ function SectionCatalog({ title, subtitle, icon: Icon, onMakeFree, onMakePro, on
             <span style={{ whiteSpace: 'nowrap' }}>Pro All</span>
           </button>
 
+          {/* 3. Enable All Button */}
           <button
             type="button"
             onClick={onEnableAll}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
               padding: '6px 4px', minHeight: 32,
-              borderRadius: 8, background: 'rgba(34, 197, 94, 0.12)',
-              border: '1px solid rgba(34, 197, 94, 0.3)',
-              color: '#22C55E', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              borderRadius: 8,
+              background: isDarkMode ? 'rgba(34, 197, 94, 0.18)' : '#F0FDF4',
+              border: `1.5px solid ${isDarkMode ? 'rgba(34, 197, 94, 0.45)' : '#BBF7D0'}`,
+              color: isDarkMode ? '#4ADE80' : '#15803D',
+              fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              boxShadow: isDarkMode ? 'none' : '0 1px 2px rgba(21,128,61,0.06)',
               transition: 'all 0.15s ease'
             }}
           >
@@ -1791,15 +1805,19 @@ function SectionCatalog({ title, subtitle, icon: Icon, onMakeFree, onMakePro, on
             <span style={{ whiteSpace: 'nowrap' }}>Enable</span>
           </button>
 
+          {/* 4. Hide / Disable All Button */}
           <button
             type="button"
             onClick={onDisableAll}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
               padding: '6px 4px', minHeight: 32,
-              borderRadius: 8, background: 'rgba(239, 68, 68, 0.12)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#EF4444', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              borderRadius: 8,
+              background: isDarkMode ? 'rgba(239, 68, 68, 0.18)' : '#FEF2F2',
+              border: `1.5px solid ${isDarkMode ? 'rgba(239, 68, 68, 0.45)' : '#FECACA'}`,
+              color: isDarkMode ? '#F87171' : '#B91C1C',
+              fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              boxShadow: isDarkMode ? 'none' : '0 1px 2px rgba(185,28,28,0.06)',
               transition: 'all 0.15s ease'
             }}
           >
@@ -1816,11 +1834,12 @@ function SectionCatalog({ title, subtitle, icon: Icon, onMakeFree, onMakePro, on
 
 function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, customPreview, fontFamily, enabled, isPaid, icon: Icon, updating, onToggleEnable, onToggleTier }) {
   const isOff = !enabled;
+  const isDarkMode = typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false;
 
   return (
     <div style={{
-      background: isOff ? 'rgba(15, 18, 33, 0.4)' : 'var(--ad-input)',
-      border: `1.5px solid ${isOff ? 'rgba(239, 68, 68, 0.3)' : (isPaid ? 'rgba(245, 158, 11, 0.35)' : 'rgba(16, 185, 129, 0.35)')}`,
+      background: isOff ? (isDarkMode ? 'rgba(15, 18, 33, 0.4)' : '#F8FAFC') : 'var(--ad-input)',
+      border: `1.5px solid ${isOff ? (isDarkMode ? 'rgba(239, 68, 68, 0.3)' : '#FCA5A5') : (isPaid ? (isDarkMode ? 'rgba(245, 158, 11, 0.35)' : '#FCD34D') : (isDarkMode ? 'rgba(16, 185, 129, 0.35)' : '#6EE7B7'))}`,
       borderRadius: 14, padding: '11px 10px',
       display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
       gap: 10, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
@@ -1848,8 +1867,8 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
         ) : (
           <div style={{
             width: 38, height: 38, borderRadius: 10,
-            background: isOff ? 'rgba(148, 163, 184, 0.15)' : (isPaid ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(214, 0, 54, 0.15))' : 'rgba(16, 185, 129, 0.15)'),
-            color: isOff ? 'var(--ad-text-sec)' : (isPaid ? '#F59E0B' : '#10B981'),
+            background: isOff ? (isDarkMode ? 'rgba(148, 163, 184, 0.15)' : '#F1F5F9') : (isPaid ? (isDarkMode ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(214, 0, 54, 0.15))' : '#FEF3C7') : (isDarkMode ? 'rgba(16, 185, 129, 0.15)' : '#D1FAE5')),
+            color: isOff ? 'var(--ad-text-sec)' : (isPaid ? (isDarkMode ? '#F59E0B' : '#B45309') : (isDarkMode ? '#10B981' : '#047857')),
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
           }}>
             {Icon && <Icon size={18} strokeWidth={2.4} />}
@@ -1895,9 +1914,11 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
           onClick={onToggleEnable}
           style={{
             display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px',
-            borderRadius: 7, border: `1px solid ${enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
-            background: enabled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            color: enabled ? '#22C55E' : '#EF4444', fontSize: 9.5, fontWeight: 800,
+            borderRadius: 7,
+            border: `1.5px solid ${enabled ? (isDarkMode ? 'rgba(34, 197, 94, 0.45)' : '#86EFAC') : (isDarkMode ? 'rgba(239, 68, 68, 0.45)' : '#FCA5A5')}`,
+            background: enabled ? (isDarkMode ? 'rgba(34, 197, 94, 0.18)' : '#F0FDF4') : (isDarkMode ? 'rgba(239, 68, 68, 0.18)' : '#FEF2F2'),
+            color: enabled ? (isDarkMode ? '#4ADE80' : '#15803D') : (isDarkMode ? '#F87171' : '#B91C1C'),
+            fontSize: 9.5, fontWeight: 800,
             cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0
           }}
         >

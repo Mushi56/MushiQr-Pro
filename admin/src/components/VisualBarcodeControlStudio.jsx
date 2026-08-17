@@ -482,15 +482,29 @@ function BarcodeSectionCard({ title, subtitle, icon: Icon, badgeCount, onMakeFre
         </div>
 
         {(onMakeFree || onMakePro) && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, width: '100%', padding: '4px', background: 'rgba(0,0,0,0.2)', borderRadius: 10 }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 6,
+            width: '100%',
+            padding: '5px',
+            background: 'var(--ad-input)',
+            borderRadius: 10,
+            border: '1px solid var(--ad-border)',
+            boxSizing: 'border-box'
+          }}>
             {onMakeFree && (
               <button
                 type="button"
                 onClick={onMakeFree}
                 style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '5px 8px',
-                  borderRadius: 7, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.35)',
-                  color: '#10B981', fontSize: 10.5, fontWeight: 800, cursor: 'pointer'
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '6px 8px',
+                  borderRadius: 7,
+                  background: isDark ? 'rgba(16, 185, 129, 0.18)' : '#ECFDF5',
+                  border: `1.5px solid ${isDark ? 'rgba(16, 185, 129, 0.45)' : '#A7F3D0'}`,
+                  color: isDark ? '#34D399' : '#047857',
+                  fontSize: 10.5, fontWeight: 800, cursor: 'pointer',
+                  boxShadow: isDark ? 'none' : '0 1px 2px rgba(4,120,87,0.06)'
                 }}
               >
                 <Shield size={11} strokeWidth={2.5} />
@@ -502,9 +516,13 @@ function BarcodeSectionCard({ title, subtitle, icon: Icon, badgeCount, onMakeFre
                 type="button"
                 onClick={onMakePro}
                 style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '5px 8px',
-                  borderRadius: 7, background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)',
-                  color: '#F59E0B', fontSize: 10.5, fontWeight: 800, cursor: 'pointer'
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '6px 8px',
+                  borderRadius: 7,
+                  background: isDark ? 'rgba(245, 158, 11, 0.18)' : '#FFFBEB',
+                  border: `1.5px solid ${isDark ? 'rgba(245, 158, 11, 0.45)' : '#FDE68A'}`,
+                  color: isDark ? '#FBBF24' : '#B45309',
+                  fontSize: 10.5, fontWeight: 800, cursor: 'pointer',
+                  boxShadow: isDark ? 'none' : '0 1px 2px rgba(180,83,9,0.06)'
                 }}
               >
                 <Crown size={11} strokeWidth={2.5} />
