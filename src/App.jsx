@@ -1043,18 +1043,16 @@ export default function App() {
     createDefaultDirectories();
   }, []);
   const [tabHistory, setTabHistory] = useState([]);
+  const [authInitialized, setAuthInitialized] = useState(false);
   const [showSplash, setShowSplash] = useState(() => {
-    // Only show splash on root page on initial load
-    return location.pathname === '/' && !location.state?.activePage;
+    return location.pathname === '/' || location.pathname === '/onboarding';
   });
   const [activePage, setActivePage] = useState(() => {
     if (location.state?.activePage) return location.state.activePage;
     const pathPage = getPageFromPath(location.pathname);
-    if (location.pathname === '/') {
-      const onboardingCompleted = localStorage.getItem('mushi_onboarding_completed') === 'true';
-      if (!onboardingCompleted) {
-        return 'onboarding';
-      }
+    const onboardingCompleted = localStorage.getItem('mushi_onboarding_completed') === 'true';
+    if (!onboardingCompleted) {
+      return 'onboarding';
     }
     return pathPage;
   });
@@ -1063,7 +1061,14 @@ export default function App() {
   const [effectiveTheme, setEffectiveTheme] = useState('dark');
   const [historyFilter, setHistoryFilter] = useState('All');
   useEffect(() => {
-    const page = location.state?.activePage || getPageFromPath(location.pathname);
+    const onboardingCompleted = localStorage.getItem('mushi_onboarding_completed') === 'true';
+    let page = location.state?.activePage || getPageFromPath(location.pathname);
+    
+    // If not completed onboarding and on root or onboarding, force onboarding
+    if (!onboardingCompleted && (location.pathname === '/' || location.pathname === '/onboarding')) {
+      page = 'onboarding';
+    }
+
     if (page !== activePage) {
       setActivePage(page);
       
@@ -1080,7 +1085,7 @@ export default function App() {
       if (location.state.isDataModalOpen !== undefined) setIsDataModalOpen(location.state.isDataModalOpen);
       if (location.state.loadedBarcodeItem) setLoadedBarcodeItem(location.state.loadedBarcodeItem);
     }
-  }, [location.pathname, location.state, activePage]);
+  }, [location.pathname, location.state]);
   const goBack = () => {
     // 1. Close overlays first
     if (advPicker.open) {

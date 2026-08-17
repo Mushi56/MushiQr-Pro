@@ -240,6 +240,17 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
 
           <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
 
+          {/* Welcome Guide / Onboarding */}
+          <div className="settings-row-item" onClick={() => onNavigate?.('onboarding')} style={{ padding: '16px', cursor: 'pointer' }}>
+            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)' }}>
+              <Sparkles size={18} />
+            </div>
+            <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Welcome Guide &amp; Features</div>
+            <ChevronRight size={16} color="var(--text-muted)" />
+          </div>
+
+          <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
+
           {/* About */}
           <div className="settings-row-item" onClick={() => window.location.hash = '#/about'} style={{ padding: '16px' }}>
             <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)' }}>
