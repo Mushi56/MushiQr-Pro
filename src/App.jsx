@@ -97,6 +97,11 @@ import AppIcon from './components/AppIcon';
 import SaveLocationModal from './components/SaveLocationModal';
 import PremiumModal from './components/PremiumModal';
 import PaidCrownBadge from './components/PaidCrownBadge';
+import SplashScreen from './components/auth/SplashScreen';
+import OnboardingFlow from './components/auth/OnboardingFlow';
+import LoginPage from './components/auth/LoginPage';
+import SignUpPage from './components/auth/SignUpPage';
+import ForgotPasswordPage from './components/auth/ForgotPasswordPage';
 import { usePremium } from './services/premiumContext';
 import { FeatureAccessManager } from './services/FeatureAccessManager';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
@@ -914,6 +919,10 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const getPageFromPath = (path) => {
+    if (path === '/onboarding') return 'onboarding';
+    if (path === '/login') return 'login';
+    if (path === '/signup') return 'signup';
+    if (path === '/forgot-password') return 'forgot-password';
     if (path === '/generator') return 'generator';
     if (path === '/settings') return 'settings';
     if (path === '/you') return 'you';
@@ -1034,8 +1043,20 @@ export default function App() {
     createDefaultDirectories();
   }, []);
   const [tabHistory, setTabHistory] = useState([]);
+  const [showSplash, setShowSplash] = useState(() => {
+    // Only show splash on root page on initial load
+    return location.pathname === '/' && !location.state?.activePage;
+  });
   const [activePage, setActivePage] = useState(() => {
-    return location.state?.activePage || getPageFromPath(location.pathname);
+    if (location.state?.activePage) return location.state.activePage;
+    const pathPage = getPageFromPath(location.pathname);
+    if (location.pathname === '/') {
+      const onboardingCompleted = localStorage.getItem('mushi_onboarding_completed') === 'true';
+      if (!onboardingCompleted) {
+        return 'onboarding';
+      }
+    }
+    return pathPage;
   });
   const [previousPage, setPreviousPage] = useState('home');
   const [theme, setTheme] = useState('auto');
@@ -1508,7 +1529,11 @@ export default function App() {
       setActiveBatchItemIndex(null);
     }
     let path = '/';
-    if (page === 'generator') path = '/generator';
+    if (page === 'onboarding') path = '/onboarding';
+    else if (page === 'login') path = '/login';
+    else if (page === 'signup') path = '/signup';
+    else if (page === 'forgot-password') path = '/forgot-password';
+    else if (page === 'generator') path = '/generator';
     else if (page === 'settings') path = '/settings';
     else if (page === 'you') path = '/you';
     else if (page === 'saved') path = '/saved';
@@ -3466,7 +3491,7 @@ export default function App() {
       {/* ── Header ── */}
       <header 
         className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' && !isHomeScrolled ? 'header-home-banner' : ''}`}
-        style={{ display: activePage === 'barcode' ? 'none' : 'flex' }}
+        style={{ display: ['barcode', 'onboarding', 'login', 'signup', 'forgot-password'].includes(activePage) ? 'none' : 'flex' }}
       >
         <div className="app-logo">
           {activePage === 'scanner' && (
@@ -4183,6 +4208,7 @@ export default function App() {
                             console.warn('Native sign out error:', e);
                           }
                           clearData();
+                          navigateTo('login');
                         }}
                         style={{
                            width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
@@ -6116,10 +6142,43 @@ export default function App() {
             currentUser={currentUser}
             showToast={showToast}
           />
+        ) : activePage === 'onboarding' ? (
+          <OnboardingFlow
+            onComplete={() => {
+              if (currentUser) {
+                navigateTo('home');
+              } else {
+                navigateTo('login');
+              }
+            }}
+          />
+        ) : activePage === 'login' ? (
+          <LoginPage
+            onNavigate={(p) => navigateTo(p)}
+            onSuccess={() => navigateTo('home')}
+          />
+        ) : activePage === 'signup' ? (
+          <SignUpPage
+            onNavigate={(p) => navigateTo(p)}
+            onSuccess={() => navigateTo('home')}
+          />
+        ) : activePage === 'forgot-password' ? (
+          <ForgotPasswordPage
+            onNavigate={(p) => navigateTo(p)}
+          />
         ) : (
           <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} initialFilter={historyFilter} />
         )}
       </main>
+
+      {/* ── Splash Screen (Animated First Launch) ── */}
+      {showSplash && (
+        <SplashScreen
+          onFinish={() => {
+            setShowSplash(false);
+          }}
+        />
+      )}
       {/* ── Bottom Navigation Bar (Only for Generator) ── */}
       {activePage === 'generator' && (
         <nav className="bottom-nav">

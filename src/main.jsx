@@ -46,6 +46,10 @@ createRoot(document.getElementById('root')).render(
         <Suspense fallback={<RouteLoader />}>
           <Routes>
             <Route path="/" element={<App />} />
+            <Route path="/onboarding" element={<App />} />
+            <Route path="/login" element={<App />} />
+            <Route path="/signup" element={<App />} />
+            <Route path="/forgot-password" element={<App />} />
             <Route path="/generator" element={<App />} />
             <Route path="/settings" element={<App />} />
             <Route path="/you" element={<App />} />

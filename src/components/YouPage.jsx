@@ -271,8 +271,62 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
             <ChevronRight size={16} color="var(--text-muted)" />
           </div>
 
-
-
+          {/* Sign Out / Sign In Row */}
+          {currentUser ? (
+            <>
+              <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
+              <div
+                className="settings-row-item"
+                onClick={async () => {
+                  const { signOut: fbSignOut } = await import('firebase/auth');
+                  const { auth } = await import('../services/firebase');
+                  const { handleLogoutClear: clearData } = await import('../utils/storage');
+                  await fbSignOut(auth);
+                  try {
+                    const { Capacitor } = await import('@capacitor/core');
+                    if (Capacitor.isNativePlatform()) {
+                      const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
+                      await FirebaseAuthentication.signOut();
+                    }
+                  } catch (e) {
+                    console.warn('Native sign out error:', e);
+                  }
+                  clearData();
+                  onNavigate?.('login');
+                }}
+                style={{ padding: '16px', cursor: 'pointer' }}
+              >
+                <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                </div>
+                <div style={{ flex: 1, fontSize: '14px', fontWeight: 700, color: '#EF4444' }}>Sign Out</div>
+                <ChevronRight size={16} color="#EF4444" />
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
+              <div
+                className="settings-row-item"
+                onClick={() => onNavigate?.('login')}
+                style={{ padding: '16px', cursor: 'pointer' }}
+              >
+                <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #D60036 0%, #B5002D 100%)' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                </div>
+                <div style={{ flex: 1, fontSize: '14px', fontWeight: 700, color: 'var(--accent-primary)' }}>Sign In / Create Account</div>
+                <ChevronRight size={16} color="var(--accent-primary)" />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
