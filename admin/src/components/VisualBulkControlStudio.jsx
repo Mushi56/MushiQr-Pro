@@ -293,23 +293,114 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
           </button>
         </div>
 
-        {/* Live Mini Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 8, paddingTop: 4 }}>
-          <div style={{ background: 'var(--ad-input)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--ad-border)' }}>
-            <div style={{ fontSize: 10, color: 'var(--ad-text-sec)', fontWeight: 700 }}>Total Tools</div>
-            <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--ad-text)', marginTop: 2 }}>{stats.total}</div>
+        {/* Live Studio Mini Stats (Consistent Premium UI with Lucide SVG Icons) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, paddingTop: 4 }}>
+          {/* Total Tools */}
+          <div style={{
+            background: 'var(--ad-input)',
+            borderRadius: 12,
+            padding: '10px 12px',
+            border: '1px solid var(--ad-border)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10
+          }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: 'rgba(139, 92, 246, 0.12)', color: '#8B5CF6',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <Layers size={16} strokeWidth={2.4} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 10, color: 'var(--ad-text-sec)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                Total Tools
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 900, color: 'var(--ad-text)', lineHeight: 1.1, marginTop: 2 }}>
+                {stats.total}
+              </div>
+            </div>
           </div>
-          <div style={{ background: 'var(--ad-input)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--ad-border)' }}>
-            <div style={{ fontSize: 10, color: '#22C55E', fontWeight: 700 }}>🟢 Active</div>
-            <div style={{ fontSize: 15, fontWeight: 900, color: '#22C55E', marginTop: 2 }}>{stats.enabled}</div>
+
+          {/* Active / Enabled */}
+          <div style={{
+            background: 'var(--ad-input)',
+            borderRadius: 12,
+            padding: '10px 12px',
+            border: '1px solid rgba(34, 197, 94, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10
+          }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: 'rgba(34, 197, 94, 0.12)', color: '#22C55E',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <CheckCircle2 size={16} strokeWidth={2.4} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 10, color: '#22C55E', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                Active Visible
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 900, color: '#22C55E', lineHeight: 1.1, marginTop: 2 }}>
+                {stats.enabled}
+              </div>
+            </div>
           </div>
-          <div style={{ background: 'var(--ad-input)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--ad-border)' }}>
-            <div style={{ fontSize: 10, color: '#10B981', fontWeight: 700 }}>🛡️ Free</div>
-            <div style={{ fontSize: 15, fontWeight: 900, color: '#10B981', marginTop: 2 }}>{stats.freeCount}</div>
+
+          {/* Free Tier */}
+          <div style={{
+            background: 'var(--ad-input)',
+            borderRadius: 12,
+            padding: '10px 12px',
+            border: '1px solid rgba(16, 185, 129, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10
+          }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: 'rgba(16, 185, 129, 0.12)', color: '#10B981',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <Shield size={16} strokeWidth={2.4} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 10, color: '#10B981', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                Free Tier
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 900, color: '#10B981', lineHeight: 1.1, marginTop: 2 }}>
+                {stats.freeCount}
+              </div>
+            </div>
           </div>
-          <div style={{ background: 'var(--ad-input)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--ad-border)' }}>
-            <div style={{ fontSize: 10, color: '#F59E0B', fontWeight: 700 }}>👑 Pro Only</div>
-            <div style={{ fontSize: 15, fontWeight: 900, color: '#F59E0B', marginTop: 2 }}>{stats.paidCount}</div>
+
+          {/* Pro Tier */}
+          <div style={{
+            background: 'var(--ad-input)',
+            borderRadius: 12,
+            padding: '10px 12px',
+            border: '1px solid rgba(245, 158, 11, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10
+          }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <Crown size={16} strokeWidth={2.4} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 10, color: '#F59E0B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                Paid Pro
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 900, color: '#F59E0B', lineHeight: 1.1, marginTop: 2 }}>
+                {stats.paidCount}
+              </div>
+            </div>
           </div>
         </div>
       </div>
