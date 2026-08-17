@@ -165,152 +165,151 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
       {/* Toast */}
       {feedbackToast && (
         <div style={{
           position: 'fixed',
-          bottom: 24,
+          bottom: 20,
           left: '50%',
           transform: 'translateX(-50%)',
           background: 'rgba(15, 18, 33, 0.96)',
           border: '1.5px solid #8B5CF6',
           borderRadius: 100,
-          padding: '10px 20px',
+          padding: '8px 18px',
           color: '#fff',
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: 800,
           boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
           zIndex: 999999,
           display: 'flex',
           alignItems: 'center',
-          gap: 8
+          gap: 8,
+          whiteSpace: 'nowrap'
         }}>
           <span>{feedbackToast}</span>
         </div>
       )}
 
-      {/* ── Studio Header & Master Controls ─────────────────────────────────── */}
+      {/* ── Studio Header & Master Controls (Mobile-First UX) ─────────────────── */}
       <div style={{
         background: 'var(--ad-card)',
         border: '1px solid var(--ad-border)',
-        borderRadius: 20,
-        padding: '24px',
+        borderRadius: 16,
+        padding: '14px 12px',
         boxShadow: 'var(--ad-card-shadow)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 16
+        gap: 12
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{
-              width: 52,
-              height: 52,
-              borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(255, 77, 157, 0.15) 100%)',
-              border: '1.5px solid rgba(139, 92, 246, 0.4)',
-              color: '#8B5CF6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(139, 92, 246, 0.2)'
-            }}>
-              <Layers size={28} strokeWidth={2.4} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--ad-text)', margin: 0, letterSpacing: '-0.4px' }}>
-                  Bulk Batch Creation Visual Studio
-                </h1>
-                <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 100, background: 'rgba(139, 92, 246, 0.15)', color: '#8B5CF6' }}>
-                  Live App Layout
-                </span>
-              </div>
-              <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '4px 0 0', fontWeight: 500 }}>
-                Visually manage CSV/Excel uploads, spreadsheet grid editor, batch styling and ZIP export features. Click any tile to enable, disable, hide, or make Free vs Paid Pro.
-              </p>
-            </div>
+        {/* Top Row: Icon + Title */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(255, 77, 157, 0.15) 100%)',
+            border: '1.5px solid rgba(139, 92, 246, 0.4)',
+            color: '#8B5CF6',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.15)'
+          }}>
+            <Layers size={22} strokeWidth={2.4} />
           </div>
-
-          {/* Quick Master Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <button
-              disabled={bulkProcessing}
-              onClick={() => handleBatchTier('free')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)',
-                color: '#10B981', fontSize: 12, fontWeight: 800, cursor: 'pointer'
-              }}
-              title="Unlock all Bulk features for 100% Free users"
-            >
-              <Shield size={14} />
-              <span>Make Bulk Free</span>
-            </button>
-
-            <button
-              disabled={bulkProcessing}
-              onClick={() => handleBatchTier('paid')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.4)',
-                color: '#F59E0B', fontSize: 12, fontWeight: 800, cursor: 'pointer'
-              }}
-              title="Lock all Bulk features behind Paid Pro subscription"
-            >
-              <Crown size={14} />
-              <span>Make Bulk Pro</span>
-            </button>
-
-            <button
-              disabled={bulkProcessing}
-              onClick={() => handleBatchEnable(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)',
-                color: '#22C55E', fontSize: 12, fontWeight: 800, cursor: 'pointer'
-              }}
-            >
-              <Power size={14} />
-              <span>Enable All</span>
-            </button>
-
-            <button
-              disabled={bulkProcessing}
-              onClick={() => handleBatchEnable(false)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)',
-                color: '#EF4444', fontSize: 12, fontWeight: 800, cursor: 'pointer'
-              }}
-            >
-              <XCircle size={14} />
-              <span>Disable All</span>
-            </button>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <h1 style={{ fontSize: 16, fontWeight: 900, color: 'var(--ad-text)', margin: 0, letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+                Bulk Batch Studio
+              </h1>
+              <span style={{ fontSize: 9.5, fontWeight: 800, padding: '2px 7px', borderRadius: 100, background: 'rgba(139, 92, 246, 0.15)', color: '#8B5CF6' }}>
+                Live Studio
+              </span>
+            </div>
+            <p style={{ fontSize: 11, color: 'var(--ad-text-sec)', margin: '3px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
+              Visually manage CSV/Excel uploads, spreadsheet grid editor, batch styling and ZIP export features.
+            </p>
           </div>
         </div>
 
+        {/* Master Batch Action Chips */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+          <button
+            disabled={bulkProcessing}
+            onClick={() => handleBatchTier('free')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 3,
+              padding: '4px 8px', borderRadius: 6,
+              background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.35)',
+              color: '#10B981', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+            }}
+          >
+            <Shield size={10} />
+            <span>Make Bulk Free</span>
+          </button>
+
+          <button
+            disabled={bulkProcessing}
+            onClick={() => handleBatchTier('paid')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 3,
+              padding: '4px 8px', borderRadius: 6,
+              background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)',
+              color: '#F59E0B', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+            }}
+          >
+            <Crown size={10} />
+            <span>Make Bulk Pro</span>
+          </button>
+
+          <button
+            disabled={bulkProcessing}
+            onClick={() => handleBatchEnable(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 3,
+              padding: '4px 8px', borderRadius: 6,
+              background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)',
+              color: '#22C55E', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+            }}
+          >
+            <Power size={10} />
+            <span>Enable All</span>
+          </button>
+
+          <button
+            disabled={bulkProcessing}
+            onClick={() => handleBatchEnable(false)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 3,
+              padding: '4px 8px', borderRadius: 6,
+              background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#EF4444', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+            }}
+          >
+            <XCircle size={10} />
+            <span>Hide All</span>
+          </button>
+        </div>
+
         {/* Live Mini Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, paddingTop: 6 }}>
-          <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '10px 14px', border: '1px solid var(--ad-border)' }}>
-            <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', fontWeight: 700 }}>Total Bulk Tools</div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--ad-text)', marginTop: 2 }}>{stats.total}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 8, paddingTop: 4 }}>
+          <div style={{ background: 'var(--ad-input)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--ad-border)' }}>
+            <div style={{ fontSize: 10, color: 'var(--ad-text-sec)', fontWeight: 700 }}>Total Tools</div>
+            <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--ad-text)', marginTop: 2 }}>{stats.total}</div>
           </div>
-          <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '10px 14px', border: '1px solid var(--ad-border)' }}>
-            <div style={{ fontSize: 11, color: '#22C55E', fontWeight: 700 }}>🟢 Active / Visible</div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#22C55E', marginTop: 2 }}>{stats.enabled}</div>
+          <div style={{ background: 'var(--ad-input)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--ad-border)' }}>
+            <div style={{ fontSize: 10, color: '#22C55E', fontWeight: 700 }}>🟢 Active</div>
+            <div style={{ fontSize: 15, fontWeight: 900, color: '#22C55E', marginTop: 2 }}>{stats.enabled}</div>
           </div>
-          <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '10px 14px', border: '1px solid var(--ad-border)' }}>
-            <div style={{ fontSize: 11, color: '#10B981', fontWeight: 700 }}>🛡️ Free Tier</div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#10B981', marginTop: 2 }}>{stats.freeCount}</div>
+          <div style={{ background: 'var(--ad-input)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--ad-border)' }}>
+            <div style={{ fontSize: 10, color: '#10B981', fontWeight: 700 }}>🛡️ Free</div>
+            <div style={{ fontSize: 15, fontWeight: 900, color: '#10B981', marginTop: 2 }}>{stats.freeCount}</div>
           </div>
-          <div style={{ background: 'var(--ad-input)', borderRadius: 12, padding: '10px 14px', border: '1px solid var(--ad-border)' }}>
-            <div style={{ fontSize: 11, color: '#F59E0B', fontWeight: 700 }}>👑 Paid Pro Only</div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#F59E0B', marginTop: 2 }}>{stats.paidCount}</div>
+          <div style={{ background: 'var(--ad-input)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--ad-border)' }}>
+            <div style={{ fontSize: 10, color: '#F59E0B', fontWeight: 700 }}>👑 Pro Only</div>
+            <div style={{ fontSize: 15, fontWeight: 900, color: '#F59E0B', marginTop: 2 }}>{stats.paidCount}</div>
           </div>
         </div>
       </div>
@@ -319,34 +318,34 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
       <div style={{
         background: 'var(--ad-card)',
         border: '1px solid var(--ad-border)',
-        borderRadius: 18,
-        padding: '20px',
+        borderRadius: 16,
+        padding: '14px 12px',
         boxShadow: 'var(--ad-card-shadow)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 16
+        gap: 12
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
             <div style={{
-              width: 34, height: 34, borderRadius: 10,
+              width: 32, height: 32, borderRadius: 9,
               background: 'rgba(139, 92, 246, 0.12)', color: '#8B5CF6',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
             }}>
-              <Layers size={18} strokeWidth={2.4} />
+              <Layers size={16} strokeWidth={2.4} />
             </div>
-            <div>
-              <h2 style={{ fontSize: 16, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
-                Bulk Batch Creation Tools &amp; Quota Access
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h2 style={{ fontSize: 13.5, fontWeight: 900, color: 'var(--ad-text)', margin: 0, lineHeight: 1.25 }}>
+                Bulk Batch Creation Tools &amp; Quota
               </h2>
-              <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500 }}>
-                Manage full bulk workflow permissions: CSV upload, in-app spreadsheet editor, batch styling and ZIP bundle downloads.
+              <p style={{ fontSize: 10.5, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
+                CSV upload, in-app spreadsheet editor, batch styling and ZIP bundle downloads.
               </p>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
           {filteredFeatures.map(feature => (
             <BulkFeatureTile
               key={feature.key}
@@ -358,118 +357,9 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
           ))}
         </div>
       </div>
-
-      {/* ── Section 2: Interactive In-App Bulk Generator Visual Mockup ───────── */}
-      <div style={{
-        background: 'var(--ad-card)',
-        border: '1px solid var(--ad-border)',
-        borderRadius: 18,
-        padding: '20px',
-        boxShadow: 'var(--ad-card-shadow)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 16
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: 'rgba(255, 77, 157, 0.12)', color: '#FF4D9D',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Table size={18} strokeWidth={2.4} />
-          </div>
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
-              Live App Bulk Screen Interactive Preview
-            </h2>
-            <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500 }}>
-              This is the live visual structure of the Batch Creation Grid as users see it in the app.
-            </p>
-          </div>
-        </div>
-
-        {/* Mock Spreadsheet Grid */}
-        <div style={{
-          background: 'var(--ad-input)',
-          border: '1px solid var(--ad-border)',
-          borderRadius: 14,
-          overflow: 'hidden'
-        }}>
-          {/* Mock Top Toolbar */}
-          <div style={{
-            padding: '12px 16px',
-            borderBottom: '1px solid var(--ad-border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 10,
-            background: 'rgba(0, 0, 0, 0.1)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)' }}>Batch Job #1042</span>
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 6, background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>
-                50 Codes Loaded
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 8, background: 'var(--ad-card)', color: 'var(--ad-text-sec)', border: '1px solid var(--ad-border)' }}>
-                📁 Upload CSV
-              </div>
-              <div style={{ fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 8, background: 'var(--ad-card)', color: 'var(--ad-text-sec)', border: '1px solid var(--ad-border)' }}>
-                🎨 Apply Style
-              </div>
-              <div style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 8, background: '#8B5CF6', color: '#fff', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Archive size={12} />
-                <span>Export ZIP</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Table Rows Preview */}
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-              <thead>
-                <tr style={{ background: 'rgba(0,0,0,0.15)', borderBottom: '1px solid var(--ad-border)', textAlign: 'left' }}>
-                  <th style={{ padding: '8px 14px', color: 'var(--ad-text-sec)', fontWeight: 800 }}>#</th>
-                  <th style={{ padding: '8px 14px', color: 'var(--ad-text-sec)', fontWeight: 800 }}>Format</th>
-                  <th style={{ padding: '8px 14px', color: 'var(--ad-text-sec)', fontWeight: 800 }}>Data / Payload</th>
-                  <th style={{ padding: '8px 14px', color: 'var(--ad-text-sec)', fontWeight: 800 }}>Custom Label</th>
-                  <th style={{ padding: '8px 14px', color: 'var(--ad-text-sec)', fontWeight: 800 }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { id: 1, type: 'QR Code', data: 'https://mushiqr.app/menu/table-1', label: 'Table 1 QR', status: 'Ready' },
-                  { id: 2, type: 'EAN-13', data: '8901234567890', label: 'Item SKU #A102', status: 'Ready' },
-                  { id: 3, type: 'Code 128', data: 'PKG-2026-X99', label: 'Shipping Label', status: 'Ready' },
-                  { id: 4, type: 'Data Matrix', data: 'LOT-992-EXP2028', label: 'Pharma Batch', status: 'Ready' },
-                ].map(row => (
-                  <tr key={row.id} style={{ borderBottom: '1px solid var(--ad-border)' }}>
-                    <td style={{ padding: '9px 14px', color: 'var(--ad-text-sec)', fontWeight: 700 }}>{row.id}</td>
-                    <td style={{ padding: '9px 14px', color: '#8B5CF6', fontWeight: 800 }}>{row.type}</td>
-                    <td style={{ padding: '9px 14px', color: 'var(--ad-text)', fontFamily: 'monospace' }}>{row.data}</td>
-                    <td style={{ padding: '9px 14px', color: 'var(--ad-text)' }}>{row.label}</td>
-                    <td style={{ padding: '9px 14px' }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E' }}>
-                        {row.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
-
-// ═════════════════════════════════════════════════════════════════════════
-// MICRO SUB-COMPONENTS
-// ═════════════════════════════════════════════════════════════════════════
 
 function BulkFeatureTile({ feature, updating, onToggleEnable, onToggleTier }) {
   const isOff = !feature.enabled;
@@ -478,22 +368,22 @@ function BulkFeatureTile({ feature, updating, onToggleEnable, onToggleTier }) {
     <div style={{
       background: isOff ? 'rgba(15, 18, 33, 0.4)' : 'var(--ad-input)',
       border: `1.5px solid ${isOff ? 'rgba(239, 68, 68, 0.3)' : (feature.isPaid ? 'rgba(245, 158, 11, 0.35)' : 'rgba(139, 92, 246, 0.35)')}`,
-      borderRadius: 14,
-      padding: '14px',
+      borderRadius: 12,
+      padding: '10px 8px',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      gap: 12,
+      gap: 8,
       opacity: isOff ? 0.65 : 1,
       transition: 'all 0.18s ease',
-      boxShadow: feature.isPaid ? '0 2px 10px rgba(245, 158, 11, 0.08)' : '0 2px 10px rgba(139, 92, 246, 0.08)'
+      boxShadow: feature.isPaid ? '0 2px 8px rgba(245, 158, 11, 0.08)' : '0 2px 8px rgba(139, 92, 246, 0.08)'
     }}>
-      {/* Top row: Format icon badge + Name + Description */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+      {/* Top: Icon + Name */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
         <div style={{
-          width: 36,
-          height: 36,
-          borderRadius: 10,
+          width: 34,
+          height: 34,
+          borderRadius: 8,
           background: isOff ? 'rgba(148, 163, 184, 0.15)' : (feature.isPaid ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(139, 92, 246, 0.15))' : 'rgba(139, 92, 246, 0.15)'),
           color: isOff ? 'var(--ad-text-sec)' : (feature.isPaid ? '#F59E0B' : '#8B5CF6'),
           display: 'flex',
@@ -501,28 +391,34 @@ function BulkFeatureTile({ feature, updating, onToggleEnable, onToggleTier }) {
           justifyContent: 'center',
           flexShrink: 0
         }}>
-          <Layers size={18} strokeWidth={2.4} />
+          <Layers size={16} strokeWidth={2.4} />
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3 }}>
+          <div style={{
+            fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.25,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          }}>
             {feature.name}
           </div>
-          <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 2, lineHeight: 1.35 }}>
+          <div style={{
+            fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 2, lineHeight: 1.3,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          }}>
             {feature.description}
           </div>
         </div>
       </div>
 
-      {/* Bottom Controls Bar: Enable/Disable Switch + 1-Click Free/Pro Toggle */}
+      {/* Controls Bar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingTop: 8,
-        borderTop: '1px solid var(--ad-border)'
+        paddingTop: 6,
+        borderTop: '1px solid var(--ad-border)',
+        gap: 4
       }}>
-        {/* Left: Enable/Disable Button */}
         <button
           type="button"
           disabled={updating}
@@ -530,23 +426,22 @@ function BulkFeatureTile({ feature, updating, onToggleEnable, onToggleTier }) {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 5,
-            padding: '4px 9px',
-            borderRadius: 8,
+            gap: 3,
+            padding: '3px 6px',
+            borderRadius: 6,
             border: `1px solid ${feature.enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
             background: feature.enabled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
             color: feature.enabled ? '#22C55E' : '#EF4444',
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: 800,
-            cursor: updating ? 'not-allowed' : 'pointer'
+            cursor: updating ? 'not-allowed' : 'pointer',
+            flexShrink: 0
           }}
-          title={feature.enabled ? "Click to Disable/Hide from users" : "Click to Enable for users"}
         >
-          <Power size={11} strokeWidth={2.5} />
-          <span>{feature.enabled ? 'ACTIVE' : 'HIDDEN'}</span>
+          <Power size={9} strokeWidth={2.5} />
+          <span>{feature.enabled ? 'ON' : 'OFF'}</span>
         </button>
 
-        {/* Right: Tactile Free vs Pro Toggle Button */}
         <button
           type="button"
           disabled={updating}
@@ -554,26 +449,23 @@ function BulkFeatureTile({ feature, updating, onToggleEnable, onToggleTier }) {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 4,
-            padding: '4px 10px',
+            gap: 3,
+            padding: '3px 7px',
             borderRadius: 100,
-            border: `1.5px solid ${feature.isPaid ? '#F59E0B' : '#10B981'}`,
-            background: feature.isPaid
-              ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)'
-              : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            border: `1.5px solid ${feature.isPaid ? '#F59E0B' : '#8B5CF6'}`,
+            background: feature.isPaid ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
             color: '#FFFFFF',
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: 800,
             cursor: updating ? 'not-allowed' : 'pointer',
-            boxShadow: feature.isPaid ? '0 2px 8px rgba(245, 158, 11, 0.35)' : '0 2px 8px rgba(16, 185, 129, 0.35)',
-            transition: 'all 0.15s ease'
+            flexShrink: 0,
+            boxShadow: feature.isPaid ? '0 2px 6px rgba(245, 158, 11, 0.35)' : '0 2px 6px rgba(139, 92, 246, 0.35)'
           }}
-          title={feature.isPaid ? "Plan: PRO (Click to make 100% Free)" : "Plan: FREE (Click to lock behind Pro)"}
         >
           {updating ? (
-            <RefreshCw size={10} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
+            <RefreshCw size={9} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
           ) : feature.isPaid ? (
-            <Crown size={11} fill="#fff" color="#fff" strokeWidth={2.2} />
+            <Crown size={9} fill="#fff" color="#fff" strokeWidth={2.2} />
           ) : (
             <Shield size={10} strokeWidth={2.5} />
           )}

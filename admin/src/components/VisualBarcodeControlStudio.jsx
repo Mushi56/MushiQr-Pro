@@ -168,134 +168,43 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
   const appearanceTools = filteredFeatures.filter(f => f.subcategory === 'Barcode Appearance');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
       {/* Toast */}
       {feedbackToast && (
         <div style={{
           position: 'fixed',
-          bottom: 24,
+          bottom: 20,
           left: '50%',
           transform: 'translateX(-50%)',
           background: 'rgba(15, 18, 33, 0.96)',
           border: '1.5px solid #3B82F6',
           borderRadius: 100,
-          padding: '10px 20px',
+          padding: '8px 18px',
           color: '#fff',
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: 800,
           boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
           zIndex: 999999,
           display: 'flex',
           alignItems: 'center',
-          gap: 8
+          gap: 8,
+          whiteSpace: 'nowrap'
         }}>
           <span>{feedbackToast}</span>
         </div>
       )}
 
-      {/* ── Studio Header & Master Controls ─────────────────────────────────── */}
+      {/* ── Studio Header & Master Controls (Mobile-First UX) ─────────────────── */}
       <div style={{
         background: 'var(--ad-card)',
         border: '1px solid var(--ad-border)',
-        borderRadius: 20,
-        padding: '24px',
+        borderRadius: 16,
+        padding: '14px 12px',
         boxShadow: 'var(--ad-card-shadow)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 16
+        gap: 12
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{
-              width: 52,
-              height: 52,
-              borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(99, 102, 241, 0.15) 100%)',
-              border: '1.5px solid rgba(59, 130, 246, 0.4)',
-              color: '#3B82F6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2)'
-            }}>
-              <Barcode size={28} strokeWidth={2.4} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--ad-text)', margin: 0, letterSpacing: '-0.4px' }}>
-                  Barcode Generator Visual Studio
-                </h1>
-                <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 100, background: 'rgba(59, 130, 246, 0.15)', color: '#3B82F6' }}>
-                  Live App Layout
-                </span>
-              </div>
-              <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '4px 0 0', fontWeight: 500 }}>
-                Visually manage all 1D &amp; 2D retail, logistics, postal and industrial barcode standards. Click any tile to enable, disable, hide, or make Free vs Paid Pro.
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Master Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <button
-              disabled={bulkProcessing}
-              onClick={() => handleBatchTier('free')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)',
-                color: '#10B981', fontSize: 12, fontWeight: 800, cursor: 'pointer'
-              }}
-              title="Unlock all Barcode features for 100% Free users"
-            >
-              <Shield size={14} />
-              <span>Make All Free</span>
-            </button>
-
-            <button
-              disabled={bulkProcessing}
-              onClick={() => handleBatchTier('paid')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.4)',
-                color: '#F59E0B', fontSize: 12, fontWeight: 800, cursor: 'pointer'
-              }}
-              title="Lock all Barcode features behind Paid Pro subscription"
-            >
-              <Crown size={14} />
-              <span>Make All Pro</span>
-            </button>
-
-            <button
-              disabled={bulkProcessing}
-              onClick={() => handleBatchEnable(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)',
-                color: '#22C55E', fontSize: 12, fontWeight: 800, cursor: 'pointer'
-              }}
-            >
-              <Power size={14} />
-              <span>Enable All</span>
-            </button>
-
-            <button
-              disabled={bulkProcessing}
-              onClick={() => handleBatchEnable(false)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)',
-                color: '#EF4444', fontSize: 12, fontWeight: 800, cursor: 'pointer'
-              }}
-            >
-              <XCircle size={14} />
-              <span>Disable All</span>
-            </button>
-          </div>
-        </div>
 
         {/* Live Mini Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, paddingTop: 6 }}>
@@ -340,14 +249,14 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
         </div>
       </div>
 
-      {/* ── Section 1: 1D Standard Formats Grid ─────────────────────────────── */}
+      {/* ── Section 1: 1D Linear Retail Standards Grid ─────────────────────── */}
       <BarcodeSectionCard
-        title="1. 1D Retail, Industrial & Logistics Standards"
-        subtitle="Linear barcode symbologies used in point-of-sale retail, warehousing, shipping & health."
+        title="1. 1D Linear Barcode Standards"
+        subtitle="EAN, UPC, Code 128, Code 39, ITF-14, ISBN and postal tracking barcodes."
         icon={Barcode}
         badgeCount={oneDStandards.length}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
           {oneDStandards.map(feature => (
             <BarcodeFeatureTile
               key={feature.key}
@@ -363,12 +272,12 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
 
       {/* ── Section 2: 2D Matrix Formats Grid ───────────────────────────────── */}
       <BarcodeSectionCard
-        title="2. 2D Matrix & High-Capacity Stacked Formats"
-        subtitle="Two-dimensional matrix barcodes for high-density industrial tracking, boarding passes & parcels."
+        title="2. 2D Matrix & High-Capacity Formats"
+        subtitle="Two-dimensional matrix barcodes for industrial tracking, boarding passes & parcels."
         icon={Box}
         badgeCount={twoDStandards.length}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
           {twoDStandards.map(feature => (
             <BarcodeFeatureTile
               key={feature.key}
@@ -384,12 +293,12 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
 
       {/* ── Section 3: Barcode Styling & Appearance Tools ───────────────────── */}
       <BarcodeSectionCard
-        title="3. Barcode Customization & Rendering Engine"
-        subtitle="Bar color pickers, background styling, dimensional scaling, and human-readable text toggling."
+        title="3. Customization & Rendering Engine"
+        subtitle="Bar color pickers, background styling, dimensional scaling, and text toggling."
         icon={Palette}
         badgeCount={appearanceTools.length}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
           {appearanceTools.map(feature => (
             <BarcodeFeatureTile
               key={feature.key}
@@ -407,7 +316,7 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
 }
 
 // ═════════════════════════════════════════════════════════════════════════
-// MICRO SUB-COMPONENTS
+// MICRO SUB-COMPONENTS (Mobile-First UX)
 // ═════════════════════════════════════════════════════════════════════════
 
 function BarcodeSectionCard({ title, subtitle, icon: Icon, badgeCount, children }) {
@@ -415,35 +324,35 @@ function BarcodeSectionCard({ title, subtitle, icon: Icon, badgeCount, children 
     <div style={{
       background: 'var(--ad-card)',
       border: '1px solid var(--ad-border)',
-      borderRadius: 18,
-      padding: '20px',
+      borderRadius: 16,
+      padding: '14px 12px',
       boxShadow: 'var(--ad-card-shadow)',
       display: 'flex',
       flexDirection: 'column',
-      gap: 16
+      gap: 12
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
           <div style={{
-            width: 34, height: 34, borderRadius: 10,
+            width: 32, height: 32, borderRadius: 9,
             background: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
           }}>
-            <Icon size={18} strokeWidth={2.4} />
+            <Icon size={16} strokeWidth={2.4} />
           </div>
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h2 style={{ fontSize: 13.5, fontWeight: 900, color: 'var(--ad-text)', margin: 0, lineHeight: 1.25 }}>
               {title}
             </h2>
-            <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500 }}>
+            <p style={{ fontSize: 10.5, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
               {subtitle}
             </p>
           </div>
         </div>
         {badgeCount !== undefined && (
           <span style={{
-            fontSize: 11, fontWeight: 800, padding: '3px 9px', borderRadius: 100,
-            background: 'var(--ad-input)', color: 'var(--ad-text-sec)', border: '1px solid var(--ad-border)'
+            fontSize: 9.5, fontWeight: 800, padding: '2px 7px', borderRadius: 100,
+            background: 'var(--ad-input)', color: 'var(--ad-text-sec)', border: '1px solid var(--ad-border)', flexShrink: 0
           }}>
             {badgeCount} Formats
           </span>
@@ -461,77 +370,73 @@ function BarcodeFeatureTile({ feature, is2D, updating, onToggleEnable, onToggleT
     <div style={{
       background: isOff ? 'rgba(15, 18, 33, 0.4)' : 'var(--ad-input)',
       border: `1.5px solid ${isOff ? 'rgba(239, 68, 68, 0.3)' : (feature.isPaid ? 'rgba(245, 158, 11, 0.35)' : 'rgba(59, 130, 246, 0.35)')}`,
-      borderRadius: 14,
-      padding: '14px',
+      borderRadius: 12,
+      padding: '10px 8px',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      gap: 12,
+      gap: 8,
       opacity: isOff ? 0.65 : 1,
       transition: 'all 0.18s ease',
-      boxShadow: feature.isPaid ? '0 2px 10px rgba(245, 158, 11, 0.08)' : '0 2px 10px rgba(59, 130, 246, 0.08)'
+      boxShadow: feature.isPaid ? '0 2px 8px rgba(245, 158, 11, 0.08)' : '0 2px 8px rgba(59, 130, 246, 0.08)'
     }}>
-      {/* Top row: Format icon badge + Name + Description */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-        <div style={{
-          width: 36,
-          height: 36,
-          borderRadius: 10,
-          background: isOff ? 'rgba(148, 163, 184, 0.15)' : (feature.isPaid ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(59, 130, 246, 0.15))' : 'rgba(59, 130, 246, 0.15)'),
-          color: isOff ? 'var(--ad-text-sec)' : (feature.isPaid ? '#F59E0B' : '#3B82F6'),
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0
-        }}>
-          {is2D ? <Box size={18} strokeWidth={2.4} /> : <Barcode size={18} strokeWidth={2.4} />}
-        </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3 }}>
-            {feature.name}
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 2, lineHeight: 1.35 }}>
-            {feature.description}
-          </div>
-        </div>
-      </div>
-
-      {/* Mini Visual Barcode Line Preview */}
+      {/* Top: Sample Barcode Lines Mockup */}
       <div style={{
-        background: 'rgba(0, 0, 0, 0.2)',
+        background: '#FFFFFF',
         borderRadius: 8,
-        padding: '6px 10px',
+        padding: '6px',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 3,
-        border: '1px dashed var(--ad-border)'
+        minHeight: 46,
+        border: '1px solid var(--ad-border)'
       }}>
         {is2D ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 4px)', gap: 2 }}>
-            {[1,0,1,1,0, 0,1,0,1,1, 1,1,1,0,0, 0,1,0,1,0].map((v, i) => (
-              <div key={i} style={{ width: 4, height: 4, background: v ? (feature.isPaid ? '#F59E0B' : '#3B82F6') : 'transparent', borderRadius: 1 }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 5px)', gap: 2 }}>
+            {[1,0,1,1,0, 0,1,0,1,1, 1,1,1,0,0, 0,1,0,1,0, 1,0,1,1,1].map((dot, idx) => (
+              <div key={idx} style={{ width: 5, height: 5, background: dot ? '#000' : 'transparent', borderRadius: 1 }} />
             ))}
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2, height: 16 }}>
-            {[3, 1, 2, 1, 4, 1, 2, 3, 1, 2, 4, 1, 3, 2, 1].map((w, i) => (
-              <div key={i} style={{ width: w, height: '100%', background: feature.isPaid ? '#F59E0B' : '#3B82F6', borderRadius: 1 }} />
-            ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 2, height: 26, width: '100%', justifyContent: 'center' }}>
+            <div style={{ width: 2, height: '100%', background: '#000' }} />
+            <div style={{ width: 4, height: '100%', background: '#000' }} />
+            <div style={{ width: 1, height: '100%', background: '#000' }} />
+            <div style={{ width: 3, height: '100%', background: '#000' }} />
+            <div style={{ width: 2, height: '100%', background: '#000' }} />
+            <div style={{ width: 4, height: '100%', background: '#000' }} />
+            <div style={{ width: 1, height: '100%', background: '#000' }} />
+            <div style={{ width: 3, height: '100%', background: '#000' }} />
           </div>
         )}
       </div>
 
-      {/* Bottom Controls Bar: Enable/Disable Switch + 1-Click Free/Pro Toggle */}
+      {/* Info */}
+      <div style={{ minWidth: 0 }}>
+        <div style={{
+          fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.25,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+        }}>
+          {feature.name}
+        </div>
+        <div style={{
+          fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 2, lineHeight: 1.3,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+        }}>
+          {feature.description}
+        </div>
+      </div>
+
+      {/* Controls Bar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingTop: 8,
-        borderTop: '1px solid var(--ad-border)'
+        paddingTop: 6,
+        borderTop: '1px solid var(--ad-border)',
+        gap: 4
       }}>
-        {/* Left: Enable/Disable Button */}
         <button
           type="button"
           disabled={updating}
@@ -539,23 +444,22 @@ function BarcodeFeatureTile({ feature, is2D, updating, onToggleEnable, onToggleT
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 5,
-            padding: '4px 9px',
-            borderRadius: 8,
+            gap: 3,
+            padding: '3px 6px',
+            borderRadius: 6,
             border: `1px solid ${feature.enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
             background: feature.enabled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
             color: feature.enabled ? '#22C55E' : '#EF4444',
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: 800,
-            cursor: updating ? 'not-allowed' : 'pointer'
+            cursor: updating ? 'not-allowed' : 'pointer',
+            flexShrink: 0
           }}
-          title={feature.enabled ? "Click to Disable/Hide from users" : "Click to Enable for users"}
         >
-          <Power size={11} strokeWidth={2.5} />
-          <span>{feature.enabled ? 'ACTIVE' : 'HIDDEN'}</span>
+          <Power size={9} strokeWidth={2.5} />
+          <span>{feature.enabled ? 'ON' : 'OFF'}</span>
         </button>
 
-        {/* Right: Tactile Free vs Pro Toggle Button */}
         <button
           type="button"
           disabled={updating}
@@ -563,26 +467,24 @@ function BarcodeFeatureTile({ feature, is2D, updating, onToggleEnable, onToggleT
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 4,
-            padding: '4px 10px',
+            gap: 3,
+            padding: '3px 7px',
             borderRadius: 100,
-            border: `1.5px solid ${feature.isPaid ? '#F59E0B' : '#10B981'}`,
-            background: feature.isPaid
-              ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)'
-              : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            border: `1.5px solid ${feature.isPaid ? '#F59E0B' : '#3B82F6'}`,
+            background: feature.isPaid ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
             color: '#FFFFFF',
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: 800,
             cursor: updating ? 'not-allowed' : 'pointer',
-            boxShadow: feature.isPaid ? '0 2px 8px rgba(245, 158, 11, 0.35)' : '0 2px 8px rgba(16, 185, 129, 0.35)',
-            transition: 'all 0.15s ease'
+            flexShrink: 0,
+            boxShadow: feature.isPaid ? '0 2px 6px rgba(245, 158, 11, 0.35)' : '0 2px 6px rgba(59, 130, 246, 0.35)'
           }}
           title={feature.isPaid ? "Plan: PRO (Click to make 100% Free)" : "Plan: FREE (Click to lock behind Pro)"}
         >
           {updating ? (
-            <RefreshCw size={10} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
+            <RefreshCw size={9} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
           ) : feature.isPaid ? (
-            <Crown size={11} fill="#fff" color="#fff" strokeWidth={2.2} />
+            <Crown size={9} fill="#fff" color="#fff" strokeWidth={2.2} />
           ) : (
             <Shield size={10} strokeWidth={2.5} />
           )}
