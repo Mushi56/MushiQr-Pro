@@ -19,7 +19,7 @@ import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { setFeatureFlagCloud, setFeaturesTierBatchCloud } from '../services/adminDataService';
 import { FEATURE_REGISTRY } from '../services/FeatureAccessManager';
-import { drawDotModule, drawEye } from '../../src/utils/qrEngine';
+import { drawDotModule, drawEye } from '../utils/qrCanvasEngine';
 
 // ─── 1. RAW CATALOG DATA ───────────────────────────────────────────────────
 
