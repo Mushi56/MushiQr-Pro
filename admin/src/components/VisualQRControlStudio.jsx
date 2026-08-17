@@ -13,13 +13,14 @@ import {
   FileSpreadsheet, Music, Calendar, DollarSign, MessageCircle, Video,
   Send, AtSign, CheckCircle2, SlidersHorizontal, ChevronRight, Eye,
   Grid, Box, Wand2, ArrowRightLeft, Lock, Unlock, EyeOff, LayoutGrid,
-  FileCheck, Star, Heart, Bookmark, UploadCloud, Brush, Layers2
+  FileCheck, Star, Heart, Bookmark, UploadCloud, Brush, Layers2,
+  Eraser, Paintbrush
 } from 'lucide-react';
 import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { setFeatureFlagCloud, setFeaturesTierBatchCloud } from '../services/adminDataService';
 import { FEATURE_REGISTRY } from '../services/FeatureAccessManager';
-import { drawDotModule, drawEye } from '../utils/qrCanvasEngine';
+import { drawDotModule, drawEye } from '../../src/utils/qrEngine.js';
 
 // ─── 1. RAW CATALOG DATA ───────────────────────────────────────────────────
 
@@ -146,6 +147,91 @@ export const ALL_TEXTURES = [
   { slug: 'telegram', name: 'Telegram Blue Texture', color: '#0088CC', url: '/textures/telegram_texture.webp' },
   { slug: 'spotify', name: 'Spotify Wave Texture', color: '#1DB954', url: '/textures/spotify_texture.webp' },
   { slug: 'custom_upload', name: 'Custom Photo Texture Upload', color: '#8B5CF6', isUpload: true, desc: 'Upload custom image pattern' }
+];
+
+export const ALL_COLOR_TOOLS = [
+  { 
+    id: 'qr_color_presets', 
+    name: 'Color Presets Gallery', 
+    desc: 'Pre-designed solid & gradient multi-color theme swatch gallery',
+    category: 'Color Tools',
+    icon: Bookmark,
+    defaultPlan: 'free'
+  },
+  { 
+    id: 'qr_color_dots', 
+    name: 'Dots Custom Color Tool', 
+    desc: 'Fine-tune custom solid hex/RGB colors and dual gradients for dot modules',
+    category: 'Color Tools',
+    icon: Grid,
+    defaultPlan: 'free'
+  },
+  { 
+    id: 'qr_color_eyes', 
+    name: 'Eyes Color Customizer', 
+    desc: 'Independent color pickers for corner finder outer frame & inner pupil',
+    category: 'Color Tools',
+    icon: Eye,
+    defaultPlan: 'free'
+  },
+  { 
+    id: 'qr_color_bg', 
+    name: 'Background Color & Transparency', 
+    desc: 'Custom canvas background color picker and transparent background toggle',
+    category: 'Color Tools',
+    icon: Palette,
+    defaultPlan: 'free'
+  },
+  { 
+    id: 'qr_color_bg_image', 
+    name: 'Background Photo & Texture Canvas', 
+    desc: 'Upload custom background images, overlay dimming slider & contrast container',
+    category: 'Color Tools',
+    icon: Image,
+    defaultPlan: 'weekly'
+  }
+];
+
+export const ALL_COLOR_THEME_PRESETS = [
+  { id: 'classic', name: 'Classic B&W', qr: '#000000', bg: '#FFFFFF', desc: 'Standard high-contrast' },
+  { id: 'ocean', name: 'Ocean Blue', qr: '#0055ff', bg: '#eef4ff', desc: 'Calm electric ocean hue' },
+  { id: 'forest', name: 'Forest Green', qr: '#008844', bg: '#f0fff4', desc: 'Fresh organic green' },
+  { id: 'sunset', name: 'Sunset Orange', qr: '#ff4400', bg: '#fff5f0', desc: 'Warm glowing sunset' },
+  { id: 'purple', name: 'Royal Purple', qr: '#8800cc', bg: '#faf0ff', desc: 'Vibrant majesty purple' },
+  { id: 'dark', name: 'Dark Cyberpunk', qr: '#00ffff', bg: '#111122', desc: 'Neon cyan on dark navy' },
+  { id: 'monochrome', name: 'Monochrome Inverted', qr: '#ffffff', bg: '#000000', desc: 'White matrix on black' },
+  { id: 'cyberpunk', name: 'Cyberpunk Yellow', qr: '#ffff00', bg: '#110022', desc: 'Neon yellow on deep purple' },
+  { id: 'crimson', name: 'Crimson Passion', qr: '#D60036', bg: '#fff0f3', desc: 'Passionate brand crimson' },
+  { id: 'emerald', name: 'Emerald Mint', qr: '#10B981', bg: '#ECFDF5', desc: 'Vibrant clean emerald' }
+];
+
+export const ALL_LOGO_CONTROLS = [
+  { id: 'custom_logo_upload', name: 'Custom Brand Logo Upload', desc: 'Upload personal image/photo logo inside QR center', icon: UploadCloud, defaultPlan: 'weekly' },
+  { id: 'custom_logo_presets', name: 'Brand Logo Presets Gallery', desc: 'Pre-installed library of 40+ social, fintech & tech brand logos', icon: Image, defaultPlan: 'free' },
+  { id: 'qr_logo_bg_remover', name: 'AI Logo Background Remover & Crop', desc: 'Remove image backgrounds and custom crop logos', icon: Eraser, defaultPlan: 'weekly' },
+  { id: 'qr_logo_stroke_shadow', name: 'Logo Stroke, Shadow & Card', desc: 'Custom outline borders, badge card backings & drop shadows', icon: Paintbrush, defaultPlan: 'free' }
+];
+
+export const ALL_TEXT_CONTROLS = [
+  { id: 'qr_center_text', name: 'Center Text Watermark Embed', desc: 'Custom text banner embedded directly inside the QR code center', icon: Type, defaultPlan: 'weekly' },
+  { id: 'qr_text_frame', name: 'CTA Frame Text (Top / Bottom)', desc: 'Call to action text rendered inside the frame badge header/footer', icon: LayoutGrid, defaultPlan: 'free' },
+  { id: 'qr_custom_font_upload', name: 'Custom TTF / OTF Font Upload', desc: 'Upload proprietary brand font files directly to QR matrix', icon: UploadCloud, defaultPlan: 'weekly' },
+  { id: 'qr_text_styling', name: 'Text Colors, Stroke & Drop Shadow', desc: 'Fine-tune typography colors, outlines, glow and drop shadows', icon: Palette, defaultPlan: 'free' }
+];
+
+export const ALL_EXPORT_FORMATS = [
+  { id: 'export_png', name: 'PNG Image Export', desc: 'Download high-res PNG image', defaultPlan: 'free' },
+  { id: 'export_jpg', name: 'JPG Image Export', desc: 'Download compressed JPG image', defaultPlan: 'free' },
+  { id: 'export_svg', name: 'SVG Vector Export', desc: 'Download scalable SVG vector file', defaultPlan: 'weekly' },
+  { id: 'export_pdf', name: 'PDF Document Export', desc: 'Download print-ready A4 PDF', defaultPlan: 'weekly' }
+];
+
+export const ALL_EXPORT_QUALITIES = [
+  { id: 'export_quality_low', name: 'Quality: Low (512px)', desc: 'Export standard low resolution (512px)', defaultPlan: 'free' },
+  { id: 'export_quality_medium', name: 'Quality: Normal (1024px)', desc: 'Export normal resolution (1024px)', defaultPlan: 'free' },
+  { id: 'export_quality_hd', name: 'Quality: HD (2048px)', desc: 'Export crisp HD resolution (2048px)', defaultPlan: 'weekly' },
+  { id: 'export_quality_ultra', name: 'Quality: 4K Ultra (4096px)', desc: 'Export ultra 4K resolution (4096px)', defaultPlan: 'weekly' },
+  { id: 'export_native_share', name: 'Native OS Share Sheet', desc: 'Share file directly to social apps', defaultPlan: 'free' }
 ];
 
 export const ALL_GRADIENTS = [
@@ -568,6 +654,30 @@ function MiniEyeCanvas({ eyeStyle, color = '#D60036' }) {
   );
 }
 
+// ─── ICON MAPPINGS FOR 18 CONTENT FORMATS ──────────────────────────────────
+const QR_CONTENT_FORMAT_ICONS = {
+  qr_text: FileText,
+  qr_url: Globe,
+  qr_wifi: Wifi,
+  qr_email: Mail,
+  qr_phone: Phone,
+  qr_sms: MessageSquare,
+  qr_vcard: User,
+  qr_location: MapPin,
+  qr_pdf: FileText,
+  qr_image: Image,
+  qr_audio: Music,
+  qr_document: FileSpreadsheet,
+  qr_event: Calendar,
+  qr_crypto: DollarSign,
+  qr_whatsapp: MessageCircle,
+  qr_youtube: Video,
+  qr_instagram: Image,
+  qr_facebook: Globe,
+  qr_x: Send,
+  qr_linkedin: AtSign,
+};
+
 // ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
 
 export default function VisualQRControlStudio({ currentUser, isDark = false }) {
@@ -575,7 +685,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
   const [livePlans, setLivePlans] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('content');
   const [updatingKey, setUpdatingKey] = useState(null);
   const [bulkProcessing, setBulkProcessing] = useState(false);
   const [feedbackToast, setFeedbackToast] = useState(null);
@@ -682,18 +792,15 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     });
   }, [liveFlagsMap, livePlans]);
 
-  // Sub-Navigation Tabs (Compact Mobile-First Labels)
+  // 7 Main Navbar Sub-Navigation Tabs
   const TABS = [
-    { id: 'overview', label: '1. Content Formats', count: 18, icon: QrCode },
-    { id: 'dots', label: '2. 37 Dot Shapes', count: ALL_DOT_STYLES.length, icon: Grid },
-    { id: 'eyes', label: '3. 35 Eye Shapes', count: ALL_EYE_STYLES.length, icon: Eye },
-    { id: 'textures', label: '4. 10 Textures', count: ALL_TEXTURES.length, icon: Brush },
-    { id: 'gradients', label: '5. 12 Gradients', count: ALL_GRADIENTS.length, icon: Wand2 },
-    { id: 'bg_shapes', label: '6. 8 Backgrounds', count: ALL_BG_SHAPES.length, icon: Box },
-    { id: 'logos', label: '7. 40 Brand Logos', count: ALL_LOGO_PRESETS.length, icon: Image },
-    { id: 'fonts', label: '8. 30 Google Fonts', count: ALL_FONTS.length, icon: Type },
-    { id: 'frames', label: '9. 12 Frames', count: ALL_FRAMES.length, icon: Sparkles },
-    { id: 'templates', label: '10. Templates', count: ALL_TEMPLATES.length, icon: LayoutGrid }
+    { id: 'content', label: '1. Content', count: 18, icon: QrCode },
+    { id: 'color', label: '2. Color', count: ALL_COLOR_TOOLS.length + ALL_COLOR_THEME_PRESETS.length + ALL_TEXTURES.length, icon: Palette },
+    { id: 'style', label: '3. Style', count: ALL_DOT_STYLES.length + ALL_EYE_STYLES.length + ALL_BG_SHAPES.length + ALL_GRADIENTS.length, icon: Grid },
+    { id: 'logo', label: '4. Logo', count: ALL_LOGO_CONTROLS.length + ALL_LOGO_PRESETS.length, icon: Image },
+    { id: 'template', label: '5. Template', count: ALL_TEMPLATES.length + ALL_FRAMES.length, icon: Sparkles },
+    { id: 'text', label: '6. Text', count: ALL_TEXT_CONTROLS.length + ALL_FONTS.length, icon: Type },
+    { id: 'export', label: '7. Save & Export', count: ALL_EXPORT_FORMATS.length + ALL_EXPORT_QUALITIES.length, icon: Download }
   ];
 
   return (
@@ -800,363 +907,707 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </div>
       </div>
 
-      {/* ── TAB 1: OVERVIEW & 18 CONTENT TYPES ────────────────────────────────── */}
-      {activeTab === 'overview' && (
-        <SectionCatalog
-          title="18 Main App QR Content Formats"
-          subtitle="The 18 content format cards shown to users on the creation screen."
-          icon={Grid}
-          onMakeFree={() => handleBatchActiveTabTier('free', canonicalQRFeatures.filter(f => f.subcategory === 'Content').map(f => f.key))}
-          onMakePro={() => handleBatchActiveTabTier('paid', canonicalQRFeatures.filter(f => f.subcategory === 'Content').map(f => f.key))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, canonicalQRFeatures.filter(f => f.subcategory === 'Content'), 'Content')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, canonicalQRFeatures.filter(f => f.subcategory === 'Content'), 'Content')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
-            {canonicalQRFeatures
-              .filter(f => f.subcategory === 'Content' && (!searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase())))
-              .map(feature => (
-                <ItemControlTile
-                  key={feature.key}
-                  name={feature.name}
-                  desc={feature.description}
-                  enabled={feature.enabled}
-                  isPaid={feature.isPaid}
-                  icon={FileText}
-                  updating={updatingKey === feature.key}
-                  onToggleEnable={() => handleToggleEnable(feature.key, feature.name, 'Content')}
-                  onToggleTier={() => handleToggleTier(feature.key, feature.name)}
-                />
-              ))}
-          </div>
-        </SectionCatalog>
+      {/* ── TAB 1: CONTENT (Content Formats Toolbar) ─────────────────────────── */}
+      {activeTab === 'content' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <SectionCatalog
+            title="18 Main App QR Content Formats"
+            subtitle="The 18 content format cards shown to users on the creation screen."
+            icon={QrCode}
+            onMakeFree={() => handleBatchActiveTabTier('free', canonicalQRFeatures.filter(f => f.subcategory === 'Content' && f.key !== 'qr_tab_content').map(f => f.key))}
+            onMakePro={() => handleBatchActiveTabTier('paid', canonicalQRFeatures.filter(f => f.subcategory === 'Content' && f.key !== 'qr_tab_content').map(f => f.key))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, canonicalQRFeatures.filter(f => f.subcategory === 'Content' && f.key !== 'qr_tab_content'), 'Content Formats')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, canonicalQRFeatures.filter(f => f.subcategory === 'Content' && f.key !== 'qr_tab_content'), 'Content Formats')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
+              {canonicalQRFeatures
+                .filter(f => f.subcategory === 'Content' && f.key !== 'qr_tab_content' && (!searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase())))
+                .map(feature => {
+                  const FormatIcon = QR_CONTENT_FORMAT_ICONS[feature.key] || FileText;
+                  return (
+                    <ItemControlTile
+                      key={feature.key}
+                      name={feature.name}
+                      desc={feature.description}
+                      enabled={feature.enabled}
+                      isPaid={feature.isPaid}
+                      icon={FormatIcon}
+                      updating={updatingKey === feature.key}
+                      onToggleEnable={() => handleToggleEnable(feature.key, feature.name, 'Content Formats')}
+                      onToggleTier={() => handleToggleTier(feature.key, feature.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+        </div>
       )}
 
-      {/* ── TAB 2: 37 DOT MODULE SHAPES (With Live Canvas Preview) ────────────── */}
-      {activeTab === 'dots' && (
-        <SectionCatalog
-          title="37 Custom QR Dot Module Shapes (Live Canvas Preview)"
-          subtitle="Every dot shape renders its actual canvas drawing pattern. Click to toggle Free/Pro & Active state."
-          icon={Grid}
-          onMakeFree={() => handleBatchActiveTabTier('free', ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`))}
-          onMakePro={() => handleBatchActiveTabTier('paid', ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_DOT_STYLES.map(d => ({ key: `qr_dot_${d.id}`, name: d.name })), 'Dot Shapes')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_DOT_STYLES.map(d => ({ key: `qr_dot_${d.id}`, name: d.name })), 'Dot Shapes')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-            {ALL_DOT_STYLES
-              .filter(d => !searchQuery || d.name.toLowerCase().includes(searchQuery.toLowerCase()) || d.id.includes(searchQuery.toLowerCase()))
-              .map(dot => {
-                const key = `qr_dot_${dot.id}`;
-                const state = getItemState(key, true, dot.id === 'denso' || dot.id === 'dots' || dot.id === 'rounded' ? 'free' : 'weekly');
+      {/* ── TAB 2: COLOR (Presets, Dots, Eyes, BG Color, BG Image, Texture) ───── */}
+      {activeTab === 'color' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Subcategory 1: Presets Toolbar */}
+          <SectionCatalog
+            title="Presets: 10 Solid Theme Presets (Live Dual Swatches)"
+            subtitle="Pre-designed color palette swatches and presets gallery access."
+            icon={Bookmark}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_presets', ...ALL_COLOR_THEME_PRESETS.map(p => `qr_color_preset_${p.id}`)])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_presets', ...ALL_COLOR_THEME_PRESETS.map(p => `qr_color_preset_${p.id}`)])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_presets', name: 'Color Presets Gallery' }, ...ALL_COLOR_THEME_PRESETS.map(p => ({ key: `qr_color_preset_${p.id}`, name: p.name }))], 'Presets')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_presets', name: 'Color Presets Gallery' }, ...ALL_COLOR_THEME_PRESETS.map(p => ({ key: `qr_color_preset_${p.id}`, name: p.name }))], 'Presets')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
+              {(() => {
+                const state = getItemState('qr_color_presets', true, 'free');
                 return (
                   <ItemControlTile
-                    key={key}
-                    name={dot.name}
-                    desc={dot.desc}
-                    badge={dot.id}
-                    customPreview={<MiniDotCanvas dotStyle={dot.id} color={state.isPaid ? '#F59E0B' : '#10B981'} />}
+                    key="qr_color_presets"
+                    name="Color Presets Gallery"
+                    desc="Master toolbar preset gallery tool"
+                    badge="qr_color_presets"
+                    customPreview={
+                      <div style={{ width: 38, height: 38, borderRadius: 10, background: state.isPaid ? 'rgba(245,158,11,0.2)' : 'rgba(16,185,129,0.2)', border: `1.5px solid ${state.isPaid ? '#F59E0B' : '#10B981'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: state.isPaid ? '#F59E0B' : '#10B981' }}>
+                        <Bookmark size={20} />
+                      </div>
+                    }
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={Grid}
-                    updating={updatingKey === key}
-                    onToggleEnable={() => handleToggleEnable(key, dot.name, 'Dot Shapes')}
-                    onToggleTier={() => handleToggleTier(key, dot.name)}
+                    icon={Bookmark}
+                    updating={updatingKey === 'qr_color_presets'}
+                    onToggleEnable={() => handleToggleEnable('qr_color_presets', 'Color Presets Gallery', 'Presets')}
+                    onToggleTier={() => handleToggleTier('qr_color_presets', 'Color Presets Gallery')}
+                  />
+                );
+              })()}
+              {ALL_COLOR_THEME_PRESETS
+                .filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.id.includes(searchQuery.toLowerCase()))
+                .map(preset => {
+                  const key = `qr_color_preset_${preset.id}`;
+                  const state = getItemState(key, true, preset.id === 'classic' || preset.id === 'ocean' ? 'free' : 'weekly');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={preset.name}
+                      desc={preset.desc}
+                      badge={preset.id}
+                      customPreview={
+                        <div style={{ width: 38, height: 38, borderRadius: 10, background: preset.bg, border: '1.5px solid var(--ad-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.15)', flexShrink: 0 }}>
+                          <div style={{ width: 18, height: 18, borderRadius: 4, background: preset.qr }} />
+                        </div>
+                      }
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Bookmark}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, preset.name, 'Presets')}
+                      onToggleTier={() => handleToggleTier(key, preset.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 2: Dots Color Toolbar */}
+          <SectionCatalog
+            title="Dots: Custom Color & Gradients"
+            subtitle="Control solid hex color pickers and dual gradient fills for QR dots."
+            icon={Grid}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_dots', 'custom_colors_solid', 'custom_colors_gradient'])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_dots', 'custom_colors_solid', 'custom_colors_gradient'])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [
+              { key: 'qr_color_dots', name: 'Dots Color Tool' },
+              { key: 'custom_colors_solid', name: 'Solid Color Pickers' },
+              { key: 'custom_colors_gradient', name: 'Dual Gradient Color Fills' }
+            ], 'Dots Color')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [
+              { key: 'qr_color_dots', name: 'Dots Color Tool' },
+              { key: 'custom_colors_solid', name: 'Solid Color Pickers' },
+              { key: 'custom_colors_gradient', name: 'Dual Gradient Color Fills' }
+            ], 'Dots Color')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+              {[
+                { key: 'qr_color_dots', name: 'Dots Color Tool Master', desc: 'Toolbar button for dot module color customization', defaultPlan: 'free', icon: Grid },
+                { key: 'custom_colors_solid', name: 'Solid Color Pickers (RGB/HSB)', desc: 'Advanced RGB/HSB/Hex solid color pickers', defaultPlan: 'free', icon: Palette },
+                { key: 'custom_colors_gradient', name: 'Dual Gradient Color Fills', desc: 'Linear & radial gradient QR color fills', defaultPlan: 'weekly', icon: Wand2 }
+              ].map(item => {
+                const state = getItemState(item.key, true, item.defaultPlan);
+                const Icon = item.icon;
+                return (
+                  <ItemControlTile
+                    key={item.key}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.key}
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={Icon}
+                    updating={updatingKey === item.key}
+                    onToggleEnable={() => handleToggleEnable(item.key, item.name, 'Dots Color')}
+                    onToggleTier={() => handleToggleTier(item.key, item.name)}
                   />
                 );
               })}
-          </div>
-        </SectionCatalog>
-      )}
+            </div>
+          </SectionCatalog>
 
-      {/* ── TAB 3: 35 EYE FINDER SHAPES (With Live Canvas Preview) ────────────── */}
-      {activeTab === 'eyes' && (
-        <SectionCatalog
-          title="35 Corner Eye Finder Shapes (Live Canvas Preview)"
-          subtitle="Every eye frame renders its actual corner contour. Click to toggle Free/Pro & Active state."
-          icon={Eye}
-          onMakeFree={() => handleBatchActiveTabTier('free', ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`))}
-          onMakePro={() => handleBatchActiveTabTier('paid', ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_EYE_STYLES.map(e => ({ key: `qr_eye_${e.id}`, name: e.name })), 'Eye Shapes')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_EYE_STYLES.map(e => ({ key: `qr_eye_${e.id}`, name: e.name })), 'Eye Shapes')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-            {ALL_EYE_STYLES
-              .filter(e => !searchQuery || e.name.toLowerCase().includes(searchQuery.toLowerCase()) || e.id.includes(searchQuery.toLowerCase()))
-              .map(eye => {
-                const key = `qr_eye_${eye.id}`;
-                const state = getItemState(key, true, eye.id === 'square' || eye.id === 'rounded' || eye.id === 'circle' ? 'free' : 'weekly');
+          {/* Subcategory 3: Eyes Color Toolbar */}
+          <SectionCatalog
+            title="Eyes: Independent Color Customizer"
+            subtitle="Independent color tuning for finder corner eye frame & inner pupil."
+            icon={Eye}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_eyes', 'qr_color_eyes_custom'])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_eyes', 'qr_color_eyes_custom'])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_eyes', name: 'Eyes Color Tool' }, { key: 'qr_color_eyes_custom', name: 'Custom Eye Finder Colors' }], 'Eyes Color')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_eyes', name: 'Eyes Color Tool' }, { key: 'qr_color_eyes_custom', name: 'Custom Eye Finder Colors' }], 'Eyes Color')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+              {[
+                { key: 'qr_color_eyes', name: 'Eyes Color Tool Master', desc: 'Toolbar button for eye color tuning', defaultPlan: 'free' },
+                { key: 'qr_color_eyes_custom', name: 'Independent Inner & Outer Colors', desc: 'Dual pickers for eye outer frame & inner pupil', defaultPlan: 'free' }
+              ].map(item => {
+                const state = getItemState(item.key, true, item.defaultPlan);
                 return (
                   <ItemControlTile
-                    key={key}
-                    name={eye.name}
-                    desc={eye.desc}
-                    badge={eye.id}
-                    customPreview={<MiniEyeCanvas eyeStyle={eye.id} color={state.isPaid ? '#F59E0B' : '#10B981'} />}
+                    key={item.key}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.key}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
                     icon={Eye}
-                    updating={updatingKey === key}
-                    onToggleEnable={() => handleToggleEnable(key, eye.name, 'Eye Shapes')}
-                    onToggleTier={() => handleToggleTier(key, eye.name)}
+                    updating={updatingKey === item.key}
+                    onToggleEnable={() => handleToggleEnable(item.key, item.name, 'Eyes Color')}
+                    onToggleTier={() => handleToggleTier(item.key, item.name)}
                   />
                 );
               })}
-          </div>
-        </SectionCatalog>
-      )}
+            </div>
+          </SectionCatalog>
 
-      {/* ── TAB 4: 10 TEXTURES & PATTERN OVERLAYS ────────────────────────────── */}
-      {activeTab === 'textures' && (
-        <SectionCatalog
-          title="10 Social Textures &amp; Matrix Overlays"
-          subtitle="Facebook, WhatsApp, Instagram, TikTok, Snapchat textures, plus custom texture uploads."
-          icon={Brush}
-          onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEXTURES.map(t => `qr_texture_${t.slug}`))}
-          onMakePro={() => handleBatchActiveTabTier('paid', ALL_TEXTURES.map(t => `qr_texture_${t.slug}`))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name })), 'Textures')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name })), 'Textures')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-            {ALL_TEXTURES
-              .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(tex => {
-                const key = `qr_texture_${tex.slug}`;
-                const state = getItemState(key, true, 'weekly');
+          {/* Subcategory 4: BG Color Toolbar */}
+          <SectionCatalog
+            title="BG Color: Background Color & Transparency"
+            subtitle="Canvas background color pickers and transparent background mode."
+            icon={Palette}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_bg'])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_bg'])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_bg', name: 'Background Color & Transparency' }], 'BG Color')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_bg', name: 'Background Color & Transparency' }], 'BG Color')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+              {(() => {
+                const state = getItemState('qr_color_bg', true, 'free');
                 return (
                   <ItemControlTile
-                    key={key}
-                    name={tex.name}
-                    desc={tex.desc || 'Social texture overlay'}
-                    imageUrl={tex.url}
-                    badge={tex.slug}
-                    color={tex.color}
+                    key="qr_color_bg"
+                    name="Background Color & Transparency"
+                    desc="Canvas background solid color picker and transparent canvas toggle"
+                    badge="qr_color_bg"
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={tex.isUpload ? UploadCloud : Brush}
-                    updating={updatingKey === key}
-                    onToggleEnable={() => handleToggleEnable(key, tex.name, 'Textures')}
-                    onToggleTier={() => handleToggleTier(key, tex.name)}
+                    icon={Palette}
+                    updating={updatingKey === 'qr_color_bg'}
+                    onToggleEnable={() => handleToggleEnable('qr_color_bg', 'Background Color & Transparency', 'BG Color')}
+                    onToggleTier={() => handleToggleTier('qr_color_bg', 'Background Color & Transparency')}
                   />
                 );
-              })}
-          </div>
-        </SectionCatalog>
-      )}
+              })()}
+            </div>
+          </SectionCatalog>
 
-      {/* ── TAB 5: 12 DUAL GRADIENT FILLS ─────────────────────────────────────── */}
-      {activeTab === 'gradients' && (
-        <SectionCatalog
-          title="12 Dual Gradient Color Schemes"
-          subtitle="Sunset Glow, Ocean Breeze, Cyberpunk Aqua, Neon Violet, Midnight Gold, etc."
-          icon={Wand2}
-          onMakeFree={() => handleBatchActiveTabTier('free', ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`))}
-          onMakePro={() => handleBatchActiveTabTier('paid', ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name })), 'Gradients')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name })), 'Gradients')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-            {ALL_GRADIENTS
-              .filter(g => !searchQuery || g.name.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(grad => {
-                const key = `qr_gradient_${grad.id}`;
-                const state = getItemState(key, true, 'weekly');
+          {/* Subcategory 5: BG Image Toolbar */}
+          <SectionCatalog
+            title="BG Image: Background Photo & Dimming Overlay"
+            subtitle="Custom background photo upload, scannability dimming slider & contrast card."
+            icon={Image}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_bg_image'])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_bg_image'])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_bg_image', name: 'Background Image & Overlay' }], 'BG Image')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_bg_image', name: 'Background Image & Overlay' }], 'BG Image')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+              {(() => {
+                const state = getItemState('qr_color_bg_image', true, 'weekly');
                 return (
                   <ItemControlTile
-                    key={key}
-                    name={grad.name}
-                    desc={`${grad.from} → ${grad.to}`}
-                    gradientFill={`linear-gradient(135deg, ${grad.from}, ${grad.to})`}
-                    badge={grad.id}
-                    enabled={state.enabled}
-                    isPaid={state.isPaid}
-                    icon={Wand2}
-                    updating={updatingKey === key}
-                    onToggleEnable={() => handleToggleEnable(key, grad.name, 'Gradients')}
-                    onToggleTier={() => handleToggleTier(key, grad.name)}
-                  />
-                );
-              })}
-          </div>
-        </SectionCatalog>
-      )}
-
-      {/* ── TAB 6: 8 CARD BACKGROUND SHAPES ──────────────────────────────────── */}
-      {activeTab === 'bg_shapes' && (
-        <SectionCatalog
-          title="8 QR Background Shapes &amp; Shield Backings"
-          subtitle="Solid, Rounded, Circle Badge, Pill Capsule, Ribbon, Neon Glow, Cyber Hexagon, etc."
-          icon={Box}
-          onMakeFree={() => handleBatchActiveTabTier('free', ALL_BG_SHAPES.map(s => `qr_bgshape_${s.id}`))}
-          onMakePro={() => handleBatchActiveTabTier('paid', ALL_BG_SHAPES.map(s => `qr_bgshape_${s.id}`))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BG_SHAPES.map(s => ({ key: `qr_bgshape_${s.id}`, name: s.name })), 'Background Shapes')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BG_SHAPES.map(s => ({ key: `qr_bgshape_${s.id}`, name: s.name })), 'Background Shapes')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-            {ALL_BG_SHAPES
-              .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(shape => {
-                const key = `qr_bgshape_${shape.id}`;
-                const state = getItemState(key, true, shape.id === 'solid' || shape.id === 'rounded' ? 'free' : 'weekly');
-                return (
-                  <ItemControlTile
-                    key={key}
-                    name={shape.name}
-                    desc={shape.desc}
-                    badge={shape.id}
-                    enabled={state.enabled}
-                    isPaid={state.isPaid}
-                    icon={Box}
-                    updating={updatingKey === key}
-                    onToggleEnable={() => handleToggleEnable(key, shape.name, 'Background Shapes')}
-                    onToggleTier={() => handleToggleTier(key, shape.name)}
-                  />
-                );
-              })}
-          </div>
-        </SectionCatalog>
-      )}
-
-      {/* ── TAB 7: 40 BRAND LOGO PRESETS ─────────────────────────────────────── */}
-      {activeTab === 'logos' && (
-        <SectionCatalog
-          title="40 Pre-installed Brand Logo Presets"
-          subtitle="Social icons, fintech logos, communication badges, and media brands."
-          icon={Image}
-          onMakeFree={() => handleBatchActiveTabTier('free', ALL_LOGO_PRESETS.map(l => `qr_logo_${l.slug}`))}
-          onMakePro={() => handleBatchActiveTabTier('paid', ALL_LOGO_PRESETS.map(l => `qr_logo_${l.slug}`))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_LOGO_PRESETS.map(l => ({ key: `qr_logo_${l.slug}`, name: l.name })), 'Logo Presets')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_LOGO_PRESETS.map(l => ({ key: `qr_logo_${l.slug}`, name: l.name })), 'Logo Presets')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-            {ALL_LOGO_PRESETS
-              .filter(l => !searchQuery || l.name.toLowerCase().includes(searchQuery.toLowerCase()) || l.slug.includes(searchQuery.toLowerCase()))
-              .map(logo => {
-                const key = `qr_logo_${logo.slug}`;
-                const state = getItemState(key, true, 'free');
-                return (
-                  <ItemControlTile
-                    key={key}
-                    name={logo.name}
-                    desc={`Brand color: ${logo.color}`}
-                    badge={logo.slug}
-                    color={logo.color}
-                    imageUrl={logo.url}
+                    key="qr_color_bg_image"
+                    name="Background Image & Overlay"
+                    desc="Custom canvas background photo upload, dimming opacity slider & contrast container"
+                    badge="qr_color_bg_image"
                     enabled={state.enabled}
                     isPaid={state.isPaid}
                     icon={Image}
-                    updating={updatingKey === key}
-                    onToggleEnable={() => handleToggleEnable(key, logo.name, 'Logo Presets')}
-                    onToggleTier={() => handleToggleTier(key, logo.name)}
+                    updating={updatingKey === 'qr_color_bg_image'}
+                    onToggleEnable={() => handleToggleEnable('qr_color_bg_image', 'Background Image & Overlay', 'BG Image')}
+                    onToggleTier={() => handleToggleTier('qr_color_bg_image', 'Background Image & Overlay')}
                   />
                 );
-              })}
-          </div>
-        </SectionCatalog>
+              })()}
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 6: Texture Toolbar */}
+          <SectionCatalog
+            title="Texture: 10 Social & Pattern Textures"
+            subtitle="WhatsApp, Instagram, TikTok, YouTube, Spotify textures, plus custom texture uploads."
+            icon={Brush}
+            onMakeFree={() => handleBatchActiveTabTier('free', ['qr_color_texture', ...ALL_TEXTURES.map(t => `qr_texture_${t.slug}`)])}
+            onMakePro={() => handleBatchActiveTabTier('paid', ['qr_color_texture', ...ALL_TEXTURES.map(t => `qr_texture_${t.slug}`)])}
+            onEnableAll={() => handleBatchActiveTabEnable(true, [{ key: 'qr_color_texture', name: 'Texture Tool Master' }, ...ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name }))], 'Texture')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, [{ key: 'qr_color_texture', name: 'Texture Tool Master' }, ...ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name }))], 'Texture')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+              {ALL_TEXTURES
+                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(tex => {
+                  const key = `qr_texture_${tex.slug}`;
+                  const state = getItemState(key, true, 'weekly');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={tex.name}
+                      desc={tex.desc || 'Social texture overlay'}
+                      imageUrl={tex.url}
+                      badge={tex.slug}
+                      color={tex.color}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={tex.isUpload ? UploadCloud : Brush}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, tex.name, 'Texture')}
+                      onToggleTier={() => handleToggleTier(key, tex.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+        </div>
       )}
 
-      {/* ── TAB 8: 30 GOOGLE FONTS ───────────────────────────────────────────── */}
-      {activeTab === 'fonts' && (
-        <SectionCatalog
-          title="30 Google Fonts Typography Collection"
-          subtitle="Outfit, Inter, Montserrat, Playfair Display, Pacifico, Orbitron, Bebas Neue, etc."
-          icon={Type}
-          onMakeFree={() => handleBatchActiveTabTier('free', ALL_FONTS.map(f => `qr_font_${f.id.toLowerCase().replace(/\s+/g, '_')}`))}
-          onMakePro={() => handleBatchActiveTabTier('paid', ALL_FONTS.map(f => `qr_font_${f.id.toLowerCase().replace(/\s+/g, '_')}`))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_FONTS.map(f => ({ key: `qr_font_${f.id.toLowerCase().replace(/\s+/g, '_')}`, name: f.name })), 'Fonts')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_FONTS.map(f => ({ key: `qr_font_${f.id.toLowerCase().replace(/\s+/g, '_')}`, name: f.name })), 'Fonts')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 12 }}>
-            {ALL_FONTS
-              .filter(f => !searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase()) || f.category.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(font => {
-                const key = `qr_font_${font.id.toLowerCase().replace(/\s+/g, '_')}`;
-                const state = getItemState(key, true, 'free');
+      {/* ── TAB 3: STYLE (Dots, Eyes, Background Shapes, Gradients) ─────────── */}
+      {activeTab === 'style' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Subcategory 1: Dots (37 Dot Shapes) */}
+          <SectionCatalog
+            title="Dots: 37 Custom QR Dot Module Shapes"
+            subtitle="Every dot shape renders its actual canvas drawing pattern. Click to toggle Free/Pro & Active state."
+            icon={Grid}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_DOT_STYLES.map(d => ({ key: `qr_dot_${d.id}`, name: d.name })), 'Dots')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_DOT_STYLES.map(d => ({ key: `qr_dot_${d.id}`, name: d.name })), 'Dots')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
+              {ALL_DOT_STYLES
+                .filter(d => !searchQuery || d.name.toLowerCase().includes(searchQuery.toLowerCase()) || d.id.includes(searchQuery.toLowerCase()))
+                .map(dot => {
+                  const key = `qr_dot_${dot.id}`;
+                  const state = getItemState(key, true, dot.id === 'denso' || dot.id === 'dots' || dot.id === 'rounded' ? 'free' : 'weekly');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={dot.name}
+                      desc={dot.desc}
+                      badge={dot.id}
+                      customPreview={<MiniDotCanvas dotStyle={dot.id} color={state.isPaid ? '#F59E0B' : '#10B981'} />}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Grid}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, dot.name, 'Dots')}
+                      onToggleTier={() => handleToggleTier(key, dot.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 2: Eyes (35 Eye Shapes) */}
+          <SectionCatalog
+            title="Eyes: 35 Corner Eye Finder Shapes"
+            subtitle="Every eye frame renders its actual corner contour. Click to toggle Free/Pro & Active state."
+            icon={Eye}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_EYE_STYLES.map(e => ({ key: `qr_eye_${e.id}`, name: e.name })), 'Eyes')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_EYE_STYLES.map(e => ({ key: `qr_eye_${e.id}`, name: e.name })), 'Eyes')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
+              {ALL_EYE_STYLES
+                .filter(e => !searchQuery || e.name.toLowerCase().includes(searchQuery.toLowerCase()) || e.id.includes(searchQuery.toLowerCase()))
+                .map(eye => {
+                  const key = `qr_eye_${eye.id}`;
+                  const state = getItemState(key, true, eye.id === 'square' || eye.id === 'rounded' || eye.id === 'circle' ? 'free' : 'weekly');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={eye.name}
+                      desc={eye.desc}
+                      badge={eye.id}
+                      customPreview={<MiniEyeCanvas eyeStyle={eye.id} color={state.isPaid ? '#F59E0B' : '#10B981'} />}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Eye}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, eye.name, 'Eyes')}
+                      onToggleTier={() => handleToggleTier(key, eye.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 3: Background (8 Background Shapes) */}
+          <SectionCatalog
+            title="Background: 8 QR Background Shapes & Shield Backings"
+            subtitle="Solid, Rounded, Circle Badge, Pill Capsule, Ribbon, Neon Glow, Cyber Hexagon, etc."
+            icon={Box}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BG_SHAPES.map(s => `qr_bgshape_${s.id}`))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BG_SHAPES.map(s => `qr_bgshape_${s.id}`))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BG_SHAPES.map(s => ({ key: `qr_bgshape_${s.id}`, name: s.name })), 'Background')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BG_SHAPES.map(s => ({ key: `qr_bgshape_${s.id}`, name: s.name })), 'Background')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+              {ALL_BG_SHAPES
+                .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(shape => {
+                  const key = `qr_bgshape_${shape.id}`;
+                  const state = getItemState(key, true, shape.id === 'solid' || shape.id === 'rounded' ? 'free' : 'weekly');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={shape.name}
+                      desc={shape.desc}
+                      badge={shape.id}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Box}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, shape.name, 'Background')}
+                      onToggleTier={() => handleToggleTier(key, shape.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 4: Gradients (12 Dual Gradients) */}
+          <SectionCatalog
+            title="Gradients: 12 Dual Gradient Color Schemes"
+            subtitle="Sunset Glow, Ocean Breeze, Cyberpunk Aqua, Neon Violet, Midnight Gold, etc."
+            icon={Wand2}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name })), 'Gradients')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name })), 'Gradients')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+              {ALL_GRADIENTS
+                .filter(g => !searchQuery || g.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(grad => {
+                  const key = `qr_gradient_${grad.id}`;
+                  const state = getItemState(key, true, 'weekly');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={grad.name}
+                      desc={`${grad.from} → ${grad.to}`}
+                      gradientFill={`linear-gradient(135deg, ${grad.from}, ${grad.to})`}
+                      badge={grad.id}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Wand2}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, grad.name, 'Gradients')}
+                      onToggleTier={() => handleToggleTier(key, grad.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+        </div>
+      )}
+
+      {/* ── TAB 4: LOGO (Upload, AI Remover, Cards & 40 Brand Logos) ─────────── */}
+      {activeTab === 'logo' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Subcategory 1: Logo Tools & Upload Controls */}
+          <SectionCatalog
+            title="Logo Controls & Upload Tools"
+            subtitle="Branding controls including custom logo uploads, presets master, AI background removal and logo cards."
+            icon={Image}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_LOGO_CONTROLS.map(c => c.id))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_LOGO_CONTROLS.map(c => c.id))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_LOGO_CONTROLS.map(c => ({ key: c.id, name: c.name })), 'Logo Controls')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_LOGO_CONTROLS.map(c => ({ key: c.id, name: c.name })), 'Logo Controls')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 10 }}>
+              {ALL_LOGO_CONTROLS.map(control => {
+                const state = getItemState(control.id, true, control.defaultPlan);
+                const Icon = control.icon;
                 return (
                   <ItemControlTile
-                    key={key}
-                    name={font.name}
-                    desc={font.category}
-                    fontFamily={font.id}
+                    key={control.id}
+                    name={control.name}
+                    desc={control.desc}
+                    badge={control.id}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={Type}
-                    updating={updatingKey === key}
-                    onToggleEnable={() => handleToggleEnable(key, font.name, 'Fonts')}
-                    onToggleTier={() => handleToggleTier(key, font.name)}
+                    icon={Icon}
+                    updating={updatingKey === control.id}
+                    onToggleEnable={() => handleToggleEnable(control.id, control.name, 'Logo Controls')}
+                    onToggleTier={() => handleToggleTier(control.id, control.name)}
                   />
                 );
               })}
-          </div>
-        </SectionCatalog>
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 2: 40 Brand Logos */}
+          <SectionCatalog
+            title="40 Pre-installed Brand Logos"
+            subtitle="Social icons, fintech logos, communication badges, and media brands."
+            icon={Image}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_LOGO_PRESETS.map(l => `qr_logo_${l.slug}`))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_LOGO_PRESETS.map(l => `qr_logo_${l.slug}`))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_LOGO_PRESETS.map(l => ({ key: `qr_logo_${l.slug}`, name: l.name })), 'Brand Logos')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_LOGO_PRESETS.map(l => ({ key: `qr_logo_${l.slug}`, name: l.name })), 'Brand Logos')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+              {ALL_LOGO_PRESETS
+                .filter(l => !searchQuery || l.name.toLowerCase().includes(searchQuery.toLowerCase()) || l.slug.includes(searchQuery.toLowerCase()))
+                .map(logo => {
+                  const key = `qr_logo_${logo.slug}`;
+                  const state = getItemState(key, true, 'free');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={logo.name}
+                      desc={`Brand color: ${logo.color}`}
+                      badge={logo.slug}
+                      color={logo.color}
+                      imageUrl={logo.url}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Image}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, logo.name, 'Brand Logos')}
+                      onToggleTier={() => handleToggleTier(key, logo.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+        </div>
       )}
 
-      {/* ── TAB 9: 12 SCAN-ME FRAMES ─────────────────────────────────────────── */}
-      {activeTab === 'frames' && (
-        <SectionCatalog
-          title="12 Scan-Me Frames &amp; Badge Backings"
-          subtitle="Pill frames, ribbons, neon glow, camera brackets, official verified stamps, etc."
-          icon={Sparkles}
-          onMakeFree={() => handleBatchActiveTabTier('free', ALL_FRAMES.map(fr => `qr_frame_${fr.id}`))}
-          onMakePro={() => handleBatchActiveTabTier('paid', ALL_FRAMES.map(fr => `qr_frame_${fr.id}`))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_FRAMES.map(fr => ({ key: `qr_frame_${fr.id}`, name: fr.name })), 'Frames')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_FRAMES.map(fr => ({ key: `qr_frame_${fr.id}`, name: fr.name })), 'Frames')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 12 }}>
-            {ALL_FRAMES
-              .filter(fr => !searchQuery || fr.name.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(frame => {
-                const key = `qr_frame_${frame.id}`;
-                const state = getItemState(key, true, frame.id === 'none' || frame.id === 'solid' ? 'free' : 'weekly');
+      {/* ── TAB 5: TEMPLATE (Template Gallery & 12 Frames) ────────────────────── */}
+      {activeTab === 'template' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Subcategory 1: Templates Gallery */}
+          <SectionCatalog
+            title="Marketing & Social Template Posters"
+            subtitle="Pre-styled 1080x1350 vertical posters for Instagram, Facebook, WhatsApp, YouTube, TikTok, etc."
+            icon={LayoutGrid}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEMPLATES.map(t => `qr_template_${t.id}`))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_TEMPLATES.map(t => `qr_template_${t.id}`))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
+              {ALL_TEMPLATES
+                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(tpl => {
+                  const key = `qr_template_${tpl.id}`;
+                  const state = getItemState(key, true, 'weekly');
+                  return (
+                    <TemplateItemControlTile
+                      key={key}
+                      tpl={tpl}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, tpl.name, 'Templates')}
+                      onToggleTier={() => handleToggleTier(key, tpl.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 2: 12 Scan-Me Frames */}
+          <SectionCatalog
+            title="12 Scan-Me Frames & Badge Backings"
+            subtitle="Pill frames, ribbons, neon glow, camera brackets, official verified stamps, etc."
+            icon={Sparkles}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_FRAMES.map(fr => `qr_frame_${fr.id}`))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_FRAMES.map(fr => `qr_frame_${fr.id}`))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_FRAMES.map(fr => ({ key: `qr_frame_${fr.id}`, name: fr.name })), 'Frames')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_FRAMES.map(fr => ({ key: `qr_frame_${fr.id}`, name: fr.name })), 'Frames')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 12 }}>
+              {ALL_FRAMES
+                .filter(fr => !searchQuery || fr.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(frame => {
+                  const key = `qr_frame_${frame.id}`;
+                  const state = getItemState(key, true, frame.id === 'none' || frame.id === 'solid' ? 'free' : 'weekly');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={frame.name}
+                      desc={frame.desc}
+                      badge={frame.id}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Sparkles}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, frame.name, 'Frames')}
+                      onToggleTier={() => handleToggleTier(key, frame.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+        </div>
+      )}
+
+      {/* ── TAB 6: TEXT (Center Text, Frame Text & 30 Google Fonts) ───────────── */}
+      {activeTab === 'text' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Subcategory 1: Center Text & Frame Text Controls */}
+          <SectionCatalog
+            title="Center Text & Frame Text Capabilities"
+            subtitle="Custom text embeds inside the QR matrix center and CTA frame ribbons."
+            icon={Type}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEXT_CONTROLS.map(c => c.id))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_TEXT_CONTROLS.map(c => c.id))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_TEXT_CONTROLS.map(c => ({ key: c.id, name: c.name })), 'Text Controls')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_TEXT_CONTROLS.map(c => ({ key: c.id, name: c.name })), 'Text Controls')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 10 }}>
+              {ALL_TEXT_CONTROLS.map(control => {
+                const state = getItemState(control.id, true, control.defaultPlan);
+                const Icon = control.icon;
                 return (
                   <ItemControlTile
-                    key={key}
-                    name={frame.name}
-                    desc={frame.desc}
-                    badge={frame.id}
+                    key={control.id}
+                    name={control.name}
+                    desc={control.desc}
+                    badge={control.id}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={Sparkles}
-                    updating={updatingKey === key}
-                    onToggleEnable={() => handleToggleEnable(key, frame.name, 'Frames')}
-                    onToggleTier={() => handleToggleTier(key, frame.name)}
+                    icon={Icon}
+                    updating={updatingKey === control.id}
+                    onToggleEnable={() => handleToggleEnable(control.id, control.name, 'Text Controls')}
+                    onToggleTier={() => handleToggleTier(control.id, control.name)}
                   />
                 );
               })}
-          </div>
-        </SectionCatalog>
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 2: Fonts (30 Google Typography Fonts) */}
+          <SectionCatalog
+            title="Fonts: 30 Google Typography Fonts"
+            subtitle="Outfit, Inter, Montserrat, Playfair Display, Pacifico, Orbitron, Bebas Neue, etc."
+            icon={Type}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_FONTS.map(f => `qr_font_${f.id.toLowerCase().replace(/\s+/g, '_')}`))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_FONTS.map(f => `qr_font_${f.id.toLowerCase().replace(/\s+/g, '_')}`))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_FONTS.map(f => ({ key: `qr_font_${f.id.toLowerCase().replace(/\s+/g, '_')}`, name: f.name })), 'Fonts')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_FONTS.map(f => ({ key: `qr_font_${f.id.toLowerCase().replace(/\s+/g, '_')}`, name: f.name })), 'Fonts')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 12 }}>
+              {ALL_FONTS
+                .filter(f => !searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase()) || f.category.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(font => {
+                  const key = `qr_font_${font.id.toLowerCase().replace(/\s+/g, '_')}`;
+                  const state = getItemState(key, true, 'free');
+                  return (
+                    <ItemControlTile
+                      key={key}
+                      name={font.name}
+                      desc={font.category}
+                      fontFamily={font.id}
+                      enabled={state.enabled}
+                      isPaid={state.isPaid}
+                      icon={Type}
+                      updating={updatingKey === key}
+                      onToggleEnable={() => handleToggleEnable(key, font.name, 'Fonts')}
+                      onToggleTier={() => handleToggleTier(key, font.name)}
+                    />
+                  );
+                })}
+            </div>
+          </SectionCatalog>
+        </div>
       )}
 
-      {/* ── TAB 10: TEMPLATES GALLERY ────────────────────────────────────────── */}
-      {activeTab === 'templates' && (
-        <SectionCatalog
-          title="Social Media &amp; Marketing Template Posters"
-          subtitle="Pre-styled 1080x1350 vertical posters for Instagram, Facebook, WhatsApp, YouTube, TikTok, etc."
-          icon={LayoutGrid}
-          onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEMPLATES.map(t => `qr_template_${t.id}`))}
-          onMakePro={() => handleBatchActiveTabTier('paid', ALL_TEMPLATES.map(t => `qr_template_${t.id}`))}
-          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
-          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
-            {ALL_TEMPLATES
-              .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.title.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(tpl => {
-                const key = `qr_template_${tpl.id}`;
-                const state = getItemState(key, true, 'weekly');
+      {/* ── TAB 7: SAVE & EXPORT (Formats & Resolution Controls) ─────────────── */}
+      {activeTab === 'export' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Subcategory 1: Export Formats */}
+          <SectionCatalog
+            title="Save & Export File Formats"
+            subtitle="PNG, JPG, Scalable Vector SVG, and Print-ready A4 PDF formats."
+            icon={Download}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_EXPORT_FORMATS.map(f => f.id))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_EXPORT_FORMATS.map(f => f.id))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_EXPORT_FORMATS.map(f => ({ key: f.id, name: f.name })), 'Export Formats')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_EXPORT_FORMATS.map(f => ({ key: f.id, name: f.name })), 'Export Formats')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
+              {ALL_EXPORT_FORMATS.map(item => {
+                const state = getItemState(item.id, true, item.defaultPlan);
                 return (
-                  <TemplateItemControlTile
-                    key={key}
-                    tpl={tpl}
+                  <ItemControlTile
+                    key={item.id}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.id}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    updating={updatingKey === key}
-                    onToggleEnable={() => handleToggleEnable(key, tpl.name, 'Templates')}
-                    onToggleTier={() => handleToggleTier(key, tpl.name)}
+                    icon={Download}
+                    updating={updatingKey === item.id}
+                    onToggleEnable={() => handleToggleEnable(item.id, item.name, 'Export Formats')}
+                    onToggleTier={() => handleToggleTier(item.id, item.name)}
                   />
                 );
               })}
-          </div>
-        </SectionCatalog>
+            </div>
+          </SectionCatalog>
+
+          {/* Subcategory 2: Resolutions & OS Sharing */}
+          <SectionCatalog
+            title="Resolutions, Quality & Native Share"
+            subtitle="Manage export image resolutions (512px–4K Ultra) and OS social share sheet."
+            icon={Sliders}
+            onMakeFree={() => handleBatchActiveTabTier('free', ALL_EXPORT_QUALITIES.map(q => q.id))}
+            onMakePro={() => handleBatchActiveTabTier('paid', ALL_EXPORT_QUALITIES.map(q => q.id))}
+            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_EXPORT_QUALITIES.map(q => ({ key: q.id, name: q.name })), 'Quality & Share')}
+            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_EXPORT_QUALITIES.map(q => ({ key: q.id, name: q.name })), 'Quality & Share')}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
+              {ALL_EXPORT_QUALITIES.map(item => {
+                const state = getItemState(item.id, true, item.defaultPlan);
+                return (
+                  <ItemControlTile
+                    key={item.id}
+                    name={item.name}
+                    desc={item.desc}
+                    badge={item.id}
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={Sliders}
+                    updating={updatingKey === item.id}
+                    onToggleEnable={() => handleToggleEnable(item.id, item.name, 'Quality & Share')}
+                    onToggleTier={() => handleToggleTier(item.id, item.name)}
+                  />
+                );
+              })}
+            </div>
+          </SectionCatalog>
+        </div>
       )}
     </div>
   );
@@ -1249,73 +1700,111 @@ function SectionCatalog({ title, subtitle, icon: Icon, onMakeFree, onMakePro, on
   return (
     <div style={{
       background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-      borderRadius: 16, padding: '14px 12px', boxShadow: 'var(--ad-card-shadow)',
-      display: 'flex', flexDirection: 'column', gap: 12
+      borderRadius: 18, padding: '14px 12px', boxShadow: 'var(--ad-card-shadow)',
+      display: 'flex', flexDirection: 'column', gap: 14, width: '100%', boxSizing: 'border-box'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+      {/* Mobile-First Header with Title and Action Toolbar */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        width: '100%'
+      }}>
+        {/* Title and Icon */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, width: '100%' }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 9,
-            background: 'rgba(255, 77, 157, 0.12)', color: '#FF4D9D',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            width: 36, height: 36, borderRadius: 10,
+            background: 'linear-gradient(135deg, rgba(255, 77, 157, 0.2) 0%, rgba(214, 0, 54, 0.15) 100%)',
+            color: '#FF4D9D',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            boxShadow: '0 2px 8px rgba(255, 77, 157, 0.2)'
           }}>
-            <Icon size={16} strokeWidth={2.4} />
+            <Icon size={18} strokeWidth={2.4} />
           </div>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <h2 style={{ fontSize: 13.5, fontWeight: 900, color: 'var(--ad-text)', margin: 0, lineHeight: 1.25 }}>
+            <h2 style={{ fontSize: 14, fontWeight: 900, color: 'var(--ad-text)', margin: 0, lineHeight: 1.25, letterSpacing: '-0.2px' }}>
               {title}
             </h2>
-            <p style={{ fontSize: 10.5, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
+            <p style={{ fontSize: 11, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
               {subtitle}
             </p>
           </div>
         </div>
 
-        {/* Section Quick Batch Actions (Mobile Chips) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+        {/* Section Quick Batch Actions (Mobile-First 4-Pill Action Bar) */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 6,
+          width: '100%',
+          padding: '6px',
+          background: 'rgba(0, 0, 0, 0.25)',
+          borderRadius: 12,
+          border: '1px solid var(--ad-border)',
+          boxSizing: 'border-box'
+        }}>
           <button
+            type="button"
             onClick={onMakeFree}
             style={{
-              display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px',
-              borderRadius: 6, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.35)',
-              color: '#10B981', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              padding: '6px 4px', minHeight: 32,
+              borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              color: '#10B981', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
           >
-            <Shield size={10} />
-            <span>Free All</span>
+            <Shield size={12} strokeWidth={2.5} />
+            <span style={{ whiteSpace: 'nowrap' }}>Free All</span>
           </button>
+
           <button
+            type="button"
             onClick={onMakePro}
             style={{
-              display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px',
-              borderRadius: 6, background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)',
-              color: '#F59E0B', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              padding: '6px 4px', minHeight: 32,
+              borderRadius: 8, background: 'rgba(245, 158, 11, 0.15)',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              color: '#F59E0B', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
           >
-            <Crown size={10} />
-            <span>Pro All</span>
+            <Crown size={12} strokeWidth={2.5} />
+            <span style={{ whiteSpace: 'nowrap' }}>Pro All</span>
           </button>
+
           <button
+            type="button"
             onClick={onEnableAll}
             style={{
-              display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
-              borderRadius: 6, background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)',
-              color: '#22C55E', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              padding: '6px 4px', minHeight: 32,
+              borderRadius: 8, background: 'rgba(34, 197, 94, 0.12)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              color: '#22C55E', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
           >
-            <Power size={10} />
-            <span>Enable</span>
+            <Power size={12} strokeWidth={2.5} />
+            <span style={{ whiteSpace: 'nowrap' }}>Enable</span>
           </button>
+
           <button
+            type="button"
             onClick={onDisableAll}
             style={{
-              display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
-              borderRadius: 6, background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#EF4444', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              padding: '6px 4px', minHeight: 32,
+              borderRadius: 8, background: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#EF4444', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
           >
-            <XCircle size={10} />
-            <span>Hide</span>
+            <XCircle size={12} strokeWidth={2.5} />
+            <span style={{ whiteSpace: 'nowrap' }}>Hide</span>
           </button>
         </div>
       </div>
@@ -1332,43 +1821,44 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
     <div style={{
       background: isOff ? 'rgba(15, 18, 33, 0.4)' : 'var(--ad-input)',
       border: `1.5px solid ${isOff ? 'rgba(239, 68, 68, 0.3)' : (isPaid ? 'rgba(245, 158, 11, 0.35)' : 'rgba(16, 185, 129, 0.35)')}`,
-      borderRadius: 12, padding: '10px 8px',
+      borderRadius: 14, padding: '11px 10px',
       display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-      gap: 8, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
-      boxShadow: isPaid ? '0 2px 8px rgba(245, 158, 11, 0.08)' : '0 2px 8px rgba(16, 185, 129, 0.08)'
+      gap: 10, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
+      boxShadow: isPaid ? '0 2px 8px rgba(245, 158, 11, 0.08)' : '0 2px 8px rgba(16, 185, 129, 0.08)',
+      boxSizing: 'border-box', minWidth: 0
     }}>
       {/* Top row: Visual Thumbnail + Name + Desc */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, minWidth: 0 }}>
         {customPreview ? (
-          customPreview
+          <div style={{ flexShrink: 0 }}>{customPreview}</div>
         ) : gradientFill ? (
           <div style={{
-            width: 34, height: 34, borderRadius: 8, background: gradientFill,
+            width: 38, height: 38, borderRadius: 10, background: gradientFill,
             border: '1.5px solid rgba(255,255,255,0.2)', flexShrink: 0,
             boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
           }} />
         ) : imageUrl ? (
           <div style={{
-            width: 34, height: 34, borderRadius: 8, background: '#fff',
-            border: '1px solid var(--ad-border)', padding: 3, flexShrink: 0,
+            width: 38, height: 38, borderRadius: 10, background: '#fff',
+            border: '1px solid var(--ad-border)', padding: 4, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             <img src={imageUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
         ) : (
           <div style={{
-            width: 34, height: 34, borderRadius: 8,
+            width: 38, height: 38, borderRadius: 10,
             background: isOff ? 'rgba(148, 163, 184, 0.15)' : (isPaid ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(214, 0, 54, 0.15))' : 'rgba(16, 185, 129, 0.15)'),
             color: isOff ? 'var(--ad-text-sec)' : (isPaid ? '#F59E0B' : '#10B981'),
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
           }}>
-            <Icon size={16} strokeWidth={2.4} />
+            {Icon && <Icon size={18} strokeWidth={2.4} />}
           </div>
         )}
 
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
           <div style={{
-            fontSize: 11.5, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3,
+            fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3,
             fontFamily: fontFamily ? `${fontFamily}, sans-serif` : 'inherit',
             wordBreak: 'break-word', whiteSpace: 'normal'
           }}>
@@ -1376,7 +1866,7 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
           </div>
           {desc && (
             <div style={{
-              fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 3, lineHeight: 1.3,
+              fontSize: 10.5, color: 'var(--ad-text-sec)', marginTop: 3, lineHeight: 1.35,
               wordBreak: 'break-word', whiteSpace: 'normal'
             }}>
               {desc}
@@ -1384,9 +1874,9 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
           )}
           {badge && (
             <span style={{
-              fontSize: 8.5, fontWeight: 800, padding: '1px 4px', borderRadius: 4,
+              fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4,
               background: 'var(--ad-card)', color: 'var(--ad-text-sec)',
-              border: '1px solid var(--ad-border)', display: 'inline-block', marginTop: 3
+              border: '1px solid var(--ad-border)', display: 'inline-block', marginTop: 4
             }}>
               {badge}
             </span>
@@ -1397,21 +1887,21 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
       {/* Bottom Controls Bar: Active Switch + 1-Click Free/Pro Toggle */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        paddingTop: 6, borderTop: '1px solid var(--ad-border)', gap: 4
+        paddingTop: 8, borderTop: '1px solid var(--ad-border)', gap: 6
       }}>
         <button
           type="button"
           disabled={updating}
           onClick={onToggleEnable}
           style={{
-            display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
-            borderRadius: 6, border: `1px solid ${enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+            display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px',
+            borderRadius: 7, border: `1px solid ${enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
             background: enabled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            color: enabled ? '#22C55E' : '#EF4444', fontSize: 9, fontWeight: 800,
+            color: enabled ? '#22C55E' : '#EF4444', fontSize: 9.5, fontWeight: 800,
             cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0
           }}
         >
-          <Power size={9} strokeWidth={2.5} />
+          <Power size={10} strokeWidth={2.5} />
           <span>{enabled ? 'ON' : 'OFF'}</span>
         </button>
 
@@ -1420,20 +1910,20 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
           disabled={updating}
           onClick={onToggleTier}
           style={{
-            display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px',
+            display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px',
             borderRadius: 100, border: `1.5px solid ${isPaid ? '#F59E0B' : '#10B981'}`,
             background: isPaid ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-            color: '#FFFFFF', fontSize: 9, fontWeight: 800,
+            color: '#FFFFFF', fontSize: 9.5, fontWeight: 800,
             cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0,
             boxShadow: isPaid ? '0 2px 6px rgba(245, 158, 11, 0.35)' : '0 2px 6px rgba(16, 185, 129, 0.35)'
           }}
         >
           {updating ? (
-            <RefreshCw size={9} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
+            <RefreshCw size={10} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
           ) : isPaid ? (
-            <Crown size={9} fill="#fff" color="#fff" strokeWidth={2.2} />
+            <Crown size={10} fill="#fff" color="#fff" strokeWidth={2.2} />
           ) : (
-            <Shield size={9} strokeWidth={2.5} />
+            <Shield size={10} strokeWidth={2.5} />
           )}
           <span>{isPaid ? 'PRO' : 'FREE'}</span>
         </button>

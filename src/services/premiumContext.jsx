@@ -101,7 +101,7 @@ export function usePremium() {
   const ctx = useContext(PremiumCtx);
   if (!ctx) {
     return {
-      isPremium: true,
+      isPremium: false,
       currentPlan: 'free',
       canAccess: () => true,
       requirePremium: () => true,

@@ -164,9 +164,13 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
     }
   };
 
+  const inputTools = filteredFeatures.filter(f => f.subcategory === 'Input & Spreadsheet' || f.subcategory === 'Batch Screen');
+  const styleTools = filteredFeatures.filter(f => f.subcategory === 'Batch Styling');
+  const exportTools = filteredFeatures.filter(f => f.subcategory === 'Bulk Export');
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
-      {/* Toast */}
+      {/* Feedback Toast */}
       {feedbackToast && (
         <div style={{
           position: 'fixed',
@@ -191,7 +195,7 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
         </div>
       )}
 
-      {/* ── Studio Header & Master Controls (Mobile-First UX) ─────────────────── */}
+      {/* ── Studio Header (Mobile-First UX) ── */}
       <div style={{
         background: 'var(--ad-card)',
         border: '1px solid var(--ad-border)',
@@ -202,100 +206,10 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
         flexDirection: 'column',
         gap: 12
       }}>
-        {/* Top Row: Icon + Title */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <div style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(255, 77, 157, 0.15) 100%)',
-            border: '1.5px solid rgba(139, 92, 246, 0.4)',
-            color: '#8B5CF6',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.15)'
-          }}>
-            <Layers size={22} strokeWidth={2.4} />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <h1 style={{ fontSize: 16, fontWeight: 900, color: 'var(--ad-text)', margin: 0, letterSpacing: '-0.3px', lineHeight: 1.2 }}>
-                Bulk Batch Studio
-              </h1>
-              <span style={{ fontSize: 9.5, fontWeight: 800, padding: '2px 7px', borderRadius: 100, background: 'rgba(139, 92, 246, 0.15)', color: '#8B5CF6' }}>
-                Live Studio
-              </span>
-            </div>
-            <p style={{ fontSize: 11, color: 'var(--ad-text-sec)', margin: '3px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
-              Visually manage CSV/Excel uploads, spreadsheet grid editor, batch styling and ZIP export features.
-            </p>
-          </div>
-        </div>
 
-        {/* Master Batch Action Chips */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-          <button
-            disabled={bulkProcessing}
-            onClick={() => handleBatchTier('free')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 3,
-              padding: '4px 8px', borderRadius: 6,
-              background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.35)',
-              color: '#10B981', fontSize: 10, fontWeight: 800, cursor: 'pointer'
-            }}
-          >
-            <Shield size={10} />
-            <span>Make Bulk Free</span>
-          </button>
-
-          <button
-            disabled={bulkProcessing}
-            onClick={() => handleBatchTier('paid')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 3,
-              padding: '4px 8px', borderRadius: 6,
-              background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)',
-              color: '#F59E0B', fontSize: 10, fontWeight: 800, cursor: 'pointer'
-            }}
-          >
-            <Crown size={10} />
-            <span>Make Bulk Pro</span>
-          </button>
-
-          <button
-            disabled={bulkProcessing}
-            onClick={() => handleBatchEnable(true)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 3,
-              padding: '4px 8px', borderRadius: 6,
-              background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)',
-              color: '#22C55E', fontSize: 10, fontWeight: 800, cursor: 'pointer'
-            }}
-          >
-            <Power size={10} />
-            <span>Enable All</span>
-          </button>
-
-          <button
-            disabled={bulkProcessing}
-            onClick={() => handleBatchEnable(false)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 3,
-              padding: '4px 8px', borderRadius: 6,
-              background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#EF4444', fontSize: 10, fontWeight: 800, cursor: 'pointer'
-            }}
-          >
-            <XCircle size={10} />
-            <span>Hide All</span>
-          </button>
-        </div>
-
-        {/* Live Studio Mini Stats (Consistent Premium UI with Lucide SVG Icons) */}
+        {/* Live Studio Mini Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, paddingTop: 4 }}>
-          {/* Total Tools */}
+          {/* Total Formats */}
           <div style={{
             background: 'var(--ad-input)',
             borderRadius: 12,
@@ -403,41 +317,41 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
             </div>
           </div>
         </div>
+
+        {/* Search Bar */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <Search size={16} style={{ position: 'absolute', left: 14, color: 'var(--ad-text-sec)' }} />
+          <input
+            type="text"
+            placeholder="Search bulk creation features (e.g. CSV, Quick Sheet, ZIP Export, Style...)"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
+              borderRadius: 12, padding: '10px 36px 10px 38px',
+              color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, outline: 'none'
+            }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: 12, background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer' }}>
+              <XCircle size={15} />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* ── Section 1: Bulk Capabilities Grid ───────────────────────────────── */}
-      <div style={{
-        background: 'var(--ad-card)',
-        border: '1px solid var(--ad-border)',
-        borderRadius: 16,
-        padding: '14px 12px',
-        boxShadow: 'var(--ad-card-shadow)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 9,
-              background: 'rgba(139, 92, 246, 0.12)', color: '#8B5CF6',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-            }}>
-              <Layers size={16} strokeWidth={2.4} />
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <h2 style={{ fontSize: 13.5, fontWeight: 900, color: 'var(--ad-text)', margin: 0, lineHeight: 1.25 }}>
-                Bulk Batch Creation Tools &amp; Quota
-              </h2>
-              <p style={{ fontSize: 10.5, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
-                CSV upload, in-app spreadsheet editor, batch styling and ZIP bundle downloads.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
-          {filteredFeatures.map(feature => (
+      {/* ── Section 1: Input & Spreadsheet Tools ── */}
+      <BulkSectionCard
+        title="1. Input & Spreadsheet Tools"
+        subtitle="CSV/Excel import, interactive in-app Quick Sheet grid editor, and shortcuts."
+        icon={FileSpreadsheet}
+        badgeCount={inputTools.length}
+        onMakeFree={() => setFeaturesTierBatchCloud(inputTools.map(f => f.key), 'free').then(() => showToast('✨ Input tools set to FREE'))}
+        onMakePro={() => setFeaturesTierBatchCloud(inputTools.map(f => f.key), 'paid').then(() => showToast('✨ Input tools set to PRO'))}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
+          {inputTools.map(feature => (
             <BulkFeatureTile
               key={feature.key}
               feature={feature}
@@ -447,7 +361,130 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
             />
           ))}
         </div>
+      </BulkSectionCard>
+
+      {/* ── Section 2: Batch Styling Engine ── */}
+      <BulkSectionCard
+        title="2. Batch Styling & Design Engine"
+        subtitle="Apply active QR colors, dot patterns, eye finders and logos across thousands of codes."
+        icon={Sparkles}
+        badgeCount={styleTools.length}
+        onMakeFree={() => setFeaturesTierBatchCloud(styleTools.map(f => f.key), 'free').then(() => showToast('✨ Batch Styling set to FREE'))}
+        onMakePro={() => setFeaturesTierBatchCloud(styleTools.map(f => f.key), 'paid').then(() => showToast('✨ Batch Styling set to PRO'))}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
+          {styleTools.map(feature => (
+            <BulkFeatureTile
+              key={feature.key}
+              feature={feature}
+              updating={updatingKey === feature.key}
+              onToggleEnable={() => handleToggleEnable(feature)}
+              onToggleTier={() => handleToggleTier(feature)}
+            />
+          ))}
+        </div>
+      </BulkSectionCard>
+
+      {/* ── Section 3: Save & Bulk Export Engine ── */}
+      <BulkSectionCard
+        title="3. Save & Bulk Export Engine"
+        subtitle="Compressed ZIP bundle packaging, bulk PNG images, SVG vectors and PDF document sheets."
+        icon={Download}
+        badgeCount={exportTools.length}
+        onMakeFree={() => setFeaturesTierBatchCloud(exportTools.map(f => f.key), 'free').then(() => showToast('✨ Bulk Export engine set to FREE'))}
+        onMakePro={() => setFeaturesTierBatchCloud(exportTools.map(f => f.key), 'paid').then(() => showToast('✨ Bulk Export engine set to PRO'))}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 10 }}>
+          {exportTools.map(feature => (
+            <BulkFeatureTile
+              key={feature.key}
+              feature={feature}
+              updating={updatingKey === feature.key}
+              onToggleEnable={() => handleToggleEnable(feature)}
+              onToggleTier={() => handleToggleTier(feature)}
+            />
+          ))}
+        </div>
+      </BulkSectionCard>
+    </div>
+  );
+}
+
+function BulkSectionCard({ title, subtitle, icon: Icon, badgeCount, onMakeFree, onMakePro, children }) {
+  return (
+    <div style={{
+      background: 'var(--ad-card)',
+      border: '1px solid var(--ad-border)',
+      borderRadius: 18,
+      padding: '14px 12px',
+      boxShadow: 'var(--ad-card-shadow)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 9,
+              background: 'rgba(139, 92, 246, 0.12)', color: '#8B5CF6',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <Icon size={16} strokeWidth={2.4} />
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h2 style={{ fontSize: 13.5, fontWeight: 900, color: 'var(--ad-text)', margin: 0, lineHeight: 1.25 }}>
+                {title}
+              </h2>
+              <p style={{ fontSize: 10.5, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
+                {subtitle}
+              </p>
+            </div>
+          </div>
+          {badgeCount !== undefined && (
+            <span style={{
+              fontSize: 9.5, fontWeight: 800, padding: '2px 7px', borderRadius: 100,
+              background: 'var(--ad-input)', color: 'var(--ad-text-sec)', border: '1px solid var(--ad-border)', flexShrink: 0
+            }}>
+              {badgeCount} Tools
+            </span>
+          )}
+        </div>
+
+        {(onMakeFree || onMakePro) && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, width: '100%', padding: '4px', background: 'rgba(0,0,0,0.2)', borderRadius: 10 }}>
+            {onMakeFree && (
+              <button
+                type="button"
+                onClick={onMakeFree}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '5px 8px',
+                  borderRadius: 7, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.35)',
+                  color: '#10B981', fontSize: 10.5, fontWeight: 800, cursor: 'pointer'
+                }}
+              >
+                <Shield size={11} strokeWidth={2.5} />
+                <span>Free Section</span>
+              </button>
+            )}
+            {onMakePro && (
+              <button
+                type="button"
+                onClick={onMakePro}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '5px 8px',
+                  borderRadius: 7, background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)',
+                  color: '#F59E0B', fontSize: 10.5, fontWeight: 800, cursor: 'pointer'
+                }}
+              >
+                <Crown size={11} strokeWidth={2.5} />
+                <span>Pro Section</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
+      {children}
     </div>
   );
 }

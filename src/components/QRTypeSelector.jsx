@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { 
   Link, 
   Type, 
@@ -23,6 +24,7 @@ import {
   FaLinkedinIn 
 } from 'react-icons/fa6';
 import { QR_TYPES } from '../utils/qrEngine';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import PaidCrownBadge from './PaidCrownBadge';
 
 const TYPE_CONFIG = {
@@ -49,9 +51,20 @@ const TYPE_CONFIG = {
 };
 
 export default function QRTypeSelector({ activeType, onTypeChange }) {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const unsub = FeatureAccessManager.subscribe(() => setTick(t => t + 1));
+    return () => unsub?.();
+  }, []);
+
+  const visibleEntries = Object.entries(TYPE_CONFIG).filter(([_, config]) => {
+    return FeatureAccessManager.isFeatureEnabled(config.featId);
+  });
+
   return (
     <div className="type-tabs">
-      {Object.entries(TYPE_CONFIG).map(([type, config]) => {
+      {visibleEntries.map(([type, config]) => {
         const Icon = config.icon;
         return (
           <button

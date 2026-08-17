@@ -321,7 +321,9 @@ const TRENDING_GRADIENT_PRESETS = GRADIENT_PRESETS.map(p => {
   if (nameLower.includes('midnight') || nameLower.includes('coal') || nameLower.includes('galaxy') || nameLower.includes('space') || nameLower.includes('steel') || nameLower.includes('frost')) {
     bg = '#111111';
   }
+  const id = p.id || p.name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
   return {
+    id,
     name: p.name,
     qr: `linear-gradient(135deg, ${p.c1}, ${p.c2})`,
     bg: bg
@@ -1249,9 +1251,10 @@ export default function App() {
       setTemplateHandleText('');
       return;
     }
-    const access = FeatureAccessManager.canUseFeature('template_presets');
+    const templateFeatId = `qr_template_${tpl.id}`;
+    const access = FeatureAccessManager.canUseFeature(templateFeatId);
     if (!access.allowed) {
-      showPaywall('template_presets');
+      showPaywall(templateFeatId);
       return;
     }
     setSelectedTemplate(tpl);
@@ -1445,6 +1448,14 @@ export default function App() {
     saveSnapshot(); // Save the final result to history
   };
   const handleTabChange = (tabId) => {
+    const tabObj = ALL_TABS.find(t => t.id === tabId);
+    if (tabObj && tabObj.featId) {
+      const access = FeatureAccessManager.canUseFeature(tabObj.featId);
+      if (!access.allowed) {
+        showPaywall(tabObj.featId);
+        return;
+      }
+    }
     if (tabId !== activeTab) {
       if (logoPopup || textPopup || colorPopup || shapePopup) {
         applyEditing();
@@ -3275,13 +3286,13 @@ export default function App() {
   }, [isDraggingCanvas, handleCanvasMove, stopCanvasDrag]);
   // ── Tab definitions (Dynamically filtered by FeatureAccessManager) ──
   const ALL_TABS = [
-    { id: 'content', label: 'Content', icon: Pencil },
-    { id: 'color', label: 'Color', icon: Palette },
-    { id: 'shapes', label: 'Style', icon: QRStyleIcon },
-    { id: 'logo', label: 'Logo', icon: ImageIcon },
-    { id: 'template', label: 'Template', icon: Sparkles },
+    { id: 'content',  label: 'Content',  icon: Pencil,      featId: 'qr_tab_content' },
+    { id: 'color',    label: 'Color',    icon: Palette,     featId: 'qr_tab_color' },
+    { id: 'shapes',   label: 'Style',    icon: QRStyleIcon, featId: 'qr_tab_style' },
+    { id: 'logo',     label: 'Logo',     icon: ImageIcon,   featId: 'qr_tab_logo' },
+    { id: 'template', label: 'Template', icon: Sparkles,    featId: 'qr_tab_template' },
     // { id: 'frame',   label: 'Frame',   icon: LayoutGrid },
-    { id: 'text', label: 'Text', icon: Type },
+    { id: 'text',     label: 'Text',     icon: Type,        featId: 'qr_tab_text' },
   ];
   const TABS = ALL_TABS.filter(tab => FeatureAccessManager.isQRTabVisible(tab.id));
 
@@ -3657,7 +3668,7 @@ export default function App() {
                           { label: 'SVG', featId: 'export_svg', Icon: FileCode },
                           { label: 'PDF', featId: 'export_pdf', Icon: FileText },
                           { label: 'JPG', featId: 'export_jpg', Icon: FileImage },
-                        ].map(({ label, featId, Icon }) => (
+                        ].filter(item => FeatureAccessManager.isFeatureEnabled(item.featId)).map(({ label, featId, Icon }) => (
                           <button
                             key={label}
                             className={`format-option ${selectedFormat === label ? 'active' : ''}`}
@@ -4354,7 +4365,10 @@ export default function App() {
                       gap: '12px',
                       marginTop: '8px'
                     }}>
-                      {ALL_TEMPLATES.filter(t => templateCategory === 'All' || t.category === templateCategory).map(tpl => {
+                      {ALL_TEMPLATES
+                        .filter(t => FeatureAccessManager.isFeatureEnabled(`qr_template_${t.id}`))
+                        .filter(t => templateCategory === 'All' || t.category === templateCategory)
+                        .map(tpl => {
                         const isSelected = selectedTemplate?.id === tpl.id;
                         return (
                           <button
@@ -4375,7 +4389,7 @@ export default function App() {
                               padding: 0
                             }}
                           >
-                            <PaidCrownBadge featureId="template_presets" position="corner" size={9} />
+                            <PaidCrownBadge featureId={`qr_template_${tpl.id}`} fallbackFeatureId="template_presets" position="corner" size={9} />
                             <TemplatePreviewCanvas 
                               template={tpl} 
                               theme={effectiveTheme} 
@@ -4854,9 +4868,30 @@ export default function App() {
                             {customFonts.map(font => (
                               <button key={font.id} onClick={() => { if (textEditMode === 'center') setTextCenterFont(font.id); else { setFrameFont(font.id); if (frameStyle === 'none') setFrameStyle('text'); } }} className={`font-btn ${(textEditMode === 'center' ? textCenterFont : frameFont) === font.id ? 'active' : ''}`} style={{ fontFamily: font.id }}>{font.label} ★</button>
                             ))}
-                            {FONT_OPTIONS.map(font => (
-                              <button key={font.id} onClick={() => { if (textEditMode === 'center') setTextCenterFont(font.id); else { setFrameFont(font.id); if (frameStyle === 'none') setFrameStyle('text'); } }} className={`font-btn ${(textEditMode === 'center' ? textCenterFont : frameFont) === font.id ? 'active' : ''}`} style={{ fontFamily: font.id }}>{font.label}</button>
-                            ))}
+                            {FONT_OPTIONS
+                              .filter(font => FeatureAccessManager.isFeatureEnabled(`qr_font_${font.id}`))
+                              .map(font => {
+                                const featId = `qr_font_${font.id}`;
+                                return (
+                                  <button 
+                                    key={font.id} 
+                                    onClick={() => {
+                                      const access = FeatureAccessManager.canUseFeature(featId);
+                                      if (!access.allowed) {
+                                        showPaywall(featId);
+                                        return;
+                                      }
+                                      if (textEditMode === 'center') setTextCenterFont(font.id); 
+                                      else { setFrameFont(font.id); if (frameStyle === 'none') setFrameStyle('text'); }
+                                    }} 
+                                    className={`font-btn ${(textEditMode === 'center' ? textCenterFont : frameFont) === font.id ? 'active' : ''}`} 
+                                    style={{ fontFamily: font.id, position: 'relative' }}
+                                  >
+                                    <PaidCrownBadge featureId={featId} fallbackFeatureId="qr_text_fonts" position="corner" size={9} />
+                                    {font.label}
+                                  </button>
+                                );
+                              })}
                           </div>
                         </div>
                       )}
@@ -5019,125 +5054,149 @@ export default function App() {
                           {presetTab === 'solid' ? (
                             <div className="fade-in">
                               <div className="swatch-grid-mini" style={{ padding: '4px 0 8px 0', gap: '10px' }}>
-                                {COLOR_PRESETS.map(p => {
-                                  const isSelected = qrColor === p.qr && bgColor === p.bg;
-                                  return (
-                                    <button 
-                                      key={p.name} 
-                                      onClick={() => { 
-                                        setQrColor(p.qr); 
-                                        setBgColor(p.bg); 
-                                        if (syncEyes) { setEyeColor(p.qr); setEyeOuterColor(p.qr); } 
-                                        setBgTransparent(false);
-                                        setQrBgImage(null);
-                                        setQrBgImageEnabled(false);
-                                        setQrTexture(null);
-                                        setQrTextureEnabled(false);
-                                      }} 
-                                      style={{ 
-                                        flex: '0 0 auto',
-                                        display: 'flex', 
-                                        flexDirection: 'column',
-                                        alignItems: 'center', 
-                                        gap: '6px', 
-                                        background: 'none', 
-                                        border: 'none',
-                                        padding: '0',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s ease',
-                                        width: '60px'
-                                      }}
-                                    >
-                                      <div style={{ 
-                                        width: '44px', 
-                                        height: '44px', 
-                                        borderRadius: '12px', 
-                                        background: p.bg, 
-                                        border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        overflow: 'hidden',
-                                        boxShadow: isSelected ? '0 8px 16px rgba(255,59,48,0.25)' : '0 2px 6px rgba(0,0,0,0.06)',
-                                        transition: 'all 0.2s ease'
-                                      }}>
-                                        <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: p.qr }} />
-                                      </div>
-                                      <span style={{ 
-                                        fontSize: '10px', 
-                                        fontWeight: isSelected ? 700 : 500, 
-                                        color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)', 
-                                        whiteSpace: 'nowrap', 
-                                        overflow: 'hidden', 
-                                        textOverflow: 'ellipsis', 
-                                        width: '100%', 
-                                        textAlign: 'center' 
-                                      }}>{p.name}</span>
-                                    </button>
-                                  );
-                                })}
+                                {COLOR_PRESETS
+                                  .filter(p => {
+                                    const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+                                    return FeatureAccessManager.isFeatureEnabled(`qr_color_preset_${slug}`);
+                                  })
+                                  .map(p => {
+                                    const isSelected = qrColor === p.qr && bgColor === p.bg;
+                                    const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+                                    const featId = `qr_color_preset_${slug}`;
+                                    return (
+                                      <button 
+                                        key={p.name} 
+                                        onClick={() => { 
+                                          const access = FeatureAccessManager.canUseFeature(featId);
+                                          if (!access.allowed) {
+                                            showPaywall(featId);
+                                            return;
+                                          }
+                                          setQrColor(p.qr); 
+                                          setBgColor(p.bg); 
+                                          if (syncEyes) { setEyeColor(p.qr); setEyeOuterColor(p.qr); } 
+                                          setBgTransparent(false);
+                                          setQrBgImage(null);
+                                          setQrBgImageEnabled(false);
+                                          setQrTexture(null);
+                                          setQrTextureEnabled(false);
+                                        }} 
+                                        style={{ 
+                                          flex: '0 0 auto',
+                                          display: 'flex', 
+                                          flexDirection: 'column',
+                                          alignItems: 'center', 
+                                          gap: '6px', 
+                                          background: 'none', 
+                                          border: 'none',
+                                          padding: '0',
+                                          cursor: 'pointer',
+                                          transition: 'all 0.2s ease',
+                                          width: '60px',
+                                          position: 'relative'
+                                        }}
+                                      >
+                                        <PaidCrownBadge featureId={featId} fallbackFeatureId="qr_color_presets" position="corner" size={8} />
+                                        <div style={{ 
+                                          width: '44px', 
+                                          height: '44px', 
+                                          borderRadius: '12px', 
+                                          background: p.bg, 
+                                          border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          overflow: 'hidden',
+                                          boxShadow: isSelected ? '0 8px 16px rgba(255,59,48,0.25)' : '0 2px 6px rgba(0,0,0,0.06)',
+                                          transition: 'all 0.2s ease'
+                                        }}>
+                                          <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: p.qr }} />
+                                        </div>
+                                        <span style={{ 
+                                          fontSize: '10px', 
+                                          fontWeight: isSelected ? 700 : 500, 
+                                          color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)', 
+                                          whiteSpace: 'nowrap', 
+                                          overflow: 'hidden', 
+                                          textOverflow: 'ellipsis', 
+                                          width: '100%', 
+                                          textAlign: 'center' 
+                                        }}>{p.name}</span>
+                                      </button>
+                                    );
+                                  })}
                               </div>
                             </div>
                           ) : (
                             <div className="fade-in">
                               <div className="swatch-grid-mini" style={{ padding: '4px 0 8px 0', gap: '10px' }}>
-                                {TRENDING_GRADIENT_PRESETS.map(p => {
-                                  const isSelected = qrColor === p.qr && bgColor === p.bg;
-                                  return (
-                                    <button 
-                                      key={p.name} 
-                                      onClick={() => { 
-                                        setQrColor(p.qr); 
-                                        setBgColor(p.bg); 
-                                        if (syncEyes) { setEyeColor(p.qr); setEyeOuterColor(p.qr); } 
-                                        setBgTransparent(false);
-                                        setQrBgImage(null);
-                                        setQrBgImageEnabled(false);
-                                        setQrTexture(null);
-                                        setQrTextureEnabled(false);
-                                      }} 
-                                      style={{ 
-                                        flex: '0 0 auto',
-                                        display: 'flex', 
-                                        flexDirection: 'column',
-                                        alignItems: 'center', 
-                                        gap: '6px', 
-                                        background: 'none', 
-                                        border: 'none',
-                                        padding: '0',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s ease',
-                                        width: '60px'
-                                      }}
-                                    >
-                                      <div style={{ 
-                                        width: '44px', 
-                                        height: '44px', 
-                                        borderRadius: '12px', 
-                                        background: p.bg, 
-                                        border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        overflow: 'hidden',
-                                        boxShadow: isSelected ? '0 8px 16px rgba(255,59,48,0.25)' : '0 2px 6px rgba(0,0,0,0.06)',
-                                        transition: 'all 0.2s ease'
-                                      }}>
-                                        <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: p.qr }} />
-                                      </div>
-                                      <span style={{ 
-                                        fontSize: '10px', 
-                                        fontWeight: isSelected ? 700 : 500, 
-                                        color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)', 
-                                        whiteSpace: 'nowrap', 
-                                        overflow: 'hidden', 
-                                        textOverflow: 'ellipsis', 
-                                        width: '100%', 
-                                        textAlign: 'center' 
-                                      }}>{p.name}</span>
-                                    </button>
-                                  );
-                                })}
+                                {TRENDING_GRADIENT_PRESETS
+                                  .filter(p => FeatureAccessManager.isFeatureEnabled(`qr_gradient_${p.id}`))
+                                  .map(p => {
+                                    const isSelected = qrColor === p.qr && bgColor === p.bg;
+                                    const featId = `qr_gradient_${p.id}`;
+                                    return (
+                                      <button 
+                                        key={p.name} 
+                                        onClick={() => { 
+                                          const access = FeatureAccessManager.canUseFeature(featId);
+                                          if (!access.allowed) {
+                                            showPaywall(featId);
+                                            return;
+                                          }
+                                          setQrColor(p.qr); 
+                                          setBgColor(p.bg); 
+                                          if (syncEyes) { setEyeColor(p.qr); setEyeOuterColor(p.qr); } 
+                                          setBgTransparent(false);
+                                          setQrBgImage(null);
+                                          setQrBgImageEnabled(false);
+                                          setQrTexture(null);
+                                          setQrTextureEnabled(false);
+                                        }} 
+                                        style={{ 
+                                          flex: '0 0 auto',
+                                          display: 'flex', 
+                                          flexDirection: 'column',
+                                          alignItems: 'center', 
+                                          gap: '6px', 
+                                          background: 'none', 
+                                          border: 'none',
+                                          padding: '0',
+                                          cursor: 'pointer',
+                                          transition: 'all 0.2s ease',
+                                          width: '60px',
+                                          position: 'relative'
+                                        }}
+                                      >
+                                        <PaidCrownBadge featureId={featId} fallbackFeatureId="custom_colors_gradient" position="corner" size={9} />
+                                        <div style={{ 
+                                          width: '44px', 
+                                          height: '44px', 
+                                          borderRadius: '12px', 
+                                          background: p.bg, 
+                                          border: isSelected ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          overflow: 'hidden',
+                                          boxShadow: isSelected ? '0 8px 16px rgba(255,59,48,0.25)' : '0 2px 6px rgba(0,0,0,0.06)',
+                                          transition: 'all 0.2s ease'
+                                        }}>
+                                          <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: p.qr }} />
+                                        </div>
+                                        <span style={{ 
+                                          fontSize: '10px', 
+                                          fontWeight: isSelected ? 700 : 500, 
+                                          color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)', 
+                                          whiteSpace: 'nowrap', 
+                                          overflow: 'hidden', 
+                                          textOverflow: 'ellipsis', 
+                                          width: '100%', 
+                                          textAlign: 'center' 
+                                        }}>{p.name}</span>
+                                      </button>
+                                    );
+                                  })}
                               </div>
                             </div>
                           )}
@@ -5218,47 +5277,55 @@ export default function App() {
                           <div className="fade-in" style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
                             <div className="logo-presets-grid">
                               {/* Upload Button */}
-                              <button
-                                className={`logo-preset-btn upload-tile ${qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? 'active' : ''}`}
-                                onClick={() => {
-                                  if (qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src)) {
-                                    setQrBgImage(null);
-                                    setQrBgImageEnabled(false);
-                                  } else {
-                                    const input = document.createElement('input');
-                                    input.type = 'file';
-                                    input.accept = 'image/*';
-                                    input.onchange = (e) => {
-                                      const file = e.target.files[0];
-                                      if (file) {
-                                        const reader = new FileReader();
-                                        reader.onload = (re) => {
-                                          const img = new Image();
-                                          img.onload = () => {
-                                            setQrBgImage({ src: re.target.result, image: img, name: file.name });
-                                            setQrBgImageEnabled(true);
-                                            setErrorLevel('H'); // Auto set high error correction for reliability
-                                          };
-                                          img.src = re.target.result;
-                                        };
-                                        reader.readAsDataURL(file);
+                              {FeatureAccessManager.isFeatureEnabled('qr_color_bg_image') && (
+                                <button
+                                  className={`logo-preset-btn upload-tile ${qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? 'active' : ''}`}
+                                  onClick={() => {
+                                    if (qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src)) {
+                                      setQrBgImage(null);
+                                      setQrBgImageEnabled(false);
+                                    } else {
+                                      const access = FeatureAccessManager.canUseFeature('qr_color_bg_image');
+                                      if (!access.allowed) {
+                                        showPaywall('qr_color_bg_image');
+                                        return;
                                       }
-                                    };
-                                    input.click();
-                                  }
-                                }}
-                                title="Upload Custom Background"
-                                style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)' }}
-                              >
-                                {qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? (
-                                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                                    <img src={qrBgImage.src} alt="Custom" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />
-                                    <X size={16} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--error)' }} />
-                                  </div>
-                                ) : (
-                                  <UploadCloud size={24} color="var(--accent-primary)" />
-                                )}
-                              </button>
+                                      const input = document.createElement('input');
+                                      input.type = 'file';
+                                      input.accept = 'image/*';
+                                      input.onchange = (e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                          const reader = new FileReader();
+                                          reader.onload = (re) => {
+                                            const img = new Image();
+                                            img.onload = () => {
+                                              setQrBgImage({ src: re.target.result, image: img, name: file.name });
+                                              setQrBgImageEnabled(true);
+                                              setErrorLevel('H'); // Auto set high error correction for reliability
+                                            };
+                                            img.src = re.target.result;
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
+                                      };
+                                      input.click();
+                                    }
+                                  }}
+                                  title="Upload Custom Background"
+                                  style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-light)', position: 'relative' }}
+                                >
+                                  <PaidCrownBadge featureId="qr_color_bg_image" fallbackFeatureId="qr_bg_image_texture" position="corner" size={9} />
+                                  {qrBgImage && !SOCIAL_TEXTURES.some(p => p.url === qrBgImage.src) ? (
+                                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                      <img src={qrBgImage.src} alt="Custom" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />
+                                      <X size={16} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--error)' }} />
+                                    </div>
+                                  ) : (
+                                    <UploadCloud size={24} color="var(--accent-primary)" />
+                                  )}
+                                </button>
+                              )}
                               {/* Social App Texture Presets */}
                               {SOCIAL_TEXTURES.map((p) => {
                                 const isActive = qrBgImage?.src === p.url;
@@ -5418,41 +5485,51 @@ export default function App() {
                                   )}
                                 </button>
                                 {/* Social App Texture Presets */}
-                                {SOCIAL_TEXTURES.map((p) => {
-                                  const isActive = qrTexture?.src === p.url;
-                                  return (
-                                    <button
-                                      key={p.slug}
-                                      className={`logo-preset-btn ${isActive ? 'active' : ''}`}
-                                      onClick={() => {
-                                        if (isActive) {
-                                          setQrTexture(null);
-                                          setQrTextureEnabled(false);
-                                        } else {
-                                          const img = new Image();
-                                          img.onload = () => {
-                                            setQrTexture({ src: p.url, image: img, name: p.name });
-                                            setQrTextureEnabled(true);
-                                          };
-                                          img.src = p.url;
-                                        }
-                                      }}
-                                      title={p.name}
-                                    >
-                                      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                                        <img 
-                                          src={p.url} 
-                                          alt={p.name} 
-                                          loading="lazy" 
-                                          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
-                                        />
-                                        {isActive && (
-                                          <X size={24} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
-                                        )}
-                                      </div>
-                                    </button>
-                                  );
-                                })}
+                                {SOCIAL_TEXTURES
+                                  .filter(p => FeatureAccessManager.isFeatureEnabled(`qr_texture_${p.slug}`))
+                                  .map((p) => {
+                                    const isActive = qrTexture?.src === p.url;
+                                    return (
+                                      <button
+                                        key={p.slug}
+                                        className={`logo-preset-btn ${isActive ? 'active' : ''}`}
+                                        onClick={() => {
+                                          if (isActive) {
+                                            setQrTexture(null);
+                                            setQrTextureEnabled(false);
+                                          } else {
+                                            const featId = `qr_texture_${p.slug}`;
+                                            const access = FeatureAccessManager.canUseFeature(featId);
+                                            if (!access.allowed) {
+                                              showPaywall(featId);
+                                              return;
+                                            }
+                                            const img = new Image();
+                                            img.onload = () => {
+                                              setQrTexture({ src: p.url, image: img, name: p.name });
+                                              setQrTextureEnabled(true);
+                                            };
+                                            img.src = p.url;
+                                          }
+                                        }}
+                                        title={p.name}
+                                        style={{ position: 'relative' }}
+                                      >
+                                        <PaidCrownBadge featureId={`qr_texture_${p.slug}`} fallbackFeatureId="qr_bg_image_texture" position="corner" size={9} />
+                                        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                          <img 
+                                            src={p.url} 
+                                            alt={p.name} 
+                                            loading="lazy" 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isActive ? 0.3 : 1, transition: 'opacity 0.2s' }} 
+                                          />
+                                          {isActive && (
+                                            <X size={24} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--accent-primary)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+                                          )}
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
                               </div>
                               {qrTexture && (
                                 <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '4px' }}>
@@ -5484,39 +5561,51 @@ export default function App() {
                                 )}
                               </div>
                               <div className="font-scroll-container" style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '4px 0 8px 0', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', marginBottom: '4px' }}>
-                                {QR_BG_SHAPES.map(shape => {
-                                  const isActive = qrBgShape === shape.id;
-                                  return (
-                                    <button 
-                                      key={shape.id} 
-                                      onClick={() => setQrBgShape(shape.id)}
-                                      className={`font-scroll-btn ${isActive ? 'active' : ''}`} 
-                                      style={{ 
-                                        flex: '0 0 auto', 
-                                        padding: '4px', 
-                                        borderRadius: '12px',
-                                        fontSize: '10px',
-                                        fontWeight: 600,
-                                        background: isActive ? 'var(--accent-primary)' : 'var(--bg-elevated)',
-                                        color: isActive ? '#fff' : 'var(--text-primary)',
-                                        border: isActive ? '2px solid var(--accent-primary)' : '1px solid var(--border-light)',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '6px',
-                                        width: '74px',
-                                        height: '94px',
-                                        boxShadow: isActive ? '0 6px 14px rgba(214,0,54,0.2)' : 'none',
-                                        transition: 'all 0.2s ease',
-                                        overflow: 'hidden'
-                                      }}
-                                    >
-                                      <MiniQRCanvasBg 
-                                        qrParams={{
-                                          dotStyle,
-                                          eyeStyle,
-                                          syncEyes,
+                                {QR_BG_SHAPES
+                                  .filter(shape => FeatureAccessManager.isFeatureEnabled(`qr_bg_${shape.id}`))
+                                  .map(shape => {
+                                    const isActive = qrBgShape === shape.id;
+                                    const featId = `qr_bg_${shape.id}`;
+                                    return (
+                                      <button 
+                                        key={shape.id} 
+                                        onClick={() => {
+                                          const access = FeatureAccessManager.canUseFeature(featId);
+                                          if (!access.allowed) {
+                                            showPaywall(featId);
+                                            return;
+                                          }
+                                          setQrBgShape(shape.id);
+                                        }}
+                                        className={`font-scroll-btn ${isActive ? 'active' : ''}`} 
+                                        style={{ 
+                                          flex: '0 0 auto', 
+                                          padding: '4px', 
+                                          borderRadius: '12px',
+                                          fontSize: '10px',
+                                          fontWeight: 600,
+                                          background: isActive ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                                          color: isActive ? '#fff' : 'var(--text-primary)',
+                                          border: isActive ? '2px solid var(--accent-primary)' : '1px solid var(--border-light)',
+                                          display: 'flex',
+                                          flexDirection: 'column',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          gap: '6px',
+                                          width: '74px',
+                                          height: '94px',
+                                          boxShadow: isActive ? '0 6px 14px rgba(214,0,54,0.2)' : 'none',
+                                          transition: 'all 0.2s ease',
+                                          overflow: 'hidden',
+                                          position: 'relative'
+                                        }}
+                                      >
+                                        <PaidCrownBadge featureId={featId} fallbackFeatureId="qr_background_shapes" position="corner" size={9} />
+                                        <MiniQRCanvasBg 
+                                          qrParams={{
+                                            dotStyle,
+                                            eyeStyle,
+                                            syncEyes,
                                           gradientEnabled,
                                           gradientColor1,
                                           gradientColor2,
@@ -5619,12 +5708,96 @@ export default function App() {
                      <div className="toolbar-tabs-row fade-in">
                        {activeTab === 'color' && (
                          <>
-                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'presets')}><Bookmark size={24} /><span>Presets</span></button>
-                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'dots')}><QRDotsIcon /><span>Dots</span></button>
-                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                           <button className={`text-toolbar-btn${colorPopup === 'bg' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg')}><Paintbrush size={24} /><span>BG Color</span></button>
-                           <button className={`text-toolbar-btn${colorPopup === 'bg-image' ? ' active' : ''}`} onClick={() => startEditing('color', 'bg-image')}><ImageIcon size={24} /><span>BG Image</span></button>
-                           <button className="text-toolbar-btn" onClick={() => startEditing('color', 'texture')}><Layers size={24} /><span>Texture</span></button>
+                           {FeatureAccessManager.isFeatureEnabled('qr_color_presets') && (
+                             <button 
+                               className={`text-toolbar-btn${colorPopup === 'presets' ? ' active' : ''}`} 
+                               onClick={() => {
+                                 const access = FeatureAccessManager.canUseFeature('qr_color_presets');
+                                 if (!access.allowed) { showPaywall('qr_color_presets'); return; }
+                                 startEditing('color', 'presets');
+                               }}
+                               style={{ position: 'relative' }}
+                             >
+                               <PaidCrownBadge featureId="qr_color_presets" position="floating" size={8} />
+                               <Bookmark size={24} />
+                               <span>Presets</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_color_dots') && (
+                             <button 
+                               className={`text-toolbar-btn${colorPopup === 'dots' ? ' active' : ''}`} 
+                               onClick={() => {
+                                 const access = FeatureAccessManager.canUseFeature('qr_color_dots');
+                                 if (!access.allowed) { showPaywall('qr_color_dots'); return; }
+                                 startEditing('color', 'dots');
+                               }}
+                               style={{ position: 'relative' }}
+                             >
+                               <PaidCrownBadge featureId="qr_color_dots" fallbackFeatureId="custom_colors_solid" position="floating" size={8} />
+                               <QRDotsIcon />
+                               <span>Dots</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_color_eyes') && (
+                             <button 
+                               className={`text-toolbar-btn${colorPopup === 'eyes' ? ' active' : ''}`} 
+                               onClick={() => {
+                                 const access = FeatureAccessManager.canUseFeature('qr_color_eyes');
+                                 if (!access.allowed) { showPaywall('qr_color_eyes'); return; }
+                                 startEditing('color', 'eyes');
+                               }}
+                               style={{ position: 'relative' }}
+                             >
+                               <PaidCrownBadge featureId="qr_color_eyes" fallbackFeatureId="qr_color_eyes_custom" position="floating" size={8} />
+                               <QREyesIcon />
+                               <span>Eyes</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_color_bg') && (
+                             <button 
+                               className={`text-toolbar-btn${colorPopup === 'bg' ? ' active' : ''}`} 
+                               onClick={() => {
+                                 const access = FeatureAccessManager.canUseFeature('qr_color_bg');
+                                 if (!access.allowed) { showPaywall('qr_color_bg'); return; }
+                                 startEditing('color', 'bg');
+                               }}
+                               style={{ position: 'relative' }}
+                             >
+                               <PaidCrownBadge featureId="qr_color_bg" position="floating" size={8} />
+                               <Paintbrush size={24} />
+                               <span>BG Color</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_color_bg_image') && (
+                             <button 
+                               className={`text-toolbar-btn${colorPopup === 'bg-image' ? ' active' : ''}`} 
+                               onClick={() => {
+                                 const access = FeatureAccessManager.canUseFeature('qr_color_bg_image');
+                                 if (!access.allowed) { showPaywall('qr_color_bg_image'); return; }
+                                 startEditing('color', 'bg-image');
+                               }}
+                               style={{ position: 'relative' }}
+                             >
+                               <PaidCrownBadge featureId="qr_color_bg_image" fallbackFeatureId="qr_bg_image_texture" position="floating" size={8} />
+                               <ImageIcon size={24} />
+                               <span>BG Image</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_color_texture') && (
+                             <button 
+                               className={`text-toolbar-btn${colorPopup === 'texture' ? ' active' : ''}`} 
+                               onClick={() => {
+                                 const access = FeatureAccessManager.canUseFeature('qr_color_texture');
+                                 if (!access.allowed) { showPaywall('qr_color_texture'); return; }
+                                 startEditing('color', 'texture');
+                               }}
+                               style={{ position: 'relative' }}
+                             >
+                               <PaidCrownBadge featureId="qr_color_texture" fallbackFeatureId="qr_bg_image_texture" position="floating" size={8} />
+                               <Layers size={24} />
+                               <span>Texture</span>
+                             </button>
+                           )}
                          </>
                        )}
                        {activeTab === 'shapes' && (
@@ -5879,7 +6052,9 @@ export default function App() {
               key={tab.id}
               className={`bottom-nav-tab${activeTab === tab.id ? ' active' : ''}`}
               onClick={() => handleTabChange(tab.id)}
+              style={{ position: 'relative' }}
             >
+              <PaidCrownBadge featureId={tab.featId} position="floating" size={9} />
               <div className="bottom-nav-highlight" />
               <span className="bottom-nav-icon">
                 <tab.icon size={24} strokeWidth={2} />

@@ -8,6 +8,7 @@ import { FeatureAccessManager } from '../services/FeatureAccessManager';
  */
 export default function PaidCrownBadge({ 
   featureId, 
+  fallbackFeatureId = null,
   size = 12, 
   style = {}, 
   showLabel = false,
@@ -24,14 +25,11 @@ export default function PaidCrownBadge({
     };
   }, []);
 
-  // 1. If featureId is invalid or if feature is included in the free tier, NEVER show crown badge
-  if (!featureId || !FeatureAccessManager.isPaidFeature(featureId)) {
-    return null;
-  }
+  // Check if primary or fallback feature is marked as Paid / Pro
+  const isPrimaryPaid = featureId && FeatureAccessManager.isPaidFeature(featureId);
+  const isFallbackPaid = fallbackFeatureId && FeatureAccessManager.isPaidFeature(fallbackFeatureId);
 
-  // 2. If the user currently has an active PRO subscription or lifetime access, NEVER show locking crown badge
-  const userPlan = FeatureAccessManager.getUserPlan();
-  if (userPlan && userPlan !== 'free') {
+  if (!isPrimaryPaid && !isFallbackPaid) {
     return null;
   }
 

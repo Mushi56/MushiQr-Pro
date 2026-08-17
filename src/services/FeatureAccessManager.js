@@ -75,6 +75,11 @@ export const FEATURE_REGISTRY = [
   { featureId: 'custom_colors_solid',   displayName: 'Solid Color Pickers (RGB/HSB)', category: 'QR_GENERATOR', subcategory: 'Color', description: 'Advanced RGB/HSB solid color pickers', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'custom_colors_gradient',displayName: 'Dual Gradient Color Fills',      category: 'QR_GENERATOR', subcategory: 'Color', description: 'Linear & radial gradient QR color fills', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'qr_color_presets',      displayName: 'Color Theme Presets Gallery',   category: 'QR_GENERATOR', subcategory: 'Color', description: 'Pre-designed multi-color theme presets',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_color_dots',         displayName: 'Dots Color Tool & Gradient',    category: 'QR_GENERATOR', subcategory: 'Color', description: 'Custom solid and gradient color tool for dots', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_color_eyes',         displayName: 'Eyes Color Tool (Inner/Outer)', category: 'QR_GENERATOR', subcategory: 'Color', description: 'Independent color tuning for finder eyes',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_color_bg',           displayName: 'Background Color & Transparency',category: 'QR_GENERATOR', subcategory: 'Color', description: 'Custom canvas background color & alpha', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'qr_color_bg_image',     displayName: 'Background Image & Overlay',     category: 'QR_GENERATOR', subcategory: 'Color', description: 'Custom canvas background image & dimming', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'qr_color_texture',      displayName: 'Color Texture Pattern Fills',   category: 'QR_GENERATOR', subcategory: 'Color', description: 'Apply texture fills to QR code matrix',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'qr_color_eyes_custom',  displayName: 'Custom Eye Finder Colors',       category: 'QR_GENERATOR', subcategory: 'Color', description: 'Independent color tuning for finder eyes',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_bg_image_texture',   displayName: 'Background Image & Texture',    category: 'QR_GENERATOR', subcategory: 'Color', description: 'Custom canvas background texture patterns', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
 
@@ -156,6 +161,11 @@ export const FEATURE_REGISTRY = [
   { featureId: 'barcode_custom_colors',      displayName: 'Barcode Custom Colors',      category: 'BARCODE_GENERATOR', subcategory: 'Barcode Appearance', description: 'Custom bar and background colors',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'barcode_dimension_controls', displayName: 'Barcode Height & Width',     category: 'BARCODE_GENERATOR', subcategory: 'Barcode Appearance', description: 'Adjust bar width multiplier & height',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'barcode_text_display',       displayName: 'Toggle Text Under Barcode',  category: 'BARCODE_GENERATOR', subcategory: 'Barcode Appearance', description: 'Show/hide human readable text',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'barcode_export_png',         displayName: 'Barcode PNG Export',         category: 'BARCODE_GENERATOR', subcategory: 'Export',             description: 'Download standard PNG barcode image',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'barcode_export_svg',         displayName: 'Barcode SVG Vector Export',  category: 'BARCODE_GENERATOR', subcategory: 'Export',             description: 'Download scalable SVG vector barcode',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'barcode_export_pdf',         displayName: 'Barcode PDF Document Export',category: 'BARCODE_GENERATOR', subcategory: 'Export',             description: 'Download printable A4 PDF barcode label',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'barcode_export_print',       displayName: 'Direct Thermal Print',       category: 'BARCODE_GENERATOR', subcategory: 'Export',             description: 'Send directly to thermal receipt printer',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'barcode_export_quality',     displayName: 'HD & Vector Quality Scaler', category: 'BARCODE_GENERATOR', subcategory: 'Export',             description: 'Scale crisp barcode resolution',            defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
 
   // ── 3. BULK GENERATION ──
   { featureId: 'batch_view',         displayName: 'Bulk Generator Screen',  category: 'BULK_GENERATOR', subcategory: 'Batch Screen',         description: 'Access bulk generation tool',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
@@ -163,6 +173,10 @@ export const FEATURE_REGISTRY = [
   { featureId: 'batch_manual_input', displayName: 'Quick Sheet Grid Editor',category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Interactive spreadsheet data editor',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'batch_custom_style', displayName: 'Apply Style to Batch',   category: 'BULK_GENERATOR', subcategory: 'Batch Styling',       description: 'Apply active design to all codes',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'batch_zip_export',   displayName: 'Download ZIP Archive',   category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Export all codes as compressed ZIP',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'bulk_export_png',    displayName: 'Bulk PNG Images in ZIP', category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Generate PNG format inside batch ZIP',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'bulk_export_svg',    displayName: 'Bulk SVG Vectors in ZIP',category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Generate SVG vectors inside batch ZIP', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'bulk_export_pdf',    displayName: 'Bulk PDF Sheets in ZIP', category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Generate PDF documents inside batch ZIP',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'bulk_export_quality',displayName: 'Bulk HD Quality Scaler', category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Export high resolution batch items',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
 
   // ── 4. SCANNER ──
   { featureId: 'scanner_camera_live',    displayName: 'Live Lens Camera Scanning',   category: 'SCANNER', subcategory: 'Camera Lens',  description: 'Real-time camera lens barcode scan',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -266,19 +280,22 @@ class FeatureAccessManagerService {
     let initialFlags = {};
     let initialPlans = {};
     let initialSub = null;
+    let initialMembership = {};
     try {
       const primaryFlags = JSON.parse(localStorage.getItem(STORAGE_KEYS.GLOBAL_FLAGS) || 'null');
       const legacyFlags = JSON.parse(localStorage.getItem('qrgen_feature_flags') || 'null');
       initialFlags = primaryFlags || legacyFlags || {};
       initialPlans = JSON.parse(localStorage.getItem(STORAGE_KEYS.PLAN_CONFIGS) || '{}');
       initialSub = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SUB) || 'null');
+      initialMembership = JSON.parse(localStorage.getItem('mushiqr_membership_config') || '{}');
     } catch {
       // Fallback if storage read fails
     }
 
-    this.globalFlags = initialFlags;       // global_config/featureFlags doc
-    this.planConfigs = initialPlans;       // subscription_plans/{planId} docs
+    this.globalFlags = initialFlags;          // global_config/featureFlags doc
+    this.planConfigs = initialPlans;          // subscription_plans/{planId} docs
     this.userSubscription = initialSub;
+    this.membershipConfig = initialMembership; // global_config/membership doc
     this.unsubFlags = null;
     this.unsubPlans = null;
     this.unsubSub = null;
@@ -504,22 +521,15 @@ class FeatureAccessManagerService {
    * Primary Entitlement Access API
    */
   canUseFeature(featureId) {
-    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
-
-    // 1. Validate feature exists in Registry
-    if (!featDef) {
-      return {
-        allowed: false,
-        reason: REASON.UNKNOWN_FEATURE,
-        status: STATUS.UNKNOWN_FEATURE,
-        featureId,
-        requiredPlan: null,
-      };
+    if (!featureId) {
+      return { allowed: true, reason: REASON.ALLOWED, status: STATUS.ALLOWED, featureId: '', userPlan: this.getUserPlan() };
     }
 
-    // 2. Check Global Feature Switch (global_config/featureFlags) FIRST
+    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
+
+    // 1. Check Global Feature Switch (global_config/featureFlags) FIRST
     const flagVal = this.globalFlags[featureId];
-    const isGloballyEnabled = flagVal !== undefined ? Boolean(flagVal) : featDef.defaultEnabled;
+    const isGloballyEnabled = flagVal !== undefined ? Boolean(flagVal) : (featDef ? featDef.defaultEnabled : true);
 
     if (!isGloballyEnabled) {
       return {
@@ -531,7 +541,7 @@ class FeatureAccessManagerService {
       };
     }
 
-    // 3. Super Admin Universal Bypass
+    // 2. Super Admin Universal Bypass
     if (this.isSuperAdmin()) {
       return {
         allowed: true,
@@ -542,8 +552,8 @@ class FeatureAccessManagerService {
       };
     }
 
-    // 4. Authentication Check
-    if (featDef.requiresAuthentication && !this.currentUser) {
+    // 3. Authentication Check
+    if (featDef?.requiresAuthentication && !this.currentUser) {
       return {
         allowed: false,
         reason: REASON.AUTH_REQUIRED,
@@ -555,44 +565,32 @@ class FeatureAccessManagerService {
 
     const userPlan = this.getUserPlan();
 
-    // 5. Entitlement & Plan Level Check
-    // Check global_config/membership featureMatrix
-    const matrixEntry = this.membershipConfig?.featureMatrix?.[featureId];
-    if (Array.isArray(matrixEntry)) {
-      if (matrixEntry.includes('free') || matrixEntry.includes(userPlan) || (userPlan !== 'free' && matrixEntry.some(p => ['weekly', 'monthly', 'yearly', 'lifetime'].includes(p)))) {
-        return {
-          allowed: true,
-          reason: REASON.ALLOWED,
-          status: STATUS.ALLOWED,
-          featureId,
-          userPlan,
-        };
-      }
+    // 4. Entitlement & Plan Level Check
+    const isPaid = this.isPaidFeature(featureId);
+    if (!isPaid) {
+      // Feature is 100% Free!
       return {
-        allowed: false,
-        reason: REASON.PLAN_REQUIRED,
-        status: STATUS.REQUIRES_PLAN,
+        allowed: true,
+        reason: REASON.ALLOWED,
+        status: STATUS.ALLOWED,
         featureId,
-        requiredPlan: matrixEntry[0] || 'weekly',
         userPlan,
       };
     }
 
-    // Fallback to Plan Configs / Canonical Defaults
-    const planConfig = this.membershipConfig?.plans?.[userPlan] || this.planConfigs[userPlan];
-    const allowedFeatures = planConfig?.features || (userPlan === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
-
-    if (!allowedFeatures.includes(featureId)) {
+    // If feature requires Paid and user is on Free tier:
+    if (userPlan === 'free') {
       return {
         allowed: false,
         reason: REASON.PLAN_REQUIRED,
         status: STATUS.REQUIRES_PLAN,
         featureId,
         requiredPlan: this.findMinimumPlanForFeature(featureId),
-        userPlan,
+        userPlan: 'free',
       };
     }
 
+    // User is on a paid plan ('weekly', 'monthly', 'yearly', 'lifetime')
     return {
       allowed: true,
       reason: REASON.ALLOWED,
@@ -623,14 +621,27 @@ class FeatureAccessManagerService {
   }
 
   /**
+   * Determines if a feature is enabled globally (visibility and functional state)
+   */
+  isFeatureEnabled(featureId) {
+    if (!featureId) return true;
+    const flagVal = this.globalFlags[featureId];
+    if (flagVal !== undefined) return Boolean(flagVal);
+    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
+    return featDef ? featDef.defaultEnabled : true;
+  }
+
+  /**
    * Determines if a feature requires a paid subscription (is in paid plans and not free)
    */
   isPaidFeature(featureId) {
+    if (!featureId) return false;
+
     // 1. If feature matrix in global_config/membership explicitly declares it
     const matrixEntry = this.membershipConfig?.featureMatrix?.[featureId];
     if (Array.isArray(matrixEntry)) {
-      // If it contains 'free', it is explicitly FREE for all users -> NEVER paid
-      return !matrixEntry.includes('free');
+      if (matrixEntry.includes('free')) return false;
+      if (matrixEntry.some(p => ['weekly', 'monthly', 'yearly', 'lifetime'].includes(p))) return true;
     }
 
     // 2. Check dynamic Free Plan features from membership config or planConfigs
@@ -644,29 +655,16 @@ class FeatureAccessManagerService {
 
     // 3. Check if any paid plans dynamically contain this feature
     const paidTiers = ['weekly', 'monthly', 'yearly'];
-    let foundInPaid = false;
-    let hasDynamicPaidConfig = false;
-
     for (const pId of paidTiers) {
       const planData = this.membershipConfig?.plans?.[pId] || this.planConfigs?.[pId];
-      if (planData && Array.isArray(planData.features)) {
-        hasDynamicPaidConfig = true;
-        if (planData.features.includes(featureId)) {
-          foundInPaid = true;
-          break;
-        }
+      if (planData && Array.isArray(planData.features) && planData.features.includes(featureId)) {
+        return true;
       }
     }
 
-    // If dynamic paid plans are configured in Firestore:
-    if (hasDynamicPaidConfig) {
-      return foundInPaid;
-    }
-
-    // 4. If free plan is configured but feature is not in it:
-    if (freePlan && Array.isArray(freePlan.features)) {
-      const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
-      return Boolean(featDef && featDef.defaultPlan && featDef.defaultPlan !== 'free');
+    // 4. If free plan is configured in Firestore and this feature is NOT in it -> it is PAID PRO!
+    if (freePlan && Array.isArray(freePlan.features) && freePlan.features.length > 0) {
+      return true;
     }
 
     // 5. Fallback: Check canonical registry defaultPlan

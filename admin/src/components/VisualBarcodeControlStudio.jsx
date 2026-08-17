@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Barcode, QrCode, Sparkles, Shield, Crown, Power, XCircle, Search, Check,
-  Palette, Sliders, RefreshCw, Box, SlidersHorizontal, Layers, CheckCircle2
+  Palette, Sliders, RefreshCw, Box, SlidersHorizontal, Layers, CheckCircle2, Download, FileUp
 } from 'lucide-react';
 import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
@@ -166,6 +166,7 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
   const oneDStandards = filteredFeatures.filter(f => f.subcategory === '1D Standards');
   const twoDStandards = filteredFeatures.filter(f => f.subcategory === '2D Standards');
   const appearanceTools = filteredFeatures.filter(f => f.subcategory === 'Barcode Appearance');
+  const exportTools = filteredFeatures.filter(f => f.subcategory === 'Export');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
@@ -206,7 +207,7 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
         gap: 12
       }}>
 
-        {/* Live Studio Mini Stats (Consistent Premium UI with Lucide SVG Icons) */}
+        {/* Live Studio Mini Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, paddingTop: 4 }}>
           {/* Total Formats */}
           <div style={{
@@ -346,6 +347,8 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
         subtitle="EAN, UPC, Code 128, Code 39, ITF-14, ISBN and postal tracking barcodes."
         icon={Barcode}
         badgeCount={oneDStandards.length}
+        onMakeFree={() => setFeaturesTierBatchCloud(oneDStandards.map(f => f.key), 'free').then(() => showToast('✨ 1D Barcodes set to FREE'))}
+        onMakePro={() => setFeaturesTierBatchCloud(oneDStandards.map(f => f.key), 'paid').then(() => showToast('✨ 1D Barcodes set to PRO'))}
       >
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
           {oneDStandards.map(feature => (
@@ -367,6 +370,8 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
         subtitle="Two-dimensional matrix barcodes for industrial tracking, boarding passes & parcels."
         icon={Box}
         badgeCount={twoDStandards.length}
+        onMakeFree={() => setFeaturesTierBatchCloud(twoDStandards.map(f => f.key), 'free').then(() => showToast('✨ 2D Barcodes set to FREE'))}
+        onMakePro={() => setFeaturesTierBatchCloud(twoDStandards.map(f => f.key), 'paid').then(() => showToast('✨ 2D Barcodes set to PRO'))}
       >
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
           {twoDStandards.map(feature => (
@@ -388,9 +393,34 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
         subtitle="Bar color pickers, background styling, dimensional scaling, and text toggling."
         icon={Palette}
         badgeCount={appearanceTools.length}
+        onMakeFree={() => setFeaturesTierBatchCloud(appearanceTools.map(f => f.key), 'free').then(() => showToast('✨ Customization tools set to FREE'))}
+        onMakePro={() => setFeaturesTierBatchCloud(appearanceTools.map(f => f.key), 'paid').then(() => showToast('✨ Customization tools set to PRO'))}
       >
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
           {appearanceTools.map(feature => (
+            <BarcodeFeatureTile
+              key={feature.key}
+              feature={feature}
+              is2D={false}
+              updating={updatingKey === feature.key}
+              onToggleEnable={() => handleToggleEnable(feature)}
+              onToggleTier={() => handleToggleTier(feature)}
+            />
+          ))}
+        </div>
+      </BarcodeSectionCard>
+
+      {/* ── Section 4: Save & Export Formats ─────────────────────────────────── */}
+      <BarcodeSectionCard
+        title="4. Save & Export Formats"
+        subtitle="Control PNG, SVG vector, PDF print document, direct thermal print and HD scalers."
+        icon={FileUp}
+        badgeCount={exportTools.length}
+        onMakeFree={() => setFeaturesTierBatchCloud(exportTools.map(f => f.key), 'free').then(() => showToast('✨ Barcode Export tools set to FREE'))}
+        onMakePro={() => setFeaturesTierBatchCloud(exportTools.map(f => f.key), 'paid').then(() => showToast('✨ Barcode Export tools set to PRO'))}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
+          {exportTools.map(feature => (
             <BarcodeFeatureTile
               key={feature.key}
               feature={feature}
@@ -410,7 +440,7 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
 // MICRO SUB-COMPONENTS (Mobile-First UX)
 // ═════════════════════════════════════════════════════════════════════════
 
-function BarcodeSectionCard({ title, subtitle, icon: Icon, badgeCount, children }) {
+function BarcodeSectionCard({ title, subtitle, icon: Icon, badgeCount, onMakeFree, onMakePro, children }) {
   return (
     <div style={{
       background: 'var(--ad-card)',
@@ -422,31 +452,66 @@ function BarcodeSectionCard({ title, subtitle, icon: Icon, badgeCount, children 
       flexDirection: 'column',
       gap: 12
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 9,
-            background: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-          }}>
-            <Icon size={16} strokeWidth={2.4} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 9,
+              background: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <Icon size={16} strokeWidth={2.4} />
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h2 style={{ fontSize: 13.5, fontWeight: 900, color: 'var(--ad-text)', margin: 0, lineHeight: 1.25 }}>
+                {title}
+              </h2>
+              <p style={{ fontSize: 10.5, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
+                {subtitle}
+              </p>
+            </div>
           </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <h2 style={{ fontSize: 13.5, fontWeight: 900, color: 'var(--ad-text)', margin: 0, lineHeight: 1.25 }}>
-              {title}
-            </h2>
-            <p style={{ fontSize: 10.5, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
-              {subtitle}
-            </p>
-          </div>
+          {badgeCount !== undefined && (
+            <span style={{
+              fontSize: 9.5, fontWeight: 800, padding: '2px 7px', borderRadius: 100,
+              background: 'var(--ad-input)', color: 'var(--ad-text-sec)', border: '1px solid var(--ad-border)', flexShrink: 0
+            }}>
+              {badgeCount} Items
+            </span>
+          )}
         </div>
-        {badgeCount !== undefined && (
-          <span style={{
-            fontSize: 9.5, fontWeight: 800, padding: '2px 7px', borderRadius: 100,
-            background: 'var(--ad-input)', color: 'var(--ad-text-sec)', border: '1px solid var(--ad-border)', flexShrink: 0
-          }}>
-            {badgeCount} Formats
-          </span>
+
+        {(onMakeFree || onMakePro) && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, width: '100%', padding: '4px', background: 'rgba(0,0,0,0.2)', borderRadius: 10 }}>
+            {onMakeFree && (
+              <button
+                type="button"
+                onClick={onMakeFree}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '5px 8px',
+                  borderRadius: 7, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.35)',
+                  color: '#10B981', fontSize: 10.5, fontWeight: 800, cursor: 'pointer'
+                }}
+              >
+                <Shield size={11} strokeWidth={2.5} />
+                <span>Free Section</span>
+              </button>
+            )}
+            {onMakePro && (
+              <button
+                type="button"
+                onClick={onMakePro}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '5px 8px',
+                  borderRadius: 7, background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)',
+                  color: '#F59E0B', fontSize: 10.5, fontWeight: 800, cursor: 'pointer'
+                }}
+              >
+                <Crown size={11} strokeWidth={2.5} />
+                <span>Pro Section</span>
+              </button>
+            )}
+          </div>
         )}
       </div>
       {children}

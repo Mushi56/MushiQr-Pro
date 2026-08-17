@@ -1,5 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DOT_STYLES, EYE_STYLES, renderQR, generateQRMatrix, drawDotModule, drawEye } from '../utils/qrEngine';
+import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import PaidCrownBadge from './PaidCrownBadge';
+import { usePremium } from '../services/premiumContext';
 
 // Cache for demo matrix to avoid redundant generations
 const matrixCache = {};
@@ -174,7 +177,7 @@ function MiniEyeCanvas({ eyeStyle, qrParams }) {
   );
 }
 
-const DOT_PREVIEWS = {
+export const DOT_PREVIEWS = {
   [DOT_STYLES.DENSO]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="0" y="0" width="28" height="28" fill="currentColor" />
@@ -434,7 +437,7 @@ const DOT_PREVIEWS = {
   ),
 };
 
-const EYE_PREVIEWS = {
+export const EYE_PREVIEWS = {
   [EYE_STYLES.SQUARE]: (
     <svg viewBox="0 0 28 28" width="28" height="28">
       <rect x="1" y="1" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="4" />
@@ -665,27 +668,32 @@ const EYE_PREVIEWS = {
   ),
 };
 
-import { FeatureAccessManager } from '../services/FeatureAccessManager';
-import PaidCrownBadge from './PaidCrownBadge';
-import { usePremium } from '../services/premiumContext';
-
 export function DotStyleSelector({ value, onChange, qrParams }) {
   const { showPaywall } = usePremium();
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const unsub = FeatureAccessManager.subscribe(() => setTick(t => t + 1));
+    return () => unsub?.();
+  }, []);
 
   const handleDotChange = (style) => {
-    if (style !== 'square' && style !== 'rounded') {
-      const access = FeatureAccessManager.canUseFeature('custom_dot_styles');
-      if (!access.allowed) {
-        showPaywall('custom_dot_styles');
-        return;
-      }
+    const featId = `qr_dot_${style}`;
+    const access = FeatureAccessManager.canUseFeature(featId);
+    if (!access.allowed) {
+      showPaywall(featId);
+      return;
     }
     onChange(style);
   };
 
+  const visibleDotEntries = Object.entries(DOT_PREVIEWS).filter(([style]) => {
+    return FeatureAccessManager.isFeatureEnabled(`qr_dot_${style}`);
+  });
+
   return (
     <div className="style-grid">
-      {Object.entries(DOT_PREVIEWS).map(([style, preview]) => (
+      {visibleDotEntries.map(([style, preview]) => (
         <button
           key={style}
           className={`style-option ${value === style ? 'active' : ''}`}
@@ -693,9 +701,7 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
           title={style}
           style={{ position: 'relative' }}
         >
-          {style !== 'square' && style !== 'rounded' && (
-            <PaidCrownBadge featureId="custom_dot_styles" position="corner" size={9} />
-          )}
+          <PaidCrownBadge featureId={`qr_dot_${style}`} fallbackFeatureId="custom_dot_styles" position="corner" size={9} />
           <div className="style-option-preview">
             <MiniDotPreviewCanvas dotStyle={style} qrParams={qrParams} />
           </div>
@@ -707,21 +713,31 @@ export function DotStyleSelector({ value, onChange, qrParams }) {
 
 export function EyeStyleSelector({ value, onChange, qrParams }) {
   const { showPaywall } = usePremium();
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const unsub = FeatureAccessManager.subscribe(() => setTick(t => t + 1));
+    return () => unsub?.();
+  }, []);
 
   const handleEyeChange = (style) => {
-    if (style !== 'square' && style !== 'rounded') {
-      const access = FeatureAccessManager.canUseFeature('custom_eye_styles');
-      if (!access.allowed) {
-        showPaywall('custom_eye_styles');
-        return;
-      }
+    const featId = `qr_eye_${style}`;
+    const access = FeatureAccessManager.canUseFeature(featId);
+    if (!access.allowed) {
+      showPaywall(featId);
+      return;
     }
     onChange(style);
   };
 
+  const visibleEyeStyles = Object.keys(EYE_STYLES).filter((styleKey) => {
+    const style = EYE_STYLES[styleKey];
+    return FeatureAccessManager.isFeatureEnabled(`qr_eye_${style}`);
+  });
+
   return (
     <div className="style-grid eye-style-grid">
-      {Object.keys(EYE_STYLES).map((styleKey) => {
+      {visibleEyeStyles.map((styleKey) => {
         const style = EYE_STYLES[styleKey];
         return (
           <button
@@ -731,9 +747,7 @@ export function EyeStyleSelector({ value, onChange, qrParams }) {
             title={style}
             style={{ position: 'relative' }}
           >
-            {style !== 'square' && style !== 'rounded' && (
-              <PaidCrownBadge featureId="custom_eye_styles" position="corner" size={9} />
-            )}
+            <PaidCrownBadge featureId={`qr_eye_${style}`} fallbackFeatureId="custom_eye_styles" position="corner" size={9} />
             <div className="style-option-preview">
               <MiniEyeCanvas eyeStyle={style} qrParams={qrParams} />
             </div>

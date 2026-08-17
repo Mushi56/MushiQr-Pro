@@ -106,6 +106,13 @@ function parseValueToFields(val, type) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, setLoadedBarcodeItem, theme, setTheme, effectiveTheme }) {
   const { showPaywall } = usePremium();
+  const [, setFamTick] = useState(0);
+
+  useEffect(() => {
+    const unsub = FeatureAccessManager.subscribe(() => setFamTick(t => t + 1));
+    return () => unsub?.();
+  }, []);
+
   const access = FeatureAccessManager.canUseFeature('barcode_generator');
 
   useEffect(() => {
@@ -689,7 +696,9 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
             {/* Barcode Type Grid (freely swipe/scroll with extra space in the content section) */}
             <div className="barcode-type-tabs">
-              {Object.entries(BARCODE_STANDARDS).map(([key, standard]) => (
+              {Object.entries(BARCODE_STANDARDS)
+                .filter(([key]) => FeatureAccessManager.isFeatureEnabled(`barcode_${key}`))
+                .map(([key, standard]) => (
                 <button
                   key={key}
                   className={`type-tab ${bcid === key ? 'active' : ''}`}

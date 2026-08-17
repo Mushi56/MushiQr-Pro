@@ -69,6 +69,13 @@ export default function BatchPage({
   initialBatchType
 }) {
   const { showPaywall } = usePremium();
+  const [, setFamTick] = useState(0);
+
+  useEffect(() => {
+    const unsub = FeatureAccessManager.subscribe(() => setFamTick(t => t + 1));
+    return () => unsub?.();
+  }, []);
+
   const access = FeatureAccessManager.canUseFeature('batch_view');
 
   useEffect(() => {
@@ -777,7 +784,14 @@ export default function BatchPage({
             {/* Mode Tabs: Upload vs Quick Sheet */}
             <div style={{ display: 'flex', background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '12px', gap: '4px' }}>
               <button
-                onClick={() => setActiveImportMode('upload')}
+                onClick={() => {
+                  const access = FeatureAccessManager.canUseFeature('batch_csv_import');
+                  if (!access.allowed) {
+                    showPaywall('batch_csv_import');
+                    return;
+                  }
+                  setActiveImportMode('upload');
+                }}
                 style={{
                   flex: 1,
                   padding: '10px 14px',
@@ -792,13 +806,22 @@ export default function BatchPage({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
+                  position: 'relative',
                   transition: 'all 0.2s ease'
                 }}
               >
+                <PaidCrownBadge featureId="batch_csv_import" position="floating" size={8} />
                 <Upload size={16} /> Upload File
               </button>
               <button
-                onClick={() => setActiveImportMode('spreadsheet')}
+                onClick={() => {
+                  const access = FeatureAccessManager.canUseFeature('batch_manual_input');
+                  if (!access.allowed) {
+                    showPaywall('batch_manual_input');
+                    return;
+                  }
+                  setActiveImportMode('spreadsheet');
+                }}
                 style={{
                   flex: 1,
                   padding: '10px 14px',
@@ -813,10 +836,12 @@ export default function BatchPage({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
+                  position: 'relative',
                   boxShadow: activeImportMode === 'spreadsheet' ? '0 4px 12px rgba(214,0,54,0.3)' : 'none',
                   transition: 'all 0.2s ease'
                 }}
               >
+                <PaidCrownBadge featureId="batch_manual_input" position="floating" size={8} />
                 <Table size={16} /> Quick Sheet
               </button>
             </div>
@@ -1579,15 +1604,20 @@ export default function BatchPage({
                   <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Export Format</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                     {[
-                      { label: 'PNG', Icon: FileImage },
-                      { label: 'SVG', Icon: FileCode },
-                      { label: 'PDF', Icon: FileText },
-                      { label: 'JPG', Icon: FileImage },
-                    ].map(({ label, Icon }) => (
+                      { label: 'PNG', featId: 'bulk_export_png', Icon: FileImage },
+                      { label: 'SVG', featId: 'bulk_export_svg', Icon: FileCode },
+                      { label: 'PDF', featId: 'bulk_export_pdf', Icon: FileText },
+                      { label: 'JPG', featId: 'bulk_export_png', Icon: FileImage },
+                    ].map(({ label, featId, Icon }) => (
                       <button
                         key={label}
                         onClick={(e) => {
                           e.stopPropagation();
+                          const access = FeatureAccessManager.canUseFeature(featId);
+                          if (!access.allowed) {
+                            showPaywall(featId);
+                            return;
+                          }
                           setSelectedFormat(label);
                         }}
                         style={{
@@ -1604,9 +1634,11 @@ export default function BatchPage({
                           borderRadius: '12px',
                           color: selectedFormat === label ? 'var(--accent-primary)' : 'var(--text-primary)',
                           cursor: 'pointer',
+                          position: 'relative',
                           transition: 'all 0.2s'
                         }}
                       >
+                        <PaidCrownBadge featureId={featId} position="floating" size={8} />
                         <Icon size={18} />
                         <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
                       </button>
@@ -1644,6 +1676,13 @@ export default function BatchPage({
                       onChange={(e) => {
                         const steps = ['Low', 'Normal', 'HD', 'HQ'];
                         const selected = steps[parseInt(e.target.value)] || 'Normal';
+                        if (selected === 'HD' || selected === 'HQ') {
+                          const access = FeatureAccessManager.canUseFeature('bulk_export_quality');
+                          if (!access.allowed) {
+                            showPaywall('bulk_export_quality');
+                            return;
+                          }
+                        }
                         setExportQuality(selected);
                       }}
                       className="export-quality-slider"
@@ -1651,40 +1690,36 @@ export default function BatchPage({
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '9px', fontWeight: 600, color: 'var(--text-muted)' }}>
                       <span>Low</span>
                       <span>Normal</span>
-                      <span>HD</span>
-                      <span>4K</span>
+                      <span style={{ position: 'relative' }}>
+                        HD <PaidCrownBadge featureId="bulk_export_quality" position="floating" size={7} />
+                      </span>
+                      <span style={{ position: 'relative' }}>
+                        4K <PaidCrownBadge featureId="bulk_export_quality" position="floating" size={7} />
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* ZIP Filename Input */}
                 <div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>
-                    Output Filename
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="text"
-                      value={customZipFileName}
-                      onChange={(e) => setCustomZipFileName(e.target.value)}
-                      placeholder={`mushi-${batchType.toLowerCase()}-batch`}
-                      style={{
-                        flex: 1,
-                        padding: '10px 14px',
-                        borderRadius: '12px',
-                        background: 'var(--bg-hover)',
-                        border: '1px solid var(--border-color)',
-                        color: 'var(--text-primary)',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        outline: 'none',
-                        fontFamily: 'inherit'
-                      }}
-                    />
-                    <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--accent-primary)', background: 'var(--accent-soft)', padding: '8px 12px', borderRadius: '10px', border: '1px solid rgba(214,0,54,0.15)', flexShrink: 0 }}>
-                      .zip
-                    </span>
-                  </div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>Custom Archive Name (Optional)</div>
+                  <input
+                    type="text"
+                    placeholder={`mushi-${batchType.toLowerCase()}-batch`}
+                    value={customZipFileName}
+                    onChange={(e) => setCustomZipFileName(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-elevated)',
+                      color: 'var(--text-primary)',
+                      fontSize: '13px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
                 </div>
 
                 {isExporting ? (
@@ -1722,7 +1757,14 @@ export default function BatchPage({
                   </div>
                 ) : (
                   <button 
-                    onClick={generateZip}
+                    onClick={() => {
+                      const access = FeatureAccessManager.canUseFeature('batch_zip_export');
+                      if (!access.allowed) {
+                        showPaywall('batch_zip_export');
+                        return;
+                      }
+                      generateZip();
+                    }}
                     style={{
                       width: '100%',
                       background: 'var(--accent-gradient)',
@@ -1737,9 +1779,11 @@ export default function BatchPage({
                       gap: '8px',
                       cursor: 'pointer',
                       boxShadow: '0 8px 24px rgba(214, 0, 54, 0.25)',
-                      marginTop: '10px'
+                      marginTop: '10px',
+                      position: 'relative'
                     }}
                   >
+                    <PaidCrownBadge featureId="batch_zip_export" position="floating" size={10} />
                     <Download size={20} />
                     Generate & Download {selectedFormat} ZIP
                   </button>
