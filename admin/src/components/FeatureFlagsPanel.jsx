@@ -120,7 +120,13 @@ const PLAN_LABELS = {
   yearly:  'Yearly Pro'
 };
 
-export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
+export default function FeatureFlagsPanel({ 
+  currentUser, 
+  isDark: propIsDark,
+  fixedCategory,
+  titleOverride,
+  subtitleOverride
+}) {
   const theme = useAdminTheme();
   const isDark = propIsDark !== undefined ? propIsDark : (theme?.isDark ?? false);
 
@@ -136,13 +142,20 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'enabled' | 'disabled'
-  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [selectedCategory, setSelectedCategory] = useState(fixedCategory || 'ALL');
   const [selectedSubcategory, setSelectedSubcategory] = useState('ALL');
   const [planFilter, setPlanFilter] = useState('all'); // 'all' | 'free' | 'paid' | 'weekly' | 'monthly' | 'yearly'
   const [envFilter, setEnvFilter] = useState('all');
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
   const [viewLayout, setViewLayout] = useState('cards'); // 'cards' | 'table'
+
+  useEffect(() => {
+    if (fixedCategory) {
+      setSelectedCategory(fixedCategory);
+      setSelectedSubcategory('ALL');
+    }
+  }, [fixedCategory]);
 
   // Create / Edit Form State
   const [formData, setFormData] = useState({
@@ -1052,7 +1065,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
             margin: 0,
             letterSpacing: '-0.4px'
           }}>
-            Feature Flags &amp; App Capabilities
+            {titleOverride || (fixedCategory ? `${CATEGORY_META[fixedCategory]?.name || fixedCategory} Access & Features` : 'Feature Flags & App Capabilities')}
           </h1>
           <p style={{
             fontSize: 12,
@@ -1060,7 +1073,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
             margin: '4px 0 0',
             fontWeight: 500
           }}>
-            Control 140+ granular features across 8 categories with live paid plan badges
+            {subtitleOverride || (fixedCategory ? `Control which ${CATEGORY_META[fixedCategory]?.name || ''} capabilities are active, hidden, or locked to Pro.` : 'Control 140+ granular features across 8 categories with live paid plan badges')}
           </p>
         </div>
 
@@ -1094,8 +1107,8 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           iconColor="#FF4D9D"
           iconBg="rgba(255, 77, 157, 0.12)"
           title="Total Features"
-          value={stats.total}
-          subtitle="All app capabilities"
+          value={fixedCategory ? (categoryCounts[fixedCategory] || 0) : stats.total}
+          subtitle={fixedCategory ? `${CATEGORY_META[fixedCategory]?.name || ''} capabilities` : "All app capabilities"}
           subColor="var(--ad-text-sec)"
         />
         <StatMiniCard
@@ -1120,69 +1133,71 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           icon={Sliders}
           iconColor="#8B5CF6"
           iconBg="rgba(139, 92, 246, 0.12)"
-          title="Core Modules"
-          value="8 Categories"
-          subtitle="Full Mushi QR ecosystem"
+          title="Subcategories"
+          value={fixedCategory ? `${availableSubcategories.length} Sections` : "8 Categories"}
+          subtitle={fixedCategory ? "Granular subsections" : "Full Mushi QR ecosystem"}
           subColor="#8B5CF6"
         />
       </div>
 
-      {/* 8 Categories Filter Carousel Bar */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        overflowX: 'auto',
-        paddingBottom: 6,
-        marginBottom: 16,
-        scrollbarWidth: 'none'
-      }}>
-        {Object.entries(CATEGORY_META).map(([key, cat]) => {
-          const isActive = selectedCategory === key;
-          const IconComp = cat.icon;
-          const count = categoryCounts[key] || 0;
+      {/* 8 Categories Filter Carousel Bar (Only when fixedCategory is not set) */}
+      {!fixedCategory && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          overflowX: 'auto',
+          paddingBottom: 6,
+          marginBottom: 16,
+          scrollbarWidth: 'none'
+        }}>
+          {Object.entries(CATEGORY_META).map(([key, cat]) => {
+            const isActive = selectedCategory === key;
+            const IconComp = cat.icon;
+            const count = categoryCounts[key] || 0;
 
-          return (
-            <button
-              key={key}
-              onClick={() => {
-                setSelectedCategory(key);
-                setSelectedSubcategory('ALL');
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '8px 14px',
-                borderRadius: 12,
-                border: `1px solid ${isActive ? cat.color : 'var(--ad-border)'}`,
-                background: isActive ? `${cat.color}18` : 'var(--ad-card)',
-                color: isActive ? cat.color : 'var(--ad-text-sec)',
-                fontSize: 12,
-                fontWeight: isActive ? 800 : 600,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                transition: 'all 0.15s ease',
-                boxShadow: isActive ? `0 2px 10px ${cat.color}25` : 'none'
-              }}
-            >
-              <IconComp size={15} strokeWidth={isActive ? 2.5 : 1.9} />
-              <span>{cat.name}</span>
-              <span style={{
-                fontSize: 10,
-                padding: '2px 6px',
-                borderRadius: 10,
-                background: isActive ? cat.color : 'var(--ad-input)',
-                color: isActive ? '#fff' : 'var(--ad-text-sec)',
-                fontWeight: 800
-              }}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+            return (
+              <button
+                key={key}
+                onClick={() => {
+                  setSelectedCategory(key);
+                  setSelectedSubcategory('ALL');
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 14px',
+                  borderRadius: 12,
+                  border: `1px solid ${isActive ? cat.color : 'var(--ad-border)'}`,
+                  background: isActive ? `${cat.color}18` : 'var(--ad-card)',
+                  color: isActive ? cat.color : 'var(--ad-text-sec)',
+                  fontSize: 12,
+                  fontWeight: isActive ? 800 : 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  transition: 'all 0.15s ease',
+                  boxShadow: isActive ? `0 2px 10px ${cat.color}25` : 'none'
+                }}
+              >
+                <IconComp size={15} strokeWidth={isActive ? 2.5 : 1.9} />
+                <span>{cat.name}</span>
+                <span style={{
+                  fontSize: 10,
+                  padding: '2px 6px',
+                  borderRadius: 10,
+                  background: isActive ? cat.color : 'var(--ad-input)',
+                  color: isActive ? '#fff' : 'var(--ad-text-sec)',
+                  fontWeight: 800
+                }}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Subcategory Filter Pills with Dedicated Main App Toolbar Icons */}
       {availableSubcategories.length > 0 && (

@@ -35,6 +35,9 @@ import FeatureMatrixManager from './FeatureMatrixManager';
 import MembershipDashboard from './MembershipDashboard';
 import AuditLogPanel from './AuditLogPanel';
 import TransactionsManager from './TransactionsManager';
+import VisualQRControlStudio from './VisualQRControlStudio';
+import VisualBarcodeControlStudio from './VisualBarcodeControlStudio';
+import VisualBulkControlStudio from './VisualBulkControlStudio';
 import { getTokens } from './AdminUIKit';
 
 // â”€â”€â”€ Static Fallback Design Tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -133,58 +136,62 @@ function fmtDate(ts) {
 
 // â”€â”€â”€ Navigation Config (Matching Reference) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const LABELS = {
-  dashboard:        'Dashboard',
-  users:            'Users',
-  subscriptions:    'Subscriptions',
-  plans:            'Plans',
-  payments:         'Payments',
-  transactions:     'Transactions',
-  'qr-barcode':     'QR Codes',
-  barcodes:         'Barcodes',
-  analytics:        'Analytics',
-  reports:          'Reports',
-  templates:        'Templates',
-  'scan-analytics': 'Scan Analytics',
-  'app-settings':   'Settings',
-  'admin-users':    'Admins',
-  'audit-logs':     'Audit Logs',
-  branding:         'Appearance',
-  'remote-config':  'System Settings',
-  'feature-matrix': 'Feature Matrix',
-  'feature-flags':  'Feature Flags',
-  categories:       'Categories',
-  bulk:             'Bulk Operations',
-  maintenance:      'Maintenance',
-  announcements:    'Announcements',
-  roles:            'Roles',
-  security:         'Security',
-  backups:          'Backups',
-  'system-health':  'System Health',
-  integrations:     'Integrations',
-  developer:        'Developer / API',
-  support:          'Support'
+  dashboard:           'Dashboard',
+  'qr-generator':      'QR Generator Control',
+  'barcode-generator': 'Barcode Generator Control',
+  'bulk-generator':    'Bulk Creation Control',
+  'feature-flags':     'Feature Flags',
+  'feature-matrix':    'Feature Matrix',
+  users:               'Users',
+  subscriptions:       'Subscriptions',
+  plans:               'Plans',
+  payments:            'Payments',
+  transactions:        'Transactions',
+  'qr-barcode':        'QR Generator Control',
+  barcodes:            'Barcode Generator Control',
+  bulk:                'Bulk Creation Control',
+  analytics:           'Analytics',
+  reports:             'Reports',
+  templates:           'Templates',
+  'scan-analytics':    'Scan Analytics',
+  'app-settings':      'Settings',
+  'admin-users':       'Admins',
+  'audit-logs':        'Audit Logs',
+  branding:            'Appearance',
+  'remote-config':     'System Settings',
+  categories:          'Categories',
+  maintenance:         'Maintenance',
+  announcements:       'Announcements',
+  roles:               'Roles',
+  security:            'Security',
+  backups:             'Backups',
+  'system-health':     'System Health',
+  integrations:        'Integrations',
+  developer:           'Developer / API',
+  support:             'Support'
 };
 
 const NAV_MAIN = [
-  { id: 'dashboard',        icon: LayoutDashboard,    label: 'Dashboard' },
-  { id: 'feature-flags',    icon: Flag,               label: 'Feature Flags', isNew: true },
-  { id: 'feature-matrix',   icon: Sliders,            label: 'Feature Matrix' },
-  { id: 'users',            icon: Users,              label: 'Users' },
-  { id: 'subscriptions',    icon: CreditCard,         label: 'Subscriptions' },
-  { id: 'plans',            icon: Package,            label: 'Plans' },
-  { id: 'payments',         icon: DollarSign,         label: 'Payments' },
-  { id: 'transactions',     icon: FileText,           label: 'Transactions' },
-  { id: 'qr-barcode',       icon: QrCode,             label: 'QR Codes' },
-  { id: 'barcodes',         icon: Barcode,            label: 'Barcodes' },
-  { id: 'analytics',        icon: BarChart3,          label: 'Analytics' },
-  { id: 'reports',          icon: Layers,             label: 'Reports' },
-  { id: 'templates',        icon: Palette,            label: 'Templates' },
-  { id: 'scan-analytics',   icon: ScanLine,           label: 'Scan Analytics' },
-  { id: 'app-settings',     icon: Settings,           label: 'Settings' },
-  { id: 'admin-users',      icon: Shield,             label: 'Admins' },
-  { id: 'audit-logs',       icon: ClipboardList,      label: 'Audit Logs' },
-  { id: 'branding',         icon: SlidersHorizontal,  label: 'Appearance' },
-  { id: 'remote-config',    icon: Cpu,                label: 'System Settings' },
+  { id: 'dashboard',         icon: LayoutDashboard,    label: 'Dashboard' },
+  { id: 'qr-generator',      icon: QrCode,             label: 'QR Generator Control' },
+  { id: 'barcode-generator', icon: Barcode,            label: 'Barcode Control' },
+  { id: 'bulk-generator',    icon: Layers,             label: 'Bulk Creation Control' },
+  { id: 'feature-flags',     icon: Flag,               label: 'All Feature Flags (140)', isNew: true },
+  { id: 'feature-matrix',    icon: Sliders,            label: 'Feature Matrix' },
+  { id: 'users',             icon: Users,              label: 'Users' },
+  { id: 'subscriptions',     icon: CreditCard,         label: 'Subscriptions' },
+  { id: 'plans',             icon: Package,            label: 'Plans' },
+  { id: 'payments',          icon: DollarSign,         label: 'Payments' },
+  { id: 'transactions',      icon: FileText,           label: 'Transactions' },
+  { id: 'analytics',         icon: BarChart3,          label: 'Analytics' },
+  { id: 'reports',           icon: FileText,           label: 'Reports' },
+  { id: 'templates',         icon: Palette,            label: 'Templates' },
+  { id: 'scan-analytics',    icon: ScanLine,           label: 'Scan Analytics' },
+  { id: 'app-settings',      icon: Settings,           label: 'Settings' },
+  { id: 'admin-users',       icon: Shield,             label: 'Admins' },
+  { id: 'audit-logs',        icon: ClipboardList,      label: 'Audit Logs' },
+  { id: 'branding',          icon: SlidersHorizontal,  label: 'Appearance' },
+  { id: 'remote-config',     icon: Cpu,                label: 'System Settings' },
 ];
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -4888,27 +4895,30 @@ function AdminPanelInner() {
     reports:          <ReportsPanel history={history} isDark={isDark} />,
     templates:        <TemplatesPanel cloudTemplates={cloudTemplates} onRefresh={refreshTemplates} isDark={isDark} />,
     'scan-analytics': <AnalyticsPanel chartData={chartData} stats={stats} isDark={isDark} />,
-    'qr-barcode':     <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
-    barcodes:         <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
-    scans:            <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
-    categories:       <CategoriesPanel isDark={isDark} />,
-    bulk:             <BulkPanel history={history} isDark={isDark} />,
-    'app-settings':   <AppSettingsPanel settings={appSettings} onSave={async s => {
+    'qr-generator':      <VisualQRControlStudio currentUser={currentUser} isDark={isDark} />,
+    'barcode-generator': <VisualBarcodeControlStudio currentUser={currentUser} isDark={isDark} />,
+    'bulk-generator':    <VisualBulkControlStudio currentUser={currentUser} isDark={isDark} />,
+    'qr-barcode':        <VisualQRControlStudio currentUser={currentUser} isDark={isDark} />,
+    barcodes:            <VisualBarcodeControlStudio currentUser={currentUser} isDark={isDark} />,
+    bulk:                <VisualBulkControlStudio currentUser={currentUser} isDark={isDark} />,
+    scans:               <QRBarcodePanel stats={stats} history={history} isDark={isDark} />,
+    categories:          <CategoriesPanel isDark={isDark} />,
+    'app-settings':      <AppSettingsPanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
       refreshAudit();
     }} isDark={isDark} />,
-    branding:         <BrandingPanel settings={appSettings} onSave={async s => {
+    branding:            <BrandingPanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
       refreshAudit();
     }} isDark={isDark} />,
-    'remote-config':  <RemoteConfigPanel config={remoteConfig} onSave={async c => {
+    'remote-config':     <RemoteConfigPanel config={remoteConfig} onSave={async c => {
       await DS.saveRemoteConfig(c);
       setRemoteConfig(c);
       refreshAudit();
     }} isDark={isDark} />,
-    'feature-flags':  <FeatureFlagsPanel currentUser={currentUser} isDark={isDark} />,
+    'feature-flags':     <FeatureFlagsPanel currentUser={currentUser} isDark={isDark} />,
     maintenance:      <MaintenancePanel settings={appSettings} onSave={async s => {
       await DS.saveAppSettings(s);
       setAppSettings(s);
