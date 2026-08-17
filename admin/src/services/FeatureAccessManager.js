@@ -168,15 +168,47 @@ export const FEATURE_REGISTRY = [
   { featureId: 'barcode_export_quality',     displayName: 'HD & Vector Quality Scaler', category: 'BARCODE_GENERATOR', subcategory: 'Export',             description: 'Scale crisp barcode resolution',            defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
 
   // ── 3. BULK GENERATION ──
-  { featureId: 'batch_view',         displayName: 'Bulk Generator Screen',  category: 'BULK_GENERATOR', subcategory: 'Batch Screen',         description: 'Access bulk generation tool',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'batch_csv_import',   displayName: 'CSV / Excel Data Import',category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Upload CSV or Excel file for bulk codes',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'batch_manual_input', displayName: 'Quick Sheet Grid Editor',category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Interactive spreadsheet data editor',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'batch_custom_style', displayName: 'Apply Style to Batch',   category: 'BULK_GENERATOR', subcategory: 'Batch Styling',       description: 'Apply active design to all codes',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'batch_zip_export',   displayName: 'Download ZIP Archive',   category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Export all codes as compressed ZIP',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'bulk_export_png',    displayName: 'Bulk PNG Images in ZIP', category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Generate PNG format inside batch ZIP',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
-  { featureId: 'bulk_export_svg',    displayName: 'Bulk SVG Vectors in ZIP',category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Generate SVG vectors inside batch ZIP', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'bulk_export_pdf',    displayName: 'Bulk PDF Sheets in ZIP', category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Generate PDF documents inside batch ZIP',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
-  { featureId: 'bulk_export_quality',displayName: 'Bulk HD Quality Scaler', category: 'BULK_GENERATOR', subcategory: 'Bulk Export',          description: 'Export high resolution batch items',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  // ── 3.1 Data Ingestion & Spreadsheets ──
+  { featureId: 'batch_view',              displayName: 'Bulk Generator Master Screen',category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Master UI access to Bulk Generation tool',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_csv_import',        displayName: 'CSV & Excel Data File Import',category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Upload CSV, XLSX or XLS files for batch codes',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_manual_input',      displayName: 'Quick-Sheet Grid Data Editor',category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Interactive spreadsheet data editor',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_paste_data',        displayName: 'Multiline Textarea Quick Paste',category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Paste multiline raw text lists for batching',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'batch_template_download', displayName: 'Sample CSV / Excel Downloader',category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Download pre-formatted sample templates',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'batch_data_cleaning',     displayName: 'Auto Data Sanitizer & Trim',  category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Filter empty rows & strip whitespace',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'batch_limit_scale',       displayName: 'High-Capacity Batch (1,000+)',category: 'BULK_GENERATOR', subcategory: 'Input & Spreadsheet', description: 'Scale engine up to 1,000+ items per job',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+
+  // ── 3.2 QR & Barcode Generation Engines ──
+  { featureId: 'batch_type_qr',           displayName: 'Bulk QR Code Generator Engine',category: 'BULK_GENERATOR', subcategory: 'Batch Engines',      description: 'Batch generate URL, vCard & Wi-Fi QR codes',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_type_barcode',      displayName: 'Bulk 1D/2D Barcode Generator',category: 'BULK_GENERATOR', subcategory: 'Batch Engines',      description: 'Batch generate EAN, UPC, Code 128 barcodes',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_type_mixed',        displayName: 'Multi-Format Mixed Batching', category: 'BULK_GENERATOR', subcategory: 'Batch Engines',      description: 'Generate both QR & Barcode in single job',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'monthly' },
+  { featureId: 'batch_error_tolerance',   displayName: 'Error Correction Level Sync', category: 'BULK_GENERATOR', subcategory: 'Batch Engines',      description: 'Synchronize L/M/Q/H error tolerance',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'batch_checksum_calc',     displayName: 'Auto Checksum Calculation',   category: 'BULK_GENERATOR', subcategory: 'Batch Engines',      description: 'Auto calculate check digits for EAN & UPC',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+
+  // ── 3.3 Design & Batch Styling ──
+  { featureId: 'batch_custom_style',      displayName: 'Inherit Active Studio Design',category: 'BULK_GENERATOR', subcategory: 'Batch Styling',      description: 'Apply active design styles to entire batch', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_color_sync',        displayName: 'Batch Color & Gradient Fills',category: 'BULK_GENERATOR', subcategory: 'Batch Styling',      description: 'Propagate custom colors across all items',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_logo_embed',        displayName: 'Bulk Brand Logo Embedding',   category: 'BULK_GENERATOR', subcategory: 'Batch Styling',      description: 'Embed brand logo in center of all codes',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_dot_shapes',        displayName: 'Dot & Eye Module Shapes Sync',category: 'BULK_GENERATOR', subcategory: 'Batch Styling',      description: 'Sync 35+ dot & eye styles across batch',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_individual_override',displayName: 'Row-Level Style Customization',category: 'BULK_GENERATOR', subcategory: 'Batch Styling',     description: 'Customize specific individual batch rows',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_live_preview',      displayName: 'Real-Time Batch Live Grid',   category: 'BULK_GENERATOR', subcategory: 'Batch Styling',      description: 'Interactive live canvas preview cards',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+
+  // ── 3.4 ZIP Archives & Printable PDF Sheets ──
+  { featureId: 'batch_zip_export',        displayName: 'Download Compressed ZIP',     category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Export all codes as compressed ZIP archive',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'bulk_export_png',         displayName: 'Bulk PNG Images in ZIP',      category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Generate PNG format inside batch ZIP',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'bulk_export_svg',         displayName: 'Bulk SVG Vectors in ZIP',     category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Generate SVG vectors inside batch ZIP',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'bulk_export_pdf',         displayName: 'Multi-Page A4 PDF Catalog',   category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Generate PDF documents inside batch ZIP',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'bulk_export_pdf_labels',  displayName: 'Sticky Label Sheet Grid',     category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Avery 5160 / 24-per-sheet label layouts',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_file_naming',       displayName: 'Custom File Naming Pattern',  category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Rule template e.g. {index}_{sku}_{content}', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_zip_compression',   displayName: 'Multi-Core ZIP Compression',  category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Fast Store vs Ultra Deflate compression',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+
+  // ── 3.5 Quality, Resolution & Distribution ──
+  { featureId: 'bulk_export_quality_low', displayName: 'Bulk Resolution: Low (512px)',category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Low resolution (512px) for quick preview',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'bulk_export_quality_medium',displayName: 'Bulk Resolution: Normal (1024px)',category: 'BULK_GENERATOR', subcategory: 'Bulk Export',   description: 'Normal resolution (1024px) for regular use', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'bulk_export_quality_hd',  displayName: 'Bulk Resolution: HD (2048px)',category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'HD resolution (2048px) for packaging print',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'bulk_export_quality_ultra',displayName: 'Bulk Resolution: 4K Ultra (4096px)',category: 'BULK_GENERATOR', subcategory: 'Bulk Export', description: 'Ultra 4K resolution (4096px) for master art',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'bulk_export_quality',     displayName: 'Bulk HD Quality Scaler Engine',category: 'BULK_GENERATOR', subcategory: 'Bulk Export',       description: 'Master quality scaler dropdown selector',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+  { featureId: 'batch_native_share',      displayName: 'Native OS Share Sheet for ZIP',category: 'BULK_GENERATOR', subcategory: 'Bulk Export',       description: 'Share ZIP archive directly to WhatsApp/Drive',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
+  { featureId: 'batch_save_documents',    displayName: 'Save to Local Documents',     category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Save ZIP directly to device Documents folder',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
   // â”€â”€ 4. SCANNER â”€â”€
   { featureId: 'scanner_camera_live',    displayName: 'Live Lens Camera Scanning',   category: 'SCANNER', subcategory: 'Camera Lens',  description: 'Real-time camera lens barcode scan',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -755,6 +787,28 @@ class FeatureAccessManagerService {
       if (norm.startsWith('qr_bgshape_') && freePlan.features.includes(norm.replace('qr_bgshape_', 'qr_bg_'))) {
         return false;
       }
+    }
+
+    // 2.1 Base tool containers (Barcode Generator & QR Generator) - Free if any standard formats are in free plan
+    if (['barcode_generator', 'home_quick_barcode'].includes(norm)) {
+      if (freePlan && Array.isArray(freePlan.features)) {
+        if (freePlan.features.some(k => k.startsWith('barcode_ean') || k.startsWith('barcode_code') || k.startsWith('barcode_upc') || k.startsWith('barcode_custom'))) {
+          return false;
+        }
+      }
+      // Check if explicitly assigned to a paid plan only
+      const paidTiers = ['weekly', 'monthly', 'yearly'];
+      for (const pId of paidTiers) {
+        const planData = this.membershipConfig?.plans?.[pId] || this.planConfigs?.[pId];
+        if (planData && Array.isArray(planData.features) && (planData.features.includes('barcode_generator') || planData.features.includes('home_quick_barcode'))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    if (['qr_generator', 'home_quick_qr', 'home_view', 'history_view', 'saved_view', 'settings_view'].includes(norm)) {
+      return false;
     }
 
     // 3. Check if any paid plans dynamically contain this feature
