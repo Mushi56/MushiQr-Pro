@@ -176,7 +176,7 @@ const NAV_MAIN = [
   { id: 'qr-generator',      icon: QrCode,             label: 'QR Generator Control' },
   { id: 'barcode-generator', icon: Barcode,            label: 'Barcode Control' },
   { id: 'bulk-generator',    icon: Layers,             label: 'Bulk Creation Control' },
-  { id: 'feature-flags',     icon: Flag,               label: 'All Feature Flags (140)', isNew: true },
+  { id: 'feature-flags',     icon: Flag,               label: 'Feature Flags' },
   { id: 'feature-matrix',    icon: Sliders,            label: 'Feature Matrix' },
   { id: 'users',             icon: Users,              label: 'Users' },
   { id: 'subscriptions',     icon: CreditCard,         label: 'Subscriptions' },

@@ -42,12 +42,9 @@ import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { useAdminTheme } from './AdminUIKit';
 
-// ── 8 Core Category Metadata (Matching Main App Navbar & Brand Palette) ──
+// ── Core Categories Metadata (Excludes QR, Barcode & Bulk studios which have dedicated visual studios) ──
 const CATEGORY_META = {
   ALL:               { id: 'ALL',               name: 'All Features',       icon: Sliders,          color: '#FF4D9D' },
-  QR_GENERATOR:      { id: 'QR_GENERATOR',      name: 'QR Generator',       icon: QrCode,           color: '#D60036' },
-  BARCODE_GENERATOR: { id: 'BARCODE_GENERATOR', name: 'Barcode Generator',  icon: Barcode,          color: '#3B82F6' },
-  BULK_GENERATOR:    { id: 'BULK_GENERATOR',    name: 'Bulk Generation',    icon: Layers,           color: '#8B5CF6' },
   SCANNER:           { id: 'SCANNER',           name: 'Scanner',            icon: ScanLine,         color: '#10B981' },
   HOME:              { id: 'HOME',              name: 'Home Screen',        icon: LayoutDashboard,  color: '#F59E0B' },
   SAVED:             { id: 'SAVED',             name: 'Saved',              icon: Bookmark,         color: '#EC4899' },
@@ -58,28 +55,6 @@ const CATEGORY_META = {
 
 // ── Subcategory Metadata (Exact Icons Matching Main App Toolbar & Tabs) ──
 const SUBCATEGORY_META = {
-  // QR Generator Subcategories
-  'Content':            { icon: Pencil,          color: '#D60036', label: 'Content' },
-  'Color':              { icon: Palette,         color: '#F59E0B', label: 'Color' },
-  'Style':              { icon: Sliders,         color: '#8B5CF6', label: 'Style' },
-  'Logo':               { icon: ImageIcon,       color: '#EC4899', label: 'Logo' },
-  'Template':           { icon: Sparkles,        color: '#3B82F6', label: 'Template' },
-  'Text':               { icon: Type,            color: '#10B981', label: 'Text' },
-  'Save & Export':      { icon: Download,        color: '#06B6D4', label: 'Save & Export' },
-  'QR Engine':          { icon: Cpu,             color: '#64748B', label: 'QR Engine' },
-
-  // Barcode Generator Subcategories
-  '1D Standards':       { icon: Barcode,         color: '#3B82F6', label: '1D Standards' },
-  '2D Standards':       { icon: QrCode,          color: '#8B5CF6', label: '2D Standards' },
-  'Barcode Appearance': { icon: Palette,         color: '#F59E0B', label: 'Appearance' },
-  'Export':             { icon: Download,        color: '#06B6D4', label: 'Export' },
-
-  // Bulk Generator Subcategories
-  'Batch Screen':       { icon: Layers,          color: '#8B5CF6', label: 'Batch Screen' },
-  'Input & Spreadsheet':{ icon: FileSpreadsheet, color: '#10B981', label: 'Spreadsheet' },
-  'Batch Styling':      { icon: Sliders,         color: '#F59E0B', label: 'Batch Styling' },
-  'Bulk Export':        { icon: Download,        color: '#06B6D4', label: 'Bulk Export' },
-
   // Scanner Subcategories
   'Camera Lens':        { icon: Camera,          color: '#10B981', label: 'Camera Lens' },
   'Detection':          { icon: Scan,            color: '#3B82F6', label: 'Detection' },
@@ -234,10 +209,13 @@ export default function FeatureFlagsPanel({
     return Boolean(defaultPlan && defaultPlan !== 'free');
   };
 
-  // ── Unified 140+ Features List ─────────────────────────────────────────
+  // ── Filtered Features List (QR, Barcode & Bulk features managed in dedicated studios) ──
   const allFeatures = useMemo(() => {
-    // 1. Standard canonical registry features (140+ items across 8 categories)
-    const registryItems = FEATURE_REGISTRY.map(f => {
+    // 1. Canonical registry features excluding QR, Barcode, and Bulk studios
+    const filteredRegistry = FEATURE_REGISTRY.filter(
+      f => f.category !== 'QR_GENERATOR' && f.category !== 'BARCODE_GENERATOR' && f.category !== 'BULK_GENERATOR'
+    );
+    const registryItems = filteredRegistry.map(f => {
       const isEnabled = liveFlagsMap[f.featureId] !== undefined 
         ? Boolean(liveFlagsMap[f.featureId]) 
         : Boolean(f.defaultEnabled);
@@ -256,15 +234,15 @@ export default function FeatureFlagsPanel({
         name: f.displayName,
         description: f.description || '',
         category: f.category,
-        categoryName: catMeta.name,
+        categoryName: catMeta?.name || f.category,
         subcategory: f.subcategory || 'General',
         environment: 'Production',
         enabled: isEnabled,
         icon: featureIcon,
         iconColor: featureColor,
         iconBg: `${featureColor}18`,
-        categoryIcon: catMeta.icon,
-        categoryColor: catMeta.color,
+        categoryIcon: catMeta?.icon || Flag,
+        categoryColor: catMeta?.color || '#FF4D9D',
         defaultPlan: f.defaultPlan || 'free',
         isPaid: isPaid,
         isCanonical: true,
