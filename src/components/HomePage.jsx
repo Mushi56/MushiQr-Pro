@@ -496,10 +496,18 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
       position: 'relative'
     }}>
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up" onScroll={handleScroll}>
-        {/* Static Hero Section with Red Rounded Rectangle Container */}
+        {/* Static Hero Section with Mesh Grain Gradient Container */}
         <div style={{
           width: '100%',
-          background: 'linear-gradient(135deg, #7A0C1E 0%, #2D0207 100%)',
+          backgroundColor: '#B80026',
+          backgroundImage: `
+            radial-gradient(at 88% 90%, #FF5E00 0px, transparent 55%),
+            radial-gradient(at 12% 95%, #FF9500 0px, transparent 50%),
+            radial-gradient(at 92% 5%, #FF1E56 0px, transparent 48%),
+            radial-gradient(at 8% 5%, #B80026 0px, transparent 50%),
+            radial-gradient(at 50% 40%, #D8042B 0px, transparent 65%),
+            linear-gradient(180deg, #B80026 0%, #7A0015 100%)
+          `,
           borderRadius: '0 0 28px 28px',
           padding: '14px var(--main-padding-x) 48px var(--main-padding-x)',
           boxSizing: 'border-box',
@@ -507,15 +515,32 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           flexDirection: 'column',
           gap: '14px',
           color: '#FFFFFF',
-          boxShadow: '0 12px 30px rgba(122, 12, 30, 0.35)',
+          boxShadow: '0 18px 40px rgba(216, 4, 43, 0.38)',
           position: 'relative',
           overflow: 'hidden'
         }}>
-          {/* Subtle background ambient blur circle */}
+          {/* Authentic Film Grain / Noise Texture Overlay */}
+          <div 
+            style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E\")",
+              mixBlendMode: 'overlay',
+              pointerEvents: 'none',
+              zIndex: 1
+            }} 
+          />
+          {/* Ambient Glow Lights */}
           <div style={{
-            position: 'absolute', top: '-40%', right: '-15%',
+            position: 'absolute', bottom: '-15%', right: '5%',
             width: '220px', height: '220px',
-            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(255, 94, 0, 0.45) 0%, transparent 70%)',
+            filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
+          }} />
+          <div style={{
+            position: 'absolute', top: '-15%', right: '-5%',
+            width: '200px', height: '200px',
+            background: 'radial-gradient(circle, rgba(255, 30, 86, 0.35) 0%, transparent 70%)',
             filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
           }} />
 
@@ -537,7 +562,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     fontWeight: 700,
                     letterSpacing: '0.8px',
                     textTransform: 'uppercase',
-                    color: '#ff5675',
+                    color: '#FFE2E8',
                     marginBottom: '0'
                   }}>
                     WELCOME BACK 👋
@@ -572,7 +597,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           </div>
 
           {/* Top Row: Create QR Code & Create Barcode 50-50 side-by-side in 1 line */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%', position: 'relative', zIndex: 2 }}>            <div 
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%', position: 'relative', zIndex: 2 }}>
+            <div 
               onClick={() => onNavigate('generator')}
               role="button"
               tabIndex={0}
@@ -587,13 +613,30 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                background: 'linear-gradient(160deg, #3D0610 0%, #170206 100%)',
+                backgroundColor: '#20040A',
+                backgroundImage: `
+                  radial-gradient(at 90% 15%, rgba(255, 42, 85, 0.42) 0px, transparent 55%),
+                  radial-gradient(at 10% 85%, rgba(179, 0, 45, 0.35) 0px, transparent 50%),
+                  radial-gradient(at 50% 50%, rgba(255, 77, 121, 0.15) 0px, transparent 60%),
+                  linear-gradient(160deg, #3D0610 0%, #170206 100%)
+                `,
                 border: 'none',
                 boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
+              {/* Film Grain Texture Overlay */}
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E\")",
+                  mixBlendMode: 'overlay',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} 
+              />
               <PaidCrownBadge featureId="qr_generator" position="floating" size={10} />
               {/* Card Image */}
               <img 
@@ -606,7 +649,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   width: '110px',
                   height: '110px',
                   objectFit: 'contain',
-                  zIndex: 1,
+                  zIndex: 2,
                   pointerEvents: 'none',
                   opacity: 0.95
                 }} 
@@ -722,13 +765,30 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                background: 'linear-gradient(160deg, #381602 0%, #140701 100%)',
+                backgroundColor: '#1E0C01',
+                backgroundImage: `
+                  radial-gradient(at 90% 15%, rgba(255, 124, 0, 0.42) 0px, transparent 55%),
+                  radial-gradient(at 10% 85%, rgba(153, 74, 0, 0.35) 0px, transparent 50%),
+                  radial-gradient(at 50% 50%, rgba(255, 157, 51, 0.15) 0px, transparent 60%),
+                  linear-gradient(160deg, #381602 0%, #140701 100%)
+                `,
                 border: 'none',
                 boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
+              {/* Film Grain Texture Overlay */}
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E\")",
+                  mixBlendMode: 'overlay',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }} 
+              />
               <PaidCrownBadge featureId="barcode_generator" position="floating" size={10} />
               {/* Card Image */}
               <img 
@@ -741,7 +801,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   width: '110px',
                   height: '110px',
                   objectFit: 'contain',
-                  zIndex: 1,
+                  zIndex: 2,
                   pointerEvents: 'none',
                   opacity: 0.95
                 }} 
@@ -861,7 +921,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               overflow: 'hidden',
               padding: '12px',
               boxSizing: 'border-box',
-              background: 'linear-gradient(160deg, #350217 0%, #15010A 100%)',
+              backgroundColor: '#1C010D',
+              backgroundImage: `
+                radial-gradient(at 85% 50%, rgba(255, 11, 72, 0.42) 0px, transparent 55%),
+                radial-gradient(at 15% 50%, rgba(158, 0, 43, 0.35) 0px, transparent 50%),
+                radial-gradient(at 50% 15%, rgba(255, 77, 128, 0.15) 0px, transparent 60%),
+                linear-gradient(160deg, #350217 0%, #15010A 100%)
+              `,
               border: 'none',
               boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
               width: '100%',
@@ -869,6 +935,17 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
+            {/* Film Grain Texture Overlay */}
+            <div 
+              style={{
+                position: 'absolute',
+                top: 0, left: 0, right: 0, bottom: 0,
+                backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E\")",
+                mixBlendMode: 'overlay',
+                pointerEvents: 'none',
+                zIndex: 1
+              }} 
+            />
             <PaidCrownBadge featureId="batch_view" position="floating" size={10} />
             {/* Card Image */}
             <img 
@@ -882,7 +959,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 width: '110px',
                 height: '110px',
                 objectFit: 'contain',
-                zIndex: 1,
+                zIndex: 2,
                 pointerEvents: 'none',
                 opacity: 0.95
               }} 
@@ -891,7 +968,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             <div style={{
               position: 'absolute', top: '-50%', right: '20%',
               width: '180px', height: '180px',
-              background: 'radial-gradient(circle, rgba(255, 11, 72, 0.3) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(255, 11, 72, 0.35) 0%, transparent 70%)',
               filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
             }} />
 
