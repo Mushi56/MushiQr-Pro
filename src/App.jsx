@@ -5802,54 +5802,130 @@ export default function App() {
                        )}
                        {activeTab === 'shapes' && (
                          <>
-                           <button className={`text-toolbar-btn${shapePopup === 'dots' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'dots')}><QRDotsIcon /><span>Dots</span></button>
-                           <button className={`text-toolbar-btn${shapePopup === 'eyes' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'eyes')}><QREyesIcon /><span>Eyes</span></button>
-                           <button className={`text-toolbar-btn${shapePopup === 'background' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'background')}><QRBgIcon size={24} /><span>Background</span></button>
-                           <button className={`text-toolbar-btn${shapePopup === 'size' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'size')}><QRSizeIcon size={24} /><span>Size</span></button>
-                           <button className={`text-toolbar-btn${shapePopup === 'pos' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'pos')}><Maximize size={24} /><span>Position</span></button>
+                           {FeatureAccessManager.isFeatureEnabled('custom_dot_styles') && (
+                             <button className={`text-toolbar-btn${shapePopup === 'dots' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'dots')} style={{ position: 'relative' }}>
+                               <PaidCrownBadge featureId="custom_dot_styles" position="floating" size={8} />
+                               <QRDotsIcon /><span>Dots</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('custom_eye_styles') && (
+                             <button className={`text-toolbar-btn${shapePopup === 'eyes' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'eyes')} style={{ position: 'relative' }}>
+                               <PaidCrownBadge featureId="custom_eye_styles" position="floating" size={8} />
+                               <QREyesIcon /><span>Eyes</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('custom_background_shapes') && (
+                             <button className={`text-toolbar-btn${shapePopup === 'background' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'background')} style={{ position: 'relative' }}>
+                               <PaidCrownBadge featureId="custom_background_shapes" position="floating" size={8} />
+                               <QRBgIcon size={24} /><span>Background</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_size_custom') && (
+                             <button className={`text-toolbar-btn${shapePopup === 'size' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'size')}>
+                               <QRSizeIcon size={24} /><span>Size</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_canvas_positioning') && (
+                             <button className={`text-toolbar-btn${shapePopup === 'pos' ? ' active' : ''}`} onClick={() => startEditing('shapes', 'pos')}>
+                               <Maximize size={24} /><span>Position</span>
+                             </button>
+                           )}
                          </>
                        )}
-                      {activeTab === 'logo' && (
-                        <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'size')}><QRSizeIcon size={24} /><span>Size</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'pos')}><Maximize size={24} /><span>Position</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'stroke')}><Paintbrush size={24} /><span>Stroke</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'bg')}><Hexagon size={24} /><span>Background</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'rotate')}><RotateCw size={24} /><span>Rotate</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'opacity')}><Sun size={24} /><span>Opacity</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'shadow')}><Moon size={24} /><span>Shadow</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'filter')}><Eraser size={24} /><span>Remove BG</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'texture')}><Layers size={24} /><span>Texture</span></button>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'crop')}><Crop size={24} /><span>Crop</span></button>
-                        </>
-                      )}
-                      {activeTab === 'text' && (
-                        <>
-                          <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')}><Type size={24} /><span>Add Text</span></button>
-                          {(() => {
-                            const isTextEnabled = textCenterEnabled || frameStyle !== 'none';
-                            const handleTextToolClick = (tool) => {
-                              if (!isTextEnabled) {
-                                showToast('Please enable Center Text or Frame Text first', 'info');
-                                return;
-                              }
-                              startEditing('text', tool);
-                            };
-                            return (
-                              <>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('pos')}><Maximize size={24} /><span>Position</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('fonts')}><ALargeSmall size={24} /><span>Fonts</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('size')}><QRSizeIcon size={24} /><span>Size</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('color')}><Palette size={24} /><span>Color</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('stroke')}><Paintbrush size={24} /><span>Stroke</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('shadow')}><Moon size={24} /><span>Shadow</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('rotate')}><RotateCw size={24} /><span>Rotate</span></button>
-                                <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('bg')}><Hexagon size={24} /><span>Shape</span></button>
-                              </>
-                            );
-                          })()}
-                        </>
-                      )}
+                       {activeTab === 'logo' && (
+                         <>
+                           {FeatureAccessManager.isFeatureEnabled('qr_logo_transforms') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'size')}><QRSizeIcon size={24} /><span>Size</span></button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_canvas_positioning') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'pos')}><Maximize size={24} /><span>Position</span></button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_logo_stroke_shadow') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'stroke')} style={{ position: 'relative' }}>
+                               <PaidCrownBadge featureId="qr_logo_stroke_shadow" position="floating" size={8} />
+                               <Paintbrush size={24} /><span>Stroke</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_logo_stroke_shadow') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'bg')} style={{ position: 'relative' }}>
+                               <PaidCrownBadge featureId="qr_logo_stroke_shadow" position="floating" size={8} />
+                               <Hexagon size={24} /><span>Background</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_logo_transforms') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'rotate')}><RotateCw size={24} /><span>Rotate</span></button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_logo_transforms') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'opacity')}><Sun size={24} /><span>Opacity</span></button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_logo_stroke_shadow') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'shadow')}><Moon size={24} /><span>Shadow</span></button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_logo_bg_remover') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'filter')} style={{ position: 'relative' }}>
+                               <PaidCrownBadge featureId="qr_logo_bg_remover" position="floating" size={8} />
+                               <Eraser size={24} /><span>Remove BG</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_color_texture') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'texture')} style={{ position: 'relative' }}>
+                               <PaidCrownBadge featureId="qr_color_texture" fallbackFeatureId="qr_bg_image_texture" position="floating" size={8} />
+                               <Layers size={24} /><span>Texture</span>
+                             </button>
+                           )}
+                           {FeatureAccessManager.isFeatureEnabled('qr_logo_bg_remover') && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('logo', 'crop')}><Crop size={24} /><span>Crop</span></button>
+                           )}
+                         </>
+                       )}
+                       {activeTab === 'text' && (
+                         <>
+                           {(FeatureAccessManager.isFeatureEnabled('qr_center_text') || FeatureAccessManager.isFeatureEnabled('qr_text_frame')) && (
+                             <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')} style={{ position: 'relative' }}>
+                               <PaidCrownBadge featureId="qr_center_text" position="floating" size={8} />
+                               <Type size={24} /><span>Add Text</span>
+                             </button>
+                           )}
+                           {(() => {
+                             const isTextEnabled = textCenterEnabled || frameStyle !== 'none';
+                             const handleTextToolClick = (tool) => {
+                               if (!isTextEnabled) {
+                                 showToast('Please enable Center Text or Frame Text first', 'info');
+                                 return;
+                               }
+                               startEditing('text', tool);
+                             };
+                             return (
+                               <>
+                                 {FeatureAccessManager.isFeatureEnabled('qr_text_transforms') && (
+                                   <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('pos')}><Maximize size={24} /><span>Position</span></button>
+                                 )}
+                                 {FeatureAccessManager.isFeatureEnabled('qr_text_fonts') && (
+                                   <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('fonts')}><ALargeSmall size={24} /><span>Fonts</span></button>
+                                 )}
+                                 {FeatureAccessManager.isFeatureEnabled('qr_text_transforms') && (
+                                   <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('size')}><QRSizeIcon size={24} /><span>Size</span></button>
+                                 )}
+                                 {FeatureAccessManager.isFeatureEnabled('qr_text_styling') && (
+                                   <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('color')}><Palette size={24} /><span>Color</span></button>
+                                 )}
+                                 {FeatureAccessManager.isFeatureEnabled('qr_text_styling') && (
+                                   <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('stroke')}><Paintbrush size={24} /><span>Stroke</span></button>
+                                 )}
+                                 {FeatureAccessManager.isFeatureEnabled('qr_text_styling') && (
+                                   <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('shadow')}><Moon size={24} /><span>Shadow</span></button>
+                                 )}
+                                 {FeatureAccessManager.isFeatureEnabled('qr_text_transforms') && (
+                                   <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('rotate')}><RotateCw size={24} /><span>Rotate</span></button>
+                                 )}
+                                 {FeatureAccessManager.isFeatureEnabled('qr_text_styling') && (
+                                   <button className="text-toolbar-btn" style={!isTextEnabled ? { opacity: 0.4 } : {}} onClick={() => handleTextToolClick('bg')}><Hexagon size={24} /><span>Shape</span></button>
+                                 )}
+                               </>
+                             );
+                           })()}
+                         </>
+                       )}
                     </div>
                   )}
                 </div>
@@ -6842,4 +6918,4 @@ function TemplatePreviewCanvas({ template, theme, qrMatrixInfo, currentQrOptions
   }, [template, theme, tick, qrMatrixInfo, currentQrOptions]);
 
   return <canvas ref={ref} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '14px', display: 'block' }} />;
-}
+}

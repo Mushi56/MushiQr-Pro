@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
-import { setFeatureFlagCloud, setFeaturesTierBatchCloud } from '../services/adminDataService';
+import { setFeatureFlagCloud, setFeatureFlagsBatchCloud, setFeaturesTierBatchCloud } from '../services/adminDataService';
 import { FEATURE_REGISTRY } from '../services/FeatureAccessManager';
 
 export default function VisualBulkControlStudio({ currentUser, isDark = false }) {
@@ -152,9 +152,9 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
     try {
       const updates = {};
       for (const f of bulkFeatures) {
-        updates[f.key] = enable;
-        await setFeatureFlagCloud(f.key, enable, { name: f.name, category: 'BULK_GENERATOR' });
+        updates[f.key] = Boolean(enable);
       }
+      await setFeatureFlagsBatchCloud(updates, { category: 'BULK_GENERATOR' });
       setLiveFlagsMap(prev => ({ ...prev, ...updates }));
       showToast(`✨ All Bulk features are now ${enable ? 'ENABLED' : 'DISABLED'}`);
     } catch (e) {

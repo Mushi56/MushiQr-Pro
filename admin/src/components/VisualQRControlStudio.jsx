@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
-import { setFeatureFlagCloud, setFeaturesTierBatchCloud } from '../services/adminDataService';
+import { setFeatureFlagCloud, setFeatureFlagsBatchCloud, setFeaturesTierBatchCloud } from '../services/adminDataService';
 import { FEATURE_REGISTRY } from '../services/FeatureAccessManager';
 import { drawDotModule, drawEye } from '../../src/utils/qrEngine.js';
 
@@ -772,9 +772,9 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     try {
       const updates = {};
       for (const item of itemsList) {
-        updates[item.key] = enable;
-        await setFeatureFlagCloud(item.key, enable, { name: item.name, category: 'QR_GENERATOR', subcategory });
+        updates[item.key] = Boolean(enable);
       }
+      await setFeatureFlagsBatchCloud(updates, { category: 'QR_GENERATOR', subcategory });
       setLiveFlagsMap(prev => ({ ...prev, ...updates }));
       showToast(`✨ ${itemsList.length} items ${enable ? 'ENABLED' : 'DISABLED'}`);
     } catch (e) {

@@ -435,6 +435,28 @@ export async function setFeatureFlagCloud(featureId, enabled) {
   }
 }
 
+export async function setFeatureFlagsBatchCloud(flagsMap, meta = {}) {
+  try {
+    const flagsRef = doc(db, 'global_config', 'featureFlags');
+    const updateObj = { ...flagsMap, _updatedAt: new Date().toISOString() };
+    await setDoc(flagsRef, updateObj, { merge: true });
+    await _audit('FEATURE_FLAGS_BATCH_UPDATED', { count: Object.keys(flagsMap).length, ...meta });
+    return { ok: true };
+  } catch (e) {
+    console.warn('[DS] Batch direct Firestore write failed:', e?.message);
+    try {
+      const fn = httpsCallable(functions, 'setFeatureFlag');
+      for (const [featureId, enabled] of Object.entries(flagsMap)) {
+        await fn({ featureId, enabled: Boolean(enabled) });
+      }
+      return { ok: true, via: 'cloud_function' };
+    } catch (cfErr) {
+      console.error('[DS] Both direct and Cloud Function batch flag updates failed:', cfErr);
+      throw new Error(friendlyError(e));
+    }
+  }
+}
+
 export async function setPlanFeaturesCloud(planId, features) {
   try {
     const planRef = doc(db, 'subscription_plans', planId);

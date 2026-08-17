@@ -508,6 +508,67 @@ class FeatureAccessManagerService {
   }
 
   /**
+   * Helper to resolve boolean feature flag value from globalFlags map with aliases and normalization
+   */
+  _resolveFlagValue(featureId) {
+    if (!featureId) return undefined;
+
+    // 1. Direct match
+    if (this.globalFlags[featureId] !== undefined) {
+      return Boolean(this.globalFlags[featureId]);
+    }
+
+    // 2. Normalized key (lowercase and underscores)
+    const norm = featureId.toLowerCase().replace(/[^a-z0-9_]+/g, '_');
+    if (this.globalFlags[norm] !== undefined) {
+      return Boolean(this.globalFlags[norm]);
+    }
+
+    // 3. Bidirectional Aliases
+    const aliasMap = {
+      'qr_style_dots': ['custom_dot_styles'],
+      'custom_dot_styles': ['qr_style_dots'],
+      'qr_style_eyes': ['custom_eye_styles'],
+      'custom_eye_styles': ['qr_style_eyes'],
+      'qr_style_background': ['custom_background_shapes', 'qr_background_shapes'],
+      'custom_background_shapes': ['qr_style_background', 'qr_background_shapes'],
+      'qr_background_shapes': ['qr_style_background', 'custom_background_shapes'],
+      'qr_doc': ['qr_document', 'qr_sheet'],
+      'qr_sheet': ['qr_document'],
+      'qr_document': ['qr_doc', 'qr_sheet'],
+      'qr_color_bg_image': ['qr_bg_image_texture'],
+      'qr_color_texture': ['qr_bg_image_texture'],
+      'qr_bg_image_texture': ['qr_color_bg_image', 'qr_color_texture'],
+      'qr_color_eyes_custom': ['qr_color_eyes'],
+      'qr_color_eyes': ['qr_color_eyes_custom'],
+      'custom_colors_solid': ['qr_color_dots'],
+      'custom_colors_gradient': ['qr_color_dots'],
+    };
+
+    if (aliasMap[featureId]) {
+      for (const alt of aliasMap[featureId]) {
+        if (this.globalFlags[alt] !== undefined) return Boolean(this.globalFlags[alt]);
+      }
+    }
+    if (aliasMap[norm]) {
+      for (const alt of aliasMap[norm]) {
+        if (this.globalFlags[alt] !== undefined) return Boolean(this.globalFlags[alt]);
+      }
+    }
+
+    // 4. Background shape prefix alias (qr_bg_* <-> qr_bgshape_*)
+    if (norm.startsWith('qr_bg_')) {
+      const altKey = norm.replace('qr_bg_', 'qr_bgshape_');
+      if (this.globalFlags[altKey] !== undefined) return Boolean(this.globalFlags[altKey]);
+    } else if (norm.startsWith('qr_bgshape_')) {
+      const altKey = norm.replace('qr_bgshape_', 'qr_bg_');
+      if (this.globalFlags[altKey] !== undefined) return Boolean(this.globalFlags[altKey]);
+    }
+
+    return undefined;
+  }
+
+  /**
    * Primary Entitlement Access API
    */
   canUseFeature(featureId) {
@@ -515,11 +576,8 @@ class FeatureAccessManagerService {
       return { allowed: true, reason: REASON.ALLOWED, status: STATUS.ALLOWED, featureId: '', userPlan: this.getUserPlan() };
     }
 
-    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
-
     // 1. Check Global Feature Switch (global_config/featureFlags) FIRST
-    const flagVal = this.globalFlags[featureId];
-    const isGloballyEnabled = flagVal !== undefined ? Boolean(flagVal) : (featDef ? featDef.defaultEnabled : true);
+    const isGloballyEnabled = this.isFeatureEnabled(featureId);
 
     if (!isGloballyEnabled) {
       return {
@@ -541,6 +599,9 @@ class FeatureAccessManagerService {
         userPlan: 'super_admin',
       };
     }
+
+    const norm = featureId.toLowerCase().replace(/[^a-z0-9_]+/g, '_');
+    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId || f.featureId === norm);
 
     // 3. Authentication Check
     if (featDef?.requiresAuthentication && !this.currentUser) {
@@ -599,9 +660,10 @@ class FeatureAccessManagerService {
   }
 
   findMinimumPlanForFeature(featureId) {
+    const norm = featureId ? featureId.toLowerCase().replace(/[^a-z0-9_]+/g, '_') : '';
     for (const pId of ['weekly', 'monthly', 'yearly']) {
       const feats = this.membershipConfig?.plans?.[pId]?.features || this.planConfigs[pId]?.features || DEFAULT_PAID_FEATURES;
-      if (Array.isArray(feats) && feats.includes(featureId)) return pId;
+      if (Array.isArray(feats) && (feats.includes(featureId) || feats.includes(norm))) return pId;
     }
     return 'weekly';
   }
@@ -615,9 +677,44 @@ class FeatureAccessManagerService {
    */
   isFeatureEnabled(featureId) {
     if (!featureId) return true;
-    const flagVal = this.globalFlags[featureId];
+
+    const norm = featureId.toLowerCase().replace(/[^a-z0-9_]+/g, '_');
+
+    // 1. Parent flag inheritance checks
+    if (norm.startsWith('qr_color_preset_') && this._resolveFlagValue('qr_color_presets') === false) {
+      return false;
+    }
+    if (norm.startsWith('qr_dot_') && (this._resolveFlagValue('custom_dot_styles') === false || this._resolveFlagValue('qr_style_dots') === false)) {
+      return false;
+    }
+    if (norm.startsWith('qr_eye_') && (this._resolveFlagValue('custom_eye_styles') === false || this._resolveFlagValue('qr_style_eyes') === false)) {
+      return false;
+    }
+    if ((norm.startsWith('qr_bg_') || norm.startsWith('qr_bgshape_')) && (this._resolveFlagValue('custom_background_shapes') === false || this._resolveFlagValue('qr_style_background') === false)) {
+      return false;
+    }
+    if (norm.startsWith('qr_logo_') && this._resolveFlagValue('custom_logo_presets') === false) {
+      return false;
+    }
+    if (norm.startsWith('qr_font_') && this._resolveFlagValue('qr_text_fonts') === false) {
+      return false;
+    }
+    if (norm.startsWith('qr_template_') && this._resolveFlagValue('template_presets') === false) {
+      return false;
+    }
+    if (norm.startsWith('qr_frame_') && this._resolveFlagValue('custom_frames') === false) {
+      return false;
+    }
+    if (norm.startsWith('barcode_') && norm !== 'barcode_generator' && this._resolveFlagValue('barcode_generator') === false) {
+      return false;
+    }
+
+    // 2. Direct/alias flag value resolution
+    const flagVal = this._resolveFlagValue(featureId);
     if (flagVal !== undefined) return Boolean(flagVal);
-    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
+
+    // 3. Canonical registry fallback
+    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId || f.featureId === norm);
     return featDef ? featDef.defaultEnabled : true;
   }
 
@@ -626,9 +723,10 @@ class FeatureAccessManagerService {
    */
   isPaidFeature(featureId) {
     if (!featureId) return false;
+    const norm = featureId.toLowerCase().replace(/[^a-z0-9_]+/g, '_');
 
     // 1. If feature matrix in global_config/membership explicitly declares it
-    const matrixEntry = this.membershipConfig?.featureMatrix?.[featureId];
+    const matrixEntry = this.membershipConfig?.featureMatrix?.[featureId] || this.membershipConfig?.featureMatrix?.[norm];
     if (Array.isArray(matrixEntry)) {
       if (matrixEntry.includes('free')) return false;
       if (matrixEntry.some(p => ['weekly', 'monthly', 'yearly', 'lifetime'].includes(p))) return true;
@@ -637,8 +735,14 @@ class FeatureAccessManagerService {
     // 2. Check dynamic Free Plan features from membership config or planConfigs
     const freePlan = this.membershipConfig?.plans?.free || this.planConfigs?.['free'];
     if (freePlan && Array.isArray(freePlan.features)) {
-      // If the free plan contains this feature, it is FREE -> NEVER paid
-      if (freePlan.features.includes(featureId)) {
+      // If the free plan contains this feature or its normalized alias, it is FREE -> NEVER paid
+      if (freePlan.features.includes(featureId) || freePlan.features.includes(norm)) {
+        return false;
+      }
+      if (norm.startsWith('qr_bg_') && freePlan.features.includes(norm.replace('qr_bg_', 'qr_bgshape_'))) {
+        return false;
+      }
+      if (norm.startsWith('qr_bgshape_') && freePlan.features.includes(norm.replace('qr_bgshape_', 'qr_bg_'))) {
         return false;
       }
     }
@@ -647,8 +751,16 @@ class FeatureAccessManagerService {
     const paidTiers = ['weekly', 'monthly', 'yearly'];
     for (const pId of paidTiers) {
       const planData = this.membershipConfig?.plans?.[pId] || this.planConfigs?.[pId];
-      if (planData && Array.isArray(planData.features) && planData.features.includes(featureId)) {
-        return true;
+      if (planData && Array.isArray(planData.features)) {
+        if (planData.features.includes(featureId) || planData.features.includes(norm)) {
+          return true;
+        }
+        if (norm.startsWith('qr_bg_') && planData.features.includes(norm.replace('qr_bg_', 'qr_bgshape_'))) {
+          return true;
+        }
+        if (norm.startsWith('qr_bgshape_') && planData.features.includes(norm.replace('qr_bgshape_', 'qr_bg_'))) {
+          return true;
+        }
       }
     }
 
@@ -658,7 +770,7 @@ class FeatureAccessManagerService {
     }
 
     // 5. Fallback: Check canonical registry defaultPlan
-    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
+    const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId || f.featureId === norm);
     return Boolean(featDef && featDef.defaultPlan && featDef.defaultPlan !== 'free');
   }
 
@@ -675,10 +787,7 @@ class FeatureAccessManagerService {
     if (subcatFeatures.length === 0) return true;
 
     // Check if any child feature in this subcategory is enabled globally
-    const hasAnyEnabled = subcatFeatures.some(f => {
-      const flagVal = this.globalFlags[f.featureId];
-      return flagVal !== undefined ? Boolean(flagVal) : f.defaultEnabled;
-    });
+    const hasAnyEnabled = subcatFeatures.some(f => this.isFeatureEnabled(f.featureId));
 
     return hasAnyEnabled;
   }
@@ -700,7 +809,7 @@ class FeatureAccessManagerService {
     if (!target) return true;
 
     // 1. If explicit tab flag is turned OFF by admin, hide immediately
-    if (this.globalFlags[target.tabFlag] === false) return false;
+    if (this._resolveFlagValue(target.tabFlag) === false) return false;
 
     // 2. If all child features under this tab are turned OFF globally, hide tab
     return this.isSubcategoryAllowed('QR_GENERATOR', target.subcat, target.tabFlag);
