@@ -682,91 +682,93 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     });
   }, [liveFlagsMap, livePlans]);
 
-  // Sub-Navigation Tabs
+  // Sub-Navigation Tabs (Compact Mobile-First Labels)
   const TABS = [
-    { id: 'overview', label: '1. Overview & Content Grid', count: 18, icon: QrCode },
-    { id: 'dots', label: '2. 37 Dot Module Shapes', count: ALL_DOT_STYLES.length, icon: Grid },
-    { id: 'eyes', label: '3. 35 Eye Finder Shapes', count: ALL_EYE_STYLES.length, icon: Eye },
-    { id: 'textures', label: '4. 10 Textures & Overlays', count: ALL_TEXTURES.length, icon: Brush },
-    { id: 'gradients', label: '5. 12 Dual Gradients', count: ALL_GRADIENTS.length, icon: Wand2 },
-    { id: 'bg_shapes', label: '6. 8 Card Backgrounds', count: ALL_BG_SHAPES.length, icon: Box },
-    { id: 'logos', label: '7. 40 Brand Logo Presets', count: ALL_LOGO_PRESETS.length, icon: Image },
+    { id: 'overview', label: '1. Content Formats', count: 18, icon: QrCode },
+    { id: 'dots', label: '2. 37 Dot Shapes', count: ALL_DOT_STYLES.length, icon: Grid },
+    { id: 'eyes', label: '3. 35 Eye Shapes', count: ALL_EYE_STYLES.length, icon: Eye },
+    { id: 'textures', label: '4. 10 Textures', count: ALL_TEXTURES.length, icon: Brush },
+    { id: 'gradients', label: '5. 12 Gradients', count: ALL_GRADIENTS.length, icon: Wand2 },
+    { id: 'bg_shapes', label: '6. 8 Backgrounds', count: ALL_BG_SHAPES.length, icon: Box },
+    { id: 'logos', label: '7. 40 Brand Logos', count: ALL_LOGO_PRESETS.length, icon: Image },
     { id: 'fonts', label: '8. 30 Google Fonts', count: ALL_FONTS.length, icon: Type },
-    { id: 'frames', label: '9. 12 Scan-Me Frames', count: ALL_FRAMES.length, icon: Sparkles },
-    { id: 'templates', label: '10. Templates Gallery', count: ALL_TEMPLATES.length, icon: LayoutGrid }
+    { id: 'frames', label: '9. 12 Frames', count: ALL_FRAMES.length, icon: Sparkles },
+    { id: 'templates', label: '10. Templates', count: ALL_TEMPLATES.length, icon: LayoutGrid }
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
       {/* Feedback Toast */}
       {feedbackToast && (
         <div style={{
-          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
           background: 'rgba(15, 18, 33, 0.96)', border: '1.5px solid #FF4D9D',
-          borderRadius: 100, padding: '10px 22px', color: '#fff',
-          fontSize: 13, fontWeight: 800, boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
-          zIndex: 999999, display: 'flex', alignItems: 'center', gap: 8
+          borderRadius: 100, padding: '8px 18px', color: '#fff',
+          fontSize: 12, fontWeight: 800, boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+          zIndex: 999999, display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'
         }}>
           <span>{feedbackToast}</span>
         </div>
       )}
 
-      {/* ── Studio Header ───────────────────────────────────────────────────── */}
+      {/* ── Studio Header (Mobile-First UX) ──────────────────────────────────── */}
       <div style={{
         background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-        borderRadius: 20, padding: '24px', boxShadow: 'var(--ad-card-shadow)',
-        display: 'flex', flexDirection: 'column', gap: 16
+        borderRadius: 16, padding: '14px', boxShadow: 'var(--ad-card-shadow)',
+        display: 'flex', flexDirection: 'column', gap: 12
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{
-              width: 52, height: 52, borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(214, 0, 54, 0.18) 0%, rgba(255, 77, 157, 0.15) 100%)',
-              border: '1.5px solid rgba(214, 0, 54, 0.4)', color: '#D60036',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(214, 0, 54, 0.2)'
-            }}>
-              <QrCode size={28} strokeWidth={2.4} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--ad-text)', margin: 0, letterSpacing: '-0.4px' }}>
-                  QR Code Generator Master Studio
-                </h1>
-                <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 100, background: 'rgba(214, 0, 54, 0.15)', color: '#D60036' }}>
-                  Live Assets &amp; Canvas Rendering
-                </span>
-              </div>
-              <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '4px 0 0', fontWeight: 500 }}>
-                Granular control over all 18 formats, 37 dot shapes, 35 eye corners, 10 textures, 12 gradients, 8 card shapes, 40 logos, 30 fonts &amp; templates.
-              </p>
-            </div>
+        {/* Top: Icon + Title + Status Badge */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 12,
+            background: 'linear-gradient(135deg, rgba(214, 0, 54, 0.18) 0%, rgba(255, 77, 157, 0.15) 100%)',
+            border: '1.5px solid rgba(214, 0, 54, 0.4)', color: '#D60036',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(214, 0, 54, 0.15)'
+          }}>
+            <QrCode size={22} strokeWidth={2.4} />
           </div>
-
-          {/* Quick Search */}
-          <div style={{ minWidth: 260, position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Search size={15} style={{ position: 'absolute', left: 12, color: 'var(--ad-text-sec)' }} />
-            <input
-              type="text"
-              placeholder="Search shapes, eyes, textures, logos..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
-                borderRadius: 10, padding: '8px 32px 8px 34px', color: 'var(--ad-text)',
-                fontSize: 12, fontWeight: 600, outline: 'none'
-              }}
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: 10, background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer' }}>
-                <XCircle size={14} />
-              </button>
-            )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <h1 style={{ fontSize: 16, fontWeight: 900, color: 'var(--ad-text)', margin: 0, letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+                QR Generator Studio
+              </h1>
+              <span style={{ fontSize: 9.5, fontWeight: 800, padding: '2px 7px', borderRadius: 100, background: 'rgba(214, 0, 54, 0.15)', color: '#D60036' }}>
+                Live Assets
+              </span>
+            </div>
+            <p style={{ fontSize: 11, color: 'var(--ad-text-sec)', margin: '3px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
+              Granular Free/Pro controls for all 18 formats, 37 dot shapes, 35 eyes, textures, gradients, shapes, logos, fonts &amp; templates.
+            </p>
           </div>
         </div>
 
-        {/* Carousel Navigation Tabs */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
+        {/* Search Bar (100% Full Width on Mobile) */}
+        <div style={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <Search size={14} style={{ position: 'absolute', left: 10, color: 'var(--ad-text-sec)' }} />
+          <input
+            type="text"
+            placeholder="Search shapes, eyes, textures, logos, fonts..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
+              borderRadius: 9, padding: '8px 30px 8px 30px', color: 'var(--ad-text)',
+              fontSize: 11.5, fontWeight: 600, outline: 'none', height: 36
+            }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: 8, background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer', padding: 2 }}>
+              <XCircle size={14} />
+            </button>
+          )}
+        </div>
+
+        {/* Carousel Navigation Tabs (Touch Friendly Mobile Pills) */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto',
+          paddingBottom: 2, scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch'
+        }}>
           {TABS.map(t => {
             const isActive = activeTab === t.id;
             const IconC = t.icon;
@@ -775,17 +777,21 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                  borderRadius: 12, border: `1.5px solid ${isActive ? '#FF4D9D' : 'var(--ad-border)'}`,
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '6px 11px',
+                  borderRadius: 10, border: `1.5px solid ${isActive ? '#FF4D9D' : 'var(--ad-border)'}`,
                   background: isActive ? 'rgba(255, 77, 157, 0.14)' : 'var(--ad-input)',
                   color: isActive ? '#FF4D9D' : 'var(--ad-text-sec)',
-                  fontSize: 12, fontWeight: isActive ? 800 : 700, cursor: 'pointer',
+                  fontSize: 11, fontWeight: isActive ? 800 : 700, cursor: 'pointer',
                   whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.15s ease'
                 }}
               >
-                <IconC size={15} />
+                <IconC size={13} />
                 <span>{t.label}</span>
-                <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: isActive ? '#FF4D9D' : 'var(--ad-card)', color: isActive ? '#fff' : 'var(--ad-text-sec)', fontWeight: 800 }}>
+                <span style={{
+                  fontSize: 9, padding: '1px 5px', borderRadius: 6,
+                  background: isActive ? '#FF4D9D' : 'var(--ad-card)',
+                  color: isActive ? '#fff' : 'var(--ad-text-sec)', fontWeight: 800
+                }}>
                   {t.count}
                 </span>
               </button>
@@ -1236,79 +1242,79 @@ function TemplateItemControlTile({ tpl, enabled, isPaid, updating, onToggleEnabl
 }
 
 // ═════════════════════════════════════════════════════════════════════════
-// REUSABLE SUB-CONTAINER CARDS
+// REUSABLE SUB-CONTAINER CARDS (Mobile-First UX)
 // ═════════════════════════════════════════════════════════════════════════
 
 function SectionCatalog({ title, subtitle, icon: Icon, onMakeFree, onMakePro, onEnableAll, onDisableAll, children }) {
   return (
     <div style={{
       background: 'var(--ad-card)', border: '1px solid var(--ad-border)',
-      borderRadius: 18, padding: '20px', boxShadow: 'var(--ad-card-shadow)',
-      display: 'flex', flexDirection: 'column', gap: 16
+      borderRadius: 16, padding: '14px 12px', boxShadow: 'var(--ad-card-shadow)',
+      display: 'flex', flexDirection: 'column', gap: 12
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
           <div style={{
-            width: 36, height: 36, borderRadius: 10,
+            width: 32, height: 32, borderRadius: 9,
             background: 'rgba(255, 77, 157, 0.12)', color: '#FF4D9D',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
           }}>
-            <Icon size={18} strokeWidth={2.4} />
+            <Icon size={16} strokeWidth={2.4} />
           </div>
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h2 style={{ fontSize: 13.5, fontWeight: 900, color: 'var(--ad-text)', margin: 0, lineHeight: 1.25 }}>
               {title}
             </h2>
-            <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500 }}>
+            <p style={{ fontSize: 10.5, color: 'var(--ad-text-sec)', margin: '2px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
               {subtitle}
             </p>
           </div>
         </div>
 
-        {/* Section Quick Batch Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        {/* Section Quick Batch Actions (Mobile Chips) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
           <button
             onClick={onMakeFree}
             style={{
-              display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px',
-              borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.35)',
-              color: '#10B981', fontSize: 11, fontWeight: 800, cursor: 'pointer'
+              display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px',
+              borderRadius: 6, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.35)',
+              color: '#10B981', fontSize: 10, fontWeight: 800, cursor: 'pointer'
             }}
           >
-            <Shield size={12} />
-            <span>Make Free</span>
+            <Shield size={10} />
+            <span>Free All</span>
           </button>
           <button
             onClick={onMakePro}
             style={{
-              display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px',
-              borderRadius: 8, background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)',
-              color: '#F59E0B', fontSize: 11, fontWeight: 800, cursor: 'pointer'
+              display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px',
+              borderRadius: 6, background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)',
+              color: '#F59E0B', fontSize: 10, fontWeight: 800, cursor: 'pointer'
             }}
           >
-            <Crown size={12} />
-            <span>Make Pro</span>
+            <Crown size={10} />
+            <span>Pro All</span>
           </button>
           <button
             onClick={onEnableAll}
             style={{
-              display: 'flex', alignItems: 'center', gap: 4, padding: '5px 8px',
-              borderRadius: 8, background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)',
-              color: '#22C55E', fontSize: 11, fontWeight: 800, cursor: 'pointer'
+              display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
+              borderRadius: 6, background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)',
+              color: '#22C55E', fontSize: 10, fontWeight: 800, cursor: 'pointer'
             }}
           >
-            <Power size={12} />
+            <Power size={10} />
             <span>Enable</span>
           </button>
           <button
             onClick={onDisableAll}
             style={{
-              display: 'flex', alignItems: 'center', gap: 4, padding: '5px 8px',
-              borderRadius: 8, background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#EF4444', fontSize: 11, fontWeight: 800, cursor: 'pointer'
+              display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
+              borderRadius: 6, background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#EF4444', fontSize: 10, fontWeight: 800, cursor: 'pointer'
             }}
           >
-            <XCircle size={12} />
+            <XCircle size={10} />
             <span>Hide</span>
           </button>
         </div>
@@ -1326,54 +1332,62 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
     <div style={{
       background: isOff ? 'rgba(15, 18, 33, 0.4)' : 'var(--ad-input)',
       border: `1.5px solid ${isOff ? 'rgba(239, 68, 68, 0.3)' : (isPaid ? 'rgba(245, 158, 11, 0.35)' : 'rgba(16, 185, 129, 0.35)')}`,
-      borderRadius: 14, padding: '13px',
+      borderRadius: 12, padding: '10px 8px',
       display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-      gap: 10, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
-      boxShadow: isPaid ? '0 2px 10px rgba(245, 158, 11, 0.08)' : '0 2px 10px rgba(16, 185, 129, 0.08)'
+      gap: 8, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
+      boxShadow: isPaid ? '0 2px 8px rgba(245, 158, 11, 0.08)' : '0 2px 8px rgba(16, 185, 129, 0.08)'
     }}>
       {/* Top row: Visual Thumbnail + Name + Desc */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
         {customPreview ? (
           customPreview
         ) : gradientFill ? (
           <div style={{
-            width: 38, height: 38, borderRadius: 10, background: gradientFill,
+            width: 34, height: 34, borderRadius: 8, background: gradientFill,
             border: '1.5px solid rgba(255,255,255,0.2)', flexShrink: 0,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
           }} />
         ) : imageUrl ? (
           <div style={{
-            width: 38, height: 38, borderRadius: 10, background: '#fff',
-            border: '1px solid var(--ad-border)', padding: 4, flexShrink: 0,
+            width: 34, height: 34, borderRadius: 8, background: '#fff',
+            border: '1px solid var(--ad-border)', padding: 3, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             <img src={imageUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
         ) : (
           <div style={{
-            width: 38, height: 38, borderRadius: 10,
+            width: 34, height: 34, borderRadius: 8,
             background: isOff ? 'rgba(148, 163, 184, 0.15)' : (isPaid ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(214, 0, 54, 0.15))' : 'rgba(16, 185, 129, 0.15)'),
             color: isOff ? 'var(--ad-text-sec)' : (isPaid ? '#F59E0B' : '#10B981'),
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
           }}>
-            <Icon size={18} strokeWidth={2.4} />
+            <Icon size={16} strokeWidth={2.4} />
           </div>
         )}
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontSize: 13, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3,
-            fontFamily: fontFamily ? `${fontFamily}, sans-serif` : 'inherit'
+            fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.25,
+            fontFamily: fontFamily ? `${fontFamily}, sans-serif` : 'inherit',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
           }}>
             {name}
           </div>
           {desc && (
-            <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 2, lineHeight: 1.35 }}>
+            <div style={{
+              fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 2, lineHeight: 1.3,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+            }}>
               {desc}
             </div>
           )}
           {badge && (
-            <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: 'var(--ad-card)', color: 'var(--ad-text-sec)', border: '1px solid var(--ad-border)', display: 'inline-block', marginTop: 4 }}>
+            <span style={{
+              fontSize: 8.5, fontWeight: 800, padding: '1px 4px', borderRadius: 4,
+              background: 'var(--ad-card)', color: 'var(--ad-text-sec)',
+              border: '1px solid var(--ad-border)', display: 'inline-block', marginTop: 3
+            }}>
               {badge}
             </span>
           )}
@@ -1383,22 +1397,22 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
       {/* Bottom Controls Bar: Active Switch + 1-Click Free/Pro Toggle */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        paddingTop: 8, borderTop: '1px solid var(--ad-border)'
+        paddingTop: 6, borderTop: '1px solid var(--ad-border)', gap: 4
       }}>
         <button
           type="button"
           disabled={updating}
           onClick={onToggleEnable}
           style={{
-            display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
-            borderRadius: 7, border: `1px solid ${enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+            display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
+            borderRadius: 6, border: `1px solid ${enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
             background: enabled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            color: enabled ? '#22C55E' : '#EF4444', fontSize: 10, fontWeight: 800,
-            cursor: updating ? 'not-allowed' : 'pointer'
+            color: enabled ? '#22C55E' : '#EF4444', fontSize: 9, fontWeight: 800,
+            cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0
           }}
         >
-          <Power size={10} strokeWidth={2.5} />
-          <span>{enabled ? 'ACTIVE' : 'HIDDEN'}</span>
+          <Power size={9} strokeWidth={2.5} />
+          <span>{enabled ? 'ON' : 'OFF'}</span>
         </button>
 
         <button
@@ -1406,23 +1420,22 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
           disabled={updating}
           onClick={onToggleTier}
           style={{
-            display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px',
+            display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px',
             borderRadius: 100, border: `1.5px solid ${isPaid ? '#F59E0B' : '#10B981'}`,
             background: isPaid ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-            color: '#FFFFFF', fontSize: 10, fontWeight: 800,
-            cursor: updating ? 'not-allowed' : 'pointer',
-            boxShadow: isPaid ? '0 2px 8px rgba(245, 158, 11, 0.35)' : '0 2px 8px rgba(16, 185, 129, 0.35)'
+            color: '#FFFFFF', fontSize: 9, fontWeight: 800,
+            cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0,
+            boxShadow: isPaid ? '0 2px 6px rgba(245, 158, 11, 0.35)' : '0 2px 6px rgba(16, 185, 129, 0.35)'
           }}
         >
           {updating ? (
-            <RefreshCw size={10} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
+            <RefreshCw size={9} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
           ) : isPaid ? (
-            <Crown size={10} fill="#fff" color="#fff" strokeWidth={2.2} />
+            <Crown size={9} fill="#fff" color="#fff" strokeWidth={2.2} />
           ) : (
-            <Shield size={10} strokeWidth={2.5} />
+            <Shield size={9} strokeWidth={2.5} />
           )}
           <span>{isPaid ? 'PRO' : 'FREE'}</span>
-          <span style={{ fontSize: 8, opacity: 0.8, marginLeft: 2 }}>⇄</span>
         </button>
       </div>
     </div>
