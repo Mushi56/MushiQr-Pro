@@ -97,7 +97,6 @@ import AppIcon from './components/AppIcon';
 import SaveLocationModal from './components/SaveLocationModal';
 import PremiumModal from './components/PremiumModal';
 import PaidCrownBadge from './components/PaidCrownBadge';
-import SplashScreen from './components/auth/SplashScreen';
 import OnboardingFlow from './components/auth/OnboardingFlow';
 import LoginPage from './components/auth/LoginPage';
 import SignUpPage from './components/auth/SignUpPage';
@@ -1044,9 +1043,6 @@ export default function App() {
   }, []);
   const [tabHistory, setTabHistory] = useState([]);
   const [authInitialized, setAuthInitialized] = useState(false);
-  const [showSplash, setShowSplash] = useState(() => {
-    return location.pathname === '/' || location.pathname === '/onboarding';
-  });
   const [activePage, setActivePage] = useState(() => {
     if (location.state?.activePage) return location.state.activePage;
     const pathPage = getPageFromPath(location.pathname);
@@ -6176,14 +6172,6 @@ export default function App() {
         )}
       </main>
 
-      {/* ── Splash Screen (Animated First Launch) ── */}
-      {showSplash && (
-        <SplashScreen
-          onFinish={() => {
-            setShowSplash(false);
-          }}
-        />
-      )}
       {/* ── Bottom Navigation Bar (Only for Generator) ── */}
       {activePage === 'generator' && (
         <nav className="bottom-nav">

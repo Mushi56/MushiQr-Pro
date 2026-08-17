@@ -211,9 +211,9 @@ export const FRAME_STYLES = {
 export function generateQRMatrix(text, ecLevel = 'H') {
   if (!text) return null;
 
-  const access = FeatureAccessManager.canUseFeature('qr_generator');
-  if (!access.allowed) {
-    console.warn('[qrEngine] generateQRMatrix blocked: qr_generator feature is disabled or restricted.');
+  const access = FeatureAccessManager.canUseFeature('qr_matrix_engine');
+  if (access && access.allowed === false) {
+    console.warn('[qrEngine] generateQRMatrix blocked: qr_matrix_engine feature is disabled.');
     return null;
   }
   const typeNumber = 0; // auto-detect
