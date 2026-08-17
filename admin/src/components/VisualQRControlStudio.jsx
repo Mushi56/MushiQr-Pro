@@ -223,17 +223,234 @@ export const ALL_FRAMES = [
 ];
 
 export const ALL_TEMPLATES = [
-  { id: 'instagram_card', name: 'Instagram Follower Card', color: '#E4405F', desc: 'Social profile promotion card' },
-  { id: 'youtube_subscribe', name: 'YouTube Subscribe Stand', color: '#FF0000', desc: 'Channel growth standee' },
-  { id: 'wifi_table_stand', name: 'Restaurant Wi-Fi Stand', color: '#2563EB', desc: 'Tabletop guest network pass' },
-  { id: 'vcard_executive', name: 'VIP Executive vCard', color: '#F59E0B', desc: 'Luxury gold contact badge' },
-  { id: 'crypto_payment', name: 'Crypto Wallet POS', color: '#10B981', desc: 'Bitcoin / USDT payment stand' },
-  { id: 'app_download_badge', name: 'App Store Download', color: '#7C3AED', desc: 'Mobile app install flyer' },
-  { id: 'event_ticket_pass', name: 'VIP Event Concert Pass', color: '#EC4899', desc: 'Admission ticket badge' },
-  { id: 'whatsapp_helpdesk', name: 'WhatsApp Live Chat', color: '#25D366', desc: 'Direct customer support link' },
-  { id: 'menu_dining_qr', name: 'Digital Dining Menu', color: '#D97706', desc: 'Contactless culinary menu' },
-  { id: 'store_google_review', name: 'Google 5-Star Reviews', color: '#4285F4', desc: 'Storefront rating booster' }
+  {
+    id: 'sm_instagram_pro',
+    name: 'Instagram Pro Follower Card',
+    logoSrc: '/presets/instagram.avif',
+    title: 'INSTAGRAM',
+    actionText: 'Follow Me',
+    defaultHandle: '@your.instagram',
+    bgGradStart: '#3B0826',
+    bgGradEnd: '#15020D',
+    glowColor: 'rgba(225, 48, 108, 0.4)',
+    iconGradStart: '#833AB4',
+    iconGradEnd: '#FD1D1D',
+    actionTextColor: '#FF4D79',
+    preset: { qrColor: '#1A0210', bgColor: '#FFFFFF', eyeColor: '#E1306C', eyeOuterColor: '#833AB4', dotStyle: 'rounded', eyeStyle: 'rounded' }
+  },
+  {
+    id: 'sm_facebook_pro',
+    name: 'Facebook Pro Community Card',
+    logoSrc: '/presets/facebook.avif',
+    title: 'FACEBOOK',
+    actionText: 'Join Our Community',
+    defaultHandle: 'facebook.com/yourpage',
+    bgGradStart: '#061B3A',
+    bgGradEnd: '#020916',
+    glowColor: 'rgba(24, 119, 242, 0.4)',
+    iconGradStart: '#1877F2',
+    iconGradEnd: '#0056C6',
+    actionTextColor: '#4D9BFF',
+    preset: { qrColor: '#030E20', bgColor: '#FFFFFF', eyeColor: '#1877F2', eyeOuterColor: '#0056C6', dotStyle: 'square', eyeStyle: 'square' }
+  },
+  {
+    id: 'sm_whatsapp_pro',
+    name: 'WhatsApp Pro Live Chat',
+    logoSrc: '/presets/whatsapp.avif',
+    title: 'WHATSAPP',
+    actionText: 'Chat With Us',
+    defaultHandle: '+1 (555) 019-2834',
+    bgGradStart: '#052B1E',
+    bgGradEnd: '#01120C',
+    glowColor: 'rgba(37, 211, 102, 0.4)',
+    iconGradStart: '#25D366',
+    iconGradEnd: '#128C7E',
+    actionTextColor: '#52E08A',
+    preset: { qrColor: '#021810', bgColor: '#FFFFFF', eyeColor: '#25D366', eyeOuterColor: '#128C7E', dotStyle: 'dots', eyeStyle: 'rounded' }
+  },
+  {
+    id: 'sm_youtube_pro',
+    name: 'YouTube Pro Subscribe Stand',
+    logoSrc: '/presets/youtube.avif',
+    title: 'YOUTUBE',
+    actionText: 'Watch & Subscribe',
+    defaultHandle: 'youtube.com/@channel',
+    bgGradStart: '#3A060B',
+    bgGradEnd: '#150103',
+    glowColor: 'rgba(255, 0, 0, 0.4)',
+    iconGradStart: '#FF0000',
+    iconGradEnd: '#990000',
+    actionTextColor: '#FF4D4D',
+    preset: { qrColor: '#200305', bgColor: '#FFFFFF', eyeColor: '#FF0000', eyeOuterColor: '#990000', dotStyle: 'rounded', eyeStyle: 'rounded' }
+  },
+  {
+    id: 'sm_x_pro',
+    name: 'X / Twitter Pro Profile',
+    logoSrc: '/presets/twitter.avif',
+    title: 'X (TWITTER)',
+    actionText: 'Follow Me',
+    defaultHandle: '@your_twitter_handle',
+    bgGradStart: '#0F172A',
+    bgGradEnd: '#020617',
+    glowColor: 'rgba(29, 155, 240, 0.4)',
+    iconGradStart: '#1DA1F2',
+    iconGradEnd: '#0C7ABF',
+    actionTextColor: '#58B9F5',
+    preset: { qrColor: '#0B132B', bgColor: '#FFFFFF', eyeColor: '#1DA1F2', eyeOuterColor: '#0C7ABF', dotStyle: 'square', eyeStyle: 'square' }
+  },
+  {
+    id: 'sm_tiktok_pro',
+    name: 'TikTok Pro Trending Card',
+    logoSrc: '/presets/tik-tok.avif',
+    title: 'TIKTOK',
+    actionText: 'Watch Trending Videos',
+    defaultHandle: '@tiktok_creator',
+    bgGradStart: '#1A0B26',
+    bgGradEnd: '#08030F',
+    glowColor: 'rgba(254, 44, 85, 0.4)',
+    iconGradStart: '#25F4EE',
+    iconGradEnd: '#FE2C55',
+    actionTextColor: '#FF5E80',
+    preset: { qrColor: '#10061A', bgColor: '#FFFFFF', eyeColor: '#FE2C55', eyeOuterColor: '#25F4EE', dotStyle: 'rounded', eyeStyle: 'rounded' }
+  },
+  {
+    id: 'sm_linkedin_pro',
+    name: 'LinkedIn Pro Connect Card',
+    logoSrc: '/presets/linkedin.avif',
+    title: 'LINKEDIN',
+    actionText: 'Connect With Me',
+    defaultHandle: 'linkedin.com/in/yourname',
+    bgGradStart: '#0A1E3F',
+    bgGradEnd: '#030A17',
+    glowColor: 'rgba(10, 102, 194, 0.4)',
+    iconGradStart: '#0A66C2',
+    iconGradEnd: '#004182',
+    actionTextColor: '#4A9EFF',
+    preset: { qrColor: '#051226', bgColor: '#FFFFFF', eyeColor: '#0A66C2', eyeOuterColor: '#004182', dotStyle: 'square', eyeStyle: 'square' }
+  },
+  {
+    id: 'sm_spotify_pro',
+    name: 'Spotify Pro Music Card',
+    logoSrc: '/presets/spotify.avif',
+    title: 'SPOTIFY',
+    actionText: 'Listen On Spotify',
+    defaultHandle: 'spotify:user:playlist',
+    bgGradStart: '#092612',
+    bgGradEnd: '#020F06',
+    glowColor: 'rgba(30, 215, 96, 0.4)',
+    iconGradStart: '#1DB954',
+    iconGradEnd: '#107C35',
+    actionTextColor: '#4DE07E',
+    preset: { qrColor: '#041409', bgColor: '#FFFFFF', eyeColor: '#1DB954', eyeOuterColor: '#107C35', dotStyle: 'dots', eyeStyle: 'rounded' }
+  },
+  {
+    id: 'sm_messenger_pro',
+    name: 'Messenger Pro Direct Chat',
+    logoSrc: '/presets/messenger.avif',
+    title: 'MESSENGER',
+    actionText: 'Chat With Us',
+    defaultHandle: 'm.me/yourpage',
+    bgGradStart: '#1F0836',
+    bgGradEnd: '#0B0215',
+    glowColor: 'rgba(0, 132, 255, 0.4)',
+    iconGradStart: '#0084FF',
+    iconGradEnd: '#A200FF',
+    actionTextColor: '#33A3FF',
+    preset: { qrColor: '#0E031A', bgColor: '#FFFFFF', eyeColor: '#0084FF', eyeOuterColor: '#A200FF', dotStyle: 'rounded', eyeStyle: 'rounded' }
+  },
+  {
+    id: 'sm_social_pro',
+    name: 'Social Hub Multi-Link Pro',
+    logoSrc: '/presets/social.avif',
+    title: 'SOCIAL HUB',
+    actionText: 'Join Us',
+    defaultHandle: 'linktr.ee/yourhub',
+    bgGradStart: '#25083B',
+    bgGradEnd: '#0D0216',
+    glowColor: 'rgba(235, 64, 52, 0.4)',
+    iconGradStart: '#FF3B30',
+    iconGradEnd: '#AF52DE',
+    actionTextColor: '#FF6B60',
+    preset: { qrColor: '#140320', bgColor: '#FFFFFF', eyeColor: '#FF3B30', eyeOuterColor: '#AF52DE', dotStyle: 'rounded', eyeStyle: 'rounded' }
+  }
 ];
+
+function TemplateMiniPosterCard({ template }) {
+  const bgGrad = `linear-gradient(160deg, ${template.bgGradStart || '#1e1b4b'} 0%, ${template.bgGradEnd || '#0f172a'} 100%)`;
+  const iconGrad = `linear-gradient(135deg, ${template.iconGradStart || '#FF4D9D'}, ${template.iconGradEnd || '#7B61FF'})`;
+
+  return (
+    <div style={{
+      width: '100%',
+      aspectRatio: '4 / 4.8',
+      background: bgGrad,
+      borderRadius: 12,
+      padding: '10px 8px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      position: 'relative',
+      overflow: 'hidden',
+      border: '1px solid rgba(255,255,255,0.12)',
+      boxShadow: `0 6px 18px ${template.glowColor || 'rgba(0,0,0,0.3)'}`
+    }}>
+      {/* Top Ambient Glow */}
+      <div style={{
+        position: 'absolute', top: -20, width: 80, height: 80, borderRadius: '50%',
+        background: template.glowColor || 'rgba(255,77,157,0.3)', filter: 'blur(16px)', pointerEvents: 'none'
+      }} />
+
+      {/* Header with Icon + Title */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, zIndex: 1 }}>
+        <div style={{
+          width: 24, height: 24, borderRadius: 6, background: iconGrad,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.3)', padding: 3
+        }}>
+          {template.logoSrc ? (
+            <img src={template.logoSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          ) : (
+            <QrCode size={13} color="#fff" />
+          )}
+        </div>
+        <span style={{ fontSize: 8, fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+          {template.title || template.name}
+        </span>
+      </div>
+
+      {/* Center White QR Card with Live Canvas / Matrix */}
+      <div style={{
+        background: '#FFFFFF',
+        borderRadius: 6,
+        padding: '4px',
+        boxShadow: '0 3px 10px rgba(0,0,0,0.25)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1
+      }}>
+        <MiniDotCanvas
+          dotStyle={template.preset?.dotStyle || 'rounded'}
+          color={template.preset?.eyeColor || '#000000'}
+        />
+      </div>
+
+      {/* Bottom Action Pill & Handle */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, zIndex: 1 }}>
+        <span style={{
+          fontSize: 7.5, fontWeight: 800, color: template.actionTextColor || '#FF4D79',
+          letterSpacing: '0.2px', textTransform: 'uppercase'
+        }}>
+          {template.actionText || 'Scan Me'}
+        </span>
+        <span style={{ fontSize: 6.5, fontWeight: 600, color: 'rgba(255,255,255,0.7)', fontFamily: 'monospace' }}>
+          {template.defaultHandle || '@mushiqr'}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 // ─── MINI CANVAS RENDERERS ──────────────────────────────────────────────────
 
@@ -900,29 +1117,26 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
       {/* ── TAB 10: TEMPLATES GALLERY ────────────────────────────────────────── */}
       {activeTab === 'templates' && (
         <SectionCatalog
-          title="20+ Ready-To-Use Social &amp; Pro Templates"
-          subtitle="Pre-styled Instagram cards, Wi-Fi table stands, VIP event tickets, and crypto payment badges."
+          title="Social Media &amp; Marketing Template Posters"
+          subtitle="Pre-styled 1080x1350 vertical posters for Instagram, Facebook, WhatsApp, YouTube, TikTok, etc."
           icon={LayoutGrid}
           onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEMPLATES.map(t => `qr_template_${t.id}`))}
           onMakePro={() => handleBatchActiveTabTier('paid', ALL_TEMPLATES.map(t => `qr_template_${t.id}`))}
           onEnableAll={() => handleBatchActiveTabEnable(true, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
           onDisableAll={() => handleBatchActiveTabEnable(false, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
             {ALL_TEMPLATES
-              .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()))
+              .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.title.toLowerCase().includes(searchQuery.toLowerCase()))
               .map(tpl => {
                 const key = `qr_template_${tpl.id}`;
                 const state = getItemState(key, true, 'weekly');
                 return (
-                  <ItemControlTile
+                  <TemplateItemControlTile
                     key={key}
-                    name={tpl.name}
-                    desc={tpl.desc}
-                    color={tpl.color}
+                    tpl={tpl}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
-                    icon={LayoutGrid}
                     updating={updatingKey === key}
                     onToggleEnable={() => handleToggleEnable(key, tpl.name, 'Templates')}
                     onToggleTier={() => handleToggleTier(key, tpl.name)}
@@ -932,6 +1146,80 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
           </div>
         </SectionCatalog>
       )}
+    </div>
+  );
+}
+
+function TemplateItemControlTile({ tpl, enabled, isPaid, updating, onToggleEnable, onToggleTier }) {
+  const isOff = !enabled;
+
+  return (
+    <div style={{
+      background: isOff ? 'rgba(15, 18, 33, 0.4)' : 'var(--ad-input)',
+      border: `1.5px solid ${isOff ? 'rgba(239, 68, 68, 0.3)' : (isPaid ? 'rgba(245, 158, 11, 0.35)' : 'rgba(16, 185, 129, 0.35)')}`,
+      borderRadius: 16, padding: '12px',
+      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+      gap: 12, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
+      boxShadow: isPaid ? '0 4px 14px rgba(245, 158, 11, 0.1)' : '0 4px 14px rgba(16, 185, 129, 0.1)'
+    }}>
+      {/* Visual Poster Thumbnail Card */}
+      <TemplateMiniPosterCard template={tpl} />
+
+      {/* Details */}
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3 }}>
+          {tpl.name}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 2 }}>
+          {tpl.actionText} · {tpl.defaultHandle}
+        </div>
+      </div>
+
+      {/* Controls Bar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        paddingTop: 8, borderTop: '1px solid var(--ad-border)'
+      }}>
+        <button
+          type="button"
+          disabled={updating}
+          onClick={onToggleEnable}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
+            borderRadius: 7, border: `1px solid ${enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+            background: enabled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+            color: enabled ? '#22C55E' : '#EF4444', fontSize: 10, fontWeight: 800,
+            cursor: updating ? 'not-allowed' : 'pointer'
+          }}
+        >
+          <Power size={10} strokeWidth={2.5} />
+          <span>{enabled ? 'ACTIVE' : 'HIDDEN'}</span>
+        </button>
+
+        <button
+          type="button"
+          disabled={updating}
+          onClick={onToggleTier}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px',
+            borderRadius: 100, border: `1.5px solid ${isPaid ? '#F59E0B' : '#10B981'}`,
+            background: isPaid ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            color: '#FFFFFF', fontSize: 10, fontWeight: 800,
+            cursor: updating ? 'not-allowed' : 'pointer',
+            boxShadow: isPaid ? '0 2px 8px rgba(245, 158, 11, 0.35)' : '0 2px 8px rgba(16, 185, 129, 0.35)'
+          }}
+        >
+          {updating ? (
+            <RefreshCw size={10} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
+          ) : isPaid ? (
+            <Crown size={10} fill="#fff" color="#fff" strokeWidth={2.2} />
+          ) : (
+            <Shield size={10} strokeWidth={2.5} />
+          )}
+          <span>{isPaid ? 'PRO' : 'FREE'}</span>
+          <span style={{ fontSize: 8, opacity: 0.8, marginLeft: 2 }}>⇄</span>
+        </button>
+      </div>
     </div>
   );
 }
