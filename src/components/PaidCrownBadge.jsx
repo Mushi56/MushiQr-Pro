@@ -25,11 +25,13 @@ export default function PaidCrownBadge({
     };
   }, []);
 
-  // Check if primary or fallback feature is marked as Paid / Pro
-  const isPrimaryPaid = featureId && FeatureAccessManager.isPaidFeature(featureId);
-  const isFallbackPaid = fallbackFeatureId && FeatureAccessManager.isPaidFeature(fallbackFeatureId);
+  // If a specific featureId is provided, its individual free/paid status is authoritative;
+  // only fall back to fallbackFeatureId if featureId is not provided
+  const isPaid = featureId 
+    ? FeatureAccessManager.isPaidFeature(featureId)
+    : (fallbackFeatureId ? FeatureAccessManager.isPaidFeature(fallbackFeatureId) : false);
 
-  if (!isPrimaryPaid && !isFallbackPaid) {
+  if (!isPaid) {
     return null;
   }
 

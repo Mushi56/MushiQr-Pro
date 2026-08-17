@@ -4389,7 +4389,7 @@ export default function App() {
                               padding: 0
                             }}
                           >
-                            <PaidCrownBadge featureId={`qr_template_${tpl.id}`} fallbackFeatureId="template_presets" position="corner" size={9} />
+                            <PaidCrownBadge featureId={`qr_template_${tpl.id}`} position="corner" size={9} />
                             <TemplatePreviewCanvas 
                               template={tpl} 
                               theme={effectiveTheme} 
