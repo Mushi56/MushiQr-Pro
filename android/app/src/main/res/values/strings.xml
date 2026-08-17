@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Mushi Admin</string>
-    <string name="title_activity_main">Mushi Admin</string>
-    <string name="package_name">com.mushiqr.admin</string>
+    <string name="app_name">Mushi QR Pro</string>
+    <string name="title_activity_main">Mushi QR Pro</string>
+    <string name="package_name">com.mushiqr.pro</string>
     <string name="custom_url_scheme">com.mushiqr.pro</string>
     <string name="server_client_id">1068457009199-eo7h1ni9ps5sre8bfg742c3eol2alslb.apps.googleusercontent.com</string>
     <string name="default_web_client_id">1068457009199-eo7h1ni9ps5sre8bfg742c3eol2alslb.apps.googleusercontent.com</string>

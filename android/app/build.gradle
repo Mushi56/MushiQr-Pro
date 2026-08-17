@@ -4,7 +4,7 @@ android {
     namespace = "com.mushiqr.pro"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.mushiqr.admin"
+        applicationId "com.mushiqr.pro"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 2
