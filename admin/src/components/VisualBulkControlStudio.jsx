@@ -98,6 +98,7 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('import_data');
+  const [activeSubTab, setActiveSubTab] = useState('all');
   const [updatingKey, setUpdatingKey] = useState(null);
   const [bulkProcessing, setBulkProcessing] = useState(false);
   const [feedbackToast, setFeedbackToast] = useState(null);
@@ -223,6 +224,35 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
     { id: 'resolution_export', label: '5. Quality & Share', count: ALL_BULK_RESOLUTION_TOOLS.length + ALL_BULK_DISTRIBUTION_TOOLS.length, icon: Download }
   ];
 
+  // Subcategory Tabs for each Main Category
+  const SUB_TABS = useMemo(() => ({
+    import_data: [
+      { id: 'all', label: 'All Data', count: ALL_BULK_IMPORT_TOOLS.length + ALL_BULK_VALIDATION_TOOLS.length, icon: Layers },
+      { id: 'spreadsheet', label: 'Spreadsheet Tools', count: ALL_BULK_IMPORT_TOOLS.length, icon: FileSpreadsheet },
+      { id: 'sanitization', label: 'Sanitization & Capacity', count: ALL_BULK_VALIDATION_TOOLS.length, icon: Zap }
+    ],
+    code_types: [
+      { id: 'all', label: 'All Codes', count: ALL_BULK_FORMAT_GENERATORS.length + ALL_BULK_CHECKSUM_TOOLS.length, icon: Layers },
+      { id: 'engines', label: 'Engines', count: ALL_BULK_FORMAT_GENERATORS.length, icon: QrCode },
+      { id: 'error', label: 'Error & Checksum', count: ALL_BULK_CHECKSUM_TOOLS.length, icon: Shield }
+    ],
+    batch_styling: [
+      { id: 'all', label: 'All Design', count: ALL_BULK_STYLING_TOOLS.length + ALL_BULK_PREVIEW_TOOLS.length, icon: Layers },
+      { id: 'presets', label: 'Design Presets', count: ALL_BULK_STYLING_TOOLS.length, icon: Palette },
+      { id: 'preview', label: 'Overrides & Preview', count: ALL_BULK_PREVIEW_TOOLS.length, icon: SlidersHorizontal }
+    ],
+    zip_archive: [
+      { id: 'all', label: 'All ZIP & PDF', count: ALL_BULK_ZIP_TOOLS.length + ALL_BULK_PRINT_NAMING_TOOLS.length, icon: Layers },
+      { id: 'zip', label: 'ZIP & PDF Formats', count: ALL_BULK_ZIP_TOOLS.length, icon: Archive },
+      { id: 'labels', label: 'Label Sheets', count: ALL_BULK_PRINT_NAMING_TOOLS.length, icon: Printer }
+    ],
+    resolution_export: [
+      { id: 'all', label: 'All Quality', count: ALL_BULK_RESOLUTION_TOOLS.length + ALL_BULK_DISTRIBUTION_TOOLS.length, icon: Layers },
+      { id: 'resolution', label: 'Resolution', count: ALL_BULK_RESOLUTION_TOOLS.length, icon: Sparkles },
+      { id: 'distribution', label: 'Distribution', count: ALL_BULK_DISTRIBUTION_TOOLS.length, icon: Share2 }
+    ]
+  }), []);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
       {/* Feedback Toast */}
@@ -291,7 +321,7 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
           )}
         </div>
 
-        {/* Horizontal Category Navbar Tabs (Touch Friendly Mobile Pills) */}
+        {/* Horizontal Category Navbar Tabs (Main Category Pills) */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto',
           paddingBottom: 2, scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch'
@@ -302,7 +332,10 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
             return (
               <button
                 key={t.id}
-                onClick={() => setActiveTab(t.id)}
+                onClick={() => {
+                  setActiveTab(t.id);
+                  setActiveSubTab('all');
+                }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px',
                   borderRadius: 10, border: `1px solid ${isActive ? '#10B981' : 'var(--ad-border)'}`,
@@ -326,78 +359,122 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
             );
           })}
         </div>
+
+        {/* Subcategory Navigation Tabs (Same style as Main Category Navbar, with 'All' first) */}
+        {SUB_TABS[activeTab] && SUB_TABS[activeTab].length > 0 && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto',
+            paddingTop: 10, borderTop: '1px solid var(--ad-border)',
+            scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch'
+          }}>
+            {SUB_TABS[activeTab].map(st => {
+              const isSubActive = activeSubTab === st.id;
+              const SubIcon = st.icon;
+              return (
+                <button
+                  key={st.id}
+                  onClick={() => setActiveSubTab(st.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px',
+                    borderRadius: 8, border: `1.5px solid ${isSubActive ? '#10B981' : 'var(--ad-border)'}`,
+                    background: isSubActive ? 'rgba(16, 185, 129, 0.16)' : 'var(--ad-input)',
+                    color: isSubActive ? '#10B981' : 'var(--ad-text-sec)',
+                    fontSize: 10.5, fontWeight: isSubActive ? 800 : 700, cursor: 'pointer',
+                    whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.15s ease'
+                  }}
+                >
+                  {SubIcon && <SubIcon size={12} />}
+                  <span>{st.label}</span>
+                  {st.count !== undefined && (
+                    <span style={{
+                      fontSize: 8.5, padding: '1px 5px', borderRadius: 5,
+                      background: isSubActive ? '#10B981' : 'var(--ad-card)',
+                      color: isSubActive ? '#fff' : 'var(--ad-text-sec)', fontWeight: 800
+                    }}>
+                      {st.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── Tab 1: Data Ingestion & Spreadsheets ─────────────────────────────── */}
       {activeTab === 'import_data' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Subcategory 1: Spreadsheets & Data Entry */}
-          <SectionCatalog
-            title="Spreadsheet Files & Data Entry Tools"
-            subtitle="Upload CSV, XLSX, XLS files, edit with interactive grid spreadsheet, or quick-paste multiline lists"
-            icon={FileSpreadsheet}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_IMPORT_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_IMPORT_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_IMPORT_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Input & Spreadsheet')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_IMPORT_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Input & Spreadsheet')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_IMPORT_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Input & Spreadsheet')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'spreadsheet') && (
+            <SectionCatalog
+              title="Spreadsheet Tools"
+              subtitle="Upload CSV, XLSX, XLS files, edit with interactive grid spreadsheet, or quick-paste multiline lists"
+              icon={FileSpreadsheet}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_IMPORT_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_IMPORT_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_IMPORT_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Input & Spreadsheet')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_IMPORT_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Input & Spreadsheet')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_IMPORT_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Input & Spreadsheet')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 2: Data Validation & Capacity */}
-          <SectionCatalog
-            title="Data Sanitization & Batch Capacity Scaling"
-            subtitle="Automated format cleaners, empty row filters, high-capacity 1,000+ item engines & master screen switch"
-            icon={Zap}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_VALIDATION_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_VALIDATION_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_VALIDATION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Input & Spreadsheet')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_VALIDATION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Input & Spreadsheet')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_VALIDATION_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Input & Spreadsheet')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'sanitization') && (
+            <SectionCatalog
+              title="Sanitization & Capacity"
+              subtitle="Automated format cleaners, empty row filters, high-capacity 1,000+ item engines & master screen switch"
+              icon={Zap}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_VALIDATION_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_VALIDATION_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_VALIDATION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Input & Spreadsheet')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_VALIDATION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Input & Spreadsheet')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_VALIDATION_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Input & Spreadsheet')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
 
@@ -405,72 +482,76 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
       {activeTab === 'code_types' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Subcategory 1: Generator Engines */}
-          <SectionCatalog
-            title="Bulk QR & Barcode Generation Engines"
-            subtitle="Bulk generate URL/vCard QR codes, 1D/2D barcodes (EAN, UPC, Code 128, DataMatrix) or combined mixed jobs"
-            icon={QrCode}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_FORMAT_GENERATORS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_FORMAT_GENERATORS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_FORMAT_GENERATORS.map(t => ({ key: t.id, name: t.name })), 'Batch Engines')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_FORMAT_GENERATORS.map(t => ({ key: t.id, name: t.name })), 'Batch Engines')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_FORMAT_GENERATORS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Batch Engines')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'engines') && (
+            <SectionCatalog
+              title="Engines"
+              subtitle="Bulk generate URL/vCard QR codes, 1D/2D barcodes (EAN, UPC, Code 128, DataMatrix) or combined mixed jobs"
+              icon={QrCode}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_FORMAT_GENERATORS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_FORMAT_GENERATORS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_FORMAT_GENERATORS.map(t => ({ key: t.id, name: t.name })), 'Batch Engines')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_FORMAT_GENERATORS.map(t => ({ key: t.id, name: t.name })), 'Batch Engines')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_FORMAT_GENERATORS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Batch Engines')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 2: Error Correction & Checksums */}
-          <SectionCatalog
-            title="Error Tolerance & Checksum Sync"
-            subtitle="Dynamic Reed-Solomon error correction and auto modulo check digit calculation across bulk lists"
-            icon={Shield}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_CHECKSUM_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_CHECKSUM_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_CHECKSUM_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Engines')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_CHECKSUM_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Engines')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_CHECKSUM_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Batch Engines')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'error') && (
+            <SectionCatalog
+              title="Error & Checksum"
+              subtitle="Dynamic Reed-Solomon error correction and auto modulo check digit calculation across bulk lists"
+              icon={Shield}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_CHECKSUM_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_CHECKSUM_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_CHECKSUM_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Engines')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_CHECKSUM_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Engines')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_CHECKSUM_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Batch Engines')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
 
@@ -478,72 +559,76 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
       {activeTab === 'batch_styling' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Subcategory 1: Synchronized Design Presets */}
-          <SectionCatalog
-            title="Synchronized Design Presets & Branding"
-            subtitle="Propagate colors, gradients, custom brand logos, and 35+ dot/eye module styles across the entire batch"
-            icon={Palette}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_STYLING_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_STYLING_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_STYLING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Styling')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_STYLING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Styling')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_STYLING_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Batch Styling')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'presets') && (
+            <SectionCatalog
+              title="Design Presets"
+              subtitle="Propagate colors, gradients, custom brand logos, and 35+ dot/eye module styles across the entire batch"
+              icon={Palette}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_STYLING_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_STYLING_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_STYLING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Styling')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_STYLING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Styling')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_STYLING_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Batch Styling')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 2: Previews & Row Overrides */}
-          <SectionCatalog
-            title="Row Overrides & Real-time Live Grid"
-            subtitle="Permit per-row custom design overrides and interactive live canvas preview cards"
-            icon={SlidersHorizontal}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_PREVIEW_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_PREVIEW_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_PREVIEW_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Styling')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_PREVIEW_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Styling')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_PREVIEW_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Batch Styling')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'preview') && (
+            <SectionCatalog
+              title="Overrides & Preview"
+              subtitle="Permit per-row custom design overrides and interactive live canvas preview cards"
+              icon={SlidersHorizontal}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_PREVIEW_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_PREVIEW_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_PREVIEW_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Styling')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_PREVIEW_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Batch Styling')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_PREVIEW_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Batch Styling')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
 
@@ -551,72 +636,76 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
       {activeTab === 'zip_archive' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Subcategory 1: ZIP Packaging & Formats */}
-          <SectionCatalog
-            title="Compressed ZIP Packaging & Formats"
-            subtitle="Download compressed ZIP archives containing individual PNGs, vector SVGs or compiled multi-page A4 PDFs"
-            icon={Archive}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_ZIP_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_ZIP_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_ZIP_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_ZIP_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_ZIP_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Bulk Export')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'zip') && (
+            <SectionCatalog
+              title="ZIP & PDF Formats"
+              subtitle="Download compressed ZIP archives containing individual PNGs, vector SVGs or compiled multi-page A4 PDFs"
+              icon={Archive}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_ZIP_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_ZIP_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_ZIP_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_ZIP_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_ZIP_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Bulk Export')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 2: Label Sheets & File Naming */}
-          <SectionCatalog
-            title="Sticky Label Sheets & Naming Rules"
-            subtitle="Print-ready Avery sticky label sheets, customizable file naming rules ({id}_{sku}_{text}), and ZIP compression"
-            icon={Printer}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_PRINT_NAMING_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_PRINT_NAMING_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_PRINT_NAMING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_PRINT_NAMING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_PRINT_NAMING_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Bulk Export')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'labels') && (
+            <SectionCatalog
+              title="Label Sheets"
+              subtitle="Print-ready Avery sticky label sheets, customizable file naming rules ({id}_{sku}_{text}), and ZIP compression"
+              icon={Printer}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_PRINT_NAMING_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_PRINT_NAMING_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_PRINT_NAMING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_PRINT_NAMING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_PRINT_NAMING_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Bulk Export')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
 
@@ -624,72 +713,76 @@ export default function VisualBulkControlStudio({ currentUser, isDark = false })
       {activeTab === 'resolution_export' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Subcategory 1: Resolution Scaler */}
-          <SectionCatalog
-            title="Batch Export Resolution Scaler"
-            subtitle="Low 512px, Normal 1024px, HD 2048px and 4K Ultra 4096px resolution multipliers for batch exports"
-            icon={Sparkles}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_RESOLUTION_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_RESOLUTION_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_RESOLUTION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_RESOLUTION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_RESOLUTION_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Bulk Export')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'resolution') && (
+            <SectionCatalog
+              title="Resolution"
+              subtitle="Low 512px, Normal 1024px, HD 2048px and 4K Ultra 4096px resolution multipliers for batch exports"
+              icon={Sparkles}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_RESOLUTION_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_RESOLUTION_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_RESOLUTION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_RESOLUTION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_RESOLUTION_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Bulk Export')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 2: Sharing & Storage */}
-          <SectionCatalog
-            title="Native Distribution & Document Storage"
-            subtitle="Direct OS Share Sheet integration (WhatsApp, AirDrop, Drive, Email) and local file storage"
-            icon={Share2}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_DISTRIBUTION_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_DISTRIBUTION_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_DISTRIBUTION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_DISTRIBUTION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BULK_DISTRIBUTION_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BulkToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      tag={tool.tag}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Bulk Export')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'distribution') && (
+            <SectionCatalog
+              title="Distribution"
+              subtitle="Direct OS Share Sheet integration (WhatsApp, AirDrop, Drive, Email) and local file storage"
+              icon={Share2}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BULK_DISTRIBUTION_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BULK_DISTRIBUTION_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BULK_DISTRIBUTION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BULK_DISTRIBUTION_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Bulk Export')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BULK_DISTRIBUTION_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()) || t.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BulkToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        tag={tool.tag}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Bulk Export')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
     </div>

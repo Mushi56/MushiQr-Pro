@@ -130,6 +130,7 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('formats_1d');
+  const [activeSubTab, setActiveSubTab] = useState('all');
   const [updatingKey, setUpdatingKey] = useState(null);
   const [bulkProcessing, setBulkProcessing] = useState(false);
   const [feedbackToast, setFeedbackToast] = useState(null);
@@ -262,6 +263,39 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
     { id: 'export_quality', label: '6. Save & Export', count: ALL_BARCODE_EXPORT_FORMATS.length + ALL_BARCODE_EXPORT_QUALITIES.length, icon: Download }
   ];
 
+  // Subcategory Tabs for each Main Category
+  const SUB_TABS = useMemo(() => ({
+    formats_1d: [
+      { id: 'all', label: 'All 1D', count: ALL_1D_RETAIL_STANDARDS.length + ALL_1D_INDUSTRIAL_STANDARDS.length + ALL_1D_POSTAL_MEDICAL_STANDARDS.length, icon: Layers },
+      { id: 'retail', label: 'Retail Formats', count: ALL_1D_RETAIL_STANDARDS.length, icon: Barcode },
+      { id: 'industrial', label: 'Industrial Formats', count: ALL_1D_INDUSTRIAL_STANDARDS.length, icon: Box },
+      { id: 'postal', label: 'Postal & Medical', count: ALL_1D_POSTAL_MEDICAL_STANDARDS.length, icon: Shield }
+    ],
+    formats_2d: [
+      { id: 'all', label: 'All 2D', count: ALL_2D_MATRIX_STANDARDS.length + ALL_2D_STACKED_STANDARDS.length, icon: Layers },
+      { id: 'matrix', label: 'Matrix Formats', count: ALL_2D_MATRIX_STANDARDS.length, icon: QrCode },
+      { id: 'stacked', label: 'Stacked Formats', count: ALL_2D_STACKED_STANDARDS.length, icon: Layers }
+    ],
+    colors_styling: [
+      { id: 'all', label: 'All Colors', count: ALL_BARCODE_COLOR_TOOLS.length + ALL_BARCODE_THEME_PRESETS.length, icon: Layers },
+      { id: 'colors', label: 'Colors', count: ALL_BARCODE_COLOR_TOOLS.length, icon: Palette },
+      { id: 'presets', label: 'Presets', count: ALL_BARCODE_THEME_PRESETS.length, icon: Bookmark }
+    ],
+    text_labels: [
+      { id: 'all', label: 'All Text', count: ALL_BARCODE_TEXT_TOOLS.length, icon: Layers },
+      { id: 'text', label: 'Text Controls', count: ALL_BARCODE_TEXT_TOOLS.length, icon: Type }
+    ],
+    sizing_geometry: [
+      { id: 'all', label: 'All Dimensions', count: ALL_BARCODE_SIZING_TOOLS.length, icon: Layers },
+      { id: 'sizing', label: 'Sizing', count: ALL_BARCODE_SIZING_TOOLS.length, icon: Sliders }
+    ],
+    export_quality: [
+      { id: 'all', label: 'All Exports', count: ALL_BARCODE_EXPORT_FORMATS.length + ALL_BARCODE_EXPORT_QUALITIES.length, icon: Layers },
+      { id: 'formats', label: 'Formats', count: ALL_BARCODE_EXPORT_FORMATS.length, icon: Download },
+      { id: 'quality', label: 'Quality', count: ALL_BARCODE_EXPORT_QUALITIES.length, icon: Sparkles }
+    ]
+  }), []);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
       {/* Feedback Toast */}
@@ -330,7 +364,7 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
           )}
         </div>
 
-        {/* Horizontal Category Navbar Tabs (Touch Friendly Mobile Pills) */}
+        {/* Horizontal Category Navbar Tabs (Main Category Pills) */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto',
           paddingBottom: 2, scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch'
@@ -341,7 +375,10 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
             return (
               <button
                 key={t.id}
-                onClick={() => setActiveTab(t.id)}
+                onClick={() => {
+                  setActiveTab(t.id);
+                  setActiveSubTab('all');
+                }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px',
                   borderRadius: 10, border: `1px solid ${isActive ? '#3B82F6' : 'var(--ad-border)'}`,
@@ -365,115 +402,161 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
             );
           })}
         </div>
+
+        {/* Subcategory Navigation Tabs (Same style as Main Category Navbar, with 'All' first) */}
+        {SUB_TABS[activeTab] && SUB_TABS[activeTab].length > 0 && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto',
+            paddingTop: 10, borderTop: '1px solid var(--ad-border)',
+            scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch'
+          }}>
+            {SUB_TABS[activeTab].map(st => {
+              const isSubActive = activeSubTab === st.id;
+              const SubIcon = st.icon;
+              return (
+                <button
+                  key={st.id}
+                  onClick={() => setActiveSubTab(st.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px',
+                    borderRadius: 8, border: `1.5px solid ${isSubActive ? '#3B82F6' : 'var(--ad-border)'}`,
+                    background: isSubActive ? 'rgba(59, 130, 246, 0.16)' : 'var(--ad-input)',
+                    color: isSubActive ? '#3B82F6' : 'var(--ad-text-sec)',
+                    fontSize: 10.5, fontWeight: isSubActive ? 800 : 700, cursor: 'pointer',
+                    whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.15s ease'
+                  }}
+                >
+                  {SubIcon && <SubIcon size={12} />}
+                  <span>{st.label}</span>
+                  {st.count !== undefined && (
+                    <span style={{
+                      fontSize: 8.5, padding: '1px 5px', borderRadius: 5,
+                      background: isSubActive ? '#3B82F6' : 'var(--ad-card)',
+                      color: isSubActive ? '#fff' : 'var(--ad-text-sec)', fontWeight: 800
+                    }}>
+                      {st.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── Tab 1: 1D Formats (Retail, Industrial & Postal) ──────────────────── */}
       {activeTab === 'formats_1d' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Subcategory 1: Retail & Point-of-Sale */}
-          <SectionCatalog
-            title="Global Retail & POS Barcodes"
-            subtitle="Standard consumer packaging standards: EAN-13, EAN-8, UPC-A, UPC-E, ISBN, ISSN, ISMN"
-            icon={Barcode}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_1D_RETAIL_STANDARDS.map(s => `barcode_${s.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_1D_RETAIL_STANDARDS.map(s => `barcode_${s.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_1D_RETAIL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_1D_RETAIL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_1D_RETAIL_STANDARDS
-                .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(std => {
-                  const key = `barcode_${std.id}`;
-                  const state = getItemState(key, true, std.defaultPlan);
-                  return (
-                    <BarcodeFormatControlTile
-                      key={key}
-                      standardKey={std.id}
-                      name={std.name}
-                      desc={std.desc}
-                      tag={std.tag}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === key}
-                      onToggleEnable={() => handleToggleEnable(key, std.name, '1D Standards')}
-                      onToggleTier={() => handleToggleTier(key, std.name)}
-                      isDark={isDark}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'retail') && (
+            <SectionCatalog
+              title="Retail Formats"
+              subtitle="Standard consumer packaging standards: EAN-13, EAN-8, UPC-A, UPC-E, ISBN, ISSN, ISMN"
+              icon={Barcode}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_1D_RETAIL_STANDARDS.map(s => `barcode_${s.id}`))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_1D_RETAIL_STANDARDS.map(s => `barcode_${s.id}`))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_1D_RETAIL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_1D_RETAIL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_1D_RETAIL_STANDARDS
+                  .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(std => {
+                    const key = `barcode_${std.id}`;
+                    const state = getItemState(key, true, std.defaultPlan);
+                    return (
+                      <BarcodeFormatControlTile
+                        key={key}
+                        standardKey={std.id}
+                        name={std.name}
+                        desc={std.desc}
+                        tag={std.tag}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === key}
+                        onToggleEnable={() => handleToggleEnable(key, std.name, '1D Standards')}
+                        onToggleTier={() => handleToggleTier(key, std.name)}
+                        isDark={isDark}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 2: Logistics & Industrial */}
-          <SectionCatalog
-            title="Logistics & Industrial 1D Standards"
-            subtitle="High-density logistics, warehouse master cartons, inventory & telecom symbologies"
-            icon={Box}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_1D_INDUSTRIAL_STANDARDS.map(s => `barcode_${s.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_1D_INDUSTRIAL_STANDARDS.map(s => `barcode_${s.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_1D_INDUSTRIAL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_1D_INDUSTRIAL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_1D_INDUSTRIAL_STANDARDS
-                .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(std => {
-                  const key = `barcode_${std.id}`;
-                  const state = getItemState(key, true, std.defaultPlan);
-                  return (
-                    <BarcodeFormatControlTile
-                      key={key}
-                      standardKey={std.id}
-                      name={std.name}
-                      desc={std.desc}
-                      tag={std.tag}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === key}
-                      onToggleEnable={() => handleToggleEnable(key, std.name, '1D Standards')}
-                      onToggleTier={() => handleToggleTier(key, std.name)}
-                      isDark={isDark}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'industrial') && (
+            <SectionCatalog
+              title="Industrial Formats"
+              subtitle="High-density logistics, warehouse master cartons, inventory & telecom symbologies"
+              icon={Box}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_1D_INDUSTRIAL_STANDARDS.map(s => `barcode_${s.id}`))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_1D_INDUSTRIAL_STANDARDS.map(s => `barcode_${s.id}`))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_1D_INDUSTRIAL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_1D_INDUSTRIAL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_1D_INDUSTRIAL_STANDARDS
+                  .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(std => {
+                    const key = `barcode_${std.id}`;
+                    const state = getItemState(key, true, std.defaultPlan);
+                    return (
+                      <BarcodeFormatControlTile
+                        key={key}
+                        standardKey={std.id}
+                        name={std.name}
+                        desc={std.desc}
+                        tag={std.tag}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === key}
+                        onToggleEnable={() => handleToggleEnable(key, std.name, '1D Standards')}
+                        onToggleTier={() => handleToggleTier(key, std.name)}
+                        isDark={isDark}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 3: Postal & Medical */}
-          <SectionCatalog
-            title="Postal, Medical & Specialized 1D Standards"
-            subtitle="USPS Postnet/Planet, UK Royal Mail RM4SCC, Telepen full-ASCII and pharmaceutical packaging controls"
-            icon={Shield}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_1D_POSTAL_MEDICAL_STANDARDS.map(s => `barcode_${s.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_1D_POSTAL_MEDICAL_STANDARDS.map(s => `barcode_${s.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_1D_POSTAL_MEDICAL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_1D_POSTAL_MEDICAL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_1D_POSTAL_MEDICAL_STANDARDS
-                .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(std => {
-                  const key = `barcode_${std.id}`;
-                  const state = getItemState(key, true, std.defaultPlan);
-                  return (
-                    <BarcodeFormatControlTile
-                      key={key}
-                      standardKey={std.id}
-                      name={std.name}
-                      desc={std.desc}
-                      tag={std.tag}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === key}
-                      onToggleEnable={() => handleToggleEnable(key, std.name, '1D Standards')}
-                      onToggleTier={() => handleToggleTier(key, std.name)}
-                      isDark={isDark}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'postal') && (
+            <SectionCatalog
+              title="Postal & Medical Formats"
+              subtitle="USPS Postnet/Planet, UK Royal Mail RM4SCC, Telepen full-ASCII and pharmaceutical packaging controls"
+              icon={Shield}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_1D_POSTAL_MEDICAL_STANDARDS.map(s => `barcode_${s.id}`))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_1D_POSTAL_MEDICAL_STANDARDS.map(s => `barcode_${s.id}`))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_1D_POSTAL_MEDICAL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_1D_POSTAL_MEDICAL_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '1D Standards')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_1D_POSTAL_MEDICAL_STANDARDS
+                  .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(std => {
+                    const key = `barcode_${std.id}`;
+                    const state = getItemState(key, true, std.defaultPlan);
+                    return (
+                      <BarcodeFormatControlTile
+                        key={key}
+                        standardKey={std.id}
+                        name={std.name}
+                        desc={std.desc}
+                        tag={std.tag}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === key}
+                        onToggleEnable={() => handleToggleEnable(key, std.name, '1D Standards')}
+                        onToggleTier={() => handleToggleTier(key, std.name)}
+                        isDark={isDark}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
 
@@ -481,74 +564,78 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
       {activeTab === 'formats_2d' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Subcategory 1: 2D Matrix Formats */}
-          <SectionCatalog
-            title="High-Density 2D Matrix Formats"
-            subtitle="Data Matrix, Aztec Transit Code, GS1 DataBar Omni, MaxiCode, Micro QR and Han Xin Code"
-            icon={QrCode}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_2D_MATRIX_STANDARDS.map(s => `barcode_${s.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_2D_MATRIX_STANDARDS.map(s => `barcode_${s.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_2D_MATRIX_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '2D Standards')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_2D_MATRIX_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '2D Standards')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_2D_MATRIX_STANDARDS
-                .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(std => {
-                  const key = `barcode_${std.id}`;
-                  const state = getItemState(key, true, std.defaultPlan);
-                  return (
-                    <BarcodeFormatControlTile
-                      key={key}
-                      standardKey={std.id}
-                      name={std.name}
-                      desc={std.desc}
-                      tag={std.tag}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === key}
-                      onToggleEnable={() => handleToggleEnable(key, std.name, '2D Standards')}
-                      onToggleTier={() => handleToggleTier(key, std.name)}
-                      isDark={isDark}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'matrix') && (
+            <SectionCatalog
+              title="Matrix Formats"
+              subtitle="Data Matrix, Aztec Transit Code, GS1 DataBar Omni, MaxiCode, Micro QR and Han Xin Code"
+              icon={QrCode}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_2D_MATRIX_STANDARDS.map(s => `barcode_${s.id}`))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_2D_MATRIX_STANDARDS.map(s => `barcode_${s.id}`))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_2D_MATRIX_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '2D Standards')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_2D_MATRIX_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '2D Standards')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_2D_MATRIX_STANDARDS
+                  .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(std => {
+                    const key = `barcode_${std.id}`;
+                    const state = getItemState(key, true, std.defaultPlan);
+                    return (
+                      <BarcodeFormatControlTile
+                        key={key}
+                        standardKey={std.id}
+                        name={std.name}
+                        desc={std.desc}
+                        tag={std.tag}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === key}
+                        onToggleEnable={() => handleToggleEnable(key, std.name, '2D Standards')}
+                        onToggleTier={() => handleToggleTier(key, std.name)}
+                        isDark={isDark}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 2: 2D Multi-Row Stacked Formats */}
-          <SectionCatalog
-            title="Multi-Row Stacked 2D Barcodes"
-            subtitle="High-capacity stacked formats: PDF417 for government IDs, Codablock F, Code 16K & Code 49"
-            icon={Layers}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_2D_STACKED_STANDARDS.map(s => `barcode_${s.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_2D_STACKED_STANDARDS.map(s => `barcode_${s.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_2D_STACKED_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '2D Standards')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_2D_STACKED_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '2D Standards')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_2D_STACKED_STANDARDS
-                .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(std => {
-                  const key = `barcode_${std.id}`;
-                  const state = getItemState(key, true, std.defaultPlan);
-                  return (
-                    <BarcodeFormatControlTile
-                      key={key}
-                      standardKey={std.id}
-                      name={std.name}
-                      desc={std.desc}
-                      tag={std.tag}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === key}
-                      onToggleEnable={() => handleToggleEnable(key, std.name, '2D Standards')}
-                      onToggleTier={() => handleToggleTier(key, std.name)}
-                      isDark={isDark}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'stacked') && (
+            <SectionCatalog
+              title="Stacked Formats"
+              subtitle="High-capacity stacked formats: PDF417 for government IDs, Codablock F, Code 16K & Code 49"
+              icon={Layers}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_2D_STACKED_STANDARDS.map(s => `barcode_${s.id}`))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_2D_STACKED_STANDARDS.map(s => `barcode_${s.id}`))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_2D_STACKED_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '2D Standards')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_2D_STACKED_STANDARDS.map(s => ({ key: `barcode_${s.id}`, name: s.name })), '2D Standards')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_2D_STACKED_STANDARDS
+                  .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()) || s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(std => {
+                    const key = `barcode_${std.id}`;
+                    const state = getItemState(key, true, std.defaultPlan);
+                    return (
+                      <BarcodeFormatControlTile
+                        key={key}
+                        standardKey={std.id}
+                        name={std.name}
+                        desc={std.desc}
+                        tag={std.tag}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === key}
+                        onToggleEnable={() => handleToggleEnable(key, std.name, '2D Standards')}
+                        onToggleTier={() => handleToggleTier(key, std.name)}
+                        isDark={isDark}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
 
@@ -556,142 +643,150 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
       {activeTab === 'colors_styling' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Subcategory 1: Color Controls */}
-          <SectionCatalog
-            title="Barcode Colors & Canvas Backings"
-            subtitle="Pick custom foreground bar colors, canvas background colors, transparency & gradient fills"
-            icon={Palette}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_COLOR_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_COLOR_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_COLOR_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_COLOR_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BARCODE_COLOR_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BarcodeToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Barcode Appearance')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'colors') && (
+            <SectionCatalog
+              title="Colors"
+              subtitle="Pick custom foreground bar colors, canvas background colors, transparency & gradient fills"
+              icon={Palette}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_COLOR_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_COLOR_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_COLOR_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_COLOR_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BARCODE_COLOR_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BarcodeToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Barcode Appearance')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 2: Color Theme Presets */}
-          <SectionCatalog
-            title="8 Color Theme Preset Swatches"
-            subtitle="Pre-styled multi-color swatch themes for instant 1-click styling in the mobile app"
-            icon={Bookmark}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_THEME_PRESETS.map(p => `barcode_theme_${p.id}`))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_THEME_PRESETS.map(p => `barcode_theme_${p.id}`))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_THEME_PRESETS.map(p => ({ key: `barcode_theme_${p.id}`, name: p.name })), 'Barcode Appearance')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_THEME_PRESETS.map(p => ({ key: `barcode_theme_${p.id}`, name: p.name })), 'Barcode Appearance')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
-              {ALL_BARCODE_THEME_PRESETS
-                .filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.desc.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(preset => {
-                  const key = `barcode_theme_${preset.id}`;
-                  const state = getItemState(key, true, 'free');
-                  return (
-                    <BarcodeThemePresetTile
-                      key={key}
-                      preset={preset}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === key}
-                      onToggleEnable={() => handleToggleEnable(key, preset.name, 'Barcode Appearance')}
-                      onToggleTier={() => handleToggleTier(key, preset.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'presets') && (
+            <SectionCatalog
+              title="Presets"
+              subtitle="Pre-styled multi-color swatch themes for instant 1-click styling in the mobile app"
+              icon={Bookmark}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_THEME_PRESETS.map(p => `barcode_theme_${p.id}`))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_THEME_PRESETS.map(p => `barcode_theme_${p.id}`))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_THEME_PRESETS.map(p => ({ key: `barcode_theme_${p.id}`, name: p.name })), 'Barcode Appearance')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_THEME_PRESETS.map(p => ({ key: `barcode_theme_${p.id}`, name: p.name })), 'Barcode Appearance')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
+                {ALL_BARCODE_THEME_PRESETS
+                  .filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.desc.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(preset => {
+                    const key = `barcode_theme_${preset.id}`;
+                    const state = getItemState(key, true, 'free');
+                    return (
+                      <BarcodeThemePresetTile
+                        key={key}
+                        preset={preset}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === key}
+                        onToggleEnable={() => handleToggleEnable(key, preset.name, 'Barcode Appearance')}
+                        onToggleTier={() => handleToggleTier(key, preset.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
 
       {/* ── Tab 4: Text & Typography ────────────────────────────────────────── */}
       {activeTab === 'text_labels' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <SectionCatalog
-            title="Human-Readable Text & Typography Controls"
-            subtitle="Toggle digits under bars, font selection, custom font file uploads, top title captions & checksum highlights"
-            icon={Type}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_TEXT_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_TEXT_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_TEXT_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_TEXT_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BARCODE_TEXT_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BarcodeToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Barcode Appearance')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'text') && (
+            <SectionCatalog
+              title="Text Controls"
+              subtitle="Toggle digits under bars, font selection, custom font file uploads, top title captions & checksum highlights"
+              icon={Type}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_TEXT_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_TEXT_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_TEXT_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_TEXT_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BARCODE_TEXT_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BarcodeToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Barcode Appearance')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
 
       {/* ── Tab 5: Dimensions & Sizing ───────────────────────────────────────── */}
       {activeTab === 'sizing_geometry' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <SectionCatalog
-            title="Dimensions, Sizing & Margin Standards"
-            subtitle="Bar width multiplier, vertical height scaler, quiet zone margins, 90°/180° rotation & guard bars"
-            icon={Sliders}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_SIZING_TOOLS.map(t => t.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_SIZING_TOOLS.map(t => t.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_SIZING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_SIZING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BARCODE_SIZING_TOOLS
-                .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(tool => {
-                  const state = getItemState(tool.id, true, tool.defaultPlan);
-                  const ToolIcon = tool.icon;
-                  return (
-                    <BarcodeToolControlTile
-                      key={tool.id}
-                      name={tool.name}
-                      desc={tool.desc}
-                      icon={ToolIcon}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === tool.id}
-                      onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Barcode Appearance')}
-                      onToggleTier={() => handleToggleTier(tool.id, tool.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'sizing') && (
+            <SectionCatalog
+              title="Sizing"
+              subtitle="Bar width multiplier, vertical height scaler, quiet zone margins, 90°/180° rotation & guard bars"
+              icon={Sliders}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_SIZING_TOOLS.map(t => t.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_SIZING_TOOLS.map(t => t.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_SIZING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_SIZING_TOOLS.map(t => ({ key: t.id, name: t.name })), 'Barcode Appearance')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BARCODE_SIZING_TOOLS
+                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(tool => {
+                    const state = getItemState(tool.id, true, tool.defaultPlan);
+                    const ToolIcon = tool.icon;
+                    return (
+                      <BarcodeToolControlTile
+                        key={tool.id}
+                        name={tool.name}
+                        desc={tool.desc}
+                        icon={ToolIcon}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === tool.id}
+                        onToggleEnable={() => handleToggleEnable(tool.id, tool.name, 'Barcode Appearance')}
+                        onToggleTier={() => handleToggleTier(tool.id, tool.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
 
@@ -699,68 +794,72 @@ export default function VisualBarcodeControlStudio({ currentUser, isDark = false
       {activeTab === 'export_quality' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Subcategory 1: File Formats */}
-          <SectionCatalog
-            title="Vector & Raster Export Formats"
-            subtitle="High-res PNG, compressed JPG, scalable SVG vectors, printable A4 PDF documents & thermal printer output"
-            icon={Download}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_EXPORT_FORMATS.map(f => f.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_EXPORT_FORMATS.map(f => f.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_EXPORT_FORMATS.map(f => ({ key: f.id, name: f.name })), 'Export')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_EXPORT_FORMATS.map(f => ({ key: f.id, name: f.name })), 'Export')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BARCODE_EXPORT_FORMATS
-                .filter(f => !searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase()) || f.desc.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(fmt => {
-                  const state = getItemState(fmt.id, true, fmt.defaultPlan);
-                  return (
-                    <BarcodeToolControlTile
-                      key={fmt.id}
-                      name={fmt.name}
-                      desc={fmt.desc}
-                      icon={fmt.id.includes('print') ? Printer : (fmt.id.includes('pdf') ? FileText : Download)}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === fmt.id}
-                      onToggleEnable={() => handleToggleEnable(fmt.id, fmt.name, 'Export')}
-                      onToggleTier={() => handleToggleTier(fmt.id, fmt.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'formats') && (
+            <SectionCatalog
+              title="Formats"
+              subtitle="High-res PNG, compressed JPG, scalable SVG vectors, printable A4 PDF documents & thermal printer output"
+              icon={Download}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_EXPORT_FORMATS.map(f => f.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_EXPORT_FORMATS.map(f => f.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_EXPORT_FORMATS.map(f => ({ key: f.id, name: f.name })), 'Export')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_EXPORT_FORMATS.map(f => ({ key: f.id, name: f.name })), 'Export')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BARCODE_EXPORT_FORMATS
+                  .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(fmt => {
+                    const state = getItemState(fmt.id, true, fmt.defaultPlan);
+                    return (
+                      <BarcodeToolControlTile
+                        key={fmt.id}
+                        name={fmt.name}
+                        desc={fmt.desc}
+                        icon={fmt.id.includes('print') ? Printer : (fmt.id.includes('pdf') ? FileText : Download)}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === fmt.id}
+                        onToggleEnable={() => handleToggleEnable(fmt.id, fmt.name, 'Export')}
+                        onToggleTier={() => handleToggleTier(fmt.id, fmt.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
 
           {/* Subcategory 2: Quality & Sharing */}
-          <SectionCatalog
-            title="Export Resolution & OS Share Sheet"
-            subtitle="Control Low (512px), Normal (1024px), HD (2048px), 4K Ultra (4096px) resolution & native sharing"
-            icon={Sparkles}
-            onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_EXPORT_QUALITIES.map(q => q.id))}
-            onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_EXPORT_QUALITIES.map(q => q.id))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_EXPORT_QUALITIES.map(q => ({ key: q.id, name: q.name })), 'Export')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_EXPORT_QUALITIES.map(q => ({ key: q.id, name: q.name })), 'Export')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
-              {ALL_BARCODE_EXPORT_QUALITIES
-                .filter(q => !searchQuery || q.name.toLowerCase().includes(searchQuery.toLowerCase()) || q.desc.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(qual => {
-                  const state = getItemState(qual.id, true, qual.defaultPlan);
-                  return (
-                    <BarcodeToolControlTile
-                      key={qual.id}
-                      name={qual.name}
-                      desc={qual.desc}
-                      icon={qual.id.includes('share') ? Share2 : Sparkles}
-                      enabled={state.enabled}
-                      isPaid={state.isPaid}
-                      updating={updatingKey === qual.id}
-                      onToggleEnable={() => handleToggleEnable(qual.id, qual.name, 'Export')}
-                      onToggleTier={() => handleToggleTier(qual.id, qual.name)}
-                    />
-                  );
-                })}
-            </div>
-          </SectionCatalog>
+          {(activeSubTab === 'all' || activeSubTab === 'quality') && (
+            <SectionCatalog
+              title="Quality"
+              subtitle="Control Low (512px), Normal (1024px), HD (2048px), 4K Ultra (4096px) resolution & native sharing"
+              icon={Sparkles}
+              onMakeFree={() => handleBatchActiveTabTier('free', ALL_BARCODE_EXPORT_QUALITIES.map(q => q.id))}
+              onMakePro={() => handleBatchActiveTabTier('paid', ALL_BARCODE_EXPORT_QUALITIES.map(q => q.id))}
+              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BARCODE_EXPORT_QUALITIES.map(q => ({ key: q.id, name: q.name })), 'Export')}
+              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BARCODE_EXPORT_QUALITIES.map(q => ({ key: q.id, name: q.name })), 'Export')}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 10 }}>
+                {ALL_BARCODE_EXPORT_QUALITIES
+                  .filter(q => !searchQuery || q.name.toLowerCase().includes(searchQuery.toLowerCase()) || q.desc.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(qual => {
+                    const state = getItemState(qual.id, true, qual.defaultPlan);
+                    return (
+                      <BarcodeToolControlTile
+                        key={qual.id}
+                        name={qual.name}
+                        desc={qual.desc}
+                        icon={qual.id.includes('share') ? Share2 : Sparkles}
+                        enabled={state.enabled}
+                        isPaid={state.isPaid}
+                        updating={updatingKey === qual.id}
+                        onToggleEnable={() => handleToggleEnable(qual.id, qual.name, 'Export')}
+                        onToggleTier={() => handleToggleTier(qual.id, qual.name)}
+                      />
+                    );
+                  })}
+              </div>
+            </SectionCatalog>
+          )}
         </div>
       )}
     </div>
