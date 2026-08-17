@@ -338,6 +338,10 @@ class FeatureAccessManagerService {
     this.notifyListeners();
   }
 
+  isSuperAdmin() {
+    return this.userClaims?.role === 'super_admin';
+  }
+
   init() {
     // 1. Listen for Auth State & custom claims
     onIdTokenChanged(auth, async (user) => {
@@ -596,7 +600,7 @@ class FeatureAccessManagerService {
     }
 
     // 2. Super Admin Universal Bypass
-    if (this.isSuperAdmin()) {
+    if (typeof this.isSuperAdmin === 'function' && this.isSuperAdmin()) {
       return {
         allowed: true,
         reason: REASON.ALLOWED,

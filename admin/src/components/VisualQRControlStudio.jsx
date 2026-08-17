@@ -20,8 +20,9 @@ import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { setFeatureFlagCloud, setFeatureFlagsBatchCloud, setFeaturesTierBatchCloud } from '../services/adminDataService';
 import { FEATURE_REGISTRY } from '../services/FeatureAccessManager';
-import { drawDotModule, drawEye, renderQR, generateQRMatrix } from '../../src/utils/qrEngine.js';
-import { QR_TEMPLATES } from '../../src/utils/qrTemplates.js';
+import { drawDotModule, drawEye, renderQR, generateQRMatrix } from '../utils/qrEngine.js';
+import { QR_TEMPLATES } from '../utils/qrTemplates.js';
+import qrcode from 'qrcode-generator';
 
 // ─── 1. RAW CATALOG DATA ───────────────────────────────────────────────────
 
@@ -311,6 +312,25 @@ export const ALL_FRAMES = [
 
 export const ALL_TEMPLATES = QR_TEMPLATES;
 
+function getSampleMatrixDirect() {
+  try {
+    const qr = qrcode(0, 'H');
+    qr.addData('https://mushiqr.pro');
+    qr.make();
+    const count = qr.getModuleCount();
+    const matrix = [];
+    for (let r = 0; r < count; r++) {
+      matrix[r] = [];
+      for (let c = 0; c < count; c++) {
+        matrix[r][c] = qr.isDark(r, c);
+      }
+    }
+    return { matrix, moduleCount: count };
+  } catch {
+    return null;
+  }
+}
+
 function TemplatePreviewCanvas({ template }) {
   const canvasRef = useRef(null);
   const [tick, setTick] = useState(0);
@@ -323,57 +343,61 @@ function TemplatePreviewCanvas({ template }) {
 
   useEffect(() => {
     if (!canvasRef.current || !template) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const w = 480;
-    const h = template.heightRatio ? Math.round(w * template.heightRatio) : Math.round(w * 1.25);
-    canvas.width = w;
-    canvas.height = h;
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.clearRect(0, 0, w, h);
+    try {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const w = 480;
+      const h = template.heightRatio ? Math.round(w * template.heightRatio) : Math.round(w * 1.25);
+      canvas.width = w;
+      canvas.height = h;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.clearRect(0, 0, w, h);
 
-    // 1. Draw template background
-    if (template.drawBackground) {
-      template.drawBackground(ctx, w, h);
-    }
+      // 1. Draw template background
+      if (template.drawBackground) {
+        template.drawBackground(ctx, w, h);
+      }
 
-    // 2. Draw real custom QR code inside placeholder slot
-    ctx.save();
-    const tplQrSize = w * (template.qrSize || 0.44);
-    const tplQrX = w * (template.qrX || 0.5) - tplQrSize / 2;
-    const tplQrY = h * (template.qrY || 0.54) - tplQrSize / 2;
+      // 2. Draw real custom QR code inside placeholder slot
+      ctx.save();
+      const tplQrSize = w * (template.qrSize || 0.44);
+      const tplQrX = w * (template.qrX || 0.5) - tplQrSize / 2;
+      const tplQrY = h * (template.qrY || 0.54) - tplQrSize / 2;
 
-    const activeMatrixInfo = generateQRMatrix('https://mushiqr.pro');
+      const activeMatrixInfo = generateQRMatrix('https://mushiqr.pro') || getSampleMatrixDirect();
 
-    if (activeMatrixInfo) {
-      const qrTempCanvas = document.createElement('canvas');
-      qrTempCanvas.width = 512;
-      qrTempCanvas.height = 512;
+      if (activeMatrixInfo) {
+        const qrTempCanvas = document.createElement('canvas');
+        qrTempCanvas.width = 512;
+        qrTempCanvas.height = 512;
 
-      const optionsForQR = {
-        ...activeMatrixInfo,
-        size: 512,
-        qrColor: template.preset?.qrColor || '#000000',
-        bgColor: template.preset?.bgColor || '#FFFFFF',
-        bgTransparent: template.preset?.bgTransparent ?? false,
-        qrBgShape: 'full',
-        dotStyle: template.preset?.dotStyle || 'rounded',
-        eyeStyle: template.preset?.eyeStyle || 'rounded',
-        eyeColor: template.preset?.eyeColor || '',
-        eyeOuterColor: template.preset?.eyeOuterColor || '',
-        syncEyes: true,
-        quietZone: 2,
-      };
+        const optionsForQR = {
+          ...activeMatrixInfo,
+          size: 512,
+          qrColor: template.preset?.qrColor || '#000000',
+          bgColor: template.preset?.bgColor || '#FFFFFF',
+          bgTransparent: template.preset?.bgTransparent ?? false,
+          qrBgShape: 'full',
+          dotStyle: template.preset?.dotStyle || 'rounded',
+          eyeStyle: template.preset?.eyeStyle || 'rounded',
+          eyeColor: template.preset?.eyeColor || '',
+          eyeOuterColor: template.preset?.eyeOuterColor || '',
+          syncEyes: true,
+          quietZone: 2,
+        };
 
-      renderQR(qrTempCanvas, optionsForQR);
-      ctx.drawImage(qrTempCanvas, tplQrX, tplQrY, tplQrSize, tplQrSize);
-    }
-    ctx.restore();
+        renderQR(qrTempCanvas, optionsForQR);
+        ctx.drawImage(qrTempCanvas, tplQrX, tplQrY, tplQrSize, tplQrSize);
+      }
+      ctx.restore();
 
-    // 3. Draw template foreground overlay
-    if (template.drawForeground) {
-      template.drawForeground(ctx, w, h);
+      // 3. Draw template foreground overlay
+      if (template.drawForeground) {
+        template.drawForeground(ctx, w, h);
+      }
+    } catch (err) {
+      console.warn('[TemplatePreviewCanvas] Render error for template:', template?.id, err);
     }
   }, [template, tick]);
 

@@ -606,7 +606,7 @@ class FeatureAccessManagerService {
     }
 
     // 2. Super Admin Universal Bypass
-    if (this.isSuperAdmin()) {
+    if (typeof this.isSuperAdmin === 'function' && this.isSuperAdmin()) {
       return {
         allowed: true,
         reason: REASON.ALLOWED,

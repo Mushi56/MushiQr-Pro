@@ -5101,7 +5101,9 @@ function AdminPanelInner() {
                   <span style={{ fontSize: 14, color: T_THEME.textSec }}>Loading admin data...</span>
                 </div>
               ) : (
-                PANELS[section] || PANELS.dashboard
+                <PanelErrorBoundary section={section}>
+                  {PANELS[section] || PANELS.dashboard}
+                </PanelErrorBoundary>
               )}
             </div>
           </main>
@@ -5220,7 +5222,86 @@ function AdminPanelInner() {
   );
 }
 
-// â”€â”€â”€ Default export wraps everything in the ToastProvider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+class PanelErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('[AdminPanel] Panel rendering error:', error, errorInfo);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.section !== this.props.section && this.state.hasError) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          padding: '40px 20px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          gap: 16,
+          background: 'var(--ad-card, #151928)',
+          borderRadius: 20,
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          margin: 20
+        }}>
+          <div style={{
+            width: 48,
+            height: 48,
+            borderRadius: 14,
+            background: 'rgba(239, 68, 68, 0.15)',
+            color: '#EF4444',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <AlertTriangle size={24} />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: 'var(--ad-text, #fff)' }}>
+              Module Render Notice
+            </h3>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--ad-text-sec, #94A3B8)', maxWidth: 450 }}>
+              {this.state.error?.message || 'An unexpected state occurred while rendering this module.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => this.setState({ hasError: false, error: null })}
+            style={{
+              padding: '8px 18px',
+              borderRadius: 10,
+              background: '#FF4D9D',
+              color: '#fff',
+              border: 'none',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer'
+            }}
+          >
+            Retry Loading Module
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ─── Default export wraps everything in the ToastProvider ─────────────────────
 export default function AdminPanel() {
   return (
     <ToastProvider>

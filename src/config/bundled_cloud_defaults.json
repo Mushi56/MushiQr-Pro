@@ -2,640 +2,288 @@
   "_generatedAt": "2026-08-17T08:48:11.070Z",
   "_syncTimestamp": "2026-08-17T08:48:11.462440Z",
   "globalFlags": {
-    "qr_gradient_deep_space": true,
-    "qr_dot_cute-emoticon": true,
-    "qr_eye_cactus-eye": true,
-    "barcode_pdf417": true,
-    "qr_dot_coffee-bean": true,
-    "export_quality_low": true,
-    "qr_eye_diamond": true,
-    "qr_bgshape_circle": true,
-    "qr_eye_forget-me-not-eye": true,
-    "export_svg": true,
-    "custom_branding": true,
-    "qr_color_bg": true,
-    "templates_save_custom": true,
-    "export_native_share": true,
-    "qr_dot_violet-flower": true,
-    "scanner_barcode_detect": true,
-    "qr_eye_leaf": true,
-    "barcode_gs1128": true,
-    "qr_texture_facebook": true,
-    "qr_eye_daisy": true,
-    "barcode_i25": true,
-    "custom_logo_upload": true,
-    "qr_texture_twitter": true,
-    "qr_bgshape_glow": true,
-    "qr_text_styling": true,
-    "qr_dot_star": true,
-    "export_pdf": true,
-    "cloud_template_upload": true,
-    "qr_eye_rounded": true,
-    "password_qr": true,
-    "qr_font_outfit": true,
-    "batch_manual_input": true,
-    "qr_gradient_electric_blue": true,
-    "barcode_ean8": true,
-    "qr_dot_dots": true,
-    "custom_frames": true,
-    "qr_bgshape_rounded": true,
-    "barcode_itf14": true,
-    "pwa_install": true,
-    "qr_eye_cherry-blossom": true,
-    "dark_mode": true,
-    "saved_save_action": true,
-    "qr_eye_tulip-eye": true,
-    "saved": true,
-    "qr_dot_lotus": true,
-    "qr_eye_notch": true,
-    "qr_eye_sunflower": true,
-    "cloud_templates": true,
-    "barcode_generation": true,
-    "cloud_firestore_mirror": true,
-    "qr_generator": true,
-    "qr_color_preset_crimson": true,
-    "account_view": true,
+    "ai_qr_code": true,
+    "qr_gradient_royal_amethyst": true,
+    "barcode_code39": true,
+    "qr_gradient_neon_violet": true,
+    "export_png": true,
     "templates_free_apply": true,
-    "qr_eye_rose": true,
-    "settings_view": true,
-    "custom_colors_solid": true,
+    "settings_theme_toggle": true,
+    "qr_facebook": true,
+    "qr_image": true,
+    "qr_eye_shield": true,
+    "qr_bgshape_brackets": true,
+    "qr_audio": true,
+    "account_subscription_status": true,
+    "qr_eye_cute-emoticon": true,
+    "qr_eye_raindrop-eye": true,
+    "qr_tab_template": true,
+    "qr_size_custom": true,
+    "barcode_itf14": true,
+    "qr_tab_content": true,
+    "qr_dot_rose": true,
+    "qr_dot_capsule": true,
+    "scanner_camera_live": true,
+    "qr_dot_heart": true,
+    "qr_color_preset_emerald": true,
+    "qr_color_bg_image": true,
+    "custom_colors_gradient": true,
+    "qr_dot_hexagon": true,
+    "home_recent_items": true,
+    "barcode_aztec": true,
+    "qr_dot_daisy": true,
+    "qr_dot_cute-emoticon": true,
+    "qr_generator": true,
+    "history": true,
+    "qr_tab_style": true,
+    "qr_center_text": true,
+    "qr_dot_cactus-plant": true,
+    "export_svg": true,
+    "qr_gradient_cyberpunk_aqua": true,
+    "qr_gradient_sweet_candy": true,
+    "barcode_code93": true,
+    "qr_dot_shield": true,
+    "scanner_result_actions": true,
+    "custom_frames": true,
+    "barcode_qrcode": true,
+    "qr_eye_forget-me-not-eye": true,
+    "qr_eye_circle": true,
+    "qr_pdf": true,
+    "qr_gradient_midnight_gold": true,
+    "home_scanner_shortcut": true,
+    "qr_logo_bg_remover": true,
+    "qr_eye_geometric": true,
+    "qr_bgshape_hexagon": true,
+    "qr_bgshape_ribbon": true,
+    "qr_dot_rounded": true,
+    "qr_color_preset_classic": true,
+    "cloud_firestore_mirror": true,
+    "qr_youtube": true,
+    "qr_background_shapes": true,
+    "batch_zip_export": true,
+    "account_view": true,
+    "qr_email": true,
+    "cloud_sync_auto": true,
+    "qr_texture_whatsapp": true,
+    "batch_csv_import": true,
+    "templates": true,
+    "qr_eye_cactus-eye": true,
+    "home_view": true,
+    "qr_dot_bow-ribbon": true,
+    "qr_url": true,
+    "qr_dot_monstera": true,
+    "home_quick_barcode": true,
+    "export_quality_hd": true,
+    "barcode_pharmacode": true,
+    "barcode_pdf417": true,
+    "barcode_royalmail": true,
+    "save_location": true,
+    "qr_eye_monstera": true,
+    "qr_color_eyes_custom": true,
+    "cloud_template_upload": true,
+    "qr_color_preset_ocean": true,
+    "qr_dot_square": true,
+    "scanner_zoom": true,
+    "qr_eye_notch": true,
+    "developer_api": true,
+    "qr_bgshape_circle": true,
+    "qr_location": true,
+    "qr_texture_facebook": true,
+    "qr_eye_lavender": true,
+    "barcode_codabar": true,
+    "custom_dot_styles": true,
+    "qr_eye_star": true,
+    "custom_colors": true,
+    "qr_eye_cherry-blossom": true,
+    "qr_dot_fluid": true,
+    "qr_texture_telegram": true,
+    "qr_eye_hexagon": true,
+    "qr_dot_coffee-bean": true,
+    "templates_premium_apply": true,
+    "qr_document": true,
+    "barcode_channelcode": true,
+    "qr_dot_tulip": true,
+    "custom_logo_presets": true,
+    "qr_eye_violet-flower-eye": true,
+    "qr_dot_sparkle": true,
+    "qr_event": true,
+    "barcode_text_display": true,
+    "history_save_auto": true,
+    "barcode_ean13": true,
+    "batch_scan": true,
+    "qr_texture_twitter": true,
+    "qr_text_fonts": true,
+    "qr_texture_tiktok": true,
+    "history_delete_item": true,
+    "qr_color_preset_monochrome": true,
+    "qr_whatsapp": true,
+    "saved": true,
+    "qr_texture_snapchat": true,
+    "saved_search_filter": true,
+    "qr_dot_cherry-blossom": true,
+    "cloud_preferences_sync": true,
+    "custom_logo_upload": true,
+    "scanner": true,
+    "barcode_i25": true,
+    "qr_color_preset_cyberpunk": true,
+    "qr_color_preset_crimson": true,
+    "templates_browse": true,
+    "qr_tab_logo": true,
+    "qr_color_eyes": true,
+    "qr_color_bg": true,
+    "bulk_qr_creation": true,
+    "qr_texture_spotify": true,
+    "qr_dot_lotus": true,
+    "batch_view": true,
+    "qr_gradient_ocean_breeze": true,
+    "password_qr": true,
+    "_updatedAt": "2026-08-17T08:48:11.070Z",
+    "batch_custom_style": true,
+    "qr_logo_transforms": true,
+    "qr_dot_lavender": true,
+    "templates_save_custom": true,
+    "home_batch_shortcut": true,
+    "qr_dot_pansy": true,
+    "qr_color_dots": true,
+    "barcode_generation": true,
+    "qr_bgshape_rounded": true,
+    "scanner_image_upload": true,
+    "qr_eye_bow-eye": true,
+    "qr_dot_denso": true,
+    "qr_dot_triangle": true,
+    "barcode_ean8": true,
+    "qr_eye_pansy-eye": true,
+    "qr_dot_raindrop": true,
+    "history_view": true,
+    "qr_dot_violet-flower": true,
+    "barcode_upce": true,
+    "custom_logo": true,
+    "qr_gradient_citrus_lime": true,
+    "qr_dot_sunflower": true,
+    "saved_save_action": true,
+    "qr_eye_teardrop": true,
+    "export_jpg": true,
+    "qr_instagram": true,
+    "saved_delete_action": true,
+    "qr_eye_sunflower": true,
+    "templates_cloud_library": true,
+    "settings_save_location": true,
+    "qr_eye_coffee-bean-eye": true,
+    "qr_vcard": true,
+    "qr_color_presets": true,
+    "barcode_code16k": true,
+    "qr_dot_star": true,
+    "qr_eye_octagon": true,
+    "qr_logo_stroke_shadow": true,
+    "home_quick_qr": true,
+    "qr_color_preset_sunset": true,
+    "qr_eye_dollar-coin": true,
+    "qr_eye_diamond": true,
+    "barcode_codablockf": true,
+    "qr_bgshape_pill": true,
+    "qr_text_transforms": true,
+    "barcode_upca": true,
+    "barcode_code128": true,
+    "qr_quiet_zone": true,
+    "qr_sms": true,
+    "svg_export": true,
     "barcode_custom_colors": true,
     "qr_gradient_sunset_glow": true,
-    "barcode_msi": true,
-    "qr_tab_content": true,
-    "barcode_datamatrix": true,
-    "settings_haptics": true,
-    "qr_dot_bow-ribbon": true,
-    "ai_qr_code": true,
-    "qr_eye_pansy-eye": true,
-    "qr_eye_dollar-coin": true,
-    "barcode_ean13": true,
-    "barcode_gs1databar": true,
-    "qr_color_preset_dark": true,
-    "qr_dot_leaf": true,
-    "custom_eye_styles": true,
-    "qr_background_shapes": true,
-    "qr_gradient_neon_violet": true,
-    "qr_dot_daisy": true,
-    "qr_dot_cross": true,
-    "qr_eye_geometric": true,
-    "home_recent_items": true,
-    "qr_dot_octagon": true,
-    "qr_matrix_engine": true,
-    "qr_color_preset_forest": true,
-    "qr_url": true,
-    "scanner_flashlight": true,
-    "qr_dot_cactus-plant": true,
-    "qr_instagram": true,
-    "qr_eye_raindrop-eye": true,
-    "qr_eye_bow-eye": true,
-    "qr_gradient_midnight_gold": true,
-    "account_google_signin": true,
-    "qr_bgshape_pill": true,
-    "export_quality_hd": true,
-    "barcode_upce": true,
-    "history_save_auto": true,
-    "qr_tab_color": true,
-    "barcode_code39": true,
-    "barcode_royalmail": true,
-    "qr_dot_shield": true,
-    "qr_eye_square": true,
-    "qr_dot_tulip": true,
     "barcode_postnet": true,
-    "history": true,
-    "qr_tab_logo": true,
-    "qr_texture_youtube": true,
-    "batch_zip_export": true,
-    "qr_logo_stroke_shadow": true,
-    "qr_dot_denso": true,
-    "qr_text": true,
-    "qr_error_correction": true,
-    "qr_color_preset_cyberpunk": true,
-    "qr_dot_fluid": true,
-    "qr_dot_dollar-coin": true,
-    "cloud_sync_auto": true,
-    "templates": true,
-    "qr_color_preset_emerald": true,
-    "templates_premium_apply": true,
-    "qr_x": true,
-    "qr_texture_spotify": true,
-    "qr_texture_tiktok": true,
-    "qr_document": true,
-    "qr_analytics": true,
-    "custom_shapes": true,
-    "batch_custom_style": true,
-    "qr_color_dots": true,
-    "barcode_code128": true,
-    "barcode_code49": true,
-    "qr_texture_whatsapp": true,
-    "bulk_generation": true,
-    "developer_api": true,
-    "geo_tracking": true,
-    "qr_color_preset_sunset": true,
-    "qr_dot_hexagon": true,
-    "qr_dot_monstera": true,
-    "qr_eye_pillow": true,
-    "settings_save_location": true,
-    "cloud_preferences_sync": true,
-    "home_scanner_shortcut": true,
-    "qr_color_eyes_custom": true,
-    "qr_dot_heart": true,
-    "qr_dot_square": true,
-    "templates_browse": true,
-    "settings_theme_toggle": true,
-    "qr_color_texture": true,
-    "qr_bgshape_brackets": true,
-    "qr_color_bg_image": true,
-    "barcode_hanxin": true,
-    "premium_features": true,
-    "qr_eye_cute-emoticon": true,
-    "qr_eye_spotlight": true,
-    "export_quality_ultra": true,
-    "qr_youtube": true,
-    "qr_sms": true,
-    "qr_eye_lotus": true,
-    "scanner_camera_live": true,
-    "saved_view": true,
-    "premium_templates": true,
-    "history_view": true,
-    "qr_color_preset_purple": true,
-    "qr_bgshape_solid": true,
-    "qr_size_custom": true,
-    "qr_eye_modern": true,
-    "qr_eye_chess-eye": true,
-    "qr_eye_star": true,
-    "barcode_qrcode": true,
-    "qr_dot_capsule": true,
-    "custom_colors": true,
-    "qr_tab_text": true,
-    "barcode_pharmacode": true,
-    "barcode_maxicode": true,
-    "home_quick_barcode": true,
-    "barcode_microqrcode": true,
-    "scanner_image_upload": true,
-    "custom_dot_styles": true,
-    "qr_dot_sunflower": true,
-    "qr_dot_pixel": true,
-    "qr_dot_raindrop": true,
-    "cloud_sync": true,
-    "qr_facebook": true,
-    "qr_whatsapp": true,
-    "custom_colors_gradient": true,
-    "barcode_code93": true,
-    "qr_pdf": true,
-    "qr_eye_coffee-bean-eye": true,
-    "bulk_qr_creation": true,
-    "qr_dot_rose": true,
-    "qr_audio": true,
-    "history_clear_all": true,
-    "qr_gradient_sweet_candy": true,
-    "qr_dot_sparkle": true,
-    "qr_dot_lavender": true,
-    "qr_color_preset_monochrome": true,
+    "scanner_barcode_detect": true,
     "export_quality_medium": true,
-    "qr_eye_basketball-eye": true,
-    "qr_eye_teardrop": true,
-    "qr_eye_monstera": true,
-    "scanner_result_actions": true,
-    "barcode_code11": true,
-    "saved_search_filter": true,
-    "qr_canvas_positioning": true,
-    "barcode_code16k": true,
-    "qr_color_presets": true,
-    "qr_color_preset_ocean": true,
-    "qr_eye_circle": true,
-    "qr_dot_rounded": true,
-    "qr_gradient_cyberpunk_aqua": true,
-    "qr_dot_cherry-blossom": true,
-    "qr_eye_octagon": true,
-    "qr_linkedin": true,
-    "home_quick_qr": true,
-    "qr_dot_triangle": true,
-    "batch_scan": true,
-    "qr_eye_lavender": true,
-    "qr_gradient_royal_amethyst": true,
-    "qr_texture_snapchat": true,
-    "qr_eye_hexagon": true,
-    "qr_gradient_ocean_breeze": true,
-    "qr_bgshape_hexagon": true,
-    "qr_gradient_lush_emerald": true,
+    "barcode_msi": true,
+    "barcode_hanxin": true,
+    "qr_color_preset_purple": true,
+    "qr_analytics": true,
+    "qr_dot_dollar-coin": true,
+    "custom_eye_styles": true,
+    "qr_tab_color": true,
+    "geo_tracking": true,
+    "dark_mode": true,
+    "barcode_gs1databar": true,
     "qr_texture_instagram": true,
-    "barcode_text_display": true,
-    "home_batch_shortcut": true,
-    "qr_logo_bg_remover": true,
-    "qr_dot_basketball-dot": true,
-    "custom_logo_presets": true,
-    "qr_texture_telegram": true,
-    "qr_dot_plus": true,
-    "qr_gradient_citrus_lime": true,
-    "barcode_generator": true,
-    "qr_color_eyes": true,
-    "qr_eye_flower": true,
-    "barcode_aztec": true,
-    "qr_eye_violet-flower-eye": true,
-    "barcode_dimension_controls": true,
-    "account_logout": true,
-    "qr_quiet_zone": true,
-    "qr_tab_style": true,
-    "qr_event": true,
-    "qr_bg_image_texture": true,
-    "qr_color_preset_classic": true,
-    "export_jpg": true,
-    "qr_vcard": true,
-    "custom_logo": true,
-    "batch_view": true,
-    "templates_cloud_library": true,
-    "qr_texture_custom_upload": true,
-    "qr_crypto": true,
-    "qr_eye_shield": true,
-    "qr_dot_chess-pawn": true,
-    "account_subscription_status": true,
-    "barcode_codablockf": true,
-    "qr_phone": true,
-    "qr_tab_template": true,
-    "history_delete_item": true,
-    "qr_dot_pansy": true,
-    "qr_dot_forget-me-not": true,
-    "qr_dot_diamond": true,
-    "batch_csv_import": true,
-    "qr_location": true,
-    "qr_image": true,
-    "scanner_zoom": true,
-    "qr_logo_transforms": true,
-    "qr_email": true,
-    "qr_gradient_fire_phoenix": true,
-    "qr_center_text": true,
+    "qr_dot_octagon": true,
+    "premium_templates": true,
+    "qr_eye_spotlight": true,
     "qr_wifi": true,
-    "barcode_channelcode": true,
+    "qr_eye_leaf": true,
+    "qr_eye_chess-eye": true,
+    "qr_eye_modern": true,
+    "export_pdf": true,
+    "qr_gradient_electric_blue": true,
+    "qr_color_preset_forest": true,
+    "qr_dot_plus": true,
+    "qr_color_texture": true,
+    "bulk_generation": true,
+    "qr_text": true,
+    "custom_colors_solid": true,
+    "qr_linkedin": true,
+    "saved_view": true,
+    "qr_matrix_engine": true,
+    "qr_eye_rounded": true,
+    "qr_bg_image_texture": true,
+    "qr_crypto": true,
+    "qr_eye_rose": true,
+    "qr_gradient_deep_space": true,
+    "premium_features": true,
+    "custom_shapes": true,
+    "history_clear_all": true,
+    "qr_dot_pixel": true,
+    "barcode_datamatrix": true,
+    "qr_font_outfit": true,
+    "cloud_sync": true,
+    "export_native_share": true,
+    "qr_color_preset_dark": true,
+    "barcode_generator": true,
     "barcode_telepen": true,
-    "qr_text_transforms": true,
-    "barcode_codabar": true,
-    "_updatedAt": "2026-08-17T08:48:11.070Z",
-    "scanner": true,
-    "barcode_upca": true,
-    "svg_export": true,
-    "save_location": true,
-    "qr_text_fonts": true,
-    "qr_bgshape_ribbon": true,
-    "home_view": true,
-    "export_png": true,
-    "saved_delete_action": true,
-    "barcode_planet": true
+    "settings_view": true,
+    "qr_texture_youtube": true,
+    "qr_tab_text": true,
+    "qr_texture_custom_upload": true,
+    "barcode_maxicode": true,
+    "qr_dot_forget-me-not": true,
+    "barcode_code11": true,
+    "qr_dot_basketball-dot": true,
+    "account_google_signin": true,
+    "qr_dot_leaf": true,
+    "qr_eye_square": true,
+    "qr_eye_tulip-eye": true,
+    "qr_dot_diamond": true,
+    "qr_dot_chess-pawn": true,
+    "qr_bgshape_solid": true,
+    "qr_dot_dots": true,
+    "batch_manual_input": true,
+    "qr_error_correction": true,
+    "qr_text_styling": true,
+    "qr_eye_pillow": true,
+    "qr_eye_basketball-eye": true,
+    "qr_gradient_fire_phoenix": true,
+    "qr_gradient_lush_emerald": true,
+    "barcode_planet": true,
+    "qr_eye_daisy": true,
+    "export_quality_ultra": true,
+    "barcode_dimension_controls": true,
+    "qr_eye_flower": true,
+    "settings_haptics": true,
+    "barcode_microqrcode": true,
+    "qr_canvas_positioning": true,
+    "qr_dot_cross": true,
+    "barcode_code49": true,
+    "qr_eye_lotus": true,
+    "barcode_gs1128": true,
+    "qr_bgshape_glow": true,
+    "qr_phone": true,
+    "export_quality_low": true,
+    "account_logout": true,
+    "pwa_install": true,
+    "qr_x": true,
+    "cloud_templates": true,
+    "custom_branding": true,
+    "scanner_flashlight": true
   },
   "membershipConfig": {
-    "featureLimits": {},
     "plans": {
-      "monthly": {
-        "features": [
-          "qr_tab_content",
-          "qr_tab_color",
-          "qr_tab_style",
-          "qr_tab_logo",
-          "qr_tab_template",
-          "qr_tab_text",
-          "qr_text",
-          "qr_url",
-          "qr_wifi",
-          "qr_email",
-          "qr_phone",
-          "qr_sms",
-          "qr_vcard",
-          "qr_location",
-          "qr_pdf",
-          "qr_image",
-          "qr_audio",
-          "qr_document",
-          "qr_event",
-          "qr_crypto",
-          "qr_whatsapp",
-          "qr_youtube",
-          "qr_instagram",
-          "qr_facebook",
-          "qr_x",
-          "qr_linkedin",
-          "custom_colors_solid",
-          "custom_colors_gradient",
-          "qr_color_presets",
-          "qr_color_eyes_custom",
-          "qr_bg_image_texture",
-          "custom_dot_styles",
-          "custom_eye_styles",
-          "qr_background_shapes",
-          "custom_frames",
-          "qr_canvas_positioning",
-          "custom_logo_presets",
-          "custom_logo_upload",
-          "qr_logo_transforms",
-          "qr_logo_bg_remover",
-          "qr_logo_stroke_shadow",
-          "templates_browse",
-          "templates_free_apply",
-          "templates_premium_apply",
-          "templates_save_custom",
-          "templates_cloud_library",
-          "qr_center_text",
-          "qr_text_fonts",
-          "qr_text_styling",
-          "qr_text_transforms",
-          "export_png",
-          "export_jpg",
-          "export_svg",
-          "export_pdf",
-          "export_quality_low",
-          "export_quality_medium",
-          "export_quality_hd",
-          "export_quality_ultra",
-          "export_native_share",
-          "qr_matrix_engine",
-          "qr_error_correction",
-          "qr_quiet_zone",
-          "qr_size_custom",
-          "barcode_code128",
-          "barcode_code39",
-          "barcode_ean13",
-          "barcode_ean8",
-          "barcode_upca",
-          "barcode_upce",
-          "barcode_itf14",
-          "barcode_i25",
-          "barcode_codabar",
-          "barcode_code93",
-          "barcode_code11",
-          "barcode_msi",
-          "barcode_gs1128",
-          "barcode_postnet",
-          "barcode_planet",
-          "barcode_royalmail",
-          "barcode_telepen",
-          "barcode_pharmacode",
-          "barcode_channelcode",
-          "barcode_datamatrix",
-          "barcode_pdf417",
-          "barcode_aztec",
-          "barcode_gs1databar",
-          "barcode_maxicode",
-          "barcode_qrcode",
-          "barcode_microqrcode",
-          "barcode_hanxin",
-          "barcode_codablockf",
-          "barcode_code16k",
-          "barcode_code49",
-          "barcode_custom_colors",
-          "barcode_dimension_controls",
-          "barcode_text_display",
-          "batch_view",
-          "batch_csv_import",
-          "batch_manual_input",
-          "batch_custom_style",
-          "batch_zip_export",
-          "scanner_camera_live",
-          "scanner_image_upload",
-          "scanner_flashlight",
-          "scanner_zoom",
-          "scanner_barcode_detect",
-          "scanner_result_actions",
-          "home_view",
-          "home_recent_items",
-          "home_quick_qr",
-          "home_quick_barcode",
-          "home_scanner_shortcut",
-          "home_batch_shortcut",
-          "saved_view",
-          "saved_save_action",
-          "saved_delete_action",
-          "saved_search_filter",
-          "history_view",
-          "history_save_auto",
-          "history_delete_item",
-          "history_clear_all",
-          "settings_view",
-          "settings_theme_toggle",
-          "settings_haptics",
-          "settings_save_location",
-          "cloud_sync_auto",
-          "cloud_firestore_mirror",
-          "cloud_template_upload",
-          "cloud_preferences_sync",
-          "account_view",
-          "account_google_signin",
-          "account_subscription_status",
-          "account_logout",
-          "qr_generator",
-          "barcode_generator",
-          "scanner",
-          "history",
-          "saved",
-          "cloud_sync",
-          "custom_logo",
-          "custom_colors",
-          "custom_shapes",
-          "premium_templates",
-          "bulk_generation",
-          "save_location",
-          "qr_eye_cute-emoticon",
-          "qr_eye_sunflower",
-          "qr_eye_lavender",
-          "qr_eye_cherry-blossom",
-          "qr_dot_denso",
-          "qr_dot_dots",
-          "qr_dot_sparkle",
-          "qr_dot_fluid",
-          "qr_dot_cherry-blossom",
-          "qr_dot_violet-flower",
-          "qr_dot_sunflower",
-          "qr_dot_tulip",
-          "qr_dot_daisy",
-          "qr_dot_rose",
-          "qr_dot_lotus",
-          "qr_dot_forget-me-not",
-          "qr_dot_pansy",
-          "qr_dot_cute-emoticon",
-          "qr_dot_coffee-bean",
-          "qr_dot_raindrop",
-          "qr_dot_chess-pawn",
-          "qr_dot_basketball-dot",
-          "qr_dot_cactus-plant",
-          "qr_dot_bow-ribbon",
-          "qr_eye_lotus",
-          "qr_eye_rose",
-          "qr_eye_monstera",
-          "qr_eye_daisy",
-          "qr_eye_coffee-bean-eye",
-          "qr_eye_raindrop-eye",
-          "qr_eye_chess-eye",
-          "qr_eye_basketball-eye",
-          "qr_eye_cactus-eye",
-          "qr_eye_violet-flower-eye",
-          "qr_eye_tulip-eye",
-          "qr_eye_forget-me-not-eye",
-          "qr_eye_pansy-eye",
-          "qr_eye_square",
-          "qr_eye_rounded",
-          "qr_eye_circle",
-          "qr_eye_leaf",
-          "qr_eye_teardrop",
-          "qr_eye_modern",
-          "qr_eye_flower",
-          "qr_eye_shield",
-          "qr_eye_diamond",
-          "qr_eye_geometric",
-          "qr_eye_octagon",
-          "qr_eye_hexagon",
-          "qr_eye_notch",
-          "qr_eye_star",
-          "qr_eye_spotlight",
-          "qr_eye_pillow",
-          "qr_eye_dollar-coin",
-          "qr_eye_bow-eye",
-          "qr_dot_capsule",
-          "qr_dot_hexagon",
-          "qr_dot_square",
-          "qr_dot_rounded",
-          "qr_dot_leaf",
-          "qr_dot_diamond",
-          "qr_dot_pixel",
-          "qr_dot_shield",
-          "qr_dot_star",
-          "qr_dot_heart",
-          "qr_dot_triangle",
-          "qr_dot_octagon",
-          "qr_dot_plus",
-          "qr_dot_cross",
-          "qr_dot_dollar-coin",
-          "qr_dot_lavender",
-          "qr_dot_monstera",
-          "qr_texture_facebook",
-          "qr_texture_whatsapp",
-          "qr_texture_instagram",
-          "qr_texture_youtube",
-          "qr_texture_tiktok",
-          "qr_texture_snapchat",
-          "qr_texture_twitter",
-          "qr_texture_telegram",
-          "qr_texture_spotify",
-          "qr_texture_custom_upload",
-          "qr_font_outfit",
-          "qr_font_inter",
-          "qr_font_montserrat",
-          "qr_font_playfair_display",
-          "qr_font_oswald",
-          "qr_font_pacifico",
-          "qr_font_caveat",
-          "qr_font_dancing_script",
-          "qr_font_bebas_neue",
-          "qr_font_lobster",
-          "qr_font_roboto",
-          "qr_font_open_sans",
-          "qr_font_lato",
-          "qr_font_poppins",
-          "qr_font_raleway",
-          "qr_font_merriweather",
-          "qr_font_noto_sans",
-          "qr_font_ubuntu",
-          "qr_font_anton",
-          "qr_font_permanent_marker",
-          "qr_font_righteous",
-          "qr_font_cinzel",
-          "qr_font_courgette",
-          "qr_font_fredoka_one",
-          "qr_font_great_vibes",
-          "qr_font_kanit",
-          "qr_font_luckiest_guy",
-          "qr_font_orbitron",
-          "qr_font_quicksand",
-          "qr_font_satisfy",
-          "qr_bgshape_solid",
-          "qr_bgshape_rounded",
-          "qr_bgshape_circle",
-          "qr_bgshape_pill",
-          "qr_bgshape_ribbon",
-          "qr_bgshape_glow",
-          "qr_bgshape_hexagon",
-          "qr_bgshape_brackets",
-          "qr_gradient_sunset_glow",
-          "qr_gradient_ocean_breeze",
-          "qr_gradient_neon_violet",
-          "qr_gradient_lush_emerald",
-          "qr_gradient_midnight_gold",
-          "qr_gradient_cyberpunk_aqua",
-          "qr_gradient_fire_phoenix",
-          "qr_gradient_royal_amethyst",
-          "qr_gradient_deep_space",
-          "qr_gradient_sweet_candy",
-          "qr_gradient_electric_blue",
-          "qr_gradient_citrus_lime",
-          "qr_color_preset_classic",
-          "qr_color_preset_ocean",
-          "qr_color_preset_forest",
-          "qr_color_preset_sunset",
-          "qr_color_preset_purple",
-          "qr_color_preset_dark",
-          "qr_color_preset_monochrome",
-          "qr_color_preset_cyberpunk",
-          "qr_color_preset_crimson",
-          "qr_color_preset_emerald",
-          "qr_color_dots",
-          "qr_color_eyes",
-          "qr_color_bg",
-          "qr_color_bg_image",
-          "qr_color_texture",
-          "qr_logo_custom-icon",
-          "qr_logo_facebook",
-          "qr_logo_whatsapp",
-          "qr_logo_instagram",
-          "qr_logo_youtube",
-          "qr_logo_tiktok",
-          "qr_logo_linkedin",
-          "qr_logo_twitter",
-          "qr_logo_gmail",
-          "qr_logo_github",
-          "qr_logo_spotify",
-          "qr_logo_apple",
-          "qr_logo_picsart",
-          "qr_logo_messenger",
-          "qr_logo_pinterest",
-          "qr_logo_reddit",
-          "qr_logo_internet",
-          "qr_logo_wifi",
-          "qr_logo_id-card",
-          "qr_logo_sms",
-          "qr_logo_pdf",
-          "qr_logo_bitcoin",
-          "qr_logo_chatting",
-          "qr_logo_dribbble",
-          "qr_logo_behance",
-          "qr_logo_google-calendar",
-          "qr_logo_google-maps",
-          "qr_logo_google-play",
-          "qr_logo_skype",
-          "qr_logo_viber",
-          "qr_logo_vimeo",
-          "qr_template_sm_instagram_pro",
-          "qr_template_sm_facebook_pro",
-          "qr_template_sm_whatsapp_pro",
-          "qr_template_sm_youtube_pro",
-          "qr_template_sm_x_pro",
-          "qr_template_sm_tiktok_pro",
-          "qr_template_sm_linkedin_pro",
-          "qr_template_sm_spotify_pro",
-          "qr_template_sm_messenger_pro",
-          "qr_template_sm_social_pro",
-          "qr_frame_none",
-          "qr_frame_solid",
-          "qr_frame_rounded",
-          "qr_frame_pill",
-          "qr_frame_outline",
-          "qr_frame_underline",
-          "qr_frame_ribbon",
-          "qr_frame_glow",
-          "qr_frame_brackets",
-          "qr_frame_hexagon",
-          "qr_frame_dots",
-          "qr_frame_stamp",
-          "qr_text_frame",
-          "qr_custom_font_upload"
-        ]
-      },
       "free": {
         "features": [
           "qr_tab_style",
@@ -963,11 +611,11 @@
         ]
       },
       "weekly": {
+        "period": "/wk",
+        "active": true,
         "_updatedAt": "2026-08-17T09:37:07.470Z",
-        "currency": "USD",
-        "price": 0.5,
-        "trialDays": 7,
-        "billingInterval": "weekly",
+        "color": "#7B61FF",
+        "planId": "weekly",
         "features": [
           "qr_tab_content",
           "qr_tab_color",
@@ -1317,14 +965,14 @@
           "qr_text_frame",
           "qr_custom_font_upload"
         ],
-        "active": true,
-        "name": "Weekly Pass",
+        "currency": "USD",
         "desc": "7-day full pro access pass",
-        "period": "/wk",
-        "planId": "weekly",
         "popular": false,
-        "id": "weekly",
-        "color": "#7B61FF"
+        "billingInterval": "weekly",
+        "trialDays": 7,
+        "name": "Weekly Pass",
+        "price": 0.5,
+        "id": "weekly"
       },
       "yearly": {
         "features": [
@@ -1676,177 +1324,364 @@
           "qr_text_frame",
           "qr_custom_font_upload"
         ]
+      },
+      "monthly": {
+        "features": [
+          "qr_tab_content",
+          "qr_tab_color",
+          "qr_tab_style",
+          "qr_tab_logo",
+          "qr_tab_template",
+          "qr_tab_text",
+          "qr_text",
+          "qr_url",
+          "qr_wifi",
+          "qr_email",
+          "qr_phone",
+          "qr_sms",
+          "qr_vcard",
+          "qr_location",
+          "qr_pdf",
+          "qr_image",
+          "qr_audio",
+          "qr_document",
+          "qr_event",
+          "qr_crypto",
+          "qr_whatsapp",
+          "qr_youtube",
+          "qr_instagram",
+          "qr_facebook",
+          "qr_x",
+          "qr_linkedin",
+          "custom_colors_solid",
+          "custom_colors_gradient",
+          "qr_color_presets",
+          "qr_color_eyes_custom",
+          "qr_bg_image_texture",
+          "custom_dot_styles",
+          "custom_eye_styles",
+          "qr_background_shapes",
+          "custom_frames",
+          "qr_canvas_positioning",
+          "custom_logo_presets",
+          "custom_logo_upload",
+          "qr_logo_transforms",
+          "qr_logo_bg_remover",
+          "qr_logo_stroke_shadow",
+          "templates_browse",
+          "templates_free_apply",
+          "templates_premium_apply",
+          "templates_save_custom",
+          "templates_cloud_library",
+          "qr_center_text",
+          "qr_text_fonts",
+          "qr_text_styling",
+          "qr_text_transforms",
+          "export_png",
+          "export_jpg",
+          "export_svg",
+          "export_pdf",
+          "export_quality_low",
+          "export_quality_medium",
+          "export_quality_hd",
+          "export_quality_ultra",
+          "export_native_share",
+          "qr_matrix_engine",
+          "qr_error_correction",
+          "qr_quiet_zone",
+          "qr_size_custom",
+          "barcode_code128",
+          "barcode_code39",
+          "barcode_ean13",
+          "barcode_ean8",
+          "barcode_upca",
+          "barcode_upce",
+          "barcode_itf14",
+          "barcode_i25",
+          "barcode_codabar",
+          "barcode_code93",
+          "barcode_code11",
+          "barcode_msi",
+          "barcode_gs1128",
+          "barcode_postnet",
+          "barcode_planet",
+          "barcode_royalmail",
+          "barcode_telepen",
+          "barcode_pharmacode",
+          "barcode_channelcode",
+          "barcode_datamatrix",
+          "barcode_pdf417",
+          "barcode_aztec",
+          "barcode_gs1databar",
+          "barcode_maxicode",
+          "barcode_qrcode",
+          "barcode_microqrcode",
+          "barcode_hanxin",
+          "barcode_codablockf",
+          "barcode_code16k",
+          "barcode_code49",
+          "barcode_custom_colors",
+          "barcode_dimension_controls",
+          "barcode_text_display",
+          "batch_view",
+          "batch_csv_import",
+          "batch_manual_input",
+          "batch_custom_style",
+          "batch_zip_export",
+          "scanner_camera_live",
+          "scanner_image_upload",
+          "scanner_flashlight",
+          "scanner_zoom",
+          "scanner_barcode_detect",
+          "scanner_result_actions",
+          "home_view",
+          "home_recent_items",
+          "home_quick_qr",
+          "home_quick_barcode",
+          "home_scanner_shortcut",
+          "home_batch_shortcut",
+          "saved_view",
+          "saved_save_action",
+          "saved_delete_action",
+          "saved_search_filter",
+          "history_view",
+          "history_save_auto",
+          "history_delete_item",
+          "history_clear_all",
+          "settings_view",
+          "settings_theme_toggle",
+          "settings_haptics",
+          "settings_save_location",
+          "cloud_sync_auto",
+          "cloud_firestore_mirror",
+          "cloud_template_upload",
+          "cloud_preferences_sync",
+          "account_view",
+          "account_google_signin",
+          "account_subscription_status",
+          "account_logout",
+          "qr_generator",
+          "barcode_generator",
+          "scanner",
+          "history",
+          "saved",
+          "cloud_sync",
+          "custom_logo",
+          "custom_colors",
+          "custom_shapes",
+          "premium_templates",
+          "bulk_generation",
+          "save_location",
+          "qr_eye_cute-emoticon",
+          "qr_eye_sunflower",
+          "qr_eye_lavender",
+          "qr_eye_cherry-blossom",
+          "qr_dot_denso",
+          "qr_dot_dots",
+          "qr_dot_sparkle",
+          "qr_dot_fluid",
+          "qr_dot_cherry-blossom",
+          "qr_dot_violet-flower",
+          "qr_dot_sunflower",
+          "qr_dot_tulip",
+          "qr_dot_daisy",
+          "qr_dot_rose",
+          "qr_dot_lotus",
+          "qr_dot_forget-me-not",
+          "qr_dot_pansy",
+          "qr_dot_cute-emoticon",
+          "qr_dot_coffee-bean",
+          "qr_dot_raindrop",
+          "qr_dot_chess-pawn",
+          "qr_dot_basketball-dot",
+          "qr_dot_cactus-plant",
+          "qr_dot_bow-ribbon",
+          "qr_eye_lotus",
+          "qr_eye_rose",
+          "qr_eye_monstera",
+          "qr_eye_daisy",
+          "qr_eye_coffee-bean-eye",
+          "qr_eye_raindrop-eye",
+          "qr_eye_chess-eye",
+          "qr_eye_basketball-eye",
+          "qr_eye_cactus-eye",
+          "qr_eye_violet-flower-eye",
+          "qr_eye_tulip-eye",
+          "qr_eye_forget-me-not-eye",
+          "qr_eye_pansy-eye",
+          "qr_eye_square",
+          "qr_eye_rounded",
+          "qr_eye_circle",
+          "qr_eye_leaf",
+          "qr_eye_teardrop",
+          "qr_eye_modern",
+          "qr_eye_flower",
+          "qr_eye_shield",
+          "qr_eye_diamond",
+          "qr_eye_geometric",
+          "qr_eye_octagon",
+          "qr_eye_hexagon",
+          "qr_eye_notch",
+          "qr_eye_star",
+          "qr_eye_spotlight",
+          "qr_eye_pillow",
+          "qr_eye_dollar-coin",
+          "qr_eye_bow-eye",
+          "qr_dot_capsule",
+          "qr_dot_hexagon",
+          "qr_dot_square",
+          "qr_dot_rounded",
+          "qr_dot_leaf",
+          "qr_dot_diamond",
+          "qr_dot_pixel",
+          "qr_dot_shield",
+          "qr_dot_star",
+          "qr_dot_heart",
+          "qr_dot_triangle",
+          "qr_dot_octagon",
+          "qr_dot_plus",
+          "qr_dot_cross",
+          "qr_dot_dollar-coin",
+          "qr_dot_lavender",
+          "qr_dot_monstera",
+          "qr_texture_facebook",
+          "qr_texture_whatsapp",
+          "qr_texture_instagram",
+          "qr_texture_youtube",
+          "qr_texture_tiktok",
+          "qr_texture_snapchat",
+          "qr_texture_twitter",
+          "qr_texture_telegram",
+          "qr_texture_spotify",
+          "qr_texture_custom_upload",
+          "qr_font_outfit",
+          "qr_font_inter",
+          "qr_font_montserrat",
+          "qr_font_playfair_display",
+          "qr_font_oswald",
+          "qr_font_pacifico",
+          "qr_font_caveat",
+          "qr_font_dancing_script",
+          "qr_font_bebas_neue",
+          "qr_font_lobster",
+          "qr_font_roboto",
+          "qr_font_open_sans",
+          "qr_font_lato",
+          "qr_font_poppins",
+          "qr_font_raleway",
+          "qr_font_merriweather",
+          "qr_font_noto_sans",
+          "qr_font_ubuntu",
+          "qr_font_anton",
+          "qr_font_permanent_marker",
+          "qr_font_righteous",
+          "qr_font_cinzel",
+          "qr_font_courgette",
+          "qr_font_fredoka_one",
+          "qr_font_great_vibes",
+          "qr_font_kanit",
+          "qr_font_luckiest_guy",
+          "qr_font_orbitron",
+          "qr_font_quicksand",
+          "qr_font_satisfy",
+          "qr_bgshape_solid",
+          "qr_bgshape_rounded",
+          "qr_bgshape_circle",
+          "qr_bgshape_pill",
+          "qr_bgshape_ribbon",
+          "qr_bgshape_glow",
+          "qr_bgshape_hexagon",
+          "qr_bgshape_brackets",
+          "qr_gradient_sunset_glow",
+          "qr_gradient_ocean_breeze",
+          "qr_gradient_neon_violet",
+          "qr_gradient_lush_emerald",
+          "qr_gradient_midnight_gold",
+          "qr_gradient_cyberpunk_aqua",
+          "qr_gradient_fire_phoenix",
+          "qr_gradient_royal_amethyst",
+          "qr_gradient_deep_space",
+          "qr_gradient_sweet_candy",
+          "qr_gradient_electric_blue",
+          "qr_gradient_citrus_lime",
+          "qr_color_preset_classic",
+          "qr_color_preset_ocean",
+          "qr_color_preset_forest",
+          "qr_color_preset_sunset",
+          "qr_color_preset_purple",
+          "qr_color_preset_dark",
+          "qr_color_preset_monochrome",
+          "qr_color_preset_cyberpunk",
+          "qr_color_preset_crimson",
+          "qr_color_preset_emerald",
+          "qr_color_dots",
+          "qr_color_eyes",
+          "qr_color_bg",
+          "qr_color_bg_image",
+          "qr_color_texture",
+          "qr_logo_custom-icon",
+          "qr_logo_facebook",
+          "qr_logo_whatsapp",
+          "qr_logo_instagram",
+          "qr_logo_youtube",
+          "qr_logo_tiktok",
+          "qr_logo_linkedin",
+          "qr_logo_twitter",
+          "qr_logo_gmail",
+          "qr_logo_github",
+          "qr_logo_spotify",
+          "qr_logo_apple",
+          "qr_logo_picsart",
+          "qr_logo_messenger",
+          "qr_logo_pinterest",
+          "qr_logo_reddit",
+          "qr_logo_internet",
+          "qr_logo_wifi",
+          "qr_logo_id-card",
+          "qr_logo_sms",
+          "qr_logo_pdf",
+          "qr_logo_bitcoin",
+          "qr_logo_chatting",
+          "qr_logo_dribbble",
+          "qr_logo_behance",
+          "qr_logo_google-calendar",
+          "qr_logo_google-maps",
+          "qr_logo_google-play",
+          "qr_logo_skype",
+          "qr_logo_viber",
+          "qr_logo_vimeo",
+          "qr_template_sm_instagram_pro",
+          "qr_template_sm_facebook_pro",
+          "qr_template_sm_whatsapp_pro",
+          "qr_template_sm_youtube_pro",
+          "qr_template_sm_x_pro",
+          "qr_template_sm_tiktok_pro",
+          "qr_template_sm_linkedin_pro",
+          "qr_template_sm_spotify_pro",
+          "qr_template_sm_messenger_pro",
+          "qr_template_sm_social_pro",
+          "qr_frame_none",
+          "qr_frame_solid",
+          "qr_frame_rounded",
+          "qr_frame_pill",
+          "qr_frame_outline",
+          "qr_frame_underline",
+          "qr_frame_ribbon",
+          "qr_frame_glow",
+          "qr_frame_brackets",
+          "qr_frame_hexagon",
+          "qr_frame_dots",
+          "qr_frame_stamp",
+          "qr_text_frame",
+          "qr_custom_font_upload"
+        ]
       }
     },
+    "updatedAt": "2026-08-17T10:45:27.986Z",
+    "featureLimits": {},
+    "configVersion": 218,
     "featureMatrix": {
-      "qr_texture_custom_upload": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_bg_image": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_diamond": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_msi": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_ean13": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_raindrop": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_google-play": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "export_quality_hd": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_facebook": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_eyes": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_whatsapp": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_dancing_script": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_codablockf": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_square": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_presets": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_frame_solid": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_frame_stamp": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_bgshape_glow": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_texture_tiktok": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_channelcode": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_shield": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_qrcode": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_lavender": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "export_quality_low": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_text_frame": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_courgette": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_violet-flower-eye": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_satisfy": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_gradient_deep_space": [
-        "free",
+      "barcode_dimension_controls": [
         "weekly",
         "monthly",
         "yearly"
@@ -1857,72 +1692,30 @@
         "monthly",
         "yearly"
       ],
-      "qr_logo_bitcoin": [
+      "qr_font_lobster": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_frame_rounded": [
+      "qr_template_sm_whatsapp_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "custom_colors_solid": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_eye_sunflower": [
+      "barcode_ean8": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_texture_telegram": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_texture_facebook": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_royalmail": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_coffee-bean-eye": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_text_display": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "export_quality_medium": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_gs1128": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_coffee-bean": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_frame_underline": [
+      "qr_eye_geometric": [
         "free",
         "weekly",
         "monthly",
@@ -1934,7 +1727,13 @@
         "monthly",
         "yearly"
       ],
-      "qr_logo_viber": [
+      "qr_logo_picsart": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_gradient_lush_emerald": [
         "free",
         "weekly",
         "monthly",
@@ -1946,25 +1745,383 @@
         "monthly",
         "yearly"
       ],
-      "qr_font_kanit": [
+      "qr_font_cinzel": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_frame_outline": [
+      "barcode_postnet": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_dot_octagon": [
+      "qr_logo_id-card": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_frame_dots": [
+      "qr_font_ubuntu": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_flower": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_maxicode": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_gradient_royal_amethyst": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_gradient_sweet_candy": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_leaf": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_pansy-eye": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_custom_colors": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_text_frame": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_shield": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_bgshape_brackets": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_playfair_display": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_brackets": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_bg_remover": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_bgshape_circle": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_facebook": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "custom_logo_presets": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_dots": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_hexagon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_preset_crimson": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_dollar-coin": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_courgette": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_template_sm_messenger_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_none": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_spotify": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_preset_dark": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_plus": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_i25": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_google-calendar": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_center_text": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_pansy": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_apple": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_pill": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_daisy": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_code16k": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "export_jpg": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_bgshape_hexagon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_violet-flower-eye": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_bgshape_glow": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_bow-ribbon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_pillow": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_twitter": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_diamond": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_leaf": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_template_sm_instagram_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_telepen": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_lavender": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "export_quality_medium": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_template_sm_facebook_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "custom_colors_gradient": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_hanxin": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_coffee-bean-eye": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_tulip-eye": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_custom_font_upload": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_permanent_marker": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_octagon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "export_native_share": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_open_sans": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_gradient_deep_space": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_coffee-bean": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_template_sm_social_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_star": [
         "free",
         "weekly",
         "monthly",
@@ -1976,19 +2133,379 @@
         "monthly",
         "yearly"
       ],
-      "qr_color_preset_purple": [
+      "qr_gradient_fire_phoenix": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_font_roboto": [
+      "qr_font_luckiest_guy": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_eye_chess-eye": [
+      "qr_dot_violet-flower": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_outline": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_stroke_shadow": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_royalmail": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_cactus-plant": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_pinterest": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_oswald": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_ribbon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_gradient_midnight_gold": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_whatsapp": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_codabar": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_bgshape_solid": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_gs1128": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_kanit": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_lato": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_twitter": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_upca": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_underline": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_whatsapp": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_code39": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_merriweather": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "export_quality_low": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_channelcode": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_preset_emerald": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_texture": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_glow": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_basketball-eye": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_vimeo": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_outfit": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_gradient_citrus_lime": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_template_sm_tiktok_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_aztec": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_heart": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_template_sm_spotify_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_circle": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_youtube": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_bow-eye": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_bgshape_pill": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_template_sm_youtube_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_hexagon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_github": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_great_vibes": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_capsule": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_internet": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_fredoka_one": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_star": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_sunflower": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_custom_upload": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_raindrop": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_msi": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_spotlight": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_denso": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_dots": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_rose": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_template_sm_x_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_hexagon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_lotus": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_eyes_custom": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_sms": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_datamatrix": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_code93": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_bg": [
         "free",
         "weekly",
         "monthly",
@@ -2006,119 +2523,12 @@
         "monthly",
         "yearly"
       ],
-      "qr_font_anton": [
-        "free",
+      "barcode_qrcode": [
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_eye_bow-eye": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "export_quality_ultra": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_capsule": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_bgshape_circle": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_dots": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_youtube_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_raindrop-eye": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_telepen": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_hexagon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_hexagon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_outfit": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_octagon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_x_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_geometric": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_code11": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_plus": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_code39": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_preset_monochrome": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_sunflower": [
+      "qr_tab_content": [
         "free",
         "weekly",
         "monthly",
@@ -2130,907 +2540,7 @@
         "monthly",
         "yearly"
       ],
-      "qr_eye_pillow": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_facebook_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_pacifico": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_cactus-eye": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_daisy": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_lato": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_ean8": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_shield": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_playfair_display": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_leaf": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_frame_ribbon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_rose": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_pixel": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_cute-emoticon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_text_styling": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_instagram_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_oswald": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_gradient_sweet_candy": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_gradient_lush_emerald": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_texture_spotify": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_triangle": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_tiktok_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_texture": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_gradient_citrus_lime": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_planet": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_pdf417": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_linkedin_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_lotus": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_picsart": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_montserrat": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_vimeo": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_righteous": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_pansy-eye": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_frame_none": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_gradient_royal_amethyst": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_gmail": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_bgshape_hexagon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_bgshape_pill": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_bow-ribbon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "custom_logo_presets": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_rounded": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_stroke_shadow": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_texture_twitter": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_preset_forest": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_tulip-eye": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_frame_hexagon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_gradient_neon_violet": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_flower": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_messenger": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_maxicode": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_dollar-coin": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_bgshape_solid": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_social_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_custom_font_upload": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_circle": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_quicksand": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_bebas_neue": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_leaf": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_frame_brackets": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_frame_glow": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "export_jpg": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_cinzel": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_texture_instagram": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "export_svg": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_ubuntu": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_texture_snapchat": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "custom_colors_solid": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_cherry-blossom": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_dots": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_frame_pill": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_cute-emoticon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_codabar": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_itf14": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_generator": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_cross": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_violet-flower": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_luckiest_guy": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_aztec": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_code16k": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_whatsapp_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_raleway": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_behance": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_tab_content": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_preset_dark": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_eyes_custom": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_instagram": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_fredoka_one": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_spotify": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_basketball-eye": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_google-calendar": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_google-maps": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_gradient_midnight_gold": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_rounded": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_heart": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_sms": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_square": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_tab_color": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_twitter": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_pansy": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_star": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "custom_colors_gradient": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_chess-pawn": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_preset_emerald": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_spotlight": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_bgshape_ribbon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_gradient_fire_phoenix": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_lavender": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_star": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_tiktok": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_internet": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_gs1databar": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_daisy": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_rose": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_modern": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_hanxin": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_preset_cyberpunk": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_center_text": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_dimension_controls": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_forget-me-not-eye": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_bg_remover": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_orbitron": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_bgshape_brackets": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_noto_sans": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_custom_colors": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_bg": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_pinterest": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_youtube": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_texture_youtube": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_diamond": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_basketball-dot": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_pdf": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_inter": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "export_native_share": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_datamatrix": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_denso": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "export_pdf": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_spotify_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_code128": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_bgshape_rounded": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_code49": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_upca": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_permanent_marker": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_fluid": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "custom_logo_upload": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_github": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_lobster": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_preset_crimson": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_cactus-plant": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_linkedin": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_color_preset_sunset": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_i25": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "export_png": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_gradient_electric_blue": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_reddit": [
+      "qr_font_satisfy": [
         "free",
         "weekly",
         "monthly",
@@ -3041,72 +2551,23 @@
         "monthly",
         "yearly"
       ],
-      "qr_eye_monstera": [
+      "barcode_gs1databar": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_text_display": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_preset_ocean": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_dot_sparkle": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_custom-icon": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_forget-me-not": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_logo_id-card": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_template_sm_messenger_pro": [
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_texture_whatsapp": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "barcode_code93": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_merriweather": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_eye_teardrop": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_font_poppins": [
-        "free",
-        "weekly",
-        "monthly",
-        "yearly"
-      ],
-      "qr_dot_tulip": [
+      "qr_eye_raindrop-eye": [
         "free",
         "weekly",
         "monthly",
@@ -3118,49 +2579,84 @@
         "monthly",
         "yearly"
       ],
-      "barcode_upce": [
+      "barcode_ean13": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_logo_chatting": [
+      "barcode_pdf417": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_rose": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_color_preset_ocean": [
+      "qr_dot_cross": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_eye_notch": [
+      "qr_dot_basketball-dot": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_eye_dollar-coin": [
+      "qr_font_righteous": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_logo_dribbble": [
+      "qr_dot_pixel": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_font_open_sans": [
+      "qr_dot_rounded": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "barcode_postnet": [
+      "qr_logo_facebook": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_bg_image": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_fluid": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_instagram": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_snapchat": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_tulip": [
         "free",
         "weekly",
         "monthly",
@@ -3172,13 +2668,305 @@
         "monthly",
         "yearly"
       ],
-      "qr_font_great_vibes": [
+      "qr_color_preset_purple": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ],
-      "qr_logo_apple": [
+      "qr_font_raleway": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_tiktok": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_lavender": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_gradient_electric_blue": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_diamond": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_custom-icon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_octagon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_preset_cyberpunk": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_pacifico": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_spotify": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_codablockf": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_upce": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_itf14": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_cherry-blossom": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_cute-emoticon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_text_styling": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_monstera": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_google-maps": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_montserrat": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "export_quality_hd": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_anton": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_instagram": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_triangle": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_chess-pawn": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_forget-me-not-eye": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_bitcoin": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_dancing_script": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_reddit": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_chatting": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_pharmacode": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_shield": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_teardrop": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_eyes": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_generator": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "export_svg": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_behance": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_quicksand": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_daisy": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_preset_monochrome": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_stamp": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_preset_sunset": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_linkedin": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_notch": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_bebas_neue": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_messenger": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_square": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_planet": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_roboto": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_bgshape_rounded": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_rounded": [
         "free",
         "weekly",
         "monthly",
@@ -3190,18 +2978,231 @@
         "monthly",
         "yearly"
       ],
-      "barcode_pharmacode": [
+      "qr_font_poppins": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "export_png": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_preset_forest": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_code11": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_gradient_neon_violet": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_tiktok": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_chess-eye": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_youtube": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_orbitron": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_cute-emoticon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_dribbble": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_code49": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "export_quality_ultra": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_color_presets": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "custom_logo_upload": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_dollar-coin": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_forget-me-not": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_bgshape_ribbon": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_dots": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_viber": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_modern": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_sparkle": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_google-play": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_sunflower": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_inter": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_frame_solid": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_rounded": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_eye_cactus-eye": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_template_sm_linkedin_pro": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_gmail": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "export_pdf": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_texture_telegram": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "barcode_code128": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_tab_color": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_logo_pdf": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_font_noto_sans": [
+        "free",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "qr_dot_square": [
         "free",
         "weekly",
         "monthly",
         "yearly"
       ]
-    },
-    "configVersion": 218,
-    "updatedAt": "2026-08-17T10:45:27.986Z"
+    }
   },
   "plans": {
     "free": {
+      "_updatedAt": "2026-08-17T10:45:26.134Z",
       "features": [
         "qr_tab_style",
         "qr_tab_logo",
@@ -3525,8 +3526,7 @@
         "export_quality_medium",
         "export_quality_hd",
         "export_quality_ultra"
-      ],
-      "_updatedAt": "2026-08-17T10:45:26.134Z"
+      ]
     },
     "monthly": {
       "_updatedAt": "2026-08-17T10:45:27.504Z",
@@ -3883,9 +3883,16 @@
     "weekly": {
       "price": 0.5,
       "trialDays": 7,
-      "desc": "7-day full pro access pass",
+      "planId": "weekly",
       "billingInterval": "weekly",
+      "_updatedAt": "2026-08-17T10:45:27.255Z",
+      "color": "#7B61FF",
+      "name": "Weekly Pass",
+      "currency": "USD",
+      "desc": "7-day full pro access pass",
       "active": true,
+      "popular": false,
+      "id": "weekly",
       "features": [
         "qr_tab_content",
         "qr_tab_color",
@@ -4235,16 +4242,10 @@
         "qr_text_frame",
         "qr_custom_font_upload"
       ],
-      "id": "weekly",
-      "_updatedAt": "2026-08-17T10:45:27.255Z",
-      "name": "Weekly Pass",
-      "currency": "USD",
-      "color": "#7B61FF",
-      "planId": "weekly",
-      "popular": false,
       "period": "/wk"
     },
     "yearly": {
+      "_updatedAt": "2026-08-17T10:45:27.732Z",
       "features": [
         "qr_tab_content",
         "qr_tab_color",
@@ -4593,8 +4594,7 @@
         "qr_frame_stamp",
         "qr_text_frame",
         "qr_custom_font_upload"
-      ],
-      "_updatedAt": "2026-08-17T10:45:27.732Z"
+      ]
     }
   }
 }
