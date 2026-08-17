@@ -382,10 +382,10 @@ function TemplateMiniPosterCard({ template }) {
   return (
     <div style={{
       width: '100%',
-      aspectRatio: '4 / 4.8',
+      aspectRatio: '4 / 4.4',
       background: bgGrad,
-      borderRadius: 12,
-      padding: '10px 8px',
+      borderRadius: 10,
+      padding: '8px 6px',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -393,28 +393,31 @@ function TemplateMiniPosterCard({ template }) {
       position: 'relative',
       overflow: 'hidden',
       border: '1px solid rgba(255,255,255,0.12)',
-      boxShadow: `0 6px 18px ${template.glowColor || 'rgba(0,0,0,0.3)'}`
+      boxShadow: `0 4px 14px ${template.glowColor || 'rgba(0,0,0,0.3)'}`
     }}>
       {/* Top Ambient Glow */}
       <div style={{
-        position: 'absolute', top: -20, width: 80, height: 80, borderRadius: '50%',
-        background: template.glowColor || 'rgba(255,77,157,0.3)', filter: 'blur(16px)', pointerEvents: 'none'
+        position: 'absolute', top: -15, width: 60, height: 60, borderRadius: '50%',
+        background: template.glowColor || 'rgba(255,77,157,0.3)', filter: 'blur(12px)', pointerEvents: 'none'
       }} />
 
       {/* Header with Icon + Title */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, zIndex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, zIndex: 1, maxWidth: '100%' }}>
         <div style={{
-          width: 24, height: 24, borderRadius: 6, background: iconGrad,
+          width: 20, height: 20, borderRadius: 5, background: iconGrad,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.3)', padding: 3
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3)', padding: 2, flexShrink: 0
         }}>
           {template.logoSrc ? (
             <img src={template.logoSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           ) : (
-            <QrCode size={13} color="#fff" />
+            <QrCode size={11} color="#fff" />
           )}
         </div>
-        <span style={{ fontSize: 8, fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+        <span style={{
+          fontSize: 7.5, fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.4px',
+          textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%'
+        }}>
           {template.title || template.name}
         </span>
       </div>
@@ -422,9 +425,9 @@ function TemplateMiniPosterCard({ template }) {
       {/* Center White QR Card with Live Canvas / Matrix */}
       <div style={{
         background: '#FFFFFF',
-        borderRadius: 6,
-        padding: '4px',
-        boxShadow: '0 3px 10px rgba(0,0,0,0.25)',
+        borderRadius: 5,
+        padding: '3px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -437,14 +440,17 @@ function TemplateMiniPosterCard({ template }) {
       </div>
 
       {/* Bottom Action Pill & Handle */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, zIndex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, zIndex: 1, maxWidth: '100%' }}>
         <span style={{
-          fontSize: 7.5, fontWeight: 800, color: template.actionTextColor || '#FF4D79',
-          letterSpacing: '0.2px', textTransform: 'uppercase'
+          fontSize: 7, fontWeight: 800, color: template.actionTextColor || '#FF4D79',
+          letterSpacing: '0.2px', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%'
         }}>
           {template.actionText || 'Scan Me'}
         </span>
-        <span style={{ fontSize: 6.5, fontWeight: 600, color: 'rgba(255,255,255,0.7)', fontFamily: 'monospace' }}>
+        <span style={{
+          fontSize: 6, fontWeight: 600, color: 'rgba(255,255,255,0.7)', fontFamily: 'monospace',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%'
+        }}>
           {template.defaultHandle || '@mushiqr'}
         </span>
       </div>
@@ -1125,7 +1131,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
           onEnableAll={() => handleBatchActiveTabEnable(true, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
           onDisableAll={() => handleBatchActiveTabEnable(false, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
             {ALL_TEMPLATES
               .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.title.toLowerCase().includes(searchQuery.toLowerCase()))
               .map(tpl => {
@@ -1157,20 +1163,26 @@ function TemplateItemControlTile({ tpl, enabled, isPaid, updating, onToggleEnabl
     <div style={{
       background: isOff ? 'rgba(15, 18, 33, 0.4)' : 'var(--ad-input)',
       border: `1.5px solid ${isOff ? 'rgba(239, 68, 68, 0.3)' : (isPaid ? 'rgba(245, 158, 11, 0.35)' : 'rgba(16, 185, 129, 0.35)')}`,
-      borderRadius: 16, padding: '12px',
+      borderRadius: 14, padding: '10px 8px',
       display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-      gap: 12, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
+      gap: 8, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
       boxShadow: isPaid ? '0 4px 14px rgba(245, 158, 11, 0.1)' : '0 4px 14px rgba(16, 185, 129, 0.1)'
     }}>
       {/* Visual Poster Thumbnail Card */}
       <TemplateMiniPosterCard template={tpl} />
 
       {/* Details */}
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3 }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={{
+          fontSize: 11, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.25,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+        }}>
           {tpl.name}
         </div>
-        <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', marginTop: 2 }}>
+        <div style={{
+          fontSize: 9.5, color: 'var(--ad-text-sec)', marginTop: 2,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+        }}>
           {tpl.actionText} · {tpl.defaultHandle}
         </div>
       </div>
@@ -1178,22 +1190,22 @@ function TemplateItemControlTile({ tpl, enabled, isPaid, updating, onToggleEnabl
       {/* Controls Bar */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        paddingTop: 8, borderTop: '1px solid var(--ad-border)'
+        paddingTop: 6, borderTop: '1px solid var(--ad-border)', gap: 4
       }}>
         <button
           type="button"
           disabled={updating}
           onClick={onToggleEnable}
           style={{
-            display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
-            borderRadius: 7, border: `1px solid ${enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+            display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
+            borderRadius: 6, border: `1px solid ${enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
             background: enabled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            color: enabled ? '#22C55E' : '#EF4444', fontSize: 10, fontWeight: 800,
-            cursor: updating ? 'not-allowed' : 'pointer'
+            color: enabled ? '#22C55E' : '#EF4444', fontSize: 9, fontWeight: 800,
+            cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0
           }}
         >
-          <Power size={10} strokeWidth={2.5} />
-          <span>{enabled ? 'ACTIVE' : 'HIDDEN'}</span>
+          <Power size={9} strokeWidth={2.5} />
+          <span>{enabled ? 'ON' : 'OFF'}</span>
         </button>
 
         <button
@@ -1201,23 +1213,22 @@ function TemplateItemControlTile({ tpl, enabled, isPaid, updating, onToggleEnabl
           disabled={updating}
           onClick={onToggleTier}
           style={{
-            display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px',
+            display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px',
             borderRadius: 100, border: `1.5px solid ${isPaid ? '#F59E0B' : '#10B981'}`,
             background: isPaid ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-            color: '#FFFFFF', fontSize: 10, fontWeight: 800,
-            cursor: updating ? 'not-allowed' : 'pointer',
-            boxShadow: isPaid ? '0 2px 8px rgba(245, 158, 11, 0.35)' : '0 2px 8px rgba(16, 185, 129, 0.35)'
+            color: '#FFFFFF', fontSize: 9, fontWeight: 800,
+            cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0,
+            boxShadow: isPaid ? '0 2px 6px rgba(245, 158, 11, 0.35)' : '0 2px 6px rgba(16, 185, 129, 0.35)'
           }}
         >
           {updating ? (
-            <RefreshCw size={10} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
+            <RefreshCw size={9} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
           ) : isPaid ? (
-            <Crown size={10} fill="#fff" color="#fff" strokeWidth={2.2} />
+            <Crown size={9} fill="#fff" color="#fff" strokeWidth={2.2} />
           ) : (
-            <Shield size={10} strokeWidth={2.5} />
+            <Shield size={9} strokeWidth={2.5} />
           )}
           <span>{isPaid ? 'PRO' : 'FREE'}</span>
-          <span style={{ fontSize: 8, opacity: 0.8, marginLeft: 2 }}>⇄</span>
         </button>
       </div>
     </div>
