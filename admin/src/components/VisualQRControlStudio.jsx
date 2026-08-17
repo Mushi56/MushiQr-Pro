@@ -1,8 +1,9 @@
 // admin/src/components/VisualQRControlStudio.jsx
-// ─── Complete Visual QR Feature, Shapes, Logos & Fonts Access Studio ────────
+// ─── Complete Visual QR Feature, Shapes, Logos, Textures & Fonts Studio ─────
 // Comprehensive WYSIWYG studio for Super Admins. Controls all 18 QR content types,
-// 37 dot module styles, 35 corner eye shapes, 40 brand logos, 30 Google fonts,
-// 12 scan-me frames, and 20+ ready templates with 1-click Free/Pro & Active toggles.
+// 37 dot shapes (with live canvas render), 35 eye shapes (with live canvas render),
+// 40 brand logos, 9 social textures, 12 dual-gradients, 8 background shapes,
+// 30 typography fonts, 12 scan-me frames, and 20+ templates with 1-click Free/Pro & Active toggles.
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
@@ -12,12 +13,13 @@ import {
   FileSpreadsheet, Music, Calendar, DollarSign, MessageCircle, Video,
   Send, AtSign, CheckCircle2, SlidersHorizontal, ChevronRight, Eye,
   Grid, Box, Wand2, ArrowRightLeft, Lock, Unlock, EyeOff, LayoutGrid,
-  FileCheck, Star, Heart, Bookmark
+  FileCheck, Star, Heart, Bookmark, UploadCloud, Brush, Layers2
 } from 'lucide-react';
 import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { setFeatureFlagCloud, setFeaturesTierBatchCloud } from '../services/adminDataService';
 import { FEATURE_REGISTRY } from '../services/FeatureAccessManager';
+import { drawDotModule, drawEye } from '../../src/utils/qrEngine';
 
 // ─── 1. RAW CATALOG DATA ───────────────────────────────────────────────────
 
@@ -133,6 +135,45 @@ export const ALL_LOGO_PRESETS = [
   { slug: 'vimeo', name: 'Vimeo Video', color: '#1AB7EA', url: '/presets/vimeo.avif' }
 ];
 
+export const ALL_TEXTURES = [
+  { slug: 'facebook', name: 'Facebook Texture', color: '#1877F2', url: '/textures/facebook_texture.webp' },
+  { slug: 'whatsapp', name: 'WhatsApp Texture', color: '#25D366', url: '/textures/whatsapp_texture.webp' },
+  { slug: 'instagram', name: 'Instagram Gradient Texture', color: '#E4405F', url: '/textures/instagram_texture.webp' },
+  { slug: 'youtube', name: 'YouTube Video Texture', color: '#FF0000', url: '/textures/youtube_texture.webp' },
+  { slug: 'tiktok', name: 'TikTok Dark Texture', color: '#000000', url: '/textures/tiktok_texture.webp' },
+  { slug: 'snapchat', name: 'Snapchat Yellow Texture', color: '#FFFC00', url: '/textures/snapchat_texture.webp' },
+  { slug: 'twitter', name: 'Twitter / X Texture', color: '#1DA1F2', url: '/textures/twitter_texture.webp' },
+  { slug: 'telegram', name: 'Telegram Blue Texture', color: '#0088CC', url: '/textures/telegram_texture.webp' },
+  { slug: 'spotify', name: 'Spotify Wave Texture', color: '#1DB954', url: '/textures/spotify_texture.webp' },
+  { slug: 'custom_upload', name: 'Custom Photo Texture Upload', color: '#8B5CF6', isUpload: true, desc: 'Upload custom image pattern' }
+];
+
+export const ALL_GRADIENTS = [
+  { id: 'sunset_glow', name: 'Sunset Glow', from: '#FF512F', to: '#DD2476' },
+  { id: 'ocean_breeze', name: 'Ocean Breeze', from: '#00c6ff', to: '#0072ff' },
+  { id: 'neon_violet', name: 'Neon Violet', from: '#7F00FF', to: '#E100FF' },
+  { id: 'lush_emerald', name: 'Lush Emerald', from: '#11998e', to: '#38ef7d' },
+  { id: 'midnight_gold', name: 'Midnight Gold', from: '#F59E0B', to: '#D97706' },
+  { id: 'cyberpunk_aqua', name: 'Cyberpunk Aqua', from: '#00F0FF', to: '#7000FF' },
+  { id: 'fire_phoenix', name: 'Fire Phoenix', from: '#f12711', to: '#f5af19' },
+  { id: 'royal_amethyst', name: 'Royal Amethyst', from: '#654ea3', to: '#eaafc8' },
+  { id: 'deep_space', name: 'Deep Space', from: '#000428', to: '#004e92' },
+  { id: 'sweet_candy', name: 'Sweet Candy', from: '#FF007F', to: '#7928CA' },
+  { id: 'electric_blue', name: 'Electric Blue', from: '#4facfe', to: '#00f2fe' },
+  { id: 'citrus_lime', name: 'Citrus Lime', from: '#0ba360', to: '#3cba92' }
+];
+
+export const ALL_BG_SHAPES = [
+  { id: 'solid', name: 'Solid Rectangle Card', desc: 'Standard rectangular card backing' },
+  { id: 'rounded', name: 'Rounded Card', desc: 'Smooth curved card backing' },
+  { id: 'circle', name: 'Circular Shield Badge', desc: 'Concentric circular backing' },
+  { id: 'pill', name: 'Horizontal Pill Capsule', desc: 'Capsule shaped backing' },
+  { id: 'ribbon', name: 'Banner Ribbon Card', desc: 'Flagged decorative banner' },
+  { id: 'glow', name: 'Ambient Radiant Glow', desc: 'Soft neon blur shadow backing' },
+  { id: 'hexagon', name: 'Cyber Hexagon Badge', desc: '6-sided polygon backing' },
+  { id: 'brackets', name: 'Camera Focus Brackets', desc: 'Camera lens corner framing' }
+];
+
 export const ALL_FONTS = [
   { id: 'Outfit', name: 'Outfit', category: 'Geometric Sans' },
   { id: 'Inter', name: 'Inter', category: 'Clean Sans' },
@@ -194,6 +235,116 @@ export const ALL_TEMPLATES = [
   { id: 'store_google_review', name: 'Google 5-Star Reviews', color: '#4285F4', desc: 'Storefront rating booster' }
 ];
 
+// ─── MINI CANVAS RENDERERS ──────────────────────────────────────────────────
+
+function MiniDotCanvas({ dotStyle, color = '#D60036' }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const size = 64;
+    ctx.clearRect(0, 0, size, size);
+
+    // Background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, size, size);
+
+    // 5x5 grid preview with center eye
+    const gridCount = 5;
+    const padding = 2;
+    const availableSize = size - padding * 2;
+    const cellSize = availableSize / gridCount;
+
+    const matrix = [
+      [1, 0, 1, 0, 1],
+      [0, 1, 1, 1, 0],
+      [1, 1, 0, 1, 1],
+      [0, 1, 1, 1, 0],
+      [1, 0, 1, 0, 1]
+    ];
+
+    ctx.fillStyle = color;
+
+    for (let r = 0; r < gridCount; r++) {
+      for (let c = 0; c < gridCount; c++) {
+        if (!matrix[r][c]) continue;
+        const x = padding + c * cellSize;
+        const y = padding + r * cellSize;
+        const neighbors = {
+          top: r > 0 && !!matrix[r - 1][c],
+          bottom: r < gridCount - 1 && !!matrix[r + 1][c],
+          left: c > 0 && !!matrix[r][c - 1],
+          right: c < gridCount - 1 && !!matrix[r][c + 1]
+        };
+        try {
+          drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, {}, r, c);
+        } catch {
+          ctx.fillRect(x, y, cellSize, cellSize);
+        }
+      }
+    }
+  }, [dotStyle, color]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={64}
+      height={64}
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: 8,
+        border: '1px solid var(--ad-border)',
+        display: 'block',
+        flexShrink: 0
+      }}
+    />
+  );
+}
+
+function MiniEyeCanvas({ eyeStyle, color = '#D60036' }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const size = 64;
+    ctx.clearRect(0, 0, size, size);
+
+    // Background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, size, size);
+
+    const padding = 3;
+    const eyeSize = size - padding * 2;
+    try {
+      drawEye(ctx, padding, padding, eyeSize, eyeStyle, color, color);
+    } catch {
+      ctx.fillStyle = color;
+      ctx.fillRect(padding, padding, eyeSize, eyeSize);
+    }
+  }, [eyeStyle, color]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={64}
+      height={64}
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: 8,
+        border: '1px solid var(--ad-border)',
+        display: 'block',
+        flexShrink: 0
+      }}
+    />
+  );
+}
+
 // ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
 
 export default function VisualQRControlStudio({ currentUser, isDark = false }) {
@@ -201,12 +352,12 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
   const [livePlans, setLivePlans] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'dots' | 'eyes' | 'logos' | 'fonts' | 'frames' | 'templates'
+  const [activeTab, setActiveTab] = useState('overview');
   const [updatingKey, setUpdatingKey] = useState(null);
   const [bulkProcessing, setBulkProcessing] = useState(false);
   const [feedbackToast, setFeedbackToast] = useState(null);
 
-  // 1. Listen to real-time Firestore updates
+  // Real-time Firestore sync
   useEffect(() => {
     setLoading(true);
     const unsubGlobal = onSnapshot(doc(db, 'global_config', 'featureFlags'), snap => {
@@ -231,7 +382,6 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     setTimeout(() => setFeedbackToast(null), 3000);
   };
 
-  // Helper to determine active state and Pro status for any item
   const getItemState = (key, defaultEnabled = true, defaultPlan = 'free') => {
     const enabled = liveFlagsMap[key] !== undefined ? Boolean(liveFlagsMap[key]) : defaultEnabled;
     let isPaid = false;
@@ -243,7 +393,6 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     return { enabled, isPaid };
   };
 
-  // Toggle state
   const handleToggleEnable = async (key, name, subcategory = 'Presets') => {
     setUpdatingKey(key);
     const current = getItemState(key).enabled;
@@ -259,7 +408,6 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     }
   };
 
-  // Toggle Free vs Pro
   const handleToggleTier = async (key, name) => {
     setUpdatingKey(key);
     const currentPaid = getItemState(key).isPaid;
@@ -274,7 +422,6 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     }
   };
 
-  // Batch toggle all items in active tab
   const handleBatchActiveTabTier = async (targetTier, keysList) => {
     setBulkProcessing(true);
     try {
@@ -304,7 +451,6 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     }
   };
 
-  // Standard Feature Registry items
   const canonicalQRFeatures = useMemo(() => {
     const raw = FEATURE_REGISTRY.filter(f => f.category === 'QR_GENERATOR');
     return raw.map(f => {
@@ -313,15 +459,18 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     });
   }, [liveFlagsMap, livePlans]);
 
-  // Tab definitions
+  // Sub-Navigation Tabs
   const TABS = [
     { id: 'overview', label: '1. Overview & Content Grid', count: 18, icon: QrCode },
     { id: 'dots', label: '2. 37 Dot Module Shapes', count: ALL_DOT_STYLES.length, icon: Grid },
     { id: 'eyes', label: '3. 35 Eye Finder Shapes', count: ALL_EYE_STYLES.length, icon: Eye },
-    { id: 'logos', label: '4. 40 Brand Logo Presets', count: ALL_LOGO_PRESETS.length, icon: Image },
-    { id: 'fonts', label: '5. 30 Google Fonts', count: ALL_FONTS.length, icon: Type },
-    { id: 'frames', label: '6. 12 Scan-Me Frames', count: ALL_FRAMES.length, icon: Sparkles },
-    { id: 'templates', label: '7. Templates Gallery', count: ALL_TEMPLATES.length, icon: LayoutGrid }
+    { id: 'textures', label: '4. 10 Textures & Overlays', count: ALL_TEXTURES.length, icon: Brush },
+    { id: 'gradients', label: '5. 12 Dual Gradients', count: ALL_GRADIENTS.length, icon: Wand2 },
+    { id: 'bg_shapes', label: '6. 8 Card Backgrounds', count: ALL_BG_SHAPES.length, icon: Box },
+    { id: 'logos', label: '7. 40 Brand Logo Presets', count: ALL_LOGO_PRESETS.length, icon: Image },
+    { id: 'fonts', label: '8. 30 Google Fonts', count: ALL_FONTS.length, icon: Type },
+    { id: 'frames', label: '9. 12 Scan-Me Frames', count: ALL_FRAMES.length, icon: Sparkles },
+    { id: 'templates', label: '10. Templates Gallery', count: ALL_TEMPLATES.length, icon: LayoutGrid }
   ];
 
   return (
@@ -362,11 +511,11 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                   QR Code Generator Master Studio
                 </h1>
                 <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 100, background: 'rgba(214, 0, 54, 0.15)', color: '#D60036' }}>
-                  Complete Catalog
+                  Live Assets &amp; Canvas Rendering
                 </span>
               </div>
               <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '4px 0 0', fontWeight: 500 }}>
-                Granular control over all 18 content types, 37 dot shapes, 35 eye frames, 40 brand logos, 30 typography fonts, frames &amp; templates.
+                Granular control over all 18 formats, 37 dot shapes, 35 eye corners, 10 textures, 12 gradients, 8 card shapes, 40 logos, 30 fonts &amp; templates.
               </p>
             </div>
           </div>
@@ -376,7 +525,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
             <Search size={15} style={{ position: 'absolute', left: 12, color: 'var(--ad-text-sec)' }} />
             <input
               type="text"
-              placeholder="Search dots, eyes, logos, fonts..."
+              placeholder="Search shapes, eyes, textures, logos..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               style={{
@@ -393,7 +542,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
           </div>
         </div>
 
-        {/* Studio Sub-Navigation Tabs Carousel */}
+        {/* Carousel Navigation Tabs */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
           {TABS.map(t => {
             const isActive = activeTab === t.id;
@@ -422,44 +571,42 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </div>
       </div>
 
-      {/* ── TAB 1: OVERVIEW & CONTENT TYPES ──────────────────────────────────── */}
+      {/* ── TAB 1: OVERVIEW & 18 CONTENT TYPES ────────────────────────────────── */}
       {activeTab === 'overview' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <SectionCatalog
-            title="18 Main App QR Content Formats"
-            subtitle="The 18 content format cards shown to users on the creation screen."
-            icon={Grid}
-            onMakeFree={() => handleBatchActiveTabTier('free', canonicalQRFeatures.filter(f => f.subcategory === 'Content').map(f => f.key))}
-            onMakePro={() => handleBatchActiveTabTier('paid', canonicalQRFeatures.filter(f => f.subcategory === 'Content').map(f => f.key))}
-            onEnableAll={() => handleBatchActiveTabEnable(true, canonicalQRFeatures.filter(f => f.subcategory === 'Content'), 'Content')}
-            onDisableAll={() => handleBatchActiveTabEnable(false, canonicalQRFeatures.filter(f => f.subcategory === 'Content'), 'Content')}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
-              {canonicalQRFeatures
-                .filter(f => f.subcategory === 'Content' && (!searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase())))
-                .map(feature => (
-                  <ItemControlTile
-                    key={feature.key}
-                    name={feature.name}
-                    desc={feature.description}
-                    enabled={feature.enabled}
-                    isPaid={feature.isPaid}
-                    icon={FileText}
-                    updating={updatingKey === feature.key}
-                    onToggleEnable={() => handleToggleEnable(feature.key, feature.name, 'Content')}
-                    onToggleTier={() => handleToggleTier(feature.key, feature.name)}
-                  />
-                ))}
-            </div>
-          </SectionCatalog>
-        </div>
+        <SectionCatalog
+          title="18 Main App QR Content Formats"
+          subtitle="The 18 content format cards shown to users on the creation screen."
+          icon={Grid}
+          onMakeFree={() => handleBatchActiveTabTier('free', canonicalQRFeatures.filter(f => f.subcategory === 'Content').map(f => f.key))}
+          onMakePro={() => handleBatchActiveTabTier('paid', canonicalQRFeatures.filter(f => f.subcategory === 'Content').map(f => f.key))}
+          onEnableAll={() => handleBatchActiveTabEnable(true, canonicalQRFeatures.filter(f => f.subcategory === 'Content'), 'Content')}
+          onDisableAll={() => handleBatchActiveTabEnable(false, canonicalQRFeatures.filter(f => f.subcategory === 'Content'), 'Content')}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+            {canonicalQRFeatures
+              .filter(f => f.subcategory === 'Content' && (!searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase())))
+              .map(feature => (
+                <ItemControlTile
+                  key={feature.key}
+                  name={feature.name}
+                  desc={feature.description}
+                  enabled={feature.enabled}
+                  isPaid={feature.isPaid}
+                  icon={FileText}
+                  updating={updatingKey === feature.key}
+                  onToggleEnable={() => handleToggleEnable(feature.key, feature.name, 'Content')}
+                  onToggleTier={() => handleToggleTier(feature.key, feature.name)}
+                />
+              ))}
+          </div>
+        </SectionCatalog>
       )}
 
-      {/* ── TAB 2: 37 DOT MODULE STYLES ──────────────────────────────────────── */}
+      {/* ── TAB 2: 37 DOT MODULE SHAPES (With Live Canvas Preview) ────────────── */}
       {activeTab === 'dots' && (
         <SectionCatalog
-          title="37 Custom QR Dot Module Shapes"
-          subtitle="Denso, Fluid, Sparkle, Rose, Cherry Blossom, Heart, Star, Sunflower, Coffee Bean, and all 37 shapes."
+          title="37 Custom QR Dot Module Shapes (Live Canvas Preview)"
+          subtitle="Every dot shape renders its actual canvas drawing pattern. Click to toggle Free/Pro & Active state."
           icon={Grid}
           onMakeFree={() => handleBatchActiveTabTier('free', ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`))}
           onMakePro={() => handleBatchActiveTabTier('paid', ALL_DOT_STYLES.map(d => `qr_dot_${d.id}`))}
@@ -478,6 +625,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                     name={dot.name}
                     desc={dot.desc}
                     badge={dot.id}
+                    customPreview={<MiniDotCanvas dotStyle={dot.id} color={state.isPaid ? '#F59E0B' : '#10B981'} />}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
                     icon={Grid}
@@ -491,11 +639,11 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </SectionCatalog>
       )}
 
-      {/* ── TAB 3: 35 EYE FINDER STYLES ──────────────────────────────────────── */}
+      {/* ── TAB 3: 35 EYE FINDER SHAPES (With Live Canvas Preview) ────────────── */}
       {activeTab === 'eyes' && (
         <SectionCatalog
-          title="35 Corner Eye Finder Shapes"
-          subtitle="Square, Rounded, Circle, Shield, Diamond, Leaf, Lotus, Sunflower, Coffee Bean, Teardrop, etc."
+          title="35 Corner Eye Finder Shapes (Live Canvas Preview)"
+          subtitle="Every eye frame renders its actual corner contour. Click to toggle Free/Pro & Active state."
           icon={Eye}
           onMakeFree={() => handleBatchActiveTabTier('free', ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`))}
           onMakePro={() => handleBatchActiveTabTier('paid', ALL_EYE_STYLES.map(e => `qr_eye_${e.id}`))}
@@ -514,6 +662,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                     name={eye.name}
                     desc={eye.desc}
                     badge={eye.id}
+                    customPreview={<MiniEyeCanvas eyeStyle={eye.id} color={state.isPaid ? '#F59E0B' : '#10B981'} />}
                     enabled={state.enabled}
                     isPaid={state.isPaid}
                     icon={Eye}
@@ -527,7 +676,118 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </SectionCatalog>
       )}
 
-      {/* ── TAB 4: 40 BRAND LOGO PRESETS ─────────────────────────────────────── */}
+      {/* ── TAB 4: 10 TEXTURES & PATTERN OVERLAYS ────────────────────────────── */}
+      {activeTab === 'textures' && (
+        <SectionCatalog
+          title="10 Social Textures &amp; Matrix Overlays"
+          subtitle="Facebook, WhatsApp, Instagram, TikTok, Snapchat textures, plus custom texture uploads."
+          icon={Brush}
+          onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEXTURES.map(t => `qr_texture_${t.slug}`))}
+          onMakePro={() => handleBatchActiveTabTier('paid', ALL_TEXTURES.map(t => `qr_texture_${t.slug}`))}
+          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name })), 'Textures')}
+          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_TEXTURES.map(t => ({ key: `qr_texture_${t.slug}`, name: t.name })), 'Textures')}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+            {ALL_TEXTURES
+              .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map(tex => {
+                const key = `qr_texture_${tex.slug}`;
+                const state = getItemState(key, true, 'weekly');
+                return (
+                  <ItemControlTile
+                    key={key}
+                    name={tex.name}
+                    desc={tex.desc || 'Social texture overlay'}
+                    imageUrl={tex.url}
+                    badge={tex.slug}
+                    color={tex.color}
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={tex.isUpload ? UploadCloud : Brush}
+                    updating={updatingKey === key}
+                    onToggleEnable={() => handleToggleEnable(key, tex.name, 'Textures')}
+                    onToggleTier={() => handleToggleTier(key, tex.name)}
+                  />
+                );
+              })}
+          </div>
+        </SectionCatalog>
+      )}
+
+      {/* ── TAB 5: 12 DUAL GRADIENT FILLS ─────────────────────────────────────── */}
+      {activeTab === 'gradients' && (
+        <SectionCatalog
+          title="12 Dual Gradient Color Schemes"
+          subtitle="Sunset Glow, Ocean Breeze, Cyberpunk Aqua, Neon Violet, Midnight Gold, etc."
+          icon={Wand2}
+          onMakeFree={() => handleBatchActiveTabTier('free', ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`))}
+          onMakePro={() => handleBatchActiveTabTier('paid', ALL_GRADIENTS.map(g => `qr_gradient_${g.id}`))}
+          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name })), 'Gradients')}
+          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_GRADIENTS.map(g => ({ key: `qr_gradient_${g.id}`, name: g.name })), 'Gradients')}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+            {ALL_GRADIENTS
+              .filter(g => !searchQuery || g.name.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map(grad => {
+                const key = `qr_gradient_${grad.id}`;
+                const state = getItemState(key, true, 'weekly');
+                return (
+                  <ItemControlTile
+                    key={key}
+                    name={grad.name}
+                    desc={`${grad.from} → ${grad.to}`}
+                    gradientFill={`linear-gradient(135deg, ${grad.from}, ${grad.to})`}
+                    badge={grad.id}
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={Wand2}
+                    updating={updatingKey === key}
+                    onToggleEnable={() => handleToggleEnable(key, grad.name, 'Gradients')}
+                    onToggleTier={() => handleToggleTier(key, grad.name)}
+                  />
+                );
+              })}
+          </div>
+        </SectionCatalog>
+      )}
+
+      {/* ── TAB 6: 8 CARD BACKGROUND SHAPES ──────────────────────────────────── */}
+      {activeTab === 'bg_shapes' && (
+        <SectionCatalog
+          title="8 QR Background Shapes &amp; Shield Backings"
+          subtitle="Solid, Rounded, Circle Badge, Pill Capsule, Ribbon, Neon Glow, Cyber Hexagon, etc."
+          icon={Box}
+          onMakeFree={() => handleBatchActiveTabTier('free', ALL_BG_SHAPES.map(s => `qr_bgshape_${s.id}`))}
+          onMakePro={() => handleBatchActiveTabTier('paid', ALL_BG_SHAPES.map(s => `qr_bgshape_${s.id}`))}
+          onEnableAll={() => handleBatchActiveTabEnable(true, ALL_BG_SHAPES.map(s => ({ key: `qr_bgshape_${s.id}`, name: s.name })), 'Background Shapes')}
+          onDisableAll={() => handleBatchActiveTabEnable(false, ALL_BG_SHAPES.map(s => ({ key: `qr_bgshape_${s.id}`, name: s.name })), 'Background Shapes')}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+            {ALL_BG_SHAPES
+              .filter(s => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map(shape => {
+                const key = `qr_bgshape_${shape.id}`;
+                const state = getItemState(key, true, shape.id === 'solid' || shape.id === 'rounded' ? 'free' : 'weekly');
+                return (
+                  <ItemControlTile
+                    key={key}
+                    name={shape.name}
+                    desc={shape.desc}
+                    badge={shape.id}
+                    enabled={state.enabled}
+                    isPaid={state.isPaid}
+                    icon={Box}
+                    updating={updatingKey === key}
+                    onToggleEnable={() => handleToggleEnable(key, shape.name, 'Background Shapes')}
+                    onToggleTier={() => handleToggleTier(key, shape.name)}
+                  />
+                );
+              })}
+          </div>
+        </SectionCatalog>
+      )}
+
+      {/* ── TAB 7: 40 BRAND LOGO PRESETS ─────────────────────────────────────── */}
       {activeTab === 'logos' && (
         <SectionCatalog
           title="40 Pre-installed Brand Logo Presets"
@@ -565,7 +825,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </SectionCatalog>
       )}
 
-      {/* ── TAB 5: 30 GOOGLE FONTS ───────────────────────────────────────────── */}
+      {/* ── TAB 8: 30 GOOGLE FONTS ───────────────────────────────────────────── */}
       {activeTab === 'fonts' && (
         <SectionCatalog
           title="30 Google Fonts Typography Collection"
@@ -601,7 +861,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </SectionCatalog>
       )}
 
-      {/* ── TAB 6: 12 SCAN-ME FRAMES ─────────────────────────────────────────── */}
+      {/* ── TAB 9: 12 SCAN-ME FRAMES ─────────────────────────────────────────── */}
       {activeTab === 'frames' && (
         <SectionCatalog
           title="12 Scan-Me Frames &amp; Badge Backings"
@@ -637,7 +897,7 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </SectionCatalog>
       )}
 
-      {/* ── TAB 7: TEMPLATES GALLERY ─────────────────────────────────────────── */}
+      {/* ── TAB 10: TEMPLATES GALLERY ────────────────────────────────────────── */}
       {activeTab === 'templates' && (
         <SectionCatalog
           title="20+ Ready-To-Use Social &amp; Pro Templates"
@@ -760,7 +1020,7 @@ function SectionCatalog({ title, subtitle, icon: Icon, onMakeFree, onMakePro, on
   );
 }
 
-function ItemControlTile({ name, desc, badge, color, imageUrl, fontFamily, enabled, isPaid, icon: Icon, updating, onToggleEnable, onToggleTier }) {
+function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, customPreview, fontFamily, enabled, isPaid, icon: Icon, updating, onToggleEnable, onToggleTier }) {
   const isOff = !enabled;
 
   return (
@@ -774,9 +1034,17 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, fontFamily, enabl
     }}>
       {/* Top row: Visual Thumbnail + Name + Desc */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-        {imageUrl ? (
+        {customPreview ? (
+          customPreview
+        ) : gradientFill ? (
           <div style={{
-            width: 36, height: 36, borderRadius: 10, background: '#fff',
+            width: 38, height: 38, borderRadius: 10, background: gradientFill,
+            border: '1.5px solid rgba(255,255,255,0.2)', flexShrink: 0,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+          }} />
+        ) : imageUrl ? (
+          <div style={{
+            width: 38, height: 38, borderRadius: 10, background: '#fff',
             border: '1px solid var(--ad-border)', padding: 4, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
@@ -784,7 +1052,7 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, fontFamily, enabl
           </div>
         ) : (
           <div style={{
-            width: 36, height: 36, borderRadius: 10,
+            width: 38, height: 38, borderRadius: 10,
             background: isOff ? 'rgba(148, 163, 184, 0.15)' : (isPaid ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(214, 0, 54, 0.15))' : 'rgba(16, 185, 129, 0.15)'),
             color: isOff ? 'var(--ad-text-sec)' : (isPaid ? '#F59E0B' : '#10B981'),
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
