@@ -501,8 +501,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           width: '100%',
           backgroundColor: '#B80026',
           backgroundImage: `
-            radial-gradient(at 88% 90%, #FF5E00 0px, transparent 55%),
-            radial-gradient(at 12% 95%, #FF9500 0px, transparent 50%),
+            radial-gradient(at 88% 90%, #FF3B1E 0px, transparent 55%),
+            radial-gradient(at 12% 95%, #FF4A22 0px, transparent 50%),
             radial-gradient(at 92% 5%, #FF1E56 0px, transparent 48%),
             radial-gradient(at 8% 5%, #B80026 0px, transparent 50%),
             radial-gradient(at 50% 40%, #D8042B 0px, transparent 65%),
@@ -534,7 +534,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           <div style={{
             position: 'absolute', bottom: '-15%', right: '5%',
             width: '220px', height: '220px',
-            background: 'radial-gradient(circle, rgba(255, 94, 0, 0.45) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(255, 59, 30, 0.35) 0%, transparent 70%)',
             filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
           }} />
           <div style={{
