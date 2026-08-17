@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 
 const requiredEnvVars = [
@@ -25,9 +25,22 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:1068457009199:web:5b09d6a86f7ecd448966da'
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-export const db = getFirestore(app);
+
+let firestoreDb;
+try {
+  firestoreDb = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
+  });
+} catch (e) {
+  firestoreDb = getFirestore(app);
+}
+
+export const db = firestoreDb;
 export const functions = getFunctions(app);
+
 

@@ -262,6 +262,8 @@ export const STATUS = {
   UNKNOWN_FEATURE: 'unknown_feature',
 };
 
+import bundledDefaults from '../config/bundled_cloud_defaults.json';
+
 // ═══════════════════════════════════════════════════════════════════════════
 // 4. CENTRALIZED FEATURE ACCESS MANAGER CLASS (Online & Offline Resilient)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -276,26 +278,30 @@ class FeatureAccessManagerService {
     this.currentUser = null;
     this.userClaims = {};
     
-    // Load local offline cached states immediately
-    let initialFlags = {};
-    let initialPlans = {};
-    let initialSub = null;
-    let initialMembership = {};
+    // 1. Start with static baseline snapshot bundled directly inside the APK build
+    const bundledFlags = bundledDefaults?.globalFlags || {};
+    const bundledMembership = bundledDefaults?.membershipConfig || {};
+    const bundledPlans = bundledDefaults?.plans || {};
+
+    // 2. Overlay dynamic local offline cache (from previous live cloud sessions)
+    let cachedFlags = null;
+    let cachedPlans = null;
+    let cachedSub = null;
+    let cachedMembership = null;
     try {
-      const primaryFlags = JSON.parse(localStorage.getItem(STORAGE_KEYS.GLOBAL_FLAGS) || 'null');
-      const legacyFlags = JSON.parse(localStorage.getItem('qrgen_feature_flags') || 'null');
-      initialFlags = primaryFlags || legacyFlags || {};
-      initialPlans = JSON.parse(localStorage.getItem(STORAGE_KEYS.PLAN_CONFIGS) || '{}');
-      initialSub = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SUB) || 'null');
-      initialMembership = JSON.parse(localStorage.getItem('mushiqr_membership_config') || '{}');
+      cachedFlags = JSON.parse(localStorage.getItem(STORAGE_KEYS.GLOBAL_FLAGS) || 'null') ||
+                    JSON.parse(localStorage.getItem('qrgen_feature_flags') || 'null');
+      cachedPlans = JSON.parse(localStorage.getItem(STORAGE_KEYS.PLAN_CONFIGS) || 'null');
+      cachedSub = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SUB) || 'null');
+      cachedMembership = JSON.parse(localStorage.getItem('mushiqr_membership_config') || 'null');
     } catch {
-      // Fallback if storage read fails
+      // Fallback
     }
 
-    this.globalFlags = initialFlags;          // global_config/featureFlags doc
-    this.planConfigs = initialPlans;          // subscription_plans/{planId} docs
-    this.userSubscription = initialSub;
-    this.membershipConfig = initialMembership; // global_config/membership doc
+    this.globalFlags = { ...bundledFlags, ...(cachedFlags || {}) };          // global_config/featureFlags doc
+    this.membershipConfig = { ...bundledMembership, ...(cachedMembership || {}) }; // global_config/membership doc
+    this.planConfigs = { ...bundledPlans, ...(cachedPlans || {}) };          // subscription_plans docs
+    this.userSubscription = cachedSub;
     this.unsubFlags = null;
     this.unsubPlans = null;
     this.unsubSub = null;
