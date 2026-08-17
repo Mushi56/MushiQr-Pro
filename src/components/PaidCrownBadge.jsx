@@ -24,7 +24,14 @@ export default function PaidCrownBadge({
     };
   }, []);
 
+  // 1. If featureId is invalid or if feature is included in the free tier, NEVER show crown badge
   if (!featureId || !FeatureAccessManager.isPaidFeature(featureId)) {
+    return null;
+  }
+
+  // 2. If the user currently has an active PRO subscription or lifetime access, NEVER show locking crown badge
+  const userPlan = FeatureAccessManager.getUserPlan();
+  if (userPlan && userPlan !== 'free') {
     return null;
   }
 

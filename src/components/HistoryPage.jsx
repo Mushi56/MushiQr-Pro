@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { getHistory, deleteFromHistory, clearHistory, saveToSaved, getSaved, clearHistoryByRange } from '../utils/storage';
-import { History as HistoryIcon, SearchX, Trash2, QrCode, Star, Clock, MoreVertical, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image } from 'lucide-react';
+import { History as HistoryIcon, SearchX, Trash2, QrCode, Star, Clock, MoreVertical, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, Crown, AlertCircle } from 'lucide-react';
 import { QR_TYPES } from '../utils/qrEngine';
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
-import { AlertCircle } from 'lucide-react';
 
 const TYPE_ICONS = {
   [QR_TYPES.URL]: <Link2 size={14} />,
@@ -24,34 +23,57 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
   const { showPaywall } = usePremium();
   const access = FeatureAccessManager.canUseFeature('history_view');
 
+  useEffect(() => {
+    if (!access.allowed && access.status !== 'disabled_by_admin') {
+      showPaywall('history_view');
+    }
+  }, [access.allowed, access.status, showPaywall]);
+
   if (!access.allowed) {
     return (
       <div style={{ padding: 40, textAlign: 'center', background: '#09090f', color: '#f0f0f8', minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
-          <AlertCircle size={32} />
-        </div>
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Creation & Scan History</h2>
-        <p style={{ color: '#8b8fa8', maxWidth: 480, margin: 0, fontSize: 14, lineHeight: 1.5 }}>
-          {access.status === 'disabled_by_admin'
-            ? 'History tracking has been disabled globally by the Administrator.'
-            : 'History tracking is a Pro feature. Upgrade your subscription plan to access your generation and scan activity log.'}
-        </p>
-        <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-          {access.status !== 'disabled_by_admin' && (
+        {access.status === 'disabled_by_admin' ? (
+          <>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+              <AlertCircle size={32} />
+            </div>
+            <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>History Log Unavailable</h2>
+            <p style={{ color: '#8b8fa8', maxWidth: 440, margin: 0, fontSize: 13, lineHeight: 1.5 }}>
+              History tracking has been disabled globally by the Administrator.
+            </p>
             <button
-              onClick={() => showPaywall('history_view')}
-              style={{ background: 'var(--accent-gradient)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(214,0,54,0.3)' }}
+              onClick={() => onNavigate && onNavigate('home')}
+              style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '10px 20px', borderRadius: 12, fontWeight: 600, cursor: 'pointer', marginTop: 12 }}
             >
-              Unlock History Log
+              Return to Home
             </button>
-          )}
-          <button
-            onClick={() => onNavigate && onNavigate('home')}
-            style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '12px 20px', borderRadius: 12, fontWeight: 600, cursor: 'pointer' }}
-          >
-            Return to Home
-          </button>
-        </div>
+          </>
+        ) : (
+          <>
+            <div style={{ width: 68, height: 68, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.15))', border: '1px solid rgba(255, 215, 0, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFD700', boxShadow: '0 8px 24px rgba(255, 170, 0, 0.25)' }}>
+              <Crown size={36} strokeWidth={2.2} />
+            </div>
+            <h2 style={{ fontSize: 24, fontWeight: 900, margin: 0, letterSpacing: '-0.3px' }}>Unlock Mushi QR Pro</h2>
+            <p style={{ color: '#8b8fa8', maxWidth: 420, margin: 0, fontSize: 13, lineHeight: 1.5 }}>
+              History tracking is a Pro feature. Upgrade your subscription plan to access your generation and scan activity log.
+            </p>
+            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+              <button
+                onClick={() => showPaywall('history_view')}
+                style={{ background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)', color: '#000', border: 'none', padding: '12px 24px', borderRadius: 14, fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 18px rgba(255, 170, 0, 0.4)' }}
+              >
+                <Crown size={16} fill="#000" color="#000" strokeWidth={2.5} />
+                <span>Buy Pro</span>
+              </button>
+              <button
+                onClick={() => onNavigate && onNavigate('home')}
+                style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '12px 20px', borderRadius: 14, fontWeight: 600, cursor: 'pointer' }}
+              >
+                Return to Home
+              </button>
+            </div>
+          </>
+        )}
       </div>
     );
   }

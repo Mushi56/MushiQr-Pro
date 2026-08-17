@@ -13,6 +13,7 @@ import {
   Sparkles, Cpu, Download, Cloud, ScanLine, MapPin, FlaskConical,
   TrendingUp, RefreshCw, X, Radio, QrCode, Barcode, LayoutDashboard,
   Bookmark, ClipboardList, Settings, Package, Zap, Save, CheckSquare, Square,
+  MinusSquare, CheckCheck, Power, RotateCcw, ToggleLeft, ToggleRight, ListFilter,
   Pencil, Image as ImageIcon, Type, Camera, Scan, Heart, History, HardDrive,
   FileSpreadsheet, FileCheck
 } from 'lucide-react';
@@ -36,7 +37,7 @@ import {
   getTargetingLabel,
   INITIAL_FEATURE_FLAGS
 } from '../services/featureFlagsService';
-import { setFeatureFlagCloud, setPlanFeaturesCloud } from '../services/adminDataService';
+import { setFeatureFlagCloud, setPlanFeaturesCloud, saveFeatureFlags, setFeaturesTierBatchCloud } from '../services/adminDataService';
 import { db } from '../services/firebase';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { useAdminTheme } from './AdminUIKit';
@@ -131,7 +132,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const [activeMode, setActiveMode] = useState('list'); // 'list' | 'details' | 'create' | 'edit'
   const [selectedFeature, setSelectedFeature] = useState(null);
 
-  // Filters & Search
+  // Filters, Selection & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'enabled' | 'disabled'
@@ -139,6 +140,9 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
   const [selectedSubcategory, setSelectedSubcategory] = useState('ALL');
   const [planFilter, setPlanFilter] = useState('all'); // 'all' | 'free' | 'paid' | 'weekly' | 'monthly' | 'yearly'
   const [envFilter, setEnvFilter] = useState('all');
+  const [selectedKeys, setSelectedKeys] = useState(new Set());
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [viewLayout, setViewLayout] = useState('cards'); // 'cards' | 'table'
 
   // Create / Edit Form State
   const [formData, setFormData] = useState({
@@ -405,6 +409,28 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     }
   };
 
+  // ── 1-Click Instant Tier (Free vs Pro) Batch & Single Setter ────────────
+  const [tierUpdatingKey, setTierUpdatingKey] = useState(null);
+
+  const handleSetFeatureTier = async (keys, targetTier) => {
+    if (!Array.isArray(keys) || keys.length === 0) return;
+    setBulkProcessing(true);
+    if (keys.length === 1) setTierUpdatingKey(keys[0]);
+    try {
+      await setFeaturesTierBatchCloud(keys, targetTier);
+      showToast(
+        keys.length === 1
+          ? `Feature switched to ${targetTier === 'free' ? 'FREE Tier 🛡️' : 'PRO Tier 👑'}`
+          : `${keys.length} features switched to ${targetTier === 'free' ? 'FREE Tier 🛡️' : 'PRO Tier 👑'}`
+      );
+    } catch (err) {
+      showToast(`Error updating tier: ${err?.message}`);
+    } finally {
+      setBulkProcessing(false);
+      setTierUpdatingKey(null);
+    }
+  };
+
   // ── Open Details Drawer ────────────────────────────────────────────────
   const openDetails = (feat) => {
     setSelectedFeature(feat);
@@ -518,6 +544,94 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
     (selectedSubcategory !== 'ALL' ? 1 : 0) +
     (planFilter !== 'all' ? 1 : 0) +
     (envFilter !== 'all' ? 1 : 0);
+
+  // ── Multi-Select Helpers ───────────────────────────────────────────────
+  const isAllVisibleSelected = useMemo(() => {
+    if (filteredFeatures.length === 0) return false;
+    return filteredFeatures.every(f => selectedKeys.has(f.key));
+  }, [filteredFeatures, selectedKeys]);
+
+  const isSomeVisibleSelected = useMemo(() => {
+    if (filteredFeatures.length === 0) return false;
+    const count = filteredFeatures.filter(f => selectedKeys.has(f.key)).length;
+    return count > 0 && count < filteredFeatures.length;
+  }, [filteredFeatures, selectedKeys]);
+
+  const handleSelectAllVisible = () => {
+    if (isAllVisibleSelected) {
+      setSelectedKeys(prev => {
+        const next = new Set(prev);
+        filteredFeatures.forEach(f => next.delete(f.key));
+        return next;
+      });
+    } else {
+      setSelectedKeys(prev => {
+        const next = new Set(prev);
+        filteredFeatures.forEach(f => next.add(f.key));
+        return next;
+      });
+    }
+  };
+
+  const handleSelectAllOverall = () => {
+    setSelectedKeys(new Set(allFeatures.map(f => f.key)));
+    showToast(`Selected all ${allFeatures.length} features`);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedKeys(new Set());
+  };
+
+  const handleToggleSelectOne = (key, e) => {
+    if (e) e.stopPropagation();
+    setSelectedKeys(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  // ── Bulk Actions Handler (Turn ON / Turn OFF / Plan Updates) ───────────
+  const handleBulkToggle = async (enableState, customKeys = null) => {
+    const targetKeys = customKeys || Array.from(selectedKeys);
+    if (targetKeys.length === 0) return;
+
+    setBulkProcessing(true);
+    const updatedMap = { ...liveFlagsMap };
+    targetKeys.forEach(k => {
+      updatedMap[k] = enableState;
+    });
+
+    // 1. Optimistic local update
+    setLiveFlagsMap(updatedMap);
+
+    try {
+      // 2. Persist to Firestore global config in single atomic write
+      await saveFeatureFlags(updatedMap);
+      showToast(`${targetKeys.length} features ${enableState ? 'ENABLED (Turned ON)' : 'DISABLED (Turned OFF)'}`);
+      if (!customKeys) {
+        setSelectedKeys(new Set());
+      }
+    } catch (err) {
+      showToast(`Batch update failed: ${err?.message}`);
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  const handleTurnAllVisibleOn = () => {
+    const visibleKeys = filteredFeatures.map(f => f.key);
+    handleBulkToggle(true, visibleKeys);
+  };
+
+  const handleTurnAllVisibleOff = () => {
+    const visibleKeys = filteredFeatures.map(f => f.key);
+    handleBulkToggle(false, visibleKeys);
+  };
 
   // ═════════════════════════════════════════════════════════════════════════
   // RENDER: 1. DETAILS DRAWER / VIEW
@@ -1136,12 +1250,14 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         </div>
       )}
 
+
+
       {/* Search & Filter Toolbar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         gap: 10,
-        marginBottom: 16
+        marginBottom: 12
       }}>
         {/* Search Input */}
         <div style={{
@@ -1185,29 +1301,35 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
 
         {/* Filter Button with Active Badge */}
         <button
-          onClick={() => setFilterOpen(true)}
+          type="button"
+          onClick={() => setFilterOpen(prev => !prev)}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            background: activeFiltersCount > 0 ? 'rgba(255, 77, 157, 0.12)' : 'var(--ad-card)',
-            border: `1px solid ${activeFiltersCount > 0 ? '#FF4D9D' : 'var(--ad-border)'}`,
+            background: filterOpen
+              ? '#FF4D9D'
+              : (activeFiltersCount > 0 ? 'rgba(255, 77, 157, 0.12)' : 'var(--ad-card)'),
+            border: `1.5px solid ${filterOpen || activeFiltersCount > 0 ? '#FF4D9D' : 'var(--ad-border)'}`,
             borderRadius: 12,
             padding: '11px 16px',
-            color: activeFiltersCount > 0 ? '#FF4D9D' : 'var(--ad-text)',
+            color: filterOpen ? '#FFFFFF' : (activeFiltersCount > 0 ? '#FF4D9D' : 'var(--ad-text)'),
             fontSize: 13,
             fontWeight: 800,
             cursor: 'pointer',
-            boxShadow: 'var(--ad-card-shadow)',
-            flexShrink: 0
+            boxShadow: filterOpen ? '0 3px 12px rgba(255, 77, 157, 0.35)' : 'var(--ad-card-shadow)',
+            flexShrink: 0,
+            transition: 'all 0.15s ease'
           }}
+          title={filterOpen ? "Hide Filter Options" : "Show Filter Options"}
         >
           <Filter size={16} />
           <span>Filters</span>
           {activeFiltersCount > 0 && (
             <span style={{
               width: 18, height: 18, borderRadius: '50%',
-              background: '#FF4D9D', color: '#fff',
+              background: filterOpen ? '#FFFFFF' : '#FF4D9D',
+              color: filterOpen ? '#FF4D9D' : '#FFFFFF',
               fontSize: 10, fontWeight: 900,
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
@@ -1217,9 +1339,219 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
         </button>
       </div>
 
+      {/* ── Expandable Inline Filter Drawer Tray ─────────────────────────── */}
+      {filterOpen && (
+        <div style={{
+          background: 'var(--ad-card)',
+          border: '1.5px solid rgba(255, 77, 157, 0.4)',
+          borderRadius: 18,
+          padding: '18px 16px',
+          marginBottom: 14,
+          boxShadow: '0 8px 28px rgba(0, 0, 0, 0.15)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+          animation: 'adSlideIn 0.2s ease'
+        }}>
+          {/* Drawer Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--ad-text)' }}>
+                Filter Feature Catalog
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--ad-text-sec)', fontWeight: 600 }}>
+                Showing {filteredFeatures.length} of {allFeatures.length} capabilities
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFilterOpen(false)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
+                borderRadius: 8, padding: '4px 8px', color: 'var(--ad-text-sec)',
+                fontSize: 11, fontWeight: 700, cursor: 'pointer'
+              }}
+            >
+              <X size={13} />
+              <span>Close</span>
+            </button>
+          </div>
+
+          {/* Quick 5 Filter Presets: All, Active, Disabled, Free, Paid Pro */}
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 8 }}>
+              Capability & Plan Presets
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
+              {[
+                { id: 'all', label: 'All Capabilities', count: stats.total, icon: Sliders, color: '#FF4D9D' },
+                { id: 'enabled', label: '🟢 Active Only', count: stats.enabled, icon: CheckCircle2, color: '#22C55E' },
+                { id: 'disabled', label: '🔴 Disabled Only', count: stats.disabled, icon: XCircle, color: '#EF4444' },
+                { id: 'free', label: '🛡️ Free Tier', count: stats.total - stats.paidCount, icon: Shield, color: '#8B8FA8' },
+                { id: 'paid', label: '👑 Paid Pro Only', count: stats.paidCount, icon: Crown, color: '#F59E0B' },
+              ].map(item => {
+                const isSelected = (item.id === 'all' && statusFilter === 'all' && planFilter === 'all') ||
+                  (item.id === 'enabled' && statusFilter === 'enabled') ||
+                  (item.id === 'disabled' && statusFilter === 'disabled') ||
+                  (item.id === 'free' && planFilter === 'free') ||
+                  (item.id === 'paid' && planFilter === 'paid');
+
+                const ItemIcon = item.icon;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      if (item.id === 'all') {
+                        setStatusFilter('all');
+                        setPlanFilter('all');
+                      } else if (item.id === 'enabled' || item.id === 'disabled') {
+                        setStatusFilter(item.id);
+                        setPlanFilter('all');
+                      } else if (item.id === 'free' || item.id === 'paid') {
+                        setPlanFilter(item.id);
+                        setStatusFilter('all');
+                      }
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '9px 12px',
+                      borderRadius: 12,
+                      border: `1.5px solid ${isSelected ? item.color : 'var(--ad-border)'}`,
+                      background: isSelected ? `${item.color}18` : 'var(--ad-input)',
+                      color: isSelected ? item.color : 'var(--ad-text)',
+                      fontSize: 12,
+                      fontWeight: isSelected ? 800 : 700,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      boxShadow: isSelected ? `0 2px 10px ${item.color}25` : 'none'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <ItemIcon size={14} strokeWidth={isSelected ? 2.5 : 2} />
+                      <span>{item.label}</span>
+                    </div>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      padding: '1px 6px',
+                      borderRadius: 8,
+                      background: isSelected ? item.color : 'var(--ad-card)',
+                      color: isSelected ? '#FFFFFF' : 'var(--ad-text-sec)'
+                    }}>
+                      {item.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Granular Category & Plan Dropdowns Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+            {/* Category Selector */}
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 6 }}>
+                Category Filter
+              </label>
+              <select
+                value={selectedCategory}
+                onChange={e => {
+                  setSelectedCategory(e.target.value);
+                  setSelectedSubcategory('ALL');
+                }}
+                style={{
+                  width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
+                  borderRadius: 10, padding: '9px 11px', color: 'var(--ad-text)', fontSize: 12, fontWeight: 700, outline: 'none'
+                }}
+              >
+                {Object.entries(CATEGORY_META).map(([k, v]) => (
+                  <option key={k} value={k}>{v.name} ({categoryCounts[k] || 0})</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Subcategory Selector */}
+            {availableSubcategories.length > 0 && (
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 6 }}>
+                  Subcategory Filter
+                </label>
+                <select
+                  value={selectedSubcategory}
+                  onChange={e => setSelectedSubcategory(e.target.value)}
+                  style={{
+                    width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
+                    borderRadius: 10, padding: '9px 11px', color: 'var(--ad-text)', fontSize: 12, fontWeight: 700, outline: 'none'
+                  }}
+                >
+                  <option value="ALL">All Subcategories in {CATEGORY_META[selectedCategory]?.name}</option>
+                  {availableSubcategories.map(sub => (
+                    <option key={sub} value={sub}>{sub}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Specific Plan Tier Filter */}
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--ad-text-sec)', display: 'block', marginBottom: 6 }}>
+                Specific Plan Tier Filter
+              </label>
+              <select
+                value={planFilter}
+                onChange={e => setPlanFilter(e.target.value)}
+                style={{
+                  width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
+                  borderRadius: 10, padding: '9px 11px', color: 'var(--ad-text)', fontSize: 12, fontWeight: 700, outline: 'none'
+                }}
+              >
+                <option value="all">All Plans (Free + Pro)</option>
+                <option value="paid">👑 Paid Pro Only (Weekly/Monthly/Yearly)</option>
+                <option value="free">🛡️ Free Tier Included</option>
+                <option value="weekly">Weekly Pro Plan</option>
+                <option value="monthly">Monthly Pro Plan</option>
+                <option value="yearly">Yearly Pro Plan</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Drawer Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, paddingTop: 6, borderTop: '1px solid var(--ad-border)' }}>
+            <button
+              type="button"
+              onClick={clearAllFilters}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '8px 14px', borderRadius: 10, background: 'var(--ad-input)',
+                border: '1px solid var(--ad-border)', color: 'var(--ad-text)', fontSize: 12, fontWeight: 700, cursor: 'pointer'
+              }}
+            >
+              <RotateCcw size={13} />
+              <span>Reset All Filters</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterOpen(false)}
+              style={{
+                padding: '8px 18px', borderRadius: 10, background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
+                border: 'none', color: '#fff', fontSize: 12, fontWeight: 800, cursor: 'pointer',
+                boxShadow: '0 2px 10px rgba(255, 77, 157, 0.3)'
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Active Filter Pills Bar */}
       {activeFiltersCount > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ad-text-sec)' }}>Active:</span>
           {selectedCategory !== 'ALL' && (
             <FilterPill label={CATEGORY_META[selectedCategory]?.name || selectedCategory} onRemove={() => setSelectedCategory('ALL')} />
@@ -1238,6 +1570,248 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
           </button>
         </div>
       )}
+
+      {/* ── Master Batch Action Bar (Select All, Clear All, Turn ON/OFF) ──── */}
+      <div style={{
+        background: selectedKeys.size > 0
+          ? 'linear-gradient(135deg, rgba(255, 77, 157, 0.14) 0%, rgba(123, 97, 255, 0.12) 100%)'
+          : 'var(--ad-card)',
+        border: `1.5px solid ${selectedKeys.size > 0 ? '#FF4D9D' : 'var(--ad-border)'}`,
+        borderRadius: 14,
+        padding: '10px 14px',
+        marginBottom: 14,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 10,
+        boxShadow: selectedKeys.size > 0 ? '0 4px 20px rgba(255, 77, 157, 0.18)' : 'var(--ad-card-shadow)',
+        transition: 'all 0.2s ease'
+      }}>
+        {/* Left: Master Checkbox & Selection / Count Info */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button
+            type="button"
+            onClick={handleSelectAllVisible}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              color: selectedKeys.size > 0 ? '#FF4D9D' : 'var(--ad-text-sec)',
+              transition: 'transform 0.1s ease'
+            }}
+            title={isAllVisibleSelected ? "Deselect All Visible" : "Select All Visible"}
+          >
+            {isAllVisibleSelected ? (
+              <CheckSquare size={20} color="#FF4D9D" strokeWidth={2.4} />
+            ) : isSomeVisibleSelected ? (
+              <MinusSquare size={20} color="#FF4D9D" strokeWidth={2.4} />
+            ) : (
+              <Square size={20} color="var(--ad-text-sec)" strokeWidth={2} />
+            )}
+          </button>
+
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ad-text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {selectedKeys.size > 0 ? (
+                <>
+                  <span style={{ color: '#FF4D9D' }}>{selectedKeys.size} Selected</span>
+                  <span style={{ color: 'var(--ad-text-sec)', fontWeight: 600, fontSize: 12 }}>
+                    (of {filteredFeatures.length} visible)
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span>Select All Visible</span>
+                  <span style={{ color: 'var(--ad-text-sec)', fontWeight: 600, fontSize: 12 }}>
+                    ({filteredFeatures.length} features)
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Meaningful Batch Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          {selectedKeys.size > 0 ? (
+            <>
+              {/* 1-Click Batch FREE */}
+              <button
+                type="button"
+                disabled={bulkProcessing}
+                onClick={() => handleSetFeatureTier(Array.from(selectedKeys), 'free')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '7px 11px', borderRadius: 10,
+                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  background: 'rgba(16, 185, 129, 0.16)',
+                  color: '#10B981', fontSize: 12, fontWeight: 800,
+                  cursor: bulkProcessing ? 'not-allowed' : 'pointer'
+                }}
+                title="Make all selected features 100% Free"
+              >
+                <Shield size={13} strokeWidth={2.5} />
+                <span>Make FREE ({selectedKeys.size})</span>
+              </button>
+
+              {/* 1-Click Batch PRO */}
+              <button
+                type="button"
+                disabled={bulkProcessing}
+                onClick={() => handleSetFeatureTier(Array.from(selectedKeys), 'paid')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '7px 11px', borderRadius: 10,
+                  border: '1px solid rgba(245, 158, 11, 0.4)',
+                  background: 'rgba(245, 158, 11, 0.16)',
+                  color: '#F59E0B', fontSize: 12, fontWeight: 800,
+                  cursor: bulkProcessing ? 'not-allowed' : 'pointer'
+                }}
+                title="Make all selected features Paid Pro"
+              >
+                <Crown size={13} strokeWidth={2.5} />
+                <span>Make PRO ({selectedKeys.size})</span>
+              </button>
+
+              {/* Turn ON Selected */}
+              <button
+                type="button"
+                disabled={bulkProcessing}
+                onClick={() => handleBulkToggle(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '7px 11px', borderRadius: 10,
+                  border: '1px solid rgba(34, 197, 94, 0.4)',
+                  background: 'rgba(34, 197, 94, 0.16)',
+                  color: '#22C55E', fontSize: 12, fontWeight: 800,
+                  cursor: bulkProcessing ? 'not-allowed' : 'pointer'
+                }}
+                title="Enable all selected features"
+              >
+                <Power size={13} strokeWidth={2.5} />
+                <span>Turn ON ({selectedKeys.size})</span>
+              </button>
+
+              {/* Turn OFF Selected */}
+              <button
+                type="button"
+                disabled={bulkProcessing}
+                onClick={() => handleBulkToggle(false)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '7px 11px', borderRadius: 10,
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  background: 'rgba(239, 68, 68, 0.16)',
+                  color: '#EF4444', fontSize: 12, fontWeight: 800,
+                  cursor: bulkProcessing ? 'not-allowed' : 'pointer'
+                }}
+                title="Disable all selected features"
+              >
+                <XCircle size={13} strokeWidth={2.5} />
+                <span>Turn OFF ({selectedKeys.size})</span>
+              </button>
+
+              {/* Clear Selection */}
+              <button
+                type="button"
+                onClick={handleClearSelection}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  padding: '7px 10px', borderRadius: 10,
+                  border: '1px solid var(--ad-border)',
+                  background: 'var(--ad-input)',
+                  color: 'var(--ad-text-sec)', fontSize: 12, fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+                title="Clear selection"
+              >
+                <X size={13} />
+                <span>Clear Selection</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Select All Overall button */}
+              <button
+                type="button"
+                onClick={handleSelectAllOverall}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '6px 11px', borderRadius: 10,
+                  border: '1px solid var(--ad-border)',
+                  background: 'var(--ad-input)',
+                  color: 'var(--ad-text)', fontSize: 11, fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+                title="Select all features across the entire catalog"
+              >
+                <CheckCheck size={13} strokeWidth={2} />
+                <span>Select All (140)</span>
+              </button>
+
+              {/* Quick Visible Batch Controls */}
+              <button
+                type="button"
+                disabled={bulkProcessing || filteredFeatures.length === 0}
+                onClick={handleTurnAllVisibleOn}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '6px 11px', borderRadius: 10,
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  color: '#22C55E', fontSize: 11, fontWeight: 800,
+                  cursor: bulkProcessing ? 'not-allowed' : 'pointer'
+                }}
+                title="Turn ON all currently filtered features"
+              >
+                <Power size={13} strokeWidth={2.4} />
+                <span>Turn All ON</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={bulkProcessing || filteredFeatures.length === 0}
+                onClick={handleTurnAllVisibleOff}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '6px 11px', borderRadius: 10,
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  color: '#EF4444', fontSize: 11, fontWeight: 800,
+                  cursor: bulkProcessing ? 'not-allowed' : 'pointer'
+                }}
+                title="Turn OFF all currently filtered features"
+              >
+                <XCircle size={13} strokeWidth={2.4} />
+                <span>Turn All OFF</span>
+              </button>
+
+              {activeFiltersCount > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 4,
+                    padding: '6px 10px', borderRadius: 10,
+                    border: '1px solid var(--ad-border)',
+                    background: 'var(--ad-input)',
+                    color: '#FF4D9D', fontSize: 11, fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                  title="Reset all search and filters"
+                >
+                  <RotateCcw size={12} />
+                  <span>Reset Filters</span>
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
 
       {/* ── Feature Flags Card List ──────────────────────────────────────── */}
       {filteredFeatures.length === 0 ? (
@@ -1271,6 +1845,7 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {filteredFeatures.map(feature => {
+            const isSelected = selectedKeys.has(feature.key);
             const IconComp = feature.icon || Flag;
             const subMeta = SUBCATEGORY_META[feature.subcategory];
             const SubIcon = subMeta?.icon || Sliders;
@@ -1280,86 +1855,64 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                 key={feature.key}
                 onClick={() => openDetails(feature)}
                 style={{
-                  background: 'var(--ad-card)',
-                  border: '1px solid var(--ad-border)',
+                  background: isSelected ? 'rgba(255, 77, 157, 0.05)' : 'var(--ad-card)',
+                  border: `1.5px solid ${isSelected ? 'rgba(255, 77, 157, 0.6)' : 'var(--ad-border)'}`,
                   borderRadius: 16,
-                  padding: '14px 16px',
+                  padding: '13px 16px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 14,
+                  gap: 12,
                   cursor: 'pointer',
-                  boxShadow: 'var(--ad-card-shadow)',
+                  boxShadow: isSelected ? '0 4px 16px rgba(255, 77, 157, 0.12)' : 'var(--ad-card-shadow)',
                   transition: 'all 0.15s ease'
                 }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255, 77, 157, 0.35)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--ad-border)'}
+                onMouseEnter={e => {
+                  if (!isSelected) e.currentTarget.style.borderColor = 'rgba(255, 77, 157, 0.35)';
+                }}
+                onMouseLeave={e => {
+                  if (!isSelected) e.currentTarget.style.borderColor = 'var(--ad-border)';
+                }}
               >
-                {/* Left Colored Icon */}
-                <div style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: feature.iconBg,
-                  color: feature.iconColor,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <IconComp size={22} strokeWidth={2.3} />
+                {/* Left Selection Checkbox */}
+                <div
+                  onClick={(e) => handleToggleSelectOne(feature.key, e)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    color: isSelected ? '#FF4D9D' : 'var(--ad-text-sec)',
+                    flexShrink: 0
+                  }}
+                  title={isSelected ? "Deselect" : "Select"}
+                >
+                  {isSelected ? (
+                    <CheckSquare size={20} color="#FF4D9D" strokeWidth={2.4} />
+                  ) : (
+                    <Square size={20} color="var(--ad-text-sec)" strokeWidth={1.8} />
+                  )}
                 </div>
 
                 {/* Center Content */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--ad-text)' }}>
-                      {feature.name}
-                    </span>
-                    <span style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: 'var(--ad-text-mut)',
-                      background: 'var(--ad-input)',
-                      padding: '2px 6px',
-                      borderRadius: 6,
-                      fontFamily: 'monospace'
-                    }}>
-                      {feature.key}
-                    </span>
-
-                    {/* Paid Crown Badge */}
-                    {feature.isPaid ? (
+                    <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--ad-text)', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
                       <span style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 6,
+                        background: feature.iconBg,
+                        color: feature.iconColor,
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: 4,
-                        fontSize: 10,
-                        fontWeight: 800,
-                        padding: '2px 8px',
-                        borderRadius: 100,
-                        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(214, 0, 54, 0.15))',
-                        color: '#F59E0B',
-                        border: '1px solid rgba(245, 158, 11, 0.35)',
-                        boxShadow: '0 1px 4px rgba(245, 158, 11, 0.12)'
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}>
-                        <Crown size={11} color="#F59E0B" strokeWidth={2.5} />
-                        <span>PRO</span>
+                        <IconComp size={12} strokeWidth={2.5} />
                       </span>
-                    ) : (
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 3,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        padding: '2px 7px',
-                        borderRadius: 100,
-                        background: 'rgba(139, 143, 168, 0.12)',
-                        color: '#8B8FA8'
-                      }}>
-                        <span>FREE</span>
-                      </span>
-                    )}
+                      <span>{feature.name}</span>
+                    </span>
                   </div>
 
                   <div style={{
@@ -1408,8 +1961,27 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
                   </div>
                 </div>
 
-                {/* Right iOS Toggle Switch */}
-                <div onClick={e => e.stopPropagation()}>
+                {/* Right Controls: Tier Toggle Pill on top (aligned with first line), Enable/Disable Switch underneath */}
+                <div 
+                  onClick={e => e.stopPropagation()} 
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-end',
+                    justifyContent: 'center',
+                    gap: 12,
+                    flexShrink: 0
+                  }}
+                >
+                  {/* Top: Modern Interactive Tier Toggle Pill (aligned with feature title line) */}
+                  <TierTogglePill
+                    isPaid={feature.isPaid}
+                    updating={tierUpdatingKey === feature.key}
+                    disabled={bulkProcessing}
+                    onToggle={() => handleSetFeatureTier([feature.key], feature.isPaid ? 'free' : 'paid')}
+                  />
+
+                  {/* Bottom: Enable/Disable Switch */}
                   <IOSSwitch
                     checked={feature.enabled}
                     onChange={() => handleToggle(feature)}
@@ -1418,125 +1990,6 @@ export default function FeatureFlagsPanel({ currentUser, isDark: propIsDark }) {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* ── Filter Bottom Sheet Modal ────────────────────────────────────── */}
-      {filterOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(3px)',
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
-        }} onClick={() => setFilterOpen(false)}>
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              width: '100%', maxWidth: 480, maxHeight: '85vh', overflowY: 'auto',
-              background: 'var(--ad-card)', borderTopLeftRadius: 24, borderTopRightRadius: 24,
-              padding: '24px 20px 36px', boxShadow: '0 -10px 40px rgba(0,0,0,0.4)',
-              display: 'flex', flexDirection: 'column', gap: 18,
-              animation: 'adSlideIn 0.2s ease'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3 style={{ fontSize: 17, fontWeight: 900, color: 'var(--ad-text)', margin: 0 }}>
-                Filter 140+ Features
-              </h3>
-              <button onClick={() => setFilterOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--ad-text-sec)', cursor: 'pointer', padding: 4 }}>
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Status Filter */}
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 8 }}>
-                Status
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                {['all', 'enabled', 'disabled'].map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setStatusFilter(s)}
-                    style={{
-                      padding: '8px 12px', borderRadius: 10,
-                      border: `1px solid ${statusFilter === s ? '#FF4D9D' : 'var(--ad-border)'}`,
-                      background: statusFilter === s ? 'rgba(255, 77, 157, 0.14)' : 'var(--ad-input)',
-                      color: statusFilter === s ? '#FF4D9D' : 'var(--ad-text)',
-                      fontSize: 12, fontWeight: 800, cursor: 'pointer', textTransform: 'capitalize'
-                    }}
-                  >
-                    {s === 'all' ? 'All' : (s === 'enabled' ? 'Active' : 'Disabled')}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Category Selector */}
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 8 }}>
-                Category
-              </label>
-              <select
-                value={selectedCategory}
-                onChange={e => {
-                  setSelectedCategory(e.target.value);
-                  setSelectedSubcategory('ALL');
-                }}
-                style={{
-                  width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
-                  borderRadius: 10, padding: '10px 12px', color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, outline: 'none'
-                }}
-              >
-                {Object.entries(CATEGORY_META).map(([k, v]) => (
-                  <option key={k} value={k}>{v.name} ({categoryCounts[k] || 0})</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Plan Tier Filter */}
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', display: 'block', marginBottom: 8 }}>
-                Subscription Plan Access
-              </label>
-              <select
-                value={planFilter}
-                onChange={e => setPlanFilter(e.target.value)}
-                style={{
-                  width: '100%', background: 'var(--ad-input)', border: '1px solid var(--ad-border)',
-                  borderRadius: 10, padding: '10px 12px', color: 'var(--ad-text)', fontSize: 13, fontWeight: 600, outline: 'none'
-                }}
-              >
-                <option value="all">All Features</option>
-                <option value="paid">👑 Paid Pro Plans Only</option>
-                <option value="free">Free Tier Included</option>
-                <option value="weekly">Weekly Pro Included</option>
-                <option value="monthly">Monthly Pro Included</option>
-                <option value="yearly">Yearly Pro Included</option>
-              </select>
-            </div>
-
-            {/* Actions */}
-            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-              <button
-                onClick={clearAllFilters}
-                style={{
-                  flex: 1, padding: 12, borderRadius: 10, background: 'var(--ad-input)',
-                  border: '1px solid var(--ad-border)', color: 'var(--ad-text)', fontSize: 13, fontWeight: 700, cursor: 'pointer'
-                }}
-              >
-                Clear Filters
-              </button>
-              <button
-                onClick={() => setFilterOpen(false)}
-                style={{
-                  flex: 1, padding: 12, borderRadius: 10, background: 'linear-gradient(135deg, #FF4D9D, #7B61FF)',
-                  border: 'none', color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer'
-                }}
-              >
-                Apply Filters
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
@@ -1617,6 +2070,69 @@ function IOSSwitch({ checked, onChange, disabled }) {
         left: checked ? 21 : 3,
         transition: 'left 0.2s ease'
       }} />
+    </button>
+  );
+}
+
+function TierTogglePill({ isPaid, onToggle, disabled, updating }) {
+  const [isHovered, setIsHovered] = React.useState(false);
+  const [isPressed, setIsPressed] = React.useState(false);
+
+  return (
+    <button
+      type="button"
+      disabled={disabled || updating}
+      onClick={onToggle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => { setIsHovered(false); setIsPressed(false); }}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 5,
+        padding: '4px 11px',
+        borderRadius: 100,
+        border: `1.5px solid ${isPaid ? '#F59E0B' : '#10B981'}`,
+        background: isPaid 
+          ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' 
+          : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+        color: '#FFFFFF',
+        boxShadow: isPressed
+          ? '0 1px 3px rgba(0,0,0,0.3) inset'
+          : isHovered
+            ? (isPaid ? '0 4px 14px rgba(245, 158, 11, 0.5)' : '0 4px 14px rgba(16, 185, 129, 0.5)')
+            : (isPaid ? '0 2px 8px rgba(245, 158, 11, 0.35)' : '0 2px 8px rgba(16, 185, 129, 0.35)'),
+        transform: isPressed ? 'scale(0.95)' : isHovered ? 'translateY(-1px)' : 'none',
+        fontSize: 11,
+        fontWeight: 800,
+        letterSpacing: '0.4px',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+        userSelect: 'none',
+        outline: 'none',
+        lineHeight: 1
+      }}
+      title={isPaid ? "Plan: PRO (Click to switch to 100% Free)" : "Plan: FREE (Click to switch to Pro)"}
+    >
+      {updating ? (
+        <RefreshCw size={11} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
+      ) : isPaid ? (
+        <Crown size={12} fill="#FFFFFF" color="#FFFFFF" strokeWidth={2.4} />
+      ) : (
+        <Shield size={11} color="#FFFFFF" strokeWidth={2.6} />
+      )}
+      <span style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+        {isPaid ? 'PRO' : 'FREE'}
+      </span>
+      <span style={{
+        fontSize: 9,
+        opacity: 0.8,
+        marginLeft: 1,
+        fontWeight: 700
+      }}>
+        ⇄
+      </span>
     </button>
   );
 }

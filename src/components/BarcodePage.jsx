@@ -4,7 +4,7 @@ import {
   FileImage, FileCode, FileText, Copy, Bookmark, Share2,
   Menu, Home, History, Moon, Sun, Info, Shield,
   FileText as FileIcon, AlertCircle, Layers, Pencil, Barcode, Pipette,
-  Check, X
+  Check, X, Crown
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
@@ -23,18 +23,61 @@ import { usePremium } from '../services/premiumContext';
 // ─── Color Presets ────────────────────────────────────────────────────────────
 const COLOR_PRESETS = [
   { name: 'Classic', qr: '#000000', bg: '#FFFFFF' },
-  { name: 'Midnight', qr: '#FFFFFF', bg: '#030305' },
-  { name: 'Vibrant Red', qr: '#FF3B30', bg: '#FFFFFF' },
-  { name: 'Electric Blue', qr: '#007AFF', bg: '#FFFFFF' },
-  { name: 'Emerald', qr: '#34C759', bg: '#FFFFFF' },
-  { name: 'Sunny', qr: '#FFCC00', bg: '#FFFFFF' },
-  { name: 'Purple Neon', qr: '#AF52DE', bg: '#0F0F1A' },
-  { name: 'Orange Glow', qr: '#FF9500', bg: '#FFFFFF' },
-  { name: 'Indigo', qr: '#5856D6', bg: '#FFFFFF' },
-  { name: 'Pink Punch', qr: '#FF2D55', bg: '#FFFFFF' },
-  { name: 'Cyan Neon', qr: '#00F0FF', bg: '#0A0A0F' },
-  { name: 'Rose Gold', qr: '#E91E63', bg: '#FFF1F2' }
+  { name: 'Ocean', qr: '#0055ff', bg: '#eef4ff' },
+  { name: 'Forest', qr: '#008844', bg: '#f0fff4' },
+  { name: 'Sunset', qr: '#ff4400', bg: '#fff5f0' },
+  { name: 'Purple', qr: '#8800cc', bg: '#faf0ff' },
+  { name: 'Dark', qr: '#00ffff', bg: '#111122' },
+  { name: 'Monochrome', qr: '#ffffff', bg: '#000000' },
+  { name: 'Cyberpunk', qr: '#ffff00', bg: '#110022' }
 ];
+
+function formatDisplayValue(val, type) {
+  if (!val) return '';
+  const digits = String(val).replace(/\D/g, '');
+  switch (type) {
+    case 'ean13': {
+      if (digits.length >= 13) return `${digits.slice(0, 1)} ${digits.slice(1, 7)} ${digits.slice(7, 13)}`;
+      return val;
+    }
+    case 'upca': {
+      if (digits.length >= 12) return `${digits.slice(0, 1)} ${digits.slice(1, 6)} ${digits.slice(6, 11)} ${digits.slice(11, 12)}`;
+      return val;
+    }
+    case 'ean8': {
+      if (digits.length >= 8) return `${digits.slice(0, 4)} ${digits.slice(4, 8)}`;
+      return val;
+    }
+    case 'upce': {
+      if (digits.length >= 8) return `${digits.slice(0, 1)} ${digits.slice(1, 7)} ${digits.slice(7, 8)}`;
+      return val;
+    }
+    default: return val;
+  }
+}
+
+function parseFormattedValue(val, type) {
+  const digits = String(val || '').replace(/\D/g, '');
+  switch (type) {
+    case 'ean13': return { format: '13', data: digits };
+    case 'upca': return { format: '12', data: digits };
+    case 'ean8': return { format: '8', data: digits };
+    case 'upce': return { format: '8', data: digits };
+    case 'itf14': return { format: '14', data: digits };
+    case 'codabar': {
+      const hasStart = /^[A-D]/i.test(val || '');
+      const hasStop = /[A-D]$/i.test(val || '');
+      return {
+        start: hasStart ? (val || '').slice(0, 1).toUpperCase() : 'A',
+        body: (val || '').slice(hasStart ? 1 : 0, hasStop ? -1 : undefined) || '',
+        stop: hasStop ? (val || '').slice(-1).toUpperCase() : 'B'
+      };
+    }
+    case 'postnet': return { format: digits.length <= 5 ? '5' : digits.length <= 9 ? '9' : '11', data: digits };
+    case 'planet': return { format: digits.length <= 11 ? '11' : digits.length <= 12 ? '12' : digits.length <= 13 ? '13' : '14', data: digits };
+    default: return { data: val || '' };
+  }
+}
 
 // ─── Parse text → structured fields for BarcodeDataModal ─────────────────────
 function parseValueToFields(val, type) {
@@ -65,24 +108,57 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   const { showPaywall } = usePremium();
   const access = FeatureAccessManager.canUseFeature('barcode_generator');
 
+  useEffect(() => {
+    if (!access.allowed && access.status !== 'disabled_by_admin') {
+      showPaywall('barcode_generator');
+    }
+  }, [access.allowed, access.status, showPaywall]);
+
   if (!access.allowed) {
     return (
       <div style={{ padding: 40, textAlign: 'center', background: '#09090f', color: '#f0f0f8', minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
-          <AlertCircle size={32} />
-        </div>
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Barcode Generator Unavailable</h2>
-        <p style={{ color: '#8b8fa8', maxWidth: 480, margin: 0, fontSize: 14, lineHeight: 1.5 }}>
-          {access.status === 'disabled_by_admin'
-            ? 'Barcode Generator has been disabled globally by the Administrator.'
-            : 'Barcode Generator requires an upgraded subscription plan.'}
-        </p>
-        <button
-          onClick={() => onNavigate && onNavigate('home')}
-          style={{ background: '#D60036', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', marginTop: 12 }}
-        >
-          Return to Home
-        </button>
+        {access.status === 'disabled_by_admin' ? (
+          <>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+              <AlertCircle size={32} />
+            </div>
+            <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Barcode Generator Unavailable</h2>
+            <p style={{ color: '#8b8fa8', maxWidth: 440, margin: 0, fontSize: 13, lineHeight: 1.5 }}>
+              Barcode Generator has been disabled globally by the Administrator.
+            </p>
+            <button
+              onClick={() => onNavigate && onNavigate('home')}
+              style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '10px 20px', borderRadius: 12, fontWeight: 600, cursor: 'pointer', marginTop: 12 }}
+            >
+              Return to Home
+            </button>
+          </>
+        ) : (
+          <>
+            <div style={{ width: 68, height: 68, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.15))', border: '1px solid rgba(255, 215, 0, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFD700', boxShadow: '0 8px 24px rgba(255, 170, 0, 0.25)' }}>
+              <Crown size={36} strokeWidth={2.2} />
+            </div>
+            <h2 style={{ fontSize: 24, fontWeight: 900, margin: 0, letterSpacing: '-0.3px' }}>Unlock Mushi QR Pro</h2>
+            <p style={{ color: '#8b8fa8', maxWidth: 420, margin: 0, fontSize: 13, lineHeight: 1.5 }}>
+              Barcode Generator is a Pro feature. Upgrade your subscription plan to create and customize all industrial and retail barcode standards.
+            </p>
+            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+              <button
+                onClick={() => showPaywall('barcode_generator')}
+                style={{ background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)', color: '#000', border: 'none', padding: '12px 24px', borderRadius: 14, fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 18px rgba(255, 170, 0, 0.4)' }}
+              >
+                <Crown size={16} fill="#000" color="#000" strokeWidth={2.5} />
+                <span>Buy Pro</span>
+              </button>
+              <button
+                onClick={() => onNavigate && onNavigate('home')}
+                style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '12px 20px', borderRadius: 14, fontWeight: 600, cursor: 'pointer' }}
+              >
+                Return to Home
+              </button>
+            </div>
+          </>
+        )}
       </div>
     );
   }

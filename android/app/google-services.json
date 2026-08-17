@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1068457009199:android:20b09e8d6963c6288966da",
+        "mobilesdk_app_id": "1:1068457009199:android:57179a55e6075d5f8966da",
         "android_client_info": {
-          "package_name": "com.mushiqr.pro"
+          "package_name": "com.mushiqr.admin"
         }
       },
       "oauth_client": [
@@ -37,12 +37,20 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1068457009199:android:20b09e8d6963c6288966db",
+        "mobilesdk_app_id": "1:1068457009199:android:20b09e8d6963c6288966da",
         "android_client_info": {
-          "package_name": "com.mushiqr.admin"
+          "package_name": "com.mushiqr.pro"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1068457009199-3snu5e86q4q2u932oviq8r7mp2afasc0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mushiqr.pro",
+            "certificate_hash": "e058ddbae62c63ffc2d1f81b0383d178cd7c59cf"
+          }
+        },
         {
           "client_id": "1068457009199-eo7h1ni9ps5sre8bfg742c3eol2alslb.apps.googleusercontent.com",
           "client_type": 3

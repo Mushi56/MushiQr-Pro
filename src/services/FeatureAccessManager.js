@@ -315,6 +315,10 @@ class FeatureAccessManagerService {
     this.notifyListeners();
   }
 
+  isSuperAdmin() {
+    return this.userClaims?.role === 'super_admin';
+  }
+
   init() {
     // 1. Listen for Auth State & custom claims
     onIdTokenChanged(auth, async (user) => {
@@ -365,7 +369,10 @@ class FeatureAccessManagerService {
             localStorage.setItem('mushiqr_config_version', String(this.configVersion));
             localStorage.setItem('mushiqr_last_synced_at', String(this.lastSyncedAt));
           } catch {}
-          if (data.plans) this.planConfigs = data.plans;
+          if (data.plans) {
+            this.planConfigs = { ...this.planConfigs, ...data.plans };
+            try { localStorage.setItem(STORAGE_KEYS.PLAN_CONFIGS, JSON.stringify(this.planConfigs)); } catch {}
+          }
         }
         this.notifyListeners();
       }, (err) => console.warn('[FeatureAccessManager] Membership config listener notice:', err.message));
@@ -381,8 +388,11 @@ class FeatureAccessManagerService {
         colSnap.forEach(d => {
           plans[d.id] = d.data();
         });
-        if (Object.keys(plans).length > 0 && !this.membershipConfig?.plans) {
-          this.planConfigs = plans;
+        if (Object.keys(plans).length > 0) {
+          this.planConfigs = { ...this.planConfigs, ...plans };
+          try {
+            localStorage.setItem(STORAGE_KEYS.PLAN_CONFIGS, JSON.stringify(this.planConfigs));
+          } catch {}
         }
         this.notifyListeners();
       }, (err) => console.warn('[FeatureAccessManager] Plans listener notice:', err.message));
@@ -492,9 +502,6 @@ class FeatureAccessManagerService {
 
   /**
    * Primary Entitlement Access API
-   * Evaluated from TWO authoritative sources:
-   * Source 1: Global Membership Configuration (feature matrix & flags)
-   * Source 2: Verified User Entitlement (plan tier & status)
    */
   canUseFeature(featureId) {
     const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
@@ -520,52 +527,39 @@ class FeatureAccessManagerService {
         reason: REASON.FEATURE_DISABLED,
         status: STATUS.DISABLED_BY_ADMIN,
         featureId,
-        requiredPlan: null,
+        userPlan: this.getUserPlan(),
       };
     }
 
-    // 3. Check Authentication Requirement
+    // 3. Super Admin Universal Bypass
+    if (this.isSuperAdmin()) {
+      return {
+        allowed: true,
+        reason: REASON.ALLOWED,
+        status: STATUS.ALLOWED,
+        featureId,
+        userPlan: 'super_admin',
+      };
+    }
+
+    // 4. Authentication Check
     if (featDef.requiresAuthentication && !this.currentUser) {
       return {
         allowed: false,
-        reason: REASON.UNAUTHENTICATED,
+        reason: REASON.AUTH_REQUIRED,
         status: STATUS.REQUIRES_AUTHENTICATION,
         featureId,
-        requiredPlan: null,
+        userPlan: 'unauthenticated',
       };
     }
 
-    // 4. Super Admin Plan Entitlement Override
-    const isSuperAdmin = this.userClaims?.role === 'super_admin';
-    if (isSuperAdmin && featDef.allowSuperAdminOverride) {
-      return {
-        allowed: true,
-        reason: REASON.ALLOWED,
-        status: STATUS.ALLOWED,
-        featureId,
-        requiredPlan: 'free',
-        isSuperAdminOverride: true,
-      };
-    }
-
-    // 5. Evaluate Source 1 (Global Feature Matrix) + Source 2 (Verified User Entitlement)
     const userPlan = this.getUserPlan();
-    
-    // Check if user has lifetime plan (unlocked across all features)
-    if (userPlan === 'lifetime') {
-      return {
-        allowed: true,
-        reason: REASON.ALLOWED,
-        status: STATUS.ALLOWED,
-        featureId,
-        userPlan,
-      };
-    }
 
+    // 5. Entitlement & Plan Level Check
     // Check global_config/membership featureMatrix
     const matrixEntry = this.membershipConfig?.featureMatrix?.[featureId];
     if (Array.isArray(matrixEntry)) {
-      if (matrixEntry.includes(userPlan)) {
+      if (matrixEntry.includes('free') || matrixEntry.includes(userPlan) || (userPlan !== 'free' && matrixEntry.some(p => ['weekly', 'monthly', 'yearly', 'lifetime'].includes(p)))) {
         return {
           allowed: true,
           reason: REASON.ALLOWED,
@@ -585,7 +579,7 @@ class FeatureAccessManagerService {
     }
 
     // Fallback to Plan Configs / Canonical Defaults
-    const planConfig = this.planConfigs[userPlan];
+    const planConfig = this.membershipConfig?.plans?.[userPlan] || this.planConfigs[userPlan];
     const allowedFeatures = planConfig?.features || (userPlan === 'free' ? DEFAULT_FREE_FEATURES : DEFAULT_PAID_FEATURES);
 
     if (!allowedFeatures.includes(featureId)) {
@@ -618,8 +612,8 @@ class FeatureAccessManagerService {
 
   findMinimumPlanForFeature(featureId) {
     for (const pId of ['weekly', 'monthly', 'yearly']) {
-      const feats = this.planConfigs[pId]?.features || DEFAULT_PAID_FEATURES;
-      if (feats.includes(featureId)) return pId;
+      const feats = this.membershipConfig?.plans?.[pId]?.features || this.planConfigs[pId]?.features || DEFAULT_PAID_FEATURES;
+      if (Array.isArray(feats) && feats.includes(featureId)) return pId;
     }
     return 'weekly';
   }
@@ -632,27 +626,50 @@ class FeatureAccessManagerService {
    * Determines if a feature requires a paid subscription (is in paid plans and not free)
    */
   isPaidFeature(featureId) {
-    // 1. If feature matrix explicitly includes 'free', it is free -> never paid
+    // 1. If feature matrix in global_config/membership explicitly declares it
     const matrixEntry = this.membershipConfig?.featureMatrix?.[featureId];
     if (Array.isArray(matrixEntry)) {
+      // If it contains 'free', it is explicitly FREE for all users -> NEVER paid
       return !matrixEntry.includes('free');
     }
 
-    // 2. Check free plan features config
-    const freePlanFeats = this.planConfigs['free']?.features || DEFAULT_FREE_FEATURES;
-    if (freePlanFeats.includes(featureId)) {
-      return false;
+    // 2. Check dynamic Free Plan features from membership config or planConfigs
+    const freePlan = this.membershipConfig?.plans?.free || this.planConfigs?.['free'];
+    if (freePlan && Array.isArray(freePlan.features)) {
+      // If the free plan contains this feature, it is FREE -> NEVER paid
+      if (freePlan.features.includes(featureId)) {
+        return false;
+      }
     }
 
-    // 3. Check if in any paid plan
+    // 3. Check if any paid plans dynamically contain this feature
     const paidTiers = ['weekly', 'monthly', 'yearly'];
-    const isInPaid = paidTiers.some(pId => {
-      const feats = this.planConfigs[pId]?.features || DEFAULT_PAID_FEATURES;
-      return feats.includes(featureId);
-    });
+    let foundInPaid = false;
+    let hasDynamicPaidConfig = false;
 
-    if (isInPaid) return true;
+    for (const pId of paidTiers) {
+      const planData = this.membershipConfig?.plans?.[pId] || this.planConfigs?.[pId];
+      if (planData && Array.isArray(planData.features)) {
+        hasDynamicPaidConfig = true;
+        if (planData.features.includes(featureId)) {
+          foundInPaid = true;
+          break;
+        }
+      }
+    }
 
+    // If dynamic paid plans are configured in Firestore:
+    if (hasDynamicPaidConfig) {
+      return foundInPaid;
+    }
+
+    // 4. If free plan is configured but feature is not in it:
+    if (freePlan && Array.isArray(freePlan.features)) {
+      const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
+      return Boolean(featDef && featDef.defaultPlan && featDef.defaultPlan !== 'free');
+    }
+
+    // 5. Fallback: Check canonical registry defaultPlan
     const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
     return Boolean(featDef && featDef.defaultPlan && featDef.defaultPlan !== 'free');
   }

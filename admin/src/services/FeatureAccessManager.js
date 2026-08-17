@@ -632,27 +632,50 @@ class FeatureAccessManagerService {
    * Determines if a feature requires a paid subscription (is in paid plans and not free)
    */
   isPaidFeature(featureId) {
-    // 1. If feature matrix explicitly includes 'free', it is free -> never paid
+    // 1. If feature matrix in global_config/membership explicitly declares it
     const matrixEntry = this.membershipConfig?.featureMatrix?.[featureId];
     if (Array.isArray(matrixEntry)) {
+      // If it contains 'free', it is explicitly FREE for all users -> NEVER paid
       return !matrixEntry.includes('free');
     }
 
-    // 2. Check free plan features config
-    const freePlanFeats = this.planConfigs['free']?.features || DEFAULT_FREE_FEATURES;
-    if (freePlanFeats.includes(featureId)) {
-      return false;
+    // 2. Check dynamic Free Plan features from membership config or planConfigs
+    const freePlan = this.membershipConfig?.plans?.free || this.planConfigs?.['free'];
+    if (freePlan && Array.isArray(freePlan.features)) {
+      // If the free plan contains this feature, it is FREE -> NEVER paid
+      if (freePlan.features.includes(featureId)) {
+        return false;
+      }
     }
 
-    // 3. Check if in any paid plan
+    // 3. Check if any paid plans dynamically contain this feature
     const paidTiers = ['weekly', 'monthly', 'yearly'];
-    const isInPaid = paidTiers.some(pId => {
-      const feats = this.planConfigs[pId]?.features || DEFAULT_PAID_FEATURES;
-      return feats.includes(featureId);
-    });
+    let foundInPaid = false;
+    let hasDynamicPaidConfig = false;
 
-    if (isInPaid) return true;
+    for (const pId of paidTiers) {
+      const planData = this.membershipConfig?.plans?.[pId] || this.planConfigs?.[pId];
+      if (planData && Array.isArray(planData.features)) {
+        hasDynamicPaidConfig = true;
+        if (planData.features.includes(featureId)) {
+          foundInPaid = true;
+          break;
+        }
+      }
+    }
 
+    // If dynamic paid plans are configured in Firestore:
+    if (hasDynamicPaidConfig) {
+      return foundInPaid;
+    }
+
+    // 4. If free plan is configured but feature is not in it:
+    if (freePlan && Array.isArray(freePlan.features)) {
+      const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
+      return Boolean(featDef && featDef.defaultPlan && featDef.defaultPlan !== 'free');
+    }
+
+    // 5. Fallback: Check canonical registry defaultPlan
     const featDef = FEATURE_REGISTRY.find(f => f.featureId === featureId);
     return Boolean(featDef && featDef.defaultPlan && featDef.defaultPlan !== 'free');
   }

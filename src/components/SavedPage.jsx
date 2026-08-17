@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { getSaved, deleteFromSaved, clearSaved, clearSavedByRange } from '../utils/storage';
-import { Search, SearchX, Trash2, MoreVertical, Star, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, QrCode } from 'lucide-react';
+import { Search, SearchX, Trash2, MoreVertical, Star, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, QrCode, Crown, AlertCircle } from 'lucide-react';
 import { QR_TYPES } from '../utils/qrEngine';
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
-import { AlertCircle } from 'lucide-react';
 
 const TYPE_ICONS = {
   [QR_TYPES.URL]: <Link2 size={16} />,
@@ -20,29 +19,48 @@ const TYPE_ICONS = {
   [QR_TYPES.TEXT]: <FileCode size={16} />
 };
 
-export default function SavedPage({ onLoadQR }) {
+export default function SavedPage({ onLoadQR, onNavigate }) {
   const { showPaywall } = usePremium();
   const access = FeatureAccessManager.canUseFeature('saved_view');
+
+  useEffect(() => {
+    if (!access.allowed && access.status !== 'disabled_by_admin') {
+      showPaywall('saved_view');
+    }
+  }, [access.allowed, access.status, showPaywall]);
 
   if (!access.allowed) {
     return (
       <div style={{ padding: 40, textAlign: 'center', background: '#09090f', color: '#f0f0f8', minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
-          <AlertCircle size={32} />
-        </div>
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Saved QR Collection</h2>
-        <p style={{ color: '#8b8fa8', maxWidth: 480, margin: 0, fontSize: 14, lineHeight: 1.5 }}>
-          {access.status === 'disabled_by_admin'
-            ? 'Saved QR Collection has been disabled globally by the Administrator.'
-            : 'Saved QR Collection is a Pro feature. Upgrade your subscription plan to bookmark and manage your favorite QR codes.'}
-        </p>
-        {access.status !== 'disabled_by_admin' && (
-          <button
-            onClick={() => showPaywall('saved_view')}
-            style={{ background: 'var(--accent-gradient)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(214,0,54,0.3)', marginTop: 12 }}
-          >
-            Unlock Saved Collection
-          </button>
+        {access.status === 'disabled_by_admin' ? (
+          <>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+              <AlertCircle size={32} />
+            </div>
+            <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Saved Collection Unavailable</h2>
+            <p style={{ color: '#8b8fa8', maxWidth: 440, margin: 0, fontSize: 13, lineHeight: 1.5 }}>
+              Saved Collection has been disabled globally by the Administrator.
+            </p>
+          </>
+        ) : (
+          <>
+            <div style={{ width: 68, height: 68, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.15))', border: '1px solid rgba(255, 215, 0, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFD700', boxShadow: '0 8px 24px rgba(255, 170, 0, 0.25)' }}>
+              <Crown size={36} strokeWidth={2.2} />
+            </div>
+            <h2 style={{ fontSize: 24, fontWeight: 900, margin: 0, letterSpacing: '-0.3px' }}>Unlock Mushi QR Pro</h2>
+            <p style={{ color: '#8b8fa8', maxWidth: 420, margin: 0, fontSize: 13, lineHeight: 1.5 }}>
+              Saved Collection is a Pro feature. Upgrade your subscription plan to bookmark and manage your favorite QR codes.
+            </p>
+            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+              <button
+                onClick={() => showPaywall('saved_view')}
+                style={{ background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)', color: '#000', border: 'none', padding: '12px 24px', borderRadius: 14, fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 18px rgba(255, 170, 0, 0.4)' }}
+              >
+                <Crown size={16} fill="#000" color="#000" strokeWidth={2.5} />
+                <span>Buy Pro</span>
+              </button>
+            </div>
+          </>
         )}
       </div>
     );

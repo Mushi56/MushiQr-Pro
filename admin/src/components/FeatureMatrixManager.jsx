@@ -79,34 +79,62 @@ export default function FeatureMatrixManager({ onClose }) {
     });
   };
 
+  const setFeatureTierQuick = (featureId, targetTier) => {
+    setMatrix(prev => ({
+      ...prev,
+      [featureId]: targetTier === 'free'
+        ? ['free', 'weekly', 'monthly', 'yearly']
+        : ['weekly', 'monthly', 'yearly']
+    }));
+  };
+
+  const setAllFilteredFeaturesTierQuick = (targetTier) => {
+    setMatrix(prev => {
+      const updated = { ...prev };
+      filteredFeatures.forEach(f => {
+        updated[f.featureId] = targetTier === 'free'
+          ? ['free', 'weekly', 'monthly', 'yearly']
+          : ['weekly', 'monthly', 'yearly'];
+      });
+      return updated;
+    });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Call Cloud Function to publish updated configuration version
-      const publishFn = httpsCallable(functions, 'publishMembershipConfig');
-      await publishFn({
-        plans: {
-          free:    { name: 'Free Tier', active: true },
-          weekly:  { name: 'Weekly Pass', active: true },
-          monthly: { name: 'Monthly Pro', active: true },
-          yearly:  { name: 'Yearly VIP', active: true },
-        },
-        featureMatrix: matrix,
-        featureLimits: limits,
-      });
-
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (e) {
-      console.warn('[FeatureMatrixManager] Cloud function fallback to direct write:', e);
-      // Fallback direct write for development
+      // Direct Firestore write for development
       await setDoc(doc(db, 'global_config', 'membership'), {
         featureMatrix: matrix,
         featureLimits: limits,
         updatedAt: new Date().toISOString(),
       }, { merge: true });
+
+      // Update subscription_plans/free features array
+      const freeFeats = Object.entries(matrix)
+        .filter(([_, plans]) => Array.isArray(plans) && plans.includes('free'))
+        .map(([k]) => k);
+      await setDoc(doc(db, 'subscription_plans', 'free'), { features: freeFeats }, { merge: true });
+
+      // Optional background cloud function sync
+      try {
+        const publishFn = httpsCallable(functions, 'publishMembershipConfig');
+        publishFn({
+          plans: {
+            free:    { name: 'Free Tier', active: true },
+            weekly:  { name: 'Weekly Pass', active: true },
+            monthly: { name: 'Monthly Pro', active: true },
+            yearly:  { name: 'Yearly VIP', active: true },
+          },
+          featureMatrix: matrix,
+          featureLimits: limits,
+        }).catch(() => {});
+      } catch {}
+
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (e) {
+      console.error('[FeatureMatrixManager] Save failed:', e);
     } finally {
       setSaving(false);
     }
@@ -122,16 +150,56 @@ export default function FeatureMatrixManager({ onClose }) {
             Feature &times; Plan Entitlement Matrix
           </h2>
           <p style={{ fontSize: 12, color: 'var(--ad-text-sec)', margin: '4px 0 0' }}>
-            Control which subscription tier has access to each of the canonical app capabilities.
+            Control which subscription tier has access to each of the canonical app capabilities with 1-click Free/Pro actions.
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           {saveSuccess && (
             <span style={{ fontSize: 12, color: '#10b981', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 4 }}>
               <CheckCircle2 size={16} /> Saved &amp; Version Published!
             </span>
           )}
+          <button
+            onClick={() => setAllFilteredFeaturesTierQuick('free')}
+            style={{
+              background: 'rgba(16, 185, 129, 0.15)',
+              color: '#10B981',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              borderRadius: 10,
+              padding: '8px 14px',
+              fontSize: 12,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+            title="Make all currently filtered features Free"
+          >
+            <Shield size={14} />
+            <span>Make All Free</span>
+          </button>
+          <button
+            onClick={() => setAllFilteredFeaturesTierQuick('paid')}
+            style={{
+              background: 'rgba(245, 158, 11, 0.15)',
+              color: '#F59E0B',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              borderRadius: 10,
+              padding: '8px 14px',
+              fontSize: 12,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+            title="Make all currently filtered features Pro Only"
+          >
+            <Sparkles size={14} />
+            <span>Make All Pro</span>
+          </button>
           <button
             onClick={handleSave}
             disabled={saving}
@@ -151,7 +219,7 @@ export default function FeatureMatrixManager({ onClose }) {
             }}
           >
             <Save size={14} />
-            {saving ? 'Publishing...' : 'Publish Matrix'}
+            {saving ? 'Publishing...' : 'Publish Changes'}
           </button>
         </div>
       </div>
@@ -188,6 +256,7 @@ export default function FeatureMatrixManager({ onClose }) {
             <tr style={{ background: 'var(--ad-input)', borderBottom: '1px solid var(--ad-border)' }}>
               <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)' }}>Feature Capability</th>
               <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: 'var(--ad-text-sec)' }}>Category</th>
+              <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', textAlign: 'center' }}>1-Click Tier</th>
               {CANONICAL_PLANS.map(plan => (
                 <th key={plan.id} style={{ padding: '12px 16px', fontSize: 12, fontWeight: 800, color: plan.color, textAlign: 'center' }}>
                   {plan.name}
@@ -198,6 +267,7 @@ export default function FeatureMatrixManager({ onClose }) {
           <tbody>
             {filteredFeatures.map(feat => {
               const assignedPlans = matrix[feat.featureId] || [];
+              const isFree = assignedPlans.includes('free');
               return (
                 <tr key={feat.featureId} style={{ borderBottom: '1px solid var(--ad-border)' }}>
                   <td style={{ padding: '12px 16px' }}>
@@ -206,6 +276,43 @@ export default function FeatureMatrixManager({ onClose }) {
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: 11, color: 'var(--ad-text-sec)' }}>
                     {FEATURE_CATEGORIES[feat.category]?.name || feat.category}
+                  </td>
+                  {/* 1-Click Quick Tier Switcher */}
+                  <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', background: 'var(--ad-input)', borderRadius: 10, padding: 2, border: '1px solid var(--ad-border)', gap: 2 }}>
+                      <button
+                        type="button"
+                        onClick={() => setFeatureTierQuick(feat.featureId, 'free')}
+                        style={{
+                          padding: '3px 8px',
+                          borderRadius: 8,
+                          border: 'none',
+                          fontSize: 10,
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          background: isFree ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
+                          color: isFree ? '#fff' : 'var(--ad-text-sec)',
+                        }}
+                      >
+                        Free
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFeatureTierQuick(feat.featureId, 'paid')}
+                        style={{
+                          padding: '3px 8px',
+                          borderRadius: 8,
+                          border: 'none',
+                          fontSize: 10,
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          background: !isFree ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'transparent',
+                          color: !isFree ? '#fff' : 'var(--ad-text-sec)',
+                        }}
+                      >
+                        Pro
+                      </button>
+                    </div>
                   </td>
                   {CANONICAL_PLANS.map(plan => {
                     const isChecked = assignedPlans.includes(plan.id);

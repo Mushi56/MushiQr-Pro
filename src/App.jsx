@@ -5699,14 +5699,46 @@ export default function App() {
           <HomePage 
             currentUser={currentUser}
             onScrollChange={(scrolled) => setIsHomeScrolled(scrolled)}
-            onNavigate={(page) => {
+            onNavigate={(page, subType) => {
               if (page === 'generator') resetGenerator();
+              if (page === 'batch') {
+                const access = FeatureAccessManager.canUseFeature('batch_view');
+                if (!access.allowed && access.status !== 'disabled_by_admin') {
+                  showPaywall('batch_view');
+                  return;
+                }
+              }
+              if (page === 'barcode') {
+                const access = FeatureAccessManager.canUseFeature('barcode_generator');
+                if (!access.allowed && access.status !== 'disabled_by_admin') {
+                  showPaywall('barcode_generator');
+                  return;
+                }
+              }
+              if (page === 'history') {
+                const access = FeatureAccessManager.canUseFeature('history_view');
+                if (!access.allowed && access.status !== 'disabled_by_admin') {
+                  showPaywall('history_view');
+                  return;
+                }
+              }
+              if (page === 'saved') {
+                const access = FeatureAccessManager.canUseFeature('saved_view');
+                if (!access.allowed && access.status !== 'disabled_by_admin') {
+                  showPaywall('saved_view');
+                  return;
+                }
+              }
               navigateTo(page);
             }}
             onQuickCreate={(type) => {
               const baseAccess = FeatureAccessManager.canUseFeature('qr_generator');
               if (!baseAccess.allowed) {
-                showToast('QR Generator feature is disabled or requires a plan upgrade.', 'error');
+                if (baseAccess.status !== 'disabled_by_admin') {
+                  showPaywall('qr_generator');
+                } else {
+                  showToast('QR Generator feature is disabled by administrator.', 'error');
+                }
                 return;
               }
               const typeAccess = FeatureAccessManager.canUseFeature(`qr_${type.toLowerCase()}`);
@@ -5728,7 +5760,11 @@ export default function App() {
             onQuickCreateBarcode={(id) => {
               const baseAccess = FeatureAccessManager.canUseFeature('barcode_generator');
               if (!baseAccess.allowed) {
-                showToast('Barcode Generator feature is disabled or requires a plan upgrade.', 'error');
+                if (baseAccess.status !== 'disabled_by_admin') {
+                  showPaywall('barcode_generator');
+                } else {
+                  showToast('Barcode Generator feature is disabled by administrator.', 'error');
+                }
                 return;
               }
               const typeAccess = FeatureAccessManager.canUseFeature(`barcode_${id.toLowerCase()}`);

@@ -453,6 +453,100 @@ export async function setPlanFeaturesCloud(planId, features) {
   }
 }
 
+/**
+ * Atomic 1-click batch setter for assigning features to Free tier or Pro tier
+ */
+export async function setFeaturesTierBatchCloud(featureKeys, targetTier = 'free') {
+  if (!Array.isArray(featureKeys) || featureKeys.length === 0) return { ok: true };
+
+  // 1. Force refresh token for super_admin claim
+  if (auth.currentUser) {
+    try { await auth.currentUser.getIdTokenResult(true); } catch {}
+  }
+
+  // 2. Read membership document and subscription_plans
+  const membershipRef = doc(db, 'global_config', 'membership');
+  const snap = await getDoc(membershipRef);
+  const currentMem = snap.exists() ? snap.data() : {};
+  const currentMatrix = { ...(currentMem.featureMatrix || {}) };
+  const currentPlans = { ...(currentMem.plans || {}) };
+  const nextVersion = (currentMem.configVersion || 100) + 1;
+
+  // Read subscription_plans/free
+  const freePlanRef = doc(db, 'subscription_plans', 'free');
+  const freeSnap = await getDoc(freePlanRef);
+  let freeFeatures = freeSnap.exists() && Array.isArray(freeSnap.data()?.features)
+    ? [...freeSnap.data().features]
+    : (currentPlans.free?.features || []);
+
+  const paidPlans = ['weekly', 'monthly', 'yearly'];
+  const paidSnaps = await Promise.all(paidPlans.map(p => getDoc(doc(db, 'subscription_plans', p))));
+  const paidFeaturesMap = {};
+  paidPlans.forEach((p, idx) => {
+    const s = paidSnaps[idx];
+    paidFeaturesMap[p] = s.exists() && Array.isArray(s.data()?.features)
+      ? [...s.data().features]
+      : (currentPlans[p]?.features || []);
+  });
+
+  const keySet = new Set(featureKeys);
+
+  if (targetTier === 'free') {
+    // Add to free tier
+    featureKeys.forEach(k => {
+      if (!freeFeatures.includes(k)) freeFeatures.push(k);
+      paidPlans.forEach(p => {
+        if (!paidFeaturesMap[p].includes(k)) paidFeaturesMap[p].push(k);
+      });
+      currentMatrix[k] = ['free', 'weekly', 'monthly', 'yearly'];
+    });
+  } else {
+    // Make Pro (Remove from free tier, ensure in paid plans)
+    freeFeatures = freeFeatures.filter(k => !keySet.has(k));
+    featureKeys.forEach(k => {
+      paidPlans.forEach(p => {
+        if (!paidFeaturesMap[p].includes(k)) paidFeaturesMap[p].push(k);
+      });
+      currentMatrix[k] = ['weekly', 'monthly', 'yearly'];
+    });
+  }
+
+  // Write to Firestore
+  try {
+    await setDoc(freePlanRef, { features: freeFeatures, _updatedAt: new Date().toISOString() }, { merge: true });
+    for (const p of paidPlans) {
+      await setDoc(doc(db, 'subscription_plans', p), { features: paidFeaturesMap[p], _updatedAt: new Date().toISOString() }, { merge: true });
+    }
+
+    // Update global_config/membership
+    const updatedPlans = {
+      ...currentPlans,
+      free: { ...(currentPlans.free || {}), features: freeFeatures },
+      weekly: { ...(currentPlans.weekly || {}), features: paidFeaturesMap['weekly'] },
+      monthly: { ...(currentPlans.monthly || {}), features: paidFeaturesMap['monthly'] },
+      yearly: { ...(currentPlans.yearly || {}), features: paidFeaturesMap['yearly'] },
+    };
+
+    await setDoc(membershipRef, {
+      configVersion: nextVersion,
+      featureMatrix: currentMatrix,
+      plans: updatedPlans,
+      updatedAt: new Date().toISOString(),
+    }, { merge: true });
+
+    await _audit('FEATURE_TIER_BATCH_UPDATED', {
+      count: featureKeys.length,
+      targetTier,
+      keys: featureKeys.slice(0, 10),
+    });
+
+    return { ok: true, configVersion: nextVersion };
+  } catch (err) {
+    console.error('[DS] Batch tier update failed:', err);
+    throw new Error(friendlyError(err));
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // BACKUP & STORAGE UTILITIES
 // ═══════════════════════════════════════════════════════════════════════════
