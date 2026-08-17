@@ -415,14 +415,14 @@ function BarcodeFeatureTile({ feature, is2D, updating, onToggleEnable, onToggleT
       {/* Info */}
       <div style={{ minWidth: 0 }}>
         <div style={{
-          fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.25,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          fontSize: 11.5, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3,
+          wordBreak: 'break-word', whiteSpace: 'normal'
         }}>
           {feature.name}
         </div>
         <div style={{
-          fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 2, lineHeight: 1.3,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 3, lineHeight: 1.3,
+          wordBreak: 'break-word', whiteSpace: 'normal'
         }}>
           {feature.description}
         </div>

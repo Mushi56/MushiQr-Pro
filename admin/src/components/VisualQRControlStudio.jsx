@@ -1368,16 +1368,16 @@ function ItemControlTile({ name, desc, badge, color, imageUrl, gradientFill, cus
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontSize: 12, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.25,
+            fontSize: 11.5, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.3,
             fontFamily: fontFamily ? `${fontFamily}, sans-serif` : 'inherit',
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+            wordBreak: 'break-word', whiteSpace: 'normal'
           }}>
             {name}
           </div>
           {desc && (
             <div style={{
-              fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 2, lineHeight: 1.3,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+              fontSize: 10, color: 'var(--ad-text-sec)', marginTop: 3, lineHeight: 1.3,
+              wordBreak: 'break-word', whiteSpace: 'normal'
             }}>
               {desc}
             </div>
