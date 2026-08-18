@@ -614,9 +614,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                backgroundColor: isDark ? '#1E2A42' : '#FFFFFF',
-                border: 'none',
-                boxShadow: isDark ? '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08)' : '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
+                backgroundColor: isDark ? 'rgba(26, 36, 56, 0.78)' : 'rgba(255, 255, 255, 0.88)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid rgba(0, 0, 0, 0.08)',
+                boxShadow: isDark 
+                  ? '0 16px 38px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)' 
+                  : '0 12px 30px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
@@ -628,21 +632,23 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 position: 'absolute', top: '-30%', right: '-15%',
                 width: '150px', height: '150px',
                 background: isDark 
-                  ? 'radial-gradient(circle, rgba(255, 30, 86, 0.32) 0%, rgba(184, 0, 38, 0.12) 50%, transparent 70%)'
-                  : 'radial-gradient(circle, rgba(255, 42, 85, 0.18) 0%, transparent 70%)',
+                  ? 'radial-gradient(circle, rgba(255, 30, 86, 0.35) 0%, rgba(184, 0, 38, 0.15) 50%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(255, 42, 85, 0.2) 0%, transparent 70%)',
                 filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
               }} />
 
-              {/* Onboarding Style Orbiting Neon Light Ring Arc */}
+              {/* Onboarding Style Orbiting Neon Light Ring Arc (4x Thicker & 40% Opacity) */}
               <div style={{
                 position: 'absolute',
-                right: '-15px',
-                bottom: '-10px',
-                width: '130px',
-                height: '90px',
+                right: '-18px',
+                bottom: '-12px',
+                width: '135px',
+                height: '95px',
                 borderRadius: '50%',
-                border: isDark ? '1.5px solid rgba(255, 30, 86, 0.32)' : '1.5px solid rgba(214, 0, 54, 0.2)',
-                boxShadow: isDark ? '0 0 14px rgba(255, 30, 86, 0.25)' : 'none',
+                border: isDark ? '12px solid rgba(255, 30, 86, 0.4)' : '12px solid rgba(214, 0, 54, 0.4)',
+                boxShadow: isDark 
+                  ? '0 0 24px rgba(255, 30, 86, 0.4), inset 0 0 16px rgba(255, 30, 86, 0.25)' 
+                  : '0 0 16px rgba(214, 0, 54, 0.25)',
                 transform: 'rotate(-25deg)',
                 pointerEvents: 'none',
                 zIndex: 1
@@ -775,9 +781,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                backgroundColor: isDark ? '#1E2A42' : '#FFFFFF',
-                border: 'none',
-                boxShadow: isDark ? '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08)' : '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
+                backgroundColor: isDark ? 'rgba(26, 36, 56, 0.78)' : 'rgba(255, 255, 255, 0.88)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid rgba(0, 0, 0, 0.08)',
+                boxShadow: isDark 
+                  ? '0 16px 38px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)' 
+                  : '0 12px 30px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
@@ -789,21 +799,23 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 position: 'absolute', top: '-30%', right: '-15%',
                 width: '150px', height: '150px',
                 background: isDark 
-                  ? 'radial-gradient(circle, rgba(255, 124, 0, 0.32) 0%, rgba(217, 101, 0, 0.12) 50%, transparent 70%)'
-                  : 'radial-gradient(circle, rgba(255, 124, 0, 0.18) 0%, transparent 70%)',
+                  ? 'radial-gradient(circle, rgba(255, 124, 0, 0.35) 0%, rgba(217, 101, 0, 0.15) 50%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(255, 124, 0, 0.2) 0%, transparent 70%)',
                 filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
               }} />
 
-              {/* Onboarding Style Orbiting Neon Light Ring Arc */}
+              {/* Onboarding Style Orbiting Neon Light Ring Arc (4x Thicker & 40% Opacity) */}
               <div style={{
                 position: 'absolute',
-                right: '-15px',
-                bottom: '-10px',
-                width: '130px',
-                height: '90px',
+                right: '-18px',
+                bottom: '-12px',
+                width: '135px',
+                height: '95px',
                 borderRadius: '50%',
-                border: isDark ? '1.5px solid rgba(255, 124, 0, 0.32)' : '1.5px solid rgba(255, 124, 0, 0.2)',
-                boxShadow: isDark ? '0 0 14px rgba(255, 124, 0, 0.25)' : 'none',
+                border: isDark ? '12px solid rgba(255, 124, 0, 0.4)' : '12px solid rgba(255, 124, 0, 0.4)',
+                boxShadow: isDark 
+                  ? '0 0 24px rgba(255, 124, 0, 0.4), inset 0 0 16px rgba(255, 124, 0, 0.25)' 
+                  : '0 0 16px rgba(255, 124, 0, 0.25)',
                 transform: 'rotate(20deg)',
                 pointerEvents: 'none',
                 zIndex: 1
@@ -940,9 +952,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               overflow: 'hidden',
               padding: '12px',
               boxSizing: 'border-box',
-              backgroundColor: isDark ? '#1E2A42' : '#FFFFFF',
-              border: 'none',
-              boxShadow: isDark ? '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08)' : '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
+              backgroundColor: isDark ? 'rgba(26, 36, 56, 0.78)' : 'rgba(255, 255, 255, 0.88)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid rgba(0, 0, 0, 0.08)',
+              boxShadow: isDark 
+                ? '0 16px 38px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)' 
+                : '0 12px 30px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
               width: '100%',
               cursor: 'pointer',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -955,21 +971,23 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               position: 'absolute', top: '-40%', right: '8%',
               width: '200px', height: '180px',
               background: isDark 
-                ? 'radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.12) 50%, transparent 70%)'
-                : 'radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%)',
+                ? 'radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, rgba(5, 150, 105, 0.15) 50%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%)',
               filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
             }} />
 
-            {/* Onboarding Style Orbiting Neon Light Ring Arc */}
+            {/* Onboarding Style Orbiting Neon Light Ring Arc (4x Thicker & 40% Opacity) */}
             <div style={{
               position: 'absolute',
-              right: '10px',
+              right: '8px',
               top: '50%',
-              width: '150px',
-              height: '105px',
+              width: '155px',
+              height: '110px',
               borderRadius: '50%',
-              border: isDark ? '1.5px solid rgba(16, 185, 129, 0.32)' : '1.5px solid rgba(16, 185, 129, 0.2)',
-              boxShadow: isDark ? '0 0 14px rgba(16, 185, 129, 0.25)' : 'none',
+              border: isDark ? '12px solid rgba(16, 185, 129, 0.4)' : '12px solid rgba(16, 185, 129, 0.4)',
+              boxShadow: isDark 
+                ? '0 0 24px rgba(16, 185, 129, 0.4), inset 0 0 16px rgba(16, 185, 129, 0.25)' 
+                : '0 0 16px rgba(16, 185, 129, 0.25)',
               transform: 'translateY(-50%) rotate(-15deg)',
               pointerEvents: 'none',
               zIndex: 1
