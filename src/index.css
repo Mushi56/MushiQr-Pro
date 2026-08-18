@@ -130,15 +130,15 @@
   box-shadow: var(--glass-shadow) !important;
 }
 
-/* Light Mode Header Scoping */
+/* Light Mode Header Scoping (Glassmorphic Translucent Effect) */
 [data-theme="light"] .app-header {
-  background: rgba(255, 255, 255, 0.52) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
   color: var(--text-primary) !important;
   border: none !important;
   border-bottom: none !important;
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.04) !important;
-  backdrop-filter: blur(28px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  box-shadow: 0 8px 32px -4px rgba(15, 23, 42, 0.08) !important;
+  backdrop-filter: blur(48px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(210%) !important;
 }
 
 [data-theme="light"] .app-header .app-logo-text {
@@ -150,50 +150,37 @@
 }
 
 .app-header {
-  background: rgba(14, 14, 20, 0.46) !important;
-  backdrop-filter: blur(28px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  background: rgba(21, 28, 46, 0.78) !important;
+  backdrop-filter: blur(48px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(210%) !important;
   border: none !important;
   border-bottom: none !important;
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.45) !important;
   transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Home Page Header Banner Glassmorphism without strokes */
-.app-header.header-home-banner {
-  background: rgba(184, 0, 38, 0.45) !important;
-  backdrop-filter: blur(28px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-  border: none !important;
-  border-bottom: none !important;
-  box-shadow: 0 8px 32px -4px rgba(184, 0, 38, 0.25) !important;
-  color: #FFFFFF !important;
-}
-
+/* Home Page Header Banner Red Brand Style (Both Light & Dark Mode at top) */
+.app-header.header-home-banner,
 [data-theme="light"] .app-header.header-home-banner {
-  background: rgba(255, 255, 255, 0.52) !important;
+  background: rgba(184, 0, 38, 0.92) !important;
+  backdrop-filter: blur(48px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(210%) !important;
   border: none !important;
   border-bottom: none !important;
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.04) !important;
-  color: var(--text-primary) !important;
-}
-
-.app-header.header-home-banner .app-logo-text {
+  box-shadow: 0 8px 32px -4px rgba(184, 0, 38, 0.35) !important;
   color: #FFFFFF !important;
 }
 
+.app-header.header-home-banner .app-logo-text,
 [data-theme="light"] .app-header.header-home-banner .app-logo-text {
-  color: var(--text-primary) !important;
+  color: #FFFFFF !important;
 }
 
 .app-header.header-home-banner .btn-menu-toggle,
-.app-header.header-home-banner .btn-header-action {
-  color: #FFFFFF !important;
-}
-
+.app-header.header-home-banner .btn-header-action,
 [data-theme="light"] .app-header.header-home-banner .btn-menu-toggle,
 [data-theme="light"] .app-header.header-home-banner .btn-header-action {
-  color: var(--text-primary) !important;
+  color: #FFFFFF !important;
 }
 
 
@@ -3662,7 +3649,7 @@ input[type="range"]::-moz-range-thumb {
   max-width: 360px;
 }
 
-/* ── Floating Capsule Bottom Navigation Bar for Main Pages (Glassmorphic & Translucent) ── */
+/* ── Floating Capsule Bottom Navigation Bar for Main Pages (Ultra-Blur Glassmorphic) ── */
 .bottom-nav:not(.bottom-nav-generator) {
   position: fixed;
   bottom: max(16px, env(safe-area-inset-bottom, 16px));
@@ -3672,24 +3659,24 @@ input[type="range"]::-moz-range-thumb {
   max-width: 440px;
   height: 64px;
   border-radius: 36px;
-  background: rgba(14, 14, 20, 0.46) !important;
-  backdrop-filter: blur(28px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  background: rgba(21, 28, 46, 0.78) !important;
+  backdrop-filter: blur(48px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(210%) !important;
   border: none !important;
-  box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.42) !important;
+  box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.55) !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 8px;
+  padding: 6px 10px;
   box-sizing: border-box;
   z-index: 2000;
   gap: 4px;
 }
 
 [data-theme="light"] .bottom-nav:not(.bottom-nav-generator) {
-  background: rgba(255, 255, 255, 0.52) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
   border: none !important;
-  box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 16px 40px -4px rgba(15, 23, 42, 0.12) !important;
 }
 
 /* ── Generator Lower Navigation Bar (Original layout with Glassmorphism) ── */
@@ -3703,12 +3690,12 @@ input[type="range"]::-moz-range-thumb {
   height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
   padding-bottom: env(safe-area-inset-bottom, 0px) !important;
   border-radius: 0 !important;
-  background: rgba(14, 14, 20, 0.52) !important;
-  backdrop-filter: blur(28px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  background: rgba(21, 28, 46, 0.78) !important;
+  backdrop-filter: blur(48px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(210%) !important;
   border: none !important;
   border-top: none !important;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4) !important;
   display: flex !important;
   align-items: stretch !important;
   justify-content: space-around !important;
@@ -3719,10 +3706,10 @@ input[type="range"]::-moz-range-thumb {
 }
 
 [data-theme="light"] .bottom-nav-generator {
-  background: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
   border: none !important;
   border-top: none !important;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06) !important;
 }
 
 .generator-nav-tab {
@@ -3789,38 +3776,57 @@ input[type="range"]::-moz-range-thumb {
   transition: all 0.2s ease;
 }
 
-/* Base Tab Button for Floating Main Nav */
+/* Base Tab Button for Floating Main Nav (Vertical Icon + Label Layout) */
 .bottom-nav-tab {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 48px;
-  padding: 0 8px;
+  height: 52px;
+  padding: 4px 2px;
   background: transparent;
   border: none;
-  border-radius: 24px;
+  border-radius: 16px;
   cursor: pointer;
   position: relative;
-  color: rgba(255, 255, 255, 0.75);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--text-tertiary, #94A3B8);
+  gap: 3px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   font-family: Outfit, var(--font-display, var(--font-sans));
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
 [data-theme="light"] .bottom-nav-tab {
-  color: rgba(0, 0, 0, 0.65);
+  color: rgba(15, 23, 42, 0.55);
 }
 
 .bottom-nav-tab:hover {
-  color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary, #FFFFFF);
 }
 
 [data-theme="light"] .bottom-nav-tab:hover {
   color: #000000;
-  background: rgba(0, 0, 0, 0.05);
+}
+
+.bottom-nav-tab .bottom-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+}
+
+.bottom-nav-tab .bottom-nav-label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+  line-height: 1;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+  color: inherit;
 }
 
 /* Nav Half Groups for Perfectly Symmetrical Centering */
@@ -3878,60 +3884,32 @@ input[type="range"]::-moz-range-thumb {
   transform: translate(-50%, calc(-50% - 10px)) scale(0.94) !important;
 }
 
-/* Active State: Brand Highlight Pill (Matches user reference image) */
+/* Active State: Color Change Only (No fill, no container pill) */
 .bottom-nav-tab.active:not(.bottom-nav-scan-btn) {
-  flex: 1.45;
-  background: linear-gradient(135deg, #FF1E56 0%, #D60036 100%) !important;
-  color: #FFFFFF !important;
-  box-shadow: 0 6px 20px rgba(214, 0, 54, 0.45);
-  padding: 0 16px;
-  gap: 8px;
+  flex: 1 !important;
+  background: transparent !important;
+  color: var(--accent-primary, #D60036) !important;
+  box-shadow: none !important;
 }
 
-.bottom-nav-tab.active:not(.bottom-nav-scan-btn):hover {
-  background: linear-gradient(135deg, #FF3366 0%, #E6003A 100%) !important;
-}
-
-.bottom-nav-tab .bottom-nav-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+.bottom-nav-tab .bottom-nav-icon svg {
+  fill: none !important;
 }
 
 .bottom-nav-tab.active .bottom-nav-icon {
-  color: #FFFFFF !important;
+  transform: scale(1.15) translateY(-1px);
+  color: var(--accent-primary, #D60036) !important;
 }
 
 .bottom-nav-tab.active .bottom-nav-icon svg {
-  fill: none;
-  stroke: #FFFFFF !important;
+  color: var(--accent-primary, #D60036) !important;
+  stroke: var(--accent-primary, #D60036) !important;
+  fill: none !important;
 }
 
-.bottom-nav-highlight {
-  display: none;
-}
-
-.bottom-nav-label {
-  display: inline-block;
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #FFFFFF;
-  letter-spacing: -0.2px;
-  white-space: nowrap;
-  animation: navLabelSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes navLabelSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-4px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
+.bottom-nav-tab.active .bottom-nav-label {
+  color: var(--accent-primary, #D60036) !important;
+  font-weight: 800;
 }
 
 /* Ã¢â€ â‚¬Ã¢â€ â‚¬ Tab Panel Area Ã¢â€ â‚¬Ã¢â€ â‚¬ */

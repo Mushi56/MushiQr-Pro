@@ -6218,8 +6218,10 @@ export default function App() {
               onClick={() => navigateTo('home')}
               aria-label="Home"
             >
-              <span className="bottom-nav-icon"><Home size={20} strokeWidth={2.2} /></span>
-              {activePage === 'home' && <span className="bottom-nav-label">Home</span>}
+              <span className="bottom-nav-icon">
+                <Home size={22} strokeWidth={activePage === 'home' ? 2.4 : 2} color={activePage === 'home' ? '#D60036' : 'currentColor'} />
+              </span>
+              <span className="bottom-nav-label">Home</span>
             </button>
             
             <button 
@@ -6227,8 +6229,10 @@ export default function App() {
               onClick={() => navigateTo('saved')}
               aria-label="Saved"
             >
-              <span className="bottom-nav-icon"><Bookmark size={20} strokeWidth={2.2} /></span>
-              {activePage === 'saved' && <span className="bottom-nav-label">Saved</span>}
+              <span className="bottom-nav-icon">
+                <Bookmark size={22} strokeWidth={activePage === 'saved' ? 2.4 : 2} color={activePage === 'saved' ? '#D60036' : 'currentColor'} />
+              </span>
+              <span className="bottom-nav-label">Saved</span>
             </button>
           </div>
 
@@ -6248,8 +6252,10 @@ export default function App() {
               onClick={() => navigateTo('history')}
               aria-label="History"
             >
-              <span className="bottom-nav-icon"><History size={20} strokeWidth={2.2} /></span>
-              {activePage === 'history' && <span className="bottom-nav-label">History</span>}
+              <span className="bottom-nav-icon">
+                <History size={22} strokeWidth={activePage === 'history' ? 2.5 : 2} color={activePage === 'history' ? '#D60036' : 'currentColor'} />
+              </span>
+              <span className="bottom-nav-label">History</span>
             </button>
             
             <button 
@@ -6258,9 +6264,9 @@ export default function App() {
               aria-label="Settings"
             >
               <span className="bottom-nav-icon">
-                <Settings size={20} strokeWidth={2.2} />
+                <Settings size={22} strokeWidth={(activePage === 'you' || activePage === 'settings') ? 2.4 : 2} color={(activePage === 'you' || activePage === 'settings') ? '#D60036' : 'currentColor'} />
               </span>
-              {(activePage === 'you' || activePage === 'settings') && <span className="bottom-nav-label">Settings</span>}
+              <span className="bottom-nav-label">Settings</span>
             </button>
           </div>
         </nav>
