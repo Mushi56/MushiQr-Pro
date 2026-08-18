@@ -159,27 +159,51 @@
   transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Home Page Header Banner Red Brand Style (Both Light & Dark Mode at top) */
-.app-header.header-home-banner,
-[data-theme="light"] .app-header.header-home-banner {
-  background: rgba(184, 0, 38, 0.92) !important;
-  backdrop-filter: blur(48px) saturate(210%) !important;
-  -webkit-backdrop-filter: blur(48px) saturate(210%) !important;
+/* Home Page Header: Matches the Red Hero Background Box (Pure Ruby-Crimson, No Orange) */
+.app-header.header-home,
+[data-theme="light"] .app-header.header-home {
+  background-color: #B80026 !important;
+  background-image: 
+    radial-gradient(at 92% 10%, #FF1E56 0px, transparent 55%),
+    radial-gradient(at 8% 10%, #B80026 0px, transparent 50%),
+    radial-gradient(at 50% 40%, #D8042B 0px, transparent 65%),
+    linear-gradient(180deg, #B80026 0%, #B80026 100%) !important;
   border: none !important;
   border-bottom: none !important;
-  box-shadow: 0 8px 32px -4px rgba(184, 0, 38, 0.35) !important;
+  box-shadow: none !important;
+  color: #FFFFFF !important;
+  position: sticky;
+  overflow: hidden;
+}
+
+.app-header.header-home::before,
+[data-theme="light"] .app-header.header-home::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.app-header.header-home > * {
+  position: relative;
+  z-index: 2;
+}
+
+.app-header.header-home .app-logo-text,
+[data-theme="light"] .app-header.header-home .app-logo-text {
   color: #FFFFFF !important;
 }
 
-.app-header.header-home-banner .app-logo-text,
-[data-theme="light"] .app-header.header-home-banner .app-logo-text {
-  color: #FFFFFF !important;
-}
-
-.app-header.header-home-banner .btn-menu-toggle,
-.app-header.header-home-banner .btn-header-action,
-[data-theme="light"] .app-header.header-home-banner .btn-menu-toggle,
-[data-theme="light"] .app-header.header-home-banner .btn-header-action {
+.app-header.header-home .btn-menu-toggle,
+.app-header.header-home .btn-header-action,
+[data-theme="light"] .app-header.header-home .btn-menu-toggle,
+[data-theme="light"] .app-header.header-home .btn-header-action {
   color: #FFFFFF !important;
 }
 

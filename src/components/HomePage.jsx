@@ -496,20 +496,20 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
       position: 'relative'
     }}>
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up" onScroll={handleScroll}>
-        {/* Static Hero Section with Mesh Grain Gradient Container */}
+        {/* Static Hero Section with Mesh Grain Gradient Container (Single Unified Box) */}
         <div style={{
           width: '100%',
           backgroundColor: '#B80026',
           backgroundImage: `
-            radial-gradient(at 88% 90%, #FF3B1E 0px, transparent 55%),
-            radial-gradient(at 12% 95%, #FF4A22 0px, transparent 50%),
-            radial-gradient(at 92% 5%, #FF1E56 0px, transparent 48%),
-            radial-gradient(at 8% 5%, #B80026 0px, transparent 50%),
+            radial-gradient(at 92% 10%, #FF1E56 0px, transparent 55%),
+            radial-gradient(at 8% 10%, #B80026 0px, transparent 50%),
             radial-gradient(at 50% 40%, #D8042B 0px, transparent 65%),
+            radial-gradient(at 90% 85%, #FF1E56 0px, transparent 55%),
             linear-gradient(180deg, #B80026 0%, #7A0015 100%)
           `,
           borderRadius: '0 0 28px 28px',
-          padding: '14px var(--main-padding-x) 48px var(--main-padding-x)',
+          marginTop: '-64px',
+          padding: '74px var(--main-padding-x) 48px var(--main-padding-x)',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
@@ -534,7 +534,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           <div style={{
             position: 'absolute', bottom: '-15%', right: '5%',
             width: '220px', height: '220px',
-            background: 'radial-gradient(circle, rgba(255, 59, 30, 0.35) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(255, 30, 86, 0.35) 0%, transparent 70%)',
             filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
           }} />
           <div style={{
@@ -604,7 +604,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               tabIndex={0}
               style={{
                 borderRadius: '18px',
-                color: '#fff',
+                color: '#0F172A',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -613,30 +613,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                backgroundColor: '#20040A',
-                backgroundImage: `
-                  radial-gradient(at 90% 15%, rgba(255, 42, 85, 0.42) 0px, transparent 55%),
-                  radial-gradient(at 10% 85%, rgba(179, 0, 45, 0.35) 0px, transparent 50%),
-                  radial-gradient(at 50% 50%, rgba(255, 77, 121, 0.15) 0px, transparent 60%),
-                  linear-gradient(160deg, #3D0610 0%, #170206 100%)
-                `,
+                backgroundColor: '#FFFFFF',
                 border: 'none',
-                boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+                boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              {/* Film Grain Texture Overlay */}
-              <div 
-                style={{
-                  position: 'absolute',
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E\")",
-                  mixBlendMode: 'overlay',
-                  pointerEvents: 'none',
-                  zIndex: 1
-                }} 
-              />
               <PaidCrownBadge featureId="qr_generator" position="floating" size={10} />
               {/* Card Image */}
               <img 
@@ -658,7 +641,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div style={{
                 position: 'absolute', top: '-40%', right: '-15%',
                 width: '130px', height: '130px',
-                background: 'radial-gradient(circle, rgba(255, 42, 85, 0.25) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(255, 42, 85, 0.12) 0%, transparent 70%)',
                 filter: 'blur(28px)', pointerEvents: 'none', zIndex: 1
               }} />
 
@@ -673,7 +656,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 10px rgba(255, 42, 85, 0.35)',
+                    boxShadow: '0 4px 10px rgba(255, 42, 85, 0.25)',
                     flexShrink: 0
                   }}>
                     <QrCode size={16} color="#FFFFFF" />
@@ -682,7 +665,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <h2 style={{
                       fontSize: '13px',
                       fontWeight: 800,
-                      color: '#FFFFFF',
+                      color: '#0F172A',
                       margin: 0,
                       lineHeight: 1.1
                     }}>
@@ -690,8 +673,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </h2>
                     <div style={{
                       fontSize: '8.5px',
-                      fontWeight: 600,
-                      color: '#FF4D79',
+                      fontWeight: 700,
+                      color: '#D60036',
                       marginTop: '2px',
                       lineHeight: 1
                     }}>
@@ -699,7 +682,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 400, lineHeight: 1.3, maxWidth: '85px' }}>
+                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: '#64748B', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
                   Create beautiful, custom QR codes with logos, colors, and unique frames.
                 </p>
               </div>
@@ -710,7 +693,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '5px 8px',
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                backgroundColor: '#F8FAFC',
                 borderRadius: '12px',
                 border: 'none',
                 width: 'calc(100% + 24px)',
@@ -724,15 +707,15 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     width: '18px',
                     height: '18px',
                     borderRadius: '6px',
-                    background: 'linear-gradient(135deg, rgba(255, 42, 85, 0.3) 0%, rgba(179, 0, 45, 0.3) 100%)',
+                    background: 'rgba(214, 0, 54, 0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <Image size={10} color="#FF4D79" />
+                    <Image size={10} color="#D60036" />
                   </div>
-                  <span style={{ fontSize: '8px', fontWeight: 700, color: '#FFFFFF' }}>Make it Yours</span>
+                  <span style={{ fontSize: '8px', fontWeight: 700, color: '#0F172A' }}>Make it Yours</span>
                 </div>
                 <div style={{
                   width: '20px',
@@ -742,7 +725,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 2px 6px rgba(255, 42, 85, 0.4)'
+                  boxShadow: '0 2px 6px rgba(255, 42, 85, 0.3)'
                 }}>
                   <ChevronRight size={12} color="#FFFFFF" />
                 </div>
@@ -756,7 +739,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               tabIndex={0}
               style={{
                 borderRadius: '18px',
-                color: '#fff',
+                color: '#0F172A',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -765,30 +748,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                backgroundColor: '#1E0C01',
-                backgroundImage: `
-                  radial-gradient(at 90% 15%, rgba(255, 124, 0, 0.42) 0px, transparent 55%),
-                  radial-gradient(at 10% 85%, rgba(153, 74, 0, 0.35) 0px, transparent 50%),
-                  radial-gradient(at 50% 50%, rgba(255, 157, 51, 0.15) 0px, transparent 60%),
-                  linear-gradient(160deg, #381602 0%, #140701 100%)
-                `,
+                backgroundColor: '#FFFFFF',
                 border: 'none',
-                boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+                boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              {/* Film Grain Texture Overlay */}
-              <div 
-                style={{
-                  position: 'absolute',
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E\")",
-                  mixBlendMode: 'overlay',
-                  pointerEvents: 'none',
-                  zIndex: 1
-                }} 
-              />
               <PaidCrownBadge featureId="barcode_generator" position="floating" size={10} />
               {/* Card Image */}
               <img 
@@ -810,7 +776,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div style={{
                 position: 'absolute', top: '-40%', right: '-15%',
                 width: '130px', height: '130px',
-                background: 'radial-gradient(circle, rgba(255, 124, 0, 0.3) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(255, 124, 0, 0.12) 0%, transparent 70%)',
                 filter: 'blur(28px)', pointerEvents: 'none', zIndex: 1
               }} />
 
@@ -825,7 +791,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 10px rgba(255, 124, 0, 0.35)',
+                    boxShadow: '0 4px 10px rgba(255, 124, 0, 0.25)',
                     flexShrink: 0
                   }}>
                     <Barcode size={16} color="#FFFFFF" />
@@ -834,7 +800,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <h2 style={{
                       fontSize: '13px',
                       fontWeight: 800,
-                      color: '#FFFFFF',
+                      color: '#0F172A',
                       margin: 0,
                       lineHeight: 1.1
                     }}>
@@ -842,8 +808,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </h2>
                     <div style={{
                       fontSize: '8.5px',
-                      fontWeight: 600,
-                      color: '#FF9D33',
+                      fontWeight: 700,
+                      color: '#D96500',
                       marginTop: '2px',
                       lineHeight: 1
                     }}>
@@ -851,7 +817,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: 'rgba(255,255,255,0.75)', fontWeight: 400, lineHeight: 1.3, maxWidth: '85px' }}>
+                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: '#64748B', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
                   Generate reliable 1D &amp; 2D barcodes for over 30 industrial standards.
                 </p>
               </div>
@@ -862,7 +828,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '5px 8px',
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                backgroundColor: '#F8FAFC',
                 borderRadius: '12px',
                 border: 'none',
                 width: 'calc(100% + 24px)',
@@ -876,15 +842,15 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     width: '18px',
                     height: '18px',
                     borderRadius: '6px',
-                    background: 'linear-gradient(135deg, rgba(255, 124, 0, 0.3) 0%, rgba(153, 74, 0, 0.3) 100%)',
+                    background: 'rgba(255, 124, 0, 0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <Barcode size={10} color="#FF9D33" />
+                    <Barcode size={10} color="#FF7C00" />
                   </div>
-                  <span style={{ fontSize: '8px', fontWeight: 700, color: '#FFFFFF' }}>30+ Formats</span>
+                  <span style={{ fontSize: '8px', fontWeight: 700, color: '#0F172A' }}>30+ Formats</span>
                 </div>
                 <div style={{
                   width: '20px',
@@ -894,7 +860,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 2px 6px rgba(255, 124, 0, 0.4)'
+                  boxShadow: '0 2px 6px rgba(255, 124, 0, 0.3)'
                 }}>
                   <ChevronRight size={12} color="#FFFFFF" />
                 </div>
@@ -913,7 +879,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             onKeyDown={(e) => e.key === 'Enter' && onNavigate('batch', 'QR')}
             style={{
               borderRadius: '18px',
-              color: '#fff',
+              color: '#0F172A',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -921,31 +887,14 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               overflow: 'hidden',
               padding: '12px',
               boxSizing: 'border-box',
-              backgroundColor: '#1C010D',
-              backgroundImage: `
-                radial-gradient(at 85% 50%, rgba(255, 11, 72, 0.42) 0px, transparent 55%),
-                radial-gradient(at 15% 50%, rgba(158, 0, 43, 0.35) 0px, transparent 50%),
-                radial-gradient(at 50% 15%, rgba(255, 77, 128, 0.15) 0px, transparent 60%),
-                linear-gradient(160deg, #350217 0%, #15010A 100%)
-              `,
+              backgroundColor: '#FFFFFF',
               border: 'none',
-              boxShadow: '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
               width: '100%',
               cursor: 'pointer',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            {/* Film Grain Texture Overlay */}
-            <div 
-              style={{
-                position: 'absolute',
-                top: 0, left: 0, right: 0, bottom: 0,
-                backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E\")",
-                mixBlendMode: 'overlay',
-                pointerEvents: 'none',
-                zIndex: 1
-              }} 
-            />
             <PaidCrownBadge featureId="batch_view" position="floating" size={10} />
             {/* Card Image */}
             <img 
@@ -968,7 +917,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             <div style={{
               position: 'absolute', top: '-50%', right: '20%',
               width: '180px', height: '180px',
-              background: 'radial-gradient(circle, rgba(255, 11, 72, 0.35) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(255, 11, 72, 0.12) 0%, transparent 70%)',
               filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
             }} />
 
@@ -983,7 +932,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 4px 10px rgba(255, 11, 72, 0.35)',
+                  boxShadow: '0 4px 10px rgba(255, 11, 72, 0.25)',
                   flexShrink: 0
                 }}>
                   <Layers size={16} color="#FFFFFF" />
@@ -992,7 +941,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   <h3 style={{
                     fontSize: '13px',
                     fontWeight: 800,
-                    color: '#FFFFFF',
+                    color: '#0F172A',
                     margin: 0,
                     lineHeight: 1.1
                   }}>
@@ -1000,8 +949,8 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </h3>
                   <div style={{
                     fontSize: '8.5px',
-                    fontWeight: 600,
-                    color: '#FF4D80',
+                    fontWeight: 700,
+                    color: '#D60036',
                     marginTop: '2px',
                     lineHeight: 1
                   }}>
@@ -1009,7 +958,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                 </div>
               </div>
-              <p style={{ fontSize: '8.5px', margin: '6px 110px 0 0', color: 'rgba(255,255,255,0.75)', fontWeight: 400, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <p style={{ fontSize: '8.5px', margin: '6px 110px 0 0', color: '#64748B', fontWeight: 500, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Create 10K+ codes from your spreadsheets.
               </p>
             </div>
