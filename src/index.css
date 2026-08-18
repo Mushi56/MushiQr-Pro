@@ -159,9 +159,9 @@
   transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Home Page Header: Matches the Red Hero Background Box (Pure Ruby-Crimson, No Orange) */
-.app-header.header-home,
-[data-theme="light"] .app-header.header-home {
+/* Home Page Header Banner: Matches the Red Hero Background Box at the top (Pure Ruby-Crimson, No Orange) */
+.app-header.header-home-banner,
+[data-theme="light"] .app-header.header-home-banner {
   background-color: #B80026 !important;
   background-image: 
     radial-gradient(at 92% 10%, #FF1E56 0px, transparent 55%),
@@ -176,8 +176,8 @@
   overflow: hidden;
 }
 
-.app-header.header-home::before,
-[data-theme="light"] .app-header.header-home::before {
+.app-header.header-home-banner::before,
+[data-theme="light"] .app-header.header-home-banner::before {
   content: '';
   position: absolute;
   top: 0;
@@ -190,20 +190,20 @@
   z-index: 1;
 }
 
-.app-header.header-home > * {
+.app-header.header-home-banner > * {
   position: relative;
   z-index: 2;
 }
 
-.app-header.header-home .app-logo-text,
-[data-theme="light"] .app-header.header-home .app-logo-text {
+.app-header.header-home-banner .app-logo-text,
+[data-theme="light"] .app-header.header-home-banner .app-logo-text {
   color: #FFFFFF !important;
 }
 
-.app-header.header-home .btn-menu-toggle,
-.app-header.header-home .btn-header-action,
-[data-theme="light"] .app-header.header-home .btn-menu-toggle,
-[data-theme="light"] .app-header.header-home .btn-header-action {
+.app-header.header-home-banner .btn-menu-toggle,
+.app-header.header-home-banner .btn-header-action,
+[data-theme="light"] .app-header.header-home-banner .btn-menu-toggle,
+[data-theme="light"] .app-header.header-home-banner .btn-header-action {
   color: #FFFFFF !important;
 }
 

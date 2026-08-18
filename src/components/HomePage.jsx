@@ -334,6 +334,7 @@ const getBarcodeIcon = (id) => {
 };
 
 export default function HomePage({ currentUser, onScrollChange, onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
+  const isDark = effectiveTheme === 'dark';
   const { isSuperAdmin } = useUserRole();
   const [recentItems, setRecentItems] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
@@ -604,7 +605,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               tabIndex={0}
               style={{
                 borderRadius: '18px',
-                color: '#0F172A',
+                color: isDark ? '#FFFFFF' : '#0F172A',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -613,9 +614,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                backgroundColor: '#FFFFFF',
+                backgroundColor: isDark ? '#1E2A42' : '#FFFFFF',
                 border: 'none',
-                boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
+                boxShadow: isDark ? '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08)' : '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
@@ -665,7 +666,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <h2 style={{
                       fontSize: '13px',
                       fontWeight: 800,
-                      color: '#0F172A',
+                      color: isDark ? '#FFFFFF' : '#0F172A',
                       margin: 0,
                       lineHeight: 1.1
                     }}>
@@ -674,7 +675,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <div style={{
                       fontSize: '8.5px',
                       fontWeight: 700,
-                      color: '#D60036',
+                      color: isDark ? '#FF4D79' : '#D60036',
                       marginTop: '2px',
                       lineHeight: 1
                     }}>
@@ -682,7 +683,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: '#64748B', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
+                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
                   Create beautiful, custom QR codes with logos, colors, and unique frames.
                 </p>
               </div>
@@ -693,7 +694,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '5px 8px',
-                backgroundColor: '#F8FAFC',
+                backgroundColor: isDark ? 'rgba(0, 0, 0, 0.35)' : '#F8FAFC',
                 borderRadius: '12px',
                 border: 'none',
                 width: 'calc(100% + 24px)',
@@ -707,15 +708,15 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     width: '18px',
                     height: '18px',
                     borderRadius: '6px',
-                    background: 'rgba(214, 0, 54, 0.1)',
+                    background: 'rgba(214, 0, 54, 0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <Image size={10} color="#D60036" />
+                    <Image size={10} color="#FF4D79" />
                   </div>
-                  <span style={{ fontSize: '8px', fontWeight: 700, color: '#0F172A' }}>Make it Yours</span>
+                  <span style={{ fontSize: '8px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#0F172A' }}>Make it Yours</span>
                 </div>
                 <div style={{
                   width: '20px',
@@ -739,7 +740,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               tabIndex={0}
               style={{
                 borderRadius: '18px',
-                color: '#0F172A',
+                color: isDark ? '#FFFFFF' : '#0F172A',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -748,9 +749,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '12px',
                 boxSizing: 'border-box',
                 minHeight: '135px',
-                backgroundColor: '#FFFFFF',
+                backgroundColor: isDark ? '#1E2A42' : '#FFFFFF',
                 border: 'none',
-                boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
+                boxShadow: isDark ? '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08)' : '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
                 cursor: 'pointer',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
@@ -800,7 +801,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <h2 style={{
                       fontSize: '13px',
                       fontWeight: 800,
-                      color: '#0F172A',
+                      color: isDark ? '#FFFFFF' : '#0F172A',
                       margin: 0,
                       lineHeight: 1.1
                     }}>
@@ -809,7 +810,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     <div style={{
                       fontSize: '8.5px',
                       fontWeight: 700,
-                      color: '#D96500',
+                      color: isDark ? '#FF9D33' : '#D96500',
                       marginTop: '2px',
                       lineHeight: 1
                     }}>
@@ -817,7 +818,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: '#64748B', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
+                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
                   Generate reliable 1D &amp; 2D barcodes for over 30 industrial standards.
                 </p>
               </div>
@@ -828,7 +829,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '5px 8px',
-                backgroundColor: '#F8FAFC',
+                backgroundColor: isDark ? 'rgba(0, 0, 0, 0.35)' : '#F8FAFC',
                 borderRadius: '12px',
                 border: 'none',
                 width: 'calc(100% + 24px)',
@@ -842,15 +843,15 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     width: '18px',
                     height: '18px',
                     borderRadius: '6px',
-                    background: 'rgba(255, 124, 0, 0.1)',
+                    background: 'rgba(255, 124, 0, 0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <Barcode size={10} color="#FF7C00" />
+                    <Barcode size={10} color="#FF9D33" />
                   </div>
-                  <span style={{ fontSize: '8px', fontWeight: 700, color: '#0F172A' }}>30+ Formats</span>
+                  <span style={{ fontSize: '8px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#0F172A' }}>30+ Formats</span>
                 </div>
                 <div style={{
                   width: '20px',
@@ -879,7 +880,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             onKeyDown={(e) => e.key === 'Enter' && onNavigate('batch', 'QR')}
             style={{
               borderRadius: '18px',
-              color: '#0F172A',
+              color: isDark ? '#FFFFFF' : '#0F172A',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -887,9 +888,9 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               overflow: 'hidden',
               padding: '12px',
               boxSizing: 'border-box',
-              backgroundColor: '#FFFFFF',
+              backgroundColor: isDark ? '#1E2A42' : '#FFFFFF',
               border: 'none',
-              boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
+              boxShadow: isDark ? '0 14px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08)' : '0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)',
               width: '100%',
               cursor: 'pointer',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -941,7 +942,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   <h3 style={{
                     fontSize: '13px',
                     fontWeight: 800,
-                    color: '#0F172A',
+                    color: isDark ? '#FFFFFF' : '#0F172A',
                     margin: 0,
                     lineHeight: 1.1
                   }}>
@@ -950,7 +951,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   <div style={{
                     fontSize: '8.5px',
                     fontWeight: 700,
-                    color: '#D60036',
+                    color: isDark ? '#FF4D80' : '#D60036',
                     marginTop: '2px',
                     lineHeight: 1
                   }}>
@@ -958,7 +959,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                 </div>
               </div>
-              <p style={{ fontSize: '8.5px', margin: '6px 110px 0 0', color: '#64748B', fontWeight: 500, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <p style={{ fontSize: '8.5px', margin: '6px 110px 0 0', color: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B', fontWeight: 500, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Create 10K+ codes from your spreadsheets.
               </p>
             </div>

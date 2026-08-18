@@ -1,22 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   ArrowRight,
-  Sparkles,
   Palette,
-  Image,
-  Layers,
-  CheckCircle2,
+  Image as ImageIcon,
+  Grid,
+  ShieldCheck,
+  ChevronRight,
   Scan,
-  TrendingUp,
   FileSpreadsheet,
   Zap,
-  Sliders,
-  Eye,
+  Layers,
   Archive,
   Download,
   Barcode as BarcodeIcon,
   Check,
-  Type
+  CheckCircle2
 } from 'lucide-react';
 import onboardingQrSvg from '../../assets/onboarding-qr-code.svg';
 
@@ -84,199 +82,546 @@ export default function OnboardingFlow({ onComplete }) {
         height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'var(--bg-primary, #0B0F19)',
-        color: 'var(--text-primary, #FFFFFF)',
+        backgroundColor: '#06070B',
+        color: '#FFFFFF',
         overflow: 'hidden',
         position: 'relative',
         userSelect: 'none',
         boxSizing: 'border-box'
       }}
     >
-      {/* Dynamic Background Ambience Gradient */}
+      {/* Dynamic Background Ambience Glow */}
       <div
         style={{
           position: 'absolute',
-          top: '-15%',
+          top: currentSlide === 0 ? '25%' : '10%',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '520px',
-          height: '520px',
+          width: '450px',
+          height: '450px',
           borderRadius: '50%',
           background:
             currentSlide === 0
-              ? 'radial-gradient(circle, rgba(214, 0, 54, 0.22) 0%, rgba(139, 92, 246, 0.14) 50%, transparent 70%)'
+              ? 'radial-gradient(circle, rgba(255, 30, 86, 0.28) 0%, rgba(184, 0, 38, 0.12) 50%, transparent 70%)'
               : currentSlide === 1
               ? 'radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, rgba(214, 0, 54, 0.12) 50%, transparent 70%)'
               : 'radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(59, 130, 246, 0.14) 50%, transparent 70%)',
-          filter: 'blur(55px)',
+          filter: 'blur(60px)',
           transition: 'background 0.5s ease',
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          zIndex: 1
         }}
       />
 
-      {/* Top Header Bar with Skip Action Only */}
+      {/* Top Header Bar with Skip Action */}
       <header
         style={{
           width: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-end',
-          padding: 'calc(16px + env(safe-area-inset-top, 0px)) 24px 8px',
+          padding: 'calc(16px + env(safe-area-inset-top, 0px)) 24px 4px',
           boxSizing: 'border-box',
-          zIndex: 10
+          zIndex: 20
         }}
       >
-        {currentSlide < totalSlides - 1 && (
+        {currentSlide < totalSlides - 1 ? (
           <button
             onClick={handleSkip}
             style={{
               background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-              color: 'var(--text-secondary, #CBD5E1)',
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontSize: '12.5px',
-              fontWeight: 700,
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              color: '#FFFFFF',
+              padding: '6px 18px',
+              borderRadius: '24px',
+              fontSize: '13px',
+              fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)'
             }}
           >
             Skip
           </button>
+        ) : (
+          <div style={{ height: '32px' }} />
         )}
       </header>
 
-      {/* Main Slide Presentation Container */}
+      {/* Main Content Area */}
       <div
         style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          padding: '0 24px',
+          justifyContent: 'space-between',
+          padding: '0 20px 8px',
           boxSizing: 'border-box',
-          zIndex: 2,
+          zIndex: 10,
           position: 'relative',
-          maxWidth: '560px',
+          maxWidth: '440px',
           margin: '0 auto',
-          width: '100%'
+          width: '100%',
+          overflowY: 'auto'
         }}
       >
         {/* ═════════════════════════════════════════════════════════════════════
-            SLIDE 1: Beautiful Real Custom QR Code (Pillow Eyes, Fluid Dots, Vibrant Red & Center Logo)
+            SLIDE 1: EXACT 3D NEON STAGE WITH GLOWING QR CODE & FLOATING BADGES
             ═════════════════════════════════════════════════════════════════════ */}
         {currentSlide === 0 && (
-          <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-            {/* Visual: Enlarged Custom QR Code with Glassmorphism and Orbiting Features */}
+          <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
+            
+            {/* Top Typography Header (Left Aligned matching reference image) */}
+            <div style={{ textAlign: 'left', width: '100%', padding: '0 4px', boxSizing: 'border-box' }}>
+              <h1
+                style={{
+                  fontSize: '30px',
+                  fontWeight: 800,
+                  color: '#FFFFFF',
+                  margin: '0 0 8px 0',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.5px',
+                  fontFamily: 'Outfit, var(--font-display, sans-serif)'
+                }}
+              >
+                Create Stunning
+                <br />
+                <span style={{ color: '#FF1E56' }}>QR</span> Codes
+              </h1>
+              <p
+                style={{
+                  fontSize: '13px',
+                  color: '#94A3B8',
+                  margin: 0,
+                  lineHeight: 1.45,
+                  maxWidth: '280px',
+                  fontWeight: 400
+                }}
+              >
+                Design beautiful QR codes with custom logos, colors, frames and unique styles.
+              </p>
+            </div>
+
+            {/* Central 3D Interactive Stage Scene */}
             <div
               style={{
                 position: 'relative',
-                width: '320px',
-                height: '255px',
+                width: '100%',
+                height: '340px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '24px'
+                margin: '4px 0 10px 0'
               }}
             >
-              {/* Premium Glass QR Frame (Enlarged Size) */}
+              {/* Cosmic Sparkle Stars around the 3D space */}
+              <span className="sparkle-star" style={{ top: '10%', left: '8%', color: '#FF4D80', fontSize: '13px' }}>✦</span>
+              <span className="sparkle-star" style={{ top: '8%', right: '36%', color: '#FF4D80', fontSize: '9px', animationDelay: '1s' }}>✦</span>
+              <span className="sparkle-star" style={{ top: '42%', left: '22%', color: '#FF2A6D', fontSize: '8px', animationDelay: '1.5s' }}>✦</span>
+              <span className="sparkle-star" style={{ bottom: '28%', left: '16%', color: '#FF4D80', fontSize: '11px', animationDelay: '0.7s' }}>✦</span>
+              <span className="sparkle-star" style={{ top: '34%', right: '6%', color: '#FFA07A', fontSize: '10px', animationDelay: '2s' }}>✦</span>
+              <span className="sparkle-star" style={{ bottom: '38%', right: '22%', color: '#FF2A6D', fontSize: '8px', animationDelay: '1.2s' }}>✦</span>
+
+              {/* Orbiting Ambient Light Ring Arcs */}
               <div
                 style={{
-                  width: '200px',
+                  position: 'absolute',
+                  width: '270px',
+                  height: '190px',
+                  borderRadius: '50%',
+                  border: '1.5px solid rgba(255, 30, 86, 0.28)',
+                  boxShadow: '0 0 18px rgba(255, 30, 86, 0.2)',
+                  transform: 'rotate(-25deg) translateY(-8px)',
+                  pointerEvents: 'none'
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '280px',
                   height: '200px',
-                  borderRadius: '30px',
-                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(20, 20, 32, 0.95) 100%)',
-                  border: '2px solid rgba(214, 0, 54, 0.55)',
-                  boxShadow: '0 24px 56px rgba(214, 0, 54, 0.38), 0 0 35px rgba(255, 23, 68, 0.22)',
+                  borderRadius: '50%',
+                  border: '1.5px solid rgba(255, 30, 86, 0.22)',
+                  transform: 'rotate(15deg) translateY(12px)',
+                  pointerEvents: 'none'
+                }}
+              />
+
+              {/* 3D Tiered Glowing Stage / Stool Platform beneath the QR Code */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '6px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '240px',
+                  height: '75px',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  padding: '12px',
-                  boxSizing: 'border-box',
-                  backdropFilter: 'blur(18px)',
-                  WebkitBackdropFilter: 'blur(18px)',
-                  animation: 'floatCenter 4s ease-in-out infinite'
+                  zIndex: 2
                 }}
               >
-                {/* Onboarding QR Code SVG rendered perfectly centered */}
-                <img
-                  src={onboardingQrSvg}
-                  alt="Onboarding QR Code"
+                {/* Upper Tier of 3D Stool Platform */}
+                <div
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    display: 'block'
+                    width: '200px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(180deg, #D8042B 0%, #500010 100%)',
+                    borderTop: '2.5px solid #FF3B69',
+                    boxShadow: '0 0 35px rgba(255, 30, 86, 0.9), inset 0 2px 14px rgba(255, 255, 255, 0.5)',
+                    position: 'relative',
+                    zIndex: 3
+                  }}
+                />
+                {/* Lower Tier of 3D Stool Platform */}
+                <div
+                  style={{
+                    width: '235px',
+                    height: '46px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(180deg, #7A0018 0%, #200006 100%)',
+                    borderTop: '2px solid #FF1E56',
+                    boxShadow: '0 14px 38px rgba(0, 0, 0, 0.95), 0 0 45px rgba(216, 4, 43, 0.6)',
+                    marginTop: '-26px',
+                    zIndex: 2
+                  }}
+                />
+                {/* Base Floor Glow Aura */}
+                <div
+                  style={{
+                    width: '270px',
+                    height: '38px',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(ellipse, rgba(255, 30, 86, 0.5) 0%, transparent 70%)',
+                    filter: 'blur(16px)',
+                    marginTop: '-22px',
+                    zIndex: 1
                   }}
                 />
               </div>
 
-              {/* Orbiting Core QR Feature Badges: Color, Style, Logo, Templates, Text */}
-              <OrbitBadge icon={Image} label="Logo" desc="PNG, SVG & Brand Icons" top="8px" left="6px" delay="0s" color="#FF2A55" />
-              <OrbitBadge icon={Sliders} label="Style" desc="Dots, Eyes & Shapes" top="10px" right="6px" delay="0.5s" color="#A855F7" />
-              <OrbitBadge icon={Type} label="Text" desc="Fonts & Typography" bottom="14px" left="4px" delay="1s" color="#38BDF8" />
-              <OrbitBadge icon={Palette} label="Color" desc="Gradients & Custom Fills" bottom="12px" right="6px" delay="1.5s" color="#FF1744" />
-              <OrbitBadge icon={Layers} label="Templates" desc="Poster Layout Presets" top="48%" right="-14px" delay="2s" color="#FBBF24" />
+              {/* 3D Floating Glowing QR Code Box with exact 3D Rotation */}
+              <div
+                className="floating-qr-3d"
+                style={{
+                  position: 'relative',
+                  width: '195px',
+                  height: '195px',
+                  borderRadius: '32px',
+                  background: 'linear-gradient(145deg, rgba(32, 6, 14, 0.96) 0%, rgba(10, 2, 5, 0.98) 100%)',
+                  border: '3px solid #FF2A6D',
+                  boxShadow: `
+                    0 0 40px rgba(255, 30, 86, 0.7),
+                    0 0 16px #FF1E56,
+                    inset 0 0 22px rgba(255, 30, 86, 0.4),
+                    0 30px 60px rgba(0, 0, 0, 0.9)
+                  `,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '10px',
+                  boxSizing: 'border-box',
+                  zIndex: 10,
+                  transform: 'perspective(900px) rotateX(15deg) rotateY(-18deg) rotateZ(5deg)',
+                  marginBottom: '20px'
+                }}
+              >
+                {/* Render the exact QR SVG */}
+                <img
+                  src={onboardingQrSvg}
+                  alt="Mushi QR Code"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    display: 'block',
+                    borderRadius: '22px'
+                  }}
+                />
+              </div>
+
+              {/* ═════════ 4 3D-ROTATED BORDERLESS FEATURE ICON TILES ═════════ */}
+
+              {/* Badge 1: Top Right - Add Logo & Frame (3D Purple Tile + Text to the Right) */}
+              <div
+                className="anim-tile-purple"
+                style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  zIndex: 15
+                }}
+              >
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(145deg, #8B5CF6 0%, #6D28D9 55%, #4C1D95 100%)',
+                    border: 'none',
+                    boxShadow: `
+                      0 12px 24px rgba(109, 40, 217, 0.6),
+                      0 4px 10px rgba(0, 0, 0, 0.45),
+                      inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                      inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+                      0 0 18px rgba(139, 92, 246, 0.4)
+                    `,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFFFFF',
+                    flexShrink: 0
+                  }}
+                >
+                  <ImageIcon size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
+                </div>
+                <div style={{ textAlign: 'left', lineHeight: 1.2 }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Add Logo</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>&amp; Frame</span>
+                </div>
+              </div>
+
+              {/* Badge 2: Top Left - Custom Designs (3D Magenta Tile + Centered Text Below) */}
+              <div
+                className="anim-tile-magenta"
+                style={{
+                  position: 'absolute',
+                  top: '32px',
+                  left: '8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '6px',
+                  zIndex: 15
+                }}
+              >
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(145deg, #FF2A6D 0%, #D8042B 55%, #880018 100%)',
+                    border: 'none',
+                    boxShadow: `
+                      0 12px 24px rgba(216, 4, 43, 0.6),
+                      0 4px 10px rgba(0, 0, 0, 0.45),
+                      inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                      inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+                      0 0 18px rgba(255, 42, 109, 0.4)
+                    `,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  <Palette size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
+                </div>
+                <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Custom</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Designs</span>
+                </div>
+              </div>
+
+              {/* Badge 3: Bottom Left - Templates & Styles (Placed closer to the lower-left QR corner) */}
+              <div
+                className="anim-tile-blue"
+                style={{
+                  position: 'absolute',
+                  bottom: '36px',
+                  left: '26px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '6px',
+                  zIndex: 15
+                }}
+              >
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(145deg, #3B82F6 0%, #1D4ED8 55%, #172554 100%)',
+                    border: 'none',
+                    boxShadow: `
+                      0 12px 24px rgba(29, 78, 216, 0.6),
+                      0 4px 10px rgba(0, 0, 0, 0.45),
+                      inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                      inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+                      0 0 18px rgba(59, 130, 246, 0.4)
+                    `,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  <Grid size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
+                </div>
+                <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Templates</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>&amp; Styles</span>
+                </div>
+              </div>
+
+              {/* Badge 4: Bottom Right - Colors & Gradients (3D Golden Amber Tile + Centered Text Below) */}
+              <div
+                className="anim-tile-amber"
+                style={{
+                  position: 'absolute',
+                  bottom: '48px',
+                  right: '8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '6px',
+                  zIndex: 15
+                }}
+              >
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(145deg, #F59E0B 0%, #D97706 55%, #78350F 100%)',
+                    border: 'none',
+                    boxShadow: `
+                      0 12px 24px rgba(217, 119, 6, 0.6),
+                      0 4px 10px rgba(0, 0, 0, 0.45),
+                      inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                      inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+                      0 0 18px rgba(245, 158, 11, 0.4)
+                    `,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFFFFF',
+                    fontWeight: 900,
+                    fontSize: '20px',
+                    fontFamily: 'serif'
+                  }}
+                >
+                  <span style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }}>Tt</span>
+                </div>
+                <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Colors &amp;</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Gradients</span>
+                </div>
+              </div>
+
             </div>
 
-            {/* Typography */}
-            <h2
+            {/* Bottom Security & Privacy Card (Matching reference card) */}
+            <div
               style={{
-                fontSize: '21px',
-                fontWeight: 850,
-                background: 'linear-gradient(135deg, #FFFFFF 35%, #FF2A55 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                margin: '0 0 6px',
-                lineHeight: 1.2,
-                letterSpacing: '-0.3px',
-                fontFamily: 'Outfit, var(--font-display, sans-serif)'
+                width: '100%',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.09)',
+                borderRadius: '16px',
+                padding: '10px 14px',
+                boxSizing: 'border-box',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backdropFilter: 'blur(10px)',
+                marginTop: '4px'
               }}
             >
-              Custom QR Studio
-            </h2>
-            <p
-              style={{
-                fontSize: '12.5px',
-                color: 'var(--text-secondary, #94A3B8)',
-                margin: 0,
-                lineHeight: 1.45,
-                maxWidth: '320px',
-                fontWeight: 450
-              }}
-            >
-              Craft stunning custom QR codes with your company logo, custom dot patterns, unique eye shapes, and rich gradients.
-            </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '11px',
+                    background: 'rgba(255, 30, 86, 0.12)',
+                    border: '1px solid rgba(255, 30, 86, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FF1E56',
+                    flexShrink: 0
+                  }}
+                >
+                  <ShieldCheck size={20} strokeWidth={2.3} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>
+                    100% Secure &amp; Private
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 400, marginTop: '2px', lineHeight: 1.2 }}>
+                    Your data is safe with us.
+                  </span>
+                </div>
+              </div>
+              <ChevronRight size={18} color="#64748B" />
+            </div>
+
           </div>
         )}
 
         {/* ═════════════════════════════════════════════════════════════════════
-            SLIDE 2: Dedicated to 1D & 2D Barcodes & Scanner
+            SLIDE 2: 1D & 2D BARCODES & SCANNER
             ═════════════════════════════════════════════════════════════════════ */}
         {currentSlide === 1 && (
-          <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-            {/* Visual Illustration: 1D & 2D Barcodes with Floating Orbit Badges */}
+          <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
+            {/* Top Typography Header */}
+            <div style={{ textAlign: 'left', width: '100%', padding: '0 4px', boxSizing: 'border-box' }}>
+              <h1
+                style={{
+                  fontSize: '30px',
+                  fontWeight: 800,
+                  color: '#FFFFFF',
+                  margin: '0 0 8px 0',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.5px',
+                  fontFamily: 'Outfit, var(--font-display, sans-serif)'
+                }}
+              >
+                Professional
+                <br />
+                <span style={{ color: '#F59E0B' }}>Barcodes</span> Studio
+              </h1>
+              <p
+                style={{
+                  fontSize: '13px',
+                  color: '#94A3B8',
+                  margin: 0,
+                  lineHeight: 1.45,
+                  maxWidth: '290px',
+                  fontWeight: 400
+                }}
+              >
+                Generate and scan 1D &amp; 2D barcodes for retail, inventory, and industrial manufacturing standards.
+              </p>
+            </div>
+
+            {/* Central 3D Barcode Visual */}
             <div
               style={{
                 position: 'relative',
-                width: '320px',
-                height: '255px',
+                width: '100%',
+                height: '300px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '24px'
+                margin: '8px 0'
               }}
             >
-              {/* Back Card 1: 2D Data Matrix Matrix Code (Non-linear 2D barcode) */}
+              {/* Back Card 1: 2D Data Matrix */}
               <div
                 style={{
                   position: 'absolute',
-                  top: '10px',
+                  top: '18px',
                   left: '12px',
                   width: '95px',
                   height: '95px',
@@ -294,7 +639,6 @@ export default function OnboardingFlow({ onComplete }) {
                   animation: 'floatLeft 4.5s ease-in-out infinite'
                 }}
               >
-                {/* Embedded 2D Data Matrix Pattern */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 10px)', gap: 2 }}>
                   {[
                     1, 1, 1, 1, 1,
@@ -319,11 +663,11 @@ export default function OnboardingFlow({ onComplete }) {
                 </span>
               </div>
 
-              {/* Back Card 2: PDF417 Stacked 2D Barcode */}
+              {/* Back Card 2: PDF417 */}
               <div
                 style={{
                   position: 'absolute',
-                  bottom: '10px',
+                  bottom: '22px',
                   right: '12px',
                   width: '115px',
                   height: '75px',
@@ -355,7 +699,7 @@ export default function OnboardingFlow({ onComplete }) {
               {/* Main Center Card: Code 128 / Scanner Studio */}
               <div
                 style={{
-                  width: '165px',
+                  width: '175px',
                   borderRadius: '24px',
                   background: 'linear-gradient(145deg, #181826 0%, #0d0d16 100%)',
                   border: '2px solid rgba(245, 158, 11, 0.65)',
@@ -366,157 +710,142 @@ export default function OnboardingFlow({ onComplete }) {
                   justifyContent: 'center',
                   padding: '16px 14px',
                   gap: 10,
-                  zIndex: 2,
+                  zIndex: 10,
                   backdropFilter: 'blur(12px)',
                   animation: 'floatCenter 4s ease-in-out infinite'
                 }}
               >
                 <div style={{ background: '#fff', borderRadius: '12px', padding: '8px 12px', width: '100%', boxSizing: 'border-box', textAlign: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, height: '34px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, height: '36px' }}>
                     {[3, 1, 4, 2, 1, 3, 2, 4, 1, 2, 3, 1, 4, 2, 1, 3, 2, 1].map((w, i) => (
                       <div key={i} style={{ width: `${w * 1.5}px`, height: '100%', background: '#000', borderRadius: '1px' }} />
                     ))}
                   </div>
-                  <div style={{ fontSize: '9.5px', fontWeight: 900, color: '#000', letterSpacing: '2px', marginTop: '3px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: 900, color: '#000', letterSpacing: '2px', marginTop: '3px' }}>
                     890123456789
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Scan size={15} color="#F59E0B" />
-                  <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#FFFFFF' }}>All Barcode Standards</span>
+                  <Scan size={16} color="#F59E0B" />
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#FFFFFF' }}>30+ Standards</span>
                 </div>
               </div>
 
-              {/* Orbiting Barcode Feature Badges with Icon Containers & Descriptions */}
-              <OrbitBadge icon={BarcodeIcon} label="EAN & UPC" desc="Retail Standards" top="8px" left="6px" delay="0s" color="#F59E0B" />
-              <OrbitBadge icon={Layers} label="Code 128" desc="Logistics Barcodes" top="10px" right="6px" delay="0.5s" color="#38BDF8" />
-              <OrbitBadge icon={Scan} label="Live Scanner" desc="Ultra Fast Detection" bottom="14px" left="4px" delay="1s" color="#34D399" />
-              <OrbitBadge icon={Zap} label="Data Matrix" desc="High Density 2D" bottom="12px" right="6px" delay="1.5s" color="#A855F7" />
-              <OrbitBadge icon={CheckCircle2} label="Checksums" desc="Auto Check Digit" top="48%" right="-14px" delay="2s" color="#FB7185" />
+              {/* Orbiting Barcode Feature Badges */}
+              <OrbitBadge icon={BarcodeIcon} label="EAN & UPC" desc="Retail Standards" top="10px" right="6px" delay="0s" color="#F59E0B" />
+              <OrbitBadge icon={Scan} label="Live Scanner" desc="Instant Camera Scan" bottom="16px" left="6px" delay="1s" color="#34D399" />
             </div>
 
-            {/* Typography */}
-            <h2
+            {/* Bottom Formats Summary Card */}
+            <div
               style={{
-                fontSize: '21px',
-                fontWeight: 850,
-                background: 'linear-gradient(135deg, #FFFFFF 35%, #F59E0B 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                margin: '0 0 6px',
-                lineHeight: 1.2,
-                letterSpacing: '-0.3px',
-                fontFamily: 'Outfit, var(--font-display, sans-serif)'
+                width: '100%',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.09)',
+                borderRadius: '16px',
+                padding: '10px 14px',
+                boxSizing: 'border-box',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backdropFilter: 'blur(10px)',
+                marginTop: '4px'
               }}
             >
-              Professional Barcodes
-            </h2>
-            <p
-              style={{
-                fontSize: '12.5px',
-                color: 'var(--text-secondary, #94A3B8)',
-                margin: 0,
-                lineHeight: 1.45,
-                maxWidth: '320px',
-                fontWeight: 450
-              }}
-            >
-              Generate and scan 1D &amp; 2D barcodes for retail, inventory, shipping, and industrial manufacturing standards.
-            </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '11px',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#F59E0B',
+                    flexShrink: 0
+                  }}
+                >
+                  <BarcodeIcon size={20} strokeWidth={2.3} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>
+                    High-Precision Barcode Engine
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 400, marginTop: '2px', lineHeight: 1.2 }}>
+                    Auto checksum validation &amp; vector SVG output.
+                  </span>
+                </div>
+              </div>
+              <ChevronRight size={18} color="#64748B" />
+            </div>
           </div>
         )}
 
         {/* ═════════════════════════════════════════════════════════════════════
-            SLIDE 3: Dedicated to Bulk Batch Generation (QRs, Barcodes, Excel/CSV)
+            SLIDE 3: BULK GENERATION ENGINE (Excel, CSV, 10K+ Codes)
             ═════════════════════════════════════════════════════════════════════ */}
         {currentSlide === 2 && (
-          <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-            {/* Visual Illustration: Multi-code Deck with CSV/Excel & Orbiting Badges */}
+          <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
+            {/* Top Typography Header */}
+            <div style={{ textAlign: 'left', width: '100%', padding: '0 4px', boxSizing: 'border-box' }}>
+              <h1
+                style={{
+                  fontSize: '30px',
+                  fontWeight: 800,
+                  color: '#FFFFFF',
+                  margin: '0 0 8px 0',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.5px',
+                  fontFamily: 'Outfit, var(--font-display, sans-serif)'
+                }}
+              >
+                Bulk Batch
+                <br />
+                <span style={{ color: '#10B981' }}>Generation</span> Engine
+              </h1>
+              <p
+                style={{
+                  fontSize: '13px',
+                  color: '#94A3B8',
+                  margin: 0,
+                  lineHeight: 1.45,
+                  maxWidth: '290px',
+                  fontWeight: 400
+                }}
+              >
+                Create thousands of QR codes and barcodes simultaneously from spreadsheets with 1-click ZIP export.
+              </p>
+            </div>
+
+            {/* Central 3D Bulk Visual */}
             <div
               style={{
                 position: 'relative',
-                width: '320px',
-                height: '255px',
+                width: '100%',
+                height: '300px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '24px'
+                margin: '8px 0'
               }}
             >
-              {/* Back Card 1: Batch QRs Stack */}
+              {/* Main Center Batch Console */}
               <div
                 style={{
-                  position: 'absolute',
-                  top: '8px',
-                  left: '10px',
-                  width: '95px',
-                  height: '95px',
-                  borderRadius: '20px',
-                  background: 'linear-gradient(145deg, #181226 0%, #0d0a17 100%)',
-                  border: '1.5px solid rgba(168, 85, 247, 0.45)',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.5)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 4,
-                  transform: 'rotate(-10deg)',
-                  animation: 'floatLeft 4.5s ease-in-out infinite'
-                }}
-              >
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 14px)', gap: 3 }}>
-                  {[1, 0, 1, 0, 1, 0, 1, 0, 1].map((c, i) => (
-                    <div key={i} style={{ width: 14, height: 14, borderRadius: 3, background: c ? '#A855F7' : 'rgba(168, 85, 247, 0.15)' }} />
-                  ))}
-                </div>
-                <span style={{ fontSize: '8.5px', fontWeight: 800, color: '#C084FC' }}>QR Batch</span>
-              </div>
-
-              {/* Back Card 2: Batch Barcodes Stack */}
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: '8px',
-                  right: '10px',
-                  width: '115px',
-                  height: '75px',
-                  borderRadius: '18px',
-                  background: 'linear-gradient(145deg, #101c24 0%, #071017 100%)',
-                  border: '1.5px solid rgba(56, 189, 248, 0.45)',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.5)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 4,
-                  transform: 'rotate(8deg)',
-                  animation: 'floatRight 4.5s ease-in-out infinite'
-                }}
-              >
-                <div style={{ display: 'flex', gap: 2, height: 22, alignItems: 'center' }}>
-                  {[2, 1, 3, 1, 2, 4, 1, 2, 3, 1, 2].map((w, i) => (
-                    <div key={i} style={{ width: `${w * 1.5}px`, height: '100%', background: '#38BDF8', borderRadius: 1 }} />
-                  ))}
-                </div>
-                <span style={{ fontSize: '9px', fontWeight: 800, color: '#7DD3FC' }}>Barcode Batch</span>
-              </div>
-
-              {/* Main Center Card: High-Tech CSV / Excel Batch Live Table */}
-              <div
-                style={{
-                  width: '196px',
+                  width: '210px',
                   borderRadius: '24px',
-                  background: 'linear-gradient(150deg, rgba(16, 35, 28, 0.95) 0%, rgba(8, 18, 14, 0.98) 100%)',
-                  border: '2px solid rgba(16, 185, 129, 0.55)',
-                  boxShadow: '0 20px 50px rgba(16, 185, 129, 0.28), 0 0 30px rgba(16, 185, 129, 0.15)',
-                  padding: '13px 12px',
+                  background: 'linear-gradient(145deg, #101f18 0%, #0a1410 100%)',
+                  border: '2px solid rgba(16, 185, 129, 0.65)',
+                  boxShadow: '0 20px 48px rgba(16, 185, 129, 0.3)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 7,
-                  zIndex: 2,
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
+                  padding: '14px',
+                  gap: 8,
+                  zIndex: 10,
+                  backdropFilter: 'blur(12px)',
                   animation: 'floatCenter 4s ease-in-out infinite'
                 }}
               >
@@ -531,7 +860,7 @@ export default function OnboardingFlow({ onComplete }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(16, 185, 129, 0.18)', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '2px 7px', borderRadius: 7 }}>
                     <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
                     <span style={{ fontSize: '9px', fontWeight: 800, color: '#34D399', letterSpacing: '0.3px' }}>
-                      5K+ CODES
+                      10K+ CODES
                     </span>
                   </div>
                 </div>
@@ -539,20 +868,20 @@ export default function OnboardingFlow({ onComplete }) {
                 {/* Progress Metric Bar */}
                 <div style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '6px', padding: '4px 6px', display: 'flex', flexDirection: 'column', gap: 3 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', fontWeight: 700, color: '#94A3B8' }}>
-                    <span>Batch Engine</span>
-                    <span style={{ color: '#10B981' }}>5,000 / 5,000 Ready</span>
+                    <span>Batch Queue</span>
+                    <span style={{ color: '#10B981' }}>10,000 / 10,000 Ready</span>
                   </div>
                   <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '10px', overflow: 'hidden' }}>
                     <div style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg, #10B981 0%, #34D399 100%)', borderRadius: '10px' }} />
                   </div>
                 </div>
 
-                {/* Simulated Batch Queue Items */}
+                {/* Queue Items */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3.5 }}>
                   {[
-                    { name: 'product_batch_01', count: '2.5k', tag: 'QR', color: '#A855F7' },
-                    { name: 'retail_barcode_02', count: '1.8k', tag: 'EAN', color: '#F59E0B' },
-                    { name: 'vcard_members_03', count: '700', tag: 'vCard', color: '#10B981' }
+                    { name: 'product_batch_01', count: '5.0k', tag: 'QR', color: '#FF1E56' },
+                    { name: 'retail_barcode_02', count: '3.5k', tag: 'EAN', color: '#F59E0B' },
+                    { name: 'vcard_members_03', count: '1.5k', tag: 'vCard', color: '#10B981' }
                   ].map((row, i) => (
                     <div
                       key={i}
@@ -573,7 +902,7 @@ export default function OnboardingFlow({ onComplete }) {
                         <span style={{ fontSize: '8px', fontWeight: 800, color: row.color, background: 'rgba(255,255,255,0.07)', padding: '1px 4px', borderRadius: 4 }}>
                           {row.tag}
                         </span>
-                        <Check size={10.5} color="#10B981" strokeWidth={3} />
+                        <Check size={11} color="#10B981" strokeWidth={3} />
                       </div>
                     </div>
                   ))}
@@ -581,7 +910,7 @@ export default function OnboardingFlow({ onComplete }) {
 
                 {/* Bottom Action Footer */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 5 }}>
-                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#94A3B8' }}>ZIP & PDF Sheet</span>
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#94A3B8' }}>ZIP &amp; PDF Export</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#10B981', fontSize: '9px', fontWeight: 800, background: 'rgba(16, 185, 129, 0.12)', padding: '2px 6px', borderRadius: '5px' }}>
                     <Download size={10} />
                     <span>Download All</span>
@@ -589,63 +918,77 @@ export default function OnboardingFlow({ onComplete }) {
                 </div>
               </div>
 
-              {/* Orbiting Bulk Feature Badges with Icon Containers & Descriptions */}
-              <OrbitBadge icon={FileSpreadsheet} label="CSV & Excel" desc="Instant Sheets Import" top="8px" left="4px" delay="0s" color="#10B981" />
-              <OrbitBadge icon={Layers} label="Multi-Format" desc="QR & Barcode Batches" top="10px" right="4px" delay="0.5s" color="#A855F7" />
-              <OrbitBadge icon={Archive} label="ZIP Export" desc="Single & Multi PDFs" bottom="14px" left="4px" delay="1s" color="#38BDF8" />
-              <OrbitBadge icon={Zap} label="Fast Engine" desc="1,000+ Codes / Sec" bottom="12px" right="4px" delay="1.5s" color="#F59E0B" />
-              <OrbitBadge icon={CheckCircle2} label="Bulk Sync" desc="Sticky Label Sheets" top="48%" right="-14px" delay="2s" color="#34D399" />
+              {/* Orbiting Bulk Badges */}
+              <OrbitBadge icon={FileSpreadsheet} label="CSV & Excel" desc="Instant Sheet Import" top="8px" left="6px" delay="0s" color="#10B981" />
+              <OrbitBadge icon={Archive} label="ZIP Export" desc="Print Ready PDFs" bottom="14px" right="6px" delay="1s" color="#38BDF8" />
             </div>
 
-            {/* Typography */}
-            <h2
+            {/* Bottom Engine Card */}
+            <div
               style={{
-                fontSize: '21px',
-                fontWeight: 850,
-                background: 'linear-gradient(135deg, #FFFFFF 35%, #10B981 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                margin: '0 0 6px',
-                lineHeight: 1.2,
-                letterSpacing: '-0.3px',
-                fontFamily: 'Outfit, var(--font-display, sans-serif)'
+                width: '100%',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.09)',
+                borderRadius: '16px',
+                padding: '10px 14px',
+                boxSizing: 'border-box',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backdropFilter: 'blur(10px)',
+                marginTop: '4px'
               }}
             >
-              Bulk Generation Engine
-            </h2>
-            <p
-              style={{
-                fontSize: '12.5px',
-                color: 'var(--text-secondary, #94A3B8)',
-                margin: 0,
-                lineHeight: 1.45,
-                maxWidth: '320px',
-                fontWeight: 450
-              }}
-            >
-              Create hundreds of QR codes and barcodes simultaneously from CSV/Excel or sequential numbers with 1-click ZIP export.
-            </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '11px',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#10B981',
+                    flexShrink: 0
+                  }}
+                >
+                  <Layers size={20} strokeWidth={2.3} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>
+                    High-Throughput Batch Engine
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 400, marginTop: '2px', lineHeight: 1.2 }}>
+                    Generate 1,000+ codes per second locally in browser.
+                  </span>
+                </div>
+              </div>
+              <ChevronRight size={18} color="#64748B" />
+            </div>
           </div>
         )}
+
       </div>
 
-      {/* Bottom Controls Bar (Pagination + Primary CTA) */}
+      {/* Bottom Controls Bar (Pagination + Primary CTA Button) */}
       <footer
         style={{
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 16,
-          padding: '16px 24px calc(24px + env(safe-area-inset-bottom, 0px))',
+          gap: 14,
+          padding: '10px 24px calc(24px + env(safe-area-inset-bottom, 0px))',
           boxSizing: 'border-box',
-          zIndex: 10,
-          maxWidth: '560px',
+          zIndex: 20,
+          maxWidth: '440px',
           margin: '0 auto'
         }}
       >
         {/* Animated Pagination Dots */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {[0, 1, 2].map((idx) => {
             const isActive = currentSlide === idx;
             return (
@@ -653,10 +996,10 @@ export default function OnboardingFlow({ onComplete }) {
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
                 style={{
-                  width: isActive ? '24px' : '8px',
-                  height: '8px',
+                  width: isActive ? '22px' : '6px',
+                  height: '6px',
                   borderRadius: '100px',
-                  background: isActive ? '#D60036' : 'rgba(255, 255, 255, 0.2)',
+                  background: isActive ? '#FF1E56' : 'rgba(255, 255, 255, 0.2)',
                   border: 'none',
                   padding: 0,
                   cursor: 'pointer',
@@ -667,20 +1010,20 @@ export default function OnboardingFlow({ onComplete }) {
           })}
         </div>
 
-        {/* Primary CTA Button */}
+        {/* Primary CTA Button (Matching reference vibrant red gradient) */}
         <button
           onClick={handleNext}
           style={{
             width: '100%',
             height: '52px',
             borderRadius: '16px',
-            background: 'linear-gradient(135deg, #D60036 0%, #B5002D 100%)',
+            background: 'linear-gradient(135deg, #FF1E56 0%, #D8042B 100%)',
             border: 'none',
             color: '#FFFFFF',
-            fontSize: '15px',
+            fontSize: '16px',
             fontWeight: 800,
             letterSpacing: '0.2px',
-            boxShadow: '0 8px 24px rgba(214, 0, 54, 0.35)',
+            boxShadow: '0 8px 25px rgba(255, 30, 86, 0.45)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -692,28 +1035,99 @@ export default function OnboardingFlow({ onComplete }) {
           onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           <span>{currentSlide === totalSlides - 1 ? 'Get Started' : 'Next'}</span>
-          <ArrowRight size={18} strokeWidth={2.5} />
+          <ArrowRight size={18} strokeWidth={2.6} />
         </button>
       </footer>
 
+      {/* Global Embedded Animations */}
       <style>{`
+        .floating-qr-3d {
+          animation: floatQR3D 5s ease-in-out infinite;
+          transform-style: preserve-3d;
+        }
+        @keyframes floatQR3D {
+          0%, 100% {
+            transform: perspective(900px) rotateX(15deg) rotateY(-18deg) rotateZ(5deg) translateY(0px);
+          }
+          50% {
+            transform: perspective(900px) rotateX(17deg) rotateY(-16deg) rotateZ(6deg) translateY(-8px);
+          }
+        }
+        .anim-tile-purple {
+          animation: floatTilePurple 4.5s ease-in-out infinite;
+        }
+        @keyframes floatTilePurple {
+          0%, 100% {
+            transform: perspective(600px) rotateX(14deg) rotateY(-18deg) rotateZ(4deg) translateY(0px);
+          }
+          50% {
+            transform: perspective(600px) rotateX(16deg) rotateY(-16deg) rotateZ(5deg) translateY(-5px);
+          }
+        }
+        .anim-tile-magenta {
+          animation: floatTileMagenta 4s ease-in-out infinite;
+        }
+        @keyframes floatTileMagenta {
+          0%, 100% {
+            transform: perspective(600px) rotateX(12deg) rotateY(16deg) rotateZ(-4deg) translateY(0px);
+          }
+          50% {
+            transform: perspective(600px) rotateX(14deg) rotateY(14deg) rotateZ(-3deg) translateY(-5px);
+          }
+        }
+        .anim-tile-blue {
+          animation: floatTileBlue 4.2s ease-in-out infinite;
+        }
+        @keyframes floatTileBlue {
+          0%, 100% {
+            transform: perspective(600px) rotateX(12deg) rotateY(14deg) rotateZ(-3deg) translateY(0px);
+          }
+          50% {
+            transform: perspective(600px) rotateX(14deg) rotateY(12deg) rotateZ(-2deg) translateY(-5px);
+          }
+        }
+        .anim-tile-amber {
+          animation: floatTileAmber 3.8s ease-in-out infinite;
+        }
+        @keyframes floatTileAmber {
+          0%, 100% {
+            transform: perspective(600px) rotateX(14deg) rotateY(-16deg) rotateZ(4deg) translateY(0px);
+          }
+          50% {
+            transform: perspective(600px) rotateX(16deg) rotateY(-14deg) rotateZ(5deg) translateY(-5px);
+          }
+        }
         @keyframes floatCenter {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-7px); }
         }
         @keyframes floatLeft {
-          0%, 100% { transform: rotate(-8deg) translateY(0px); }
-          50% { transform: rotate(-6deg) translateY(-5px); }
+          0%, 100% { transform: rotate(-10deg) translateY(0px); }
+          50% { transform: rotate(-8deg) translateY(-6px); }
         }
         @keyframes floatRight {
           0%, 100% { transform: rotate(8deg) translateY(0px); }
-          50% { transform: rotate(10deg) translateY(-5px); }
+          50% { transform: rotate(10deg) translateY(-6px); }
+        }
+        @keyframes floatBadge {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-5px); }
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        .sparkle-star {
+          position: absolute;
+          animation: twinkle 3s ease-in-out infinite;
+          pointer-events: none;
+          z-index: 5;
         }
         .onboarding-slide-anim {
           animation: slideFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         @keyframes slideFadeIn {
-          from { opacity: 0; transform: translateY(14px) scale(0.98); }
+          from { opacity: 0; transform: translateY(12px) scale(0.98); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
@@ -721,7 +1135,7 @@ export default function OnboardingFlow({ onComplete }) {
   );
 }
 
-// Sub-component: Floating Orbital Badge with Glassmorphism & Dedicated Icon Container
+// Sub-component: Floating Orbital Badge for Barcode and Bulk slides
 function OrbitBadge({ icon: Icon, label, desc, top, bottom, left, right, color, delay }) {
   return (
     <div
@@ -731,7 +1145,7 @@ function OrbitBadge({ icon: Icon, label, desc, top, bottom, left, right, color, 
         bottom,
         left,
         right,
-        background: 'rgba(15, 23, 42, 0.78)',
+        background: 'rgba(15, 23, 42, 0.85)',
         border: '1px solid rgba(255, 255, 255, 0.16)',
         borderRadius: '14px',
         padding: '5px 10px 5px 6px',
@@ -739,13 +1153,12 @@ function OrbitBadge({ icon: Icon, label, desc, top, bottom, left, right, color, 
         alignItems: 'center',
         gap: 7,
         boxShadow: '0 12px 30px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(16px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-        zIndex: 6,
-        animation: `orbitFloat 3.5s ease-in-out infinite ${delay}`
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        zIndex: 15,
+        animation: `floatBadge 3.5s ease-in-out infinite ${delay}`
       }}
     >
-      {/* Dedicated Icon Glass Container */}
       <div
         style={{
           width: '24px',
@@ -763,7 +1176,6 @@ function OrbitBadge({ icon: Icon, label, desc, top, bottom, left, right, color, 
         <Icon size={13} color={color} strokeWidth={2.4} />
       </div>
 
-      {/* Title & Description Stack */}
       <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', minWidth: 0 }}>
         <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#F8FAFC', lineHeight: 1.15, whiteSpace: 'nowrap' }}>
           {label}
@@ -774,13 +1186,6 @@ function OrbitBadge({ icon: Icon, label, desc, top, bottom, left, right, color, 
           </span>
         )}
       </div>
-
-      <style>{`
-        @keyframes orbitFloat {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-5px); }
-        }
-      `}</style>
     </div>
   );
 }
