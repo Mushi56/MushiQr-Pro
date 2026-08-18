@@ -622,32 +622,58 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               }}
             >
               <PaidCrownBadge featureId="qr_generator" position="floating" size={10} />
-              {/* Card Image */}
+              
+              {/* Onboarding Style Ambient Ruby Nebula Background */}
+              <div style={{
+                position: 'absolute', top: '-30%', right: '-15%',
+                width: '150px', height: '150px',
+                background: isDark 
+                  ? 'radial-gradient(circle, rgba(255, 30, 86, 0.32) 0%, rgba(184, 0, 38, 0.12) 50%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(255, 42, 85, 0.18) 0%, transparent 70%)',
+                filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
+              }} />
+
+              {/* Onboarding Style Orbiting Neon Light Ring Arc */}
+              <div style={{
+                position: 'absolute',
+                right: '-15px',
+                bottom: '-10px',
+                width: '130px',
+                height: '90px',
+                borderRadius: '50%',
+                border: isDark ? '1.5px solid rgba(255, 30, 86, 0.32)' : '1.5px solid rgba(214, 0, 54, 0.2)',
+                boxShadow: isDark ? '0 0 14px rgba(255, 30, 86, 0.25)' : 'none',
+                transform: 'rotate(-25deg)',
+                pointerEvents: 'none',
+                zIndex: 1
+              }} />
+
+              {/* Onboarding Style Sparkle Stars */}
+              <span className="sparkle-star" style={{ top: '15%', right: '48%', color: '#FF4D80', fontSize: '9px', zIndex: 2 }}>✦</span>
+              <span className="sparkle-star" style={{ bottom: '26%', right: '12%', color: '#FF2A6D', fontSize: '11px', animationDelay: '1.2s', zIndex: 2 }}>✦</span>
+
+              {/* Card Image with 3D Drop-Shadow and Ruby Neon Glow */}
               <img 
                 src="/Qr Code.webp" 
                 alt="QR Code" 
                 style={{
                   position: 'absolute',
-                  right: '-12px',
-                  bottom: '6px',
-                  width: '110px',
-                  height: '110px',
+                  right: '-10px',
+                  bottom: '4px',
+                  width: '115px',
+                  height: '115px',
                   objectFit: 'contain',
-                  zIndex: 2,
+                  zIndex: 3,
                   pointerEvents: 'none',
-                  opacity: 0.95
+                  opacity: 0.98,
+                  filter: isDark 
+                    ? 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 16px rgba(255, 30, 86, 0.5))'
+                    : 'drop-shadow(0 8px 16px rgba(214, 0, 54, 0.25))'
                 }} 
               />
-              {/* Ambient glow only */}
-              <div style={{
-                position: 'absolute', top: '-40%', right: '-15%',
-                width: '130px', height: '130px',
-                background: 'radial-gradient(circle, rgba(255, 42, 85, 0.12) 0%, transparent 70%)',
-                filter: 'blur(28px)', pointerEvents: 'none', zIndex: 1
-              }} />
 
               {/* Top Title & Description */}
-              <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2, position: 'relative' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', zIndex: 4, position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                   <div style={{
                     width: '32px',
@@ -700,7 +726,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 width: 'calc(100% + 24px)',
                 boxSizing: 'border-box',
                 margin: 'auto -12px -12px -12px',
-                zIndex: 2,
+                zIndex: 4,
                 position: 'relative'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -757,32 +783,58 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               }}
             >
               <PaidCrownBadge featureId="barcode_generator" position="floating" size={10} />
-              {/* Card Image */}
+              
+              {/* Onboarding Style Ambient Golden Amber Nebula Background */}
+              <div style={{
+                position: 'absolute', top: '-30%', right: '-15%',
+                width: '150px', height: '150px',
+                background: isDark 
+                  ? 'radial-gradient(circle, rgba(255, 124, 0, 0.32) 0%, rgba(217, 101, 0, 0.12) 50%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(255, 124, 0, 0.18) 0%, transparent 70%)',
+                filter: 'blur(22px)', pointerEvents: 'none', zIndex: 1
+              }} />
+
+              {/* Onboarding Style Orbiting Neon Light Ring Arc */}
+              <div style={{
+                position: 'absolute',
+                right: '-15px',
+                bottom: '-10px',
+                width: '130px',
+                height: '90px',
+                borderRadius: '50%',
+                border: isDark ? '1.5px solid rgba(255, 124, 0, 0.32)' : '1.5px solid rgba(255, 124, 0, 0.2)',
+                boxShadow: isDark ? '0 0 14px rgba(255, 124, 0, 0.25)' : 'none',
+                transform: 'rotate(20deg)',
+                pointerEvents: 'none',
+                zIndex: 1
+              }} />
+
+              {/* Onboarding Style Sparkle Stars */}
+              <span className="sparkle-star" style={{ top: '15%', right: '48%', color: '#FFB74D', fontSize: '9px', zIndex: 2 }}>✦</span>
+              <span className="sparkle-star" style={{ bottom: '26%', right: '12%', color: '#FFA000', fontSize: '11px', animationDelay: '1.2s', zIndex: 2 }}>✦</span>
+
+              {/* Card Image with 3D Drop-Shadow and Golden Neon Glow */}
               <img 
                 src="/Barcode.webp" 
                 alt="Barcode" 
                 style={{
                   position: 'absolute',
-                  right: '-12px',
-                  bottom: '6px',
-                  width: '110px',
-                  height: '110px',
+                  right: '-10px',
+                  bottom: '4px',
+                  width: '115px',
+                  height: '115px',
                   objectFit: 'contain',
-                  zIndex: 2,
+                  zIndex: 3,
                   pointerEvents: 'none',
-                  opacity: 0.95
+                  opacity: 0.98,
+                  filter: isDark 
+                    ? 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 16px rgba(255, 124, 0, 0.5))'
+                    : 'drop-shadow(0 8px 16px rgba(255, 124, 0, 0.25))'
                 }} 
               />
-              {/* Ambient glow only */}
-              <div style={{
-                position: 'absolute', top: '-40%', right: '-15%',
-                width: '130px', height: '130px',
-                background: 'radial-gradient(circle, rgba(255, 124, 0, 0.12) 0%, transparent 70%)',
-                filter: 'blur(28px)', pointerEvents: 'none', zIndex: 1
-              }} />
 
               {/* Top Title & Description */}
-              <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2, position: 'relative' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', zIndex: 4, position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                   <div style={{
                     width: '32px',
@@ -835,7 +887,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 width: 'calc(100% + 24px)',
                 boxSizing: 'border-box',
                 margin: 'auto -12px -12px -12px',
-                zIndex: 2,
+                zIndex: 4,
                 position: 'relative'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -897,43 +949,69 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             }}
           >
             <PaidCrownBadge featureId="batch_view" position="floating" size={10} />
-            {/* Card Image */}
+            
+            {/* Onboarding Style Ambient Emerald Nebula Background */}
+            <div style={{
+              position: 'absolute', top: '-40%', right: '8%',
+              width: '200px', height: '180px',
+              background: isDark 
+                ? 'radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.12) 50%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%)',
+              filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
+            }} />
+
+            {/* Onboarding Style Orbiting Neon Light Ring Arc */}
+            <div style={{
+              position: 'absolute',
+              right: '10px',
+              top: '50%',
+              width: '150px',
+              height: '105px',
+              borderRadius: '50%',
+              border: isDark ? '1.5px solid rgba(16, 185, 129, 0.32)' : '1.5px solid rgba(16, 185, 129, 0.2)',
+              boxShadow: isDark ? '0 0 14px rgba(16, 185, 129, 0.25)' : 'none',
+              transform: 'translateY(-50%) rotate(-15deg)',
+              pointerEvents: 'none',
+              zIndex: 1
+            }} />
+
+            {/* Onboarding Style Sparkle Stars */}
+            <span className="sparkle-star" style={{ top: '16%', right: '124px', color: '#00E676', fontSize: '10px', zIndex: 2 }}>✦</span>
+            <span className="sparkle-star" style={{ bottom: '18%', right: '16px', color: '#34D399', fontSize: '11px', animationDelay: '1.4s', zIndex: 2 }}>✦</span>
+
+            {/* Card Image with 3D Drop-Shadow and Emerald Neon Glow */}
             <img 
               src="/Bulk Ganaration.webp" 
               alt="Bulk Generation" 
               style={{
                 position: 'absolute',
-                right: '8px',
+                right: '12px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                width: '110px',
-                height: '110px',
+                width: '115px',
+                height: '115px',
                 objectFit: 'contain',
-                zIndex: 2,
+                zIndex: 3,
                 pointerEvents: 'none',
-                opacity: 0.95
+                opacity: 0.98,
+                filter: isDark 
+                  ? 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 18px rgba(16, 185, 129, 0.5))'
+                  : 'drop-shadow(0 8px 16px rgba(16, 185, 129, 0.25))'
               }} 
             />
-            {/* Background ambient glow */}
-            <div style={{
-              position: 'absolute', top: '-50%', right: '20%',
-              width: '180px', height: '180px',
-              background: 'radial-gradient(circle, rgba(255, 11, 72, 0.12) 0%, transparent 70%)',
-              filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
-            }} />
 
             {/* Top Title & Description */}
-            <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2, flex: 1, minWidth: 0, position: 'relative' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', zIndex: 4, flex: 1, minWidth: 0, position: 'relative' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                 <div style={{
                   width: '32px',
                   height: '32px',
                   borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #FF0B48 0%, #9E002B 100%)',
+                  background: 'linear-gradient(135deg, #10B981 0%, #047857 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 4px 10px rgba(255, 11, 72, 0.25)',
+                  boxShadow: '0 4px 10px rgba(16, 185, 129, 0.25)',
                   flexShrink: 0
                 }}>
                   <Layers size={16} color="#FFFFFF" />
@@ -951,7 +1029,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   <div style={{
                     fontSize: '8.5px',
                     fontWeight: 700,
-                    color: isDark ? '#FF4D80' : '#D60036',
+                    color: isDark ? '#34D399' : '#059669',
                     marginTop: '2px',
                     lineHeight: 1
                   }}>

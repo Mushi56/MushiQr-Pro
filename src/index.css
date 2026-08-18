@@ -8510,5 +8510,18 @@ video::-webkit-media-controls {
   border-color: #fff;
 }
 
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.sparkle-star {
+  position: absolute;
+  animation: twinkle 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 5;
+  user-select: none;
+}
+
 
 
