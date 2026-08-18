@@ -139,7 +139,7 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        backgroundColor: 'var(--bg-primary, #030305)',
+        backgroundColor: 'var(--bg-primary, #0B0F19)',
         color: 'var(--text-primary, #FFFFFF)',
         padding: 'calc(16px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px))',
         boxSizing: 'border-box',

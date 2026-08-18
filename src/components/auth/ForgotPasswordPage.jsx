@@ -53,7 +53,7 @@ export default function ForgotPasswordPage({ onNavigate }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'var(--bg-primary, #030305)',
+        backgroundColor: 'var(--bg-primary, #0B0F19)',
         color: 'var(--text-primary, #FFFFFF)',
         padding: '24px 16px',
         boxSizing: 'border-box',

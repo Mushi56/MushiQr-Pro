@@ -7,17 +7,17 @@
    ======================================== */
 
 :root {
-  /* Colors — Dark Theme (Ultra-Premium, Sleek Dark Glass Mode) */
-  --bg-primary: #030305;
-  --bg-secondary: #0A0A0F;
-  --bg-tertiary: #12121A;
-  --bg-card: #141420;
-  --bg-elevated: #0C0C14;
-  --bg-input: #0E0E16;
-  --bg-hover: rgba(255, 255, 255, 0.07);
-  --bg-glass: #0C0C14;
-  --bg-glass-light: #1A1A2A;
-  --nav-bg: #0C0C14;
+  /* Colors — Dark Theme (Deep Midnight Slate & Ultra-Premium Glass Mode) */
+  --bg-primary: #0B0F19;
+  --bg-secondary: #111625;
+  --bg-tertiary: #161C2E;
+  --bg-card: #151C2E;
+  --bg-elevated: #111625;
+  --bg-input: #151C2E;
+  --bg-hover: rgba(255, 255, 255, 0.08);
+  --bg-glass: rgba(15, 21, 35, 0.65);
+  --bg-glass-light: rgba(22, 30, 48, 0.75);
+  --nav-bg: #111625;
 
   --text-primary: #FFFFFF;
   --text-secondary: #CBD5E1;
@@ -5204,7 +5204,7 @@ input[type="range"]::-moz-range-thumb {
   left: 0;
   width: 100%;
   height: 100%;
-  background: #030305;
+  background: #0B0F19;
   /* Always dark background for camera */
   z-index: 8000; /* Stacks above app-header (z-index 6000) */
   display: flex;

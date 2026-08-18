@@ -37,7 +37,7 @@ export default function SplashScreen({ onFinish }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'var(--bg-primary, #030305)',
+        background: 'var(--bg-primary, #0B0F19)',
         color: 'var(--text-primary, #FFFFFF)',
         opacity: fadeState === 'out' ? 0 : 1,
         transition: 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',

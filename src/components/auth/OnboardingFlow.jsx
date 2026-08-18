@@ -84,7 +84,7 @@ export default function OnboardingFlow({ onComplete }) {
         height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'var(--bg-primary, #030305)',
+        backgroundColor: 'var(--bg-primary, #0B0F19)',
         color: 'var(--text-primary, #FFFFFF)',
         overflow: 'hidden',
         position: 'relative',

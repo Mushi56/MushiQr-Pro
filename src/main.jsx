@@ -16,7 +16,7 @@ const RouteLoader = () => (
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#030305',
+    background: '#0B0F19',
     color: '#f0f0f8',
     fontFamily: 'Outfit, sans-serif'
   }}>
