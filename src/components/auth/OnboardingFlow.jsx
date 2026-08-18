@@ -14,9 +14,15 @@ import {
   Download,
   Barcode as BarcodeIcon,
   Check,
-  CheckCircle2
+  CheckCircle2,
+  QrCode,
+  ShoppingBag,
+  Truck,
+  Package,
+  Factory
 } from 'lucide-react';
 import onboardingQrSvg from '../../assets/onboarding-qr-code.svg';
+import onboardingBarcodeSvg from '../../assets/onboarding-barcode.svg';
 
 export default function OnboardingFlow({ onComplete }) {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -570,11 +576,12 @@ export default function OnboardingFlow({ onComplete }) {
         )}
 
         {/* ═════════════════════════════════════════════════════════════════════
-            SLIDE 2: 1D & 2D BARCODES & SCANNER
+            SLIDE 2: PROFESSIONAL BARCODES (EXACT 3D GOLDEN STOOL + 3D BARCODE + CATEGORIES)
             ═════════════════════════════════════════════════════════════════════ */}
         {currentSlide === 1 && (
           <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
-            {/* Top Typography Header */}
+            
+            {/* Top Typography Header (Left Aligned matching reference image) */}
             <div style={{ textAlign: 'left', width: '100%', padding: '0 4px', boxSizing: 'border-box' }}>
               <h1
                 style={{
@@ -589,7 +596,7 @@ export default function OnboardingFlow({ onComplete }) {
               >
                 Professional
                 <br />
-                <span style={{ color: '#F59E0B' }}>Barcodes</span> Studio
+                <span style={{ color: '#FF7C00' }}>Barcodes</span>
               </h1>
               <p
                 style={{
@@ -597,190 +604,428 @@ export default function OnboardingFlow({ onComplete }) {
                   color: '#94A3B8',
                   margin: 0,
                   lineHeight: 1.45,
-                  maxWidth: '290px',
+                  maxWidth: '280px',
                   fontWeight: 400
                 }}
               >
-                Generate and scan 1D &amp; 2D barcodes for retail, inventory, and industrial manufacturing standards.
+                Generate and scan 1D &amp; 2D barcodes for retail, inventory, shipping and industrial standards.
               </p>
             </div>
 
-            {/* Central 3D Barcode Visual */}
+            {/* Central 3D Interactive Stage Scene (Amber / Gold Theme) */}
             <div
               style={{
                 position: 'relative',
                 width: '100%',
-                height: '300px',
+                height: '340px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '8px 0'
+                margin: '4px 0 10px 0'
               }}
             >
-              {/* Back Card 1: 2D Data Matrix */}
+              {/* Golden Cosmic Sparkle Stars */}
+              <span className="sparkle-star" style={{ top: '10%', left: '8%', color: '#FFA000', fontSize: '13px' }}>✦</span>
+              <span className="sparkle-star" style={{ top: '8%', right: '36%', color: '#FFB74D', fontSize: '9px', animationDelay: '1s' }}>✦</span>
+              <span className="sparkle-star" style={{ top: '42%', left: '22%', color: '#FF7C00', fontSize: '8px', animationDelay: '1.5s' }}>✦</span>
+              <span className="sparkle-star" style={{ bottom: '28%', left: '16%', color: '#FFA000', fontSize: '11px', animationDelay: '0.7s' }}>✦</span>
+              <span className="sparkle-star" style={{ top: '34%', right: '6%', color: '#FFD54F', fontSize: '10px', animationDelay: '2s' }}>✦</span>
+              <span className="sparkle-star" style={{ bottom: '38%', right: '22%', color: '#FF7C00', fontSize: '8px', animationDelay: '1.2s' }}>✦</span>
+
+              {/* Orbiting Ambient Light Ring Arcs (Gold) */}
               <div
                 style={{
                   position: 'absolute',
-                  top: '18px',
-                  left: '12px',
-                  width: '95px',
-                  height: '95px',
-                  borderRadius: '20px',
-                  background: 'linear-gradient(145deg, #101726 0%, #0a0f1c 100%)',
-                  border: '1.5px solid rgba(59, 130, 246, 0.5)',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.5)',
+                  width: '270px',
+                  height: '190px',
+                  borderRadius: '50%',
+                  border: '1.5px solid rgba(255, 124, 0, 0.28)',
+                  boxShadow: '0 0 18px rgba(255, 124, 0, 0.2)',
+                  transform: 'rotate(-25deg) translateY(-8px)',
+                  pointerEvents: 'none'
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '280px',
+                  height: '200px',
+                  borderRadius: '50%',
+                  border: '1.5px solid rgba(255, 124, 0, 0.22)',
+                  transform: 'rotate(15deg) translateY(12px)',
+                  pointerEvents: 'none'
+                }}
+              />
+
+              {/* 3D Tiered Glowing Stage / Stool Platform (Golden Theme) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '6px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '240px',
+                  height: '75px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 2
+                }}
+              >
+                {/* Upper Tier of 3D Stool Platform */}
+                <div
+                  style={{
+                    width: '200px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(180deg, #D96500 0%, #4D2000 100%)',
+                    borderTop: '2.5px solid #FF9D33',
+                    boxShadow: '0 0 35px rgba(255, 124, 0, 0.9), inset 0 2px 14px rgba(255, 255, 255, 0.5)',
+                    position: 'relative',
+                    zIndex: 3
+                  }}
+                />
+                {/* Lower Tier of 3D Stool Platform */}
+                <div
+                  style={{
+                    width: '235px',
+                    height: '46px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(180deg, #78350F 0%, #250E02 100%)',
+                    borderTop: '2px solid #FF7C00',
+                    boxShadow: '0 14px 38px rgba(0, 0, 0, 0.95), 0 0 45px rgba(217, 119, 6, 0.6)',
+                    marginTop: '-26px',
+                    zIndex: 2
+                  }}
+                />
+                {/* Base Floor Glow Aura */}
+                <div
+                  style={{
+                    width: '270px',
+                    height: '38px',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(ellipse, rgba(255, 124, 0, 0.5) 0%, transparent 70%)',
+                    filter: 'blur(16px)',
+                    marginTop: '-22px',
+                    zIndex: 1
+                  }}
+                />
+              </div>
+
+              {/* 3D Floating Glowing Barcode Box */}
+              <div
+                className="floating-barcode-3d"
+                style={{
+                  position: 'relative',
+                  width: '210px',
+                  height: '145px',
+                  borderRadius: '26px',
+                  background: 'linear-gradient(145deg, #FBF8F3 0%, #E6E0D5 100%)',
+                  border: '3px solid #FFA000',
+                  boxShadow: `
+                    0 0 40px rgba(255, 124, 0, 0.7),
+                    0 0 16px #FF7C00,
+                    inset 0 0 18px rgba(255, 124, 0, 0.35),
+                    0 30px 60px rgba(0, 0, 0, 0.9)
+                  `,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '10px',
+                  padding: '16px 20px',
                   boxSizing: 'border-box',
-                  transform: 'rotate(-10deg)',
-                  animation: 'floatLeft 4.5s ease-in-out infinite'
+                  zIndex: 10,
+                  transform: 'perspective(900px) rotateX(15deg) rotateY(-18deg) rotateZ(5deg)',
+                  marginBottom: '20px'
                 }}
               >
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 10px)', gap: 2 }}>
-                  {[
-                    1, 1, 1, 1, 1,
-                    1, 0, 1, 0, 1,
-                    1, 1, 0, 1, 0,
-                    1, 0, 1, 1, 1,
-                    1, 0, 1, 0, 1
-                  ].map((cell, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '2px',
-                        background: cell ? '#38BDF8' : 'rgba(56, 189, 248, 0.1)'
-                      }}
-                    />
+                {/* Crisp Vector Barcode Pattern */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2.5px', height: '62px', width: '100%' }}>
+                  {[3, 1.2, 4, 1.5, 3, 2, 4, 1, 2.5, 3.5, 1, 4, 2, 1.5, 3, 2, 4, 1.5, 3, 1.2, 3.5, 2, 4, 1.5, 2, 3].map((w, i) => (
+                    <div key={i} style={{ width: `${w * 1.5}px`, height: '100%', background: '#0F172A', borderRadius: '1px' }} />
                   ))}
                 </div>
-                <span style={{ fontSize: '8.5px', fontWeight: 800, color: '#93C5FD', marginTop: 4 }}>
-                  Data Matrix
-                </span>
+                <div style={{ fontSize: '13.5px', fontWeight: 900, color: '#0F172A', letterSpacing: '4px', marginTop: '6px', fontFamily: 'var(--font-mono, monospace)' }}>
+                  890123456789
+                </div>
               </div>
 
-              {/* Back Card 2: PDF417 */}
+              {/* ═════════ 4 3D-ROTATED BORDERLESS BARCODE FEATURE ICON TILES ═════════ */}
+
+              {/* Badge 1: Top Right - Live Scanner (3D Golden-Orange Tile + Text to the Right) */}
               <div
+                className="anim-tile-amber"
                 style={{
                   position: 'absolute',
-                  bottom: '22px',
-                  right: '12px',
-                  width: '115px',
-                  height: '75px',
-                  borderRadius: '18px',
-                  background: 'linear-gradient(145deg, #1f170c 0%, #120e06 100%)',
-                  border: '1.5px solid rgba(245, 158, 11, 0.5)',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.5)',
+                  top: '12px',
+                  right: '6px',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 4,
-                  transform: 'rotate(8deg)',
-                  animation: 'floatRight 4.5s ease-in-out infinite'
+                  gap: '8px',
+                  zIndex: 15
                 }}
               >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, width: '80%' }}>
-                  <div style={{ height: 3, background: '#F59E0B', borderRadius: 1 }} />
-                  <div style={{ display: 'flex', gap: 2, height: 16 }}>
-                    {[2, 1, 3, 1, 2, 3, 1, 2, 1, 3].map((w, i) => (
-                      <div key={i} style={{ width: `${w * 2}px`, height: '100%', background: '#F59E0B' }} />
-                    ))}
-                  </div>
-                  <div style={{ height: 3, background: '#F59E0B', borderRadius: 1 }} />
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(145deg, #FF7C00 0%, #D96500 55%, #78350F 100%)',
+                    border: 'none',
+                    boxShadow: `
+                      0 12px 24px rgba(217, 119, 6, 0.6),
+                      0 4px 10px rgba(0, 0, 0, 0.45),
+                      inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                      inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+                      0 0 18px rgba(255, 124, 0, 0.4)
+                    `,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFFFFF',
+                    flexShrink: 0
+                  }}
+                >
+                  <Scan size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
                 </div>
-                <span style={{ fontSize: '9px', fontWeight: 800, color: '#FCD34D' }}>PDF417 2D</span>
+                <div style={{ textAlign: 'left', lineHeight: 1.2 }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Live Scanner</span>
+                  <span style={{ fontSize: '10px', fontWeight: 600, color: '#CBD5E1', display: 'block', letterSpacing: '-0.2px' }}>Ultra Fast</span>
+                </div>
               </div>
 
-              {/* Main Center Card: Code 128 / Scanner Studio */}
+              {/* Badge 2: Top Left - 30+ Formats (3D Purple Tile + Centered Text Below) */}
               <div
+                className="anim-tile-purple"
                 style={{
-                  width: '175px',
-                  borderRadius: '24px',
-                  background: 'linear-gradient(145deg, #181826 0%, #0d0d16 100%)',
-                  border: '2px solid rgba(245, 158, 11, 0.65)',
-                  boxShadow: '0 18px 45px rgba(245, 158, 11, 0.35)',
+                  position: 'absolute',
+                  top: '26px',
+                  left: '8px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '16px 14px',
-                  gap: 10,
-                  zIndex: 10,
-                  backdropFilter: 'blur(12px)',
-                  animation: 'floatCenter 4s ease-in-out infinite'
+                  gap: '5px',
+                  zIndex: 15
                 }}
               >
-                <div style={{ background: '#fff', borderRadius: '12px', padding: '8px 12px', width: '100%', boxSizing: 'border-box', textAlign: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, height: '36px' }}>
-                    {[3, 1, 4, 2, 1, 3, 2, 4, 1, 2, 3, 1, 4, 2, 1, 3, 2, 1].map((w, i) => (
-                      <div key={i} style={{ width: `${w * 1.5}px`, height: '100%', background: '#000', borderRadius: '1px' }} />
-                    ))}
-                  </div>
-                  <div style={{ fontSize: '10px', fontWeight: 900, color: '#000', letterSpacing: '2px', marginTop: '3px' }}>
-                    890123456789
-                  </div>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(145deg, #8B5CF6 0%, #6D28D9 55%, #4C1D95 100%)',
+                    border: 'none',
+                    boxShadow: `
+                      0 12px 24px rgba(109, 40, 217, 0.6),
+                      0 4px 10px rgba(0, 0, 0, 0.45),
+                      inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                      inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+                      0 0 18px rgba(139, 92, 246, 0.4)
+                    `,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  <BarcodeIcon size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Scan size={16} color="#F59E0B" />
-                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#FFFFFF' }}>30+ Standards</span>
+                <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
+                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>30+ Formats</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>EAN, UPC,</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>Code 128 &amp; more</span>
                 </div>
               </div>
 
-              {/* Orbiting Barcode Feature Badges */}
-              <OrbitBadge icon={BarcodeIcon} label="EAN & UPC" desc="Retail Standards" top="10px" right="6px" delay="0s" color="#F59E0B" />
-              <OrbitBadge icon={Scan} label="Live Scanner" desc="Instant Camera Scan" bottom="16px" left="6px" delay="1s" color="#34D399" />
+              {/* Badge 3: Bottom Left - 1D & 2D Support (3D Cobalt Blue Tile - Tucked near lower-left QR/Barcode) */}
+              <div
+                className="anim-tile-blue"
+                style={{
+                  position: 'absolute',
+                  bottom: '36px',
+                  left: '26px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '5px',
+                  zIndex: 15
+                }}
+              >
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(145deg, #3B82F6 0%, #1D4ED8 55%, #172554 100%)',
+                    border: 'none',
+                    boxShadow: `
+                      0 12px 24px rgba(29, 78, 216, 0.6),
+                      0 4px 10px rgba(0, 0, 0, 0.45),
+                      inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                      inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+                      0 0 18px rgba(59, 130, 246, 0.4)
+                    `,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  <QrCode size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
+                </div>
+                <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
+                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>1D &amp; 2D</span>
+                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Support</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>All Standards</span>
+                </div>
+              </div>
+
+              {/* Badge 4: Bottom Right - High Quality (3D Emerald Green Tile + Centered Text Below) */}
+              <div
+                className="anim-tile-green"
+                style={{
+                  position: 'absolute',
+                  bottom: '44px',
+                  right: '8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '5px',
+                  zIndex: 15
+                }}
+              >
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(145deg, #10B981 0%, #059669 55%, #064E3B 100%)',
+                    border: 'none',
+                    boxShadow: `
+                      0 12px 24px rgba(5, 150, 105, 0.6),
+                      0 4px 10px rgba(0, 0, 0, 0.45),
+                      inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                      inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+                      0 0 18px rgba(16, 185, 129, 0.4)
+                    `,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  <ShieldCheck size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
+                </div>
+                <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
+                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>High Quality</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>Print Ready</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>&amp; Clear</span>
+                </div>
+              </div>
+
             </div>
 
-            {/* Bottom Formats Summary Card */}
+            {/* Bottom Multi-Category Strip Card (Retail, Logistics, Inventory, Industry) */}
             <div
               style={{
                 width: '100%',
                 background: 'rgba(255, 255, 255, 0.04)',
                 border: '1px solid rgba(255, 255, 255, 0.09)',
                 borderRadius: '16px',
-                padding: '10px 14px',
+                padding: '10px 6px',
                 boxSizing: 'border-box',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '4px',
                 backdropFilter: 'blur(10px)',
                 marginTop: '4px'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* Item 1: Retail */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
                 <div
                   style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '11px',
-                    background: 'rgba(245, 158, 11, 0.15)',
-                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: 'rgba(255, 124, 0, 0.15)',
+                    border: '1px solid rgba(255, 124, 0, 0.35)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#F59E0B',
-                    flexShrink: 0
+                    color: '#FF7C00'
                   }}
                 >
-                  <BarcodeIcon size={20} strokeWidth={2.3} />
+                  <ShoppingBag size={16} strokeWidth={2.3} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>
-                    High-Precision Barcode Engine
-                  </span>
-                  <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 400, marginTop: '2px', lineHeight: 1.2 }}>
-                    Auto checksum validation &amp; vector SVG output.
-                  </span>
-                </div>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Retail</span>
+                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Price tags &amp; labels</span>
               </div>
-              <ChevronRight size={18} color="#64748B" />
+
+              {/* Item 2: Logistics */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: 'rgba(168, 85, 247, 0.15)',
+                    border: '1px solid rgba(168, 85, 247, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#A855F7'
+                  }}
+                >
+                  <Truck size={16} strokeWidth={2.3} />
+                </div>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Logistics</span>
+                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Shipping &amp; tracking</span>
+              </div>
+
+              {/* Item 3: Inventory */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    border: '1px solid rgba(56, 189, 248, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#38BDF8'
+                  }}
+                >
+                  <Package size={16} strokeWidth={2.3} />
+                </div>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Inventory</span>
+                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Stock &amp; assets</span>
+              </div>
+
+              {/* Item 4: Industry */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#10B981'
+                  }}
+                >
+                  <Factory size={16} strokeWidth={2.3} />
+                </div>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Industry</span>
+                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Manufacturing</span>
+              </div>
             </div>
+
           </div>
         )}
 
@@ -991,6 +1236,12 @@ export default function OnboardingFlow({ onComplete }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {[0, 1, 2].map((idx) => {
             const isActive = currentSlide === idx;
+            const dotColor =
+              currentSlide === 0
+                ? '#FF1E56'
+                : currentSlide === 1
+                ? '#FF7C00'
+                : '#10B981';
             return (
               <button
                 key={idx}
@@ -999,7 +1250,7 @@ export default function OnboardingFlow({ onComplete }) {
                   width: isActive ? '22px' : '6px',
                   height: '6px',
                   borderRadius: '100px',
-                  background: isActive ? '#FF1E56' : 'rgba(255, 255, 255, 0.2)',
+                  background: isActive ? dotColor : 'rgba(255, 255, 255, 0.2)',
                   border: 'none',
                   padding: 0,
                   cursor: 'pointer',
@@ -1010,26 +1261,36 @@ export default function OnboardingFlow({ onComplete }) {
           })}
         </div>
 
-        {/* Primary CTA Button (Matching reference vibrant red gradient) */}
+        {/* Primary CTA Button (Theme-Aware Matching Vibrant Gradient) */}
         <button
           onClick={handleNext}
           style={{
             width: '100%',
             height: '52px',
             borderRadius: '16px',
-            background: 'linear-gradient(135deg, #FF1E56 0%, #D8042B 100%)',
+            background:
+              currentSlide === 0
+                ? 'linear-gradient(135deg, #FF1E56 0%, #D8042B 100%)'
+                : currentSlide === 1
+                ? 'linear-gradient(135deg, #FF7C00 0%, #D96500 100%)'
+                : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
             border: 'none',
             color: '#FFFFFF',
             fontSize: '16px',
             fontWeight: 800,
             letterSpacing: '0.2px',
-            boxShadow: '0 8px 25px rgba(255, 30, 86, 0.45)',
+            boxShadow:
+              currentSlide === 0
+                ? '0 8px 25px rgba(255, 30, 86, 0.45)'
+                : currentSlide === 1
+                ? '0 8px 25px rgba(255, 124, 0, 0.45)'
+                : '0 8px 25px rgba(16, 185, 129, 0.45)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
             cursor: 'pointer',
-            transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+            transition: 'transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease'
           }}
           onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
           onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -1046,6 +1307,18 @@ export default function OnboardingFlow({ onComplete }) {
           transform-style: preserve-3d;
         }
         @keyframes floatQR3D {
+          0%, 100% {
+            transform: perspective(900px) rotateX(15deg) rotateY(-18deg) rotateZ(5deg) translateY(0px);
+          }
+          50% {
+            transform: perspective(900px) rotateX(17deg) rotateY(-16deg) rotateZ(6deg) translateY(-8px);
+          }
+        }
+        .floating-barcode-3d {
+          animation: floatBarcode3D 5s ease-in-out infinite;
+          transform-style: preserve-3d;
+        }
+        @keyframes floatBarcode3D {
           0%, 100% {
             transform: perspective(900px) rotateX(15deg) rotateY(-18deg) rotateZ(5deg) translateY(0px);
           }
@@ -1090,6 +1363,17 @@ export default function OnboardingFlow({ onComplete }) {
           animation: floatTileAmber 3.8s ease-in-out infinite;
         }
         @keyframes floatTileAmber {
+          0%, 100% {
+            transform: perspective(600px) rotateX(14deg) rotateY(-16deg) rotateZ(4deg) translateY(0px);
+          }
+          50% {
+            transform: perspective(600px) rotateX(16deg) rotateY(-14deg) rotateZ(5deg) translateY(-5px);
+          }
+        }
+        .anim-tile-green {
+          animation: floatTileGreen 4.4s ease-in-out infinite;
+        }
+        @keyframes floatTileGreen {
           0%, 100% {
             transform: perspective(600px) rotateX(14deg) rotateY(-16deg) rotateZ(4deg) translateY(0px);
           }
