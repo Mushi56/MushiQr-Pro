@@ -617,7 +617,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 backgroundColor: isDark ? 'rgba(26, 36, 56, 0.78)' : 'rgba(255, 255, 255, 0.88)',
                 backdropFilter: 'blur(24px)',
                 WebkitBackdropFilter: 'blur(24px)',
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid rgba(0, 0, 0, 0.08)',
+                border: 'none',
                 boxShadow: isDark 
                   ? '0 16px 38px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)' 
                   : '0 12px 30px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
@@ -715,7 +715,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
+                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: isDark ? 'rgba(255, 255, 255, 0.95)' : '#334155', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
                   Create beautiful, custom QR codes with logos, colors, and unique frames.
                 </p>
               </div>
@@ -784,7 +784,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 backgroundColor: isDark ? 'rgba(26, 36, 56, 0.78)' : 'rgba(255, 255, 255, 0.88)',
                 backdropFilter: 'blur(24px)',
                 WebkitBackdropFilter: 'blur(24px)',
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid rgba(0, 0, 0, 0.08)',
+                border: 'none',
                 boxShadow: isDark 
                   ? '0 16px 38px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)' 
                   : '0 12px 30px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
@@ -882,7 +882,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
+                <p style={{ fontSize: '8.5px', margin: '0 0 8px 0', color: isDark ? 'rgba(255, 255, 255, 0.95)' : '#334155', fontWeight: 500, lineHeight: 1.3, maxWidth: '85px' }}>
                   Generate reliable 1D &amp; 2D barcodes for over 30 industrial standards.
                 </p>
               </div>
@@ -955,7 +955,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               backgroundColor: isDark ? 'rgba(26, 36, 56, 0.78)' : 'rgba(255, 255, 255, 0.88)',
               backdropFilter: 'blur(24px)',
               WebkitBackdropFilter: 'blur(24px)',
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid rgba(0, 0, 0, 0.08)',
+              border: 'none',
               boxShadow: isDark 
                 ? '0 16px 38px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)' 
                 : '0 12px 30px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
@@ -976,10 +976,10 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               filter: 'blur(24px)', pointerEvents: 'none', zIndex: 1
             }} />
 
-            {/* Onboarding Style Orbiting Neon Light Ring Arc (4x Thicker & 40% Opacity) */}
+            {/* Onboarding Style Orbiting Neon Light Ring Arc (Shifted Right with Right-Side Hidden) */}
             <div style={{
               position: 'absolute',
-              right: '8px',
+              right: '-32px',
               top: '50%',
               width: '155px',
               height: '110px',
@@ -1055,7 +1055,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   </div>
                 </div>
               </div>
-              <p style={{ fontSize: '8.5px', margin: '6px 110px 0 0', color: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B', fontWeight: 500, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <p style={{ fontSize: '8.5px', margin: '6px 110px 0 0', color: isDark ? 'rgba(255, 255, 255, 0.95)' : '#334155', fontWeight: 500, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Create 10K+ codes from your spreadsheets.
               </p>
             </div>
