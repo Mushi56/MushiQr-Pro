@@ -6,6 +6,7 @@ import {
   EyeOff,
   Loader2,
   ArrowRight,
+  ArrowLeft,
   ChevronRight
 } from 'lucide-react';
 import { auth, googleProvider } from '../../services/firebase';
@@ -151,41 +152,39 @@ export default function LoginPage({ onNavigate, onSuccess }) {
         }}
       />
 
-      {/* Top Header Row with Skip Button */}
+      {/* Top Header Row with Back Button */}
       <div
         style={{
           width: '100%',
           maxWidth: '420px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-end',
+          justifyContent: 'flex-start',
           marginBottom: '12px',
           zIndex: 10
         }}
       >
-        {/* Skip Button */}
         <button
           type="button"
-          onClick={handleSkip}
+          onClick={() => onNavigate('home')}
           style={{
             background: 'rgba(255, 255, 255, 0.08)',
             border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
             color: 'var(--text-secondary, #CBD5E1)',
-            padding: '6px 14px',
-            borderRadius: '20px',
-            fontSize: '12.5px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
-            gap: 4
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
           }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+          aria-label="Back"
         >
-          <span>Skip</span>
-          <ChevronRight size={14} />
+          <ArrowLeft size={18} />
         </button>
       </div>
 

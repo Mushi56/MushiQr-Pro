@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Moon, Sun, Info, Shield, FileText, ChevronRight, Folder, Settings as SettingsIcon, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Moon, Sun, Info, Shield, FileText, ChevronRight, Folder, Settings as SettingsIcon, Sparkles, Scan } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import AppIcon from './AppIcon';
 import PaidCrownBadge from './PaidCrownBadge';
@@ -7,11 +7,26 @@ import { usePremium } from '../services/premiumContext';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 import SaveLocationModal from './SaveLocationModal';
+import ScanSettingsModal from './ScanSettingsModal';
 
 export default function SettingsPage({ onNavigate, theme, setTheme, effectiveTheme, currentUser, showToast }) {
-  const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
+  const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Pictures/Mushi QR Pro');
+  const [scanSound, setScanSound] = useState(() => getPreferences().scanSound !== false);
+  const [autoOpenUrl, setAutoOpenUrl] = useState(() => getPreferences().autoOpenUrl === true);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const { showPaywall } = usePremium();
+
+  useEffect(() => {
+    const handlePrefSync = () => {
+      const prefs = getPreferences();
+      setSaveLocation(prefs.saveLocation || 'Pictures/Mushi QR Pro');
+      setScanSound(prefs.scanSound !== false);
+      setAutoOpenUrl(prefs.autoOpenUrl === true);
+    };
+    window.addEventListener('preferences-sync', handlePrefSync);
+    return () => window.removeEventListener('preferences-sync', handlePrefSync);
+  }, []);
 
   const handleThemeChange = () => {
     let next;
@@ -20,7 +35,9 @@ export default function SettingsPage({ onNavigate, theme, setTheme, effectiveThe
     else next = 'dark';
     
     setTheme(next);
-    savePreferences({ ...getPreferences(), theme: next });
+    const updated = { ...getPreferences(), theme: next };
+    savePreferences(updated);
+    window.dispatchEvent(new Event('preferences-sync'));
   };
 
   const handleChooseFolder = () => {
@@ -49,6 +66,17 @@ export default function SettingsPage({ onNavigate, theme, setTheme, effectiveThe
         fontWeight: 'bold'
       }}>{theme}</span>,
       onClick: handleThemeChange
+    },
+    {
+      id: 'scanSettings',
+      label: 'Scan Settings',
+      icon: <Scan size={20} />,
+      value: (
+        <span style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600 }}>
+          {scanSound ? 'Sound On' : 'Muted'} • {autoOpenUrl ? 'Auto URL' : 'Manual'}
+        </span>
+      ),
+      onClick: () => setIsScanModalOpen(true)
     },
     {
       id: 'saveLocation',
@@ -138,12 +166,14 @@ export default function SettingsPage({ onNavigate, theme, setTheme, effectiveThe
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px var(--main-padding-x) 100px' }}>
 
-
         <div className="settings-group-container">
           {menuItems.map((item, index) => {
             // Pick a background gradient based on the setting ID
             let gradient = 'linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)';
-            if (item.id === 'about') gradient = 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)';
+            if (item.id === 'scanSettings') gradient = 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)';
+            else if (item.id === 'saveLocation') gradient = 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
+            else if (item.id === 'guide') gradient = 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)';
+            else if (item.id === 'about') gradient = 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)';
             else if (item.id === 'privacy') gradient = 'linear-gradient(135deg, #0d9488 0%, #10b981 100%)';
             else if (item.id === 'terms') gradient = 'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)';
 
@@ -185,6 +215,12 @@ export default function SettingsPage({ onNavigate, theme, setTheme, effectiveThe
         isOpen={isFolderModalOpen}
         onClose={() => setIsFolderModalOpen(false)}
         onSave={(newLoc) => setSaveLocation(newLoc)}
+        showToast={showToast}
+      />
+
+      <ScanSettingsModal
+        isOpen={isScanModalOpen}
+        onClose={() => setIsScanModalOpen(false)}
         showToast={showToast}
       />
     </div>

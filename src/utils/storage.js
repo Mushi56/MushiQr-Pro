@@ -309,9 +309,21 @@ export function getPreferences() {
     if (!prefs.saveLocation || prefs.saveLocation === 'Mushi QR Pro') {
       prefs.saveLocation = 'Pictures/Mushi QR Pro';
     }
+    if (prefs.scanSound === undefined) {
+      const legacySound = localStorage.getItem('qrgen_scan_sound');
+      prefs.scanSound = legacySound !== 'false';
+    }
+    if (prefs.autoOpenUrl === undefined) {
+      const legacyAutoOpen = localStorage.getItem('qrgen_auto_open_url');
+      prefs.autoOpenUrl = legacyAutoOpen === 'true';
+    }
     return prefs;
   } catch {
-    return { saveLocation: 'Pictures/Mushi QR Pro' };
+    return { 
+      saveLocation: 'Pictures/Mushi QR Pro',
+      scanSound: true,
+      autoOpenUrl: false
+    };
   }
 }
 

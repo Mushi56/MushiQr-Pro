@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Settings, ChevronRight, Moon, Sun, Info, Shield, FileText, Folder, Crown, Zap, Star, Sparkles
+  Settings, ChevronRight, Moon, Sun, Info, Shield, FileText, Folder, Crown, Zap, Star, Sparkles, Scan
 } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import { usePremium } from '../services/premiumContext';
@@ -8,15 +8,22 @@ import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import PaidCrownBadge from './PaidCrownBadge';
 
 import SaveLocationModal from './SaveLocationModal';
+import ScanSettingsModal from './ScanSettingsModal';
 
 export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, currentUser, showToast }) {
-  const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
+  const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Pictures/Mushi QR Pro');
+  const [scanSound, setScanSound] = useState(() => getPreferences().scanSound !== false);
+  const [autoOpenUrl, setAutoOpenUrl] = useState(() => getPreferences().autoOpenUrl === true);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const { isPremium, currentPlan, showPaywall, subscription } = usePremium();
 
   useEffect(() => {
     const handlePrefSync = () => {
-      setSaveLocation(getPreferences().saveLocation || 'Mushi QR Pro');
+      const prefs = getPreferences();
+      setSaveLocation(prefs.saveLocation || 'Pictures/Mushi QR Pro');
+      setScanSound(prefs.scanSound !== false);
+      setAutoOpenUrl(prefs.autoOpenUrl === true);
     };
     window.addEventListener('preferences-sync', handlePrefSync);
     return () => window.removeEventListener('preferences-sync', handlePrefSync);
@@ -28,7 +35,9 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
     else if (theme === 'light') next = 'auto';
     else next = 'dark';
     setTheme(next);
-    savePreferences({ ...getPreferences(), theme: next });
+    const updated = { ...getPreferences(), theme: next };
+    savePreferences(updated);
+    window.dispatchEvent(new Event('preferences-sync'));
   };
 
   const handleChooseFolder = () => {
@@ -224,6 +233,20 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
 
           <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
 
+          {/* Scan Settings */}
+          <div className="settings-row-item" onClick={() => setIsScanModalOpen(true)} style={{ padding: '16px' }}>
+            <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' }}>
+              <Scan size={18} />
+            </div>
+            <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Scan Settings</div>
+            <div style={{ marginRight: '12px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>
+              {scanSound ? 'Sound On' : 'Muted'} • {autoOpenUrl ? 'Auto URL' : 'Manual'}
+            </div>
+            <ChevronRight size={16} color="var(--text-muted)" />
+          </div>
+
+          <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
+
           {/* Save Location */}
           <div className="settings-row-item" onClick={handleChooseFolder} style={{ padding: '16px' }}>
             <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}>
@@ -281,63 +304,6 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
             <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Terms of Service</div>
             <ChevronRight size={16} color="var(--text-muted)" />
           </div>
-
-          {/* Sign Out / Sign In Row */}
-          {currentUser ? (
-            <>
-              <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
-              <div
-                className="settings-row-item"
-                onClick={async () => {
-                  const { signOut: fbSignOut } = await import('firebase/auth');
-                  const { auth } = await import('../services/firebase');
-                  const { handleLogoutClear: clearData } = await import('../utils/storage');
-                  await fbSignOut(auth);
-                  try {
-                    const { Capacitor } = await import('@capacitor/core');
-                    if (Capacitor.isNativePlatform()) {
-                      const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
-                      await FirebaseAuthentication.signOut();
-                    }
-                  } catch (e) {
-                    console.warn('Native sign out error:', e);
-                  }
-                  clearData();
-                  onNavigate?.('login');
-                }}
-                style={{ padding: '16px', cursor: 'pointer' }}
-              >
-                <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                  </svg>
-                </div>
-                <div style={{ flex: 1, fontSize: '14px', fontWeight: 700, color: '#EF4444' }}>Sign Out</div>
-                <ChevronRight size={16} color="#EF4444" />
-              </div>
-            </>
-          ) : (
-            <>
-              <div style={{ height: '1px', background: 'var(--border-color)', marginLeft: '64px' }} />
-              <div
-                className="settings-row-item"
-                onClick={() => onNavigate?.('login')}
-                style={{ padding: '16px', cursor: 'pointer' }}
-              >
-                <div className="icon-container-gradient" style={{ background: 'linear-gradient(135deg, #D60036 0%, #B5002D 100%)' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                    <polyline points="10 17 15 12 10 7" />
-                    <line x1="15" y1="12" x2="3" y2="12" />
-                  </svg>
-                </div>
-                <div style={{ flex: 1, fontSize: '14px', fontWeight: 700, color: 'var(--accent-primary)' }}>Sign In / Create Account</div>
-                <ChevronRight size={16} color="var(--accent-primary)" />
-              </div>
-            </>
-          )}
         </div>
       </div>
 
@@ -345,6 +311,12 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
         isOpen={isFolderModalOpen}
         onClose={() => setIsFolderModalOpen(false)}
         onSave={(newLoc) => setSaveLocation(newLoc)}
+        showToast={showToast}
+      />
+
+      <ScanSettingsModal
+        isOpen={isScanModalOpen}
+        onClose={() => setIsScanModalOpen(false)}
         showToast={showToast}
       />
     </div>

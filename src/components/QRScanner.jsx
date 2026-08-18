@@ -180,11 +180,32 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
   const [scanDate, setScanDate] = useState('');
   const [soundEnabled, setSoundEnabled] = useState(() => {
     try {
+      const prefs = JSON.parse(localStorage.getItem('qrgen_preferences') || '{}');
+      if (prefs.scanSound !== undefined) return prefs.scanSound;
       return localStorage.getItem('qrgen_scan_sound') !== 'false';
     } catch {
       return true;
     }
   });
+
+  useEffect(() => {
+    const handlePrefSync = () => {
+      try {
+        const prefs = JSON.parse(localStorage.getItem('qrgen_preferences') || '{}');
+        if (prefs.scanSound !== undefined) {
+          setSoundEnabled(prefs.scanSound);
+        } else {
+          setSoundEnabled(localStorage.getItem('qrgen_scan_sound') !== 'false');
+        }
+      } catch {}
+    };
+    window.addEventListener('preferences-sync', handlePrefSync);
+    window.addEventListener('storage', handlePrefSync);
+    return () => {
+      window.removeEventListener('preferences-sync', handlePrefSync);
+      window.removeEventListener('storage', handlePrefSync);
+    };
+  }, []);
 
   const qrScannerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -565,7 +586,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       console.error('Failed to generate thumbnail for scanned QR:', err);
     }
 
-    import('../utils/storage').then(({ saveToHistory }) => {
+    import('../utils/storage').then(({ saveToHistory, getPreferences }) => {
       saveToHistory({
         source: 'scan',
         qrData: { text: decodedText },
@@ -573,6 +594,17 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
         displayText: decodedText,
         thumbnail: thumbnail
       });
+
+      const prefs = getPreferences();
+      if (prefs.autoOpenUrl && parsed.type === 'url' && parsed.data?.url) {
+        setTimeout(() => {
+          try {
+            window.open(parsed.data.url, '_blank', 'noopener,noreferrer');
+          } catch (e) {
+            console.error('Failed to auto open URL:', e);
+          }
+        }, 400);
+      }
     });
     
     setStatus('DETECTED');
@@ -1025,37 +1057,6 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
         {/* Mode Selector Tabs & Options */}
         <div className="qrs-mode-selector" style={{ position: 'relative', justifyContent: 'center' }}>
-          <button
-            style={{
-              position: 'absolute',
-              left: 16,
-              background: soundEnabled ? 'rgba(214, 0, 54, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-              border: `1px solid ${soundEnabled ? 'rgba(214, 0, 54, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-              color: soundEnabled ? 'var(--accent-primary, #D60036)' : 'var(--text-muted)',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 12,
-              fontWeight: 700,
-              padding: '6px 10px',
-              transition: 'all 0.2s ease'
-            }}
-            onClick={() => {
-              triggerHapticFeedback();
-              setSoundEnabled(prev => {
-                const next = !prev;
-                try { localStorage.setItem('qrgen_scan_sound', String(next)); } catch {}
-                return next;
-              });
-            }}
-            aria-label={soundEnabled ? 'Disable Scan Sound' : 'Enable Scan Sound'}
-          >
-            {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
-            <span>{soundEnabled ? 'Sound On' : 'Muted'}</span>
-          </button>
-
           <div className="qrs-mode-tab active" style={{ margin: 0 }}>
             Scan
             <div className="qrs-mode-dot" />

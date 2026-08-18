@@ -3953,26 +3953,25 @@ export default function App() {
           {/* ── Auth Avatar / Sign-In Button (always visible in header) ── */}
           {!['generator'].includes(activePage) && (
             <div style={{ position: 'relative' }} ref={authDropdownRef}>
-              <button
-                onClick={() => setAuthDropdownOpen(prev => !prev)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: currentUser ? 'transparent' : 'var(--accent-gradient)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  padding: '0',
-                  cursor: 'pointer',
-                  width: '36px',
-                  height: '36px',
-                  transition: 'all 0.2s ease',
-                  boxShadow: currentUser ? 'none' : '0 4px 14px rgba(214,0,54,0.3)',
-                  flexShrink: 0,
-                }}
-                aria-label={currentUser ? 'Account' : 'Sign In'}
-              >
-                {currentUser ? (
+              {currentUser ? (
+                <button
+                  onClick={() => setAuthDropdownOpen(prev => !prev)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '50%',
+                    padding: '0',
+                    cursor: 'pointer',
+                    width: '36px',
+                    height: '36px',
+                    transition: 'all 0.2s ease',
+                    flexShrink: 0,
+                  }}
+                  aria-label="Account"
+                >
                   <div style={{ position: 'relative', display: 'inline-flex' }}>
                     {currentUser.photoURL ? (
                       <img
@@ -4004,25 +4003,47 @@ export default function App() {
                       </div>
                     )}
                   </div>
-                ) : (
-                  <User size={24} color="#fff" />
-                )}
-              </button>
-              {authDropdownOpen && (
-                currentUser ? (
-                  <div
-                    style={{
-                      position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                      background: 'var(--bg-elevated, #0C0C14)', border: '1px solid var(--border-color)',
-                      borderRadius: '28px', width: '335px',
-                      boxShadow: '0 20px 50px rgba(0,0,0,0.4)', zIndex: 999,
-                      overflow: 'hidden',
-                      animation: 'dropdownFadeIn 0.18s ease',
-                      fontFamily: 'var(--font-sans)',
-                      color: 'var(--text-primary)'
-                    }}
-                    onClick={e => e.stopPropagation()}
-                  >
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigateTo('login')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'var(--accent-gradient)',
+                    border: 'none',
+                    borderRadius: '20px',
+                    padding: '7px 14px',
+                    cursor: 'pointer',
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    boxShadow: '0 4px 14px rgba(214,0,54,0.35)',
+                    transition: 'all 0.2s ease',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap'
+                  }}
+                  aria-label="Sign In / Create Account"
+                >
+                  <User size={15} color="#fff" />
+                  <span>Sign In</span>
+                </button>
+              )}
+              {authDropdownOpen && currentUser && (
+                <div
+                  style={{
+                    position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                    background: 'var(--bg-elevated, #0C0C14)', border: '1px solid var(--border-color)',
+                    borderRadius: '28px', width: '335px',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.4)', zIndex: 999,
+                    overflow: 'hidden',
+                    animation: 'dropdownFadeIn 0.18s ease',
+                    fontFamily: 'var(--font-sans)',
+                    color: 'var(--text-primary)'
+                  }}
+                  onClick={e => e.stopPropagation()}
+                >
                     {/* Profile Header */}
                     <div style={{ padding: '24px 20px 18px', background: 'var(--bg-elevated, #0C0C14)', borderBottom: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -4229,32 +4250,6 @@ export default function App() {
                       </button>
                     </div>
                   </div>
-                ) : (
-                  <div
-                    style={{
-                      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                      background: 'rgba(9, 9, 15, 0.75)',
-                      backdropFilter: 'blur(12px)',
-                      WebkitBackdropFilter: 'blur(12px)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      zIndex: 9999,
-                      animation: 'dropdownFadeIn 0.2s ease'
-                    }}
-                    onClick={() => setAuthDropdownOpen(false)}
-                  >
-                    <div
-                      style={{
-                        background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
-                        borderRadius: '24px', width: '90%', maxWidth: '420px',
-                        boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
-                        overflow: 'hidden',
-                      }}
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <AuthDropdownPanel onClose={() => setAuthDropdownOpen(false)} />
-                    </div>
-                  </div>
-                )
               )}
             </div>
           )}
