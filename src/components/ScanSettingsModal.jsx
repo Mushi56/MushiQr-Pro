@@ -23,7 +23,6 @@ export default function ScanSettingsModal({ isOpen, onClose, showToast }) {
     savePreferences(updated);
     try { localStorage.setItem('qrgen_scan_sound', String(next)); } catch {}
     window.dispatchEvent(new Event('preferences-sync'));
-    if (showToast) showToast(next ? 'Scanner beep sound enabled' : 'Scanner sound muted');
   };
 
   const handleToggleAutoOpenUrl = () => {
@@ -33,7 +32,6 @@ export default function ScanSettingsModal({ isOpen, onClose, showToast }) {
     savePreferences(updated);
     try { localStorage.setItem('qrgen_auto_open_url', String(next)); } catch {}
     window.dispatchEvent(new Event('preferences-sync'));
-    if (showToast) showToast(next ? 'Auto-open scanned URLs enabled' : 'Auto-open scanned URLs disabled');
   };
 
   return (

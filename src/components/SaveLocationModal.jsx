@@ -32,7 +32,6 @@ export default function SaveLocationModal({ isOpen, onClose, onSave, showToast }
     const prefs = getPreferences();
     savePreferences({ ...prefs, saveLocation: clean });
     if (onSave) onSave(clean);
-    if (showToast) showToast(`Save location set: Internal Storage/${clean}`);
     onClose();
   };
 
