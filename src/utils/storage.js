@@ -57,38 +57,11 @@ export function getHistory() {
 export function deleteFromHistory(id) {
   const history = getHistory().filter(item => item.id !== id);
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-
-  // Firestore mirror sync
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const docRef = doc(db, 'users', user.uid, 'history', id);
-      deleteDoc(docRef).catch(e => console.error('Firestore deleteFromHistory error:', e));
-    }
-  } catch (e) {
-    console.error('Firestore deleteFromHistory error:', e);
-  }
-
   return history;
 }
 
 export function clearHistory() {
   localStorage.removeItem(HISTORY_KEY);
-
-  // Firestore mirror sync
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const colRef = collection(db, 'users', user.uid, 'history');
-      getDocs(colRef).then(snapshot => {
-        const batch = writeBatch(db);
-        snapshot.forEach(doc => batch.delete(doc.ref));
-        return batch.commit();
-      }).catch(e => console.error('Firestore clearHistory error:', e));
-    }
-  } catch (e) {
-    console.error('Firestore clearHistory error:', e);
-  }
 }
 
 export function clearHistoryByRange(hours) {
@@ -102,29 +75,8 @@ export function clearHistoryByRange(hours) {
     const time = new Date(item.timestamp).getTime();
     return time < cutoff;
   });
-  
-  const toDelete = history.filter(item => {
-    const time = new Date(item.timestamp).getTime();
-    return time >= cutoff;
-  });
 
   localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-
-  // Firestore mirror sync
-  try {
-    const user = auth.currentUser;
-    if (user && toDelete.length > 0) {
-      const batch = writeBatch(db);
-      toDelete.forEach(item => {
-        const docRef = doc(db, 'users', user.uid, 'history', item.id);
-        batch.delete(docRef);
-      });
-      batch.commit().catch(e => console.error('Firestore clearHistoryByRange error:', e));
-    }
-  } catch (e) {
-    console.error('Firestore clearHistoryByRange error:', e);
-  }
-
   return updated;
 }
 
@@ -238,43 +190,12 @@ export function deleteFromSaved(idOrItem) {
   const remaining = saved.filter(item => !toDeleteIds.includes(item.id));
   localStorage.setItem(SAVED_KEY, JSON.stringify(remaining));
   window.dispatchEvent(new Event('storage-sync'));
-
-  // Firestore mirror sync
-  try {
-    const user = auth.currentUser;
-    if (user && toDeleteIds.length > 0) {
-      const batch = writeBatch(db);
-      toDeleteIds.forEach(id => {
-        const docRef = doc(db, 'users', user.uid, 'saved', id);
-        batch.delete(docRef);
-      });
-      batch.commit().catch(e => console.error('Firestore deleteFromSaved error:', e));
-    }
-  } catch (e) {
-    console.error('Firestore deleteFromSaved error:', e);
-  }
-
   return remaining;
 }
 
 export function clearSaved() {
   localStorage.removeItem(SAVED_KEY);
   window.dispatchEvent(new Event('storage-sync'));
-
-  // Firestore mirror sync
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const colRef = collection(db, 'users', user.uid, 'saved');
-      getDocs(colRef).then(snapshot => {
-        const batch = writeBatch(db);
-        snapshot.forEach(doc => batch.delete(doc.ref));
-        return batch.commit();
-      }).catch(e => console.error('Firestore clearSaved error:', e));
-    }
-  } catch (e) {
-    console.error('Firestore clearSaved error:', e);
-  }
 }
 
 export function clearSavedByRange(hours) {
@@ -289,28 +210,8 @@ export function clearSavedByRange(hours) {
     return time < cutoff;
   });
 
-  const toDelete = saved.filter(item => {
-    const time = new Date(item.savedAt || item.timestamp).getTime();
-    return time >= cutoff;
-  });
-
   localStorage.setItem(SAVED_KEY, JSON.stringify(updated));
-
-  // Firestore mirror sync
-  try {
-    const user = auth.currentUser;
-    if (user && toDelete.length > 0) {
-      const batch = writeBatch(db);
-      toDelete.forEach(item => {
-        const docRef = doc(db, 'users', user.uid, 'saved', item.id);
-        batch.delete(docRef);
-      });
-      batch.commit().catch(e => console.error('Firestore clearSavedByRange error:', e));
-    }
-  } catch (e) {
-    console.error('Firestore clearSavedByRange error:', e);
-  }
-
+  window.dispatchEvent(new Event('storage-sync'));
   return updated;
 }
 
