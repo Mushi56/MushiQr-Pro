@@ -984,7 +984,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR, currentUser, o
 
   return (
     <div className="scanner-page scanner-page-enter">
-      {/* Upper Navbar (#FFFFFF with 100% opacity) */}
+      {/* Upper Navbar (#FFFFFF with 100% opacity + safe area) */}
       <header 
         className="scanner-upper-navbar" 
         style={{ 
@@ -992,6 +992,12 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR, currentUser, o
           borderBottom: '1px solid rgba(0, 0, 0, 0.08)', 
           display: 'flex', 
           width: '100%', 
+          height: 'calc(64px + env(safe-area-inset-top, 0px))',
+          minHeight: 'calc(64px + env(safe-area-inset-top, 0px))',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingLeft: '16px',
+          paddingRight: '16px',
+          boxSizing: 'border-box',
           flexShrink: 0, 
           zIndex: 100, 
           justifyContent: 'space-between', 

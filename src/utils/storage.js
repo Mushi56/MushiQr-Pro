@@ -582,12 +582,19 @@ export async function clearUserCloudData({ clearSaved = true, clearHistory = tru
       const historyColRef = collection(db, 'users', user.uid, 'history');
       const historySnapshot = await getDocs(historyColRef);
       const docs = historySnapshot.docs;
-      const chunkSize = 400;
-      for (let i = 0; i < docs.length; i += chunkSize) {
-        const chunk = docs.slice(i, i + chunkSize);
-        const batch = writeBatch(db);
-        chunk.forEach(d => batch.delete(d.ref));
-        await batch.commit();
+      if (docs.length > 0) {
+        try {
+          const chunkSize = 400;
+          for (let i = 0; i < docs.length; i += chunkSize) {
+            const chunk = docs.slice(i, i + chunkSize);
+            const batch = writeBatch(db);
+            chunk.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+          }
+        } catch (batchErr) {
+          console.warn('Batch delete history failed, falling back to individual deletes:', batchErr);
+          await Promise.all(docs.map(d => deleteDoc(d.ref).catch(e => console.error('Individual doc delete error:', e))));
+        }
       }
     }
 
@@ -595,12 +602,19 @@ export async function clearUserCloudData({ clearSaved = true, clearHistory = tru
       const savedColRef = collection(db, 'users', user.uid, 'saved');
       const savedSnapshot = await getDocs(savedColRef);
       const docs = savedSnapshot.docs;
-      const chunkSize = 400;
-      for (let i = 0; i < docs.length; i += chunkSize) {
-        const chunk = docs.slice(i, i + chunkSize);
-        const batch = writeBatch(db);
-        chunk.forEach(d => batch.delete(d.ref));
-        await batch.commit();
+      if (docs.length > 0) {
+        try {
+          const chunkSize = 400;
+          for (let i = 0; i < docs.length; i += chunkSize) {
+            const chunk = docs.slice(i, i + chunkSize);
+            const batch = writeBatch(db);
+            chunk.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+          }
+        } catch (batchErr) {
+          console.warn('Batch delete saved failed, falling back to individual deletes:', batchErr);
+          await Promise.all(docs.map(d => deleteDoc(d.ref).catch(e => console.error('Individual doc delete error:', e))));
+        }
       }
     }
 

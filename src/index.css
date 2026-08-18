@@ -5053,11 +5053,13 @@ input[type="range"]::-moz-range-thumb {
 
 .scanner-page .scanner-upper-navbar,
 .scanner-upper-navbar {
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-top, 0px)) !important;
+  min-height: calc(64px + env(safe-area-inset-top, 0px)) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 0 16px !important;
+  padding: env(safe-area-inset-top, 0px) 16px 0 16px !important;
+  box-sizing: border-box !important;
   background: #FFFFFF !important;
   background-color: #FFFFFF !important;
   opacity: 1 !important;

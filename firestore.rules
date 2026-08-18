@@ -35,11 +35,15 @@ service cloud.firestore {
     }
 
     function containsProtectedFields() {
-      return request.resource.data.keys().hasAny(['role', 'isAdmin', 'subscription', 'plan', 'entitlement', 'isPro', 'permissions', 'admin']);
+      return request.resource != null && 
+             request.resource.data != null && 
+             request.resource.data.keys().hasAny(['role', 'isAdmin', 'subscription', 'plan', 'entitlement', 'isPro', 'permissions', 'admin']);
     }
 
     function containsAppUserProtectedFields() {
-      return request.resource.data.keys().hasAny(['role', 'isPro', 'planId', 'subscriptionStatus', 'entitlement', 'permissions', 'admin', 'roleUpdatedAt', 'roleUpdatedBy', 'proGrantedAt', 'proGrantedBy']);
+      return request.resource != null && 
+             request.resource.data != null && 
+             request.resource.data.keys().hasAny(['role', 'isPro', 'planId', 'subscriptionStatus', 'entitlement', 'permissions', 'admin', 'roleUpdatedAt', 'roleUpdatedBy', 'proGrantedAt', 'proGrantedBy']);
     }
 
     // ── Global Config (appSettings, featureFlags, announcement, remoteConfig, membership)
@@ -73,7 +77,8 @@ service cloud.firestore {
     // Each user can read/write strictly their own sub-documents (excluding protected security attributes)
     match /users/{userId}/{document=**} {
       allow read: if isOwner(userId) || isSuperAdmin();
-      allow write: if isOwner(userId) && !containsProtectedFields();
+      allow create, update: if isOwner(userId) && !containsProtectedFields();
+      allow delete: if isOwner(userId) || isSuperAdmin();
     }
 
     // ── App Users (profile tracking for admin visibility)

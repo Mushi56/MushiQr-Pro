@@ -6943,7 +6943,6 @@ export default function App() {
                 </div>
                 <div>
                   <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary, #FFFFFF)' }}>Cloud Data Manager</h3>
-                  <p style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)', margin: '2px 0 0' }}>Sync, restore, or delete your cloud backups</p>
                 </div>
               </div>
               <button 
