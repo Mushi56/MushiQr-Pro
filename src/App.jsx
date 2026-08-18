@@ -6186,97 +6186,83 @@ export default function App() {
         )}
       </main>
 
-      {/* ── Bottom Navigation Bar (Only for Generator) ── */}
+      {/* ── Bottom Navigation Bar (Only for Generator - Original Layout with Glassmorphism) ── */}
       {activePage === 'generator' && (
-        <nav className="bottom-nav">
-          {TABS.filter(tab => activeBatchItemIndex === null || tab.id !== 'content').map(tab => (
-            <button
-              key={tab.id}
-              className={`bottom-nav-tab${activeTab === tab.id ? ' active' : ''}`}
-              onClick={() => handleTabChange(tab.id)}
-              style={{ position: 'relative' }}
-            >
-              <PaidCrownBadge featureId={tab.featId} position="floating" size={9} />
-              <div className="bottom-nav-highlight" />
-              <span className="bottom-nav-icon">
-                <tab.icon size={24} strokeWidth={2} />
-              </span>
-              <span className="bottom-nav-label">{tab.label}</span>
-            </button>
-          ))}
+        <nav className="bottom-nav bottom-nav-generator">
+          {TABS.filter(tab => activeBatchItemIndex === null || tab.id !== 'content').map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                className={`generator-nav-tab${isActive ? ' active' : ''}`}
+                onClick={() => handleTabChange(tab.id)}
+                style={{ position: 'relative' }}
+                aria-label={tab.label}
+              >
+                <PaidCrownBadge featureId={tab.featId} position="floating" size={9} />
+                <span className="generator-nav-icon">
+                  <tab.icon size={22} strokeWidth={isActive ? 2.4 : 2} />
+                </span>
+                <span className="generator-nav-label">{tab.label}</span>
+              </button>
+            );
+          })}
         </nav>
       )}
-      {/* ── Main App Navigation ── */}
+      {/* ── Main App Navigation (Glassmorphic Floating Navbar with Locked Center Scanner) ── */}
       {(['home', 'saved', 'history', 'you', 'settings'].includes(activePage)) && (
         <nav className="bottom-nav">
-          <button 
-            className={`bottom-nav-tab${activePage === 'home' ? ' active' : ''}`}
-            onClick={() => navigateTo('home')}
-          >
-            <span className="bottom-nav-icon"><Home size={24} /></span>
-            <span className="bottom-nav-label">Home</span>
-          </button>
-          
-          <button 
-            className={`bottom-nav-tab${activePage === 'saved' ? ' active' : ''}`}
-            onClick={() => navigateTo('saved')}
-          >
-            <span className="bottom-nav-icon"><Bookmark size={24} /></span>
-            <span className="bottom-nav-label">Saved</span>
-          </button>
-          
-          {/* Integrated Scan Button */}
-          <div 
-            onClick={() => navigateTo('scanner')}
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              marginTop: '-30px',
-              cursor: 'pointer',
-              flex: 1
-            }}
-          >
+          <div className="bottom-nav-group bottom-nav-left">
             <button 
-              className="floating-scan-btn glow-scan-btn"
-              style={{ 
-                width: '64px',
-                height: '64px',
-                borderRadius: '32px',
-                background: 'var(--accent-primary)',
-                border: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 8px 24px rgba(214, 0, 54, 0.4)',
-                color: 'white',
-                zIndex: 101,
-                transition: 'transform 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              className={`bottom-nav-tab${activePage === 'home' ? ' active' : ''}`}
+              onClick={() => navigateTo('home')}
+              aria-label="Home"
             >
-              <ScanLine size={28} />
+              <span className="bottom-nav-icon"><Home size={20} strokeWidth={2.2} /></span>
+              {activePage === 'home' && <span className="bottom-nav-label">Home</span>}
+            </button>
+            
+            <button 
+              className={`bottom-nav-tab${activePage === 'saved' ? ' active' : ''}`}
+              onClick={() => navigateTo('saved')}
+              aria-label="Saved"
+            >
+              <span className="bottom-nav-icon"><Bookmark size={20} strokeWidth={2.2} /></span>
+              {activePage === 'saved' && <span className="bottom-nav-label">Saved</span>}
             </button>
           </div>
+
+          {/* Scanner Button (Permanently locked in exact dead center) */}
           <button 
-            className={`bottom-nav-tab${activePage === 'history' ? ' active' : ''}`}
-            onClick={() => navigateTo('history')}
+            className={`bottom-nav-scan-btn${activePage === 'scanner' ? ' active' : ''}`}
+            onClick={() => navigateTo('scanner')}
+            aria-label="Scanner"
+            title="Scan QR or Barcode"
           >
-            <span className="bottom-nav-icon"><History size={24} /></span>
-            <span className="bottom-nav-label">History</span>
+            <ScanLine size={26} strokeWidth={2.4} />
           </button>
           
-          <button 
-            className={`bottom-nav-tab${(activePage === 'you' || activePage === 'settings') ? ' active' : ''}`}
-            onClick={() => navigateTo('you')}
-          >
-            <span className="bottom-nav-icon">
-              <Settings size={24} />
-            </span>
-            <span className="bottom-nav-label">Settings</span>
-          </button>
+          <div className="bottom-nav-group bottom-nav-right">
+            <button 
+              className={`bottom-nav-tab${activePage === 'history' ? ' active' : ''}`}
+              onClick={() => navigateTo('history')}
+              aria-label="History"
+            >
+              <span className="bottom-nav-icon"><History size={20} strokeWidth={2.2} /></span>
+              {activePage === 'history' && <span className="bottom-nav-label">History</span>}
+            </button>
+            
+            <button 
+              className={`bottom-nav-tab${(activePage === 'you' || activePage === 'settings') ? ' active' : ''}`}
+              onClick={() => navigateTo('you')}
+              aria-label="Settings"
+            >
+              <span className="bottom-nav-icon">
+                <Settings size={20} strokeWidth={2.2} />
+              </span>
+              {(activePage === 'you' || activePage === 'settings') && <span className="bottom-nav-label">Settings</span>}
+            </button>
+          </div>
         </nav>
       )}
       {/* ── QR Data Modal ── */}
