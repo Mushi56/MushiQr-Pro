@@ -6133,7 +6133,14 @@ export default function App() {
             effectiveTheme={effectiveTheme}
           />
         ) : activePage === 'settings' ? (
-          <SettingsPage theme={theme} setTheme={setTheme} effectiveTheme={effectiveTheme} />
+          <SettingsPage 
+            theme={theme} 
+            setTheme={setTheme} 
+            effectiveTheme={effectiveTheme} 
+            onNavigate={navigateTo}
+            currentUser={currentUser}
+            showToast={showToast}
+          />
         ) : activePage === 'you' ? (
           <YouPage 
             onNavigate={navigateTo} 

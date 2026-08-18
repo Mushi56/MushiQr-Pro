@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Moon, Sun, Info, Shield, FileText, ChevronRight, Folder, Settings as SettingsIcon } from 'lucide-react';
+import { Moon, Sun, Info, Shield, FileText, ChevronRight, Folder, Settings as SettingsIcon, Sparkles } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import AppIcon from './AppIcon';
 import PaidCrownBadge from './PaidCrownBadge';
@@ -8,7 +8,7 @@ import { FeatureAccessManager } from '../services/FeatureAccessManager';
 
 import SaveLocationModal from './SaveLocationModal';
 
-export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
+export default function SettingsPage({ onNavigate, theme, setTheme, effectiveTheme, currentUser, showToast }) {
   const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Mushi QR Pro');
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const { showPaywall } = usePremium();
@@ -60,6 +60,12 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
       icon: <Folder size={20} />,
       value: <span style={{ color: 'var(--accent-primary)', fontWeight: 'bold' }}>{saveLocation}</span>,
       onClick: handleChooseFolder
+    },
+    {
+      id: 'guide',
+      label: 'Welcome Guide & Features',
+      icon: <Sparkles size={20} />,
+      onClick: () => onNavigate?.('onboarding')
     },
     {
       id: 'about',
@@ -179,6 +185,7 @@ export default function SettingsPage({ theme, setTheme, effectiveTheme }) {
         isOpen={isFolderModalOpen}
         onClose={() => setIsFolderModalOpen(false)}
         onSave={(newLoc) => setSaveLocation(newLoc)}
+        showToast={showToast}
       />
     </div>
   );

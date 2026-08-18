@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Settings, ChevronRight, Moon, Sun, Info, Shield, FileText, Folder, Crown, Zap, Star
+  Settings, ChevronRight, Moon, Sun, Info, Shield, FileText, Folder, Crown, Zap, Star, Sparkles
 } from 'lucide-react';
 import { getPreferences, savePreferences } from '../utils/storage';
 import { usePremium } from '../services/premiumContext';
