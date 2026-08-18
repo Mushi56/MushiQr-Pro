@@ -578,29 +578,30 @@ export async function clearUserCloudData({ clearSaved = true, clearHistory = tru
   if (!user) return { success: false, error: 'User not signed in' };
 
   try {
-    const batch = writeBatch(db);
-    let hasBatchDeletes = false;
-
     if (clearHistory) {
       const historyColRef = collection(db, 'users', user.uid, 'history');
       const historySnapshot = await getDocs(historyColRef);
-      historySnapshot.forEach(d => {
-        batch.delete(d.ref);
-        hasBatchDeletes = true;
-      });
+      const docs = historySnapshot.docs;
+      const chunkSize = 400;
+      for (let i = 0; i < docs.length; i += chunkSize) {
+        const chunk = docs.slice(i, i + chunkSize);
+        const batch = writeBatch(db);
+        chunk.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+      }
     }
 
     if (clearSaved) {
       const savedColRef = collection(db, 'users', user.uid, 'saved');
       const savedSnapshot = await getDocs(savedColRef);
-      savedSnapshot.forEach(d => {
-        batch.delete(d.ref);
-        hasBatchDeletes = true;
-      });
-    }
-
-    if (hasBatchDeletes) {
-      await batch.commit();
+      const docs = savedSnapshot.docs;
+      const chunkSize = 400;
+      for (let i = 0; i < docs.length; i += chunkSize) {
+        const chunk = docs.slice(i, i + chunkSize);
+        const batch = writeBatch(db);
+        chunk.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+      }
     }
 
     return { success: true };

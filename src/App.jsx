@@ -5993,6 +5993,17 @@ export default function App() {
             }}
             navigateTo={navigateTo}
             onLoadQR={handleLoadQR}
+            currentUser={currentUser}
+            onOpenProfile={() => {
+              if (currentUser) {
+                setProfileNameInput(currentUser.displayName || '');
+                setNewProfilePicUrl(currentUser.photoURL || '');
+                setIsProfileModalOpen(true);
+                setAuthDropdownOpen(false);
+              } else {
+                navigateTo('login');
+              }
+            }}
           />
         ) : activePage === 'home' ? (
           <HomePage 
@@ -6914,8 +6925,8 @@ export default function App() {
               background: 'var(--bg-elevated, #0F172A)', 
               border: '1px solid var(--border-color, #334155)', 
               borderRadius: '24px', 
-              width: '92%', 
-              maxWidth: '440px', 
+              width: '94%', 
+              maxWidth: '520px', 
               padding: '24px', 
               color: 'var(--text-primary, #FFFFFF)', 
               boxShadow: '0 25px 60px rgba(0,0,0,0.4)',
@@ -7017,7 +7028,7 @@ export default function App() {
                 }}
               >
                 <Trash2 size={14} />
-                <span>Clear Cloud</span>
+                <span>Clear</span>
               </button>
             </div>
 
@@ -7041,8 +7052,8 @@ export default function App() {
                         <Bookmark size={18} />
                       </div>
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Saved Items</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{getSaved().length} local items</div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Saved</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{getSaved().length} items</div>
                       </div>
                     </div>
                     <button
@@ -7052,7 +7063,7 @@ export default function App() {
                         try {
                           const res = await syncUserSavedData();
                           if (res.success) {
-                            showToast(`Saved items synced! (${res.savedCount || getSaved().length} in cloud)`);
+                            showToast(`Saved synced! (${res.savedCount || getSaved().length} in cloud)`);
                             const counts = await getUserCloudCounts();
                             setCloudCounts(counts);
                           } else {
@@ -7065,7 +7076,7 @@ export default function App() {
                         }
                       }}
                       style={{
-                        padding: '7px 12px',
+                        padding: '7px 14px',
                         borderRadius: '8px',
                         border: 'none',
                         background: 'rgba(236, 72, 153, 0.15)',
@@ -7079,7 +7090,7 @@ export default function App() {
                       }}
                     >
                       {isSyncing ? <Loader2 size={12} className="spin" /> : <RefreshCw size={12} />}
-                      <span>Sync Saved</span>
+                      <span>Sync</span>
                     </button>
                   </div>
 
@@ -7099,8 +7110,8 @@ export default function App() {
                         <History size={18} />
                       </div>
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>History &amp; Recent</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{getHistory().length} local items</div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>History</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{getHistory().length} items</div>
                       </div>
                     </div>
                     <button
@@ -7110,7 +7121,7 @@ export default function App() {
                         try {
                           const res = await syncUserHistoryData();
                           if (res.success) {
-                            showToast(`History items synced! (${res.historyCount || getHistory().length} in cloud)`);
+                            showToast(`History synced! (${res.historyCount || getHistory().length} in cloud)`);
                             const counts = await getUserCloudCounts();
                             setCloudCounts(counts);
                           } else {
@@ -7123,7 +7134,7 @@ export default function App() {
                         }
                       }}
                       style={{
-                        padding: '7px 12px',
+                        padding: '7px 14px',
                         borderRadius: '8px',
                         border: 'none',
                         background: 'rgba(16, 185, 129, 0.15)',
@@ -7137,7 +7148,7 @@ export default function App() {
                       }}
                     >
                       {isSyncing ? <Loader2 size={12} className="spin" /> : <RefreshCw size={12} />}
-                      <span>Sync History</span>
+                      <span>Sync</span>
                     </button>
                   </div>
                 </div>
@@ -7149,7 +7160,7 @@ export default function App() {
                     try {
                       const res = await syncUserAllData();
                       if (res.success) {
-                        showToast('All saved and history items synced to cloud!');
+                        showToast('All saved and history records synced to cloud!');
                         const counts = await getUserCloudCounts();
                         setCloudCounts(counts);
                         setIsCloudSyncModalOpen(false);
@@ -7209,8 +7220,8 @@ export default function App() {
                         <Bookmark size={18} />
                       </div>
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Restore Saved</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudSavedCount} items in cloud</div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Saved</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudSavedCount} items</div>
                       </div>
                     </div>
                     <button
@@ -7220,7 +7231,7 @@ export default function App() {
                         try {
                           const res = await restoreUserSavedData();
                           if (res.success) {
-                            showToast(`Restored ${res.restoredSavedCount} saved items from cloud!`);
+                            showToast(`Restored ${res.restoredSavedCount} saved from cloud!`);
                           } else {
                             showToast(res.error || 'Restore failed.');
                           }
@@ -7246,7 +7257,7 @@ export default function App() {
                       }}
                     >
                       {isSyncing ? <Loader2 size={12} className="spin" /> : <Download size={12} />}
-                      <span>Restore Saved</span>
+                      <span>Restore</span>
                     </button>
                   </div>
 
@@ -7266,8 +7277,8 @@ export default function App() {
                         <History size={18} />
                       </div>
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Restore History</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudHistoryCount} items in cloud</div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>History</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudHistoryCount} items</div>
                       </div>
                     </div>
                     <button
@@ -7277,7 +7288,7 @@ export default function App() {
                         try {
                           const res = await restoreUserHistoryData();
                           if (res.success) {
-                            showToast(`Restored ${res.restoredHistoryCount} history items from cloud!`);
+                            showToast(`Restored ${res.restoredHistoryCount} history from cloud!`);
                           } else {
                             showToast(res.error || 'Restore failed.');
                           }
@@ -7303,7 +7314,7 @@ export default function App() {
                       }}
                     >
                       {isSyncing ? <Loader2 size={12} className="spin" /> : <Download size={12} />}
-                      <span>Restore History</span>
+                      <span>Restore</span>
                     </button>
                   </div>
                 </div>
@@ -7367,7 +7378,7 @@ export default function App() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
-                  {/* Clear Cloud Saved */}
+                  {/* Clear Saved */}
                   <div style={{
                     background: 'var(--bg-primary, #0B0F19)',
                     border: '1px solid var(--border-color, #1E293B)',
@@ -7378,19 +7389,24 @@ export default function App() {
                     justifyContent: 'space-between',
                     gap: '10px'
                   }}>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Cloud Saved Backups</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudSavedCount} items in cloud</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EC4899', flexShrink: 0 }}>
+                        <Bookmark size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Saved</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudSavedCount} items</div>
+                      </div>
                     </div>
                     <button
                       disabled={isSyncing || cloudCounts.cloudSavedCount === 0}
                       onClick={() => {
                         setDeleteModalConfig({
                           isOpen: true,
-                          title: 'Clear Cloud Saved Items?',
+                          title: 'Clear Saved?',
                           description: 'This will delete all saved QR codes and templates stored on the cloud server. Your local items on this device will NOT be deleted.',
-                          itemTitle: `${cloudCounts.cloudSavedCount} cloud saved items`,
-                          confirmText: 'Clear Cloud Saved',
+                          itemTitle: `${cloudCounts.cloudSavedCount} cloud saved`,
+                          confirmText: 'Clear Saved',
                           iconType: 'trash',
                           isDangerous: false,
                           onConfirm: async () => {
@@ -7398,7 +7414,8 @@ export default function App() {
                             try {
                               const res = await clearUserCloudSavedData();
                               if (res.success) {
-                                showToast('Cloud saved items cleared!');
+                                showToast('Saved cloud backups cleared!');
+                                setCloudCounts(prev => ({ ...prev, cloudSavedCount: 0 }));
                                 const counts = await getUserCloudCounts();
                                 setCloudCounts(counts);
                               } else {
@@ -7413,7 +7430,7 @@ export default function App() {
                         });
                       }}
                       style={{
-                        padding: '7px 12px',
+                        padding: '7px 14px',
                         borderRadius: '8px',
                         border: '1px solid rgba(239, 68, 68, 0.3)',
                         background: 'transparent',
@@ -7432,7 +7449,7 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Clear Cloud History */}
+                  {/* Clear History */}
                   <div style={{
                     background: 'var(--bg-primary, #0B0F19)',
                     border: '1px solid var(--border-color, #1E293B)',
@@ -7443,19 +7460,24 @@ export default function App() {
                     justifyContent: 'space-between',
                     gap: '10px'
                   }}>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Cloud History Backups</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudHistoryCount} items in cloud</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', flexShrink: 0 }}>
+                        <History size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>History</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudHistoryCount} items</div>
+                      </div>
                     </div>
                     <button
                       disabled={isSyncing || cloudCounts.cloudHistoryCount === 0}
                       onClick={() => {
                         setDeleteModalConfig({
                           isOpen: true,
-                          title: 'Clear Cloud History?',
+                          title: 'Clear History?',
                           description: 'This will delete all history and scan backups from the cloud server. Your local history on this device will NOT be deleted.',
-                          itemTitle: `${cloudCounts.cloudHistoryCount} cloud history items`,
-                          confirmText: 'Clear Cloud History',
+                          itemTitle: `${cloudCounts.cloudHistoryCount} cloud history`,
+                          confirmText: 'Clear History',
                           iconType: 'trash',
                           isDangerous: false,
                           onConfirm: async () => {
@@ -7463,7 +7485,8 @@ export default function App() {
                             try {
                               const res = await clearUserCloudHistoryData();
                               if (res.success) {
-                                showToast('Cloud history cleared!');
+                                showToast('History cloud backups cleared!');
+                                setCloudCounts(prev => ({ ...prev, cloudHistoryCount: 0 }));
                                 const counts = await getUserCloudCounts();
                                 setCloudCounts(counts);
                               } else {
@@ -7478,7 +7501,7 @@ export default function App() {
                         });
                       }}
                       style={{
-                        padding: '7px 12px',
+                        padding: '7px 14px',
                         borderRadius: '8px',
                         border: '1px solid rgba(239, 68, 68, 0.3)',
                         background: 'transparent',
@@ -7503,10 +7526,10 @@ export default function App() {
                   onClick={() => {
                     setDeleteModalConfig({
                       isOpen: true,
-                      title: 'Delete All Cloud Backups?',
+                      title: 'Delete All Backups?',
                       description: 'Are you sure you want to permanently erase ALL saved codes and history records from the cloud server? (Your local device data is completely safe and will remain untouched).',
                       itemTitle: `${cloudCounts.cloudSavedCount + cloudCounts.cloudHistoryCount} total cloud records`,
-                      confirmText: 'Delete All Cloud Backups',
+                      confirmText: 'Delete All Backups',
                       iconType: 'alert',
                       isDangerous: true,
                       onConfirm: async () => {
@@ -7515,6 +7538,7 @@ export default function App() {
                           const res = await clearUserCloudAllData();
                           if (res.success) {
                             showToast('All cloud backups deleted successfully!');
+                            setCloudCounts({ cloudSavedCount: 0, cloudHistoryCount: 0 });
                             const counts = await getUserCloudCounts();
                             setCloudCounts(counts);
                           } else {
@@ -7547,7 +7571,7 @@ export default function App() {
                   }}
                 >
                   {isSyncing ? <Loader2 size={16} className="spin" /> : <Trash2 size={16} />}
-                  <span>Delete All Cloud Backups</span>
+                  <span>{isSyncing ? 'Deleting...' : 'Delete All Backups'}</span>
                 </button>
               </div>
             )}

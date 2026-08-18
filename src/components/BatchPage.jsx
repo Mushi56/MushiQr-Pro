@@ -683,17 +683,27 @@ export default function BatchPage({
       <div style={{ flex: 1, padding: '16px var(--main-padding-x) 140px', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
         
         {/* Toggle Selector for Batch Mode (Always Accessible) */}
-        <div style={{ display: 'flex', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', padding: '4px', borderRadius: '14px', marginBottom: '20px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{
+          display: 'flex',
+          background: 'var(--bg-elevated)',
+          border: '1px solid var(--border-color)',
+          padding: '6px',
+          borderRadius: '16px',
+          marginBottom: '20px',
+          position: 'relative',
+          gap: '6px',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
+        }}>
           <button 
             onClick={() => handleModeSwitch('QR')}
             disabled={isProcessing}
             style={{
               flex: 1,
-              padding: '12px',
-              borderRadius: '10px',
+              padding: '12px 16px',
+              borderRadius: '12px',
               border: 'none',
               background: batchType === 'QR' ? 'var(--accent-primary)' : 'transparent',
-              color: batchType === 'QR' ? '#FFFFFF' : 'var(--accent-primary)',
+              color: batchType === 'QR' ? '#FFFFFF' : 'var(--text-secondary)',
               fontWeight: 800,
               fontSize: '14px',
               cursor: isProcessing ? 'default' : 'pointer',
@@ -705,6 +715,18 @@ export default function BatchPage({
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px'
+            }}
+            onMouseEnter={(e) => {
+              if (batchType !== 'QR' && !isProcessing) {
+                e.currentTarget.style.background = 'var(--bg-hover)';
+                e.currentTarget.style.color = 'var(--text-primary)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (batchType !== 'QR' && !isProcessing) {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+              }
             }}
           >
             {isProcessing && batchType !== 'QR' ? (
@@ -745,11 +767,11 @@ export default function BatchPage({
             disabled={isProcessing}
             style={{
               flex: 1,
-              padding: '12px',
-              borderRadius: '10px',
+              padding: '12px 16px',
+              borderRadius: '12px',
               border: 'none',
               background: batchType === 'BARCODE' ? 'var(--accent-primary)' : 'transparent',
-              color: batchType === 'BARCODE' ? '#FFFFFF' : 'var(--accent-primary)',
+              color: batchType === 'BARCODE' ? '#FFFFFF' : 'var(--text-secondary)',
               fontWeight: 800,
               fontSize: '14px',
               cursor: isProcessing ? 'default' : 'pointer',
@@ -761,6 +783,18 @@ export default function BatchPage({
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px'
+            }}
+            onMouseEnter={(e) => {
+              if (batchType !== 'BARCODE' && !isProcessing) {
+                e.currentTarget.style.background = 'var(--bg-hover)';
+                e.currentTarget.style.color = 'var(--text-primary)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (batchType !== 'BARCODE' && !isProcessing) {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+              }
             }}
           >
             {isProcessing && batchType !== 'BARCODE' ? (

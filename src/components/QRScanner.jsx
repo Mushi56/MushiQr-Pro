@@ -10,7 +10,7 @@ import {
   Phone, User, Globe, FileText, Minus, Plus, AlertCircle, RefreshCcw, Clock,
   ScanLine, Info, ShieldAlert, Barcode, X,
   Pencil, MoreVertical, Tag, Hash, Calendar, ListPlus, Check, Sparkles, ShoppingCart,
-  Volume2, VolumeX
+  Volume2, VolumeX, Menu, Home, History, Moon, Sun, Shield
 } from 'lucide-react';
 import { generateQRMatrix, renderQR } from '../utils/qrEngine';
 import qrNotFoundSvg from '../assets/qr-not-found.svg';
@@ -20,6 +20,7 @@ import AppIcon from './AppIcon';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
 import PaidCrownBadge from './PaidCrownBadge';
+import { getPreferences, savePreferences } from '../utils/storage';
 
 // ─── Barcode format metadata ──────────────────────────────────────────────────
 // Formats supported by html5-qrcode (ZXing) for live camera scanning
@@ -103,7 +104,7 @@ const detectFormatFromText = (text) => {
   return 'QR Code';
 };
 
-export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
+export default function QRScanner({ onBack, navigateTo, onLoadQR, currentUser, onOpenProfile }) {
   const { showPaywall } = usePremium();
   const access = FeatureAccessManager.canUseFeature('scanner_camera_live');
 
@@ -187,6 +188,32 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       return true;
     }
   });
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  const [theme, setTheme] = useState(() => {
+    try {
+      return getPreferences().theme || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   useEffect(() => {
     const handlePrefSync = () => {
@@ -957,10 +984,162 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
   return (
     <div className="scanner-page scanner-page-enter">
-      <header className="app-header header-home" style={{ position: 'relative', borderBottom: 'none', display: 'flex', width: '100%', flexShrink: 0, zIndex: 100 }}>
-        <div className="app-logo" style={{ gap: '12px', paddingLeft: '16px' }}>
-          <AppIcon size={44} shadow />
-          <div className="app-logo-text" style={{ whiteSpace: 'nowrap' }}>Mushi QR <span>Pro</span></div>
+      {/* Upper Navbar (#FFFFFF with 100% opacity) */}
+      <header 
+        className="scanner-upper-navbar" 
+        style={{ 
+          position: 'relative', 
+          borderBottom: '1px solid rgba(0, 0, 0, 0.08)', 
+          display: 'flex', 
+          width: '100%', 
+          flexShrink: 0, 
+          zIndex: 100, 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          background: '#FFFFFF',
+          backgroundColor: '#FFFFFF',
+          opacity: 1,
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+          color: '#111827'
+        }}
+      >
+        <div className="app-logo">
+          <AppIcon size={34} shadow />
+          <div className="app-logo-text" style={{ whiteSpace: 'nowrap', color: '#111827' }}>Mushi QR <span style={{ color: 'var(--accent-primary)' }}>Pro</span></div>
+        </div>
+
+        <div className="app-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* User Profile Section */}
+          {currentUser ? (
+            <button
+              onClick={() => onOpenProfile ? onOpenProfile() : (navigateTo && navigateTo('you'))}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '2px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+              aria-label="User Profile"
+              title={currentUser.displayName || currentUser.email || 'Profile'}
+            >
+              {currentUser.photoURL ? (
+                <img
+                  src={currentUser.photoURL}
+                  alt="Profile"
+                  style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', display: 'block' }}
+                />
+              ) : (
+                <div style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  background: 'var(--accent-gradient)',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '13px',
+                  fontWeight: 800
+                }}>
+                  {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
+                </div>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={() => onOpenProfile ? onOpenProfile() : (navigateTo && navigateTo('login'))}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'var(--accent-gradient)',
+                border: 'none',
+                borderRadius: '20px',
+                padding: '6px 12px',
+                cursor: 'pointer',
+                color: '#fff',
+                fontSize: '12px',
+                fontWeight: 700,
+                boxShadow: '0 2px 8px rgba(214, 0, 54, 0.25)'
+              }}
+              title="Sign In"
+            >
+              <User size={14} />
+              <span>Sign In</span>
+            </button>
+          )}
+
+          <div className="menu-container" ref={menuRef} style={{ position: 'relative' }}>
+            <button
+              className={`btn-menu-toggle ${isMenuOpen ? 'active' : ''}`}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+              style={{
+                color: '#111827',
+                background: 'rgba(0, 0, 0, 0.05)',
+                border: '1px solid rgba(0, 0, 0, 0.08)'
+              }}
+            >
+              <Menu size={20} />
+            </button>
+
+            {isMenuOpen && (
+              <div className="app-dropdown-menu fade-in" style={{ top: 'calc(100% + 12px)', right: 0 }}>
+                <div className="menu-links">
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); navigateTo && navigateTo('home'); }}>
+                    <Home size={16} /> Home
+                  </button>
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); navigateTo && navigateTo('history'); }}>
+                    <History size={16} /> History
+                  </button>
+                  <button
+                    className="menu-link-btn"
+                    onClick={() => {
+                      let next;
+                      if (theme === 'dark') next = 'light';
+                      else if (theme === 'light') next = 'auto';
+                      else next = 'dark';
+                      setTheme(next);
+                      const prefs = getPreferences();
+                      savePreferences({ ...prefs, theme: next });
+                      const eff = next === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : next;
+                      document.documentElement.setAttribute('data-theme', eff);
+                    }}
+                  >
+                    {theme === 'dark' ? (
+                      <Moon size={16} />
+                    ) : theme === 'light' ? (
+                      <Sun size={16} />
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v20" />
+                        <path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" />
+                        <circle cx="12" cy="12" r="10" />
+                      </svg>
+                    )}
+                    Theme <span style={{ textTransform: 'capitalize', marginLeft: 4, fontWeight: 'bold' }}>{theme}</span>
+                  </button>
+                  <div className="menu-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '4px 8px' }} />
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/about'; }}>
+                    <Info size={16} /> About
+                  </button>
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/privacy-policy'; }}>
+                    <Shield size={16} /> Privacy Policy
+                  </button>
+                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); window.location.hash = '#/terms'; }}>
+                    <FileText size={16} /> Terms of Service
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

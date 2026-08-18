@@ -182,7 +182,7 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
       isOpen: true,
       title,
       description: desc,
-      itemTitle: hours === -1 ? `All ${saved.length} saved items` : null,
+      itemTitle: hours === -1 ? `All ${saved.length} saved` : null,
       confirmText: hours === -1 ? 'Clear All' : 'Clear',
       iconType: hours === -1 ? 'alert' : 'trash',
       isDangerous: isDang,
