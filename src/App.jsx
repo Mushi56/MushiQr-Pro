@@ -1053,6 +1053,7 @@ export default function App() {
     return pathPage;
   });
   const [previousPage, setPreviousPage] = useState('home');
+  const [isFirstLaunchLogin, setIsFirstLaunchLogin] = useState(false);
   const [theme, setTheme] = useState('auto');
   const [effectiveTheme, setEffectiveTheme] = useState('dark');
   const [historyFilter, setHistoryFilter] = useState('All');
@@ -6151,19 +6152,30 @@ export default function App() {
               if (currentUser) {
                 navigateTo('home');
               } else {
+                setIsFirstLaunchLogin(true);
                 navigateTo('login');
               }
             }}
           />
         ) : activePage === 'login' ? (
           <LoginPage
-            onNavigate={(p) => navigateTo(p)}
-            onSuccess={() => navigateTo('home')}
+            onNavigate={(p) => {
+              setIsFirstLaunchLogin(false);
+              navigateTo(p);
+            }}
+            onSuccess={() => {
+              setIsFirstLaunchLogin(false);
+              navigateTo('home');
+            }}
+            isFirstLaunch={isFirstLaunchLogin}
           />
         ) : activePage === 'signup' ? (
           <SignUpPage
             onNavigate={(p) => navigateTo(p)}
-            onSuccess={() => navigateTo('home')}
+            onSuccess={() => {
+              setIsFirstLaunchLogin(false);
+              navigateTo('home');
+            }}
           />
         ) : activePage === 'forgot-password' ? (
           <ForgotPasswordPage

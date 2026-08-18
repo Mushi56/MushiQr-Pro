@@ -239,9 +239,6 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
               <Scan size={18} />
             </div>
             <div style={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>Scan Settings</div>
-            <div style={{ marginRight: '12px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>
-              {scanSound ? 'Sound On' : 'Muted'} • {autoOpenUrl ? 'Auto URL' : 'Manual'}
-            </div>
             <ChevronRight size={16} color="var(--text-muted)" />
           </div>
 
@@ -254,9 +251,6 @@ export default function YouPage({ onNavigate, theme, setTheme, effectiveTheme, c
             </div>
             <div style={{ flex: 1, fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
               Save Location <PaidCrownBadge featureId="settings_save_location" position="inline" size={9} />
-            </div>
-            <div style={{ marginRight: '12px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 'bold', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {saveLocation}
             </div>
             <ChevronRight size={16} color="var(--text-muted)" />
           </div>

@@ -40,18 +40,16 @@ function handleAuthError(err) {
   }
 }
 
-export default function LoginPage({ onNavigate, onSuccess }) {
+export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
       setError('Please enter your email address.');
@@ -66,10 +64,18 @@ export default function LoginPage({ onNavigate, onSuccess }) {
       return;
     }
 
+    setError('');
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, trimmedEmail, password);
-      onSuccess?.();
+      try {
+        localStorage.setItem('mushi_onboarding_completed', 'true');
+      } catch {}
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onNavigate('home');
+      }
     } catch (err) {
       setError(handleAuthError(err));
     } finally {
@@ -88,14 +94,28 @@ export default function LoginPage({ onNavigate, onSuccess }) {
         if (result.credential?.idToken) {
           const credential = GoogleAuthProvider.credential(result.credential.idToken);
           await signInWithCredential(auth, credential);
-          onSuccess?.();
+          try {
+            localStorage.setItem('mushi_onboarding_completed', 'true');
+          } catch {}
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            onNavigate('home');
+          }
         } else {
           throw new Error('No ID token received from Google sign in');
         }
       } else {
         try {
           await signInWithPopup(auth, googleProvider);
-          onSuccess?.();
+          try {
+            localStorage.setItem('mushi_onboarding_completed', 'true');
+          } catch {}
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            onNavigate('home');
+          }
         } catch (popupErr) {
           if (
             popupErr.code === 'auth/popup-closed-by-user' ||
@@ -114,7 +134,14 @@ export default function LoginPage({ onNavigate, onSuccess }) {
   };
 
   const handleSkip = () => {
-    onSuccess?.();
+    try {
+      localStorage.setItem('mushi_onboarding_completed', 'true');
+    } catch {}
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      onNavigate('home');
+    }
   };
 
   return (
@@ -152,41 +179,44 @@ export default function LoginPage({ onNavigate, onSuccess }) {
         }}
       />
 
-      {/* Top Header Row with Back Button */}
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '420px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          marginBottom: '12px',
-          zIndex: 10
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => onNavigate('home')}
+      {/* Top Header Row with Skip Button (Only visible during first launch with onboarding) */}
+      {isFirstLaunch && (
+        <div
           style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-            color: 'var(--text-secondary, #CBD5E1)',
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
+            width: '100%',
+            maxWidth: '420px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            justifyContent: 'flex-end',
+            marginBottom: '12px',
+            zIndex: 10
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
-          aria-label="Back"
         >
-          <ArrowLeft size={18} />
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={handleSkip}
+            style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
+              color: 'var(--text-secondary, #CBD5E1)',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+          >
+            <span>Skip</span>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Main Form Content - Fully Out-of-the-box (Frameless & Clean) */}
       <div

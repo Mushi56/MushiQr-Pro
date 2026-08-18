@@ -586,7 +586,19 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       console.error('Failed to generate thumbnail for scanned QR:', err);
     }
 
-    import('../utils/storage').then(({ saveToHistory, getPreferences }) => {
+    const isUrl = parsed.type === 'Website' || /^https?:\/\//i.test(decodedText.trim()) || /^www\./i.test(decodedText.trim());
+    let targetUrl = decodedText.trim();
+    if (isUrl && !/^https?:\/\//i.test(targetUrl)) {
+      targetUrl = 'https://' + targetUrl;
+    }
+
+    let shouldAutoOpen = false;
+    try {
+      const prefs = JSON.parse(localStorage.getItem('qrgen_preferences') || '{}');
+      shouldAutoOpen = prefs.autoOpenUrl === true;
+    } catch {}
+
+    import('../utils/storage').then(({ saveToHistory }) => {
       saveToHistory({
         source: 'scan',
         qrData: { text: decodedText },
@@ -594,20 +606,32 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
         displayText: decodedText,
         thumbnail: thumbnail
       });
-
-      const prefs = getPreferences();
-      if (prefs.autoOpenUrl && parsed.type === 'url' && parsed.data?.url) {
-        setTimeout(() => {
-          try {
-            window.open(parsed.data.url, '_blank', 'noopener,noreferrer');
-          } catch (e) {
-            console.error('Failed to auto open URL:', e);
-          }
-        }, 400);
-      }
     });
-    
-    setStatus('DETECTED');
+
+    if (shouldAutoOpen && isUrl) {
+      // Navigate directly to link without opening result page
+      if (Capacitor.isNativePlatform()) {
+        Browser.open({ url: targetUrl, windowName: '_system' }).catch(() => {
+          window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        });
+      } else {
+        const opened = window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        if (!opened) {
+          window.location.assign(targetUrl);
+        }
+      }
+
+      // Re-enable scanning after returning
+      setTimeout(() => {
+        if (mountedRef.current) {
+          scanHandledRef.current = false;
+          try { qrScannerRef.current?.resume(); } catch {}
+        }
+      }, 1500);
+    } else {
+      // Toggle closed or non-URL: navigate to result page
+      setStatus('DETECTED');
+    }
   }, [playBeep]);
 
   const startScanner = useCallback(async () => {

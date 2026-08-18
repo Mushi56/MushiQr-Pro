@@ -71,11 +71,6 @@ export default function SettingsPage({ onNavigate, theme, setTheme, effectiveThe
       id: 'scanSettings',
       label: 'Scan Settings',
       icon: <Scan size={20} />,
-      value: (
-        <span style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600 }}>
-          {scanSound ? 'Sound On' : 'Muted'} • {autoOpenUrl ? 'Auto URL' : 'Manual'}
-        </span>
-      ),
       onClick: () => setIsScanModalOpen(true)
     },
     {
@@ -86,7 +81,6 @@ export default function SettingsPage({ onNavigate, theme, setTheme, effectiveThe
         </span>
       ),
       icon: <Folder size={20} />,
-      value: <span style={{ color: 'var(--accent-primary)', fontWeight: 'bold' }}>{saveLocation}</span>,
       onClick: handleChooseFolder
     },
     {
