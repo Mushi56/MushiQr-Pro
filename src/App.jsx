@@ -985,7 +985,6 @@ export default function App() {
         } catch (e) {
           setIsSuperAdmin(false);
         }
-        syncUserFirestoreData();
         // Track user profile for admin panel visibility
         trackUserProfile(user);
         linkVisitorToUser(user.uid);
@@ -4219,7 +4218,6 @@ export default function App() {
                         onClick={async () => {
                           setAuthDropdownOpen(false);
                           const { signOut: fbSignOut } = await import('firebase/auth');
-                          const { handleLogoutClear: clearData } = await import('./utils/storage');
                           await fbSignOut(auth);
                           try {
                             const { Capacitor } = await import('@capacitor/core');
@@ -4230,7 +4228,6 @@ export default function App() {
                           } catch (e) {
                             console.warn('Native sign out error:', e);
                           }
-                          clearData();
                           navigateTo('login');
                         }}
                         style={{

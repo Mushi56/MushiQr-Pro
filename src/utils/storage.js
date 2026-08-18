@@ -291,12 +291,15 @@ export function clearDrafts() {
 export function savePreferences(prefs) {
   localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
 
-  // Firestore mirror sync
+  // Firestore mirror sync (exclude theme - theme is purely local device preference)
   try {
     const user = auth.currentUser;
     if (user) {
-      const docRef = doc(db, 'users', user.uid, 'preferences', 'settings');
-      setDoc(docRef, prefs).catch(e => console.error('Firestore savePreferences error:', e));
+      const { theme, ...cloudPrefs } = prefs || {};
+      if (Object.keys(cloudPrefs).length > 0) {
+        const docRef = doc(db, 'users', user.uid, 'preferences', 'settings');
+        setDoc(docRef, cloudPrefs).catch(e => console.error('Firestore savePreferences error:', e));
+      }
     }
   } catch (e) {
     console.error('Firestore savePreferences error:', e);
@@ -359,7 +362,7 @@ export async function syncUserFirestoreData() {
     const localHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
     const localSaved = JSON.parse(localStorage.getItem(SAVED_KEY) || '[]');
 
-    // 3. Merge History (latest timestamp wins)
+    // 3. Merge History (preserve all local items, latest timestamp wins)
     const historyMap = new Map();
     dbHistory.forEach(item => historyMap.set(item.id, item));
     localHistory.forEach(item => {
@@ -372,7 +375,7 @@ export async function syncUserFirestoreData() {
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
       .slice(0, MAX_HISTORY);
 
-    // 4. Merge Saved (latest timestamp wins)
+    // 4. Merge Saved (preserve all local items, latest timestamp wins)
     const savedMap = new Map();
     dbSaved.forEach(item => savedMap.set(item.id, item));
     localSaved.forEach(item => {
@@ -387,7 +390,7 @@ export async function syncUserFirestoreData() {
       .sort((a, b) => new Date(b.savedAt || b.timestamp) - new Date(a.savedAt || a.timestamp))
       .slice(0, MAX_SAVED);
 
-    // 5. Update Local Storage
+    // 5. Update Local Storage with merged data
     localStorage.setItem(HISTORY_KEY, JSON.stringify(mergedHistory));
     localStorage.setItem(SAVED_KEY, JSON.stringify(mergedSaved));
 
@@ -403,17 +406,25 @@ export async function syncUserFirestoreData() {
     });
     await batch.commit();
 
-    // 7. Sync Preferences
+    // 7. Sync Preferences (Theme is strictly excluded to preserve local device theme)
     if (prefsSnap.exists()) {
-      const dbPrefs = prefsSnap.data();
+      const dbPrefs = prefsSnap.data() || {};
+      delete dbPrefs.theme;
       const localPrefs = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}');
+      const currentLocalTheme = localPrefs.theme;
       const mergedPrefs = { ...localPrefs, ...dbPrefs };
+      if (currentLocalTheme) {
+        mergedPrefs.theme = currentLocalTheme;
+      } else {
+        delete mergedPrefs.theme;
+      }
       localStorage.setItem(PREFS_KEY, JSON.stringify(mergedPrefs));
       window.dispatchEvent(new Event('preferences-sync'));
     } else {
       const localPrefs = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}');
-      if (Object.keys(localPrefs).length > 0) {
-        await setDoc(prefsDocRef, localPrefs);
+      const { theme, ...cloudPrefs } = localPrefs || {};
+      if (Object.keys(cloudPrefs).length > 0) {
+        await setDoc(prefsDocRef, cloudPrefs);
       }
     }
 
@@ -425,9 +436,6 @@ export async function syncUserFirestoreData() {
 }
 
 export function handleLogoutClear() {
-  localStorage.removeItem(HISTORY_KEY);
-  localStorage.removeItem(SAVED_KEY);
-  localStorage.removeItem(PREFS_KEY);
-  window.dispatchEvent(new Event('storage-sync'));
-  window.dispatchEvent(new Event('preferences-sync'));
+  // Preserve local device history, saved items, and theme preferences across logouts
+  // so user data is never deleted when signing out or switching accounts.
 }
