@@ -13,6 +13,7 @@ import { getOrganizedFilePath } from '../utils/exportUtils';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
 import PaidCrownBadge from './PaidCrownBadge';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 // Helper for mobile ZIP saving
 async function saveZipNative(base64Data, filename, category = 'QR Codes') {
@@ -143,6 +144,16 @@ export default function BatchPage({
   const [exportQuality, setExportQuality] = useState('Normal');
   const [customZipFileName, setCustomZipFileName] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [deleteModalConfig, setDeleteModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    itemTitle: null,
+    confirmText: 'Delete',
+    iconType: 'trash',
+    isDangerous: false,
+    onConfirm: null
+  });
   const [exportSuccessInfo, setExportSuccessInfo] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
@@ -409,9 +420,18 @@ export default function BatchPage({
   };
 
   const handleClearBatch = () => {
-    if (window.confirm('Remove all items from the batch?')) {
-      setBatchItems([]);
-    }
+    setDeleteModalConfig({
+      isOpen: true,
+      title: 'Clear Entire Batch?',
+      description: 'Are you sure you want to remove all imported and generated items from this batch? This action cannot be undone.',
+      itemTitle: `${batchItems.length} batch items`,
+      confirmText: 'Clear Batch',
+      iconType: 'alert',
+      isDangerous: true,
+      onConfirm: () => {
+        setBatchItems([]);
+      }
+    });
   };
 
   const downloadSampleCSV = () => {
@@ -2253,6 +2273,18 @@ export default function BatchPage({
           </div>
         </div>
       )}
+
+      <DeleteConfirmModal
+        isOpen={deleteModalConfig.isOpen}
+        onClose={() => setDeleteModalConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={deleteModalConfig.onConfirm}
+        title={deleteModalConfig.title}
+        description={deleteModalConfig.description}
+        itemTitle={deleteModalConfig.itemTitle}
+        confirmText={deleteModalConfig.confirmText}
+        iconType={deleteModalConfig.iconType}
+        isDangerous={deleteModalConfig.isDangerous}
+      />
     </div>
   );
 }

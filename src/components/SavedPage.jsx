@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { getSaved, deleteFromSaved, clearSaved, clearSavedByRange } from '../utils/storage';
-import { Search, SearchX, Trash2, MoreVertical, Star, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, QrCode, Crown, AlertCircle } from 'lucide-react';
+import { Search, SearchX, Trash2, Star, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, QrCode, Crown, AlertCircle } from 'lucide-react';
 import { QR_TYPES } from '../utils/qrEngine';
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 const TYPE_ICONS = {
   [QR_TYPES.URL]: <Link2 size={16} />,
@@ -68,8 +69,17 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
   const [saved, setSaved] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
-  const [openMenuId, setOpenMenuId] = useState(null);
   const [showRangeMenu, setShowRangeMenu] = useState(false);
+  const [deleteModalConfig, setDeleteModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    itemTitle: null,
+    confirmText: 'Delete',
+    iconType: 'trash',
+    isDangerous: false,
+    onConfirm: null
+  });
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -92,25 +102,57 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
     return () => window.removeEventListener('storage-sync', handleSync);
   }, []);
 
-  const handleDelete = (e, id) => {
+  const handleDelete = (e, item) => {
     e.stopPropagation();
-    const updated = deleteFromSaved(id);
-    setSaved(updated);
-    setOpenMenuId(null);
+    setDeleteModalConfig({
+      isOpen: true,
+      title: 'Delete Saved QR Code?',
+      description: 'Are you sure you want to remove this item from your saved collection?',
+      itemTitle: getQRTitle(item),
+      confirmText: 'Delete',
+      iconType: 'trash',
+      isDangerous: false,
+      onConfirm: () => {
+        const updated = deleteFromSaved(item.id);
+        setSaved(updated);
+      }
+    });
   };
 
   const handleClear = (hours) => {
-    let msg = 'Are you sure?';
-    if (hours === 1) msg = 'Clear saved items from the last hour?';
-    if (hours === 24) msg = 'Clear saved items from the last 24 hours?';
-    if (hours === 168) msg = 'Clear saved items from the last 7 days?';
-    if (hours === -1) msg = 'Clear ALL saved items?';
+    setShowRangeMenu(false);
+    let title = 'Clear Saved Items?';
+    let desc = 'Are you sure you want to clear these saved items?';
+    let isDang = false;
 
-    if (window.confirm(msg)) {
-      const updated = clearSavedByRange(hours);
-      setSaved(updated);
-      setShowRangeMenu(false);
+    if (hours === 1) {
+      title = 'Clear Recent Saved?';
+      desc = 'Remove saved items added within the last 1 hour?';
+    } else if (hours === 24) {
+      title = 'Clear 24h Saved?';
+      desc = 'Remove saved items added in the last 24 hours?';
+    } else if (hours === 168) {
+      title = 'Clear 7-Day Saved?';
+      desc = 'Remove saved items added in the last 7 days?';
+    } else if (hours === -1) {
+      title = 'Clear ALL Saved Items?';
+      desc = 'Permanently delete ALL saved QR codes and templates from this device? This action cannot be undone.';
+      isDang = true;
     }
+
+    setDeleteModalConfig({
+      isOpen: true,
+      title,
+      description: desc,
+      itemTitle: hours === -1 ? `All ${saved.length} saved items` : null,
+      confirmText: hours === -1 ? 'Clear All' : 'Clear',
+      iconType: hours === -1 ? 'alert' : 'trash',
+      isDangerous: isDang,
+      onConfirm: () => {
+        const updated = clearSavedByRange(hours);
+        setSaved(updated);
+      }
+    });
   };
 
   const getQRTitle = (item) => {
@@ -154,62 +196,10 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
     }}>
       {/* Header */}
       <div style={{ padding: '24px var(--main-padding-x) 16px', background: 'var(--bg-primary)', zIndex: 10 }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          position: 'relative'
-        }}>
-
-          {saved.length > 0 && (
-             <div style={{ position: 'relative' }} ref={menuRef}>
-               <button 
-                 onClick={() => setShowRangeMenu(!showRangeMenu)}
-                 style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '8px' }}
-               >
-                 <Trash2 size={22} />
-               </button>
-               
-               {showRangeMenu && (
-                 <div style={{
-                   position: 'absolute', top: '100%', right: 0,
-                   background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
-                   borderRadius: '12px', padding: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                   zIndex: 100, minWidth: '180px', display: 'flex', flexDirection: 'column', gap: '4px'
-                 }}>
-                   <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-tertiary)', padding: '4px 8px', textTransform: 'uppercase' }}>Clear Saved</div>
-                   {[
-                     { label: 'Last Hour', val: 1 },
-                     { label: 'Last 24 Hours', val: 24 },
-                     { label: 'Last 7 Days', val: 168 },
-                     { label: 'All Time', val: -1, color: '#D60036' }
-                   ].map(opt => (
-                     <button
-                       key={opt.label}
-                       onClick={() => handleClear(opt.val)}
-                       style={{
-                         padding: '10px 12px', borderRadius: '8px', border: 'none',
-                         background: 'transparent', color: opt.color || 'var(--text-primary)',
-                         fontSize: '14px', fontWeight: 600, textAlign: 'left', cursor: 'pointer',
-                         display: 'flex', alignItems: 'center', gap: '8px'
-                       }}
-                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
-                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                     >
-                       <Trash2 size={16} /> {opt.label}
-                     </button>
-                   ))}
-                 </div>
-               )}
-             </div>
-          )}
-        </div>
-
         {/* Search */}
         <div style={{
           display: 'flex', alignItems: 'center', background: 'var(--bg-elevated)',
           borderRadius: '16px', padding: '0 16px', border: '1px solid var(--border-color)',
-          marginTop: '20px',
           marginBottom: '16px'
         }}>
           <Search size={20} color="var(--text-muted)" />
@@ -225,21 +215,83 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
           />
         </div>
 
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' }}>
-          {availableTypes.map(type => {
-            const count = type === 'All' ? saved.length : saved.filter(i => getTypeLabel(i) === type).length;
-            const isActive = activeFilter === type;
-            return (
-              <button
-                key={type}
-                onClick={() => setActiveFilter(type)}
-                className={`tab-pill-premium ${isActive ? 'active' : ''}`}
+        {/* Filters & Clear Saved Button */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', flex: 1 }}>
+            {availableTypes.map(type => {
+              const count = type === 'All' ? saved.length : saved.filter(i => getTypeLabel(i) === type).length;
+              const isActive = activeFilter === type;
+              return (
+                <button
+                  key={type}
+                  onClick={() => setActiveFilter(type)}
+                  className={`tab-pill-premium ${isActive ? 'active' : ''}`}
+                >
+                  {type} {count > 0 && <span style={{ opacity: 0.8, fontSize: '11px', fontWeight: 700 }}>({count})</span>}
+                </button>
+              );
+            })}
+          </div>
+
+          {saved.length > 0 && (
+            <div style={{ position: 'relative', flexShrink: 0 }} ref={menuRef}>
+              <button 
+                onClick={() => setShowRangeMenu(!showRangeMenu)}
+                style={{ 
+                  background: 'var(--bg-elevated)', 
+                  border: '1px solid var(--border-color)', 
+                  color: 'var(--text-primary)', 
+                  cursor: 'pointer', 
+                  padding: '8px 12px',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  transition: 'all 0.2s'
+                }}
+                title="Clear Saved Items"
+                onMouseEnter={(e) => e.currentTarget.style.color = '#D60036'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
               >
-                {type} {count > 0 && <span style={{ opacity: 0.8, fontSize: '11px', fontWeight: 700 }}>({count})</span>}
+                <Trash2 size={16} />
+                <span>Clear</span>
               </button>
-            );
-          })}
+              
+              {showRangeMenu && (
+                <div style={{
+                  position: 'absolute', top: '100%', right: 0, marginTop: '6px',
+                  background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                  borderRadius: '12px', padding: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                  zIndex: 100, minWidth: '180px', display: 'flex', flexDirection: 'column', gap: '4px'
+                }}>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-tertiary)', padding: '4px 8px', textTransform: 'uppercase' }}>Clear Saved</div>
+                  {[
+                    { label: 'Last Hour', val: 1 },
+                    { label: 'Last 24 Hours', val: 24 },
+                    { label: 'Last 7 Days', val: 168 },
+                    { label: 'All Time', val: -1, color: '#D60036' }
+                  ].map(opt => (
+                    <button
+                      key={opt.label}
+                      onClick={() => handleClear(opt.val)}
+                      style={{
+                        padding: '10px 12px', borderRadius: '8px', border: 'none',
+                        background: 'transparent', color: opt.color || 'var(--text-primary)',
+                        fontSize: '14px', fontWeight: 600, textAlign: 'left', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '8px'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <Trash2 size={16} /> {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -306,100 +358,103 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
             {filteredItems.map((item) => {
               const typeStr = item.qrType || item.type;
               return (
-              <div 
-                key={item.id} 
-                onClick={() => onLoadQR(item)}
-                style={{
-                  background: 'var(--bg-elevated)',
-                  border: 'none',
-                  borderRadius: '16px',
-                  padding: '10px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                  transition: 'all 0.2s',
-                  minWidth: 0 // Prevent expansion
-                }}
-              >
-                <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 2 }}>
-                  <Star size={16} fill="#D60036" strokeWidth={0} />
-                </div>
-                
-                <div style={{
-                  width: '100%',
-                  aspectRatio: '1/1',
-                  borderRadius: '8px',
-                  background: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '8px',
-                  border: 'none',
-                  overflow: 'hidden'
-                }}>
-                  {item.thumbnail ? (
-                    <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
-                  ) : (
-                    <QrCode size={40} color="var(--accent-primary)" />
-                  )}
-                </div>
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div 
+                  key={item.id} 
+                  onClick={() => onLoadQR(item)}
+                  style={{
+                    background: 'var(--bg-elevated)',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                    transition: 'all 0.2s',
+                    minWidth: 0
+                  }}
+                >
                   <div style={{
-                    width: '24px', height: '24px', borderRadius: '6px',
-                    background: 'rgba(214, 0, 54, 0.1)', color: '#D60036',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    width: '100%',
+                    aspectRatio: '1/1',
+                    borderRadius: '10px',
+                    background: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '10px',
+                    border: 'none',
+                    overflow: 'hidden'
                   }}>
-                    {TYPE_ICONS[typeStr] || <QrCode size={14} />}
-                  </div>
-                  <h4 style={{ 
-                    margin: 0, fontSize: '12px', fontWeight: 700, 
-                    color: 'var(--text-primary)', whiteSpace: 'nowrap',
-                    overflow: 'hidden', textOverflow: 'ellipsis', flex: 1
-                  }}>
-                    {getQRTitle(item)}
-                  </h4>
-                  
-                  <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
-                    <button 
-                      onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
-                      style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
-                    >
-                      <MoreVertical size={16} />
-                    </button>
-                    {openMenuId === item.id && (
-                      <div style={{
-                        position: 'absolute', bottom: '100%', right: 0,
-                        background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
-                        borderRadius: '12px', padding: '4px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                        zIndex: 10, minWidth: '120px'
-                      }}>
-                        <button
-                          onClick={(e) => handleDelete(e, item.id)}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            width: '100%', padding: '10px 12px', background: 'none', border: 'none',
-                            borderRadius: '8px', color: '#D60036', fontSize: '13px', fontWeight: 600,
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <Trash2 size={16} /> Delete
-                        </button>
-                      </div>
+                    {item.thumbnail ? (
+                      <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                    ) : (
+                      <QrCode size={40} color="var(--accent-primary)" />
                     )}
                   </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', marginBottom: '2px' }}>
+                    <h4 style={{ 
+                      margin: 0, fontSize: '13px', fontWeight: 700, 
+                      color: 'var(--text-primary)', whiteSpace: 'nowrap',
+                      overflow: 'hidden', textOverflow: 'ellipsis', flex: 1
+                    }}>
+                      {getQRTitle(item)}
+                    </h4>
+                    
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <button 
+                        onClick={(e) => handleDelete(e, item)}
+                        title="Delete from Saved"
+                        style={{
+                          background: 'rgba(214, 0, 54, 0.08)',
+                          border: 'none',
+                          color: 'var(--accent-primary, #D60036)',
+                          cursor: 'pointer',
+                          padding: '6px',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s',
+                          flexShrink: 0
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(214, 0, 54, 0.2)';
+                          e.currentTarget.style.transform = 'scale(1.08)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(214, 0, 54, 0.08)';
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                    {getTypeLabel(item)}
+                  </p>
                 </div>
-                
-                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  {getTypeLabel(typeStr)}
-                </p>
-              </div>
-            )})}
+              );
+            })}
           </div>
         )}
       </div>
+
+      <DeleteConfirmModal
+        isOpen={deleteModalConfig.isOpen}
+        onClose={() => setDeleteModalConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={deleteModalConfig.onConfirm}
+        title={deleteModalConfig.title}
+        description={deleteModalConfig.description}
+        itemTitle={deleteModalConfig.itemTitle}
+        confirmText={deleteModalConfig.confirmText}
+        iconType={deleteModalConfig.iconType}
+        isDangerous={deleteModalConfig.isDangerous}
+      />
     </div>
   );
 }

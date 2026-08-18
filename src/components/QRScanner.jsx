@@ -554,32 +554,32 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
     try {
       const canvas = document.createElement('canvas');
       if (finalBcid && finalBcid !== 'qrcode') {
-        canvas.width = 200;
-        canvas.height = 120;
+        canvas.width = 600;
+        canvas.height = 300;
         renderBarcode(canvas, decodedText, {
           bcid: finalBcid,
           barColor: '#000000',
           bgColor: '#ffffff',
-          barWidth: 2,
-          height: 80,
-          margin: 10,
+          barWidth: 3,
+          height: 160,
+          margin: 20,
           displayValue: false
         });
-        thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+        thumbnail = canvas.toDataURL('image/png');
       } else {
-        canvas.width = 120;
-        canvas.height = 120;
+        canvas.width = 400;
+        canvas.height = 400;
         const matrixInfo = generateQRMatrix(decodedText, 'M');
         if (matrixInfo) {
           renderQR(canvas, {
             matrix: matrixInfo.matrix,
             moduleCount: matrixInfo.moduleCount,
-            size: 120,
+            size: 400,
             qrColor: '#000000',
             bgColor: '#ffffff',
             bgTransparent: false
           });
-          thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+          thumbnail = canvas.toDataURL('image/png');
         }
       }
     } catch (err) {
@@ -813,32 +813,32 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       const canvas = document.createElement('canvas');
       const bcid = mapFormatToBcid(detectedFormatName);
       if (bcid && bcid !== 'qrcode') {
-        canvas.width = 200;
-        canvas.height = 120;
+        canvas.width = 600;
+        canvas.height = 300;
         renderBarcode(canvas, result, {
           bcid: bcid,
           barColor: '#000000',
           bgColor: '#ffffff',
-          barWidth: 2,
-          height: 80,
-          margin: 10,
+          barWidth: 3,
+          height: 160,
+          margin: 20,
           displayValue: false
         });
-        thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+        thumbnail = canvas.toDataURL('image/png');
       } else {
-        canvas.width = 120;
-        canvas.height = 120;
+        canvas.width = 400;
+        canvas.height = 400;
         const matrixInfo = generateQRMatrix(result, 'M');
         if (matrixInfo) {
           renderQR(canvas, {
             matrix: matrixInfo.matrix,
             moduleCount: matrixInfo.moduleCount,
-            size: 120,
+            size: 400,
             qrColor: '#000000',
             bgColor: '#ffffff',
             bgTransparent: false
           });
-          thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+          thumbnail = canvas.toDataURL('image/png');
         }
       }
     } catch (err) {

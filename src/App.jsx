@@ -52,6 +52,7 @@ import {
   Redo2,
   Check,
   RotateCw,
+  RefreshCw,
   Filter,
   Crop,
   Eraser,
@@ -63,7 +64,8 @@ import {
   ChevronRight,
   Cloud,
   Lock,
-  Smartphone
+  Smartphone,
+  Trash2
 } from 'lucide-react';
 import ColorPicker from './components/ColorPicker';
 import Slider from './components/Slider';
@@ -74,7 +76,26 @@ import QRDataInput from './components/QRDataInput';
 import { DotStyleSelector, EyeStyleSelector } from './components/StyleSelectors';
 import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData, constrainToSafeZone } from './utils/qrEngine';
 import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from './utils/exportUtils';
-import { saveToHistory, getSaved, saveToSaved, getPreferences, savePreferences, syncUserFirestoreData, handleLogoutClear } from './utils/storage';
+import {
+  saveToHistory,
+  getHistory,
+  getSaved,
+  saveToSaved,
+  getPreferences,
+  savePreferences,
+  syncUserFirestoreData,
+  syncUserSavedData,
+  syncUserHistoryData,
+  syncUserAllData,
+  restoreUserSavedData,
+  restoreUserHistoryData,
+  restoreUserAllData,
+  clearUserCloudSavedData,
+  clearUserCloudHistoryData,
+  clearUserCloudAllData,
+  getUserCloudCounts,
+  handleLogoutClear
+} from './utils/storage';
 import { QR_TEMPLATES, getAllTemplates, getUserTemplates } from './utils/qrTemplates';
 import QRScanner from './components/QRScanner';
 import HistoryPage from './components/HistoryPage';
@@ -97,6 +118,7 @@ import AppIcon from './components/AppIcon';
 import SaveLocationModal from './components/SaveLocationModal';
 import PremiumModal from './components/PremiumModal';
 import PaidCrownBadge from './components/PaidCrownBadge';
+import DeleteConfirmModal from './components/DeleteConfirmModal';
 import OnboardingFlow from './components/auth/OnboardingFlow';
 import LoginPage from './components/auth/LoginPage';
 import SignUpPage from './components/auth/SignUpPage';
@@ -942,7 +964,26 @@ export default function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [isCloudSyncModalOpen, setIsCloudSyncModalOpen] = useState(false);
+  const [cloudSyncTab, setCloudSyncTab] = useState('sync'); // 'sync' | 'restore' | 'clear'
+  const [cloudCounts, setCloudCounts] = useState({ cloudSavedCount: 0, cloudHistoryCount: 0 });
   const [isSyncing, setIsSyncing] = useState(false);
+  const [deleteModalConfig, setDeleteModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    itemTitle: null,
+    confirmText: 'Delete',
+    iconType: 'trash',
+    isDangerous: false,
+    onConfirm: null
+  });
+
+  useEffect(() => {
+    if (isCloudSyncModalOpen && currentUser) {
+      getUserCloudCounts().then(counts => setCloudCounts(counts));
+    }
+  }, [isCloudSyncModalOpen, currentUser]);
   const [newProfilePicUrl, setNewProfilePicUrl] = useState('');
   const [profileNameInput, setProfileNameInput] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -4160,35 +4201,24 @@ export default function App() {
                       </button>
                       {/* Cloud Sync */}
                       <button 
-                        onClick={async () => {
-                          if (isSyncing) return;
-                          setIsSyncing(true);
-                          try {
-                            await syncUserFirestoreData();
-                            showToast('Successfully synced all QR templates, history, and settings to the cloud!');
-                          } catch (err) {
-                            console.error(err);
-                            showToast('Failed to sync. Please try again.');
-                          } finally {
-                            setIsSyncing(false);
-                            setAuthDropdownOpen(false);
-                          }
+                        onClick={() => {
+                          setIsCloudSyncModalOpen(true);
+                          setAuthDropdownOpen(false);
                         }}
-                        disabled={isSyncing}
                         style={{
                           width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px',
-                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: isSyncing ? 'default' : 'pointer', textAlign: 'left',
-                          transition: 'background 0.2s ease', opacity: isSyncing ? 0.7 : 1
+                          background: 'transparent', border: 'none', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                          transition: 'background 0.2s ease'
                         }}
-                        onMouseEnter={e => !isSyncing && (e.currentTarget.style.background = 'var(--bg-hover)')}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.09)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {isSyncing ? <Loader2 size={24} color="#3B82F6" className="spin" /> : <Cloud size={24} color="#3B82F6" />}
+                          <Cloud size={24} color="#3B82F6" />
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>{isSyncing ? 'Syncing...' : 'Cloud Sync'}</div>
-                          <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>Sync your projects across devices</div>
+                          <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>Cloud Sync</div>
+                          <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>Sync saved &amp; history data</div>
                         </div>
                         <ChevronRight size={15} color="var(--text-muted)" />
                       </button>
@@ -6642,26 +6672,6 @@ export default function App() {
       {unsavedChangesModal.isOpen && (
         <div className="modal-overlay" onClick={handleCancelExit}>
           <div className="modal-container glass-panel" style={{ position: 'relative', maxWidth: '360px', padding: '24px' }} onClick={e => e.stopPropagation()}>
-            <button 
-              onClick={handleCancelExit}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'var(--bg-hover)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '32px',
-                height: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-secondary)',
-                cursor: 'pointer'
-              }}
-            >
-              <X size={16} />
-            </button>
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
               <div style={{
                 width: '56px',
@@ -6895,10 +6905,683 @@ export default function App() {
           </div>
         </div>
       )}
+      {/* ── Complete Cloud Sync, Restore & Data Management Modal ── */}
+      {isCloudSyncModalOpen && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }} onClick={() => !isSyncing && setIsCloudSyncModalOpen(false)}>
+          <div 
+            className="modal-container" 
+            style={{ 
+              background: 'var(--bg-elevated, #0F172A)', 
+              border: '1px solid var(--border-color, #334155)', 
+              borderRadius: '24px', 
+              width: '92%', 
+              maxWidth: '440px', 
+              padding: '24px', 
+              color: 'var(--text-primary, #FFFFFF)', 
+              boxShadow: '0 25px 60px rgba(0,0,0,0.4)',
+              fontFamily: 'var(--font-sans)',
+              boxSizing: 'border-box'
+            }} 
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3B82F6' }}>
+                  <Cloud size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary, #FFFFFF)' }}>Cloud Data Manager</h3>
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)', margin: '2px 0 0' }}>Sync, restore, or delete your cloud backups</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => !isSyncing && setIsCloudSyncModalOpen(false)} 
+                disabled={isSyncing}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary, #94A3B8)', cursor: 'pointer', fontSize: '24px', lineHeight: 1, padding: '4px' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Navigation Tabs (Sync / Restore / Clear) */}
+            <div style={{
+              display: 'flex',
+              background: 'var(--bg-primary, #0B0F19)',
+              borderRadius: '12px',
+              padding: '4px',
+              marginBottom: '18px',
+              border: '1px solid var(--border-color, #1E293B)'
+            }}>
+              <button
+                onClick={() => setCloudSyncTab('sync')}
+                style={{
+                  flex: 1,
+                  padding: '8px 4px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  background: cloudSyncTab === 'sync' ? 'var(--accent-primary, #D60036)' : 'transparent',
+                  color: cloudSyncTab === 'sync' ? '#FFFFFF' : 'var(--text-secondary, #94A3B8)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '5px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <Cloud size={14} />
+                <span>Backup</span>
+              </button>
+              <button
+                onClick={() => setCloudSyncTab('restore')}
+                style={{
+                  flex: 1,
+                  padding: '8px 4px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  background: cloudSyncTab === 'restore' ? 'var(--accent-primary, #D60036)' : 'transparent',
+                  color: cloudSyncTab === 'restore' ? '#FFFFFF' : 'var(--text-secondary, #94A3B8)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '5px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <Download size={14} />
+                <span>Restore</span>
+              </button>
+              <button
+                onClick={() => setCloudSyncTab('clear')}
+                style={{
+                  flex: 1,
+                  padding: '8px 4px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  background: cloudSyncTab === 'clear' ? 'rgba(239, 68, 68, 0.2)' : 'transparent',
+                  color: cloudSyncTab === 'clear' ? '#EF4444' : 'var(--text-secondary, #94A3B8)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '5px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <Trash2 size={14} />
+                <span>Clear Cloud</span>
+              </button>
+            </div>
+
+            {/* ── TAB 1: BACKUP / SYNC ── */}
+            {cloudSyncTab === 'sync' && (
+              <div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+                  {/* Sync Saved */}
+                  <div style={{
+                    background: 'var(--bg-primary, #0B0F19)',
+                    border: '1px solid var(--border-color, #1E293B)',
+                    borderRadius: '14px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EC4899', flexShrink: 0 }}>
+                        <Bookmark size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Saved Items</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{getSaved().length} local items</div>
+                      </div>
+                    </div>
+                    <button
+                      disabled={isSyncing}
+                      onClick={async () => {
+                        setIsSyncing(true);
+                        try {
+                          const res = await syncUserSavedData();
+                          if (res.success) {
+                            showToast(`Saved items synced! (${res.savedCount || getSaved().length} in cloud)`);
+                            const counts = await getUserCloudCounts();
+                            setCloudCounts(counts);
+                          } else {
+                            showToast(res.error || 'Failed to sync saved.');
+                          }
+                        } catch (e) {
+                          showToast('Sync error.');
+                        } finally {
+                          setIsSyncing(false);
+                        }
+                      }}
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'rgba(236, 72, 153, 0.15)',
+                        color: '#EC4899',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: isSyncing ? 'default' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      {isSyncing ? <Loader2 size={12} className="spin" /> : <RefreshCw size={12} />}
+                      <span>Sync Saved</span>
+                    </button>
+                  </div>
+
+                  {/* Sync History */}
+                  <div style={{
+                    background: 'var(--bg-primary, #0B0F19)',
+                    border: '1px solid var(--border-color, #1E293B)',
+                    borderRadius: '14px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', flexShrink: 0 }}>
+                        <History size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>History &amp; Recent</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{getHistory().length} local items</div>
+                      </div>
+                    </div>
+                    <button
+                      disabled={isSyncing}
+                      onClick={async () => {
+                        setIsSyncing(true);
+                        try {
+                          const res = await syncUserHistoryData();
+                          if (res.success) {
+                            showToast(`History items synced! (${res.historyCount || getHistory().length} in cloud)`);
+                            const counts = await getUserCloudCounts();
+                            setCloudCounts(counts);
+                          } else {
+                            showToast(res.error || 'Failed to sync history.');
+                          }
+                        } catch (e) {
+                          showToast('Sync error.');
+                        } finally {
+                          setIsSyncing(false);
+                        }
+                      }}
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#10B981',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: isSyncing ? 'default' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      {isSyncing ? <Loader2 size={12} className="spin" /> : <RefreshCw size={12} />}
+                      <span>Sync History</span>
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  disabled={isSyncing}
+                  onClick={async () => {
+                    setIsSyncing(true);
+                    try {
+                      const res = await syncUserAllData();
+                      if (res.success) {
+                        showToast('All saved and history items synced to cloud!');
+                        const counts = await getUserCloudCounts();
+                        setCloudCounts(counts);
+                        setIsCloudSyncModalOpen(false);
+                      } else {
+                        showToast(res.error || 'Sync failed.');
+                      }
+                    } catch (e) {
+                      showToast('Sync error.');
+                    } finally {
+                      setIsSyncing(false);
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: 'none',
+                    background: 'var(--accent-gradient)',
+                    color: '#FFFFFF',
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    fontSize: '13.5px',
+                    cursor: isSyncing ? 'default' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 14px rgba(214, 0, 54, 0.25)',
+                    opacity: isSyncing ? 0.7 : 1
+                  }}
+                >
+                  {isSyncing ? <Loader2 size={16} className="spin" /> : <Cloud size={16} />}
+                  <span>{isSyncing ? 'Syncing...' : 'Sync All (Saved + History)'}</span>
+                </button>
+              </div>
+            )}
+
+            {/* ── TAB 2: RESTORE FROM CLOUD ── */}
+            {cloudSyncTab === 'restore' && (
+              <div>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary, #94A3B8)', margin: '0 0 12px', lineHeight: 1.4 }}>
+                  Restore your cloud backups onto this device without losing existing local records:
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+                  {/* Restore Saved */}
+                  <div style={{
+                    background: 'var(--bg-primary, #0B0F19)',
+                    border: '1px solid var(--border-color, #1E293B)',
+                    borderRadius: '14px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3B82F6', flexShrink: 0 }}>
+                        <Bookmark size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Restore Saved</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudSavedCount} items in cloud</div>
+                      </div>
+                    </div>
+                    <button
+                      disabled={isSyncing || cloudCounts.cloudSavedCount === 0}
+                      onClick={async () => {
+                        setIsSyncing(true);
+                        try {
+                          const res = await restoreUserSavedData();
+                          if (res.success) {
+                            showToast(`Restored ${res.restoredSavedCount} saved items from cloud!`);
+                          } else {
+                            showToast(res.error || 'Restore failed.');
+                          }
+                        } catch (e) {
+                          showToast('Restore error.');
+                        } finally {
+                          setIsSyncing(false);
+                        }
+                      }}
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'rgba(59, 130, 246, 0.15)',
+                        color: '#3B82F6',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: (isSyncing || cloudCounts.cloudSavedCount === 0) ? 'default' : 'pointer',
+                        opacity: cloudCounts.cloudSavedCount === 0 ? 0.5 : 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      {isSyncing ? <Loader2 size={12} className="spin" /> : <Download size={12} />}
+                      <span>Restore Saved</span>
+                    </button>
+                  </div>
+
+                  {/* Restore History */}
+                  <div style={{
+                    background: 'var(--bg-primary, #0B0F19)',
+                    border: '1px solid var(--border-color, #1E293B)',
+                    borderRadius: '14px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', flexShrink: 0 }}>
+                        <History size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Restore History</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudHistoryCount} items in cloud</div>
+                      </div>
+                    </div>
+                    <button
+                      disabled={isSyncing || cloudCounts.cloudHistoryCount === 0}
+                      onClick={async () => {
+                        setIsSyncing(true);
+                        try {
+                          const res = await restoreUserHistoryData();
+                          if (res.success) {
+                            showToast(`Restored ${res.restoredHistoryCount} history items from cloud!`);
+                          } else {
+                            showToast(res.error || 'Restore failed.');
+                          }
+                        } catch (e) {
+                          showToast('Restore error.');
+                        } finally {
+                          setIsSyncing(false);
+                        }
+                      }}
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#10B981',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: (isSyncing || cloudCounts.cloudHistoryCount === 0) ? 'default' : 'pointer',
+                        opacity: cloudCounts.cloudHistoryCount === 0 ? 0.5 : 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      {isSyncing ? <Loader2 size={12} className="spin" /> : <Download size={12} />}
+                      <span>Restore History</span>
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  disabled={isSyncing || (cloudCounts.cloudSavedCount === 0 && cloudCounts.cloudHistoryCount === 0)}
+                  onClick={async () => {
+                    setIsSyncing(true);
+                    try {
+                      const res = await restoreUserAllData();
+                      if (res.success) {
+                        showToast(`Restored all cloud data successfully!`);
+                        setIsCloudSyncModalOpen(false);
+                      } else {
+                        showToast(res.error || 'Restore failed.');
+                      }
+                    } catch (e) {
+                      showToast('Restore error.');
+                    } finally {
+                      setIsSyncing(false);
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: 'none',
+                    background: 'var(--accent-gradient)',
+                    color: '#FFFFFF',
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    fontSize: '13.5px',
+                    cursor: (isSyncing || (cloudCounts.cloudSavedCount === 0 && cloudCounts.cloudHistoryCount === 0)) ? 'default' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 14px rgba(214, 0, 54, 0.25)',
+                    opacity: (isSyncing || (cloudCounts.cloudSavedCount === 0 && cloudCounts.cloudHistoryCount === 0)) ? 0.5 : 1
+                  }}
+                >
+                  {isSyncing ? <Loader2 size={16} className="spin" /> : <Download size={16} />}
+                  <span>{isSyncing ? 'Restoring...' : 'Restore Everything from Cloud'}</span>
+                </button>
+              </div>
+            )}
+
+            {/* ── TAB 3: CLEAR CLOUD DATA ── */}
+            {cloudSyncTab === 'clear' && (
+              <div>
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  borderRadius: '12px',
+                  padding: '10px 12px',
+                  marginBottom: '14px',
+                  fontSize: '11.5px',
+                  color: '#EF4444',
+                  lineHeight: 1.4
+                }}>
+                  ⚠️ <strong>Notice:</strong> This deletes backup data from the cloud server. Your local items on this device will NOT be affected.
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+                  {/* Clear Cloud Saved */}
+                  <div style={{
+                    background: 'var(--bg-primary, #0B0F19)',
+                    border: '1px solid var(--border-color, #1E293B)',
+                    borderRadius: '14px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Cloud Saved Backups</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudSavedCount} items in cloud</div>
+                    </div>
+                    <button
+                      disabled={isSyncing || cloudCounts.cloudSavedCount === 0}
+                      onClick={() => {
+                        setDeleteModalConfig({
+                          isOpen: true,
+                          title: 'Clear Cloud Saved Items?',
+                          description: 'This will delete all saved QR codes and templates stored on the cloud server. Your local items on this device will NOT be deleted.',
+                          itemTitle: `${cloudCounts.cloudSavedCount} cloud saved items`,
+                          confirmText: 'Clear Cloud Saved',
+                          iconType: 'trash',
+                          isDangerous: false,
+                          onConfirm: async () => {
+                            setIsSyncing(true);
+                            try {
+                              const res = await clearUserCloudSavedData();
+                              if (res.success) {
+                                showToast('Cloud saved items cleared!');
+                                const counts = await getUserCloudCounts();
+                                setCloudCounts(counts);
+                              } else {
+                                showToast(res.error || 'Failed to clear cloud saved.');
+                              }
+                            } catch (e) {
+                              showToast('Clear error.');
+                            } finally {
+                              setIsSyncing(false);
+                            }
+                          }
+                        });
+                      }}
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        background: 'transparent',
+                        color: '#EF4444',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: (isSyncing || cloudCounts.cloudSavedCount === 0) ? 'default' : 'pointer',
+                        opacity: cloudCounts.cloudSavedCount === 0 ? 0.4 : 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <Trash2 size={12} />
+                      <span>Clear</span>
+                    </button>
+                  </div>
+
+                  {/* Clear Cloud History */}
+                  <div style={{
+                    background: 'var(--bg-primary, #0B0F19)',
+                    border: '1px solid var(--border-color, #1E293B)',
+                    borderRadius: '14px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>Cloud History Backups</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary, #94A3B8)' }}>{cloudCounts.cloudHistoryCount} items in cloud</div>
+                    </div>
+                    <button
+                      disabled={isSyncing || cloudCounts.cloudHistoryCount === 0}
+                      onClick={() => {
+                        setDeleteModalConfig({
+                          isOpen: true,
+                          title: 'Clear Cloud History?',
+                          description: 'This will delete all history and scan backups from the cloud server. Your local history on this device will NOT be deleted.',
+                          itemTitle: `${cloudCounts.cloudHistoryCount} cloud history items`,
+                          confirmText: 'Clear Cloud History',
+                          iconType: 'trash',
+                          isDangerous: false,
+                          onConfirm: async () => {
+                            setIsSyncing(true);
+                            try {
+                              const res = await clearUserCloudHistoryData();
+                              if (res.success) {
+                                showToast('Cloud history cleared!');
+                                const counts = await getUserCloudCounts();
+                                setCloudCounts(counts);
+                              } else {
+                                showToast(res.error || 'Failed to clear cloud history.');
+                              }
+                            } catch (e) {
+                              showToast('Clear error.');
+                            } finally {
+                              setIsSyncing(false);
+                            }
+                          }
+                        });
+                      }}
+                      style={{
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        background: 'transparent',
+                        color: '#EF4444',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: (isSyncing || cloudCounts.cloudHistoryCount === 0) ? 'default' : 'pointer',
+                        opacity: cloudCounts.cloudHistoryCount === 0 ? 0.4 : 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <Trash2 size={12} />
+                      <span>Clear</span>
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  disabled={isSyncing || (cloudCounts.cloudSavedCount === 0 && cloudCounts.cloudHistoryCount === 0)}
+                  onClick={() => {
+                    setDeleteModalConfig({
+                      isOpen: true,
+                      title: 'Delete All Cloud Backups?',
+                      description: 'Are you sure you want to permanently erase ALL saved codes and history records from the cloud server? (Your local device data is completely safe and will remain untouched).',
+                      itemTitle: `${cloudCounts.cloudSavedCount + cloudCounts.cloudHistoryCount} total cloud records`,
+                      confirmText: 'Delete All Cloud Backups',
+                      iconType: 'alert',
+                      isDangerous: true,
+                      onConfirm: async () => {
+                        setIsSyncing(true);
+                        try {
+                          const res = await clearUserCloudAllData();
+                          if (res.success) {
+                            showToast('All cloud backups deleted successfully!');
+                            const counts = await getUserCloudCounts();
+                            setCloudCounts(counts);
+                          } else {
+                            showToast(res.error || 'Clear all failed.');
+                          }
+                        } catch (e) {
+                          showToast('Clear error.');
+                        } finally {
+                          setIsSyncing(false);
+                        }
+                      }
+                    });
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: 'none',
+                    background: '#EF4444',
+                    color: '#FFFFFF',
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    fontSize: '13.5px',
+                    cursor: (isSyncing || (cloudCounts.cloudSavedCount === 0 && cloudCounts.cloudHistoryCount === 0)) ? 'default' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)',
+                    opacity: (cloudCounts.cloudSavedCount === 0 && cloudCounts.cloudHistoryCount === 0) ? 0.4 : 1
+                  }}
+                >
+                  {isSyncing ? <Loader2 size={16} className="spin" /> : <Trash2 size={16} />}
+                  <span>Delete All Cloud Backups</span>
+                </button>
+              </div>
+            )}
+
+            {/* Privacy Guarantee Footer */}
+            <div style={{
+              fontSize: '11px',
+              color: 'var(--text-secondary, #94A3B8)',
+              textAlign: 'center',
+              lineHeight: 1.4,
+              marginTop: '16px',
+              borderTop: '1px solid var(--border-color, #1E293B)',
+              paddingTop: '12px'
+            }}>
+              🔒 Settings, Theme &amp; Device preferences are 100% private to this device and are never uploaded or altered.
+            </div>
+          </div>
+        </div>
+      )}
       <SaveLocationModal
         isOpen={isFolderModalOpen}
         onClose={() => setIsFolderModalOpen(false)}
         showToast={showToast}
+      />
+      <DeleteConfirmModal
+        isOpen={deleteModalConfig.isOpen}
+        onClose={() => setDeleteModalConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={deleteModalConfig.onConfirm}
+        title={deleteModalConfig.title}
+        description={deleteModalConfig.description}
+        itemTitle={deleteModalConfig.itemTitle}
+        confirmText={deleteModalConfig.confirmText}
+        iconType={deleteModalConfig.iconType}
+        isDangerous={deleteModalConfig.isDangerous}
       />
     </div>
   );

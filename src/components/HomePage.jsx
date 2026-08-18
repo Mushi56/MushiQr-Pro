@@ -3,10 +3,11 @@ import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon
 import { FaInstagram, FaFacebookF, FaXTwitter, FaLinkedinIn } from 'react-icons/fa6';
 import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
 import { renderBarcode } from '../utils/barcodeEngine';
-import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved } from '../utils/storage';
+import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved, deleteFromSaved, isItemSaved, toggleSaved } from '../utils/storage';
 import AppIcon from './AppIcon';
 import GoldenAdminBadge from './GoldenAdminBadge';
 import PaidCrownBadge from './PaidCrownBadge';
+import DeleteConfirmModal from './DeleteConfirmModal';
 import { useUserRole } from '../services/roleService';
 
 function HeroQRCanvas() {
@@ -343,6 +344,16 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
   const [showAllQR, setShowAllQR] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [deleteModalConfig, setDeleteModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    itemTitle: null,
+    confirmText: 'Delete',
+    iconType: 'trash',
+    isDangerous: false,
+    onConfirm: null
+  });
   const slideCount = 3;
 
   const handleScroll = (e) => {
@@ -391,16 +402,24 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
   }, [activePage, isPaused, activeSlide]);
 
   useEffect(() => {
-    if (activePage === 'home') {
+    const refreshData = () => {
       const history = getHistory().filter(item => item.source !== 'scan');
       setRecentItems(history.slice(0, 10));
       setSavedIds(new Set(getSaved().map(s => s.id)));
+    };
+
+    if (activePage === 'home') {
+      refreshData();
     }
+
+    window.addEventListener('storage-sync', refreshData);
+    return () => window.removeEventListener('storage-sync', refreshData);
   }, [activePage]);
 
-  const handleSave = (item) => {
-    saveToSaved(item);
-    setSavedIds(new Set([...savedIds, item.id]));
+  const handleToggleSave = (item) => {
+    toggleSaved(item);
+    const updated = getSaved();
+    setSavedIds(new Set(updated.map(s => s.id)));
   };
 
   const quickOptions = [
@@ -1249,15 +1268,16 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
                   {/* Save/Favorite Star */}
                   <button
-                    onClick={() => handleSave(item)}
+                    onClick={() => handleToggleSave(item)}
+                    title={savedIds.has(item.id) ? "Remove from Saved" : "Add to Saved"}
                     style={{
                       background: 'transparent', border: 'none',
-                      color: 'var(--text-tertiary)', cursor: 'pointer',
+                      color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)', cursor: 'pointer',
                       padding: '4px', borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.color = '#F39C12'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'}
                   >
                     <Star
                       size={18}
@@ -1273,10 +1293,19 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                   {/* Delete Item */}
                   <button
                     onClick={() => {
-                      if (window.confirm('Delete this item from history?')) {
-                        const updated = deleteFromHistory(item.id);
-                        setRecentItems(updated.filter(i => i.source !== 'scan').slice(0, 10));
-                      }
+                      setDeleteModalConfig({
+                        isOpen: true,
+                        title: 'Delete Recent Item?',
+                        description: 'Are you sure you want to remove this item from your recent list?',
+                        itemTitle: item.data || item.displayText || 'QR Code',
+                        confirmText: 'Delete',
+                        iconType: 'trash',
+                        isDangerous: false,
+                        onConfirm: () => {
+                          const updated = deleteFromHistory(item.id);
+                          setRecentItems(updated.filter(i => i.source !== 'scan').slice(0, 10));
+                        }
+                      });
                     }}
                     style={{
                       background: 'transparent', border: 'none',
@@ -1342,6 +1371,17 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
         </div>
       </div>
 
+      <DeleteConfirmModal
+        isOpen={deleteModalConfig.isOpen}
+        onClose={() => setDeleteModalConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={deleteModalConfig.onConfirm}
+        title={deleteModalConfig.title}
+        description={deleteModalConfig.description}
+        itemTitle={deleteModalConfig.itemTitle}
+        confirmText={deleteModalConfig.confirmText}
+        iconType={deleteModalConfig.iconType}
+        isDangerous={deleteModalConfig.isDangerous}
+      />
     </div>
 
   );

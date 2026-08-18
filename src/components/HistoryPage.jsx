@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { getHistory, deleteFromHistory, clearHistory, saveToSaved, getSaved, clearHistoryByRange } from '../utils/storage';
-import { History as HistoryIcon, SearchX, Trash2, QrCode, Star, Clock, MoreVertical, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, Crown, AlertCircle } from 'lucide-react';
+import { getHistory, deleteFromHistory, clearHistory, saveToSaved, getSaved, clearHistoryByRange, deleteFromSaved, isItemSaved, toggleSaved } from '../utils/storage';
+import { History as HistoryIcon, SearchX, Trash2, QrCode, Star, Clock, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, Crown, AlertCircle } from 'lucide-react';
 import { QR_TYPES } from '../utils/qrEngine';
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 const TYPE_ICONS = {
   [QR_TYPES.URL]: <Link2 size={14} />,
@@ -82,6 +83,16 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
    const [swipedItemId, setSwipedItemId] = useState(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [showRangeMenu, setShowRangeMenu] = useState(false);
+  const [deleteModalConfig, setDeleteModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    itemTitle: null,
+    confirmText: 'Delete',
+    iconType: 'trash',
+    isDangerous: false,
+    onConfirm: null
+  });
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -117,33 +128,71 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
     return () => window.removeEventListener('storage-sync', loadData);
   }, []);
 
-  const handleDelete = (id) => {
-    const updated = deleteFromHistory(id);
-    setHistory(updated);
-    setSwipedItemId(null);
-    setSwipeOffset(0);
+  const handleDelete = (item) => {
+    setDeleteModalConfig({
+      isOpen: true,
+      title: 'Delete History Item?',
+      description: 'Are you sure you want to remove this record from your history log?',
+      itemTitle: item.data || item.displayText || 'QR Code',
+      confirmText: 'Delete',
+      iconType: 'trash',
+      isDangerous: false,
+      onConfirm: () => {
+        const updated = deleteFromHistory(item.id);
+        setHistory(updated);
+        setSwipedItemId(null);
+        setSwipeOffset(0);
+      }
+    });
   };
 
-  const handleSave = (item) => {
-    saveToSaved(item);
-    setSavedIds(new Set([...savedIds, item.id]));
+  const handleToggleSave = (item) => {
+    const isNowSaved = toggleSaved(item);
+    const updatedSaved = getSaved();
+    setSavedIds(new Set(updatedSaved.map(s => s.id)));
+    if (isNowSaved) {
+      showLocalToast('Added to Saved QRs');
+    } else {
+      showLocalToast('Removed from Saved QRs');
+    }
     setSwipedItemId(null);
     setSwipeOffset(0);
-    showLocalToast('Added to Saved QRs');
   };
 
   const handleClear = (hours) => {
-    let msg = 'Are you sure?';
-    if (hours === 1) msg = 'Clear history from the last hour?';
-    if (hours === 24) msg = 'Clear history from the last 24 hours?';
-    if (hours === 168) msg = 'Clear history from the last 7 days?';
-    if (hours === -1) msg = 'Clear ALL history?';
+    setShowRangeMenu(false);
+    let title = 'Clear History?';
+    let desc = 'Are you sure you want to clear your history records?';
+    let isDang = false;
 
-    if (window.confirm(msg)) {
-      const updated = clearHistoryByRange(hours);
-      setHistory(updated);
-      setShowRangeMenu(false);
+    if (hours === 1) {
+      title = 'Clear Recent History?';
+      desc = 'Remove history records from the last 1 hour?';
+    } else if (hours === 24) {
+      title = 'Clear 24h History?';
+      desc = 'Remove history records from the last 24 hours?';
+    } else if (hours === 168) {
+      title = 'Clear 7-Day History?';
+      desc = 'Remove history records from the last 7 days?';
+    } else if (hours === -1) {
+      title = 'Clear ALL History?';
+      desc = 'Permanently delete ALL scan and creation history from this device? This action cannot be undone.';
+      isDang = true;
     }
+
+    setDeleteModalConfig({
+      isOpen: true,
+      title,
+      description: desc,
+      itemTitle: hours === -1 ? `All ${history.length} history records` : null,
+      confirmText: hours === -1 ? 'Clear All' : 'Clear',
+      iconType: hours === -1 ? 'alert' : 'trash',
+      isDangerous: isDang,
+      onConfirm: () => {
+        const updated = clearHistoryByRange(hours);
+        setHistory(updated);
+      }
+    });
   };
 
   const formatDate = (iso) => {
@@ -214,12 +263,13 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
     if (!swipedItemId || swipedItemId !== id) return;
     
     if (swipeOffset > 60) {
-      // Swiped right -> Save
+      // Swiped right -> Toggle Save
       const item = history.find(i => i.id === id);
-      if (item) handleSave(item);
+      if (item) handleToggleSave(item);
     } else if (swipeOffset < -60) {
       // Swiped left -> Delete
-      handleDelete(id);
+      const item = history.find(i => i.id === id);
+      if (item) handleDelete(item);
     } else {
       // Snap back
       setSwipedItemId(null);
@@ -239,59 +289,8 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
     }}>
       {/* Header */}
       <div style={{ padding: '24px var(--main-padding-x) 16px', background: 'var(--bg-primary)', zIndex: 10 }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          position: 'relative'
-        }}>
-
-          {history.length > 0 && (
-             <div style={{ position: 'relative' }} ref={menuRef}>
-               <button 
-                 onClick={() => setShowRangeMenu(!showRangeMenu)}
-                 style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '8px' }}
-               >
-                  <Trash2 size={22} />
-               </button>
-               
-               {showRangeMenu && (
-                 <div style={{
-                   position: 'absolute', top: '100%', right: 0,
-                   background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
-                   borderRadius: '12px', padding: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                   zIndex: 100, minWidth: '180px', display: 'flex', flexDirection: 'column', gap: '4px'
-                 }}>
-                   <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-tertiary)', padding: '4px 8px', textTransform: 'uppercase' }}>Clear History</div>
-                   {[
-                     { label: 'Last Hour', val: 1 },
-                     { label: 'Last 24 Hours', val: 24 },
-                     { label: 'Last 7 Days', val: 168 },
-                     { label: 'All Time', val: -1, color: '#D60036' }
-                   ].map(opt => (
-                     <button
-                       key={opt.label}
-                       onClick={() => handleClear(opt.val)}
-                       style={{
-                         padding: '10px 12px', borderRadius: '8px', border: 'none',
-                         background: 'transparent', color: opt.color || 'var(--text-primary)',
-                         fontSize: '14px', fontWeight: 600, textAlign: 'left', cursor: 'pointer',
-                         display: 'flex', alignItems: 'center', gap: '8px'
-                       }}
-                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
-                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                     >
-                       <Trash2 size={16} /> {opt.label}
-                     </button>
-                   ))}
-                 </div>
-               )}
-             </div>
-          )}
-        </div>
-
         {/* Filter Tabs */}
-        <div style={{ display: 'flex', gap: '8px', marginTop: '20px', paddingBottom: '4px' }}>
+        <div style={{ display: 'flex', gap: '8px', paddingBottom: '4px' }}>
           {['All', 'Scanned', 'Created'].map(tab => {
             const count = tab === 'All' ? history.length : history.filter(i => (tab === 'Scanned' ? i.source === 'scan' : i.source !== 'scan')).length;
             const isActive = activeFilter === tab;
@@ -363,7 +362,7 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {['Today', 'Yesterday', 'Older'].map(group => {
+            {['Today', 'Yesterday', 'Older'].map((group, groupIndex) => {
               const items = groupedHistory[group];
               if (!items || items.length === 0) return null;
               
@@ -371,7 +370,69 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
                 <div key={group}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', padding: '0 4px' }}>
                     <h3 style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', margin: 0, color: 'var(--text-secondary)' }}>{group}</h3>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)' }}>{items.length} items</span>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)' }}>{items.length} items</span>
+                      {groupIndex === 0 && history.length > 0 && (
+                        <div style={{ position: 'relative' }} ref={menuRef}>
+                          <button 
+                            onClick={() => setShowRangeMenu(!showRangeMenu)}
+                            style={{ 
+                              background: 'rgba(214, 0, 54, 0.08)', 
+                              border: 'none', 
+                              color: '#D60036', 
+                              cursor: 'pointer', 
+                              padding: '4px 10px',
+                              borderRadius: '8px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              transition: 'all 0.2s'
+                            }}
+                            title="Clear History Records"
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(214, 0, 54, 0.16)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(214, 0, 54, 0.08)'}
+                          >
+                            <Trash2 size={13} />
+                            <span>Clear</span>
+                          </button>
+                          
+                          {showRangeMenu && (
+                            <div style={{
+                              position: 'absolute', top: '100%', right: 0, marginTop: '6px',
+                              background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                              borderRadius: '12px', padding: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+                              zIndex: 100, minWidth: '180px', display: 'flex', flexDirection: 'column', gap: '4px'
+                            }}>
+                              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-tertiary)', padding: '4px 8px', textTransform: 'uppercase' }}>Clear History</div>
+                              {[
+                                { label: 'Last Hour', val: 1 },
+                                { label: 'Last 24 Hours', val: 24 },
+                                { label: 'Last 7 Days', val: 168 },
+                                { label: 'All Time', val: -1, color: '#D60036' }
+                              ].map(opt => (
+                                <button
+                                  key={opt.label}
+                                  onClick={() => handleClear(opt.val)}
+                                  style={{
+                                    padding: '10px 12px', borderRadius: '8px', border: 'none',
+                                    background: 'transparent', color: opt.color || 'var(--text-primary)',
+                                    fontSize: '14px', fontWeight: 600, textAlign: 'left', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: '8px'
+                                  }}
+                                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                >
+                                  <Trash2 size={16} /> {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -481,30 +542,59 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
                               </div>
                             </div>
                             
-                             <button 
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 handleSave(item);
-                               }}
-                               style={{ 
-                                 background: 'transparent', border: 'none', 
-                                 color: 'var(--text-tertiary)', cursor: 'pointer',
-                                 padding: '8px', borderRadius: '50%',
-                                 display: 'flex', alignItems: 'center', justifyContent: 'center'
-                               }}
-                               onMouseEnter={(e) => e.currentTarget.style.color = '#F39C12'}
-                               onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
-                             >
-                               <Star 
-                                 size={18} 
-                                 fill={savedIds.has(item.id) ? '#F39C12' : 'none'}
-                                 style={{ 
-                                   transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                   transform: savedIds.has(item.id) ? 'scale(1.2)' : 'scale(1)',
-                                   color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'
-                                 }}
-                               />
-                             </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleSave(item);
+                                  }}
+                                  title={savedIds.has(item.id) ? "Remove from Saved" : "Add to Saved"}
+                                  style={{ 
+                                    background: 'transparent', border: 'none', 
+                                    color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)', cursor: 'pointer',
+                                    padding: '7px', borderRadius: '50%',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    transition: 'all 0.2s'
+                                  }}
+                                  onMouseEnter={(e) => e.currentTarget.style.color = '#F39C12'}
+                                  onMouseLeave={(e) => e.currentTarget.style.color = savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'}
+                                >
+                                  <Star 
+                                    size={18} 
+                                    fill={savedIds.has(item.id) ? '#F39C12' : 'none'}
+                                    style={{ 
+                                      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                      transform: savedIds.has(item.id) ? 'scale(1.15)' : 'scale(1)',
+                                      color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'
+                                    }}
+                                  />
+                                </button>
+
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(item);
+                                  }}
+                                  title="Delete from History"
+                                  style={{ 
+                                    background: 'transparent', border: 'none', 
+                                    color: 'var(--text-tertiary)', cursor: 'pointer',
+                                    padding: '7px', borderRadius: '50%',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    transition: 'all 0.2s'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.color = '#EF4444';
+                                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.color = 'var(--text-tertiary)';
+                                    e.currentTarget.style.background = 'transparent';
+                                  }}
+                                >
+                                  <Trash2 size={17} />
+                                </button>
+                              </div>
                           </div>
                         </div>
                       );
@@ -528,6 +618,18 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
           <Star size={16} fill="#F39C12" strokeWidth={0} /> {toast}
         </div>
       )}
+
+      <DeleteConfirmModal
+        isOpen={deleteModalConfig.isOpen}
+        onClose={() => setDeleteModalConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={deleteModalConfig.onConfirm}
+        title={deleteModalConfig.title}
+        description={deleteModalConfig.description}
+        itemTitle={deleteModalConfig.itemTitle}
+        confirmText={deleteModalConfig.confirmText}
+        iconType={deleteModalConfig.iconType}
+        isDangerous={deleteModalConfig.isDangerous}
+      />
 
       <style>{`
         @keyframes slideUpFade {
