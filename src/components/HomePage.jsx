@@ -333,7 +333,7 @@ const getBarcodeIcon = (id) => {
   }
 };
 
-export default function HomePage({ currentUser, onScrollChange, onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick }) {
+export default function HomePage({ currentUser, onScrollChange, onNavigate, onQuickCreate, onQuickCreateBarcode, onLoadQR, theme, setTheme, effectiveTheme, activePage, onMenuClick, onOpenProfile, onOpenAuth }) {
   const isDark = effectiveTheme === 'dark';
   const { isSuperAdmin } = useUserRole();
   const [recentItems, setRecentItems] = useState([]);
@@ -546,15 +546,22 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
           }} />
 
           {/* Welcome Message / Admin Dashboard Header Block */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            position: 'relative',
-            zIndex: 2,
-            paddingTop: '2px',
-            paddingBottom: '2px'
-          }}>
+          <div 
+            onClick={() => onOpenProfile && onOpenProfile()}
+            role="button"
+            tabIndex={0}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              position: 'relative',
+              zIndex: 2,
+              paddingTop: '2px',
+              paddingBottom: '2px',
+              cursor: 'pointer',
+              userSelect: 'none'
+            }}
+          >
             <div>
               {currentUser ? (
                 <>

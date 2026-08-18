@@ -6106,6 +6106,17 @@ export default function App() {
             }}
             activePage={activePage}
             onMenuClick={() => navigateTo('settings')}
+            onOpenProfile={() => {
+              if (currentUser) {
+                setProfileNameInput(currentUser.displayName || '');
+                setNewProfilePicUrl(currentUser.photoURL || '');
+                setIsProfileModalOpen(true);
+                setAuthDropdownOpen(false);
+              } else {
+                navigateTo('login');
+              }
+            }}
+            onOpenAuth={() => setAuthDropdownOpen(prev => !prev)}
           />
         ) : activePage === 'saved' ? (
           <SavedPage onLoadQR={handleLoadQR} onNavigate={navigateTo} />
