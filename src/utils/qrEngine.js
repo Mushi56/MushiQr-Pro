@@ -102,6 +102,144 @@ export function formatQRData(type, data) {
   }
 }
 
+export function getQRItemTitle(item) {
+  if (!item) return 'QR Code';
+  const type = (item.qrType || item.type || '').toLowerCase();
+  
+  if (type === 'url' || type === 'qr_url') return 'URL';
+  if (type === 'text' || type === 'qr_text') return 'Text';
+  if (type === 'wifi' || type === 'qr_wifi') return 'WiFi';
+  if (type === 'vcard' || type === 'qr_vcard') return 'Contact';
+  if (type === 'email' || type === 'qr_email') return 'Email';
+  if (type === 'phone' || type === 'qr_phone') return 'Phone';
+  if (type === 'sms' || type === 'qr_sms') return 'SMS';
+  if (type === 'location' || type === 'geo' || type === 'qr_location') return 'Location';
+  if (type === 'facebook' || type === 'qr_facebook') return 'Facebook';
+  if (type === 'instagram' || type === 'qr_instagram') return 'Instagram';
+  if (type === 'x' || type === 'twitter' || type === 'qr_x') return 'X';
+  if (type === 'whatsapp' || type === 'qr_whatsapp') return 'WhatsApp';
+  if (type === 'linkedin' || type === 'qr_linkedin') return 'LinkedIn';
+  if (type === 'youtube' || type === 'qr_youtube') return 'YouTube';
+  if (type === 'event' || type === 'qr_event') return 'Event';
+  if (type === 'crypto' || type === 'qr_crypto') return 'Crypto';
+  if (type === 'pdf' || type === 'qr_pdf') return 'PDF';
+  if (type === 'image' || type === 'qr_image') return 'Image';
+  if (type === 'audio' || type === 'qr_audio') return 'Audio';
+  if (type === 'document' || type === 'qr_document') return 'Document';
+  if (type === 'barcode') return 'Barcode';
+
+  if (item.qrType || item.type) {
+    const raw = (item.qrType || item.type).replace(/^(qr_)/i, '').replace(/_/g, ' ');
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  }
+  return 'QR Code';
+}
+
+export function getQRItemSubtitle(item) {
+  if (!item) return '';
+  const type = (item.qrType || item.type || '').toLowerCase();
+  const data = item.qrData || (typeof item.data === 'object' ? item.data : {}) || {};
+  const rawString = typeof item.data === 'string' ? item.data : (item.displayText || '');
+
+  switch (type) {
+    case 'url':
+    case 'qr_url':
+    case 'website':
+      return data.url || (rawString && rawString !== 'Website Link' ? rawString : '');
+
+    case 'text':
+    case 'qr_text':
+    case 'plain text':
+      return data.text || (rawString && rawString !== 'Plain Text' ? rawString : '');
+
+    case 'wifi':
+    case 'qr_wifi':
+      if (data.ssid) return `SSID: ${data.ssid}${data.encryption ? ` (${data.encryption})` : ''}`;
+      return (rawString && !rawString.startsWith('WIFI:') ? rawString : (rawString ? rawString.replace(/^WIFI:.*S:([^;]+).*/i, 'SSID: $1') : ''));
+
+    case 'vcard':
+    case 'qr_vcard':
+    case 'contact': {
+      const name = [data.firstName, data.lastName].filter(Boolean).join(' ');
+      return name || data.organization || data.phone || data.email || (rawString && !rawString.startsWith('BEGIN:VCARD') ? rawString : 'Contact Card');
+    }
+
+    case 'email':
+    case 'qr_email':
+      return data.email ? `${data.email}${data.subject ? ` (${data.subject})` : ''}` : (data.subject || rawString || '');
+
+    case 'phone':
+    case 'qr_phone':
+      return data.phone || rawString || '';
+
+    case 'sms':
+    case 'qr_sms':
+      return data.phone ? `${data.phone}${data.message ? `: ${data.message}` : ''}` : (data.message || rawString || '');
+
+    case 'location':
+    case 'geo':
+    case 'qr_location':
+      return (data.latitude && data.longitude) ? `${data.latitude}, ${data.longitude}` : (rawString || '');
+
+    case 'facebook':
+    case 'qr_facebook':
+      return data.username ? `facebook.com/${data.username}` : (data.url || (rawString && rawString !== 'Facebook' ? rawString : ''));
+
+    case 'instagram':
+    case 'qr_instagram':
+      return data.username ? `@${data.username.replace(/^@/, '')}` : (data.url || (rawString && rawString !== 'Instagram' ? rawString : ''));
+
+    case 'x':
+    case 'twitter':
+    case 'qr_x':
+      return data.username ? `@${data.username.replace(/^@/, '')}` : (data.url || (rawString && rawString !== 'X (Twitter)' ? rawString : ''));
+
+    case 'whatsapp':
+    case 'qr_whatsapp':
+      return data.phone ? `wa.me/${data.phone}` : (data.message || rawString || '');
+
+    case 'linkedin':
+    case 'qr_linkedin':
+      return data.username ? `linkedin.com/in/${data.username}` : (data.url || rawString || '');
+
+    case 'youtube':
+    case 'qr_youtube':
+    case 'pdf':
+    case 'qr_pdf':
+    case 'image':
+    case 'qr_image':
+    case 'audio':
+    case 'qr_audio':
+    case 'document':
+    case 'qr_document':
+      return data.url || (rawString && rawString !== 'Document' ? rawString : '');
+
+    case 'event':
+    case 'qr_event':
+      return data.title || data.summary || data.location || (rawString && !rawString.startsWith('BEGIN:VEVENT') ? rawString : 'Event');
+
+    case 'crypto':
+    case 'qr_crypto':
+      return data.address ? `${data.cryptoType || 'Crypto'}: ${data.address}` : rawString || '';
+
+    case 'barcode':
+      return rawString || data.text || data.code || 'Barcode';
+
+    default:
+      if (item.displayText && item.displayText !== 'https://example.com' && item.displayText !== 'http://example.com') {
+        return item.displayText;
+      }
+      if (data.text) return data.text;
+      if (data.url && data.url !== 'https://example.com' && data.url !== 'http://example.com') return data.url;
+      if (data.ssid) return `SSID: ${data.ssid}`;
+      if (data.email) return data.email;
+      if (data.phone) return data.phone;
+      if (data.username) return data.username;
+      if (rawString && rawString !== 'https://example.com' && rawString !== 'http://example.com') return rawString;
+      return '';
+  }
+}
+
 // Error correction levels
 export const EC_LEVELS = {
   L: 'L', // 7%

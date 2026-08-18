@@ -74,7 +74,7 @@ import LogoPresets from './components/LogoPresets';
 import QRTypeSelector from './components/QRTypeSelector';
 import QRDataInput from './components/QRDataInput';
 import { DotStyleSelector, EyeStyleSelector } from './components/StyleSelectors';
-import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData, constrainToSafeZone } from './utils/qrEngine';
+import { generateQRMatrix, renderQR, QR_TYPES, DOT_STYLES, EYE_STYLES, FRAME_STYLES, formatQRData, constrainToSafeZone, getQRItemTitle, getQRItemSubtitle } from './utils/qrEngine';
 import { downloadPNG, downloadSVG, downloadPDF, downloadJPG } from './utils/exportUtils';
 import {
   saveToHistory,
@@ -1910,20 +1910,9 @@ export default function App() {
   }, []);
   // ── Helper: build a human-readable display name from qrType + qrData ──
   const getQRDisplayName = (type, data) => {
-    if (!data) return 'QR Code';
-    switch (type) {
-      case QR_TYPES.URL:    return data.url || 'QR Code';
-      case QR_TYPES.TEXT:   return data.text || 'QR Code';
-      case QR_TYPES.EMAIL:  return data.email || data.subject || 'Email QR';
-      case QR_TYPES.PHONE:  return data.phone || 'Phone QR';
-      case QR_TYPES.SMS:    return data.phone || data.message || 'SMS QR';
-      case QR_TYPES.WIFI:   return data.ssid ? `Wi-Fi: ${data.ssid}` : 'Wi-Fi QR';
-      case QR_TYPES.VCARD:  return [data.firstName, data.lastName].filter(Boolean).join(' ') || data.organization || 'Contact QR';
-      case QR_TYPES.GEO:    return (data.latitude && data.longitude) ? `${data.latitude}, ${data.longitude}` : 'Location QR';
-      case QR_TYPES.EVENT:  return data.summary || data.title || 'Event QR';
-      case QR_TYPES.CRYPTO: return data.address || 'Crypto QR';
-      default:              return formatQRData(type, data)?.substring(0, 50) || 'QR Code';
-    }
+    const subtitle = getQRItemSubtitle({ qrType: type, qrData: data });
+    const title = getQRItemTitle({ qrType: type, qrData: data });
+    return subtitle || title || 'QR Code';
   };
   // ── Unsaved Changes Modal Actions ──
   const handleSaveAndExit = () => {
@@ -2183,11 +2172,13 @@ export default function App() {
     const dataString = formatQRData(qrType, qrData);
     if (!dataString) { showToast('Please enter QR data first', 'error'); return; }
     
+    const displayText = getQRDisplayName(qrType, qrData);
+    
     // We already save to history automatically, but user clicked "Add to Saved"
     const savedEntry = saveToSaved({
       id: loadedItemId,
       source: 'create',
-      qrType, qrData, displayText: dataString.substring(0, 50), errorLevel,
+      qrType, qrData, displayText: displayText.substring(0, 80), errorLevel,
       ...getSnapshot(),
       thumbnail: latestThumbnailRef.current || canvasRef.current?.toDataURL('image/jpeg', 0.8) || null
     });
@@ -4330,6 +4321,7 @@ export default function App() {
                           return;
                         }
                         setQrType(type);
+                        setQrData(prev => (prev?.url === 'https://example.com' || prev?.url === 'http://example.com') ? {} : prev);
                         generatorIsDirtyRef.current = true;
                         setIsDataModalOpen(true);
                       }}
@@ -6057,6 +6049,9 @@ export default function App() {
                 return;
               }
               resetGenerator();
+              setQrType(type);
+              setQrData({});
+              setIsDataModalOpen(true);
               navigate('/generator', {
                 state: {
                   qrType: type,

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getHistory, deleteFromHistory, clearHistory, saveToSaved, getSaved, clearHistoryByRange, deleteFromSaved, isItemSaved, toggleSaved } from '../utils/storage';
 import { History as HistoryIcon, SearchX, Trash2, QrCode, Star, Clock, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, Crown, AlertCircle } from 'lucide-react';
-import { QR_TYPES } from '../utils/qrEngine';
+import { QR_TYPES, getQRItemTitle, getQRItemSubtitle } from '../utils/qrEngine';
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
@@ -481,122 +481,138 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
                             }}
                             style={{
                               background: 'var(--bg-elevated)',
-                              backgroundColor: 'var(--bg-elevated)', // Ensure solid background
+                              backgroundColor: 'var(--bg-elevated)',
                               border: 'none',
-                              borderRadius: '16px',
-                              padding: '12px 16px',
+                              borderRadius: '14px',
+                              padding: '9px 12px',
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '12px',
+                              gap: '10px',
                               position: 'relative',
                               zIndex: 2,
                               transform: `translateX(${currentOffset}px)`,
                               transition: isSwiped ? 'none' : 'transform 0.2s',
-                              boxShadow: '0 4px 16px rgba(0,0,0,0.12)'
+                              boxShadow: '0 3px 12px rgba(0,0,0,0.08)'
                             }}
                           >
                             <div style={{
-                              width: '56px', height: '56px', borderRadius: '12px',
+                              width: '44px', height: '44px', borderRadius: '10px',
                               background: '#fff', display: 'flex', alignItems: 'center',
                               justifyContent: 'center', flexShrink: 0,
                               border: 'none', overflow: 'hidden'
                             }}>
                               {item.thumbnail ? (
-                                <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                                <img src={item.thumbnail} alt="QR" style={{ width: '88%', height: '88%', objectFit: 'contain' }} />
                               ) : (
-                                <QrCode size={28} color="var(--accent-primary)" />
+                                <QrCode size={22} color="var(--accent-primary)" />
                               )}
                             </div>
                             
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                <h4 style={{ 
-                                  margin: 0, fontSize: '15px', fontWeight: 700, 
-                                  color: 'var(--text-primary)', whiteSpace: 'nowrap',
-                                  overflow: 'hidden', textOverflow: 'ellipsis'
-                                }}>
-                                  {item.displayText || 'Unnamed QR Code'}
-                                </h4>
-                                <span style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap', marginLeft: '8px' }}>
-                                  {formatDate(item.timestamp)}
-                                </span>
+                            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              {/* Top / Star Row: Title + Tag (Left) & Time + Star (Right) */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, overflow: 'hidden' }}>
+                                  <h4 style={{ 
+                                    margin: 0, fontSize: '13.5px', fontWeight: 700, 
+                                    color: 'var(--text-primary)', whiteSpace: 'nowrap',
+                                    overflow: 'hidden', textOverflow: 'ellipsis'
+                                  }}>
+                                    {getQRItemTitle(item)}
+                                  </h4>
+                                  <span style={{
+                                    fontSize: '9.5px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px',
+                                    background: isScanned ? 'rgba(0, 112, 243, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+                                    color: isScanned ? '#0070F3' : '#10B981', display: 'inline-flex', alignItems: 'center', gap: '3px',
+                                    flexShrink: 0
+                                  }}>
+                                    {isScanned ? 'Scan' : 'Create'}
+                                  </span>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                                  <span style={{ 
+                                    fontSize: '10.5px', 
+                                    color: 'var(--text-muted)', 
+                                    whiteSpace: 'nowrap', 
+                                    fontWeight: 500
+                                  }}>
+                                    {formatDate(item.timestamp)}
+                                  </span>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleToggleSave(item);
+                                    }}
+                                    title={savedIds.has(item.id) ? "Remove from Saved" : "Add to Saved"}
+                                    style={{ 
+                                      background: 'transparent', border: 'none', 
+                                      color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)', cursor: 'pointer',
+                                      padding: '2px', borderRadius: '50%',
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                      lineHeight: 1,
+                                      transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.color = '#F39C12'}
+                                    onMouseLeave={(e) => e.currentTarget.style.color = savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'}
+                                  >
+                                    <Star 
+                                      size={15} 
+                                      fill={savedIds.has(item.id) ? '#F39C12' : 'none'}
+                                      style={{ 
+                                        transition: 'all 0.2s ease',
+                                        transform: savedIds.has(item.id) ? 'scale(1.1)' : 'scale(1)',
+                                        color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'
+                                      }}
+                                    />
+                                  </button>
+                                </div>
                               </div>
                               
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                                  {getTypeLabel(typeStr)}
-                                </span>
-                                <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>•</span>
-                                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                  {item.qrData?.url || item.qrData?.text || item.qrData?.ssid || 'Data'}
-                                </span>
-                              </div>
-                              
-                              <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <span style={{
-                                  fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px',
-                                  background: isScanned ? 'rgba(0, 112, 243, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                                  color: isScanned ? '#0070F3' : '#10B981', display: 'flex', alignItems: 'center', gap: '4px'
+                              {/* Bottom Row: Subtitle (Left) & Delete Button (Right) */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                <p style={{ 
+                                  margin: 0, 
+                                  fontSize: '11.5px', 
+                                  color: 'var(--text-secondary)', 
+                                  whiteSpace: 'nowrap', 
+                                  overflow: 'hidden', 
+                                  textOverflow: 'ellipsis',
+                                  flex: 1,
+                                  minWidth: 0,
+                                  lineHeight: 1.3
                                 }}>
-                                  {isScanned ? <QrCode size={10} /> : <FileCode size={10} />}
-                                  {isScanned ? 'Scanned' : 'Created'}
-                                </span>
+                                  {getQRItemSubtitle(item) || item.displayText || 'QR Code Data'}
+                                </p>
+
+                                <div onClick={(e) => e.stopPropagation()} style={{ flexShrink: 0 }}>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDelete(item);
+                                    }}
+                                    title="Delete from History"
+                                    style={{ 
+                                      background: 'transparent', border: 'none', 
+                                      color: 'var(--text-tertiary)', cursor: 'pointer',
+                                      padding: '2px', borderRadius: '50%',
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                      lineHeight: 1,
+                                      transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.color = '#EF4444';
+                                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.color = 'var(--text-tertiary)';
+                                      e.currentTarget.style.background = 'transparent';
+                                    }}
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
                               </div>
                             </div>
-                            
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleToggleSave(item);
-                                  }}
-                                  title={savedIds.has(item.id) ? "Remove from Saved" : "Add to Saved"}
-                                  style={{ 
-                                    background: 'transparent', border: 'none', 
-                                    color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)', cursor: 'pointer',
-                                    padding: '7px', borderRadius: '50%',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    transition: 'all 0.2s'
-                                  }}
-                                  onMouseEnter={(e) => e.currentTarget.style.color = '#F39C12'}
-                                  onMouseLeave={(e) => e.currentTarget.style.color = savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'}
-                                >
-                                  <Star 
-                                    size={18} 
-                                    fill={savedIds.has(item.id) ? '#F39C12' : 'none'}
-                                    style={{ 
-                                      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                      transform: savedIds.has(item.id) ? 'scale(1.15)' : 'scale(1)',
-                                      color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'
-                                    }}
-                                  />
-                                </button>
-
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(item);
-                                  }}
-                                  title="Delete from History"
-                                  style={{ 
-                                    background: 'transparent', border: 'none', 
-                                    color: 'var(--text-tertiary)', cursor: 'pointer',
-                                    padding: '7px', borderRadius: '50%',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    transition: 'all 0.2s'
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    e.currentTarget.style.color = '#EF4444';
-                                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.color = 'var(--text-tertiary)';
-                                    e.currentTarget.style.background = 'transparent';
-                                  }}
-                                >
-                                  <Trash2 size={17} />
-                                </button>
-                              </div>
                           </div>
                         </div>
                       );

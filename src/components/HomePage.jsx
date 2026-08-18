@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, Crown, Plus, Link2, Type, Wifi, User, Mail, MapPin, History, Moon, Sun, Info, Shield, FileText, Home, Bookmark, Settings, QrCode, ChevronLeft, ChevronRight, ScanLine, Phone, MessageSquare, FileCode, Image, Trash2, Star, FileSpreadsheet, Barcode, Link, Contact, File, Music, Coins, MessageCircle, Play, Calendar, Layers, Zap, Target } from 'lucide-react';
 import { FaInstagram, FaFacebookF, FaXTwitter, FaLinkedinIn } from 'react-icons/fa6';
-import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
+import { QR_TYPES, renderQR, generateQRMatrix, getQRItemTitle, getQRItemSubtitle } from '../utils/qrEngine';
 import { renderBarcode } from '../utils/barcodeEngine';
 import { getHistory, deleteFromHistory, clearHistory, getSaved, saveToSaved, deleteFromSaved, isItemSaved, toggleSaved } from '../utils/storage';
 import AppIcon from './AppIcon';
@@ -486,23 +486,11 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
   };
 
   const getQRTitle = (item) => {
-    const type = item.qrType || item.type || '';
-    if (type === QR_TYPES.URL) return 'Website Link';
-    if (type === QR_TYPES.WIFI) return 'WiFi Network';
-    if (type === QR_TYPES.VCARD) return 'Contact Card';
-    if (type === QR_TYPES.EMAIL) return 'Email';
-    if (type === QR_TYPES.PHONE) return 'Phone Call';
-    if (type === QR_TYPES.SMS) return 'SMS Message';
-    if (type === QR_TYPES.LOCATION) return 'Location';
-    if (type === QR_TYPES.TEXT) return 'Plain Text';
-    if (type === QR_TYPES.PDF) return 'PDF File';
-    if (type === QR_TYPES.IMAGE) return 'Image';
-    return type ? type.split('_').join(' ') : 'QR Code';
+    return getQRItemTitle(item);
   };
 
   const getQRSubtitle = (item) => {
-    const data = item.qrData || item.data || {};
-    return data.url || data.ssid || data.text || data.email || data.phone || item.displayText || 'QR Code Data';
+    return getQRItemSubtitle(item) || 'QR Code Data';
   };
 
   return (
@@ -1222,12 +1210,12 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
               <div key={item.id} style={{
                 background: 'var(--bg-elevated)',
                 border: 'none',
-                borderRadius: '16px',
-                padding: '16px',
+                borderRadius: '14px',
+                padding: '9px 12px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '16px',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                gap: '10px',
+                boxShadow: '0 3px 12px rgba(0,0,0,0.08)',
                 position: 'relative',
                 cursor: 'pointer',
                 transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease'
@@ -1235,89 +1223,130 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 onClick={() => onLoadQR(item)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.18)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.14)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+                  e.currentTarget.style.boxShadow = '0 3px 12px rgba(0,0,0,0.08)';
                 }}
               >
                 <div style={{
-                  width: '56px', height: '56px', borderRadius: '12px',
+                  width: '44px', height: '44px', borderRadius: '10px',
                   background: '#fff', display: 'flex', alignItems: 'center',
                   justifyContent: 'center', flexShrink: 0,
                   border: 'none', overflow: 'hidden'
                 }}>
                   {item.thumbnail ? (
-                    <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                    <img src={item.thumbnail} alt="QR" style={{ width: '88%', height: '88%', objectFit: 'contain' }} />
                   ) : (
-                    <QrCode size={28} color="var(--accent-primary)" />
+                    <QrCode size={22} color="var(--accent-primary)" />
                   )}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {getQRTitle(item)}
-                  </h4>
-                  <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {getQRSubtitle(item)}
-                  </p>
-                  <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-muted)' }}>
-                    {formatDate(item.timestamp)}
-                  </p>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                  {/* Save/Favorite Star */}
-                  <button
-                    onClick={() => handleToggleSave(item)}
-                    title={savedIds.has(item.id) ? "Remove from Saved" : "Add to Saved"}
-                    style={{
-                      background: 'transparent', border: 'none',
-                      color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)', cursor: 'pointer',
-                      padding: '4px', borderRadius: '50%',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = '#F39C12'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'}
-                  >
-                    <Star
-                      size={18}
-                      fill={savedIds.has(item.id) ? '#F39C12' : 'none'}
-                      style={{
-                        transition: 'all 0.3s ease',
-                        transform: savedIds.has(item.id) ? 'scale(1.2)' : 'scale(1)',
-                        color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'
-                      }}
-                    />
-                  </button>
 
-                  {/* Delete Item */}
-                  <button
-                    onClick={() => {
-                      setDeleteModalConfig({
-                        isOpen: true,
-                        title: 'Delete Recent Item?',
-                        description: 'Are you sure you want to remove this item from your recent list?',
-                        itemTitle: item.data || item.displayText || 'QR Code',
-                        confirmText: 'Delete',
-                        iconType: 'trash',
-                        isDangerous: false,
-                        onConfirm: () => {
-                          const updated = deleteFromHistory(item.id);
-                          setRecentItems(updated.filter(i => i.source !== 'scan').slice(0, 10));
-                        }
-                      });
-                    }}
-                    style={{
-                      background: 'transparent', border: 'none',
-                      color: 'var(--text-tertiary)', cursor: 'pointer',
-                      padding: '4px', borderRadius: '50%',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = '#D60036'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  {/* Top / Star Row: Title (Left) & Time + Star (Right) */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <h4 style={{ 
+                      margin: 0, fontSize: '13.5px', fontWeight: 700, 
+                      color: 'var(--text-primary)', whiteSpace: 'nowrap', 
+                      overflow: 'hidden', textOverflow: 'ellipsis' 
+                    }}>
+                      {getQRTitle(item)}
+                    </h4>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                      <span style={{ 
+                        fontSize: '10.5px', 
+                        color: 'var(--text-muted)', 
+                        whiteSpace: 'nowrap', 
+                        fontWeight: 500 
+                      }}>
+                        {formatDate(item.timestamp)}
+                      </span>
+
+                      {/* Save/Favorite Star */}
+                      <button
+                        onClick={() => handleToggleSave(item)}
+                        title={savedIds.has(item.id) ? "Remove from Saved" : "Add to Saved"}
+                        style={{
+                          background: 'transparent', border: 'none',
+                          color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)', cursor: 'pointer',
+                          padding: '2px', borderRadius: '50%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          lineHeight: 1,
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#F39C12'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'}
+                      >
+                        <Star
+                          size={15}
+                          fill={savedIds.has(item.id) ? '#F39C12' : 'none'}
+                          style={{
+                            transition: 'all 0.2s ease',
+                            transform: savedIds.has(item.id) ? 'scale(1.1)' : 'scale(1)',
+                            color: savedIds.has(item.id) ? '#F39C12' : 'var(--text-tertiary)'
+                          }}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Subtitle (Left) & Delete (Right) */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <p style={{ 
+                      margin: 0, 
+                      fontSize: '11.5px', 
+                      color: 'var(--text-secondary)', 
+                      whiteSpace: 'nowrap', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis',
+                      flex: 1,
+                      minWidth: 0,
+                      lineHeight: 1.3
+                    }}>
+                      {getQRSubtitle(item)}
+                    </p>
+
+                    {/* Delete Item */}
+                    <div onClick={(e) => e.stopPropagation()} style={{ flexShrink: 0 }}>
+                      <button
+                        onClick={() => {
+                          setDeleteModalConfig({
+                            isOpen: true,
+                            title: 'Delete Recent Item?',
+                            description: 'Are you sure you want to remove this item from your recent list?',
+                            itemTitle: item.data || item.displayText || 'QR Code',
+                            confirmText: 'Delete',
+                            iconType: 'trash',
+                            isDangerous: false,
+                            onConfirm: () => {
+                              const updated = deleteFromHistory(item.id);
+                              setRecentItems(updated.filter(i => i.source !== 'scan').slice(0, 10));
+                            }
+                          });
+                        }}
+                        style={{
+                          background: 'transparent', border: 'none',
+                          color: 'var(--text-tertiary)', cursor: 'pointer',
+                          padding: '2px', borderRadius: '50%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          lineHeight: 1,
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#EF4444';
+                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'var(--text-tertiary)';
+                          e.currentTarget.style.background = 'transparent';
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )) : (

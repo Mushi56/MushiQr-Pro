@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getSaved, deleteFromSaved, clearSaved, clearSavedByRange } from '../utils/storage';
 import { Search, SearchX, Trash2, Star, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, QrCode, Crown, AlertCircle } from 'lucide-react';
-import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
+import { QR_TYPES, renderQR, generateQRMatrix, getQRItemTitle, getQRItemSubtitle } from '../utils/qrEngine';
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
@@ -194,7 +194,11 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
   };
 
   const getQRTitle = (item) => {
-    return item.displayText || 'Unnamed QR Code';
+    return getQRItemTitle(item);
+  };
+
+  const getQRSubtitle = (item) => {
+    return getQRItemSubtitle(item);
   };
 
   const getTypeLabel = (item) => {
@@ -481,8 +485,15 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
                     </div>
                   </div>
                   
-                  <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--text-secondary)' }}>
-                    {getTypeLabel(item)}
+                  <p style={{ 
+                    margin: 0, 
+                    fontSize: '11.5px', 
+                    color: 'var(--text-secondary)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    {getQRSubtitle(item) || getTypeLabel(item)}
                   </p>
                 </div>
               );
