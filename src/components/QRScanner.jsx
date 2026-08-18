@@ -592,10 +592,15 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
       targetUrl = 'https://' + targetUrl;
     }
 
-    let shouldAutoOpen = false;
+    let shouldAutoOpen = true;
     try {
       const prefs = JSON.parse(localStorage.getItem('qrgen_preferences') || '{}');
-      shouldAutoOpen = prefs.autoOpenUrl === true;
+      if (prefs.autoOpenUrl !== undefined) {
+        shouldAutoOpen = prefs.autoOpenUrl !== false;
+      } else {
+        const legacy = localStorage.getItem('qrgen_auto_open_url');
+        shouldAutoOpen = legacy !== null ? legacy !== 'false' : true;
+      }
     } catch {}
 
     import('../utils/storage').then(({ saveToHistory }) => {

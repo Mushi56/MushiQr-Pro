@@ -12,7 +12,7 @@ import ScanSettingsModal from './ScanSettingsModal';
 export default function SettingsPage({ onNavigate, theme, setTheme, effectiveTheme, currentUser, showToast }) {
   const [saveLocation, setSaveLocation] = useState(() => getPreferences().saveLocation || 'Pictures/Mushi QR Pro');
   const [scanSound, setScanSound] = useState(() => getPreferences().scanSound !== false);
-  const [autoOpenUrl, setAutoOpenUrl] = useState(() => getPreferences().autoOpenUrl === true);
+  const [autoOpenUrl, setAutoOpenUrl] = useState(() => getPreferences().autoOpenUrl !== false);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const { showPaywall } = usePremium();
@@ -22,7 +22,7 @@ export default function SettingsPage({ onNavigate, theme, setTheme, effectiveThe
       const prefs = getPreferences();
       setSaveLocation(prefs.saveLocation || 'Pictures/Mushi QR Pro');
       setScanSound(prefs.scanSound !== false);
-      setAutoOpenUrl(prefs.autoOpenUrl === true);
+      setAutoOpenUrl(prefs.autoOpenUrl !== false);
     };
     window.addEventListener('preferences-sync', handlePrefSync);
     return () => window.removeEventListener('preferences-sync', handlePrefSync);
