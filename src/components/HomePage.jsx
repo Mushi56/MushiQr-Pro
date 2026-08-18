@@ -712,7 +712,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '5px 8px',
                 backgroundColor: 'rgba(0, 0, 0, 0.4)',
                 borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
+                border: 'none',
                 width: 'calc(100% + 24px)',
                 boxSizing: 'border-box',
                 margin: 'auto -12px -12px -12px',
@@ -864,7 +864,7 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
                 padding: '5px 8px',
                 backgroundColor: 'rgba(0, 0, 0, 0.4)',
                 borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
+                border: 'none',
                 width: 'calc(100% + 24px)',
                 boxSizing: 'border-box',
                 margin: 'auto -12px -12px -12px',
@@ -1149,32 +1149,32 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             {recentItems.length > 0 ? recentItems.map(item => (
               <div key={item.id} style={{
                 background: 'var(--bg-elevated)',
-                border: '1px solid var(--border-color)',
+                border: 'none',
                 borderRadius: '16px',
                 padding: '16px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '16px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
                 position: 'relative',
                 cursor: 'pointer',
-                transition: 'transform 0.2s, border-color 0.2s'
+                transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease'
               }}
                 onClick={() => onLoadQR(item)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.borderColor = 'var(--accent-primary)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.18)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
                 }}
               >
                 <div style={{
                   width: '56px', height: '56px', borderRadius: '12px',
                   background: '#fff', display: 'flex', alignItems: 'center',
                   justifyContent: 'center', flexShrink: 0,
-                  border: '1px solid var(--border-color)', overflow: 'hidden'
+                  border: 'none', overflow: 'hidden'
                 }}>
                   {item.thumbnail ? (
                     <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
@@ -1241,13 +1241,13 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             )) : (
               <div style={{
                 background: 'var(--bg-elevated)',
-                border: '1px solid var(--border-color)',
+                border: 'none',
                 borderRadius: '16px',
                 padding: '20px 24px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '20px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
+                boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <svg width="68" height="52" viewBox="0 0 68 52" fill="none" xmlns="http://www.w3.org/2000/svg">

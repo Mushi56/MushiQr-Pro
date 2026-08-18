@@ -248,13 +248,13 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
         {saved.length === 0 ? (
           <div style={{
             background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-color)',
+            border: 'none',
             borderRadius: '16px',
             padding: '20px 24px',
             display: 'flex',
             alignItems: 'center',
             gap: '20px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
+            boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <svg width="68" height="52" viewBox="0 0 68 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -284,10 +284,10 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
             </div>
             <div style={{ flex: 1 }}>
               <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                No saved items yet.
+                No saved items yet
               </h4>
               <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500, lineHeight: 1.3 }}>
-                Save customized QR codes to access them instantly at any time.
+                Star QR codes or barcodes to save them here for quick access.
               </p>
             </div>
           </div>
@@ -298,9 +298,10 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
         ) : (
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
             gap: '12px',
-            width: '100%'
+            width: '100%',
+            boxSizing: 'border-box'
           }}>
             {filteredItems.map((item) => {
               const typeStr = item.qrType || item.type;
@@ -310,14 +311,14 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
                 onClick={() => onLoadQR(item)}
                 style={{
                   background: 'var(--bg-elevated)',
-                  border: '1px solid var(--border-color)',
+                  border: 'none',
                   borderRadius: '16px',
                   padding: '10px',
                   display: 'flex',
                   flexDirection: 'column',
                   cursor: 'pointer',
                   position: 'relative',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
                   transition: 'all 0.2s',
                   minWidth: 0 // Prevent expansion
                 }}
@@ -335,7 +336,7 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: '8px',
-                  border: '1px solid var(--border-color)',
+                  border: 'none',
                   overflow: 'hidden'
                 }}>
                   {item.thumbnail ? (

@@ -314,13 +314,13 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
         {history.length === 0 ? (
           <div style={{
             background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-color)',
+            border: 'none',
             borderRadius: '16px',
             padding: '20px 24px',
             display: 'flex',
             alignItems: 'center',
             gap: '20px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
+            boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <svg width="68" height="52" viewBox="0 0 68 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -350,10 +350,10 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
             </div>
             <div style={{ flex: 1 }}>
               <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                No history yet.
+                No history yet
               </h4>
               <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500, lineHeight: 1.3 }}>
-                Your scanned and created items will appear here automatically.
+                Generated and scanned QR codes will appear here automatically.
               </p>
             </div>
           </div>
@@ -419,7 +419,7 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
                             style={{
                               background: 'var(--bg-elevated)',
                               backgroundColor: 'var(--bg-elevated)', // Ensure solid background
-                              border: '1px solid var(--border-color)',
+                              border: 'none',
                               borderRadius: '16px',
                               padding: '12px 16px',
                               display: 'flex',
@@ -429,14 +429,14 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
                               zIndex: 2,
                               transform: `translateX(${currentOffset}px)`,
                               transition: isSwiped ? 'none' : 'transform 0.2s',
-                              boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
+                              boxShadow: '0 4px 16px rgba(0,0,0,0.12)'
                             }}
                           >
                             <div style={{
                               width: '56px', height: '56px', borderRadius: '12px',
                               background: '#fff', display: 'flex', alignItems: 'center',
                               justifyContent: 'center', flexShrink: 0,
-                              border: '1px solid var(--border-color)', overflow: 'hidden'
+                              border: 'none', overflow: 'hidden'
                             }}>
                               {item.thumbnail ? (
                                 <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
