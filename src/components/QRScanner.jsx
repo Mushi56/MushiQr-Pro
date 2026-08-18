@@ -847,6 +847,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR }) {
 
     import('../utils/storage').then(({ saveToSaved }) => {
       saveToSaved({
+        source: 'scan',
         qrData: { text: result },
         type: qrTypeData.type.toUpperCase(),
         displayText: result,

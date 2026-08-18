@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getSaved, deleteFromSaved, clearSaved, clearSavedByRange } from '../utils/storage';
 import { Search, SearchX, Trash2, Star, Link2, Wifi, User, Mail, Phone, MessageSquare, MapPin, FileCode, Image, QrCode, Crown, AlertCircle } from 'lucide-react';
-import { QR_TYPES } from '../utils/qrEngine';
+import { QR_TYPES, renderQR, generateQRMatrix } from '../utils/qrEngine';
 
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
@@ -19,6 +19,44 @@ const TYPE_ICONS = {
   [QR_TYPES.IMAGE]: <Image size={16} />,
   [QR_TYPES.TEXT]: <FileCode size={16} />
 };
+
+function ScannedQRThumbnail({ item }) {
+  const canvasRef = useRef(null);
+  const text = item.qrData?.text || item.qrData?.url || item.displayText || item.data || '';
+
+  useEffect(() => {
+    if (!canvasRef.current || !text) return;
+    try {
+      const matrixInfo = generateQRMatrix(text, 'M');
+      if (matrixInfo) {
+        renderQR(canvasRef.current, {
+          matrix: matrixInfo.matrix,
+          moduleCount: matrixInfo.moduleCount,
+          size: 512,
+          qrColor: '#000000',
+          bgColor: '#ffffff',
+          bgTransparent: false,
+          quietZone: 2
+        });
+      }
+    } catch (e) {
+      console.error('Error rendering scanned QR thumbnail:', e);
+    }
+  }, [text]);
+
+  if (!text && item.thumbnail) {
+    return <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />;
+  }
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      width={512} 
+      height={512} 
+      style={{ width: '90%', height: '90%', objectFit: 'contain', display: 'block' }} 
+    />
+  );
+}
 
 export default function SavedPage({ onLoadQR, onNavigate }) {
   const { showPaywall } = usePremium();
@@ -173,6 +211,13 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
       return 'Barcode';
     }
     return 'QR Code';
+  };
+
+  const isScannedQR = (item) => {
+    if (!item) return false;
+    const isBarcode = getTypeLabel(item) === 'Barcode';
+    if (isBarcode) return false;
+    return item.source === 'scan';
   };
 
   // Group types for filters: All, QR Code, Barcode
@@ -387,7 +432,9 @@ export default function SavedPage({ onLoadQR, onNavigate }) {
                     border: 'none',
                     overflow: 'hidden'
                   }}>
-                    {item.thumbnail ? (
+                    {isScannedQR(item) ? (
+                      <ScannedQRThumbnail item={item} />
+                    ) : item.thumbnail ? (
                       <img src={item.thumbnail} alt="QR" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                     ) : (
                       <QrCode size={40} color="var(--accent-primary)" />
