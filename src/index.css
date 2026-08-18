@@ -104,21 +104,21 @@
   --accent-glow: rgba(214, 0, 54, 0.25);
   --accent-soft: rgba(214, 0, 54, 0.1);
 
-  --border-color: rgba(15, 23, 42, 0.12);
-  --border-light: rgba(15, 23, 42, 0.08);
+  --border-color: transparent;
+  --border-light: transparent;
   --border-accent: rgba(214, 0, 54, 0.3);
 
-  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.09);
-  --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.12);
+  --shadow-sm: 0 4px 16px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.1);
 
   --accent-gradient-animated: linear-gradient(270deg, #D60036, #B5002D, #FF4D7D, #D60036);
 
   /* Glassmorphism Light Presets */
   --glass-bg: #FFFFFF;
-  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-border: transparent;
   --glass-blur: blur(20px) saturate(150%);
-  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.06);
 }
 
 /* Glass Utility Classes */
@@ -7898,7 +7898,7 @@ button:active,
 /* Apple-style Grouped Settings Layout */
 .settings-group-container {
   background: var(--bg-elevated);
-  border: 1px solid var(--border-color);
+  border: none;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
