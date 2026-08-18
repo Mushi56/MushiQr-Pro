@@ -8,6 +8,8 @@ import {
   ChevronRight,
   Scan,
   FileSpreadsheet,
+  FileText,
+  FileCode,
   Zap,
   Layers,
   Archive,
@@ -19,7 +21,10 @@ import {
   ShoppingBag,
   Truck,
   Package,
-  Factory
+  Factory,
+  Cloud,
+  Gauge,
+  RefreshCw
 } from 'lucide-react';
 import onboardingQrSvg from '../../assets/onboarding-qr-code.svg';
 import onboardingBarcodeSvg from '../../assets/onboarding-barcode.svg';
@@ -1030,188 +1035,624 @@ export default function OnboardingFlow({ onComplete }) {
         )}
 
         {/* ═════════════════════════════════════════════════════════════════════
-            SLIDE 3: BULK GENERATION ENGINE (Excel, CSV, 10K+ Codes)
+            SLIDE 3: POWERFUL BULK GENERATION (SPLIT VIEW + 3D DECK + PREVIEW CONSOLE)
             ═════════════════════════════════════════════════════════════════════ */}
         {currentSlide === 2 && (
           <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
-            {/* Top Typography Header */}
+            
+            {/* Top Typography Header (Without '03' badge matching user instruction) */}
             <div style={{ textAlign: 'left', width: '100%', padding: '0 4px', boxSizing: 'border-box' }}>
               <h1
                 style={{
                   fontSize: '30px',
                   fontWeight: 800,
                   color: '#FFFFFF',
-                  margin: '0 0 8px 0',
+                  margin: '0 0 6px 0',
                   lineHeight: 1.15,
                   letterSpacing: '-0.5px',
                   fontFamily: 'Outfit, var(--font-display, sans-serif)'
                 }}
               >
-                Bulk Batch
+                Powerful
                 <br />
-                <span style={{ color: '#10B981' }}>Generation</span> Engine
+                <span style={{ color: '#00E676' }}>Bulk Generation</span>
               </h1>
               <p
                 style={{
-                  fontSize: '13px',
+                  fontSize: '12.5px',
                   color: '#94A3B8',
                   margin: 0,
-                  lineHeight: 1.45,
+                  lineHeight: 1.4,
                   maxWidth: '290px',
                   fontWeight: 400
                 }}
               >
-                Create thousands of QR codes and barcodes simultaneously from spreadsheets with 1-click ZIP export.
+                Create thousands of QR codes and barcodes in seconds. Import, sync and export with ease.
               </p>
             </div>
 
-            {/* Central 3D Bulk Visual */}
+            {/* Central Split Section: Left 3D Extruded Feature Tiles + Right 3D Deck & Preview Console */}
             <div
               style={{
-                position: 'relative',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1.32fr',
+                gap: '10px',
                 width: '100%',
-                height: '300px',
-                display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                margin: '8px 0'
+                margin: '4px 0 6px 0'
               }}
             >
-              {/* Main Center Batch Console */}
-              <div
-                style={{
-                  width: '210px',
-                  borderRadius: '24px',
-                  background: 'linear-gradient(145deg, #101f18 0%, #0a1410 100%)',
-                  border: '2px solid rgba(16, 185, 129, 0.65)',
-                  boxShadow: '0 20px 48px rgba(16, 185, 129, 0.3)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  padding: '14px',
-                  gap: 8,
-                  zIndex: 10,
-                  backdropFilter: 'blur(12px)',
-                  animation: 'floatCenter 4s ease-in-out infinite'
-                }}
-              >
-                {/* Header Stats */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
-                      <FileSpreadsheet size={13} />
-                    </div>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF' }}>CSV / Excel</span>
+              {/* Left Column: 5 3D Extruded Borderless Feature Tiles */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+                {/* Feature 1: CSV / Excel Import (3D Green Tile) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '13px',
+                      background: 'linear-gradient(145deg, #10B981 0%, #059669 55%, #064E3B 100%)',
+                      border: 'none',
+                      boxShadow: `
+                        0 8px 18px rgba(5, 150, 105, 0.55),
+                        0 3px 6px rgba(0, 0, 0, 0.4),
+                        inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                        inset 0 -2px 3px rgba(0, 0, 0, 0.45)
+                      `,
+                      transform: 'perspective(400px) rotateX(10deg) rotateY(-10deg)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFFFFF',
+                      flexShrink: 0
+                    }}
+                  >
+                    <FileSpreadsheet size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(16, 185, 129, 0.18)', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '2px 7px', borderRadius: 7 }}>
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
-                    <span style={{ fontSize: '9px', fontWeight: 800, color: '#34D399', letterSpacing: '0.3px' }}>
-                      10K+ CODES
-                    </span>
-                  </div>
-                </div>
-
-                {/* Progress Metric Bar */}
-                <div style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '6px', padding: '4px 6px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', fontWeight: 700, color: '#94A3B8' }}>
-                    <span>Batch Queue</span>
-                    <span style={{ color: '#10B981' }}>10,000 / 10,000 Ready</span>
-                  </div>
-                  <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '10px', overflow: 'hidden' }}>
-                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg, #10B981 0%, #34D399 100%)', borderRadius: '10px' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>CSV / Excel Import</span>
+                    <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Instant data import</span>
                   </div>
                 </div>
 
-                {/* Queue Items */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 3.5 }}>
-                  {[
-                    { name: 'product_batch_01', count: '5.0k', tag: 'QR', color: '#FF1E56' },
-                    { name: 'retail_barcode_02', count: '3.5k', tag: 'EAN', color: '#F59E0B' },
-                    { name: 'vcard_members_03', count: '1.5k', tag: 'vCard', color: '#10B981' }
-                  ].map((row, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.06)',
-                        borderRadius: '6px',
-                        padding: '3.5px 7px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        fontSize: '9px'
-                      }}
-                    >
-                      <span style={{ fontWeight: 700, color: '#F1F5F9', maxWidth: '85px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {row.name}
-                      </span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <span style={{ fontSize: '8px', fontWeight: 800, color: row.color, background: 'rgba(255,255,255,0.07)', padding: '1px 4px', borderRadius: 4 }}>
-                          {row.tag}
-                        </span>
-                        <Check size={11} color="#10B981" strokeWidth={3} />
-                      </div>
-                    </div>
-                  ))}
+                {/* Feature 2: Multi-Format (3D Purple Tile) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '13px',
+                      background: 'linear-gradient(145deg, #8B5CF6 0%, #6D28D9 55%, #4C1D95 100%)',
+                      border: 'none',
+                      boxShadow: `
+                        0 8px 18px rgba(109, 40, 217, 0.55),
+                        0 3px 6px rgba(0, 0, 0, 0.4),
+                        inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                        inset 0 -2px 3px rgba(0, 0, 0, 0.45)
+                      `,
+                      transform: 'perspective(400px) rotateX(10deg) rotateY(-10deg)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFFFFF',
+                      flexShrink: 0
+                    }}
+                  >
+                    <Layers size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>Multi-Format</span>
+                    <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>QR Codes &amp; Barcodes</span>
+                  </div>
                 </div>
 
-                {/* Bottom Action Footer */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 5 }}>
-                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#94A3B8' }}>ZIP &amp; PDF Export</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#10B981', fontSize: '9px', fontWeight: 800, background: 'rgba(16, 185, 129, 0.12)', padding: '2px 6px', borderRadius: '5px' }}>
-                    <Download size={10} />
-                    <span>Download All</span>
+                {/* Feature 3: Bulk Engine (3D Lime/Green Tile) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '13px',
+                      background: 'linear-gradient(145deg, #00E676 0%, #10B981 55%, #064E3B 100%)',
+                      border: 'none',
+                      boxShadow: `
+                        0 8px 18px rgba(0, 230, 118, 0.55),
+                        0 3px 6px rgba(0, 0, 0, 0.4),
+                        inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                        inset 0 -2px 3px rgba(0, 0, 0, 0.45)
+                      `,
+                      transform: 'perspective(400px) rotateX(10deg) rotateY(-10deg)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFFFFF',
+                      flexShrink: 0
+                    }}
+                  >
+                    <Zap size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>Bulk Engine</span>
+                    <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>5,000+ codes per batch</span>
+                  </div>
+                </div>
+
+                {/* Feature 4: ZIP Export (3D Blue Tile) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '13px',
+                      background: 'linear-gradient(145deg, #38BDF8 0%, #0284C7 55%, #0C4A6E 100%)',
+                      border: 'none',
+                      boxShadow: `
+                        0 8px 18px rgba(2, 132, 199, 0.55),
+                        0 3px 6px rgba(0, 0, 0, 0.4),
+                        inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                        inset 0 -2px 3px rgba(0, 0, 0, 0.45)
+                      `,
+                      transform: 'perspective(400px) rotateX(10deg) rotateY(-10deg)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFFFFF',
+                      flexShrink: 0
+                    }}
+                  >
+                    <FileText size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>ZIP Export</span>
+                    <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Single or bulk export</span>
+                  </div>
+                </div>
+
+                {/* Feature 5: Bulk Sync (3D Amber Tile) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '13px',
+                      background: 'linear-gradient(145deg, #F59E0B 0%, #D97706 55%, #78350F 100%)',
+                      border: 'none',
+                      boxShadow: `
+                        0 8px 18px rgba(217, 119, 6, 0.55),
+                        0 3px 6px rgba(0, 0, 0, 0.4),
+                        inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                        inset 0 -2px 3px rgba(0, 0, 0, 0.45)
+                      `,
+                      transform: 'perspective(400px) rotateX(10deg) rotateY(-10deg)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFFFFF',
+                      flexShrink: 0
+                    }}
+                  >
+                    <RefreshCw size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>Bulk Sync</span>
+                    <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Sticky label sheets</span>
                   </div>
                 </div>
               </div>
 
-              {/* Orbiting Bulk Badges */}
-              <OrbitBadge icon={FileSpreadsheet} label="CSV & Excel" desc="Instant Sheet Import" top="8px" left="6px" delay="0s" color="#10B981" />
-              <OrbitBadge icon={Archive} label="ZIP Export" desc="Print Ready PDFs" bottom="14px" right="6px" delay="1s" color="#38BDF8" />
+              {/* Right Column: 3D Stacked Deck (QR Overlapping Barcode) + Bulk Generation Preview Console */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                
+                {/* 3D Stack of 3 Cards (CSV/Excel at back + Barcode behind + QR in front overlapping) */}
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '148px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'visible'
+                  }}
+                >
+                  {/* Glowing Emerald Nebula Background Aura */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '-12px',
+                      right: '-8px',
+                      width: '175px',
+                      height: '155px',
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, rgba(0, 230, 118, 0.45) 0%, rgba(16, 185, 129, 0.22) 45%, transparent 75%)',
+                      filter: 'blur(20px)',
+                      pointerEvents: 'none',
+                      zIndex: 0
+                    }}
+                  />
+
+                  {/* Orbiting Green Light Ring Arc 1 */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '-2px',
+                      right: '-4px',
+                      width: '185px',
+                      height: '135px',
+                      borderRadius: '50%',
+                      border: '1.5px solid rgba(0, 230, 118, 0.45)',
+                      boxShadow: '0 0 16px rgba(0, 230, 118, 0.3)',
+                      transform: 'rotate(-22deg)',
+                      pointerEvents: 'none',
+                      zIndex: 0
+                    }}
+                  />
+                  {/* Orbiting Green Light Ring Arc 2 */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      width: '175px',
+                      height: '125px',
+                      borderRadius: '50%',
+                      border: '1.5px solid rgba(16, 185, 129, 0.3)',
+                      transform: 'rotate(18deg)',
+                      pointerEvents: 'none',
+                      zIndex: 0
+                    }}
+                  />
+
+                  {/* Cosmic Green Sparkle Stars */}
+                  <span className="sparkle-star" style={{ top: '-4px', right: '14px', color: '#00E676', fontSize: '13px', zIndex: 1 }}>✦</span>
+                  <span className="sparkle-star" style={{ top: '35%', right: '-8px', color: '#34D399', fontSize: '9px', animationDelay: '1.2s', zIndex: 1 }}>✦</span>
+                  <span className="sparkle-star" style={{ bottom: '15px', left: '-4px', color: '#00E676', fontSize: '10px', animationDelay: '0.8s', zIndex: 1 }}>✦</span>
+
+                  {/* 1. Back Sheet: CSV / Excel Glass Sheet (Layer 1 - Back) */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '-10px',
+                      right: '6px',
+                      width: '138px',
+                      height: '115px',
+                      borderRadius: '16px',
+                      background: 'linear-gradient(145deg, rgba(16, 185, 129, 0.28) 0%, rgba(4, 28, 19, 0.92) 100%)',
+                      border: '2px solid #00E676',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.8), 0 0 24px rgba(0, 230, 118, 0.45)',
+                      padding: '6px 8px',
+                      boxSizing: 'border-box',
+                      transform: 'perspective(600px) rotateX(14deg) rotateY(-6deg) rotateZ(3deg)',
+                      zIndex: 1,
+                      backdropFilter: 'blur(8px)'
+                    }}
+                  >
+                    {/* Header Tab with CSV / Excel Badge */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '7.5px', fontWeight: 900, color: '#022C22', background: '#00E676', padding: '1.5px 6px', borderRadius: '4px', boxShadow: '0 1px 4px rgba(0,230,118,0.4)' }}>
+                        CSV / Excel
+                      </span>
+                    </div>
+                    {/* Top Table Header Bar */}
+                    <div style={{ height: '8px', background: '#10B981', borderRadius: '3px', width: '100%', marginBottom: '4px' }} />
+                    {/* Grid Table Cells */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '3px' }}>
+                      {[...Array(16)].map((_, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            height: '8px',
+                            background: i % 2 === 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.14)',
+                            borderRadius: '2px'
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 2. Middle Layer: 3D Barcode Card (Layer 2 - Behind QR, peeking out on the right) */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '4px',
+                      right: '0px',
+                      width: '102px',
+                      height: '76px',
+                      borderRadius: '15px',
+                      background: 'linear-gradient(145deg, #FFFFFF 0%, #F1F5F9 100%)',
+                      border: '2px solid rgba(168, 85, 247, 0.8)',
+                      boxShadow: '0 12px 28px rgba(0,0,0,0.8), 0 0 20px rgba(168, 85, 247, 0.4)',
+                      padding: '8px 10px 14px 10px',
+                      boxSizing: 'border-box',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transform: 'perspective(600px) rotateX(15deg) rotateY(16deg) rotateZ(8deg)',
+                      zIndex: 2
+                    }}
+                  >
+                    {/* Barcode Pattern */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.8px', height: '36px', width: '100%' }}>
+                      {[3, 1, 4, 1.5, 3, 2, 4, 1, 2.5, 3.5, 1, 4, 2, 1.5, 3, 2, 4, 1.5].map((w, i) => (
+                        <div key={i} style={{ width: `${w * 1.1}px`, height: '100%', background: '#0F172A', borderRadius: '0.5px' }} />
+                      ))}
+                    </div>
+                    {/* Attached Purple Barcode Tag */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: '-5px',
+                        right: '8px',
+                        background: '#8B5CF6',
+                        color: '#FFFFFF',
+                        fontSize: '7.5px',
+                        fontWeight: 900,
+                        padding: '1.5px 6px',
+                        borderRadius: '5px',
+                        boxShadow: '0 2px 6px rgba(139, 92, 246, 0.6)'
+                      }}
+                    >
+                      Barcode
+                    </div>
+                  </div>
+
+                  {/* 3. Front Layer: 3D QR Code Card (Layer 3 - Front Center-Left, OVERLAPPING the Barcode) */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '-6px',
+                      left: '0px',
+                      width: '108px',
+                      height: '108px',
+                      borderRadius: '18px',
+                      background: 'linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%)',
+                      border: '2.5px solid #00E676',
+                      boxShadow: '0 18px 40px rgba(0,0,0,0.9), 0 0 32px rgba(0, 230, 118, 0.7)',
+                      padding: '8px',
+                      boxSizing: 'border-box',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transform: 'perspective(600px) rotateX(14deg) rotateY(-16deg) rotateZ(4deg)',
+                      zIndex: 5
+                    }}
+                  >
+                    {/* Render exact Onboarding QR Code SVG from Screen 1 */}
+                    <img
+                      src={onboardingQrSvg}
+                      alt="Mushi QR"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        display: 'block'
+                      }}
+                    />
+                    {/* Attached Green QR Tag */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: '-5px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: '#00E676',
+                        color: '#022C22',
+                        fontSize: '8px',
+                        fontWeight: 900,
+                        padding: '1.5px 7px',
+                        borderRadius: '5px',
+                        boxShadow: '0 2px 8px rgba(0, 230, 118, 0.6)'
+                      }}
+                    >
+                      QR
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Bulk Generation Preview Console Box */}
+                <div
+                  style={{
+                    width: '100%',
+                    background: '#09131D',
+                    border: '1.5px solid rgba(16, 185, 129, 0.45)',
+                    borderRadius: '16px',
+                    padding: '8px 10px',
+                    boxSizing: 'border-box',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.7), 0 0 20px rgba(16, 185, 129, 0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px'
+                  }}
+                >
+                  {/* Header Row */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 800, color: '#FFFFFF' }}>Bulk Generation Preview</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', background: 'rgba(16, 185, 129, 0.2)', padding: '1.5px 6px', borderRadius: '6px' }}>
+                      <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#00E676' }} />
+                      <span style={{ fontSize: '8px', fontWeight: 800, color: '#34D399' }}>Ready</span>
+                    </div>
+                  </div>
+
+                  {/* Total Codes Count */}
+                  <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                    <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 600 }}>Total Codes</span>
+                    <span style={{ fontSize: '14px', fontWeight: 900, color: '#00E676', lineHeight: 1.1 }}>5,000 / 5,000</span>
+                    <span style={{ fontSize: '7.5px', color: '#34D399', fontWeight: 600 }}>Ready to generate</span>
+                  </div>
+
+                  {/* Full Green Progress Bar */}
+                  <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg, #10B981 0%, #00E676 100%)', borderRadius: '10px' }} />
+                  </div>
+
+                  {/* 3 Queue Rows */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 5px', borderRadius: '5px', fontSize: '8.5px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ background: '#10B981', color: '#fff', fontSize: '7px', fontWeight: 900, padding: '0 3px', borderRadius: '2px' }}>X</span>
+                        <span style={{ fontWeight: 700, color: '#FFFFFF' }}>products.csv</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#94A3B8', fontSize: '7.5px' }}>
+                        <span>2,500 rows</span>
+                        <Check size={10} color="#10B981" strokeWidth={3} />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 5px', borderRadius: '5px', fontSize: '8.5px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ background: '#8B5CF6', color: '#fff', fontSize: '7px', fontWeight: 900, padding: '0 3px', borderRadius: '2px' }}>📋</span>
+                        <span style={{ fontWeight: 700, color: '#FFFFFF' }}>contacts.xlsx</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#94A3B8', fontSize: '7.5px' }}>
+                        <span>1,500 rows</span>
+                        <Check size={10} color="#10B981" strokeWidth={3} />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 5px', borderRadius: '5px', fontSize: '8.5px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ background: '#F59E0B', color: '#fff', fontSize: '7px', fontWeight: 900, padding: '0 3px', borderRadius: '2px' }}>{'{}'}</span>
+                        <span style={{ fontWeight: 700, color: '#FFFFFF' }}>barcodes.json</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#94A3B8', fontSize: '7.5px' }}>
+                        <span>1,000 rows</span>
+                        <Check size={10} color="#10B981" strokeWidth={3} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Export Button */}
+                  <button
+                    style={{
+                      width: '100%',
+                      height: '26px',
+                      borderRadius: '8px',
+                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                      border: 'none',
+                      color: '#FFFFFF',
+                      fontSize: '9.5px',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px',
+                      cursor: 'pointer',
+                      boxShadow: '0 3px 10px rgba(16, 185, 129, 0.4)',
+                      marginTop: '2px'
+                    }}
+                  >
+                    <Download size={11} strokeWidth={2.5} />
+                    <span>Export All (ZIP)</span>
+                  </button>
+                </div>
+
+              </div>
             </div>
 
-            {/* Bottom Engine Card */}
+            {/* Bottom Multi-Benefit Strip Card (Super Fast, Works Offline, 100% Secure, No Limits) */}
             <div
               style={{
                 width: '100%',
                 background: 'rgba(255, 255, 255, 0.04)',
                 border: '1px solid rgba(255, 255, 255, 0.09)',
                 borderRadius: '16px',
-                padding: '10px 14px',
+                padding: '10px 6px',
                 boxSizing: 'border-box',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '4px',
                 backdropFilter: 'blur(10px)',
                 marginTop: '4px'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* Item 1: Super Fast */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
                 <div
                   style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '11px',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
                     background: 'rgba(16, 185, 129, 0.15)',
                     border: '1px solid rgba(16, 185, 129, 0.35)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#10B981',
-                    flexShrink: 0
+                    color: '#10B981'
                   }}
                 >
-                  <Layers size={20} strokeWidth={2.3} />
+                  <Gauge size={16} strokeWidth={2.3} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>
-                    High-Throughput Batch Engine
-                  </span>
-                  <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 400, marginTop: '2px', lineHeight: 1.2 }}>
-                    Generate 1,000+ codes per second locally in browser.
-                  </span>
-                </div>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Super Fast</span>
+                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Thousands of codes in sec</span>
               </div>
-              <ChevronRight size={18} color="#64748B" />
+
+              {/* Item 2: Works Offline */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: 'rgba(168, 85, 247, 0.15)',
+                    border: '1px solid rgba(168, 85, 247, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#A855F7'
+                  }}
+                >
+                  <Cloud size={16} strokeWidth={2.3} />
+                </div>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Works Offline</span>
+                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Create anytime, anywhere</span>
+              </div>
+
+              {/* Item 3: 100% Secure */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    border: '1px solid rgba(56, 189, 248, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#38BDF8'
+                  }}
+                >
+                  <ShieldCheck size={16} strokeWidth={2.3} />
+                </div>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>100% Secure</span>
+                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Your data is safe &amp; private</span>
+              </div>
+
+              {/* Item 4: No Limits */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#F59E0B'
+                  }}
+                >
+                  <Layers size={16} strokeWidth={2.3} />
+                </div>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>No Limits</span>
+                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Batch, formats &amp; creativity</span>
+              </div>
             </div>
+
           </div>
         )}
 

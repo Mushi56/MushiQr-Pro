@@ -7,7 +7,10 @@ import {
   Loader2,
   ArrowRight,
   ArrowLeft,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck,
+  Zap,
+  Cloud
 } from 'lucide-react';
 import { auth, googleProvider } from '../../services/firebase';
 import {
@@ -154,30 +157,35 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        backgroundColor: 'var(--bg-primary, #0B0F19)',
-        color: 'var(--text-primary, #FFFFFF)',
-        padding: 'calc(16px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px))',
+        backgroundColor: '#0B0F19',
+        color: '#FFFFFF',
+        padding: 'calc(14px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px))',
         boxSizing: 'border-box',
         position: 'relative',
         overflowY: 'auto'
       }}
     >
-      {/* Dynamic Ambient Background Radiant Mesh */}
+      {/* Dynamic Ambient Background Radiant Mesh (Ruby-Crimson Nebula) */}
       <div
         style={{
           position: 'fixed',
-          top: '-15%',
+          top: '-10%',
           left: '50%',
           transform: 'translateX(-50%)',
           width: '550px',
           height: '550px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(214, 0, 54, 0.16) 0%, rgba(139, 92, 246, 0.1) 40%, transparent 70%)',
-          filter: 'blur(60px)',
+          background: 'radial-gradient(circle, rgba(255, 30, 86, 0.22) 0%, rgba(139, 92, 246, 0.1) 45%, transparent 70%)',
+          filter: 'blur(70px)',
           pointerEvents: 'none',
           zIndex: 0
         }}
       />
+
+      {/* Cosmic Sparkle Stars */}
+      <span className="sparkle-star" style={{ top: '8%', left: '10%', color: '#FF2A6D', fontSize: '13px', zIndex: 1 }}>✦</span>
+      <span className="sparkle-star" style={{ top: '14%', right: '12%', color: '#FFB74D', fontSize: '10px', animationDelay: '1s', zIndex: 1 }}>✦</span>
+      <span className="sparkle-star" style={{ top: '24%', left: '8%', color: '#38BDF8', fontSize: '9px', animationDelay: '1.8s', zIndex: 1 }}>✦</span>
 
       {/* Top Header Row with Skip Button (Only visible during first launch with onboarding) */}
       {isFirstLaunch && (
@@ -188,7 +196,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
-            marginBottom: '12px',
+            marginBottom: '10px',
             zIndex: 10
           }}
         >
@@ -197,8 +205,8 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             onClick={handleSkip}
             style={{
               background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-              color: 'var(--text-secondary, #CBD5E1)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              color: '#CBD5E1',
               padding: '6px 14px',
               borderRadius: '20px',
               fontSize: '12.5px',
@@ -209,8 +217,6 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
               alignItems: 'center',
               gap: 4
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
           >
             <span>Skip</span>
             <ChevronRight size={14} />
@@ -218,7 +224,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
         </div>
       )}
 
-      {/* Main Form Content - Fully Out-of-the-box (Frameless & Clean) */}
+      {/* Main Content Container */}
       <div
         className="login-content-anim"
         style={{
@@ -230,38 +236,180 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
           position: 'relative'
         }}
       >
-        {/* App Icon & Branding Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{ display: 'inline-flex', marginBottom: '14px' }}>
-            <AppIcon size={64} shadow />
+        {/* ═══════════════ 3D INTERACTIVE HERO STAGE ═══════════════ */}
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '140px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '12px'
+          }}
+        >
+          {/* Glowing Ruby Light Ring Arc */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '190px',
+              height: '130px',
+              borderRadius: '50%',
+              border: '1.5px solid rgba(255, 30, 86, 0.35)',
+              boxShadow: '0 0 16px rgba(255, 30, 86, 0.25)',
+              transform: 'rotate(-20deg)',
+              pointerEvents: 'none'
+            }}
+          />
+
+          {/* Central 3D Tilted Glowing App Card */}
+          <div
+            className="floating-login-card"
+            style={{
+              width: '96px',
+              height: '96px',
+              borderRadius: '24px',
+              background: '#0E1422',
+              border: '2.5px solid #FF1E56',
+              boxShadow: `
+                0 0 35px rgba(255, 30, 86, 0.7),
+                0 0 14px #FF2A6D,
+                inset 0 0 16px rgba(255, 30, 86, 0.35),
+                0 18px 40px rgba(0, 0, 0, 0.9)
+              `,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              padding: 0,
+              boxSizing: 'border-box',
+              transform: 'perspective(600px) rotateX(14deg) rotateY(-16deg) rotateZ(4deg)',
+              zIndex: 5
+            }}
+          >
+            <img
+              src="/logo.webp"
+              alt="Mushi QR Pro Logo"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block'
+              }}
+            />
           </div>
 
+          {/* 3D Extruded Tile 1: Cloud Sync (Top Left) */}
+          <div
+            className="anim-tile-blue"
+            style={{
+              position: 'absolute',
+              top: '12px',
+              left: '24px',
+              width: '38px',
+              height: '38px',
+              borderRadius: '13px',
+              background: 'linear-gradient(145deg, #3B82F6 0%, #1D4ED8 55%, #172554 100%)',
+              border: 'none',
+              boxShadow: `
+                0 8px 18px rgba(29, 78, 216, 0.6),
+                inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                inset 0 -2px 3px rgba(0, 0, 0, 0.5)
+              `,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              zIndex: 6
+            }}
+          >
+            <Cloud size={18} strokeWidth={2.4} />
+          </div>
+
+          {/* 3D Extruded Tile 2: 100% Secure (Top Right) */}
+          <div
+            className="anim-tile-purple"
+            style={{
+              position: 'absolute',
+              top: '14px',
+              right: '26px',
+              width: '38px',
+              height: '38px',
+              borderRadius: '13px',
+              background: 'linear-gradient(145deg, #8B5CF6 0%, #6D28D9 55%, #4C1D95 100%)',
+              border: 'none',
+              boxShadow: `
+                0 8px 18px rgba(109, 40, 217, 0.6),
+                inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                inset 0 -2px 3px rgba(0, 0, 0, 0.5)
+              `,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              zIndex: 6
+            }}
+          >
+            <ShieldCheck size={18} strokeWidth={2.4} />
+          </div>
+
+          {/* 3D Extruded Tile 3: Pro Speed (Bottom Right) */}
+          <div
+            className="anim-tile-amber"
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              right: '38px',
+              width: '34px',
+              height: '34px',
+              borderRadius: '12px',
+              background: 'linear-gradient(145deg, #F59E0B 0%, #D97706 55%, #78350F 100%)',
+              border: 'none',
+              boxShadow: `
+                0 8px 16px rgba(217, 119, 6, 0.6),
+                inset 0 2px 2px rgba(255, 255, 255, 0.7),
+                inset 0 -2px 3px rgba(0, 0, 0, 0.5)
+              `,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              zIndex: 6
+            }}
+          >
+            <Zap size={16} strokeWidth={2.4} />
+          </div>
+        </div>
+
+        {/* Typography Header */}
+        <div style={{ textAlign: 'center', marginBottom: '22px' }}>
           <h1
             style={{
               fontSize: '26px',
-              fontWeight: 900,
-              color: 'var(--text-primary, #FFFFFF)',
+              fontWeight: 800,
+              color: '#FFFFFF',
               margin: '0 0 6px',
               letterSpacing: '-0.5px',
               fontFamily: 'Outfit, var(--font-display, sans-serif)'
             }}
           >
-            Welcome Back
+            Welcome Back to{' '}
+            <span style={{ color: '#FF1E56' }}>Mushi QR</span>
           </h1>
           <p
             style={{
-              fontSize: '14px',
-              color: 'var(--text-secondary, #CBD5E1)',
+              fontSize: '13px',
+              color: '#94A3B8',
               margin: 0,
-              fontWeight: 500,
+              fontWeight: 400,
               lineHeight: 1.4
             }}
           >
-            Sign in to continue using Mushi QR Pro.
+            Sign in to access your saved codes, styles and batch sync.
           </p>
         </div>
 
-        {/* 1. Continue with Google on Top */}
+        {/* 1. Continue with Google */}
         <button
           type="button"
           onClick={handleGoogleSignIn}
@@ -270,9 +418,9 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             width: '100%',
             height: '50px',
             borderRadius: '16px',
-            background: 'var(--bg-input, #0E0E16)',
-            border: '1px solid var(--border-color, rgba(255, 255, 255, 0.14))',
-            color: 'var(--text-primary, #FFFFFF)',
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            color: '#FFFFFF',
             fontSize: '14px',
             fontWeight: 700,
             cursor: loading || googleLoading ? 'not-allowed' : 'pointer',
@@ -280,11 +428,10 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 12,
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
-            transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.1s ease'
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
+            transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.1s ease',
+            backdropFilter: 'blur(8px)'
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.07)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-input, #0E0E16)'}
           onMouseDown={e => e.currentTarget.style.transform = 'scale(0.99)'}
           onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
         >
@@ -302,20 +449,20 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
         </button>
 
         {/* OR Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', margin: '22px 0', gap: '12px' }}>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-color, rgba(255, 255, 255, 0.12))' }} />
+        <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: '12px' }}>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
           <span
             style={{
               fontSize: '11px',
               fontWeight: 800,
-              color: 'var(--text-muted, #64748B)',
+              color: '#64748B',
               textTransform: 'uppercase',
               letterSpacing: '0.8px'
             }}
           >
             OR WITH EMAIL
           </span>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-color, rgba(255, 255, 255, 0.12))' }} />
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
         </div>
 
         {/* Error Alert Message */}
@@ -325,31 +472,31 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
               background: 'rgba(239, 68, 68, 0.12)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '14px',
-              padding: '12px 16px',
+              padding: '10px 14px',
               color: '#EF4444',
-              fontSize: '13px',
+              fontSize: '12.5px',
               fontWeight: 600,
-              marginBottom: '18px',
+              marginBottom: '16px',
               display: 'flex',
               alignItems: 'center',
               gap: '10px'
             }}
           >
-            <span style={{ fontSize: '16px' }}>⚠️</span>
+            <span>⚠️</span>
             <span style={{ flex: 1 }}>{error}</span>
           </div>
         )}
 
         {/* Form Fields */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {/* Email Input */}
           <div>
             <label
               style={{
                 display: 'block',
-                fontSize: '12.5px',
+                fontSize: '12px',
                 fontWeight: 700,
-                color: 'var(--text-secondary, #CBD5E1)',
+                color: '#CBD5E1',
                 marginBottom: '6px',
                 letterSpacing: '0.2px'
               }}
@@ -362,7 +509,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                 style={{
                   position: 'absolute',
                   left: '15px',
-                  color: 'var(--text-muted, #64748B)'
+                  color: '#64748B'
                 }}
               />
               <input
@@ -373,12 +520,12 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                 disabled={loading || googleLoading}
                 style={{
                   width: '100%',
-                  height: '50px',
+                  height: '48px',
                   padding: '0 14px 0 44px',
                   borderRadius: '14px',
-                  border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
-                  background: 'var(--bg-input, #0E0E16)',
-                  color: 'var(--text-primary, #FFFFFF)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  color: '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 600,
                   outline: 'none',
@@ -386,25 +533,25 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                   transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                 }}
                 onFocus={e => {
-                  e.target.style.borderColor = '#D60036';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(214, 0, 54, 0.2)';
+                  e.target.style.borderColor = '#FF1E56';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(255, 30, 86, 0.25)';
                 }}
                 onBlur={e => {
-                  e.target.style.borderColor = 'var(--border-color, rgba(255, 255, 255, 0.12))';
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)';
                   e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
           </div>
 
-          {/* Password Input with "Forgot Password?" directly underneath */}
+          {/* Password Input */}
           <div>
             <label
               style={{
                 display: 'block',
-                fontSize: '12.5px',
+                fontSize: '12px',
                 fontWeight: 700,
-                color: 'var(--text-secondary, #CBD5E1)',
+                color: '#CBD5E1',
                 marginBottom: '6px',
                 letterSpacing: '0.2px'
               }}
@@ -417,7 +564,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                 style={{
                   position: 'absolute',
                   left: '15px',
-                  color: 'var(--text-muted, #64748B)'
+                  color: '#64748B'
                 }}
               />
               <input
@@ -428,12 +575,12 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                 disabled={loading || googleLoading}
                 style={{
                   width: '100%',
-                  height: '50px',
+                  height: '48px',
                   padding: '0 44px 0 44px',
                   borderRadius: '14px',
-                  border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
-                  background: 'var(--bg-input, #0E0E16)',
-                  color: 'var(--text-primary, #FFFFFF)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  color: '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 600,
                   outline: 'none',
@@ -441,11 +588,11 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                   transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                 }}
                 onFocus={e => {
-                  e.target.style.borderColor = '#D60036';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(214, 0, 54, 0.2)';
+                  e.target.style.borderColor = '#FF1E56';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(255, 30, 86, 0.25)';
                 }}
                 onBlur={e => {
-                  e.target.style.borderColor = 'var(--border-color, rgba(255, 255, 255, 0.12))';
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)';
                   e.target.style.boxShadow = 'none';
                 }}
               />
@@ -457,7 +604,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                   right: '12px',
                   background: 'none',
                   border: 'none',
-                  color: 'var(--text-muted, #64748B)',
+                  color: '#64748B',
                   cursor: 'pointer',
                   padding: '6px',
                   display: 'flex',
@@ -469,16 +616,16 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
               </button>
             </div>
 
-            {/* Forgot Password Link Directly Under Password Input */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+            {/* Forgot Password Link */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
               <button
                 type="button"
                 onClick={() => onNavigate?.('forgot-password')}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#D60036',
-                  fontSize: '12.5px',
+                  color: '#FF1E56',
+                  fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
                   padding: 0
@@ -489,27 +636,27 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             </div>
           </div>
 
-          {/* Primary Sign In Button */}
+          {/* Primary Sign In Button (Vibrant Ruby Red Gradient) */}
           <button
             type="submit"
             disabled={loading || googleLoading}
             style={{
               width: '100%',
-              height: '52px',
+              height: '50px',
               borderRadius: '16px',
-              background: 'linear-gradient(135deg, #D60036 0%, #B5002D 100%)',
+              background: 'linear-gradient(135deg, #FF1E56 0%, #D8042B 100%)',
               border: 'none',
               color: '#FFFFFF',
               fontSize: '15px',
               fontWeight: 800,
               cursor: loading || googleLoading ? 'not-allowed' : 'pointer',
-              boxShadow: '0 8px 24px rgba(214, 0, 54, 0.35)',
+              boxShadow: '0 8px 25px rgba(255, 30, 86, 0.45)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 8,
               marginTop: '4px',
-              transition: 'transform 0.15s ease, opacity 0.2s ease'
+              transition: 'transform 0.15s ease, box-shadow 0.15s ease'
             }}
             onMouseDown={e => { if (!loading) e.currentTarget.style.transform = 'scale(0.98)'; }}
             onMouseUp={e => { if (!loading) e.currentTarget.style.transform = 'scale(1)'; }}
@@ -532,9 +679,9 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
         <div
           style={{
             textAlign: 'center',
-            marginTop: '28px',
-            fontSize: '13.5px',
-            color: 'var(--text-secondary, #CBD5E1)'
+            marginTop: '22px',
+            fontSize: '13px',
+            color: '#94A3B8'
           }}
         >
           Don't have an account?{' '}
@@ -543,7 +690,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             style={{
               background: 'none',
               border: 'none',
-              color: '#D60036',
+              color: '#FF1E56',
               fontWeight: 800,
               cursor: 'pointer',
               padding: 0
@@ -556,11 +703,23 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
 
       <style>{`
         .login-content-anim {
-          animation: contentSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: contentSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
         @keyframes contentSlideUp {
           from { opacity: 0; transform: translateY(18px) scale(0.98); }
           to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .floating-login-card {
+          animation: floatLoginCard 4.8s ease-in-out infinite;
+          transform-style: preserve-3d;
+        }
+        @keyframes floatLoginCard {
+          0%, 100% {
+            transform: perspective(600px) rotateX(14deg) rotateY(-16deg) rotateZ(4deg) translateY(0px);
+          }
+          50% {
+            transform: perspective(600px) rotateX(16deg) rotateY(-14deg) rotateZ(5deg) translateY(-6px);
+          }
         }
       `}</style>
     </div>
