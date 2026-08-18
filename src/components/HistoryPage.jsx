@@ -20,7 +20,7 @@ const TYPE_ICONS = {
   [QR_TYPES.TEXT]: <FileCode size={14} />
 };
 
-export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All' }) {
+export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All', showToast }) {
   const { showPaywall } = usePremium();
   const access = FeatureAccessManager.canUseFeature('history_view');
 
@@ -151,9 +151,11 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
     const updatedSaved = getSaved();
     setSavedIds(new Set(updatedSaved.map(s => s.id)));
     if (isNowSaved) {
-      showLocalToast('Added to Saved QRs');
+      if (showToast) showToast('Saved to your collection!', 'success');
+      else showLocalToast('Saved to your collection!');
     } else {
-      showLocalToast('Removed from Saved QRs');
+      if (showToast) showToast('Removed from saved items', 'info');
+      else showLocalToast('Removed from saved items');
     }
     setSwipedItemId(null);
     setSwipeOffset(0);
@@ -607,15 +609,13 @@ export default function HistoryPage({ onLoadQR, onNavigate, initialFilter = 'All
         )}
       </div>
 
-      {/* Toast Notification */}
-      {toast && (
-        <div style={{
-          position: 'fixed', bottom: '100px', left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,0.8)', color: '#fff', padding: '12px 24px', borderRadius: '30px',
-          fontSize: '14px', fontWeight: 600, zIndex: 1000, boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-          display: 'flex', alignItems: 'center', gap: '8px', animation: 'slideUpFade 0.3s ease-out'
-        }}>
-          <Star size={16} fill="#F39C12" strokeWidth={0} /> {toast}
+      {/* Toast Notification (Fallback) */}
+      {!showToast && toast && (
+        <div className="app-toast app-toast-success" onClick={() => setToast(null)}>
+          <div className="app-toast-icon">
+            <Star size={14} fill="#F39C12" strokeWidth={0} />
+          </div>
+          <span className="app-toast-msg">{toast}</span>
         </div>
       )}
 

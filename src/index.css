@@ -7897,54 +7897,159 @@ button:active,
   animation: fadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Sleek Floating Toast Notification Card */
+/* ── Premium Floating Island Toast Notification ── */
+.app-toast,
 .toast {
   position: fixed;
-  top: 50%;
+  top: max(20px, calc(env(safe-area-inset-top, 0px) + 16px));
   left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  padding: 12px 22px;
-  border-radius: 16px;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
+  transform: translateX(-50%);
+  z-index: 999999;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
-  z-index: 999999;
-  pointer-events: none;
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  transform-origin: center center;
-  animation: toastEnter 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
-             toastExit 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) 2.7s forwards;
+  max-width: 92%;
+  min-width: 240px;
+  width: auto;
+  padding: 10px 14px 10px 12px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.90);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.5), 
+              0 0 0 1px rgba(255, 255, 255, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  pointer-events: auto;
+  animation: appToastEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+             appToastExit 0.28s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
 }
 
-@keyframes toastEnter {
+[data-theme='light'] .app-toast,
+[data-theme='light'] .toast {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #0F172A;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.16), 
+              0 0 0 1px rgba(0, 0, 0, 0.04),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.app-toast:hover,
+.toast:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 20px 42px -4px rgba(0, 0, 0, 0.6), 
+              0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.app-toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Success Type */
+.app-toast-success .app-toast-icon,
+.toast.success .app-toast-icon {
+  background: rgba(34, 197, 94, 0.18);
+  color: #22C55E;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.25);
+}
+
+/* Info Type */
+.app-toast-info .app-toast-icon,
+.toast.info .app-toast-icon {
+  background: rgba(59, 130, 246, 0.18);
+  color: #3B82F6;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
+}
+
+/* Error Type */
+.app-toast-error .app-toast-icon,
+.toast.error .app-toast-icon {
+  background: rgba(239, 68, 68, 0.18);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+}
+
+.app-toast-msg {
+  flex: 1;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+@media (max-width: 480px) {
+  .app-toast-msg {
+    max-width: 220px;
+    font-size: 13px;
+  }
+}
+
+.app-toast-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin-left: 4px;
+  color: var(--text-secondary, #94A3B8);
+  opacity: 0.65;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.app-toast-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+[data-theme='light'] .app-toast-close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #0F172A;
+}
+
+@keyframes appToastEnter {
   0% {
     opacity: 0;
-    transform: translate(-50%, -40%) scale(0.92);
-    filter: blur(4px);
+    transform: translate(-50%, -24px) scale(0.94);
+    filter: blur(6px);
   }
   100% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, 0) scale(1);
     filter: blur(0);
   }
 }
 
-@keyframes toastExit {
+@keyframes appToastExit {
   0% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, 0) scale(1);
     filter: blur(0);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -60%) scale(0.92);
+    transform: translate(-50%, -18px) scale(0.96);
     filter: blur(4px);
   }
 }

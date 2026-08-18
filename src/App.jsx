@@ -6157,7 +6157,7 @@ export default function App() {
             onOpenAuth={() => setAuthDropdownOpen(prev => !prev)}
           />
         ) : activePage === 'saved' ? (
-          <SavedPage onLoadQR={handleLoadQR} onNavigate={navigateTo} />
+          <SavedPage onLoadQR={handleLoadQR} onNavigate={navigateTo} showToast={showToast} />
         ) : activePage === 'batch' ? (
           <BatchPage
             onNavigate={navigateTo}
@@ -6231,7 +6231,7 @@ export default function App() {
             onNavigate={(p) => navigateTo(p)}
           />
         ) : (
-          <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} initialFilter={historyFilter} />
+          <HistoryPage onLoadQR={handleLoadQR} onNavigate={navigateTo} initialFilter={historyFilter} showToast={showToast} />
         )}
       </main>
 
@@ -6351,47 +6351,34 @@ export default function App() {
           </div>
         </div>
       )}
-      {/* Toast (Styled like Batch Success Info) */}
+      {/* Floating Island Toast Notification */}
       {toast && (
-        <div className={`toast fade-in-up ${toast.type}`} style={{
-          background: 'var(--bg-elevated, #0C0C14)',
-          border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
-          borderRadius: '24px',
-          padding: '24px',
-          maxWidth: '320px',
-          width: '90%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)'
-        }}>
-          <div style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            background: toast.type === 'success' ? 'rgba(34, 197, 94, 0.15)' : toast.type === 'info' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            color: toast.type === 'success' ? '#22C55E' : toast.type === 'info' ? '#3B82F6' : '#EF4444',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '16px',
-            border: `1px solid ${toast.type === 'success' ? 'rgba(34, 197, 94, 0.3)' : toast.type === 'info' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
-          }}>
+        <div 
+          className={`app-toast app-toast-${toast.type || 'success'}`}
+          onClick={() => setToast(null)}
+          role="status"
+          aria-live="polite"
+        >
+          <div className="app-toast-icon">
             {toast.type === 'success' ? (
-              <CheckCircle2 size={28} />
+              <CheckCircle2 size={16} strokeWidth={2.5} />
             ) : toast.type === 'info' ? (
-              <Info size={28} />
+              <Info size={16} strokeWidth={2.5} />
             ) : (
-              <XCircle size={28} />
+              <AlertCircle size={16} strokeWidth={2.5} />
             )}
           </div>
-          <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
-            {toast.type === 'success' ? 'Success! 🎉' : toast.type === 'info' ? 'Notice' : 'Error'}
-          </h3>
-          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-            {toast.message}
-          </p>
+          <span className="app-toast-msg">{toast.message}</span>
+          <button 
+            className="app-toast-close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setToast(null);
+            }}
+            aria-label="Dismiss"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 
