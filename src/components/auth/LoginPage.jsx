@@ -159,7 +159,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
         justifyContent: 'flex-start',
         backgroundColor: '#0B0F19',
         color: '#FFFFFF',
-        padding: 'calc(14px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px))',
+        padding: '0 0 calc(24px + env(safe-area-inset-bottom, 0px))',
         boxSizing: 'border-box',
         position: 'relative',
         overflowY: 'auto'
@@ -182,47 +182,45 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
         }}
       />
 
-      {/* Cosmic Sparkle Stars */}
-      <span className="sparkle-star" style={{ top: '8%', left: '10%', color: '#FF2A6D', fontSize: '13px', zIndex: 1 }}>✦</span>
-      <span className="sparkle-star" style={{ top: '14%', right: '12%', color: '#FFB74D', fontSize: '10px', animationDelay: '1s', zIndex: 1 }}>✦</span>
-      <span className="sparkle-star" style={{ top: '24%', left: '8%', color: '#38BDF8', fontSize: '9px', animationDelay: '1.8s', zIndex: 1 }}>✦</span>
-
-      {/* Top Header Row with Skip Button (Only visible during first launch with onboarding) */}
-      {isFirstLaunch && (
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '420px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            marginBottom: '10px',
-            zIndex: 10
-          }}
-        >
+      {/* Top Header Bar with Skip Action (Exact matching Onboarding position) */}
+      <header
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          padding: 'calc(18px + env(safe-area-inset-top, 0px)) 24px 8px',
+          boxSizing: 'border-box',
+          zIndex: 30
+        }}
+      >
+        {isFirstLaunch ? (
           <button
             type="button"
             onClick={handleSkip}
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              color: '#CBD5E1',
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontSize: '12.5px',
-              fontWeight: 700,
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              color: '#FFFFFF',
+              padding: '7px 20px',
+              borderRadius: '24px',
+              fontSize: '13px',
+              fontWeight: 600,
               cursor: 'pointer',
-              transition: 'all 0.2s ease',
+              transition: 'background 0.2s ease',
               display: 'flex',
               alignItems: 'center',
-              gap: 4
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)',
+              outline: 'none'
             }}
           >
-            <span>Skip</span>
-            <ChevronRight size={14} />
+            Skip
           </button>
-        </div>
-      )}
+        ) : (
+          <div style={{ height: '34px' }} />
+        )}
+      </header>
 
       {/* Main Content Container */}
       <div
@@ -230,6 +228,8 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
         style={{
           width: '100%',
           maxWidth: '420px',
+          padding: '0 20px',
+          boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
           zIndex: 2,
@@ -241,11 +241,11 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
           style={{
             position: 'relative',
             width: '100%',
-            height: '140px',
+            height: '145px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: '12px'
+            marginBottom: '14px'
           }}
         >
           {/* Glowing Ruby Light Ring Arc */}
@@ -261,6 +261,14 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
               pointerEvents: 'none'
             }}
           />
+
+          {/* Cosmic Sparkle Stars around the 3D space (Exact Onboarding Screen 1 design) */}
+          <span className="sparkle-star" style={{ top: '8%', left: '8%', color: '#FF4D80', fontSize: '13px' }}>✦</span>
+          <span className="sparkle-star" style={{ top: '6%', right: '34%', color: '#FF4D80', fontSize: '9px', animationDelay: '1s' }}>✦</span>
+          <span className="sparkle-star" style={{ top: '44%', left: '16%', color: '#FF2A6D', fontSize: '8px', animationDelay: '1.5s' }}>✦</span>
+          <span className="sparkle-star" style={{ bottom: '16%', left: '12%', color: '#FF4D80', fontSize: '11px', animationDelay: '0.7s' }}>✦</span>
+          <span className="sparkle-star" style={{ top: '36%', right: '6%', color: '#FFA07A', fontSize: '10px', animationDelay: '2s' }}>✦</span>
+          <span className="sparkle-star" style={{ bottom: '20%', right: '20%', color: '#FF2A6D', fontSize: '8px', animationDelay: '1.2s' }}>✦</span>
 
           {/* Central 3D Tilted Glowing App Card */}
           <div
@@ -305,7 +313,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             style={{
               position: 'absolute',
               top: '12px',
-              left: '24px',
+              left: '20px',
               width: '38px',
               height: '38px',
               borderRadius: '13px',
@@ -332,7 +340,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             style={{
               position: 'absolute',
               top: '14px',
-              right: '26px',
+              right: '22px',
               width: '38px',
               height: '38px',
               borderRadius: '13px',
@@ -358,8 +366,8 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             className="anim-tile-amber"
             style={{
               position: 'absolute',
-              bottom: '10px',
-              right: '38px',
+              bottom: '8px',
+              right: '32px',
               width: '34px',
               height: '34px',
               borderRadius: '12px',
@@ -720,6 +728,16 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
           50% {
             transform: perspective(600px) rotateX(16deg) rotateY(-14deg) rotateZ(5deg) translateY(-6px);
           }
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        .sparkle-star {
+          position: absolute;
+          animation: twinkle 3s ease-in-out infinite;
+          pointer-events: none;
+          z-index: 6;
         }
       `}</style>
     </div>

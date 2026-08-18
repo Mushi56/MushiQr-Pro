@@ -131,34 +131,39 @@ export default function OnboardingFlow({ onComplete }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-end',
-          padding: 'calc(16px + env(safe-area-inset-top, 0px)) 24px 4px',
+          padding: 'calc(18px + env(safe-area-inset-top, 0px)) 24px 8px',
           boxSizing: 'border-box',
-          zIndex: 20
+          zIndex: 30
         }}
       >
         {currentSlide < totalSlides - 1 ? (
           <button
-            onClick={handleSkip}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSkip();
+            }}
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
               color: '#FFFFFF',
-              padding: '6px 18px',
+              padding: '7px 20px',
               borderRadius: '24px',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
-              transition: 'all 0.2s ease',
+              transition: 'background 0.2s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
+              backdropFilter: 'blur(10px)',
+              outline: 'none'
             }}
           >
             Skip
           </button>
         ) : (
-          <div style={{ height: '32px' }} />
+          <div style={{ height: '34px' }} />
         )}
       </header>
 
@@ -1658,53 +1663,31 @@ export default function OnboardingFlow({ onComplete }) {
 
       </div>
 
-      {/* Bottom Controls Bar (Pagination + Primary CTA Button) */}
+      {/* Bottom Controls Bar (Primary CTA Button) */}
       <footer
         style={{
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 14,
-          padding: '10px 24px calc(24px + env(safe-area-inset-bottom, 0px))',
+          padding: '8px 24px calc(24px + env(safe-area-inset-bottom, 0px))',
           boxSizing: 'border-box',
-          zIndex: 20,
+          zIndex: 50,
           maxWidth: '440px',
-          margin: '0 auto'
+          margin: '0 auto',
+          position: 'relative'
         }}
       >
-        {/* Animated Pagination Dots */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {[0, 1, 2].map((idx) => {
-            const isActive = currentSlide === idx;
-            const dotColor =
-              currentSlide === 0
-                ? '#FF1E56'
-                : currentSlide === 1
-                ? '#FF7C00'
-                : '#10B981';
-            return (
-              <button
-                key={idx}
-                onClick={() => setCurrentSlide(idx)}
-                style={{
-                  width: isActive ? '22px' : '6px',
-                  height: '6px',
-                  borderRadius: '100px',
-                  background: isActive ? dotColor : 'rgba(255, 255, 255, 0.2)',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-              />
-            );
-          })}
-        </div>
-
         {/* Primary CTA Button (Theme-Aware Matching Vibrant Gradient) */}
         <button
-          onClick={handleNext}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleNext();
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+          }}
           style={{
             width: '100%',
             height: '52px',
@@ -1731,7 +1714,8 @@ export default function OnboardingFlow({ onComplete }) {
             justifyContent: 'center',
             gap: 8,
             cursor: 'pointer',
-            transition: 'transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease'
+            transition: 'transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease',
+            outline: 'none'
           }}
           onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
           onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}

@@ -141,7 +141,7 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
         justifyContent: 'flex-start',
         backgroundColor: 'var(--bg-primary, #0B0F19)',
         color: 'var(--text-primary, #FFFFFF)',
-        padding: 'calc(16px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px))',
+        padding: '0 0 calc(24px + env(safe-area-inset-bottom, 0px))',
         boxSizing: 'border-box',
         position: 'relative',
         overflowY: 'auto'
@@ -164,16 +164,16 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
         }}
       />
 
-      {/* Top Header Row with Back Button */}
-      <div
+      {/* Top Header Bar (Exact matching Onboarding position) */}
+      <header
         style={{
           width: '100%',
-          maxWidth: '420px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-start',
-          marginBottom: '8px',
-          zIndex: 10
+          justifyContent: 'space-between',
+          padding: 'calc(18px + env(safe-area-inset-top, 0px)) 24px 8px',
+          boxSizing: 'border-box',
+          zIndex: 30
         }}
       >
         <button
@@ -181,8 +181,8 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
           onClick={() => onNavigate('login')}
           style={{
             background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-            color: 'var(--text-secondary, #CBD5E1)',
+            border: 'none',
+            color: '#CBD5E1',
             width: '36px',
             height: '36px',
             borderRadius: '50%',
@@ -192,13 +192,34 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
             cursor: 'pointer',
             transition: 'all 0.2s ease'
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
           aria-label="Back"
         >
           <ArrowLeft size={18} />
         </button>
-      </div>
+
+        <button
+          type="button"
+          onClick={handleSkip}
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            color: '#FFFFFF',
+            padding: '7px 20px',
+            borderRadius: '24px',
+            fontSize: '13px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'background 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backdropFilter: 'blur(10px)',
+            outline: 'none'
+          }}
+        >
+          Skip
+        </button>
+      </header>
 
       {/* Main Frameless Content */}
       <div
