@@ -1879,6 +1879,7 @@ export default function App() {
   // ── Mobile App Fixes (Capacitor) ──
   useEffect(() => {
     const updateStatusBar = async () => {
+      // 1. Native Capacitor StatusBar
       try {
         await StatusBar.show();
         // Set overlaysWebView to TRUE and add padding in CSS for the 24dp status bar
@@ -1899,7 +1900,30 @@ export default function App() {
           }
         }
       } catch (e) {
-        console.warn('StatusBar plugin failed to update:', e);
+        // Fallback on web/PWA
+      }
+
+      // 2. PWA Browser Top Bar & Safe Area Theme-Color Synchronization
+      try {
+        let targetColor = '#F01A4E';
+        if (activePage === 'home' && !isHomeScrolled) {
+          targetColor = '#F01A4E';
+        } else {
+          targetColor = effectiveTheme === 'light' ? '#FFFFFF' : '#0B0F19';
+        }
+
+        let metaThemeColor = document.querySelector('meta[name="theme-color"]:not([media])');
+        if (!metaThemeColor) {
+          metaThemeColor = document.createElement('meta');
+          metaThemeColor.setAttribute('name', 'theme-color');
+          document.head.appendChild(metaThemeColor);
+        }
+        metaThemeColor.setAttribute('content', targetColor);
+
+        const mediaThemeColors = document.querySelectorAll('meta[name="theme-color"][media]');
+        mediaThemeColors.forEach(tag => tag.setAttribute('content', targetColor));
+      } catch (pwaErr) {
+        console.warn('PWA theme-color synchronization failed:', pwaErr);
       }
     };
     updateStatusBar();
