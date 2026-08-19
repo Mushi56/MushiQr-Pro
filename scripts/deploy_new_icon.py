@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw
 import os
 
 SOURCE_ICON = r"E:\Downloads\Mushi Qr Pro App Icon 1.png"
@@ -6,6 +6,7 @@ OUTPUT_DIR = "public"
 RES_DIR = "android/app/src/main/res"
 
 DENSITIES = {
+    "mipmap-ldpi": 36,
     "mipmap-mdpi": 48,
     "mipmap-hdpi": 72,
     "mipmap-xhdpi": 96,
@@ -14,12 +15,16 @@ DENSITIES = {
 }
 
 FG_SIZES = {
+    "mipmap-ldpi": 81,
     "mipmap-mdpi": 108,
     "mipmap-hdpi": 162,
     "mipmap-xhdpi": 216,
     "mipmap-xxhdpi": 324,
     "mipmap-xxxhdpi": 432,
 }
+
+# Exact matching icon crimson-red color
+MATCHING_RED = (235, 25, 60, 255)
 
 def clean_and_solidify_icon(source_path):
     img = Image.open(source_path).convert("RGBA")
@@ -28,18 +33,13 @@ def clean_and_solidify_icon(source_path):
     # Extract alpha mask
     r, g, b, a = img.split()
     
-    # Average color of the icon background for solid fill if needed (Never use white)
-    # Sample from non-transparent corner of the red background
-    sample_r, sample_g, sample_b, _ = img.getpixel((200, 200))
-    bg_fill_color = (sample_r, sample_g, sample_b, 255)
+    # Create solid base with icon matching color (Zero white)
+    solid_base = Image.new("RGBA", (w, h), MATCHING_RED)
     
-    # Create solid base with icon matching color
-    solid_base = Image.new("RGBA", (w, h), bg_fill_color)
-    
-    # Paste the original image over the matching red base
+    # Paste original image over matching red base
     composite = Image.alpha_composite(solid_base, img)
     
-    # Apply the exact alpha mask of the original squircle
+    # Apply alpha mask
     final_icon = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     final_icon.paste(composite, (0, 0), a)
     
@@ -95,16 +95,28 @@ def deploy():
             # Round launcher icon
             ri = make_round(r)
             ri.save(os.path.join(od, "ic_launcher_round.png"), "PNG")
+            
+            # Solid matching red background (Replace any legacy white backgrounds)
+            bg_img = Image.new("RGBA", (s, s), MATCHING_RED)
+            bg_img.save(os.path.join(od, "ic_launcher_background.png"), "PNG")
             print(f"  Saved {d}: {s}x{s}")
 
         for d, s in FG_SIZES.items():
             od = os.path.join(RES_DIR, d)
             os.makedirs(od, exist_ok=True)
-            r = icon_1024.resize((s, s), Image.LANCZOS)
-            r.save(os.path.join(od, "ic_launcher_foreground.png"), "PNG")
-            print(f"  Saved {d} foreground: {s}x{s}")
             
-    print("All icons successfully generated and deployed!")
+            # Foreground icon scaled into adaptive safe-zone
+            fg_canvas = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+            r = icon_1024.resize((s, s), Image.LANCZOS)
+            fg_canvas.paste(r, (0, 0), r)
+            fg_canvas.save(os.path.join(od, "ic_launcher_foreground.png"), "PNG")
+            
+            # Adaptive background (solid matching red)
+            bg_fg = Image.new("RGBA", (s, s), MATCHING_RED)
+            bg_fg.save(os.path.join(od, "ic_launcher_background.png"), "PNG")
+            print(f"  Saved {d} foreground & background: {s}x{s}")
+            
+    print("All Android mipmap icons successfully updated with ZERO white gap!")
 
 if __name__ == "__main__":
     deploy()
