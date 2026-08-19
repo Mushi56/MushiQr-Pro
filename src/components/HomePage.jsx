@@ -581,46 +581,82 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                onClick={() => onOpenProfile ? onOpenProfile() : (onMenuClick && onMenuClick())}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'transparent',
-                  border: 'none',
-                  borderRadius: '50%',
-                  padding: '0',
-                  cursor: 'pointer',
-                  width: '38px',
-                  height: '38px',
-                  transition: 'all 0.2s ease',
-                  flexShrink: 0,
-                  position: 'relative'
-                }}
-                aria-label="Profile"
-              >
-                <UserAvatar user={currentUser} size={36} border="2px solid rgba(255, 255, 255, 0.85)" />
-                {isSuperAdmin && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '-2px',
-                    right: '-2px',
-                    zIndex: 3,
+              {currentUser ? (
+                <button
+                  onClick={() => onOpenAuth ? onOpenAuth() : (onOpenProfile && onOpenProfile())}
+                  style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <GoldenAdminBadge size={13} />
-                  </div>
-                )}
-              </button>
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '50%',
+                    padding: '0',
+                    cursor: 'pointer',
+                    width: '38px',
+                    height: '38px',
+                    transition: 'all 0.2s ease',
+                    flexShrink: 0,
+                    position: 'relative'
+                  }}
+                  aria-label="Account Menu"
+                >
+                  <UserAvatar user={currentUser} size={36} border="2px solid rgba(255, 255, 255, 0.85)" />
+                  {isSuperAdmin && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '-2px',
+                      right: '-2px',
+                      zIndex: 3,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <GoldenAdminBadge size={13} />
+                    </div>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => onNavigate('login')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.4)',
+                    borderRadius: '20px',
+                    padding: '6px 14px',
+                    cursor: 'pointer',
+                    color: '#FFFFFF',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    transition: 'all 0.2s ease',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap'
+                  }}
+                  aria-label="Sign In"
+                >
+                  <User size={14} color="#FFFFFF" />
+                  <span>Sign In</span>
+                </button>
+              )}
             </div>
           </div>
 
           {/* Welcome Message / Admin Dashboard Header Block */}
           <div 
-            onClick={() => onOpenProfile && onOpenProfile()}
+            onClick={() => {
+              if (currentUser) {
+                if (onOpenAuth) onOpenAuth();
+                else if (onOpenProfile) onOpenProfile();
+              } else {
+                onNavigate('login');
+              }
+            }}
             role="button"
             tabIndex={0}
             style={{

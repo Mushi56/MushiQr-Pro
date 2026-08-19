@@ -1876,27 +1876,33 @@ export default function App() {
   const menuRef = useRef(null);
   // ── Bottom Nav Toggle ──
   const [isNavExpanded, setIsNavExpanded] = useState(false);
-  // ── Mobile App Fixes (Capacitor) ──
+  // ── Mobile App Fixes (Capacitor Status Bar) ──
   useEffect(() => {
     const updateStatusBar = async () => {
       try {
         await StatusBar.show();
-        // Set overlaysWebView to TRUE and add padding in CSS for the 24dp status bar
         await StatusBar.setOverlaysWebView({ overlay: true });
         
-        if (effectiveTheme === 'dark') {
-          await StatusBar.setStyle({ style: 'DARK' }); // Light text/icons for dark background
+        // On Home page when at top (red hero background), safe area content (status bar text/icons) must be WHITE (Style 'DARK')
+        if (activePage === 'home' && !isHomeScrolled) {
+          await StatusBar.setStyle({ style: 'DARK' }); // White icons on red hero
           await StatusBar.setBackgroundColor({ color: '#00000000' });
         } else {
-          await StatusBar.setStyle({ style: 'LIGHT' }); // Dark text/icons for light background
-          await StatusBar.setBackgroundColor({ color: '#00000000' });
+          // When scrolled or on other pages, follow theme
+          if (effectiveTheme === 'dark') {
+            await StatusBar.setStyle({ style: 'DARK' }); // White text/icons for dark background
+            await StatusBar.setBackgroundColor({ color: '#00000000' });
+          } else {
+            await StatusBar.setStyle({ style: 'LIGHT' }); // Dark text/icons for light background
+            await StatusBar.setBackgroundColor({ color: '#00000000' });
+          }
         }
       } catch (e) {
         console.warn('StatusBar plugin failed to update:', e);
       }
     };
     updateStatusBar();
-  }, [effectiveTheme]);
+  }, [effectiveTheme, activePage, isHomeScrolled]);
   // ── Sync Eyes color with dots color when syncEyes is ON ──
   useEffect(() => {
     if (syncEyes) {
