@@ -5,7 +5,7 @@ import PaidCrownBadge from './PaidCrownBadge';
 import { usePremium } from '../services/premiumContext';
 
 const LOGO_PRESETS = [
-  { slug: 'custom-icon', name: 'Custom Icon', color: '#D60036', url: '/presets/Icon.avif' },
+  { slug: 'custom-icon', name: 'M Code Studio', color: '#D60036', url: '/logo.webp' },
   { slug: 'facebook', name: 'Facebook', color: '#1877F2', url: '/presets/facebook.avif' },
   { slug: 'whatsapp', name: 'WhatsApp', color: '#25D366', url: '/presets/whatsapp.avif' },
   { slug: 'instagram', name: 'Instagram', color: '#E4405F', url: '/presets/instagram.avif' },
