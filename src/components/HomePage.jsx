@@ -8,7 +8,6 @@ import AppIcon from './AppIcon';
 import GoldenAdminBadge from './GoldenAdminBadge';
 import PaidCrownBadge from './PaidCrownBadge';
 import DeleteConfirmModal from './DeleteConfirmModal';
-import UserAvatar from './UserAvatar';
 import { useUserRole } from '../services/roleService';
 
 function HeroQRCanvas() {
@@ -505,158 +504,44 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
       position: 'relative'
     }}>
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '90px' }} className="fade-in-up" onScroll={handleScroll}>
-        {/* Static Hero Section with Mesh Grain Gradient Container (Single Unified Box) */}
+        {/* Static Hero Section with Smooth Subtle Top-to-Bottom Ruby Gradient */}
         <div style={{
           width: '100%',
-          backgroundColor: '#B80026',
+          backgroundColor: '#F01A4E',
           backgroundImage: `
-            radial-gradient(at 92% 10%, #FF1E56 0px, transparent 55%),
-            radial-gradient(at 8% 10%, #B80026 0px, transparent 50%),
-            radial-gradient(at 50% 40%, #D8042B 0px, transparent 65%),
-            radial-gradient(at 90% 85%, #FF1E56 0px, transparent 55%),
-            linear-gradient(180deg, #B80026 0%, #7A0015 100%)
+            radial-gradient(ellipse 65% 50% at 0% 100%, rgba(185, 10, 50, 0.45) 0%, transparent 70%),
+            radial-gradient(ellipse 65% 50% at 100% 100%, rgba(185, 10, 50, 0.45) 0%, transparent 70%),
+            linear-gradient(180deg, #F01A4E 0%, #F01A4E 35%, #E21345 68%, #C60835 100%)
           `,
           borderRadius: '0 0 28px 28px',
-          marginTop: '0',
-          padding: 'calc(env(safe-area-inset-top, 0px) + 24px) var(--main-padding-x) 48px var(--main-padding-x)',
+          marginTop: '-64px',
+          padding: '74px var(--main-padding-x) 48px var(--main-padding-x)',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
-          gap: '18px',
+          gap: '14px',
           color: '#FFFFFF',
-          boxShadow: '0 18px 40px rgba(216, 4, 43, 0.38)',
+          boxShadow: '0 18px 40px rgba(198, 8, 53, 0.35), inset 0 -1px 2px rgba(255, 255, 255, 0.22)',
           position: 'relative',
           overflow: 'hidden'
         }}>
-          {/* Authentic Film Grain / Noise Texture Overlay */}
-          <div 
-            style={{
-              position: 'absolute',
-              top: 0, left: 0, right: 0, bottom: 0,
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E\")",
-              mixBlendMode: 'overlay',
-              pointerEvents: 'none',
-              zIndex: 1
-            }} 
-          />
-          {/* Ambient Glow Lights */}
+          {/* Frosted Glass Horizon Sheen along the bottom curved edge */}
           <div style={{
-            position: 'absolute', bottom: '-15%', right: '5%',
-            width: '220px', height: '220px',
-            background: 'radial-gradient(circle, rgba(255, 30, 86, 0.35) 0%, transparent 70%)',
-            filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '50px',
+            background: 'linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.12) 100%)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.18)',
+            borderRadius: '0 0 28px 28px',
+            pointerEvents: 'none',
+            zIndex: 1
           }} />
-          <div style={{
-            position: 'absolute', top: '-15%', right: '-5%',
-            width: '200px', height: '200px',
-            background: 'radial-gradient(circle, rgba(255, 30, 86, 0.35) 0%, transparent 70%)',
-            filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
-          }} />
-
-          {/* Top In-Hero Navigation & App Branding (Seamlessly Fades Out on Scroll) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            position: 'relative',
-            zIndex: 2,
-            width: '100%',
-            paddingBottom: '2px',
-            opacity: isScrolled ? 0 : 1,
-            transform: isScrolled ? 'translateY(-8px) scale(0.98)' : 'translateY(0) scale(1)',
-            pointerEvents: isScrolled ? 'none' : 'auto',
-            transition: 'opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <AppIcon size={40} noBackground />
-              <div style={{
-                fontFamily: 'Outfit, sans-serif',
-                fontSize: '20px',
-                fontWeight: 800,
-                color: '#FFFFFF',
-                letterSpacing: '-0.5px'
-              }}>
-                Mushi QR <span style={{ color: '#FFE2E8', fontWeight: 600 }}>Pro</span>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {currentUser ? (
-                <button
-                  onClick={() => onOpenAuth ? onOpenAuth() : (onOpenProfile && onOpenProfile())}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'transparent',
-                    border: 'none',
-                    borderRadius: '50%',
-                    padding: '0',
-                    cursor: 'pointer',
-                    width: '38px',
-                    height: '38px',
-                    transition: 'all 0.2s ease',
-                    flexShrink: 0,
-                    position: 'relative'
-                  }}
-                  aria-label="Account Menu"
-                >
-                  <UserAvatar user={currentUser} size={36} border="2px solid rgba(255, 255, 255, 0.85)" />
-                  {isSuperAdmin && (
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '-2px',
-                      right: '-2px',
-                      zIndex: 3,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <GoldenAdminBadge size={13} />
-                    </div>
-                  )}
-                </button>
-              ) : (
-                <button
-                  onClick={() => onNavigate('login')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    border: '1.5px solid rgba(255, 255, 255, 0.4)',
-                    borderRadius: '20px',
-                    padding: '6px 14px',
-                    cursor: 'pointer',
-                    color: '#FFFFFF',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    transition: 'all 0.2s ease',
-                    flexShrink: 0,
-                    whiteSpace: 'nowrap'
-                  }}
-                  aria-label="Sign In"
-                >
-                  <User size={14} color="#FFFFFF" />
-                  <span>Sign In</span>
-                </button>
-              )}
-            </div>
-          </div>
 
           {/* Welcome Message / Admin Dashboard Header Block */}
           <div 
-            onClick={() => {
-              if (currentUser) {
-                if (onOpenAuth) onOpenAuth();
-                else if (onOpenProfile) onOpenProfile();
-              } else {
-                onNavigate('login');
-              }
-            }}
+            onClick={() => onOpenProfile && onOpenProfile()}
             role="button"
             tabIndex={0}
             style={{

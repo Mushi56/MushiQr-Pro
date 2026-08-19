@@ -1876,33 +1876,27 @@ export default function App() {
   const menuRef = useRef(null);
   // ── Bottom Nav Toggle ──
   const [isNavExpanded, setIsNavExpanded] = useState(false);
-  // ── Mobile App Fixes (Capacitor Status Bar) ──
+  // ── Mobile App Fixes (Capacitor) ──
   useEffect(() => {
     const updateStatusBar = async () => {
       try {
         await StatusBar.show();
+        // Set overlaysWebView to TRUE and add padding in CSS for the 24dp status bar
         await StatusBar.setOverlaysWebView({ overlay: true });
         
-        // On Home page when at top (red hero background), safe area content (status bar text/icons) must be WHITE (Style 'DARK')
-        if (activePage === 'home' && !isHomeScrolled) {
-          await StatusBar.setStyle({ style: 'DARK' }); // White icons on red hero
+        if (effectiveTheme === 'dark') {
+          await StatusBar.setStyle({ style: 'DARK' }); // Light text/icons for dark background
           await StatusBar.setBackgroundColor({ color: '#00000000' });
         } else {
-          // When scrolled or on other pages, follow theme
-          if (effectiveTheme === 'dark') {
-            await StatusBar.setStyle({ style: 'DARK' }); // White text/icons for dark background
-            await StatusBar.setBackgroundColor({ color: '#00000000' });
-          } else {
-            await StatusBar.setStyle({ style: 'LIGHT' }); // Dark text/icons for light background
-            await StatusBar.setBackgroundColor({ color: '#00000000' });
-          }
+          await StatusBar.setStyle({ style: 'LIGHT' }); // Dark text/icons for light background
+          await StatusBar.setBackgroundColor({ color: '#00000000' });
         }
       } catch (e) {
         console.warn('StatusBar plugin failed to update:', e);
       }
     };
     updateStatusBar();
-  }, [effectiveTheme, activePage, isHomeScrolled]);
+  }, [effectiveTheme]);
   // ── Sync Eyes color with dots color when syncEyes is ON ──
   useEffect(() => {
     if (syncEyes) {
@@ -3551,7 +3545,7 @@ export default function App() {
       )}
       {/* ── Header ── */}
       <header 
-        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' ? (!isHomeScrolled ? 'header-home-banner' : 'header-home-scrolled') : ''}`}
+        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' && !isHomeScrolled ? 'header-home-banner' : ''}`}
         style={{ display: ['barcode', 'onboarding', 'login', 'signup', 'forgot-password'].includes(activePage) ? 'none' : 'flex' }}
       >
         <div className="app-logo">
