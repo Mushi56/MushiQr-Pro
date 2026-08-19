@@ -1884,19 +1884,26 @@ export default function App() {
         // Set overlaysWebView to TRUE and add padding in CSS for the 24dp status bar
         await StatusBar.setOverlaysWebView({ overlay: true });
         
-        if (effectiveTheme === 'dark') {
-          await StatusBar.setStyle({ style: 'DARK' }); // Light text/icons for dark background
+        // Initial state at the top of Home (over the #F01A4E red hero banner): White text/icons
+        if (activePage === 'home' && !isHomeScrolled) {
+          await StatusBar.setStyle({ style: 'DARK' }); // White icons on red hero banner
           await StatusBar.setBackgroundColor({ color: '#00000000' });
         } else {
-          await StatusBar.setStyle({ style: 'LIGHT' }); // Dark text/icons for light background
-          await StatusBar.setBackgroundColor({ color: '#00000000' });
+          // When scrolled down or navigating to other pages: transition according to active theme
+          if (effectiveTheme === 'dark') {
+            await StatusBar.setStyle({ style: 'DARK' }); // Light/white text & icons for dark theme
+            await StatusBar.setBackgroundColor({ color: '#00000000' });
+          } else {
+            await StatusBar.setStyle({ style: 'LIGHT' }); // Dark text & icons for light theme
+            await StatusBar.setBackgroundColor({ color: '#00000000' });
+          }
         }
       } catch (e) {
         console.warn('StatusBar plugin failed to update:', e);
       }
     };
     updateStatusBar();
-  }, [effectiveTheme]);
+  }, [effectiveTheme, activePage, isHomeScrolled]);
   // ── Sync Eyes color with dots color when syncEyes is ON ──
   useEffect(() => {
     if (syncEyes) {
