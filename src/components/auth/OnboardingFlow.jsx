@@ -124,50 +124,7 @@ export default function OnboardingFlow({ onComplete }) {
         }}
       />
 
-      {/* Top Header Bar with Skip Action */}
-      <header
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          padding: 'calc(18px + env(safe-area-inset-top, 0px)) 24px 8px',
-          boxSizing: 'border-box',
-          zIndex: 30
-        }}
-      >
-        {currentSlide < totalSlides - 1 ? (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSkip();
-            }}
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: 'none',
-              color: '#FFFFFF',
-              padding: '7px 20px',
-              borderRadius: '24px',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'background 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)',
-              outline: 'none'
-            }}
-          >
-            Skip
-          </button>
-        ) : (
-          <div style={{ height: '34px' }} />
-        )}
-      </header>
-
-      {/* Main Content Area */}
+      {/* Main Content Area directly under Safe Area */}
       <div
         style={{
           flex: 1,
@@ -175,7 +132,7 @@ export default function OnboardingFlow({ onComplete }) {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 20px 8px',
+          padding: 'calc(16px + env(safe-area-inset-top, 0px)) 20px 8px',
           boxSizing: 'border-box',
           zIndex: 10,
           position: 'relative',
@@ -191,35 +148,73 @@ export default function OnboardingFlow({ onComplete }) {
         {currentSlide === 0 && (
           <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
             
-            {/* Top Typography Header (Left Aligned matching reference image) */}
-            <div style={{ textAlign: 'left', width: '100%', padding: '0 4px', boxSizing: 'border-box' }}>
-              <h1
-                style={{
-                  fontSize: '30px',
-                  fontWeight: 800,
-                  color: '#FFFFFF',
-                  margin: '0 0 8px 0',
-                  lineHeight: 1.15,
-                  letterSpacing: '-0.5px',
-                  fontFamily: 'Outfit, var(--font-display, sans-serif)'
+            {/* Top Typography Header & Containerless Skip Action */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                width: '100%',
+                padding: '0 4px',
+                boxSizing: 'border-box',
+                gap: '12px'
+              }}
+            >
+              <div style={{ flex: 1, textAlign: 'left' }}>
+                <h1
+                  style={{
+                    fontSize: '30px',
+                    fontWeight: 800,
+                    color: '#FFFFFF',
+                    margin: '0 0 8px 0',
+                    lineHeight: 1.15,
+                    letterSpacing: '-0.5px',
+                    fontFamily: 'Outfit, var(--font-display, sans-serif)'
+                  }}
+                >
+                  Create Stunning
+                  <br />
+                  <span style={{ color: '#FF1E56' }}>QR</span> Codes
+                </h1>
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: '#94A3B8',
+                    margin: 0,
+                    lineHeight: 1.45,
+                    maxWidth: '280px',
+                    fontWeight: 400
+                  }}
+                >
+                  Design beautiful QR codes with custom logos, colors, frames and unique styles.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSkip();
                 }}
-              >
-                Create Stunning
-                <br />
-                <span style={{ color: '#FF1E56' }}>QR</span> Codes
-              </h1>
-              <p
                 style={{
-                  fontSize: '13px',
-                  color: '#94A3B8',
-                  margin: 0,
-                  lineHeight: 1.45,
-                  maxWidth: '280px',
-                  fontWeight: 400
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '4px 0 4px 12px',
+                  marginTop: '4px',
+                  outline: 'none',
+                  flexShrink: 0,
+                  transition: 'color 0.2s ease',
+                  userSelect: 'none'
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
               >
-                Design beautiful QR codes with custom logos, colors, frames and unique styles.
-              </p>
+                Skip
+              </button>
             </div>
 
             {/* Central 3D Interactive Stage Scene */}
@@ -360,6 +355,39 @@ export default function OnboardingFlow({ onComplete }) {
                     borderRadius: '22px'
                   }}
                 />
+
+                {/* App Current Icon Logo in the Center of QR Code (Compact size, no strokes, no shadow) */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '33px',
+                    height: '33px',
+                    borderRadius: '7.5px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 15,
+                    border: 'none',
+                    padding: 0,
+                    boxShadow: 'none'
+                  }}
+                >
+                  <img
+                    src="/logo.webp"
+                    alt="Mushi QR Pro App Icon"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '7.5px',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                  />
+                </div>
               </div>
 
               {/* ═════════ 4 3D-ROTATED BORDERLESS FEATURE ICON TILES ═════════ */}
@@ -591,35 +619,73 @@ export default function OnboardingFlow({ onComplete }) {
         {currentSlide === 1 && (
           <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
             
-            {/* Top Typography Header (Left Aligned matching reference image) */}
-            <div style={{ textAlign: 'left', width: '100%', padding: '0 4px', boxSizing: 'border-box' }}>
-              <h1
-                style={{
-                  fontSize: '30px',
-                  fontWeight: 800,
-                  color: '#FFFFFF',
-                  margin: '0 0 8px 0',
-                  lineHeight: 1.15,
-                  letterSpacing: '-0.5px',
-                  fontFamily: 'Outfit, var(--font-display, sans-serif)'
+            {/* Top Typography Header & Containerless Skip Action */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                width: '100%',
+                padding: '0 4px',
+                boxSizing: 'border-box',
+                gap: '12px'
+              }}
+            >
+              <div style={{ flex: 1, textAlign: 'left' }}>
+                <h1
+                  style={{
+                    fontSize: '30px',
+                    fontWeight: 800,
+                    color: '#FFFFFF',
+                    margin: '0 0 8px 0',
+                    lineHeight: 1.15,
+                    letterSpacing: '-0.5px',
+                    fontFamily: 'Outfit, var(--font-display, sans-serif)'
+                  }}
+                >
+                  Professional
+                  <br />
+                  <span style={{ color: '#FF7C00' }}>Barcodes</span>
+                </h1>
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: '#94A3B8',
+                    margin: 0,
+                    lineHeight: 1.45,
+                    maxWidth: '280px',
+                    fontWeight: 400
+                  }}
+                >
+                  Generate and scan 1D &amp; 2D barcodes for retail, inventory, shipping and industrial standards.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSkip();
                 }}
-              >
-                Professional
-                <br />
-                <span style={{ color: '#FF7C00' }}>Barcodes</span>
-              </h1>
-              <p
                 style={{
-                  fontSize: '13px',
-                  color: '#94A3B8',
-                  margin: 0,
-                  lineHeight: 1.45,
-                  maxWidth: '280px',
-                  fontWeight: 400
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '4px 0 4px 12px',
+                  marginTop: '4px',
+                  outline: 'none',
+                  flexShrink: 0,
+                  transition: 'color 0.2s ease',
+                  userSelect: 'none'
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
               >
-                Generate and scan 1D &amp; 2D barcodes for retail, inventory, shipping and industrial standards.
-              </p>
+                Skip
+              </button>
             </div>
 
             {/* Central 3D Interactive Stage Scene (Amber / Gold Theme) */}
@@ -1046,34 +1112,46 @@ export default function OnboardingFlow({ onComplete }) {
           <div className="onboarding-slide-anim" style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
             
             {/* Top Typography Header (Without '03' badge matching user instruction) */}
-            <div style={{ textAlign: 'left', width: '100%', padding: '0 4px', boxSizing: 'border-box' }}>
-              <h1
-                style={{
-                  fontSize: '30px',
-                  fontWeight: 800,
-                  color: '#FFFFFF',
-                  margin: '0 0 6px 0',
-                  lineHeight: 1.15,
-                  letterSpacing: '-0.5px',
-                  fontFamily: 'Outfit, var(--font-display, sans-serif)'
-                }}
-              >
-                Powerful
-                <br />
-                <span style={{ color: '#00E676' }}>Bulk Generation</span>
-              </h1>
-              <p
-                style={{
-                  fontSize: '12.5px',
-                  color: '#94A3B8',
-                  margin: 0,
-                  lineHeight: 1.4,
-                  maxWidth: '290px',
-                  fontWeight: 400
-                }}
-              >
-                Create thousands of QR codes and barcodes in seconds. Import, sync and export with ease.
-              </p>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                width: '100%',
+                padding: '0 4px',
+                boxSizing: 'border-box',
+                gap: '12px'
+              }}
+            >
+              <div style={{ flex: 1, textAlign: 'left' }}>
+                <h1
+                  style={{
+                    fontSize: '30px',
+                    fontWeight: 800,
+                    color: '#FFFFFF',
+                    margin: '0 0 6px 0',
+                    lineHeight: 1.15,
+                    letterSpacing: '-0.5px',
+                    fontFamily: 'Outfit, var(--font-display, sans-serif)'
+                  }}
+                >
+                  Powerful
+                  <br />
+                  <span style={{ color: '#00E676' }}>Bulk Generation</span>
+                </h1>
+                <p
+                  style={{
+                    fontSize: '12.5px',
+                    color: '#94A3B8',
+                    margin: 0,
+                    lineHeight: 1.4,
+                    maxWidth: '290px',
+                    fontWeight: 400
+                  }}
+                >
+                  Create thousands of QR codes and barcodes in seconds. Import, sync and export with ease.
+                </p>
+              </div>
             </div>
 
             {/* Central Split Section: Left 3D Extruded Feature Tiles + Right 3D Deck & Preview Console */}
@@ -1435,6 +1513,38 @@ export default function OnboardingFlow({ onComplete }) {
                         display: 'block'
                       }}
                     />
+
+                    {/* App Current Icon Logo in the Center of QR Code Card (Compact size, no strokes) */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '17px',
+                        height: '17px',
+                        borderRadius: '3.5px',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 10,
+                        border: 'none',
+                        padding: 0
+                      }}
+                    >
+                      <img
+                        src="/logo.webp"
+                        alt="App Logo"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '3.5px',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                      />
+                    </div>
                     {/* Attached Green QR Tag */}
                     <div
                       style={{
@@ -1670,7 +1780,7 @@ export default function OnboardingFlow({ onComplete }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: '8px 24px calc(24px + env(safe-area-inset-bottom, 0px))',
+          padding: '10px 24px calc(38px + env(safe-area-inset-bottom, 0px))',
           boxSizing: 'border-box',
           zIndex: 50,
           maxWidth: '440px',
