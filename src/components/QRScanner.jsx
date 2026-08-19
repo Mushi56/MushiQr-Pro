@@ -17,6 +17,7 @@ import qrNotFoundSvg from '../assets/qr-not-found.svg';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { renderBarcode } from '../utils/barcodeEngine';
 import AppIcon from './AppIcon';
+import UserAvatar from './UserAvatar';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { usePremium } from '../services/premiumContext';
 import PaidCrownBadge from './PaidCrownBadge';
@@ -1012,7 +1013,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR, currentUser, o
         }}
       >
         <div className="app-logo">
-          <AppIcon size={34} shadow />
+          <AppIcon size={46} noBackground />
           <div className="app-logo-text" style={{ whiteSpace: 'nowrap', color: '#111827' }}>Mushi QR <span style={{ color: 'var(--accent-primary)' }}>Pro</span></div>
         </div>
 
@@ -1035,28 +1036,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR, currentUser, o
               aria-label="User Profile"
               title={currentUser.displayName || currentUser.email || 'Profile'}
             >
-              {currentUser.photoURL ? (
-                <img
-                  src={currentUser.photoURL}
-                  alt="Profile"
-                  style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', display: 'block' }}
-                />
-              ) : (
-                <div style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '50%',
-                  background: 'var(--accent-gradient)',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '13px',
-                  fontWeight: 800
-                }}>
-                  {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
-                </div>
-              )}
+              <UserAvatar user={currentUser} size={34} border="2px solid var(--accent-primary)" />
             </button>
           ) : (
             <button

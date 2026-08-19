@@ -125,6 +125,7 @@ import SignUpPage from './components/auth/SignUpPage';
 import ForgotPasswordPage from './components/auth/ForgotPasswordPage';
 import { usePremium } from './services/premiumContext';
 import { FeatureAccessManager } from './services/FeatureAccessManager';
+import UserAvatar from './components/UserAvatar';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 const QRDotsIcon = ({ size = 24 }) => (
@@ -1018,26 +1019,47 @@ export default function App() {
     let unsubProfile = null;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (unsubProfile) unsubProfile(); // cleanup previous listener
-      setCurrentUser(user);
       if (user) {
+        setCurrentUser(user);
+
+        // 1. Reload user from Google / Auth provider to get latest Gmail profile picture
+        try {
+          await user.reload();
+          if (auth.currentUser) {
+            setCurrentUser({ ...auth.currentUser });
+            user = auth.currentUser;
+          }
+        } catch (reloadErr) {
+          console.warn('[Auth] User profile reload error:', reloadErr);
+        }
+
         try {
           const { isSuperAdmin: isSA } = await checkIsSuperAdmin(user);
           setIsSuperAdmin(isSA);
         } catch (e) {
           setIsSuperAdmin(false);
         }
-        // Track user profile for admin panel visibility
+
+        // Track user profile for admin panel visibility with fresh info
         trackUserProfile(user);
         linkVisitorToUser(user.uid);
         
-        // Enforce blocked status
+        // Listen to Firestore profile updates (status, photoURL, displayName)
         unsubProfile = onSnapshot(doc(db, 'app_users', user.uid), (docSnap) => {
-          if (docSnap.exists() && docSnap.data().status === 'blocked') {
-            signOut(auth);
-            setIsBlocked(true);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.status === 'blocked') {
+              signOut(auth);
+              setIsBlocked(true);
+            }
+            // If user has updated photo or name in Firestore, reflect it immediately
+            if (data.photoURL && data.photoURL !== user.photoURL) {
+              setCurrentUser(prev => prev ? { ...prev, photoURL: data.photoURL } : prev);
+            }
           }
         });
       } else {
+        setCurrentUser(null);
         setIsSuperAdmin(false);
       }
     });
@@ -3549,7 +3571,7 @@ export default function App() {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
             </button>
           )}
-          <AppIcon size={34} shadow />
+          <AppIcon size={46} noBackground />
           {activePage === 'generator' ? (
             <div className="header-undo-redo" style={{ display: 'flex', gap: '8px', marginLeft: '12px' }}>
               <button 
@@ -4005,22 +4027,7 @@ export default function App() {
                   aria-label="Account"
                 >
                   <div style={{ position: 'relative', display: 'inline-flex' }}>
-                    {currentUser.photoURL ? (
-                      <img
-                        src={currentUser.photoURL}
-                        alt="Profile"
-                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-primary)', display: 'block' }}
-                      />
-                    ) : (
-                      <div style={{
-                        width: '36px', height: '36px', borderRadius: '50%',
-                        background: 'var(--accent-gradient)', color: '#fff',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '13px', fontWeight: 800,
-                      }}>
-                        {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
-                      </div>
-                    )}
+                    <UserAvatar user={currentUser} size={36} border="2px solid var(--accent-primary)" />
                     {isSuperAdmin && (
                       <div style={{
                         position: 'absolute',
@@ -4080,13 +4087,7 @@ export default function App() {
                     <div style={{ padding: '24px 20px 18px', background: 'var(--bg-elevated, #0C0C14)', borderBottom: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                         <div style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
-                          {currentUser.photoURL ? (
-                            <img src={currentUser.photoURL} alt="Profile" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border-color)', flexShrink: 0 }} />
-                          ) : (
-                            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 800, flexShrink: 0 }}>
-                              {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser.email ? currentUser.email[0].toUpperCase() : 'U')}
-                            </div>
-                          )}
+                          <UserAvatar user={currentUser} size={56} border="2px solid var(--border-color)" />
                           {isSuperAdmin && (
                             <div style={{
                               position: 'absolute',
@@ -6738,13 +6739,43 @@ export default function App() {
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ position: 'relative' }}>
-                {newProfilePicUrl ? (
-                  <img src={newProfilePicUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #E2E8F0' }} />
-                ) : (
-                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--accent-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 800 }}>
-                    {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : 'U'}
-                  </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                <div style={{ position: 'relative' }}>
+                  <UserAvatar user={{ ...currentUser, photoURL: newProfilePicUrl }} size={80} border="3px solid #E2E8F0" />
+                </div>
+                {currentUser?.providerData?.some(p => p.providerId === 'google.com') && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        showToast('Syncing with Google...');
+                        await auth.currentUser?.reload();
+                        if (auth.currentUser) {
+                          setCurrentUser({ ...auth.currentUser });
+                          const freshPhoto = auth.currentUser.photoURL || auth.currentUser.providerData?.[0]?.photoURL || '';
+                          setNewProfilePicUrl(freshPhoto);
+                          showToast('Google photo updated!');
+                        }
+                      } catch (e) {
+                        showToast('Could not sync with Google.');
+                      }
+                    }}
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: '#0070F3',
+                      background: 'rgba(0, 112, 243, 0.08)',
+                      border: '1px solid rgba(0, 112, 243, 0.2)',
+                      borderRadius: '8px',
+                      padding: '4px 10px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <RefreshCw size={12} /> Sync Google Photo
+                  </button>
                 )}
               </div>
               

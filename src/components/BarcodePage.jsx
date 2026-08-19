@@ -423,7 +423,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       {/* ── Top Header ── */}
       <header className="app-header">
         <div className="app-logo">
-          <AppIcon size={44} shadow />
+          <AppIcon size={46} noBackground />
           <div style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
             <button onClick={undo} disabled={historyIndex <= 0} title="Undo" style={undoRedoStyle(historyIndex <= 0)}>
               <Undo2 size={18} strokeWidth={2.5} />

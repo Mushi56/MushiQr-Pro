@@ -3,8 +3,9 @@
  * Renders the logo with iPhone-style squircle (super-ellipse) corners everywhere.
  * Usage: <AppIcon size={42} /> or <AppIcon size={96} shadow />
  */
-export default function AppIcon({ size = 42, shadow = false, className = '', style = {} }) {
-  const borderRadius = size * 0.22; // iPhone squircle ratio (~22%)
+export default function AppIcon({ size = 42, shadow = false, noBackground = false, className = '', style = {} }) {
+  const borderRadius = noBackground ? 0 : size * 0.22; // iPhone squircle ratio (~22%)
+  const imgSrc = noBackground ? '/logo-transparent.webp' : '/logo.webp';
   
   return (
     <div
@@ -19,12 +20,12 @@ export default function AppIcon({ size = 42, shadow = false, className = '', sty
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        boxShadow: shadow ? `0 ${size * 0.08}px ${size * 0.2}px rgba(214,0,54,0.3)` : 'none',
+        boxShadow: (shadow && !noBackground) ? `0 ${size * 0.08}px ${size * 0.2}px rgba(214,0,54,0.3)` : 'none',
         ...style
       }}
     >
       <img
-        src="/logo.webp"
+        src={imgSrc}
         alt="Mushi QR Pro Logo"
         style={{
           width: '100%',
