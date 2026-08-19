@@ -8,6 +8,7 @@ import AppIcon from './AppIcon';
 import GoldenAdminBadge from './GoldenAdminBadge';
 import PaidCrownBadge from './PaidCrownBadge';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import UserAvatar from './UserAvatar';
 import { useUserRole } from '../services/roleService';
 
 function HeroQRCanvas() {
@@ -516,12 +517,12 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             linear-gradient(180deg, #B80026 0%, #7A0015 100%)
           `,
           borderRadius: '0 0 28px 28px',
-          marginTop: '-64px',
-          padding: '74px var(--main-padding-x) 48px var(--main-padding-x)',
+          marginTop: '0',
+          padding: 'calc(env(safe-area-inset-top, 0px) + 24px) var(--main-padding-x) 48px var(--main-padding-x)',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
-          gap: '14px',
+          gap: '18px',
           color: '#FFFFFF',
           boxShadow: '0 18px 40px rgba(216, 4, 43, 0.38)',
           position: 'relative',
@@ -551,6 +552,71 @@ export default function HomePage({ currentUser, onScrollChange, onNavigate, onQu
             background: 'radial-gradient(circle, rgba(255, 30, 86, 0.35) 0%, transparent 70%)',
             filter: 'blur(30px)', pointerEvents: 'none', zIndex: 1
           }} />
+
+          {/* Top In-Hero Navigation & App Branding (Seamlessly Fades Out on Scroll) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            position: 'relative',
+            zIndex: 2,
+            width: '100%',
+            paddingBottom: '2px',
+            opacity: isScrolled ? 0 : 1,
+            transform: isScrolled ? 'translateY(-8px) scale(0.98)' : 'translateY(0) scale(1)',
+            pointerEvents: isScrolled ? 'none' : 'auto',
+            transition: 'opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <AppIcon size={40} noBackground />
+              <div style={{
+                fontFamily: 'Outfit, sans-serif',
+                fontSize: '20px',
+                fontWeight: 800,
+                color: '#FFFFFF',
+                letterSpacing: '-0.5px'
+              }}>
+                Mushi QR <span style={{ color: '#FFE2E8', fontWeight: 600 }}>Pro</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={() => onOpenProfile ? onOpenProfile() : (onMenuClick && onMenuClick())}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  border: 'none',
+                  borderRadius: '50%',
+                  padding: '0',
+                  cursor: 'pointer',
+                  width: '38px',
+                  height: '38px',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0,
+                  position: 'relative'
+                }}
+                aria-label="Profile"
+              >
+                <UserAvatar user={currentUser} size={36} border="2px solid rgba(255, 255, 255, 0.85)" />
+                {isSuperAdmin && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    right: '-2px',
+                    zIndex: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <GoldenAdminBadge size={13} />
+                  </div>
+                )}
+              </button>
+            </div>
+          </div>
 
           {/* Welcome Message / Admin Dashboard Header Block */}
           <div 

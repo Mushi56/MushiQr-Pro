@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Mail,
   Lock,
@@ -6,8 +6,6 @@ import {
   EyeOff,
   Loader2,
   ArrowRight,
-  ArrowLeft,
-  ChevronRight,
   ShieldCheck,
   Zap,
   Cloud
@@ -22,7 +20,6 @@ import {
 } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
-import AppIcon from '../AppIcon';
 
 function handleAuthError(err) {
   switch (err.code) {
@@ -43,13 +40,55 @@ function handleAuthError(err) {
   }
 }
 
-export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
+export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch, theme, effectiveTheme: propEffectiveTheme }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Dynamic Light/Dark Mode Detection
+  const [effectiveTheme, setEffectiveTheme] = useState(() => {
+    if (propEffectiveTheme) return propEffectiveTheme;
+    const attr = typeof document !== 'undefined' ? document.documentElement.getAttribute('data-theme') : null;
+    if (attr === 'light' || attr === 'dark') return attr;
+    try {
+      const prefs = JSON.parse(localStorage.getItem('mushi_qr_preferences_v2') || '{}');
+      if (prefs.theme === 'light') return 'light';
+      if (prefs.theme === 'dark') return 'dark';
+    } catch (e) {}
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      return 'light';
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    if (propEffectiveTheme) {
+      setEffectiveTheme(propEffectiveTheme);
+      return;
+    }
+    const updateTheme = () => {
+      const attr = document.documentElement.getAttribute('data-theme');
+      if (attr === 'light' || attr === 'dark') {
+        setEffectiveTheme(attr);
+      } else {
+        const isSysLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        setEffectiveTheme(isSysLight ? 'light' : 'dark');
+      }
+    };
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+    mediaQuery.addEventListener('change', updateTheme);
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', updateTheme);
+    };
+  }, [propEffectiveTheme]);
+
+  const isLight = effectiveTheme === 'light';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -157,15 +196,16 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        backgroundColor: '#0B0F19',
-        color: '#FFFFFF',
+        backgroundColor: isLight ? '#F8FAFC' : '#0B0F19',
+        color: isLight ? '#0F172A' : '#FFFFFF',
+        transition: 'background-color 0.3s ease, color 0.3s ease',
         padding: '0 0 calc(24px + env(safe-area-inset-bottom, 0px))',
         boxSizing: 'border-box',
         position: 'relative',
         overflowY: 'auto'
       }}
     >
-      {/* Dynamic Ambient Background Radiant Mesh (Ruby-Crimson Nebula) */}
+      {/* Dynamic Ambient Background Radiant Mesh (Rose-Violet-Amber Nebula in Light & Dark Mode) */}
       <div
         style={{
           position: 'fixed',
@@ -175,21 +215,41 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
           width: '550px',
           height: '550px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255, 30, 86, 0.22) 0%, rgba(139, 92, 246, 0.1) 45%, transparent 70%)',
-          filter: 'blur(70px)',
+          background: isLight
+            ? 'radial-gradient(circle at 45% 45%, rgba(255, 30, 86, 0.2) 0%, rgba(168, 85, 247, 0.12) 40%, rgba(251, 146, 60, 0.08) 65%, transparent 75%)'
+            : 'radial-gradient(circle, rgba(255, 30, 86, 0.22) 0%, rgba(139, 92, 246, 0.1) 45%, transparent 70%)',
+          filter: isLight ? 'blur(55px)' : 'blur(70px)',
           pointerEvents: 'none',
           zIndex: 0
         }}
       />
 
-      {/* Top Header Bar with Skip Action (Exact matching Onboarding position) */}
+      {/* Secondary Light Mode Ambient Glow */}
+      {isLight && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '10%',
+            right: '-10%',
+            width: '280px',
+            height: '280px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(251, 146, 60, 0.14) 0%, rgba(255, 30, 86, 0.06) 50%, transparent 70%)',
+            filter: 'blur(45px)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        />
+      )}
+
+      {/* Top Header Bar with Containerless Skip Action (Exact matching Onboarding position) */}
       <header
         style={{
           width: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-end',
-          padding: 'calc(18px + env(safe-area-inset-top, 0px)) 24px 8px',
+          padding: 'calc(16px + env(safe-area-inset-top, 0px)) 24px 4px',
           boxSizing: 'border-box',
           zIndex: 30
         }}
@@ -199,26 +259,24 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             type="button"
             onClick={handleSkip}
             style={{
-              background: 'rgba(255, 255, 255, 0.1)',
+              background: 'none',
               border: 'none',
-              color: '#FFFFFF',
-              padding: '7px 20px',
-              borderRadius: '24px',
-              fontSize: '13px',
+              color: isLight ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.7)',
+              fontSize: '14px',
               fontWeight: 600,
               cursor: 'pointer',
-              transition: 'background 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)',
-              outline: 'none'
+              padding: '4px 0 4px 12px',
+              outline: 'none',
+              transition: 'color 0.2s ease',
+              userSelect: 'none'
             }}
+            onMouseEnter={e => (e.currentTarget.style.color = isLight ? '#0F172A' : '#FFFFFF')}
+            onMouseLeave={e => (e.currentTarget.style.color = isLight ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.7)')}
           >
             Skip
           </button>
         ) : (
-          <div style={{ height: '34px' }} />
+          <div style={{ height: '24px' }} />
         )}
       </header>
 
@@ -255,14 +313,14 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
               width: '190px',
               height: '130px',
               borderRadius: '50%',
-              border: '1.5px solid rgba(255, 30, 86, 0.35)',
-              boxShadow: '0 0 16px rgba(255, 30, 86, 0.25)',
+              border: isLight ? '2px solid rgba(255, 30, 86, 0.4)' : '1.5px solid rgba(255, 30, 86, 0.35)',
+              boxShadow: isLight ? '0 0 20px rgba(255, 30, 86, 0.25)' : '0 0 16px rgba(255, 30, 86, 0.25)',
               transform: 'rotate(-20deg)',
               pointerEvents: 'none'
             }}
           />
 
-          {/* Cosmic Sparkle Stars around the 3D space (Exact Onboarding Screen 1 design) */}
+          {/* Cosmic Sparkle Stars around the 3D space */}
           <span className="sparkle-star" style={{ top: '8%', left: '8%', color: '#FF4D80', fontSize: '13px' }}>✦</span>
           <span className="sparkle-star" style={{ top: '6%', right: '34%', color: '#FF4D80', fontSize: '9px', animationDelay: '1s' }}>✦</span>
           <span className="sparkle-star" style={{ top: '44%', left: '16%', color: '#FF2A6D', fontSize: '8px', animationDelay: '1.5s' }}>✦</span>
@@ -270,16 +328,18 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
           <span className="sparkle-star" style={{ top: '36%', right: '6%', color: '#FFA07A', fontSize: '10px', animationDelay: '2s' }}>✦</span>
           <span className="sparkle-star" style={{ bottom: '20%', right: '20%', color: '#FF2A6D', fontSize: '8px', animationDelay: '1.2s' }}>✦</span>
 
-          {/* Central 3D Tilted Glowing App Card */}
+          {/* Central 3D Tilted Glowing App Card (Edge-to-Edge Logo Fit) */}
           <div
             className="floating-login-card"
             style={{
               width: '96px',
               height: '96px',
               borderRadius: '24px',
-              background: '#0E1422',
+              background: 'linear-gradient(145deg, #FF1E56 0%, #D8042B 100%)',
               border: '2.5px solid #FF1E56',
-              boxShadow: `
+              boxShadow: isLight
+                ? '0 16px 40px rgba(255, 30, 86, 0.28), 0 0 16px rgba(255, 30, 86, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 8px 20px rgba(0, 0, 0, 0.06)'
+                : `
                 0 0 35px rgba(255, 30, 86, 0.7),
                 0 0 14px #FF2A6D,
                 inset 0 0 16px rgba(255, 30, 86, 0.35),
@@ -302,6 +362,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
+                transform: 'scale(1.08)',
                 display: 'block'
               }}
             />
@@ -395,19 +456,21 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             style={{
               fontSize: '26px',
               fontWeight: 800,
-              color: '#FFFFFF',
+              color: isLight ? '#0F172A' : '#FFFFFF',
               margin: '0 0 6px',
               letterSpacing: '-0.5px',
               fontFamily: 'Outfit, var(--font-display, sans-serif)'
             }}
           >
             Welcome Back to{' '}
-            <span style={{ color: '#FF1E56' }}>Mushi QR</span>
+            <span style={{ background: 'linear-gradient(135deg, #FF1E56 0%, #FF6B8B 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Mushi QR
+            </span>
           </h1>
           <p
             style={{
               fontSize: '13px',
-              color: '#94A3B8',
+              color: isLight ? '#475569' : '#94A3B8',
               margin: 0,
               fontWeight: 400,
               lineHeight: 1.4
@@ -426,9 +489,9 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             width: '100%',
             height: '50px',
             borderRadius: '16px',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            color: '#FFFFFF',
+            background: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.05)',
+            border: isLight ? '1.5px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.12)',
+            color: isLight ? '#0F172A' : '#FFFFFF',
             fontSize: '14px',
             fontWeight: 700,
             cursor: loading || googleLoading ? 'not-allowed' : 'pointer',
@@ -436,9 +499,9 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 12,
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
+            boxShadow: isLight ? '0 4px 16px rgba(0, 0, 0, 0.05)' : '0 4px 16px rgba(0, 0, 0, 0.25)',
             transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.1s ease',
-            backdropFilter: 'blur(8px)'
+            backdropFilter: 'blur(10px)'
           }}
           onMouseDown={e => e.currentTarget.style.transform = 'scale(0.99)'}
           onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -458,26 +521,26 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
 
         {/* OR Divider */}
         <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: '12px' }}>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
+          <div style={{ flex: 1, height: '1px', background: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)' }} />
           <span
             style={{
               fontSize: '11px',
               fontWeight: 800,
-              color: '#64748B',
+              color: isLight ? '#94A3B8' : '#64748B',
               textTransform: 'uppercase',
               letterSpacing: '0.8px'
             }}
           >
             OR WITH EMAIL
           </span>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
+          <div style={{ flex: 1, height: '1px', background: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)' }} />
         </div>
 
         {/* Error Alert Message */}
         {error && (
           <div
             style={{
-              background: 'rgba(239, 68, 68, 0.12)',
+              background: isLight ? 'rgba(239, 68, 68, 0.08)' : 'rgba(239, 68, 68, 0.12)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '14px',
               padding: '10px 14px',
@@ -504,7 +567,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                 display: 'block',
                 fontSize: '12px',
                 fontWeight: 700,
-                color: '#CBD5E1',
+                color: isLight ? '#475569' : '#CBD5E1',
                 marginBottom: '6px',
                 letterSpacing: '0.2px'
               }}
@@ -517,7 +580,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                 style={{
                   position: 'absolute',
                   left: '15px',
-                  color: '#64748B'
+                  color: isLight ? '#94A3B8' : '#64748B'
                 }}
               />
               <input
@@ -531,22 +594,23 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                   height: '48px',
                   padding: '0 14px 0 44px',
                   borderRadius: '14px',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  color: '#FFFFFF',
+                  border: isLight ? '1.5px solid rgba(0, 0, 0, 0.1)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  background: isLight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.04)',
+                  color: isLight ? '#0F172A' : '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 600,
                   outline: 'none',
                   boxSizing: 'border-box',
-                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                  boxShadow: isLight ? '0 2px 8px rgba(0, 0, 0, 0.03)' : 'none'
                 }}
                 onFocus={e => {
                   e.target.style.borderColor = '#FF1E56';
                   e.target.style.boxShadow = '0 0 0 3px rgba(255, 30, 86, 0.25)';
                 }}
                 onBlur={e => {
-                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)';
-                  e.target.style.boxShadow = 'none';
+                  e.target.style.borderColor = isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.12)';
+                  e.target.style.boxShadow = isLight ? '0 2px 8px rgba(0, 0, 0, 0.03)' : 'none';
                 }}
               />
             </div>
@@ -559,7 +623,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                 display: 'block',
                 fontSize: '12px',
                 fontWeight: 700,
-                color: '#CBD5E1',
+                color: isLight ? '#475569' : '#CBD5E1',
                 marginBottom: '6px',
                 letterSpacing: '0.2px'
               }}
@@ -572,7 +636,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                 style={{
                   position: 'absolute',
                   left: '15px',
-                  color: '#64748B'
+                  color: isLight ? '#94A3B8' : '#64748B'
                 }}
               />
               <input
@@ -586,22 +650,23 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                   height: '48px',
                   padding: '0 44px 0 44px',
                   borderRadius: '14px',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  color: '#FFFFFF',
+                  border: isLight ? '1.5px solid rgba(0, 0, 0, 0.1)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  background: isLight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.04)',
+                  color: isLight ? '#0F172A' : '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 600,
                   outline: 'none',
                   boxSizing: 'border-box',
-                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                  boxShadow: isLight ? '0 2px 8px rgba(0, 0, 0, 0.03)' : 'none'
                 }}
                 onFocus={e => {
                   e.target.style.borderColor = '#FF1E56';
                   e.target.style.boxShadow = '0 0 0 3px rgba(255, 30, 86, 0.25)';
                 }}
                 onBlur={e => {
-                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)';
-                  e.target.style.boxShadow = 'none';
+                  e.target.style.borderColor = isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.12)';
+                  e.target.style.boxShadow = isLight ? '0 2px 8px rgba(0, 0, 0, 0.03)' : 'none';
                 }}
               />
               <button
@@ -612,7 +677,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
                   right: '12px',
                   background: 'none',
                   border: 'none',
-                  color: '#64748B',
+                  color: isLight ? '#94A3B8' : '#64748B',
                   cursor: 'pointer',
                   padding: '6px',
                   display: 'flex',
@@ -689,7 +754,7 @@ export default function LoginPage({ onNavigate, onSuccess, isFirstLaunch }) {
             textAlign: 'center',
             marginTop: '22px',
             fontSize: '13px',
-            color: '#94A3B8'
+            color: isLight ? '#64748B' : '#94A3B8'
           }}
         >
           Don't have an account?{' '}

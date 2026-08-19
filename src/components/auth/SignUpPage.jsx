@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Mail,
   Lock,
@@ -7,8 +7,7 @@ import {
   EyeOff,
   Loader2,
   ArrowRight,
-  ArrowLeft,
-  ChevronRight
+  Check
 } from 'lucide-react';
 import { auth, googleProvider } from '../../services/firebase';
 import {
@@ -30,7 +29,7 @@ function handleAuthError(err) {
     case 'auth/invalid-email':
       return 'Please enter a valid email address.';
     case 'auth/weak-password':
-      return 'Password should be at least 6 characters long.';
+      return 'Password should be at least 8 characters long with uppercase, numbers and symbols.';
     case 'auth/popup-closed-by-user':
       return 'Google sign-in was cancelled.';
     default:
@@ -38,7 +37,7 @@ function handleAuthError(err) {
   }
 }
 
-export default function SignUpPage({ onNavigate, onSuccess }) {
+export default function SignUpPage({ onNavigate, onSuccess, theme, effectiveTheme: propEffectiveTheme }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,6 +47,67 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Dynamic Theme Detection
+  const [effectiveTheme, setEffectiveTheme] = useState(() => {
+    if (propEffectiveTheme) return propEffectiveTheme;
+    const attr = typeof document !== 'undefined' ? document.documentElement.getAttribute('data-theme') : null;
+    if (attr === 'light' || attr === 'dark') return attr;
+    try {
+      const prefs = JSON.parse(localStorage.getItem('mushi_qr_preferences_v2') || '{}');
+      if (prefs.theme === 'light') return 'light';
+      if (prefs.theme === 'dark') return 'dark';
+    } catch (e) {}
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      return 'light';
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    if (propEffectiveTheme) {
+      setEffectiveTheme(propEffectiveTheme);
+      return;
+    }
+    const updateTheme = () => {
+      const attr = document.documentElement.getAttribute('data-theme');
+      if (attr === 'light' || attr === 'dark') {
+        setEffectiveTheme(attr);
+      } else {
+        const isSysLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        setEffectiveTheme(isSysLight ? 'light' : 'dark');
+      }
+    };
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+    mediaQuery.addEventListener('change', updateTheme);
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', updateTheme);
+    };
+  }, [propEffectiveTheme]);
+
+  const isLight = effectiveTheme === 'light';
+
+  // Password criteria checks (Min 8 chars, Uppercase, Number, Special symbol)
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password);
+  const isStrong = hasMinLength && hasUppercase && hasNumber && hasSpecial;
+
+  const handleRefreshSuggestion = () => {
+    setSuggestedPassword(generateStrongPassword());
+    setCopiedSuggested(false);
+  };
+
+  const handleApplySuggestedPassword = () => {
+    setPassword(suggestedPassword);
+    setConfirmPassword(suggestedPassword);
+    setCopiedSuggested(true);
+    setTimeout(() => setCopiedSuggested(false), 2500);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,8 +128,12 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
       setError('Please enter a valid email address format.');
       return;
     }
-    if (!password || password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    if (!hasMinLength) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+    if (!hasUppercase || !hasNumber || !hasSpecial) {
+      setError('Password must include at least one uppercase letter, one number, and one special character.');
       return;
     }
     if (password !== confirmPassword) {
@@ -81,6 +145,9 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
     try {
       const cred = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
       await updateProfile(cred.user, { displayName: trimmedName });
+      try {
+        localStorage.setItem('mushi_onboarding_completed', 'true');
+      } catch {}
       onSuccess?.();
     } catch (err) {
       setError(handleAuthError(err));
@@ -100,6 +167,9 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
         if (result.credential?.idToken) {
           const credential = GoogleAuthProvider.credential(result.credential.idToken);
           await signInWithCredential(auth, credential);
+          try {
+            localStorage.setItem('mushi_onboarding_completed', 'true');
+          } catch {}
           onSuccess?.();
         } else {
           throw new Error('No ID token received from Google sign in');
@@ -107,6 +177,9 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
       } else {
         try {
           await signInWithPopup(auth, googleProvider);
+          try {
+            localStorage.setItem('mushi_onboarding_completed', 'true');
+          } catch {}
           onSuccess?.();
         } catch (popupErr) {
           if (
@@ -125,10 +198,6 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
     }
   };
 
-  const handleSkip = () => {
-    onSuccess?.();
-  };
-
   return (
     <div
       style={{
@@ -139,12 +208,14 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        backgroundColor: 'var(--bg-primary, #0B0F19)',
-        color: 'var(--text-primary, #FFFFFF)',
-        padding: '0 0 calc(24px + env(safe-area-inset-bottom, 0px))',
+        backgroundColor: isLight ? '#F8FAFC' : '#0B0F19',
+        color: isLight ? '#0F172A' : '#FFFFFF',
+        transition: 'background-color 0.3s ease, color 0.3s ease',
+        padding: 'calc(24px + env(safe-area-inset-top, 0px)) 20px calc(28px + env(safe-area-inset-bottom, 0px))',
         boxSizing: 'border-box',
         position: 'relative',
-        overflowY: 'auto'
+        overflowY: 'auto',
+        userSelect: 'none'
       }}
     >
       {/* Dynamic Ambient Background Radiant Mesh */}
@@ -157,71 +228,16 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
           width: '550px',
           height: '550px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, rgba(214, 0, 54, 0.12) 50%, transparent 70%)',
-          filter: 'blur(60px)',
+          background: isLight
+            ? 'radial-gradient(circle at 45% 45%, rgba(16, 185, 129, 0.18) 0%, rgba(255, 30, 86, 0.1) 40%, rgba(56, 189, 248, 0.08) 65%, transparent 75%)'
+            : 'radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, rgba(214, 0, 54, 0.12) 50%, transparent 70%)',
+          filter: isLight ? 'blur(55px)' : 'blur(60px)',
           pointerEvents: 'none',
           zIndex: 0
         }}
       />
 
-      {/* Top Header Bar (Exact matching Onboarding position) */}
-      <header
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: 'calc(18px + env(safe-area-inset-top, 0px)) 24px 8px',
-          boxSizing: 'border-box',
-          zIndex: 30
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => onNavigate('login')}
-          style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: 'none',
-            color: '#CBD5E1',
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-          aria-label="Back"
-        >
-          <ArrowLeft size={18} />
-        </button>
-
-        <button
-          type="button"
-          onClick={handleSkip}
-          style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: 'none',
-            color: '#FFFFFF',
-            padding: '7px 20px',
-            borderRadius: '24px',
-            fontSize: '13px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'background 0.2s ease',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(10px)',
-            outline: 'none'
-          }}
-        >
-          Skip
-        </button>
-      </header>
-
-      {/* Main Frameless Content */}
+      {/* Main Responsive Container (Fluid on Mobile, Max 420px on Desktop) */}
       <div
         className="signup-content-anim"
         style={{
@@ -230,7 +246,9 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
           display: 'flex',
           flexDirection: 'column',
           zIndex: 2,
-          position: 'relative'
+          position: 'relative',
+          margin: '0 auto',
+          boxSizing: 'border-box'
         }}
       >
         {/* App Icon & Branding Header */}
@@ -243,7 +261,7 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
             style={{
               fontSize: '24px',
               fontWeight: 900,
-              color: 'var(--text-primary, #FFFFFF)',
+              color: isLight ? '#0F172A' : '#FFFFFF',
               margin: '0 0 6px',
               letterSpacing: '-0.5px',
               fontFamily: 'Outfit, var(--font-display, sans-serif)'
@@ -251,7 +269,7 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
           >
             Create Your Account
           </h1>
-          <p style={{ fontSize: '13.5px', color: 'var(--text-secondary, #CBD5E1)', margin: 0, fontWeight: 500 }}>
+          <p style={{ fontSize: '13.5px', color: isLight ? '#475569' : '#CBD5E1', margin: 0, fontWeight: 500 }}>
             Start creating professional QR codes and barcodes today.
           </p>
         </div>
@@ -265,9 +283,9 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
             width: '100%',
             height: '48px',
             borderRadius: '16px',
-            background: 'var(--bg-input, #0E0E16)',
-            border: '1px solid var(--border-color, rgba(255, 255, 255, 0.14))',
-            color: 'var(--text-primary, #FFFFFF)',
+            background: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.05)',
+            border: isLight ? '1.5px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.14)',
+            color: isLight ? '#0F172A' : '#FFFFFF',
             fontSize: '14px',
             fontWeight: 700,
             cursor: loading || googleLoading ? 'not-allowed' : 'pointer',
@@ -275,9 +293,12 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 12,
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
-            transition: 'background 0.2s ease, border-color 0.2s ease'
+            boxShadow: isLight ? '0 4px 16px rgba(0, 0, 0, 0.05)' : '0 4px 16px rgba(0, 0, 0, 0.2)',
+            transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.1s ease',
+            backdropFilter: 'blur(10px)'
           }}
+          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.99)'}
+          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           {googleLoading ? (
             <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} />
@@ -294,16 +315,18 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
 
         {/* OR Divider */}
         <div style={{ display: 'flex', alignItems: 'center', margin: '18px 0', gap: '12px' }}>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-color, rgba(255, 255, 255, 0.12))' }} />
-          <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted, #64748B)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>OR WITH EMAIL</span>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-color, rgba(255, 255, 255, 0.12))' }} />
+          <div style={{ flex: 1, height: '1px', background: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)' }} />
+          <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#94A3B8' : '#64748B', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+            OR WITH EMAIL
+          </span>
+          <div style={{ flex: 1, height: '1px', background: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)' }} />
         </div>
 
         {/* Error Alert Box */}
         {error && (
           <div
             style={{
-              background: 'rgba(239, 68, 68, 0.12)',
+              background: isLight ? 'rgba(239, 68, 68, 0.08)' : 'rgba(239, 68, 68, 0.12)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '14px',
               padding: '11px 14px',
@@ -325,11 +348,11 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '13px' }}>
           {/* Full Name */}
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #CBD5E1)', marginBottom: '5px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isLight ? '#475569' : '#CBD5E1', marginBottom: '5px' }}>
               Full Name
             </label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <User size={17} style={{ position: 'absolute', left: '14px', color: 'var(--text-muted, #64748B)' }} />
+              <User size={17} style={{ position: 'absolute', left: '14px', color: isLight ? '#94A3B8' : '#64748B' }} />
               <input
                 type="text"
                 placeholder="Enter your full name"
@@ -341,13 +364,14 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
                   height: '46px',
                   padding: '0 14px 0 42px',
                   borderRadius: '14px',
-                  border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
-                  background: 'var(--bg-input, #0E0E16)',
-                  color: 'var(--text-primary, #FFFFFF)',
+                  border: isLight ? '1.5px solid rgba(0, 0, 0, 0.1)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  background: isLight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.04)',
+                  color: isLight ? '#0F172A' : '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 600,
                   outline: 'none',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  boxShadow: isLight ? '0 2px 6px rgba(0, 0, 0, 0.02)' : 'none'
                 }}
               />
             </div>
@@ -355,11 +379,11 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
 
           {/* Email Address */}
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #CBD5E1)', marginBottom: '5px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isLight ? '#475569' : '#CBD5E1', marginBottom: '5px' }}>
               Email Address
             </label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Mail size={17} style={{ position: 'absolute', left: '14px', color: 'var(--text-muted, #64748B)' }} />
+              <Mail size={17} style={{ position: 'absolute', left: '14px', color: isLight ? '#94A3B8' : '#64748B' }} />
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -371,28 +395,29 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
                   height: '46px',
                   padding: '0 14px 0 42px',
                   borderRadius: '14px',
-                  border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
-                  background: 'var(--bg-input, #0E0E16)',
-                  color: 'var(--text-primary, #FFFFFF)',
+                  border: isLight ? '1.5px solid rgba(0, 0, 0, 0.1)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  background: isLight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.04)',
+                  color: isLight ? '#0F172A' : '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 600,
                   outline: 'none',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  boxShadow: isLight ? '0 2px 6px rgba(0, 0, 0, 0.02)' : 'none'
                 }}
               />
             </div>
           </div>
 
-          {/* Password */}
+          {/* Password Input */}
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #CBD5E1)', marginBottom: '5px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isLight ? '#475569' : '#CBD5E1', marginBottom: '5px' }}>
               Password
             </label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Lock size={17} style={{ position: 'absolute', left: '14px', color: 'var(--text-muted, #64748B)' }} />
+              <Lock size={17} style={{ position: 'absolute', left: '14px', color: isLight ? '#94A3B8' : '#64748B' }} />
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Create a password (min 6 chars)"
+                placeholder="Create a password (min 8 chars)"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 disabled={loading || googleLoading}
@@ -401,13 +426,14 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
                   height: '46px',
                   padding: '0 40px 0 42px',
                   borderRadius: '14px',
-                  border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
-                  background: 'var(--bg-input, #0E0E16)',
-                  color: 'var(--text-primary, #FFFFFF)',
+                  border: isLight ? '1.5px solid rgba(0, 0, 0, 0.1)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  background: isLight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.04)',
+                  color: isLight ? '#0F172A' : '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 600,
                   outline: 'none',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  boxShadow: isLight ? '0 2px 6px rgba(0, 0, 0, 0.02)' : 'none'
                 }}
               />
               <button
@@ -418,7 +444,7 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
                   right: '12px',
                   background: 'none',
                   border: 'none',
-                  color: 'var(--text-muted, #64748B)',
+                  color: isLight ? '#94A3B8' : '#64748B',
                   cursor: 'pointer',
                   padding: '4px'
                 }}
@@ -426,15 +452,111 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
                 {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
+
+            {/* Real-time Password Strength Criteria Checklist */}
+            {password.length > 0 && (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '4px',
+                  marginTop: '6px'
+                }}
+              >
+                {/* 8+ Chars */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '3px',
+                    padding: '3px 2px',
+                    borderRadius: '6px',
+                    background: hasMinLength
+                      ? 'rgba(16, 185, 129, 0.15)'
+                      : isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.05)',
+                    color: hasMinLength ? '#10B981' : isLight ? '#94A3B8' : '#64748B',
+                    fontSize: '9.5px',
+                    fontWeight: 700
+                  }}
+                >
+                  <Check size={10} strokeWidth={hasMinLength ? 3 : 1.5} />
+                  <span>8+ Chars</span>
+                </div>
+
+                {/* Uppercase */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '3px',
+                    padding: '3px 2px',
+                    borderRadius: '6px',
+                    background: hasUppercase
+                      ? 'rgba(16, 185, 129, 0.15)'
+                      : isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.05)',
+                    color: hasUppercase ? '#10B981' : isLight ? '#94A3B8' : '#64748B',
+                    fontSize: '9.5px',
+                    fontWeight: 700
+                  }}
+                >
+                  <Check size={10} strokeWidth={hasUppercase ? 3 : 1.5} />
+                  <span>Uppercase</span>
+                </div>
+
+                {/* Number */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '3px',
+                    padding: '3px 2px',
+                    borderRadius: '6px',
+                    background: hasNumber
+                      ? 'rgba(16, 185, 129, 0.15)'
+                      : isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.05)',
+                    color: hasNumber ? '#10B981' : isLight ? '#94A3B8' : '#64748B',
+                    fontSize: '9.5px',
+                    fontWeight: 700
+                  }}
+                >
+                  <Check size={10} strokeWidth={hasNumber ? 3 : 1.5} />
+                  <span>Number</span>
+                </div>
+
+                {/* Symbol */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '3px',
+                    padding: '3px 2px',
+                    borderRadius: '6px',
+                    background: hasSpecial
+                      ? 'rgba(16, 185, 129, 0.15)'
+                      : isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.05)',
+                    color: hasSpecial ? '#10B981' : isLight ? '#94A3B8' : '#64748B',
+                    fontSize: '9.5px',
+                    fontWeight: 700
+                  }}
+                >
+                  <Check size={10} strokeWidth={hasSpecial ? 3 : 1.5} />
+                  <span>Symbol</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Confirm Password */}
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #CBD5E1)', marginBottom: '5px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isLight ? '#475569' : '#CBD5E1', marginBottom: '5px' }}>
               Confirm Password
             </label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Lock size={17} style={{ position: 'absolute', left: '14px', color: 'var(--text-muted, #64748B)' }} />
+              <Lock size={17} style={{ position: 'absolute', left: '14px', color: isLight ? '#94A3B8' : '#64748B' }} />
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Re-enter your password"
@@ -446,13 +568,14 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
                   height: '46px',
                   padding: '0 40px 0 42px',
                   borderRadius: '14px',
-                  border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
-                  background: 'var(--bg-input, #0E0E16)',
-                  color: 'var(--text-primary, #FFFFFF)',
+                  border: isLight ? '1.5px solid rgba(0, 0, 0, 0.1)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  background: isLight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.04)',
+                  color: isLight ? '#0F172A' : '#FFFFFF',
                   fontSize: '14px',
                   fontWeight: 600,
                   outline: 'none',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  boxShadow: isLight ? '0 2px 6px rgba(0, 0, 0, 0.02)' : 'none'
                 }}
               />
               <button
@@ -463,7 +586,7 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
                   right: '12px',
                   background: 'none',
                   border: 'none',
-                  color: 'var(--text-muted, #64748B)',
+                  color: isLight ? '#94A3B8' : '#64748B',
                   cursor: 'pointer',
                   padding: '4px'
                 }}
@@ -481,19 +604,22 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
               width: '100%',
               height: '50px',
               borderRadius: '16px',
-              background: 'linear-gradient(135deg, #D60036 0%, #B5002D 100%)',
+              background: 'linear-gradient(135deg, #FF1E56 0%, #D8042B 100%)',
               border: 'none',
               color: '#FFFFFF',
               fontSize: '14.5px',
               fontWeight: 800,
               cursor: loading || googleLoading ? 'not-allowed' : 'pointer',
-              boxShadow: '0 8px 24px rgba(214, 0, 54, 0.35)',
+              boxShadow: '0 8px 25px rgba(255, 30, 86, 0.45)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 8,
-              marginTop: '4px'
+              marginTop: '6px',
+              transition: 'transform 0.15s ease, box-shadow 0.15s ease'
             }}
+            onMouseDown={e => { if (!loading) e.currentTarget.style.transform = 'scale(0.98)'; }}
+            onMouseUp={e => { if (!loading) e.currentTarget.style.transform = 'scale(1)'; }}
           >
             {loading ? (
               <>
@@ -510,14 +636,14 @@ export default function SignUpPage({ onNavigate, onSuccess }) {
         </form>
 
         {/* Footer Navigation Link */}
-        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '13.5px', color: 'var(--text-secondary, #CBD5E1)' }}>
+        <div style={{ textAlign: 'center', marginTop: '22px', fontSize: '13.5px', color: isLight ? '#64748B' : '#CBD5E1' }}>
           Already have an account?{' '}
           <button
             onClick={() => onNavigate?.('login')}
             style={{
               background: 'none',
               border: 'none',
-              color: '#D60036',
+              color: '#FF1E56',
               fontWeight: 800,
               cursor: 'pointer',
               padding: 0

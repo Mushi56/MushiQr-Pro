@@ -3545,7 +3545,7 @@ export default function App() {
       )}
       {/* ── Header ── */}
       <header 
-        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' && !isHomeScrolled ? 'header-home-banner' : ''}`}
+        className={`app-header ${['home', 'saved', 'history', 'you', 'settings'].includes(activePage) ? 'header-home' : ''} ${activePage === 'home' ? (!isHomeScrolled ? 'header-home-banner' : 'header-home-scrolled') : ''}`}
         style={{ display: ['barcode', 'onboarding', 'login', 'signup', 'forgot-password'].includes(activePage) ? 'none' : 'flex' }}
       >
         <div className="app-logo">
@@ -6206,6 +6206,8 @@ export default function App() {
           />
         ) : activePage === 'login' ? (
           <LoginPage
+            theme={theme}
+            effectiveTheme={effectiveTheme}
             onNavigate={(p) => {
               setIsFirstLaunchLogin(false);
               navigateTo(p);
@@ -6218,6 +6220,8 @@ export default function App() {
           />
         ) : activePage === 'signup' ? (
           <SignUpPage
+            theme={theme}
+            effectiveTheme={effectiveTheme}
             onNavigate={(p) => navigateTo(p)}
             onSuccess={() => {
               setIsFirstLaunchLogin(false);
@@ -6226,6 +6230,8 @@ export default function App() {
           />
         ) : activePage === 'forgot-password' ? (
           <ForgotPasswordPage
+            theme={theme}
+            effectiveTheme={effectiveTheme}
             onNavigate={(p) => navigateTo(p)}
           />
         ) : (
