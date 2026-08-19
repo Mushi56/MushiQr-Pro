@@ -6193,6 +6193,8 @@ export default function App() {
           />
         ) : activePage === 'onboarding' ? (
           <OnboardingFlow
+            theme={theme}
+            effectiveTheme={effectiveTheme}
             onComplete={() => {
               if (currentUser) {
                 navigateTo('home');

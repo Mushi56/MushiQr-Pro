@@ -29,7 +29,47 @@ import {
 import onboardingQrSvg from '../../assets/onboarding-qr-code.svg';
 import onboardingBarcodeSvg from '../../assets/onboarding-barcode.svg';
 
-export default function OnboardingFlow({ onComplete }) {
+export default function OnboardingFlow({ onComplete, theme, effectiveTheme: propEffectiveTheme }) {
+  const [effectiveTheme, setEffectiveTheme] = useState(() => {
+    if (propEffectiveTheme) return propEffectiveTheme;
+    const attr = typeof document !== 'undefined' ? document.documentElement.getAttribute('data-theme') : null;
+    if (attr === 'light' || attr === 'dark') return attr;
+    try {
+      const prefs = JSON.parse(localStorage.getItem('mushi_qr_preferences_v2') || '{}');
+      if (prefs.theme === 'light') return 'light';
+      if (prefs.theme === 'dark') return 'dark';
+    } catch (e) {}
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      return 'light';
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    if (propEffectiveTheme) {
+      setEffectiveTheme(propEffectiveTheme);
+      return;
+    }
+    const updateTheme = () => {
+      const attr = document.documentElement.getAttribute('data-theme');
+      if (attr === 'light' || attr === 'dark') {
+        setEffectiveTheme(attr);
+      } else {
+        const isSysLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        setEffectiveTheme(isSysLight ? 'light' : 'dark');
+      }
+    };
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+    mediaQuery.addEventListener('change', updateTheme);
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', updateTheme);
+    };
+  }, [propEffectiveTheme]);
+
+  const isLight = effectiveTheme === 'light';
   const [currentSlide, setCurrentSlide] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
@@ -93,36 +133,86 @@ export default function OnboardingFlow({ onComplete }) {
         height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#06070B',
-        color: '#FFFFFF',
+        backgroundColor: isLight ? '#F8FAFC' : '#06070B',
+        color: isLight ? '#0F172A' : '#FFFFFF',
+        transition: 'background-color 0.3s ease, color 0.3s ease',
         overflow: 'hidden',
         position: 'relative',
         userSelect: 'none',
         boxSizing: 'border-box'
       }}
     >
-      {/* Dynamic Background Ambience Glow */}
+      {/* Dynamic Multi-Orb Ambient Glass Glow (Lush in Light Mode & Atmospheric in Dark Mode) */}
       <div
         style={{
           position: 'absolute',
-          top: currentSlide === 0 ? '25%' : '10%',
+          top: currentSlide === 0 ? '20%' : '8%',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '450px',
-          height: '450px',
+          width: '480px',
+          height: '480px',
           borderRadius: '50%',
-          background:
-            currentSlide === 0
+          background: isLight
+            ? currentSlide === 0
+              ? 'radial-gradient(circle at 45% 45%, rgba(255, 30, 86, 0.22) 0%, rgba(244, 63, 94, 0.12) 40%, rgba(168, 85, 247, 0.08) 65%, transparent 75%)'
+              : currentSlide === 1
+              ? 'radial-gradient(circle at 50% 45%, rgba(255, 124, 0, 0.22) 0%, rgba(245, 158, 11, 0.14) 40%, rgba(139, 92, 246, 0.08) 65%, transparent 75%)'
+              : 'radial-gradient(circle at 45% 45%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 182, 212, 0.14) 40%, rgba(99, 102, 241, 0.08) 65%, transparent 75%)'
+            : currentSlide === 0
               ? 'radial-gradient(circle, rgba(255, 30, 86, 0.28) 0%, rgba(184, 0, 38, 0.12) 50%, transparent 70%)'
               : currentSlide === 1
               ? 'radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, rgba(214, 0, 54, 0.12) 50%, transparent 70%)'
               : 'radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(59, 130, 246, 0.14) 50%, transparent 70%)',
-          filter: 'blur(60px)',
+          filter: isLight ? 'blur(55px)' : 'blur(60px)',
           transition: 'background 0.5s ease',
           pointerEvents: 'none',
           zIndex: 1
         }}
       />
+
+      {/* Secondary Ambient Accent Glow Orbs for Rich Color Vibrance in Light Mode */}
+      {isLight && (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              top: '4%',
+              right: '-8%',
+              width: '260px',
+              height: '260px',
+              borderRadius: '50%',
+              background:
+                currentSlide === 0
+                  ? 'radial-gradient(circle, rgba(168, 85, 247, 0.18) 0%, rgba(236, 72, 153, 0.08) 50%, transparent 70%)'
+                  : currentSlide === 1
+                  ? 'radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, rgba(251, 191, 36, 0.08) 50%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(16, 185, 129, 0.08) 50%, transparent 70%)',
+              filter: 'blur(45px)',
+              pointerEvents: 'none',
+              zIndex: 1
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '18%',
+              left: '-10%',
+              width: '280px',
+              height: '280px',
+              borderRadius: '50%',
+              background:
+                currentSlide === 0
+                  ? 'radial-gradient(circle, rgba(251, 146, 60, 0.16) 0%, rgba(255, 30, 86, 0.06) 50%, transparent 70%)'
+                  : currentSlide === 1
+                  ? 'radial-gradient(circle, rgba(236, 72, 153, 0.16) 0%, rgba(245, 158, 11, 0.06) 50%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(168, 85, 247, 0.16) 0%, rgba(16, 185, 129, 0.06) 50%, transparent 70%)',
+              filter: 'blur(45px)',
+              pointerEvents: 'none',
+              zIndex: 1
+            }}
+          />
+        </>
+      )}
 
       {/* Main Content Area directly under Safe Area */}
       <div
@@ -165,7 +255,7 @@ export default function OnboardingFlow({ onComplete }) {
                   style={{
                     fontSize: '30px',
                     fontWeight: 800,
-                    color: '#FFFFFF',
+                    color: isLight ? '#0F172A' : '#FFFFFF',
                     margin: '0 0 8px 0',
                     lineHeight: 1.15,
                     letterSpacing: '-0.5px',
@@ -174,12 +264,12 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   Create Stunning
                   <br />
-                  <span style={{ color: '#FF1E56' }}>QR</span> Codes
+                  <span style={{ background: 'linear-gradient(135deg, #FF1E56 0%, #FF6B8B 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>QR</span> Codes
                 </h1>
                 <p
                   style={{
                     fontSize: '13px',
-                    color: '#94A3B8',
+                    color: isLight ? '#475569' : '#94A3B8',
                     margin: 0,
                     lineHeight: 1.45,
                     maxWidth: '280px',
@@ -199,7 +289,7 @@ export default function OnboardingFlow({ onComplete }) {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: isLight ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.7)',
                   fontSize: '14px',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -210,8 +300,8 @@ export default function OnboardingFlow({ onComplete }) {
                   transition: 'color 0.2s ease',
                   userSelect: 'none'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = isLight ? '#0F172A' : '#FFFFFF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = isLight ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.7)')}
               >
                 Skip
               </button>
@@ -244,8 +334,8 @@ export default function OnboardingFlow({ onComplete }) {
                   width: '270px',
                   height: '190px',
                   borderRadius: '50%',
-                  border: '1.5px solid rgba(255, 30, 86, 0.28)',
-                  boxShadow: '0 0 18px rgba(255, 30, 86, 0.2)',
+                  border: isLight ? '2px solid rgba(255, 30, 86, 0.45)' : '1.5px solid rgba(255, 30, 86, 0.28)',
+                  boxShadow: isLight ? '0 0 20px rgba(255, 30, 86, 0.3)' : '0 0 18px rgba(255, 30, 86, 0.2)',
                   transform: 'rotate(-25deg) translateY(-8px)',
                   pointerEvents: 'none'
                 }}
@@ -283,9 +373,9 @@ export default function OnboardingFlow({ onComplete }) {
                     width: '200px',
                     height: '42px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(180deg, #D8042B 0%, #500010 100%)',
+                    background: isLight ? 'linear-gradient(180deg, #FF1E56 0%, #D8042B 100%)' : 'linear-gradient(180deg, #D8042B 0%, #500010 100%)',
                     borderTop: '2.5px solid #FF3B69',
-                    boxShadow: '0 0 35px rgba(255, 30, 86, 0.9), inset 0 2px 14px rgba(255, 255, 255, 0.5)',
+                    boxShadow: isLight ? '0 8px 25px rgba(255, 30, 86, 0.35), inset 0 2px 10px rgba(255, 255, 255, 0.7)' : '0 0 35px rgba(255, 30, 86, 0.9), inset 0 2px 14px rgba(255, 255, 255, 0.5)',
                     position: 'relative',
                     zIndex: 3
                   }}
@@ -296,9 +386,9 @@ export default function OnboardingFlow({ onComplete }) {
                     width: '235px',
                     height: '46px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(180deg, #7A0018 0%, #200006 100%)',
+                    background: isLight ? 'linear-gradient(180deg, #E11D48 0%, #9F1239 100%)' : 'linear-gradient(180deg, #7A0018 0%, #200006 100%)',
                     borderTop: '2px solid #FF1E56',
-                    boxShadow: '0 14px 38px rgba(0, 0, 0, 0.95), 0 0 45px rgba(216, 4, 43, 0.6)',
+                    boxShadow: isLight ? '0 10px 25px rgba(0, 0, 0, 0.12), 0 0 20px rgba(216, 4, 43, 0.3)' : '0 14px 38px rgba(0, 0, 0, 0.95), 0 0 45px rgba(216, 4, 43, 0.6)',
                     marginTop: '-26px',
                     zIndex: 2
                   }}
@@ -325,9 +415,12 @@ export default function OnboardingFlow({ onComplete }) {
                   width: '195px',
                   height: '195px',
                   borderRadius: '32px',
-                  background: 'linear-gradient(145deg, rgba(32, 6, 14, 0.96) 0%, rgba(10, 2, 5, 0.98) 100%)',
+                  background: isLight ? 'linear-gradient(145deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 241, 245, 0.9) 100%)' : 'linear-gradient(145deg, rgba(32, 6, 14, 0.96) 0%, rgba(10, 2, 5, 0.98) 100%)',
                   border: '3px solid #FF2A6D',
-                  boxShadow: `
+                  backdropFilter: isLight ? 'blur(20px)' : 'none',
+                  boxShadow: isLight
+                    ? '0 20px 50px rgba(255, 30, 86, 0.28), 0 0 25px rgba(255, 30, 86, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.95), 0 10px 24px rgba(0, 0, 0, 0.05)'
+                    : `
                     0 0 40px rgba(255, 30, 86, 0.7),
                     0 0 16px #FF1E56,
                     inset 0 0 22px rgba(255, 30, 86, 0.4),
@@ -429,8 +522,8 @@ export default function OnboardingFlow({ onComplete }) {
                   <ImageIcon size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
                 </div>
                 <div style={{ textAlign: 'left', lineHeight: 1.2 }}>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Add Logo</span>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>&amp; Frame</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Add Logo</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>&amp; Frame</span>
                 </div>
               </div>
 
@@ -471,8 +564,8 @@ export default function OnboardingFlow({ onComplete }) {
                   <Palette size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
                 </div>
                 <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Custom</span>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Designs</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Custom</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Designs</span>
                 </div>
               </div>
 
@@ -513,8 +606,8 @@ export default function OnboardingFlow({ onComplete }) {
                   <Grid size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
                 </div>
                 <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Templates</span>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>&amp; Styles</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Templates</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>&amp; Styles</span>
                 </div>
               </div>
 
@@ -558,37 +651,46 @@ export default function OnboardingFlow({ onComplete }) {
                   <span style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }}>Tt</span>
                 </div>
                 <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Colors &amp;</span>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Gradients</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Colors &amp;</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Gradients</span>
                 </div>
               </div>
 
             </div>
 
-            {/* Bottom Security & Privacy Card (Matching reference card) */}
+            {/* Bottom Security & Privacy Card (Rich Glassmorphic in Light Mode) */}
             <div
               style={{
                 width: '100%',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.09)',
-                borderRadius: '16px',
-                padding: '10px 14px',
+                background: isLight
+                  ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 241, 245, 0.72) 100%)'
+                  : 'rgba(255, 255, 255, 0.04)',
+                border: isLight ? '1.5px solid rgba(255, 255, 255, 0.95)' : '1px solid rgba(255, 255, 255, 0.09)',
+                borderRadius: '18px',
+                padding: '11px 15px',
                 boxSizing: 'border-box',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                backdropFilter: 'blur(10px)',
-                marginTop: '4px'
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                marginTop: '4px',
+                boxShadow: isLight
+                  ? '0 12px 32px rgba(255, 30, 86, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 1)'
+                  : 'none'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div
                   style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '11px',
-                    background: 'rgba(255, 30, 86, 0.12)',
-                    border: '1px solid rgba(255, 30, 86, 0.3)',
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '12px',
+                    background: isLight
+                      ? 'linear-gradient(135deg, rgba(255, 30, 86, 0.18) 0%, rgba(255, 107, 138, 0.1) 100%)'
+                      : 'rgba(255, 30, 86, 0.12)',
+                    border: isLight ? '1.5px solid rgba(255, 30, 86, 0.35)' : '1px solid rgba(255, 30, 86, 0.3)',
+                    boxShadow: isLight ? '0 4px 14px rgba(255, 30, 86, 0.25)' : 'none',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -596,18 +698,18 @@ export default function OnboardingFlow({ onComplete }) {
                     flexShrink: 0
                   }}
                 >
-                  <ShieldCheck size={20} strokeWidth={2.3} />
+                  <ShieldCheck size={21} strokeWidth={2.4} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.2 }}>
                     100% Secure &amp; Private
                   </span>
-                  <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 400, marginTop: '2px', lineHeight: 1.2 }}>
-                    Your data is safe with us.
+                  <span style={{ fontSize: '11px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 500, marginTop: '2px', lineHeight: 1.2 }}>
+                    On-device encryption &amp; privacy
                   </span>
                 </div>
               </div>
-              <ChevronRight size={18} color="#64748B" />
+              <ChevronRight size={18} color={isLight ? '#FF1E56' : '#64748B'} strokeWidth={2.5} />
             </div>
 
           </div>
@@ -636,7 +738,7 @@ export default function OnboardingFlow({ onComplete }) {
                   style={{
                     fontSize: '30px',
                     fontWeight: 800,
-                    color: '#FFFFFF',
+                    color: isLight ? '#0F172A' : '#FFFFFF',
                     margin: '0 0 8px 0',
                     lineHeight: 1.15,
                     letterSpacing: '-0.5px',
@@ -645,12 +747,12 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   Professional
                   <br />
-                  <span style={{ color: '#FF7C00' }}>Barcodes</span>
+                  <span style={{ background: 'linear-gradient(135deg, #FF7C00 0%, #F59E0B 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Barcodes</span>
                 </h1>
                 <p
                   style={{
                     fontSize: '13px',
-                    color: '#94A3B8',
+                    color: isLight ? '#475569' : '#94A3B8',
                     margin: 0,
                     lineHeight: 1.45,
                     maxWidth: '280px',
@@ -670,7 +772,7 @@ export default function OnboardingFlow({ onComplete }) {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: isLight ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.7)',
                   fontSize: '14px',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -681,8 +783,8 @@ export default function OnboardingFlow({ onComplete }) {
                   transition: 'color 0.2s ease',
                   userSelect: 'none'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = isLight ? '#0F172A' : '#FFFFFF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = isLight ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.7)')}
               >
                 Skip
               </button>
@@ -865,8 +967,8 @@ export default function OnboardingFlow({ onComplete }) {
                   <Scan size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
                 </div>
                 <div style={{ textAlign: 'left', lineHeight: 1.2 }}>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Live Scanner</span>
-                  <span style={{ fontSize: '10px', fontWeight: 600, color: '#CBD5E1', display: 'block', letterSpacing: '-0.2px' }}>Ultra Fast</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Live Scanner</span>
+                  <span style={{ fontSize: '10px', fontWeight: 600, color: isLight ? '#64748B' : '#CBD5E1', display: 'block', letterSpacing: '-0.2px' }}>Ultra Fast</span>
                 </div>
               </div>
 
@@ -907,9 +1009,9 @@ export default function OnboardingFlow({ onComplete }) {
                   <BarcodeIcon size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
                 </div>
                 <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
-                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>30+ Formats</span>
-                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>EAN, UPC,</span>
-                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>Code 128 &amp; more</span>
+                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>30+ Formats</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: isLight ? '#64748B' : '#94A3B8', display: 'block' }}>EAN, UPC,</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: isLight ? '#64748B' : '#94A3B8', display: 'block' }}>Code 128 &amp; more</span>
                 </div>
               </div>
 
@@ -950,9 +1052,9 @@ export default function OnboardingFlow({ onComplete }) {
                   <QrCode size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
                 </div>
                 <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
-                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>1D &amp; 2D</span>
-                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Support</span>
-                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>All Standards</span>
+                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>1D &amp; 2D</span>
+                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>Support</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: isLight ? '#64748B' : '#94A3B8', display: 'block' }}>All Standards</span>
                 </div>
               </div>
 
@@ -993,9 +1095,9 @@ export default function OnboardingFlow({ onComplete }) {
                   <ShieldCheck size={22} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))' }} />
                 </div>
                 <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
-                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>High Quality</span>
-                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>Print Ready</span>
-                  <span style={{ fontSize: '9px', fontWeight: 600, color: '#94A3B8', display: 'block' }}>&amp; Clear</span>
+                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', display: 'block', letterSpacing: '-0.2px' }}>High Quality</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: isLight ? '#64748B' : '#94A3B8', display: 'block' }}>Print Ready</span>
+                  <span style={{ fontSize: '9px', fontWeight: 600, color: isLight ? '#64748B' : '#94A3B8', display: 'block' }}>&amp; Clear</span>
                 </div>
               </div>
 
@@ -1005,8 +1107,8 @@ export default function OnboardingFlow({ onComplete }) {
             <div
               style={{
                 width: '100%',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.09)',
+                background: isLight ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)' : 'rgba(255, 255, 255, 0.04)',
+                border: isLight ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.09)',
                 borderRadius: '16px',
                 padding: '10px 6px',
                 boxSizing: 'border-box',
@@ -1014,7 +1116,8 @@ export default function OnboardingFlow({ onComplete }) {
                 gridTemplateColumns: 'repeat(4, 1fr)',
                 gap: '4px',
                 backdropFilter: 'blur(10px)',
-                marginTop: '4px'
+                marginTop: '4px',
+                boxShadow: isLight ? '0 8px 24px rgba(0, 0, 0, 0.05)' : 'none'
               }}
             >
               {/* Item 1: Retail */}
@@ -1034,8 +1137,8 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   <ShoppingBag size={16} strokeWidth={2.3} />
                 </div>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Retail</span>
-                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Price tags &amp; labels</span>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.1 }}>Retail</span>
+                <span style={{ fontSize: '8px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Price tags &amp; labels</span>
               </div>
 
               {/* Item 2: Logistics */}
@@ -1055,8 +1158,8 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   <Truck size={16} strokeWidth={2.3} />
                 </div>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Logistics</span>
-                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Shipping &amp; tracking</span>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.1 }}>Logistics</span>
+                <span style={{ fontSize: '8px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Shipping &amp; tracking</span>
               </div>
 
               {/* Item 3: Inventory */}
@@ -1076,8 +1179,8 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   <Package size={16} strokeWidth={2.3} />
                 </div>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Inventory</span>
-                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Stock &amp; assets</span>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.1 }}>Inventory</span>
+                <span style={{ fontSize: '8px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Stock &amp; assets</span>
               </div>
 
               {/* Item 4: Industry */}
@@ -1097,8 +1200,8 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   <Factory size={16} strokeWidth={2.3} />
                 </div>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Industry</span>
-                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Manufacturing</span>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.1 }}>Industry</span>
+                <span style={{ fontSize: '8px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Manufacturing</span>
               </div>
             </div>
 
@@ -1128,7 +1231,7 @@ export default function OnboardingFlow({ onComplete }) {
                   style={{
                     fontSize: '30px',
                     fontWeight: 800,
-                    color: '#FFFFFF',
+                    color: isLight ? '#0F172A' : '#FFFFFF',
                     margin: '0 0 6px 0',
                     lineHeight: 1.15,
                     letterSpacing: '-0.5px',
@@ -1137,12 +1240,12 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   Powerful
                   <br />
-                  <span style={{ color: '#00E676' }}>Bulk Generation</span>
+                  <span style={{ background: 'linear-gradient(135deg, #059669 0%, #00E676 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Bulk Generation</span>
                 </h1>
                 <p
                   style={{
                     fontSize: '12.5px',
-                    color: '#94A3B8',
+                    color: isLight ? '#475569' : '#94A3B8',
                     margin: 0,
                     lineHeight: 1.4,
                     maxWidth: '290px',
@@ -1193,7 +1296,7 @@ export default function OnboardingFlow({ onComplete }) {
                     <FileSpreadsheet size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>CSV / Excel Import</span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.15 }}>CSV / Excel Import</span>
                     <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Instant data import</span>
                   </div>
                 </div>
@@ -1224,7 +1327,7 @@ export default function OnboardingFlow({ onComplete }) {
                     <Layers size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>Multi-Format</span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.15 }}>Multi-Format</span>
                     <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>QR Codes &amp; Barcodes</span>
                   </div>
                 </div>
@@ -1255,7 +1358,7 @@ export default function OnboardingFlow({ onComplete }) {
                     <Zap size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>Bulk Engine</span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.15 }}>Bulk Engine</span>
                     <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>5,000+ codes per batch</span>
                   </div>
                 </div>
@@ -1286,7 +1389,7 @@ export default function OnboardingFlow({ onComplete }) {
                     <FileText size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>ZIP Export</span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.15 }}>ZIP Export</span>
                     <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Single or bulk export</span>
                   </div>
                 </div>
@@ -1317,7 +1420,7 @@ export default function OnboardingFlow({ onComplete }) {
                     <RefreshCw size={18} strokeWidth={2.4} style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.15 }}>Bulk Sync</span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.15 }}>Bulk Sync</span>
                     <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Sticky label sheets</span>
                   </div>
                 </div>
@@ -1567,101 +1670,112 @@ export default function OnboardingFlow({ onComplete }) {
 
                 </div>
 
-                {/* Bulk Generation Preview Console Box */}
+                {/* Bulk Generation Preview Console Box (Reduced by 30% without redesigning, keeping 3D cards untouched) */}
                 <div
                   style={{
                     width: '100%',
-                    background: '#09131D',
-                    border: '1.5px solid rgba(16, 185, 129, 0.45)',
-                    borderRadius: '16px',
-                    padding: '8px 10px',
-                    boxSizing: 'border-box',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.7), 0 0 20px rgba(16, 185, 129, 0.2)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '5px'
+                    transform: 'scale(0.70)',
+                    transformOrigin: 'top center',
+                    marginBottom: '-48px'
                   }}
                 >
-                  {/* Header Row */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 800, color: '#FFFFFF' }}>Bulk Generation Preview</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', background: 'rgba(16, 185, 129, 0.2)', padding: '1.5px 6px', borderRadius: '6px' }}>
-                      <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#00E676' }} />
-                      <span style={{ fontSize: '8px', fontWeight: 800, color: '#34D399' }}>Ready</span>
-                    </div>
-                  </div>
-
-                  {/* Total Codes Count */}
-                  <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                    <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 600 }}>Total Codes</span>
-                    <span style={{ fontSize: '14px', fontWeight: 900, color: '#00E676', lineHeight: 1.1 }}>5,000 / 5,000</span>
-                    <span style={{ fontSize: '7.5px', color: '#34D399', fontWeight: 600 }}>Ready to generate</span>
-                  </div>
-
-                  {/* Full Green Progress Bar */}
-                  <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '10px', overflow: 'hidden' }}>
-                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg, #10B981 0%, #00E676 100%)', borderRadius: '10px' }} />
-                  </div>
-
-                  {/* 3 Queue Rows */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 5px', borderRadius: '5px', fontSize: '8.5px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ background: '#10B981', color: '#fff', fontSize: '7px', fontWeight: 900, padding: '0 3px', borderRadius: '2px' }}>X</span>
-                        <span style={{ fontWeight: 700, color: '#FFFFFF' }}>products.csv</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#94A3B8', fontSize: '7.5px' }}>
-                        <span>2,500 rows</span>
-                        <Check size={10} color="#10B981" strokeWidth={3} />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 5px', borderRadius: '5px', fontSize: '8.5px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ background: '#8B5CF6', color: '#fff', fontSize: '7px', fontWeight: 900, padding: '0 3px', borderRadius: '2px' }}>📋</span>
-                        <span style={{ fontWeight: 700, color: '#FFFFFF' }}>contacts.xlsx</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#94A3B8', fontSize: '7.5px' }}>
-                        <span>1,500 rows</span>
-                        <Check size={10} color="#10B981" strokeWidth={3} />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 5px', borderRadius: '5px', fontSize: '8.5px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ background: '#F59E0B', color: '#fff', fontSize: '7px', fontWeight: 900, padding: '0 3px', borderRadius: '2px' }}>{'{}'}</span>
-                        <span style={{ fontWeight: 700, color: '#FFFFFF' }}>barcodes.json</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#94A3B8', fontSize: '7.5px' }}>
-                        <span>1,000 rows</span>
-                        <Check size={10} color="#10B981" strokeWidth={3} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Export Button */}
-                  <button
+                  <div
                     style={{
                       width: '100%',
-                      height: '26px',
-                      borderRadius: '8px',
-                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                      border: 'none',
-                      color: '#FFFFFF',
-                      fontSize: '9.5px',
-                      fontWeight: 800,
+                      background: isLight ? 'linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%)' : '#09131D',
+                      border: isLight ? '1.5px solid rgba(16, 185, 129, 0.35)' : '1.5px solid rgba(16, 185, 129, 0.45)',
+                      borderRadius: '16px',
+                      padding: '8px 10px',
+                      boxSizing: 'border-box',
+                      boxShadow: isLight
+                        ? '0 6px 20px rgba(0,0,0,0.06)'
+                        : '0 10px 30px rgba(0,0,0,0.7), 0 0 20px rgba(16, 185, 129, 0.2)',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '4px',
-                      cursor: 'pointer',
-                      boxShadow: '0 3px 10px rgba(16, 185, 129, 0.4)',
-                      marginTop: '2px'
+                      flexDirection: 'column',
+                      gap: '5px'
                     }}
                   >
-                    <Download size={11} strokeWidth={2.5} />
-                    <span>Export All (ZIP)</span>
-                  </button>
+                    {/* Header Row */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF' }}>Bulk Generation Preview</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', background: 'rgba(16, 185, 129, 0.2)', padding: '1.5px 6px', borderRadius: '6px' }}>
+                        <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#00E676' }} />
+                        <span style={{ fontSize: '8px', fontWeight: 800, color: '#34D399' }}>Ready</span>
+                      </div>
+                    </div>
+
+                    {/* Total Codes Count */}
+                    <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                      <span style={{ fontSize: '8px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 600 }}>Total Codes</span>
+                      <span style={{ fontSize: '14px', fontWeight: 900, color: '#00E676', lineHeight: 1.1 }}>5,000 / 5,000</span>
+                      <span style={{ fontSize: '7.5px', color: '#34D399', fontWeight: 600 }}>Ready to generate</span>
+                    </div>
+
+                    {/* Full Green Progress Bar */}
+                    <div style={{ width: '100%', height: '4px', background: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)', borderRadius: '10px', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg, #10B981 0%, #00E676 100%)', borderRadius: '10px' }} />
+                    </div>
+
+                    {/* 3 Queue Rows */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.05)', padding: '2px 5px', borderRadius: '5px', fontSize: '8.5px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ background: '#10B981', color: '#fff', fontSize: '7px', fontWeight: 900, padding: '0 3px', borderRadius: '2px' }}>X</span>
+                          <span style={{ fontWeight: 700, color: isLight ? '#0F172A' : '#FFFFFF' }}>products.csv</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isLight ? '#64748B' : '#94A3B8', fontSize: '7.5px' }}>
+                          <span>2,500 rows</span>
+                          <Check size={10} color="#10B981" strokeWidth={3} />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.05)', padding: '2px 5px', borderRadius: '5px', fontSize: '8.5px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ background: '#8B5CF6', color: '#fff', fontSize: '7px', fontWeight: 900, padding: '0 3px', borderRadius: '2px' }}>📋</span>
+                          <span style={{ fontWeight: 700, color: isLight ? '#0F172A' : '#FFFFFF' }}>contacts.xlsx</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isLight ? '#64748B' : '#94A3B8', fontSize: '7.5px' }}>
+                          <span>1,500 rows</span>
+                          <Check size={10} color="#10B981" strokeWidth={3} />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.05)', padding: '2px 5px', borderRadius: '5px', fontSize: '8.5px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ background: '#F59E0B', color: '#fff', fontSize: '7px', fontWeight: 900, padding: '0 3px', borderRadius: '2px' }}>{'{}'}</span>
+                          <span style={{ fontWeight: 700, color: isLight ? '#0F172A' : '#FFFFFF' }}>barcodes.json</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isLight ? '#64748B' : '#94A3B8', fontSize: '7.5px' }}>
+                          <span>1,000 rows</span>
+                          <Check size={10} color="#10B981" strokeWidth={3} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Export Button */}
+                    <button
+                      style={{
+                        width: '100%',
+                        height: '26px',
+                        borderRadius: '8px',
+                        background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                        border: 'none',
+                        color: '#FFFFFF',
+                        fontSize: '9.5px',
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                        cursor: 'pointer',
+                        boxShadow: '0 3px 10px rgba(16, 185, 129, 0.4)',
+                        marginTop: '2px'
+                      }}
+                    >
+                      <Download size={11} strokeWidth={2.5} />
+                      <span>Export All (ZIP)</span>
+                    </button>
+                  </div>
                 </div>
 
               </div>
@@ -1671,8 +1785,8 @@ export default function OnboardingFlow({ onComplete }) {
             <div
               style={{
                 width: '100%',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.09)',
+                background: isLight ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)' : 'rgba(255, 255, 255, 0.04)',
+                border: isLight ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.09)',
                 borderRadius: '16px',
                 padding: '10px 6px',
                 boxSizing: 'border-box',
@@ -1680,7 +1794,8 @@ export default function OnboardingFlow({ onComplete }) {
                 gridTemplateColumns: 'repeat(4, 1fr)',
                 gap: '4px',
                 backdropFilter: 'blur(10px)',
-                marginTop: '4px'
+                marginTop: '4px',
+                boxShadow: isLight ? '0 8px 24px rgba(0, 0, 0, 0.05)' : 'none'
               }}
             >
               {/* Item 1: Super Fast */}
@@ -1700,8 +1815,8 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   <Gauge size={16} strokeWidth={2.3} />
                 </div>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Super Fast</span>
-                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Thousands of codes in sec</span>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.1 }}>Super Fast</span>
+                <span style={{ fontSize: '8px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Thousands of codes in sec</span>
               </div>
 
               {/* Item 2: Works Offline */}
@@ -1721,8 +1836,8 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   <Cloud size={16} strokeWidth={2.3} />
                 </div>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>Works Offline</span>
-                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Create anytime, anywhere</span>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.1 }}>Works Offline</span>
+                <span style={{ fontSize: '8px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Create anytime, anywhere</span>
               </div>
 
               {/* Item 3: 100% Secure */}
@@ -1742,8 +1857,8 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   <ShieldCheck size={16} strokeWidth={2.3} />
                 </div>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>100% Secure</span>
-                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Your data is safe &amp; private</span>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.1 }}>100% Secure</span>
+                <span style={{ fontSize: '8px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Your data is safe &amp; private</span>
               </div>
 
               {/* Item 4: No Limits */}
@@ -1763,8 +1878,8 @@ export default function OnboardingFlow({ onComplete }) {
                 >
                   <Layers size={16} strokeWidth={2.3} />
                 </div>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>No Limits</span>
-                <span style={{ fontSize: '8px', color: '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Batch, formats &amp; creativity</span>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#FFFFFF', lineHeight: 1.1 }}>No Limits</span>
+                <span style={{ fontSize: '8px', color: isLight ? '#64748B' : '#94A3B8', fontWeight: 500, lineHeight: 1.15 }}>Batch, formats &amp; creativity</span>
               </div>
             </div>
 
@@ -1955,7 +2070,7 @@ export default function OnboardingFlow({ onComplete }) {
 }
 
 // Sub-component: Floating Orbital Badge for Barcode and Bulk slides
-function OrbitBadge({ icon: Icon, label, desc, top, bottom, left, right, color, delay }) {
+function OrbitBadge({ icon: Icon, label, desc, top, bottom, left, right, color, delay, isLight }) {
   return (
     <div
       style={{
@@ -1964,16 +2079,18 @@ function OrbitBadge({ icon: Icon, label, desc, top, bottom, left, right, color, 
         bottom,
         left,
         right,
-        background: 'rgba(15, 23, 42, 0.85)',
-        border: '1px solid rgba(255, 255, 255, 0.16)',
-        borderRadius: '14px',
-        padding: '5px 10px 5px 6px',
+        background: isLight ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.75) 100%)' : 'rgba(15, 23, 42, 0.85)',
+        border: isLight ? '1.5px solid rgba(255, 255, 255, 0.95)' : '1px solid rgba(255, 255, 255, 0.16)',
+        borderRadius: '16px',
+        padding: '6px 12px 6px 7px',
         display: 'flex',
         alignItems: 'center',
-        gap: 7,
-        boxShadow: '0 12px 30px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        gap: 8,
+        boxShadow: isLight
+          ? '0 10px 28px rgba(0, 0, 0, 0.07), 0 2px 6px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1)'
+          : '0 12px 30px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         zIndex: 15,
         animation: `floatBadge 3.5s ease-in-out infinite ${delay}`
       }}
@@ -1996,11 +2113,11 @@ function OrbitBadge({ icon: Icon, label, desc, top, bottom, left, right, color, 
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', minWidth: 0 }}>
-        <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#F8FAFC', lineHeight: 1.15, whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: '10.5px', fontWeight: 800, color: isLight ? '#0F172A' : '#F8FAFC', lineHeight: 1.15, whiteSpace: 'nowrap' }}>
           {label}
         </span>
         {desc && (
-          <span style={{ fontSize: '8.5px', fontWeight: 600, color: 'rgba(203, 213, 225, 0.85)', lineHeight: 1.15, whiteSpace: 'nowrap', marginTop: 1 }}>
+          <span style={{ fontSize: '8.5px', fontWeight: 600, color: isLight ? '#64748B' : 'rgba(203, 213, 225, 0.85)', lineHeight: 1.15, whiteSpace: 'nowrap', marginTop: 1 }}>
             {desc}
           </span>
         )}
