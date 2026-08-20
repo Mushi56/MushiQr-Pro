@@ -6,6 +6,9 @@ import { generateQRMatrix, renderQR } from '../../utils/qrEngine';
 
 const isVCard = (t) => t?.styleFamily === 'vcard';
 
+// Global offscreen thumbnail cache: template.id -> cached HTMLCanvasElement
+const thumbnailCache = new Map();
+
 export const TemplateCard = React.memo(function TemplateCard({
   template,
   isSelected,
@@ -20,36 +23,45 @@ export const TemplateCard = React.memo(function TemplateCard({
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !template) return;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
 
+    // 1. Check if we already have a cached canvas for this template
+    const cacheKey = `${template.id}`;
+    if (thumbnailCache.has(cacheKey)) {
+      const cached = thumbnailCache.get(cacheKey);
+      canvas.width = cached.width;
+      canvas.height = cached.height;
+      ctx.drawImage(cached, 0, 0);
+      return;
+    }
+
+    // 2. Offscreen rendering for crisp, instant cached thumbnails
     const activeMatrix = qrMatrixInfo || generateQRMatrix('https://mushiqr.pro');
 
     if (isVCard(template)) {
-      // ── vCard 16:9 thumbnail ─────────────────────────────────────────────
-      // We render at 630×360 (exactly 1.75× scale of the 360px display width)
-      const W = 630;
-      const H = 360;
-      canvas.width  = W;
+      // vCard landscape thumbnail rendered at optimal lightweight resolution
+      const W = 420;
+      const H = 240;
+      canvas.width = W;
       canvas.height = H;
 
       const coords = drawVCardTemplate(ctx, W, H, template, {
-        name:    'Your Name',
+        name: 'Your Name',
         jobTitle: 'Job Title, Company',
-        phone:   '+60 12-345 6789',
-        email:   'you@example.com',
+        phone: '+60 12-345 6789',
+        email: 'you@example.com',
         address: '123 Business Street, Your City'
       });
 
-      // Draw QR inside the returned white box
       if (coords && activeMatrix) {
         const qrTempCanvas = document.createElement('canvas');
-        qrTempCanvas.width  = 256;
-        qrTempCanvas.height = 256;
+        qrTempCanvas.width = 160;
+        qrTempCanvas.height = 160;
         renderQR(qrTempCanvas, {
           ...activeMatrix,
-          size: 256,
+          size: 160,
           qrColor: template.preset?.qrColor || '#000000',
           bgColor: '#FFFFFF',
           bgTransparent: false,
@@ -57,7 +69,6 @@ export const TemplateCard = React.memo(function TemplateCard({
           eyeStyle: template.preset?.eyeStyle || 'rounded',
           quietZone: 1
         });
-        ctx.save();
         const margin = coords.qrBoxSize * 0.06;
         ctx.drawImage(
           qrTempCanvas,
@@ -66,32 +77,30 @@ export const TemplateCard = React.memo(function TemplateCard({
           coords.qrBoxSize - margin * 2,
           coords.qrBoxSize - margin * 2
         );
-        ctx.restore();
       }
     } else {
-      // ── Standard square thumbnail ────────────────────────────────────────
-      const w = 320;
-      const h = 320;
-      canvas.width  = w;
+      // Standard square thumbnail
+      const w = 220;
+      const h = 220;
+      canvas.width = w;
       canvas.height = h;
 
       drawTemplateBackground(ctx, w, h, template, {
-        templateHeadline:   headlineText || template.headline,
-        templateHandleText: handleText   || template.subtitle
+        templateHeadline: template.headline || template.defaultHeadline || '',
+        templateHandleText: template.subtitle || template.defaultHandle || ''
       });
 
-      ctx.save();
       const qrSize = w * 0.35;
-      const qrX    = w * 0.5 - qrSize / 2;
-      const qrY    = h * 0.555 - qrSize / 2;
+      const qrX = w * 0.5 - qrSize / 2;
+      const qrY = h * 0.555 - qrSize / 2;
 
       if (activeMatrix) {
         const qrTempCanvas = document.createElement('canvas');
-        qrTempCanvas.width  = 256;
-        qrTempCanvas.height = 256;
+        qrTempCanvas.width = 160;
+        qrTempCanvas.height = 160;
         renderQR(qrTempCanvas, {
           ...activeMatrix,
-          size: 256,
+          size: 160,
           qrColor: template.preset?.qrColor || '#000000',
           bgColor: '#FFFFFF',
           bgTransparent: false,
@@ -101,9 +110,18 @@ export const TemplateCard = React.memo(function TemplateCard({
         });
         ctx.drawImage(qrTempCanvas, qrX, qrY, qrSize, qrSize);
       }
-      ctx.restore();
     }
-  }, [template, headlineText, handleText, qrMatrixInfo]);
+
+    // 3. Save snapshot to memory cache so selecting templates or scrolling is instantaneous
+    try {
+      const offscreen = document.createElement('canvas');
+      offscreen.width = canvas.width;
+      offscreen.height = canvas.height;
+      const offCtx = offscreen.getContext('2d');
+      offCtx.drawImage(canvas, 0, 0);
+      thumbnailCache.set(cacheKey, offscreen);
+    } catch (e) {}
+  }, [template.id]);
 
   const vcardCard = isVCard(template);
 

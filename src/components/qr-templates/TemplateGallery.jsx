@@ -35,9 +35,10 @@ export function TemplateGallery({
   qrMatrixInfo,
   currentQrOptions,
   headlineText,
-  handleText
+  handleText,
+  selectedCategory = 'All',
+  onCategoryChange
 }) {
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('mushiqr_fav_templates');
@@ -97,85 +98,9 @@ export function TemplateGallery({
     return list.filter(t => FeatureAccessManager.isFeatureEnabled(`qr_template_${t.id}`));
   }, [templates, selectedCategory, favorites, recentTemplates]);
 
-  const categories = ['All', 'Favorites', 'Recent', ...TEMPLATE_CATEGORIES.filter(c => c !== 'All')];
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
-      {/* Category Toolbar Style Container (Icon + Label Toolbar items) */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        background: 'var(--bg-elevated)',
-        padding: '8px 10px',
-        borderRadius: '18px',
-        border: '1px solid var(--border-color)',
-        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
-        gap: '6px'
-      }}>
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          overflowX: 'auto',
-          padding: '2px 0',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-          flex: 1
-        }}>
-          {categories.map(cat => {
-            const isSelected = selectedCategory === cat;
-            const IconComp = CATEGORY_ICONS[cat] || Grid;
-            return (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                style={{
-                  flex: '0 0 auto',
-                  padding: '8px 14px',
-                  borderRadius: '14px',
-                  border: isSelected ? '1.5px solid var(--accent-primary)' : '1.5px solid transparent',
-                  background: isSelected ? 'rgba(214, 0, 54, 0.12)' : 'transparent',
-                  color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px',
-                  minWidth: '58px'
-                }}
-              >
-                <div style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '10px',
-                  background: isSelected ? 'var(--accent-primary)' : 'var(--bg-card)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  boxShadow: isSelected ? '0 2px 8px rgba(214, 0, 54, 0.3)' : 'none'
-                }}>
-                  <IconComp 
-                    size={15} 
-                    color={isSelected ? '#FFFFFF' : 'var(--text-primary)'} 
-                    fill={cat === 'Favorites' && isSelected ? '#FFFFFF' : 'none'}
-                    strokeWidth={isSelected ? 2.5 : 2}
-                  />
-                </div>
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: isSelected ? 800 : 600,
-                  whiteSpace: 'nowrap',
-                  letterSpacing: '0.2px'
-                }}>
-                  {cat}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+
 
       {/* Templates Count Header */}
       <div style={{

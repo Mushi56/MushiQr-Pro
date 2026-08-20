@@ -65,7 +65,14 @@ import {
   Cloud,
   Lock,
   Smartphone,
-  Trash2
+  Trash2,
+  Briefcase,
+  MessageSquare,
+  Megaphone,
+  Wrench,
+  Contact,
+  Clock,
+  Grid
 } from 'lucide-react';
 import ColorPicker from './components/ColorPicker';
 import Slider from './components/Slider';
@@ -4522,7 +4529,7 @@ export default function App() {
               )}
             </section>
             {/* ─── Shared Unified Expandable Toolbar (Centralized Bottom Layer) ─── */}
-            {((activeTab === 'logo' && logo) || activeTab === 'text' || activeTab === 'color' || activeTab === 'shapes') && (
+            {((activeTab === 'logo' && logo) || activeTab === 'text' || activeTab === 'color' || activeTab === 'shapes' || activeTab === 'template') && (
               <div className="logo-toolbar-container">
                 <div className="unified-toolbar-card">
                   {(logoPopup || textPopup || colorPopup || shapePopup) ? (
@@ -5996,7 +6003,36 @@ export default function App() {
                            )}
                          </>
                        )}
-                       {activeTab === 'text' && (
+                       {activeTab === 'template' && (
+                          <>
+                            {[
+                              { id: 'All', label: 'All', icon: Grid },
+                              { id: 'Social Media', label: 'Social', icon: Share2 },
+                              { id: 'Business', label: 'Business', icon: Briefcase },
+                              { id: 'Communication', label: 'Chat', icon: MessageSquare },
+                              { id: 'Marketing', label: 'Marketing', icon: Megaphone },
+                              { id: 'Utility', label: 'Utility', icon: Wrench },
+                              { id: 'vCard', label: 'vCard', icon: Contact },
+                              { id: 'Favorites', label: 'Favorites', icon: Heart },
+                              { id: 'Recent', label: 'Recent', icon: Clock }
+                            ].map(cat => {
+                              const isActive = templateCategory === cat.id;
+                              const IconComp = cat.icon;
+                              return (
+                                <button
+                                  key={cat.id}
+                                  className={`text-toolbar-btn${isActive ? ' active' : ''}`}
+                                  onClick={() => setTemplateCategory(cat.id)}
+                                  style={{ position: 'relative' }}
+                                >
+                                  <IconComp size={24} />
+                                  <span>{cat.label}</span>
+                                </button>
+                              );
+                            })}
+                          </>
+                        )}
+                        {activeTab === 'text' && (
                          <>
                            {(FeatureAccessManager.isFeatureEnabled('qr_center_text') || FeatureAccessManager.isFeatureEnabled('qr_text_frame')) && (
                              <button className="text-toolbar-btn" onClick={() => startEditing('text', 'input')} style={{ position: 'relative' }}>

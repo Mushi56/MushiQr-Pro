@@ -467,16 +467,30 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   ctx.fillRect(0, 0, W, H);
   ctx.restore();
 
-  // Grain noise (subtle fractalNoise simulation with tiny dots)
+  // Grain noise (fast simulation using offscreen pattern tile)
   ctx.save();
-  ctx.globalAlpha = 0.04;
-  for (let gy = 0; gy < H; gy += 3) {
-    for (let gx = 0; gx < W; gx += 3) {
-      if (Math.random() > 0.5) {
-        ctx.fillStyle = isDark ? '#ffffff' : '#000000';
-        ctx.fillRect(gx, gy, 1, 1);
+  ctx.globalAlpha = 0.035;
+  if (!drawVCardTemplate._noisePattern) {
+    try {
+      const nCanvas = document.createElement('canvas');
+      nCanvas.width = 64;
+      nCanvas.height = 64;
+      const nCtx = nCanvas.getContext('2d');
+      const imgData = nCtx.createImageData(64, 64);
+      for (let i = 0; i < imgData.data.length; i += 4) {
+        const val = Math.random() > 0.5 ? 255 : 0;
+        imgData.data[i]     = val;
+        imgData.data[i + 1] = val;
+        imgData.data[i + 2] = val;
+        imgData.data[i + 3] = Math.random() > 0.5 ? 30 : 0;
       }
-    }
+      nCtx.putImageData(imgData, 0, 0);
+      drawVCardTemplate._noisePattern = ctx.createPattern(nCanvas, 'repeat');
+    } catch (e) {}
+  }
+  if (drawVCardTemplate._noisePattern) {
+    ctx.fillStyle = drawVCardTemplate._noisePattern;
+    ctx.fillRect(0, 0, W, H);
   }
   ctx.globalAlpha = 1;
   ctx.restore();
