@@ -1,9 +1,32 @@
 // src/components/qr-templates/TemplateGallery.jsx
 import React, { useState, useMemo } from 'react';
-import { Heart, Clock } from 'lucide-react';
+import { 
+  Grid, 
+  Heart, 
+  Clock, 
+  Share2, 
+  Briefcase, 
+  MessageSquare, 
+  Megaphone, 
+  Wrench, 
+  Contact 
+} from 'lucide-react';
 import { TEMPLATE_CATEGORIES } from '../../data/qrTemplates';
 import { TemplateCard } from './TemplateCard';
 import { FeatureAccessManager } from '../../services/FeatureAccessManager';
+
+// Category icon map for toolbar styling
+const CATEGORY_ICONS = {
+  'All': Grid,
+  'Favorites': Heart,
+  'Recent': Clock,
+  'Social Media': Share2,
+  'Business': Briefcase,
+  'Communication': MessageSquare,
+  'Marketing': Megaphone,
+  'Utility': Wrench,
+  'vCard': Contact
+};
 
 export function TemplateGallery({
   templates,
@@ -78,20 +101,20 @@ export function TemplateGallery({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
-      {/* Category Toolbar Style Container */}
+      {/* Category Toolbar Style Container (Icon + Label Toolbar items) */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         background: 'var(--bg-elevated)',
-        padding: '6px 8px',
-        borderRadius: '16px',
+        padding: '8px 10px',
+        borderRadius: '18px',
         border: '1px solid var(--border-color)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
         gap: '6px'
       }}>
         <div style={{
           display: 'flex',
-          gap: '6px',
+          gap: '8px',
           overflowX: 'auto',
           padding: '2px 0',
           WebkitOverflowScrolling: 'touch',
@@ -100,30 +123,54 @@ export function TemplateGallery({
         }}>
           {categories.map(cat => {
             const isSelected = selectedCategory === cat;
+            const IconComp = CATEGORY_ICONS[cat] || Grid;
             return (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 style={{
                   flex: '0 0 auto',
-                  padding: '7px 14px',
-                  borderRadius: '12px',
-                  border: isSelected ? '1px solid var(--accent-primary)' : '1px solid transparent',
-                  background: isSelected ? 'var(--accent-primary)' : 'transparent',
-                  color: isSelected ? '#FFFFFF' : 'var(--text-secondary)',
-                  fontSize: '12.5px',
-                  fontWeight: isSelected ? 800 : 600,
+                  padding: '8px 14px',
+                  borderRadius: '14px',
+                  border: isSelected ? '1.5px solid var(--accent-primary)' : '1.5px solid transparent',
+                  background: isSelected ? 'rgba(214, 0, 54, 0.12)' : 'transparent',
+                  color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)',
                   cursor: 'pointer',
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '6px',
-                  whiteSpace: 'nowrap'
+                  justifyContent: 'center',
+                  gap: '4px',
+                  minWidth: '58px'
                 }}
               >
-                {cat === 'Favorites' && <Heart size={13} fill={isSelected ? '#fff' : 'none'} />}
-                {cat === 'Recent' && <Clock size={13} />}
-                {cat}
+                <div style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '10px',
+                  background: isSelected ? 'var(--accent-primary)' : 'var(--bg-card)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  boxShadow: isSelected ? '0 2px 8px rgba(214, 0, 54, 0.3)' : 'none'
+                }}>
+                  <IconComp 
+                    size={15} 
+                    color={isSelected ? '#FFFFFF' : 'var(--text-primary)'} 
+                    fill={cat === 'Favorites' && isSelected ? '#FFFFFF' : 'none'}
+                    strokeWidth={isSelected ? 2.5 : 2}
+                  />
+                </div>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: isSelected ? 800 : 600,
+                  whiteSpace: 'nowrap',
+                  letterSpacing: '0.2px'
+                }}>
+                  {cat}
+                </span>
               </button>
             );
           })}
