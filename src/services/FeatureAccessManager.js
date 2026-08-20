@@ -850,6 +850,15 @@ class FeatureAccessManagerService {
       return false;
     }
 
+    // Standard pre-designed templates are free by default
+    if (norm.startsWith('qr_template_')) {
+      const freeTemplates = ['google', 'whatsapp', 'facebook', 'youtube', 'tiktok', 'instagram', 'twitter', 'linkedin', 'wifi', 'website', 'contact', 'email'];
+      const subId = norm.replace('qr_template_', '');
+      if (freeTemplates.includes(subId)) {
+        return false;
+      }
+    }
+
     // 3. Check if any paid plans dynamically contain this feature
     const paidTiers = ['weekly', 'monthly', 'yearly'];
     for (const pId of paidTiers) {

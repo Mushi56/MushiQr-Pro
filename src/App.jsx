@@ -128,6 +128,8 @@ import { FeatureAccessManager } from './services/FeatureAccessManager';
 import UserAvatar from './components/UserAvatar';
 import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { TemplateGallery } from './components/qr-templates/TemplateGallery';
+import { TemplateCustomizer } from './components/qr-templates/TemplateCustomizer';
 const QRDotsIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="mushi-pro-wide-dots">
     {/* Smaller Rounded Star (Preserving the shape and style) */}
@@ -1299,6 +1301,7 @@ export default function App() {
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
   const [canvasSelection, setCanvasSelection] = useState(null); // 'logo' | 'text' | null
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [templateHeadlineText, setTemplateHeadlineText] = useState('');
   const [templateHandleText, setTemplateHandleText] = useState('');
   const [isEditingTemplateText, setIsEditingTemplateText] = useState(false);
   const [templateCategory, setTemplateCategory] = useState('All');
@@ -1333,6 +1336,7 @@ export default function App() {
   const applyTemplate = (tpl) => {
     if (!tpl) {
       setSelectedTemplate(null);
+      setTemplateHeadlineText('');
       setTemplateHandleText('');
       return;
     }
@@ -1343,11 +1347,18 @@ export default function App() {
       return;
     }
     setSelectedTemplate(tpl);
-    setTemplateHandleText(tpl.defaultHandle || '');
+    setTemplateHeadlineText(tpl.headline || tpl.defaultHeadline || '');
+    setTemplateHandleText(tpl.subtitle || tpl.defaultHandle || '');
     setQrBgImage(null);
     setQrBgImageEnabled(false);
     setQrTexture(null);
     setQrTextureEnabled(false);
+    
+    // Switch QR type if template specifically maps to a native type
+    if (tpl.qrType && tpl.qrType !== qrType) {
+      setQrType(tpl.qrType);
+    }
+
     if (tpl.preset) {
       if (tpl.preset.qrColor) setQrColor(tpl.preset.qrColor);
       if (tpl.preset.bgColor) setBgColor(tpl.preset.bgColor);
@@ -2131,10 +2142,21 @@ export default function App() {
     tempCanvas.width = exportSize;
     tempCanvas.height = exportSize;
     
+    // Extract vCard fields for export
+    const isVCardTpl = selectedTemplate?.styleFamily === 'vcard';
+    const vcardExportFields = isVCardTpl ? {
+      vcardName:     [qrData?.firstName, qrData?.lastName].filter(Boolean).join(' ') || qrData?.name || '',
+      vcardJobTitle: [qrData?.title, qrData?.org].filter(Boolean).join(', ')           || qrData?.jobTitle || '',
+      vcardPhone:    qrData?.phone   || '',
+      vcardEmail:    qrData?.email   || '',
+      vcardAddress:  qrData?.address || '',
+    } : {};
+
     renderQR(tempCanvas, {
       ...qrMatrixInfo, 
       size: exportSize,
       template: selectedTemplate,
+      ...vcardExportFields,
       qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
       eyeColor,
       eyeOuterColor,
@@ -2422,10 +2444,22 @@ export default function App() {
       if (document.fonts) await document.fonts.ready;
       if (!canvasRef.current) return;
       
+      // Extract vCard content fields so template preview reflects live user input
+      const isVCardTemplate = selectedTemplate?.styleFamily === 'vcard';
+      const vcardFields = isVCardTemplate ? {
+        vcardName:     [qrData?.firstName, qrData?.lastName].filter(Boolean).join(' ') || qrData?.name || '',
+        vcardJobTitle: [qrData?.title, qrData?.org].filter(Boolean).join(', ')           || qrData?.jobTitle || '',
+        vcardPhone:    qrData?.phone   || '',
+        vcardEmail:    qrData?.email   || '',
+        vcardAddress:  qrData?.address || '',
+      } : {};
+
       renderQR(canvasRef.current, {
         ...qrMatrixInfo, size: 1024,
         template: selectedTemplate,
-        templateHandleText: templateHandleText || selectedTemplate?.defaultHandle || '',
+        templateHeadline: templateHeadlineText || selectedTemplate?.headline || selectedTemplate?.defaultHeadline || '',
+        templateHandleText: templateHandleText || selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || '',
+        ...vcardFields,
         qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
         eyeColor,
         eyeOuterColor,
@@ -2514,7 +2548,9 @@ export default function App() {
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
     qrBgImageEnabled, qrBgImage, qrBgImageOpacity, qrBgImageBlur, qrBgImageOverlayOpacity, qrBgCardEnabled, qrBgCardOpacity,
     qrBgShape, qrBgCardShape, qrSizeScale, qrPosX, qrPosY,
-    activeTab, canvasSelection
+    activeTab, canvasSelection,
+    selectedTemplate, templateHeadlineText, templateHandleText,
+    qrData, qrType
   ]);
   useEffect(() => {
     renderCanvas();
@@ -2533,7 +2569,7 @@ export default function App() {
     return () => {
       window.removeEventListener('qr-template-loaded', handleTemplateLoad);
     };
-  }, [renderCanvas, logo, qrTexture, activePage, selectedTemplate]);
+  }, [renderCanvas, logo, qrTexture, activePage, selectedTemplate, templateHeadlineText, templateHandleText]);
   const getQRContentArea = useCallback(() => {
     const size = 512;
     const padding = size * 0.03;
@@ -4393,112 +4429,43 @@ export default function App() {
                 <div className="tab-panel fade-in" id="panel-template">
                   <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 20px 100px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     
-                    {/* Category Selector Bar (Swipeable) */}
-                    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', borderBottom: '1px solid var(--border-color)' }}>
-                      {/* Category tabs — dynamic list based on available templates */}
-                      {['All', ...Array.from(new Set(ALL_TEMPLATES.map(t => t.category || 'Social')))].map(cat => {
-                        const isSelected = templateCategory === cat;
-                        const label = cat === 'Hot' ? 'Hot 🔥' : cat;
-                        return (
-                          <button
-                            key={cat}
-                            onClick={() => setTemplateCategory(cat)}
-                            style={{
-                              flex: '0 0 auto',
-                              border: 'none',
-                              background: 'transparent',
-                              color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                              fontSize: '13px',
-                              fontWeight: 700,
-                              padding: '8px 16px',
-                              position: 'relative',
-                              cursor: 'pointer',
-                              transition: 'color 0.2s ease'
-                            }}
-                          >
-                            {label}
-                            {isSelected && (
-                              <div style={{
-                                position: 'absolute',
-                                bottom: 0,
-                                left: '16px',
-                                right: '16px',
-                                height: '3px',
-                                borderRadius: '2px',
-                                background: 'var(--accent-primary)'
-                              }} />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {/* Template Card Grid (3 Columns) */}
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, 1fr)',
-                      gap: '12px',
-                      marginTop: '8px'
-                    }}>
-                      {ALL_TEMPLATES
-                        .filter(t => FeatureAccessManager.isFeatureEnabled(`qr_template_${t.id}`))
-                        .filter(t => templateCategory === 'All' || t.category === templateCategory)
-                        .map(tpl => {
-                        const isSelected = selectedTemplate?.id === tpl.id;
-                        return (
-                          <button
-                            key={tpl.id}
-                            onClick={() => applyTemplate(isSelected ? null : tpl)}
-                            style={{
-                              aspectRatio: tpl.heightRatio ? `1 / ${tpl.heightRatio}` : '1 / 1',
-                              borderRadius: '16px',
-                              border: isSelected ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                              background: 'var(--bg-elevated)',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              cursor: 'pointer',
-                              position: 'relative',
-                              overflow: 'hidden',
-                              boxShadow: isSelected ? '0 8px 20px rgba(255,59,48,0.15)' : 'none',
-                              transition: 'all 0.2s ease',
-                              padding: 0
-                            }}
-                          >
-                            <PaidCrownBadge featureId={`qr_template_${tpl.id}`} position="corner" size={9} />
-                            <TemplatePreviewCanvas 
-                              template={tpl} 
-                              theme={effectiveTheme} 
-                              qrMatrixInfo={qrMatrixInfo}
-                              currentQrOptions={{
-                                templateHandleText: templateHandleText || tpl.defaultHandle || '',
-                                qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
-                                eyeColor, eyeOuterColor, syncEyes,
-                                gradientEnabled, gradientColor1, gradientColor2, gradientType,
-                                qrTextureEnabled, qrTexture, qrTextureSyncEyes,
-                                qrBgShape, qrSizeScale, qrPosX, qrPosY,
-                                logo: logo?.image, logoWidth, logoHeight, logoPadding,
-                                logoBackground, logoBgColor, logoBgShape,
-                                logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity
-                              }}
-                            />
-                            {isSelected && (
-                              <div
-                                onClick={(e) => { e.stopPropagation(); applyTemplate(null); }}
-                                style={{
-                                  position: 'absolute', top: '6px', right: '6px',
-                                  width: '22px', height: '22px', borderRadius: '50%',
-                                  background: 'var(--accent-primary)',
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  cursor: 'pointer',
-                                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-                                }}
-                              >
-                                <X size={12} color="white" />
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {/* Active Template Customizer Panel if a template is currently selected */}
+                    {selectedTemplate && (
+                      <TemplateCustomizer
+                        selectedTemplate={selectedTemplate}
+                        headlineText={templateHeadlineText}
+                        onHeadlineChange={setTemplateHeadlineText}
+                        handleText={templateHandleText}
+                        onHandleChange={setTemplateHandleText}
+                        qrType={qrType}
+                        qrData={qrData}
+                        onQRDataChange={setQrData}
+                        onResetToDefault={() => {
+                          setTemplateHeadlineText(selectedTemplate.headline || selectedTemplate.defaultHeadline || '');
+                          setTemplateHandleText(selectedTemplate.subtitle || selectedTemplate.defaultHandle || '');
+                        }}
+                      />
+                    )}
+
+                    {/* Template Gallery with Search, Categories, Favorites, and Recents */}
+                    <TemplateGallery
+                      templates={ALL_TEMPLATES}
+                      selectedTemplate={selectedTemplate}
+                      onSelectTemplate={(tpl) => applyTemplate(tpl)}
+                      qrMatrixInfo={qrMatrixInfo}
+                      currentQrOptions={{
+                        qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
+                        eyeColor, eyeOuterColor, syncEyes,
+                        gradientEnabled, gradientColor1, gradientColor2, gradientType,
+                        qrTextureEnabled, qrTexture, qrTextureSyncEyes,
+                        qrBgShape, qrSizeScale, qrPosX, qrPosY,
+                        logo: logo?.image, logoWidth, logoHeight, logoPadding,
+                        logoBackground, logoBgColor, logoBgShape,
+                        logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity
+                      }}
+                      headlineText={templateHeadlineText}
+                      handleText={templateHandleText}
+                    />
                   </div>
                 </div>
               )}
@@ -4805,25 +4772,51 @@ export default function App() {
                                   Active Template
                                 </span>
                               </div>
-                              <input 
-                                id="template-handle-input"
-                                type="text" 
-                                value={templateHandleText} 
-                                onChange={(e) => setTemplateHandleText(e.target.value)}
-                                placeholder={selectedTemplate.defaultHandle || 'Enter handle...'} 
-                                style={{
-                                  width: '100%',
-                                  padding: '10px 14px',
-                                  borderRadius: '10px',
-                                  border: '1px solid var(--border-color)',
-                                  background: 'var(--bg-card)',
-                                  color: 'var(--text-primary)',
-                                  fontSize: '13.5px',
-                                  fontWeight: 600,
-                                  outline: 'none',
-                                  boxSizing: 'border-box'
-                                }} 
-                              />
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)' }}>Headline Text</label>
+                                <input 
+                                  id="template-headline-input"
+                                  type="text" 
+                                  value={templateHeadlineText} 
+                                  onChange={(e) => setTemplateHeadlineText(e.target.value)}
+                                  placeholder={selectedTemplate.headline || selectedTemplate.defaultHeadline || 'Enter headline...'} 
+                                  style={{
+                                    width: '100%',
+                                    padding: '10px 14px',
+                                    borderRadius: '10px',
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-card)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '13.5px',
+                                    fontWeight: 700,
+                                    textTransform: 'uppercase',
+                                    outline: 'none',
+                                    boxSizing: 'border-box'
+                                  }} 
+                                />
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)' }}>Handle / Subtitle</label>
+                                <input 
+                                  id="template-handle-input"
+                                  type="text" 
+                                  value={templateHandleText} 
+                                  onChange={(e) => setTemplateHandleText(e.target.value)}
+                                  placeholder={selectedTemplate.subtitle || selectedTemplate.defaultHandle || 'Enter handle...'} 
+                                  style={{
+                                    width: '100%',
+                                    padding: '10px 14px',
+                                    borderRadius: '10px',
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-card)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '13.5px',
+                                    fontWeight: 600,
+                                    outline: 'none',
+                                    boxSizing: 'border-box'
+                                  }} 
+                                />
+                              </div>
                             </div>
                           )}
                           <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>

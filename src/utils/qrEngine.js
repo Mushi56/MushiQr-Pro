@@ -1,5 +1,6 @@
 import qrcode from 'qrcode-generator';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
+import { drawTemplateBackground } from '../components/qr-templates/TemplateRenderer';
 
 /**
  * QR Code Generation Engine
@@ -501,20 +502,10 @@ export function renderQR(canvas, options) {
 
   const effectiveBgTransparent = bgTransparent;
 
-  if (options.template) {
-    options.template.drawBackground(ctx, w, h);
-    ctx.save();
-    const qrSize = w * options.template.qrSize;
-    const qrX = w * options.template.qrX - qrSize / 2;
-    const qrY = h * options.template.qrY - qrSize / 2;
-    ctx.translate(qrX, qrY);
-    ctx.scale(options.template.qrSize, options.template.qrSize);
-  }
-
   // Background & Clipping
-  const hasBgShape = !effectiveBgTransparent && qrBgShape && qrBgShape !== 'full';
+  const hasBgShape = !effectiveBgTransparent && qrBgShape && qrBgShape !== 'full' && !options.template;
   
-  if (hasBgShape || (backgroundImageEnabled && backgroundImage)) {
+  if (hasBgShape || (backgroundImageEnabled && backgroundImage && !options.template)) {
     ctx.save();
     if (qrBgShape && qrBgShape !== 'full') {
       ctx.beginPath();
@@ -589,12 +580,12 @@ export function renderQR(canvas, options) {
       ctx.clip();
     }
 
-    if (!effectiveBgTransparent) {
+    if (!effectiveBgTransparent && !options.template) {
       ctx.fillStyle = parseColorOrGradient(ctx, 0, 0, size, size, bgColor);
       ctx.fillRect(0, 0, size, size);
     }
 
-    if (backgroundImageEnabled && backgroundImage) {
+    if (backgroundImageEnabled && backgroundImage && !options.template) {
       ctx.save();
       if (backgroundImageBlur > 0) {
         ctx.filter = `blur(${backgroundImageBlur}px)`;
@@ -625,9 +616,37 @@ export function renderQR(canvas, options) {
     
     ctx.restore();
   } else {
-    if (!effectiveBgTransparent) {
+    if (!effectiveBgTransparent && !options.template) {
       ctx.fillStyle = parseColorOrGradient(ctx, 0, 0, size, size, bgColor);
       ctx.fillRect(0, 0, size, size);
+    }
+  }
+
+  // Draw template background if template is active
+  if (options.template) {
+    if (typeof options.template.drawBackground === 'function') {
+      options.template.drawBackground(ctx, w, h, options);
+    } else {
+      drawTemplateBackground(ctx, w, h, options.template, options);
+    }
+    ctx.save();
+
+    if (options.template.styleFamily === 'vcard' && options.template._vcardQrBoxSize) {
+      // ── vCard: use exact pixel coords stored by drawVCardTemplate ──────────
+      const boxX    = options.template._vcardQrBoxX;
+      const boxY    = options.template._vcardQrBoxY;
+      const boxSize = options.template._vcardQrBoxSize;
+      const margin  = boxSize * 0.05; // 5% inner padding
+      const inner   = boxSize - margin * 2;
+      ctx.translate(boxX + margin, boxY + margin);
+      ctx.scale(inner / w, inner / w);
+    } else {
+      // ── Standard: ratio-based QR positioning ───────────────────────────────
+      const qrSize = w * (options.template.qrSize || 0.35);
+      const qrX = w * (options.template.qrX || 0.5) - qrSize / 2;
+      const qrY = h * (options.template.qrY || 0.535) - qrSize / 2;
+      ctx.translate(qrX, qrY);
+      ctx.scale(options.template.qrSize || 0.35, options.template.qrSize || 0.35);
     }
   }
 
@@ -950,6 +969,10 @@ export function renderQR(canvas, options) {
       showHandle: options.showHandle,
       selectedType: options.selectedType
     });
+  }
+
+  if (options.template) {
+    ctx.restore();
   }
 
   return canvas;
