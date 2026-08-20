@@ -1169,6 +1169,10 @@ export default function App() {
       setIsDataModalOpen(false);
       return;
     }
+    if (isTemplateTextModalOpen) {
+      setIsTemplateTextModalOpen(false);
+      return;
+    }
     // 2. Navigation logic
     if (activePage === 'scanner') {
       // From Scan to Home or Exit if launched from widget
@@ -1304,6 +1308,7 @@ export default function App() {
   const [templateHeadlineText, setTemplateHeadlineText] = useState('');
   const [templateHandleText, setTemplateHandleText] = useState('');
   const [isEditingTemplateText, setIsEditingTemplateText] = useState(false);
+  const [isTemplateTextModalOpen, setIsTemplateTextModalOpen] = useState(false);
   const [templateCategory, setTemplateCategory] = useState('All');
   const applyLogoBySlug = (slug) => {
     const LOGO_PRESETS = [
@@ -2990,11 +2995,30 @@ export default function App() {
         return;
       }
     }
+    // 4. Check Template Text Click
+    if (selectedTemplate) {
+      if (selectedTemplate.styleFamily === 'vcard') {
+        // For vCard: left panel contains text (x <= 256 or left half of canvas)
+        if (x <= 320) {
+          setIsTemplateTextModalOpen(true);
+          e.preventDefault();
+          return;
+        }
+      } else {
+        // For standard square templates: top headline (y <= 130) or bottom handle (y >= 380)
+        if (y <= 140 || y >= 370) {
+          setIsTemplateTextModalOpen(true);
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+
     // Clear selection if we clicked outside any active elements
     if (!isPipetteActive) {
       setCanvasSelection(null);
     }
-  }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, canvasSelection, getSnapshot, frameStyle, frameText, frameSize, frameFont, framePosition, frameRotation]);
+  }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, canvasSelection, getSnapshot, frameStyle, frameText, frameSize, frameFont, framePosition, frameRotation, selectedTemplate]);
   const handleCanvasDoubleClick = useCallback((e) => {
     if (!canvasRef.current || !qrMatrixInfo) return;
     const canvas = canvasRef.current;
@@ -3011,8 +3035,7 @@ export default function App() {
     };
     // 0. Check Template Text Interaction
     if (selectedTemplate) {
-      handleTabChange('text');
-      startEditing('text', 'input');
+      setIsTemplateTextModalOpen(true);
       return;
     }
 
@@ -4431,25 +4454,51 @@ export default function App() {
                 <div className="tab-panel fade-in" id="panel-template">
                   <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 20px 100px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     
-                    {/* Active Template Customizer Panel if a template is currently selected */}
+                    {/* If a template is selected, show a sleek banner with an Edit Text button that triggers the popup modal */}
                     {selectedTemplate && (
-                      <TemplateCustomizer
-                        selectedTemplate={selectedTemplate}
-                        headlineText={templateHeadlineText}
-                        onHeadlineChange={setTemplateHeadlineText}
-                        handleText={templateHandleText}
-                        onHandleChange={setTemplateHandleText}
-                        qrType={qrType}
-                        qrData={qrData}
-                        onQRDataChange={setQrData}
-                        onResetToDefault={() => {
-                          setTemplateHeadlineText(selectedTemplate.headline || selectedTemplate.defaultHeadline || '');
-                          setTemplateHandleText(selectedTemplate.subtitle || selectedTemplate.defaultHandle || '');
-                        }}
-                      />
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        background: 'var(--bg-elevated)',
+                        padding: '12px 16px',
+                        borderRadius: '16px',
+                        border: '1px solid var(--accent-primary)',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
+                      }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                            {selectedTemplate.name}
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                            {selectedTemplate.category || 'Template Frame'}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={() => setIsTemplateTextModalOpen(true)}
+                            className="btn-primary-compact"
+                            style={{
+                              padding: '7px 14px',
+                              borderRadius: '10px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              background: 'var(--accent-primary)',
+                              color: '#fff',
+                              border: 'none',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <Pencil size={13} /> Edit Text
+                          </button>
+                        </div>
+                      </div>
                     )}
 
-                    {/* Template Gallery with Search, Categories, Favorites, and Recents */}
+                    {/* Template Gallery */}
                     <TemplateGallery
                       templates={ALL_TEMPLATES}
                       selectedTemplate={selectedTemplate}
@@ -6377,6 +6426,118 @@ export default function App() {
             </div>
             <button className="modal-done-btn" onClick={() => setIsDataModalOpen(false)}>
               Update QR Code
+            </button>
+          </div>
+        </div>
+      )}
+      {/* ── Template Text Modal (Popup style matching QR Data Modal) ── */}
+      {isTemplateTextModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsTemplateTextModalOpen(false)}>
+          <div className="modal-container glass-panel" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-header-title">
+                <h3>{selectedTemplate?.styleFamily === 'vcard' ? 'Edit vCard Details' : (selectedTemplate ? `${selectedTemplate.name} Text` : 'Template Text')}</h3>
+                <p>Customize the text displayed on this template</p>
+              </div>
+              <button className="modal-close" onClick={() => setIsTemplateTextModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-content" style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 20px' }}>
+              {selectedTemplate?.styleFamily === 'vcard' ? (
+                /* vCard template text inputs */
+                <QRDataInput 
+                  type={QR_TYPES.VCARD} 
+                  data={qrData} 
+                  onChange={(newData) => { 
+                    generatorIsDirtyRef.current = true; 
+                    setQrData(newData); 
+                  }} 
+                />
+              ) : (
+                /* Standard headline & subtitle inputs */
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      Top Headline Banner
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={templateHeadlineText}
+                      onChange={(e) => {
+                        generatorIsDirtyRef.current = true;
+                        setTemplateHeadlineText(e.target.value);
+                      }}
+                      placeholder={selectedTemplate?.headline || selectedTemplate?.defaultHeadline || 'Enter headline...'}
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-elevated)',
+                        color: 'var(--text-primary)',
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        outline: 'none',
+                        textTransform: 'uppercase'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      Bottom Handle / Text
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={templateHandleText}
+                      onChange={(e) => {
+                        generatorIsDirtyRef.current = true;
+                        setTemplateHandleText(e.target.value);
+                      }}
+                      placeholder={selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || 'Enter handle / username...'}
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-elevated)',
+                        color: 'var(--text-primary)',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  {selectedTemplate && (
+                    <button
+                      onClick={() => {
+                        setTemplateHeadlineText(selectedTemplate.headline || selectedTemplate.defaultHeadline || '');
+                        setTemplateHandleText(selectedTemplate.subtitle || selectedTemplate.defaultHandle || '');
+                      }}
+                      style={{
+                        alignSelf: 'flex-start',
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--accent-primary)',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 0'
+                      }}
+                    >
+                      <RotateCcw size={13} /> Reset text to default
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+            <button className="modal-done-btn" onClick={() => setIsTemplateTextModalOpen(false)}>
+              Save &amp; Update
             </button>
           </div>
         </div>

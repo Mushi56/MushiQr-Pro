@@ -481,15 +481,6 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   ctx.globalAlpha = 1;
   ctx.restore();
 
-  // ── 2. Card border ─────────────────────────────────────────────────────────
-  ctx.save();
-  ctx.strokeStyle = borderColor;
-  ctx.lineWidth = Math.max(1, W * 0.001);
-  ctx.shadowColor = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.14)';
-  ctx.shadowBlur  = W * 0.04;
-  drawRoundedRect(ctx, 0, 0, W, H, W * 0.032);
-  ctx.stroke();
-  ctx.restore();
 
   // ── 3. Layout constants (match HTML: padding 64px 60px, gap 45px, QR right 280px) ─
   const pad   = W * 0.057;      // ~60px on 1050
