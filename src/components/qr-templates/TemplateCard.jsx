@@ -1,6 +1,6 @@
 // src/components/qr-templates/TemplateCard.jsx
-import React, { useRef, useEffect } from 'react';
-import PaidCrownBadge from '../PaidCrownBadge';
+import React, { useRef, useEffect, useState } from 'react';
+import { Heart } from 'lucide-react';
 import { drawTemplateBackground, drawVCardTemplate } from './TemplateRenderer';
 import { generateQRMatrix, renderQR } from '../../utils/qrEngine';
 
@@ -19,6 +19,7 @@ export const TemplateCard = React.memo(function TemplateCard({
   handleText
 }) {
   const canvasRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -29,7 +30,6 @@ export const TemplateCard = React.memo(function TemplateCard({
 
     if (isVCard(template)) {
       // ── vCard 16:9 thumbnail ─────────────────────────────────────────────
-      // Render at 525x300 (fast, clean, crisp)
       const W = 525;
       const H = 300;
       canvas.width  = W;
@@ -43,7 +43,6 @@ export const TemplateCard = React.memo(function TemplateCard({
         address: '123 Business Street, Your City'
       });
 
-      // Draw QR directly on canvas inside the exact QR box with uniform margin
       if (coords && activeMatrix) {
         const qrTempCanvas = document.createElement('canvas');
         qrTempCanvas.width  = 160;
@@ -114,26 +113,25 @@ export const TemplateCard = React.memo(function TemplateCard({
   return (
     <div
       onClick={onSelect}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       role="button"
       tabIndex={0}
       style={{
         position:        'relative',
-        borderRadius:    '20px',
+        borderRadius:    '18px',
         overflow:        'hidden',
         cursor:          'pointer',
         border:          isSelected ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
-        boxShadow:       isSelected ? '0 8px 24px rgba(255, 42, 85, 0.35)' : '0 4px 14px rgba(0,0,0,0.15)',
-        transform:       isSelected ? 'scale(1.02)' : 'scale(1)',
-        transition:      'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow:       isSelected ? '0 6px 20px rgba(255, 42, 85, 0.35)' : '0 2px 10px rgba(0,0,0,0.1)',
+        transform:       isHovered ? 'translateY(-2px)' : (isSelected ? 'scale(1.02)' : 'scale(1)'),
+        transition:      'all 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
         backgroundColor: 'var(--bg-elevated)',
-        // vCard = 16:9, everything else = 1:1
         aspectRatio:     vcardCard ? '7 / 4' : '1 / 1',
         display:         'flex',
         flexDirection:   'column'
       }}
     >
-      <PaidCrownBadge featureId={`qr_template_${template.id}`} position="corner" size={9} />
-
       <canvas
         ref={canvasRef}
         style={{
@@ -144,15 +142,16 @@ export const TemplateCard = React.memo(function TemplateCard({
         }}
       />
 
-      {/* Template Name Overlay Pill */}
+      {/* Template Name Overlay — Appears on Hover */}
       <div style={{
         position:       'absolute',
-        bottom:         '8px',
-        left:           '8px',
-        right:          '8px',
-        padding:        '4px 8px',
-        background:     'rgba(0, 0, 0, 0.65)',
-        backdropFilter: 'blur(8px)',
+        bottom:         '6px',
+        left:           '6px',
+        right:          '6px',
+        padding:        '5px 8px',
+        background:     'rgba(15, 23, 42, 0.85)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
         borderRadius:   '10px',
         display:        'flex',
         alignItems:     'center',
@@ -161,17 +160,20 @@ export const TemplateCard = React.memo(function TemplateCard({
         fontSize:       '10px',
         fontWeight:     700,
         letterSpacing:  '0.3px',
-        pointerEvents:  'none'
+        pointerEvents:  'none',
+        opacity:        isHovered || isSelected ? 1 : 0,
+        transform:      isHovered || isSelected ? 'translateY(0)' : 'translateY(6px)',
+        transition:     'opacity 0.2s ease, transform 0.2s ease'
       }}>
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {template.name}
         </span>
-        <span style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>
+        <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>
           {template.category.split(' ')[0]}
         </span>
       </div>
 
-      {/* Favorite Heart Button */}
+      {/* Beautiful Favorite Heart Button (Top-Left Position) */}
       {onToggleFavorite && (
         <button
           onClick={(e) => {
@@ -181,23 +183,31 @@ export const TemplateCard = React.memo(function TemplateCard({
           style={{
             position:       'absolute',
             top:            '8px',
-            right:          '8px',
-            width:          '26px',
-            height:         '26px',
+            left:           '8px',
+            zIndex:         25,
+            width:          '28px',
+            height:         '28px',
             borderRadius:   '50%',
-            background:     'rgba(0, 0, 0, 0.55)',
-            backdropFilter: 'blur(6px)',
-            border:         'none',
-            color:          isFavorite ? '#FF2A55' : 'rgba(255, 255, 255, 0.75)',
+            background:     isFavorite ? 'rgba(255, 42, 85, 0.95)' : 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            border:         isFavorite ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid rgba(255, 255, 255, 0.18)',
+            color:          '#FFFFFF',
             display:        'flex',
             alignItems:     'center',
             justifyContent: 'center',
             cursor:         'pointer',
-            fontSize:       '12px'
+            boxShadow:      isFavorite ? '0 2px 12px rgba(255, 42, 85, 0.55)' : '0 2px 8px rgba(0, 0, 0, 0.3)',
+            transition:     'all 0.22s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
-          title={isFavorite ? 'Remove Favorite' : 'Add to Favorites'}
+          title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
         >
-          {isFavorite ? '♥' : '♡'}
+          <Heart 
+            size={13} 
+            color="#FFFFFF" 
+            fill={isFavorite ? '#FFFFFF' : 'none'} 
+            strokeWidth={2.2} 
+          />
         </button>
       )}
     </div>

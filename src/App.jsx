@@ -52,6 +52,7 @@ import {
   Redo2,
   Check,
   RotateCw,
+  RotateCcw,
   RefreshCw,
   Filter,
   Crop,
@@ -2998,15 +2999,17 @@ export default function App() {
     // 4. Check Template Text Click
     if (selectedTemplate) {
       if (selectedTemplate.styleFamily === 'vcard') {
-        // For vCard: left panel contains text (x <= 256 or left half of canvas)
-        if (x <= 320) {
+        // For vCard landscape: Left text panel occupies entire left portion (x <= 360)
+        if (x <= 360) {
           setIsTemplateTextModalOpen(true);
           e.preventDefault();
           return;
         }
       } else {
-        // For standard square templates: top headline (y <= 130) or bottom handle (y >= 380)
-        if (y <= 140 || y >= 370) {
+        // For standard square templates:
+        // - Top Headline container: y <= 160
+        // - Bottom Handle/Subtitle: y >= 360
+        if (y <= 160 || y >= 360) {
           setIsTemplateTextModalOpen(true);
           e.preventDefault();
           return;
@@ -3021,19 +3024,6 @@ export default function App() {
   }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, canvasSelection, getSnapshot, frameStyle, frameText, frameSize, frameFont, framePosition, frameRotation, selectedTemplate]);
   const handleCanvasDoubleClick = useCallback((e) => {
     if (!canvasRef.current || !qrMatrixInfo) return;
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-    const scale = 512 / rect.width;
-    const x = (clientX - rect.left) * scale;
-    const y = (clientY - rect.top) * scale;
-    const { contentX, contentY, contentSize } = getQRContentArea();
-    const inRect = (px, py, rx, ry, rw, rh) => {
-      const pad = 25; 
-      return px >= rx - pad && px <= rx + rw + pad && py >= ry - pad && py <= ry + rh + pad;
-    };
-    // 0. Check Template Text Interaction
     if (selectedTemplate) {
       setIsTemplateTextModalOpen(true);
       return;
@@ -4391,7 +4381,7 @@ export default function App() {
                       onDoubleClick={handleCanvasDoubleClick}
                       style={{ 
                         willChange: 'transform',
-                        cursor: isDraggingCanvas ? 'grabbing' : (logo?.image || textCenterEnabled ? 'move' : 'default'),
+                        cursor: isDraggingCanvas ? 'grabbing' : (logo?.image || textCenterEnabled ? 'move' : (selectedTemplate ? 'pointer' : 'default')),
                         touchAction: 'none'
                       }} 
                     />
@@ -4454,50 +4444,6 @@ export default function App() {
                 <div className="tab-panel fade-in" id="panel-template">
                   <div className="panel-scroll-area" style={{ flex: '1', overflowY: 'auto', padding: '16px 20px 100px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     
-                    {/* If a template is selected, show a sleek banner with an Edit Text button that triggers the popup modal */}
-                    {selectedTemplate && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        background: 'var(--bg-elevated)',
-                        padding: '12px 16px',
-                        borderRadius: '16px',
-                        border: '1px solid var(--accent-primary)',
-                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
-                      }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                            {selectedTemplate.name}
-                          </span>
-                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                            {selectedTemplate.category || 'Template Frame'}
-                          </span>
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button
-                            onClick={() => setIsTemplateTextModalOpen(true)}
-                            className="btn-primary-compact"
-                            style={{
-                              padding: '7px 14px',
-                              borderRadius: '10px',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              background: 'var(--accent-primary)',
-                              color: '#fff',
-                              border: 'none',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px'
-                            }}
-                          >
-                            <Pencil size={13} /> Edit Text
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
                     {/* Template Gallery */}
                     <TemplateGallery
                       templates={ALL_TEMPLATES}
@@ -4813,63 +4759,6 @@ export default function App() {
                       {/* TEXT PROPERTIES */}
                       {textPopup === 'input' && (
                         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          {selectedTemplate && (
-                            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1.5px solid var(--accent-primary)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  <Pencil size={15} color="var(--accent-primary)" /> Template Handle / Username
-                                </span>
-                                <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--accent-primary)', background: 'var(--accent-light)', padding: '2px 8px', borderRadius: '10px' }}>
-                                  Active Template
-                                </span>
-                              </div>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)' }}>Headline Text</label>
-                                <input 
-                                  id="template-headline-input"
-                                  type="text" 
-                                  value={templateHeadlineText} 
-                                  onChange={(e) => setTemplateHeadlineText(e.target.value)}
-                                  placeholder={selectedTemplate.headline || selectedTemplate.defaultHeadline || 'Enter headline...'} 
-                                  style={{
-                                    width: '100%',
-                                    padding: '10px 14px',
-                                    borderRadius: '10px',
-                                    border: '1px solid var(--border-color)',
-                                    background: 'var(--bg-card)',
-                                    color: 'var(--text-primary)',
-                                    fontSize: '13.5px',
-                                    fontWeight: 700,
-                                    textTransform: 'uppercase',
-                                    outline: 'none',
-                                    boxSizing: 'border-box'
-                                  }} 
-                                />
-                              </div>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)' }}>Handle / Subtitle</label>
-                                <input 
-                                  id="template-handle-input"
-                                  type="text" 
-                                  value={templateHandleText} 
-                                  onChange={(e) => setTemplateHandleText(e.target.value)}
-                                  placeholder={selectedTemplate.subtitle || selectedTemplate.defaultHandle || 'Enter handle...'} 
-                                  style={{
-                                    width: '100%',
-                                    padding: '10px 14px',
-                                    borderRadius: '10px',
-                                    border: '1px solid var(--border-color)',
-                                    background: 'var(--bg-card)',
-                                    color: 'var(--text-primary)',
-                                    fontSize: '13.5px',
-                                    fontWeight: 600,
-                                    outline: 'none',
-                                    boxSizing: 'border-box'
-                                  }} 
-                                />
-                              </div>
-                            </div>
-                          )}
                           <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <Toggle
                               label={

@@ -130,34 +130,6 @@ export function TemplateGallery({
         </div>
       </div>
 
-      {/* Templates Count Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 4px',
-        fontSize: '12px',
-        color: 'var(--text-tertiary)',
-        fontWeight: 600
-      }}>
-        <span>Showing {filteredTemplates.length} templates</span>
-        {selectedTemplate && (
-          <button
-            onClick={() => handleSelect(null)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--accent-primary)',
-              cursor: 'pointer',
-              fontSize: '11px',
-              fontWeight: 700
-            }}
-          >
-            Remove Template Frame
-          </button>
-        )}
-      </div>
-
       {/* Template Card Grid — 3 columns */}
       {filteredTemplates.length > 0 ? (
         <div style={{

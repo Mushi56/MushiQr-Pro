@@ -299,6 +299,10 @@ export default function QRDataInput({ type, data, onChange }) {
             <AndroidInput className="form-input" type="email" placeholder="email@example.com" defaultValue={data.email} onValueChange={(v) => updateField('email', v)} />
           </div>
           <div className="form-group">
+            <label className="form-label">Address</label>
+            <AndroidInput className="form-input" placeholder="123 Business Street, Your City" defaultValue={data.address} onValueChange={(v) => updateField('address', v)} />
+          </div>
+          <div className="form-group">
             <label className="form-label">Website</label>
             <AndroidInput className="form-input" type="url" placeholder="https://example.com" defaultValue={data.url} onValueChange={(v) => updateField('url', v)} />
           </div>
