@@ -1,32 +1,9 @@
 // src/components/qr-templates/TemplateGallery.jsx
 import React, { useState, useMemo } from 'react';
-import { 
-  Grid, 
-  Heart, 
-  Clock, 
-  Share2, 
-  Briefcase, 
-  MessageSquare, 
-  Megaphone, 
-  Wrench, 
-  Contact 
-} from 'lucide-react';
+import { Heart, Clock } from 'lucide-react';
 import { TEMPLATE_CATEGORIES } from '../../data/qrTemplates';
 import { TemplateCard } from './TemplateCard';
 import { FeatureAccessManager } from '../../services/FeatureAccessManager';
-
-// Category icon map for toolbar styling
-const CATEGORY_ICONS = {
-  'All': Grid,
-  'Favorites': Heart,
-  'Recent': Clock,
-  'Social Media': Share2,
-  'Business': Briefcase,
-  'Communication': MessageSquare,
-  'Marketing': Megaphone,
-  'Utility': Wrench,
-  'vCard': Contact
-};
 
 export function TemplateGallery({
   templates,
@@ -35,10 +12,9 @@ export function TemplateGallery({
   qrMatrixInfo,
   currentQrOptions,
   headlineText,
-  handleText,
-  selectedCategory = 'All',
-  onCategoryChange
+  handleText
 }) {
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('mushiqr_fav_templates');
@@ -68,16 +44,16 @@ export function TemplateGallery({
 
   const handleSelect = (tpl) => {
     if (tpl) {
-      setRecentTemplates(prev => {
-        const next = [tpl.id, ...prev.filter(id => id !== tpl.id)].slice(0, 10);
-        try {
-          localStorage.setItem('mushiqr_recent_templates', JSON.stringify(next));
-        } catch {}
-        return next;
-      });
-      // Ensure we pass the enriched template with drawBackground function
-      const fullTemplate = templates.find(t => t.id === tpl.id) || tpl;
-      onSelectTemplate(fullTemplate);
+      onSelectTemplate(tpl);
+      setTimeout(() => {
+        setRecentTemplates(prev => {
+          const next = [tpl.id, ...prev.filter(id => id !== tpl.id)].slice(0, 10);
+          try {
+            localStorage.setItem('mushiqr_recent_templates', JSON.stringify(next));
+          } catch {}
+          return next;
+        });
+      }, 0);
     } else {
       onSelectTemplate(null);
     }
@@ -98,9 +74,61 @@ export function TemplateGallery({
     return list.filter(t => FeatureAccessManager.isFeatureEnabled(`qr_template_${t.id}`));
   }, [templates, selectedCategory, favorites, recentTemplates]);
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+  const categories = ['All', 'Favorites', 'Recent', ...TEMPLATE_CATEGORIES.filter(c => c !== 'All')];
 
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+      {/* Category Toolbar Style Container */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        background: 'var(--bg-elevated)',
+        padding: '6px 8px',
+        borderRadius: '16px',
+        border: '1px solid var(--border-color)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+        gap: '6px'
+      }}>
+        <div style={{
+          display: 'flex',
+          gap: '6px',
+          overflowX: 'auto',
+          padding: '2px 0',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          flex: 1
+        }}>
+          {categories.map(cat => {
+            const isSelected = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                style={{
+                  flex: '0 0 auto',
+                  padding: '7px 14px',
+                  borderRadius: '12px',
+                  border: isSelected ? '1px solid var(--accent-primary)' : '1px solid transparent',
+                  background: isSelected ? 'var(--accent-primary)' : 'transparent',
+                  color: isSelected ? '#FFFFFF' : 'var(--text-secondary)',
+                  fontSize: '12.5px',
+                  fontWeight: isSelected ? 800 : 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {cat === 'Favorites' && <Heart size={13} fill={isSelected ? '#fff' : 'none'} />}
+                {cat === 'Recent' && <Clock size={13} />}
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Templates Count Header */}
       <div style={{
@@ -148,10 +176,6 @@ export function TemplateGallery({
                 onSelect={() => handleSelect(isSelected ? null : tpl)}
                 isFavorite={isFav}
                 onToggleFavorite={toggleFavorite}
-                headlineText={headlineText}
-                handleText={handleText}
-                qrMatrixInfo={qrMatrixInfo}
-                currentQrOptions={currentQrOptions}
               />
             );
           })}
