@@ -407,13 +407,47 @@ function drawLocationIcon(ctx, x, y, size, color) {
   ctx.restore();
 }
 
+function drawWebsiteIcon(ctx, x, y, size, color) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = size * 0.08;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  const s = size;
+  const cx = x + s * 0.5, cy = y + s * 0.5, r = s * 0.4;
+  // Globe circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+  // Vertical meridian
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, r * 0.5, r, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  // Horizontal equator
+  ctx.beginPath();
+  ctx.moveTo(cx - r, cy);
+  ctx.lineTo(cx + r, cy);
+  ctx.stroke();
+  // Top/bottom arcs
+  ctx.beginPath();
+  ctx.moveTo(cx - r * 0.85, cy - r * 0.55);
+  ctx.lineTo(cx + r * 0.85, cy - r * 0.55);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx - r * 0.85, cy + r * 0.55);
+  ctx.lineTo(cx + r * 0.85, cy + r * 0.55);
+  ctx.stroke();
+  ctx.restore();
+}
+
 /**
  * vCard Landscape (1050×600) Canvas Renderer
  * @param {CanvasRenderingContext2D} ctx
- * @param {number} W  — canvas width  (rendered at 1050 or scaled equivalent)
- * @param {number} H  — canvas height (rendered at 600 or scaled equivalent)
+ * @param {number} W  — canvas width
+ * @param {number} H  — canvas height
  * @param {Object} template
- * @param {Object} options — { name, jobTitle, phone, email, address }
+ * @param {Object} options — { name, jobTitle, phone, email, address, url }
+ *   All contact fields are optional — empty ones are hidden automatically.
  */
 export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   ctx.save();
@@ -468,42 +502,49 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   const midY   = H / 2;
 
   // ── 4. Left panel — Name + Title + Divider + Contact rows ─────────────────
-  // Font sizes matching vcard-templates-2.html exactly:
-  //   name: 54px, title: 20px, rows: 22px, icons: 28px  (on H=600)
-  const nameFontSize  = Math.round(H * 0.090); // 54px on 600
-  const titleFontSize = Math.round(H * 0.034); // 20px on 600
-  const rowFontSize   = Math.round(H * 0.037); // 22px on 600
-  const iconSize      = H * 0.047;             // 28px on 600
-  const blockGap      = H * 0.053;             // 32px on 600 — gap between name-block/divider/rows
-  const rowGap        = H * 0.037;             // 22px on 600
+  // Font sizes matching vcard-templates-2.html exactly (at H=600):
+  //   name: 54px  title: 20px  rows: 22px  icons: 28px
+  const nameFontSize  = Math.round(H * 0.090);
+  const titleFontSize = Math.round(H * 0.034);
+  const rowFontSize   = Math.round(H * 0.037);
+  const iconSize      = H * 0.047;   // 28px
+  const blockGap      = H * 0.053;   // 32px — gap between name-block / divider / rows
+  const rowGap        = H * 0.037;   // 22px — gap between rows
+  const rowStride     = iconSize + rowGap;
 
   const nameFont  = `800 ${nameFontSize}px 'Manrope', 'Outfit', 'Inter', sans-serif`;
   const titleFont = `600 ${titleFontSize}px 'Manrope', 'Outfit', 'Inter', sans-serif`;
   const rowFont   = `500 ${rowFontSize}px 'Inter', 'Outfit', sans-serif`;
 
+  // ── Displayed text — fall back to placeholders only for name/title ─────────
   const nameText  = options.name     || options.fullName    || 'Your Name';
   const titleText = options.jobTitle || options.organization || 'Job Title, Company';
-  const phoneText = options.phone    || '+60 12-345 6789';
-  const emailText = options.email    || 'you@example.com';
-  const addrText  = options.address  || '123 Business Street, Your City';
 
-  // ── Measure content block height so we can vertically centre it ───────────
-  // (replicates HTML flexbox align-items:center on the card)
-  const nameLineH  = nameFontSize  * 1.15;  // line-height approx
+  // ── Build visible rows — skip any field left empty ─────────────────────────
+  const visibleRows = [
+    { icon: 'phone',    text: (options.phone   || '').trim() },
+    { icon: 'email',    text: (options.email   || '').trim() },
+    { icon: 'location', text: (options.address || '').trim() },
+    { icon: 'website',  text: (options.url     || '').trim() },
+  ].filter(r => r.text !== '');
+
+  // ── Measure total block height for vertical centering ─────────────────────
+  const nameLineH  = nameFontSize  * 1.15;
   const titleLineH = titleFontSize * 1.40;
-  const nameGap    = H * 0.007;             // 4px gap between name & title
+  const nameGap    = H * 0.007;
   const nameBlockH = nameLineH + nameGap + titleLineH;
-  const rowStride  = iconSize + rowGap;
-  const rowsH      = iconSize + rowStride * 2; // 3 rows
-  const totalContentH = nameBlockH + blockGap + 1 + blockGap + rowsH;
+  const rowsH      = visibleRows.length > 0
+    ? iconSize + rowStride * (visibleRows.length - 1)
+    : 0;
+  const totalContentH = nameBlockH + blockGap + 1
+    + (visibleRows.length > 0 ? blockGap + rowsH : 0);
 
-  // Vertical padding matches HTML padding-top/bottom: 64px on 600
-  const padV = H * 0.107; // 64px
+  // Vertical padding: 64px on 600 → H * 0.107
+  const padV   = H * 0.107;
   const availH = H - padV * 2;
-  // Clamp so content never starts above padV
   const startY = padV + Math.max(0, (availH - totalContentH) / 2);
 
-  // ── Clip left panel so text never bleeds into the QR frame ───────────────
+  // ── Clip left panel so text never bleeds into the QR frame ────────────────
   ctx.save();
   ctx.beginPath();
   ctx.rect(leftX - 2, 0, leftW + 4, H);
@@ -516,7 +557,7 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   ctx.fillStyle = textColor;
   ctx.textBaseline = 'top';
   ctx.textAlign    = 'left';
-  ctx.fillText(nameText, leftX, nameY, leftW);   // maxWidth prevents overflow
+  ctx.fillText(nameText, leftX, nameY, leftW);
   ctx.restore();
 
   // ── Job Title (accent colour) ─────────────────────────────────────────────
@@ -533,10 +574,10 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   const dividerY = titleY + titleLineH + blockGap;
   ctx.save();
   const divGrad = ctx.createLinearGradient(leftX, dividerY, leftX + leftW, dividerY);
-  divGrad.addColorStop(0,   accent + '66'); // 40% opacity
+  divGrad.addColorStop(0,   accent + '66');
   divGrad.addColorStop(0.7, accent + '00');
   ctx.strokeStyle = divGrad;
-  ctx.lineWidth = Math.max(1, H * 0.0017); // ~1px on 600
+  ctx.lineWidth = Math.max(1, H * 0.0017);
   ctx.beginPath();
   ctx.moveTo(leftX,         dividerY);
   ctx.lineTo(leftX + leftW, dividerY);
@@ -544,35 +585,33 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   ctx.restore();
 
   // ── Contact rows ──────────────────────────────────────────────────────────
-  const firstRowY = dividerY + 1 + blockGap;
-  const textGapX  = iconSize + W * 0.014; // gap between icon and text
-  const rowTextMaxW = leftW - textGapX;   // text can only be as wide as leftW minus icon
+  if (visibleRows.length > 0) {
+    const firstRowY   = dividerY + 1 + blockGap;
+    const textGapX    = iconSize + W * 0.014;
+    const rowTextMaxW = leftW - textGapX;
 
-  const rows = [
-    { icon: 'phone',    text: phoneText },
-    { icon: 'email',    text: emailText },
-    { icon: 'location', text: addrText  }
-  ];
+    visibleRows.forEach((row, i) => {
+      const rowY  = firstRowY + i * rowStride;
+      const iconY = rowY;
 
-  rows.forEach((row, i) => {
-    const rowY  = firstRowY + i * rowStride;
-    const iconY = rowY;
+      if (row.icon === 'phone')    drawPhoneIcon   (ctx, leftX, iconY, iconSize, accent);
+      if (row.icon === 'email')    drawEmailIcon   (ctx, leftX, iconY, iconSize, accent);
+      if (row.icon === 'location') drawLocationIcon(ctx, leftX, iconY, iconSize, accent);
+      if (row.icon === 'website')  drawWebsiteIcon (ctx, leftX, iconY, iconSize, accent);
 
-    if (row.icon === 'phone')    drawPhoneIcon   (ctx, leftX, iconY, iconSize, accent);
-    if (row.icon === 'email')    drawEmailIcon   (ctx, leftX, iconY, iconSize, accent);
-    if (row.icon === 'location') drawLocationIcon(ctx, leftX, iconY, iconSize, accent);
-
-    ctx.save();
-    ctx.font = rowFont;
-    ctx.fillStyle = subColor;
-    ctx.textBaseline = 'middle';
-    ctx.textAlign    = 'left';
-    ctx.fillText(row.text, leftX + textGapX, iconY + iconSize / 2, rowTextMaxW);
-    ctx.restore();
-  });
+      ctx.save();
+      ctx.font = rowFont;
+      ctx.fillStyle = subColor;
+      ctx.textBaseline = 'middle';
+      ctx.textAlign    = 'left';
+      ctx.fillText(row.text, leftX + textGapX, iconY + iconSize / 2, rowTextMaxW);
+      ctx.restore();
+    });
+  }
 
   // Restore left-panel clip
   ctx.restore();
+
 
   // ── 5. Right panel — QR Frame (matches .qr-frame-vc styling) ──────────────
   const qrFramePad = W * 0.023;   // ~24px on 1050

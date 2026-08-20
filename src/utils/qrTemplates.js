@@ -48,9 +48,10 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
         const coords = drawVCardTemplate(ctx, W, H, tpl, {
           name:     options?.vcardName     || 'Your Name',
           jobTitle: options?.vcardJobTitle || 'Job Title, Company',
-          phone:    options?.vcardPhone    || '+60 12-345 6789',
-          email:    options?.vcardEmail    || 'you@example.com',
-          address:  options?.vcardAddress  || '123 Business Street, Your City'
+          phone:    options?.vcardPhone    || '',
+          email:    options?.vcardEmail    || '',
+          address:  options?.vcardAddress  || '',
+          url:      options?.vcardUrl      || '',
         });
         // Persist the exact pixel coords so qrEngine can position the QR
         if (coords) {

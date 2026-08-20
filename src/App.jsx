@@ -2150,6 +2150,7 @@ export default function App() {
       vcardPhone:    qrData?.phone   || '',
       vcardEmail:    qrData?.email   || '',
       vcardAddress:  qrData?.address || '',
+      vcardUrl:      qrData?.url     || '',
     } : {};
 
     renderQR(tempCanvas, {
@@ -2452,6 +2453,7 @@ export default function App() {
         vcardPhone:    qrData?.phone   || '',
         vcardEmail:    qrData?.email   || '',
         vcardAddress:  qrData?.address || '',
+        vcardUrl:      qrData?.url     || '',
       } : {};
 
       renderQR(canvasRef.current, {
