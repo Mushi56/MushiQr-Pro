@@ -640,13 +640,24 @@ export function renderQR(canvas, options) {
       const inner   = boxSize - margin * 2;
       ctx.translate(boxX + margin, boxY + margin);
       ctx.scale(inner / w, inner / w);
+    } else if (options.template._stdQrBoxSize) {
+      // ── Standard: use exact pixel coords from drawTemplateBackground ────────
+      const boxX    = options.template._stdQrBoxX;
+      const boxY    = options.template._stdQrBoxY;
+      const boxSize = options.template._stdQrBoxSize;
+      const margin  = boxSize * 0.07; // 7% inner padding for perfect margin
+      const inner   = boxSize - margin * 2;
+      ctx.translate(boxX + margin, boxY + margin);
+      ctx.scale(inner / w, inner / w);
     } else {
-      // ── Standard: ratio-based QR positioning ───────────────────────────────
+      // ── Standard fallback: ratio-based QR positioning ───────────────────────
       const qrSize = w * (options.template.qrSize || 0.35);
       const qrX = w * (options.template.qrX || 0.5) - qrSize / 2;
-      const qrY = h * (options.template.qrY || 0.535) - qrSize / 2;
-      ctx.translate(qrX, qrY);
-      ctx.scale(options.template.qrSize || 0.35, options.template.qrSize || 0.35);
+      const qrY = h * (options.template.qrY || 0.555) - qrSize / 2;
+      const margin = qrSize * 0.06;
+      const inner = qrSize - margin * 2;
+      ctx.translate(qrX + margin, qrY + margin);
+      ctx.scale(inner / w, inner / w);
     }
   }
 

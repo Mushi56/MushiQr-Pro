@@ -130,28 +130,87 @@ export function TemplateGallery({
         </div>
       </div>
 
-      {/* Template Card Grid — 3 columns */}
+      {/* Template Card Grid — 2 columns for vCard (landscape), 3 columns for standard square */}
       {filteredTemplates.length > 0 ? (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '10px'
-        }}>
-          {filteredTemplates.map(tpl => {
-            const isSelected = selectedTemplate?.id === tpl.id;
-            const isFav = favorites.includes(tpl.id);
+        selectedCategory === 'vCard' ? (
+          // Dedicated 2-per-row grid for vCard section
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '12px'
+          }}>
+            {filteredTemplates.map(tpl => {
+              const isSelected = selectedTemplate?.id === tpl.id;
+              const isFav = favorites.includes(tpl.id);
+              return (
+                <TemplateCard
+                  key={tpl.id}
+                  template={tpl}
+                  isSelected={isSelected}
+                  onSelect={() => handleSelect(isSelected ? null : tpl)}
+                  isFavorite={isFav}
+                  onToggleFavorite={toggleFavorite}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          // For other categories (e.g. All, Favorites, Social, Business)
+          (() => {
+            const vcards = filteredTemplates.filter(t => t.styleFamily === 'vcard');
+            const standards = filteredTemplates.filter(t => t.styleFamily !== 'vcard');
+
             return (
-              <TemplateCard
-                key={tpl.id}
-                template={tpl}
-                isSelected={isSelected}
-                onSelect={() => handleSelect(isSelected ? null : tpl)}
-                isFavorite={isFav}
-                onToggleFavorite={toggleFavorite}
-              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {vcards.length > 0 && (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '12px'
+                  }}>
+                    {vcards.map(tpl => {
+                      const isSelected = selectedTemplate?.id === tpl.id;
+                      const isFav = favorites.includes(tpl.id);
+                      return (
+                        <TemplateCard
+                          key={tpl.id}
+                          template={tpl}
+                          isSelected={isSelected}
+                          onSelect={() => handleSelect(isSelected ? null : tpl)}
+                          isFavorite={isFav}
+                          onToggleFavorite={toggleFavorite}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+
+                {standards.length > 0 && (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '10px'
+                  }}>
+                    {standards.map(tpl => {
+                      const isSelected = selectedTemplate?.id === tpl.id;
+                      const isFav = favorites.includes(tpl.id);
+                      return (
+                        <TemplateCard
+                          key={tpl.id}
+                          template={tpl}
+                          isSelected={isSelected}
+                          onSelect={() => handleSelect(isSelected ? null : tpl)}
+                          isFavorite={isFav}
+                          onToggleFavorite={toggleFavorite}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
-          })}
-        </div>
+          })()
+        )
       ) : (
         <div style={{
           padding: '40px 20px',

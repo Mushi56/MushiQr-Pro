@@ -274,7 +274,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.fill();
   ctx.stroke();
 
-  // Solid White Inner Box (105px on 300px)
+  // Inner QR box (uses strong contrast background color, responds directly to user-chosen bgColor/options.templateBgColor)
   const qrBoxPadding = w * 0.0267; // 8px on 300px
   const qrBoxSize = qrFrameSize - qrBoxPadding * 2;
   const qrBoxX = qrFrameX + qrBoxPadding;
@@ -284,7 +284,9 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
   ctx.shadowBlur = w * 0.040;
   ctx.shadowOffsetY = w * 0.018;
-  ctx.fillStyle = '#FFFFFF';
+  // Use user-selected background color if provided, otherwise default to clean high-contrast crisp white/tint
+  const holderBg = options.bgColor || options.templateBgColor || template.holderBg || '#FFFFFF';
+  ctx.fillStyle = holderBg;
   drawRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, qrBoxRadius);
   ctx.fill();
   ctx.restore();
@@ -340,104 +342,128 @@ function parseRadialGradients(ctx, bgString, W, H) {
   }
 }
 
-// Tiny phone icon path (drawn manually to avoid SVG loading delay)
-function drawPhoneIcon(ctx, x, y, size, color) {
+// ── Beautiful Vector Icons with Theme-Matching Glassy Badge Containers ────────
+
+function drawIconBadgeContainer(ctx, x, y, size, accentColor, isDark) {
+  ctx.save();
+  // Rounded squircle container
+  const radius = size * 0.28;
+  // Glassy tinted container fill matching template accent
+  ctx.fillStyle = isDark ? `${accentColor}22` : `${accentColor}18`;
+  ctx.strokeStyle = `${accentColor}44`;
+  ctx.lineWidth = Math.max(1, size * 0.05);
+  drawRoundedRect(ctx, x, y, size, size, radius);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawPhoneIcon(ctx, x, y, size, color, isDark) {
+  drawIconBadgeContainer(ctx, x, y, size, color, isDark);
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.08;
+  ctx.fillStyle = color;
+  ctx.lineWidth = size * 0.075;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  const s = size;
-  // Simplified phone handset
+  const pad = size * 0.26;
+  const s = size - pad * 2;
+  const ox = x + pad;
+  const oy = y + pad;
+
+  // Modern crisp phone receiver
   ctx.beginPath();
-  ctx.moveTo(x + s * 0.25, y + s * 0.14);
-  ctx.bezierCurveTo(x + s * 0.25, y + s * 0.08, x + s * 0.54, y + s * 0.08, x + s * 0.54, y + s * 0.14);
-  ctx.lineTo(x + s * 0.54, y + s * 0.44);
-  ctx.bezierCurveTo(x + s * 0.54, y + s * 0.50, x + s * 0.75, y + s * 0.50, x + s * 0.75, y + s * 0.56);
-  ctx.lineTo(x + s * 0.75, y + s * 0.78);
-  ctx.bezierCurveTo(x + s * 0.75, y + s * 0.90, x + s * 0.45, y + s * 0.92, x + s * 0.40, y + s * 0.78);
-  ctx.lineTo(x + s * 0.25, y + s * 0.58);
-  ctx.bezierCurveTo(x + s * 0.10, y + s * 0.50, x + s * 0.10, y + s * 0.20, x + s * 0.25, y + s * 0.14);
+  ctx.moveTo(ox + s * 0.18, oy + s * 0.12);
+  ctx.bezierCurveTo(ox + s * 0.38, oy + s * 0.06, ox + s * 0.50, oy + s * 0.24, ox + s * 0.42, oy + s * 0.40);
+  ctx.lineTo(ox + s * 0.36, oy + s * 0.48);
+  ctx.bezierCurveTo(ox + s * 0.42, oy + s * 0.60, ox + s * 0.52, oy + s * 0.70, ox + s * 0.64, oy + s * 0.76);
+  ctx.lineTo(ox + s * 0.72, oy + s * 0.70);
+  ctx.bezierCurveTo(ox + s * 0.88, oy + s * 0.62, ox + s * 1.06, oy + s * 0.74, ox + s * 1.00, oy + s * 0.94);
+  ctx.bezierCurveTo(ox + s * 0.94, oy + s * 1.06, ox + s * 0.78, oy + s * 1.08, ox + s * 0.68, oy + s * 1.02);
+  ctx.bezierCurveTo(ox + s * 0.32, oy + s * 0.88, ox + s * 0.12, oy + s * 0.68, ox + s * 0.00, oy + s * 0.34);
+  ctx.bezierCurveTo(ox - s * 0.06, oy + s * 0.24, ox - s * 0.04, oy + s * 0.08, ox + s * 0.18, oy + s * 0.12);
   ctx.closePath();
   ctx.stroke();
   ctx.restore();
 }
 
-function drawEmailIcon(ctx, x, y, size, color) {
+function drawEmailIcon(ctx, x, y, size, color, isDark) {
+  drawIconBadgeContainer(ctx, x, y, size, color, isDark);
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.08;
+  ctx.lineWidth = size * 0.075;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  const s = size;
-  // Rectangle envelope
-  drawRoundedRect(ctx, x + s * 0.12, y + s * 0.23, s * 0.75, s * 0.54, s * 0.08);
+  const pad = size * 0.26;
+  const s = size - pad * 2;
+  const ox = x + pad;
+  const oy = y + pad;
+
+  // Envelope Body
+  drawRoundedRect(ctx, ox, oy + s * 0.12, s, s * 0.76, s * 0.16);
   ctx.stroke();
-  // V-flap
+  // V-Flap
   ctx.beginPath();
-  ctx.moveTo(x + s * 0.16, y + s * 0.29);
-  ctx.lineTo(x + s * 0.5,  y + s * 0.55);
-  ctx.lineTo(x + s * 0.84, y + s * 0.29);
+  ctx.moveTo(ox + s * 0.08, oy + s * 0.22);
+  ctx.lineTo(ox + s * 0.50, oy + s * 0.54);
+  ctx.lineTo(ox + s * 0.92, oy + s * 0.22);
   ctx.stroke();
   ctx.restore();
 }
 
-function drawLocationIcon(ctx, x, y, size, color) {
+function drawLocationIcon(ctx, x, y, size, color, isDark) {
+  drawIconBadgeContainer(ctx, x, y, size, color, isDark);
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.08;
+  ctx.lineWidth = size * 0.075;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  const s = size;
-  // Teardrop pin
+  const pad = size * 0.24;
+  const s = size - pad * 2;
+  const cx = x + size * 0.5;
+  const cy = y + pad + s * 0.38;
+
+  // Pin Head
   ctx.beginPath();
-  ctx.arc(x + s * 0.5, y + s * 0.42, s * 0.27, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x + s * 0.5, y + s * 0.69);
-  ctx.bezierCurveTo(x + s * 0.5, y + s * 0.69, x + s * 0.22, y + s * 0.54, x + s * 0.22, y + s * 0.42);
-  ctx.bezierCurveTo(x + s * 0.22, y + s * 0.26, x + s * 0.34, y + s * 0.14, x + s * 0.5, y + s * 0.14);
-  ctx.bezierCurveTo(x + s * 0.66, y + s * 0.14, x + s * 0.78, y + s * 0.26, x + s * 0.78, y + s * 0.42);
-  ctx.bezierCurveTo(x + s * 0.78, y + s * 0.54, x + s * 0.5, y + s * 0.69, x + s * 0.5, y + s * 0.69);
+  ctx.arc(cx, cy, s * 0.34, Math.PI * 0.75, Math.PI * 2.25, false);
+  ctx.lineTo(cx, y + pad + s * 0.96);
   ctx.closePath();
   ctx.stroke();
-  // Drop point
+
+  // Pin Inner Circle
   ctx.beginPath();
-  ctx.moveTo(x + s * 0.5, y + s * 0.69);
-  ctx.lineTo(x + s * 0.5, y + s * 0.875);
+  ctx.arc(cx, cy, s * 0.14, 0, Math.PI * 2);
   ctx.stroke();
   ctx.restore();
 }
 
-function drawWebsiteIcon(ctx, x, y, size, color) {
+function drawWebsiteIcon(ctx, x, y, size, color, isDark) {
+  drawIconBadgeContainer(ctx, x, y, size, color, isDark);
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.08;
+  ctx.lineWidth = size * 0.075;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  const s = size;
-  const cx = x + s * 0.5, cy = y + s * 0.5, r = s * 0.4;
-  // Globe circle
+  const pad = size * 0.25;
+  const s = size - pad * 2;
+  const cx = x + size * 0.5;
+  const cy = y + size * 0.5;
+  const r = s * 0.48;
+
+  // Outer Globe Circle
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.stroke();
-  // Vertical meridian
+
+  // Meridian Ellipse
   ctx.beginPath();
-  ctx.ellipse(cx, cy, r * 0.5, r, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, cy, r * 0.45, r, 0, 0, Math.PI * 2);
   ctx.stroke();
-  // Horizontal equator
+
+  // Equator Line
   ctx.beginPath();
   ctx.moveTo(cx - r, cy);
   ctx.lineTo(cx + r, cy);
-  ctx.stroke();
-  // Top/bottom arcs
-  ctx.beginPath();
-  ctx.moveTo(cx - r * 0.85, cy - r * 0.55);
-  ctx.lineTo(cx + r * 0.85, cy - r * 0.55);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(cx - r * 0.85, cy + r * 0.55);
-  ctx.lineTo(cx + r * 0.85, cy + r * 0.55);
   ctx.stroke();
   ctx.restore();
 }
@@ -495,10 +521,10 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   const midY   = H / 2;
 
   // ── 4. Left panel — Name + Title + Divider + Contact rows ─────────────────
-  // Font sizes matching vcard-templates-2.html exactly (at H=600):
-  //   name: 54px  title: 20px  rows: 22px  icons: 28px
+  // Font sizes matching vcard-templates-2.html (at H=600):
+  //   name: 54px  title: 25px (increased for legibility)  rows: 22px  icons: 28px
   const nameFontSize  = Math.round(H * 0.090);
-  const titleFontSize = Math.round(H * 0.034);
+  const titleFontSize = Math.round(H * 0.042); // increased size (~25px on 600)
   const rowFontSize   = Math.round(H * 0.037);
   const iconSize      = H * 0.047;   // 28px
   const blockGap      = H * 0.053;   // 32px — gap between name-block / divider / rows
@@ -522,15 +548,17 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   ].filter(r => r.text !== '');
 
   // ── Measure total block height for vertical centering ─────────────────────
-  const nameLineH  = nameFontSize  * 1.15;
-  const titleLineH = titleFontSize * 1.40;
-  const nameGap    = H * 0.007;
-  const nameBlockH = nameLineH + nameGap + titleLineH;
-  const rowsH      = visibleRows.length > 0
+  const nameLineH     = nameFontSize  * 1.15;
+  const titleLineH    = titleFontSize * 1.25;
+  const nameGap       = H * 0.007;
+  const dividerTopGap = H * 0.016; // ~10px on 600 (sits close right under job title)
+  const dividerBotGap = H * 0.045; // ~27px gap between divider and contact rows
+  const nameBlockH    = nameLineH + nameGap + titleLineH;
+  const rowsH         = visibleRows.length > 0
     ? iconSize + rowStride * (visibleRows.length - 1)
     : 0;
-  const totalContentH = nameBlockH + blockGap + 1
-    + (visibleRows.length > 0 ? blockGap + rowsH : 0);
+  const totalContentH = nameBlockH + dividerTopGap + 1
+    + (visibleRows.length > 0 ? dividerBotGap + rowsH : 0);
 
   // Vertical padding: 64px on 600 → H * 0.107
   const padV   = H * 0.107;
@@ -543,43 +571,64 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   ctx.rect(leftX - 2, 0, leftW + 4, H);
   ctx.clip();
 
-  // ── Name ──────────────────────────────────────────────────────────────────
+  // ── Name (First Name + Lighter Second Name) ────────────────────────────────
   const nameY = startY;
+  const nameParts = nameText.trim().split(/\s+/);
+  const firstName = nameParts[0] || '';
+  const secondName = nameParts.slice(1).join(' ');
+
   ctx.save();
   ctx.font = nameFont;
-  ctx.fillStyle = textColor;
   ctx.textBaseline = 'top';
   ctx.textAlign    = 'left';
-  ctx.fillText(nameText, leftX, nameY, leftW);
+
+  let nameMeasuredW = 0;
+  if (secondName) {
+    // Draw first name in primary textColor
+    ctx.fillStyle = textColor;
+    ctx.fillText(firstName, leftX, nameY);
+    const firstW = ctx.measureText(firstName + ' ').width;
+
+    // Draw second name in lighter color (subColor / softer accent tone)
+    ctx.fillStyle = subColor || (isDark ? 'rgba(255, 255, 255, 0.72)' : 'rgba(0, 0, 0, 0.60)');
+    ctx.fillText(secondName, leftX + firstW, nameY, leftW - firstW);
+    nameMeasuredW = Math.min(firstW + ctx.measureText(secondName).width, leftW);
+  } else {
+    ctx.fillStyle = textColor;
+    ctx.fillText(firstName, leftX, nameY, leftW);
+    nameMeasuredW = Math.min(ctx.measureText(firstName).width, leftW);
+  }
   ctx.restore();
 
-  // ── Job Title (accent colour) ─────────────────────────────────────────────
+  // ── Job Title & Organization (Increased size, aligned to right edge of name) ──
   const titleY = nameY + nameLineH + nameGap;
+  const nameRightEdgeX = leftX + nameMeasuredW;
   ctx.save();
   ctx.font = titleFont;
   ctx.fillStyle = accent;
   ctx.textBaseline = 'top';
-  ctx.textAlign    = 'left';
-  ctx.fillText(titleText, leftX, titleY, leftW);
+  ctx.textAlign    = 'right';
+  ctx.fillText(titleText, nameRightEdgeX, titleY, Math.max(nameMeasuredW, leftW));
   ctx.restore();
 
-  // ── Divider (accent → transparent gradient) ───────────────────────────────
-  const dividerY = titleY + titleLineH + blockGap;
+  // ── Divider Line (Close under job title text) ──────────────────────────────
+  const dividerY = titleY + titleLineH + dividerTopGap;
+  const dividerEndW = Math.max(nameMeasuredW, leftW * 0.75);
   ctx.save();
-  const divGrad = ctx.createLinearGradient(leftX, dividerY, leftX + leftW, dividerY);
+  const divGrad = ctx.createLinearGradient(leftX, dividerY, leftX + dividerEndW, dividerY);
   divGrad.addColorStop(0,   accent + '66');
-  divGrad.addColorStop(0.7, accent + '00');
+  divGrad.addColorStop(0.85, accent + '00');
   ctx.strokeStyle = divGrad;
   ctx.lineWidth = Math.max(1, H * 0.0017);
   ctx.beginPath();
-  ctx.moveTo(leftX,         dividerY);
-  ctx.lineTo(leftX + leftW, dividerY);
+  ctx.moveTo(leftX, dividerY);
+  ctx.lineTo(leftX + dividerEndW, dividerY);
   ctx.stroke();
   ctx.restore();
 
   // ── Contact rows ──────────────────────────────────────────────────────────
   if (visibleRows.length > 0) {
-    const firstRowY   = dividerY + 1 + blockGap;
+    const firstRowY   = dividerY + 1 + dividerBotGap;
     const textGapX    = iconSize + W * 0.014;
     const rowTextMaxW = leftW - textGapX;
 
@@ -587,10 +636,10 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
       const rowY  = firstRowY + i * rowStride;
       const iconY = rowY;
 
-      if (row.icon === 'phone')    drawPhoneIcon   (ctx, leftX, iconY, iconSize, accent);
-      if (row.icon === 'email')    drawEmailIcon   (ctx, leftX, iconY, iconSize, accent);
-      if (row.icon === 'location') drawLocationIcon(ctx, leftX, iconY, iconSize, accent);
-      if (row.icon === 'website')  drawWebsiteIcon (ctx, leftX, iconY, iconSize, accent);
+      if (row.icon === 'phone')    drawPhoneIcon   (ctx, leftX, iconY, iconSize, accent, isDark);
+      if (row.icon === 'email')    drawEmailIcon   (ctx, leftX, iconY, iconSize, accent, isDark);
+      if (row.icon === 'location') drawLocationIcon(ctx, leftX, iconY, iconSize, accent, isDark);
+      if (row.icon === 'website')  drawWebsiteIcon (ctx, leftX, iconY, iconSize, accent, isDark);
 
       ctx.save();
       ctx.font = rowFont;
@@ -629,7 +678,7 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   ctx.stroke();
   ctx.restore();
 
-  // Inner white QR box (matches .qr-box-vc: border-radius 22px, shadow)
+  // Inner QR box (matches .qr-box-vc: border-radius 22px, shadow, adapts to user-selected background color)
   const qrBoxX = qrFrameX + qrFramePad;
   const qrBoxY = qrFrameY + qrFramePad;
   const qrBoxRadius = W * 0.021; // ~22px on 1050
@@ -638,9 +687,27 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   ctx.shadowColor  = 'rgba(0,0,0,0.35)';
   ctx.shadowBlur   = W * 0.032;
   ctx.shadowOffsetY = W * 0.015;
-  ctx.fillStyle = '#FFFFFF';
+  const vcardHolderBg = options.bgColor || options.templateBgColor || template.holderBg || '#FFFFFF';
+  ctx.fillStyle = vcardHolderBg;
   drawRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, qrBoxRadius);
   ctx.fill();
+  ctx.restore();
+
+  // ── 6. Inset Card Edge Stroke Border ─────────────────────────────────────
+  ctx.save();
+  const strokeInset = W * 0.015; // ~16px inset on 1050
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth   = Math.max(1.5, W * 0.002);
+  const cardRadius = W * 0.024; // ~25px radius
+  drawRoundedRect(
+    ctx, 
+    strokeInset, 
+    strokeInset, 
+    W - strokeInset * 2, 
+    H - strokeInset * 2, 
+    cardRadius
+  );
+  ctx.stroke();
   ctx.restore();
 
   ctx.restore();

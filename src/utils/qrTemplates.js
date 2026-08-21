@@ -1,8 +1,6 @@
-// src/utils/qrTemplates.js
-// Universal QR Code Templates with all Follow Me, Social, Brand & vCard Templates
-
 import { ALL_50_TEMPLATES, getTemplateById } from '../data/qrTemplates';
 import { drawTemplateBackground, drawVCardTemplate } from '../components/qr-templates/TemplateRenderer';
+import { getTemplateStylingPreset } from '../data/qrTemplates/templateStylingConfig';
 
 const VCARD_HEIGHT_RATIO = 600 / 1050; // ≈ 0.5714 — landscape 1050×600
 
@@ -12,8 +10,6 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
 
   if (isVCard) {
     // ── vCard landscape template ─────────────────────────────────────────────
-    // drawBackground calls drawVCardTemplate and stores the returned QR box coords
-    // on the template object so qrEngine can position the QR dot matrix correctly.
     const vcardTpl = {
       id:             tpl.id,
       name:           tpl.name,
@@ -21,10 +17,9 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
       dimensions:     '1050 x 600 px',
       heightRatio:    VCARD_HEIGHT_RATIO,
       styleFamily:    'vcard',
-      // These will be overwritten after drawBackground is called
-      qrSize:   0.265,   // qrBoxSize / W — approximate until real render
-      qrX:      0.82,    // approximate centre-X of right panel
-      qrY:      0.50,    // vertically centred
+      qrSize:   0.265,
+      qrX:      0.82,
+      qrY:      0.50,
       defaultHeadline: tpl.headline,
       defaultHandle:   tpl.subtitle,
       headline:  tpl.headline,
@@ -39,7 +34,7 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
       qrType:     tpl.qrType,
       fields:     tpl.fields,
       preset: tpl.preset || {
-        qrColor:   '#000000',
+        qrColor:   tpl.accent || '#000000',
         bgColor:   '#FFFFFF',
         dotStyle:  'rounded',
         eyeStyle:  'rounded'
@@ -53,12 +48,10 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
           address:  options?.vcardAddress  || '',
           url:      options?.vcardUrl      || '',
         });
-        // Persist the exact pixel coords so qrEngine can position the QR
         if (coords) {
           this._vcardQrBoxX    = coords.qrBoxX;
           this._vcardQrBoxY    = coords.qrBoxY;
           this._vcardQrBoxSize = coords.qrBoxSize;
-          // Update ratio-based helpers for qrEngine fallback
           this.qrSize = coords.qrBoxSize / W;
           this.qrX    = (coords.qrBoxX + coords.qrBoxSize / 2) / W;
           this.qrY    = (coords.qrBoxY + coords.qrBoxSize / 2) / H;
@@ -69,7 +62,9 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
     return vcardTpl;
   }
 
-  // ── Standard square template ─────────────────────────────────────────────
+  // ── Standard square template (with tailored platform colors, diverse eyes & dots) ──
+  const stylingPreset = getTemplateStylingPreset(tpl);
+
   return {
     id:             tpl.id,
     name:           tpl.name,
@@ -92,14 +87,19 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
     bgShapes:    tpl.bgShapes,
     qrType:      tpl.qrType,
     fields:      tpl.fields,
-    preset: tpl.preset || {
-      qrColor:   '#000000',
+    preset: stylingPreset || tpl.preset || {
+      qrColor:   '#1877F2',
       bgColor:   '#FFFFFF',
-      dotStyle:  'rounded',
+      dotStyle:  'fluid',
       eyeStyle:  'rounded'
     },
     drawBackground(ctx, w, h, options = {}) {
-      drawTemplateBackground(ctx, w, h, tpl, options);
+      const coords = drawTemplateBackground(ctx, w, h, tpl, options);
+      if (coords) {
+        this._stdQrBoxX    = coords.qrBoxX;
+        this._stdQrBoxY    = coords.qrBoxY;
+        this._stdQrBoxSize = coords.qrBoxSize;
+      }
     },
     drawForeground: () => {}
   };

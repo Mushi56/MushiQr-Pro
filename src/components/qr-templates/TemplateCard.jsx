@@ -1,8 +1,8 @@
-// src/components/qr-templates/TemplateCard.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { drawTemplateBackground, drawVCardTemplate } from './TemplateRenderer';
 import { generateQRMatrix, renderQR } from '../../utils/qrEngine';
+import { getTemplateStylingPreset } from '../../data/qrTemplates/templateStylingConfig';
 
 const isVCard = (t) => t?.styleFamily === 'vcard';
 
@@ -40,7 +40,8 @@ export const TemplateCard = React.memo(function TemplateCard({
         jobTitle: 'Job Title, Company',
         phone:   '+60 12-345 6789',
         email:   'you@example.com',
-        address: '123 Business Street, Your City'
+        address: '123 Business Street, Your City',
+        url:     'https://example.com'
       });
 
       if (coords && activeMatrix) {
@@ -80,6 +81,8 @@ export const TemplateCard = React.memo(function TemplateCard({
         templateHandleText: handleText   || template.subtitle
       });
 
+      const stylePreset = getTemplateStylingPreset(template) || template.preset;
+
       if (coords && activeMatrix) {
         const qrTempCanvas = document.createElement('canvas');
         qrTempCanvas.width  = 160;
@@ -87,11 +90,14 @@ export const TemplateCard = React.memo(function TemplateCard({
         renderQR(qrTempCanvas, {
           ...activeMatrix,
           size: 160,
-          qrColor: template.preset?.qrColor || '#000000',
+          qrColor: stylePreset?.qrColor || '#1877F2',
           bgColor: 'transparent',
           bgTransparent: true,
-          dotStyle: template.preset?.dotStyle || 'rounded',
-          eyeStyle: template.preset?.eyeStyle || 'rounded',
+          dotStyle: stylePreset?.dotStyle || 'fluid',
+          eyeStyle: stylePreset?.eyeStyle || 'rounded',
+          eyeColor: stylePreset?.eyeColor || stylePreset?.qrColor || '#1877F2',
+          eyeOuterColor: stylePreset?.eyeOuterColor || stylePreset?.qrColor || '#1877F2',
+          syncEyes: true,
           quietZone: 0
         });
         ctx.save();
@@ -119,7 +125,7 @@ export const TemplateCard = React.memo(function TemplateCard({
       tabIndex={0}
       style={{
         position:        'relative',
-        borderRadius:    '18px',
+        borderRadius:    '4px', // hard crisp edges
         overflow:        'hidden',
         cursor:          'pointer',
         border:          isSelected ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
@@ -149,27 +155,26 @@ export const TemplateCard = React.memo(function TemplateCard({
         left:           '6px',
         right:          '6px',
         padding:        '5px 8px',
-        background:     'rgba(15, 23, 42, 0.85)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        borderRadius:   '10px',
+        background:     'var(--bg-elevated, rgba(255, 255, 255, 0.92))',
+        border:         '1px solid var(--border-color, rgba(0, 0, 0, 0.12))',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius:   '4px',
         display:        'flex',
         alignItems:     'center',
-        justifyContent: 'space-between',
-        color:          '#FFFFFF',
+        justifyContent: 'center',
+        color:          'var(--text-primary, #1e293b)',
         fontSize:       '10px',
         fontWeight:     700,
         letterSpacing:  '0.3px',
+        boxShadow:      '0 2px 8px rgba(0, 0, 0, 0.12)',
         pointerEvents:  'none',
         opacity:        isHovered || isSelected ? 1 : 0,
         transform:      isHovered || isSelected ? 'translateY(0)' : 'translateY(6px)',
         transition:     'opacity 0.2s ease, transform 0.2s ease'
       }}>
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>
           {template.name}
-        </span>
-        <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>
-          {template.category.split(' ')[0]}
         </span>
       </div>
 
