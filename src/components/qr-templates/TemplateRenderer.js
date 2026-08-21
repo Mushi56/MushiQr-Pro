@@ -1,22 +1,34 @@
 // src/components/qr-templates/TemplateRenderer.js
 // Universal Canvas 2D Renderer for all Follow Me, Social & Brand Pro Templates
-// Features tailored brand typography matching each platform's distinct identity,
-// unified glassy containers, reserved top icon slots, and balanced vertical layout.
 
 const svgImageCache = {};
 
-function getSvgImage(svgString) {
-  if (!svgString) return null;
-  if (svgImageCache[svgString]) {
-    return svgImageCache[svgString];
+function getSvgImage(svgStringOrUrl) {
+  if (!svgStringOrUrl) return null;
+  if (svgImageCache[svgStringOrUrl]) {
+    return svgImageCache[svgStringOrUrl];
   }
+  
   const img = new Image();
-  const encoded = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
-  img.src = encoded;
+  img.crossOrigin = 'anonymous';
+
+  if (svgStringOrUrl.startsWith('/') || svgStringOrUrl.startsWith('http') || svgStringOrUrl.startsWith('data:')) {
+    img.src = svgStringOrUrl;
+  } else {
+    let formattedSvg = svgStringOrUrl.trim();
+    if (!formattedSvg.includes('xmlns=')) {
+      formattedSvg = formattedSvg.replace(/<svg\b([^>]*)>/i, '<svg xmlns="http://www.w3.org/2000/svg" $1>');
+    }
+    if (!formattedSvg.includes('width=') && !formattedSvg.includes('height=')) {
+      formattedSvg = formattedSvg.replace(/<svg\b([^>]*)>/i, '<svg width="24" height="24" $1>');
+    }
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(formattedSvg);
+  }
+
   img.onload = () => {
     window.dispatchEvent(new CustomEvent('qr-template-loaded'));
   };
-  svgImageCache[svgString] = img;
+  svgImageCache[svgStringOrUrl] = img;
   return img;
 }
 
@@ -227,21 +239,13 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   const cardH = h - cardInset * 2;
   const cardRadius = w * 0.06; // 18px on 300px
 
-  const isLightTpl = isLightBackground(template.background);
-  
-  // For light backgrounds (like Snapchat / Google), use contrasting dark-tinted glass + dark border
-  // For standard/dark backgrounds, use crisp translucent white glass + bright rim stroke
-  const glassyFill = isLightTpl 
-    ? 'rgba(0, 0, 0, 0.08)' 
-    : (isBrandStyle ? 'rgba(255, 255, 255, 0.24)' : 'rgba(255, 255, 255, 0.10)');
-  const glassyStroke = isLightTpl 
-    ? 'rgba(0, 0, 0, 0.22)' 
-    : (isBrandStyle ? 'rgba(255, 255, 255, 0.50)' : 'rgba(255, 255, 255, 0.32)');
+  const glassyFill = isBrandStyle ? 'rgba(255, 255, 255, 0.24)' : 'rgba(255, 255, 255, 0.10)';
+  const glassyStroke = isBrandStyle ? 'rgba(255, 255, 255, 0.50)' : 'rgba(255, 255, 255, 0.32)';
   const glassyStrokeWidth = Math.max(1.2, w * 0.003);
 
   // Central Card Frame with subtle backdrop depth
   ctx.save();
-  ctx.shadowColor = isLightTpl ? 'rgba(0, 0, 0, 0.12)' : 'rgba(0, 0, 0, 0.25)';
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
   ctx.shadowBlur = w * 0.03;
   ctx.shadowOffsetY = w * 0.01;
   ctx.fillStyle = glassyFill;
@@ -252,20 +256,22 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.stroke();
   ctx.restore();
 
-  // 4. Platform Top Icon Slot (Reserved at 11.5% Y center)
+  // 4. Platform Top Icon Slot (Original Template SVGs, shifted down 20px on standard 1080px canvas)
   if (template.svg) {
     const iconImg = getSvgImage(template.svg);
     if (iconImg && iconImg.complete && iconImg.naturalWidth !== 0) {
-      const iconSize = w * 0.073;
+      const iconShiftY = (20 / 1080) * w;
+      const iconSize = w * 0.075;
       const iconX = (w - iconSize) / 2;
-      const iconY = cardY + cardH * 0.115 - iconSize / 2;
+      const iconY = cardY + cardH * 0.115 - iconSize / 2 + iconShiftY;
       ctx.drawImage(iconImg, iconX, iconY, iconSize, iconSize);
     }
   }
 
-  // 5. Headline Text & Matching Glassy Container (Perfect Mathematical Centering)
+  // 5. Headline Text & Matching Glassy Container (Perfect Mathematical Centering, shifted down 50px on standard 1080px canvas)
   const headlineText = (options.templateHeadline || template.headline || '').toUpperCase();
-  const headlineCenterY = cardY + cardH * 0.245;
+  const headlineShiftY = (50 / 1080) * w;
+  const headlineCenterY = cardY + cardH * 0.245 + headlineShiftY;
 
   ctx.save();
   const isBebas = typography.headlineFont.includes('Bebas');
@@ -316,11 +322,12 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.fillText(headlineText, w * 0.5 + letterSpacingComp, badgeY + badgeHeight / 2);
   ctx.restore();
 
-  // 6. QR Frame & QR White Box
+  // 6. QR Frame & QR White Box (shifted down 50px on standard 1080px canvas)
+  const qrShiftY = (50 / 1080) * w;
   const isDarkQrFrame = template.isDarkQrFrame || false;
   const qrFrameSize = w * 0.40;
   const qrFrameX = (w - qrFrameSize) / 2;
-  const qrFrameCenterY = cardY + cardH * 0.555;
+  const qrFrameCenterY = cardY + cardH * 0.555 + qrShiftY;
   const qrFrameY = qrFrameCenterY - qrFrameSize / 2;
   const qrFrameRadius = w * 0.050; // 15px on 300px
 

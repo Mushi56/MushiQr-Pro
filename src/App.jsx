@@ -1365,7 +1365,15 @@ export default function App() {
       if (tpl.preset.eyeStyle) setEyeStyle(tpl.preset.eyeStyle);
       if (tpl.preset.eyeColor) setEyeColor(tpl.preset.eyeColor);
       if (tpl.preset.eyeOuterColor) setEyeOuterColor(tpl.preset.eyeOuterColor);
-      if (tpl.preset.bgTransparent !== undefined) setBgTransparent(tpl.preset.bgTransparent);
+      if (tpl.preset.logoBgColor !== undefined) {
+        if (tpl.preset.logoBgColor) {
+          setLogoBackground(true);
+          setLogoBgColor(tpl.preset.logoBgColor);
+        } else {
+          setLogoBackground(false);
+        }
+      }
+      if (tpl.preset.logoBgShape) setLogoBgShape(tpl.preset.logoBgShape);
       if (tpl.preset.logo) {
         applyLogoBySlug(tpl.preset.logo);
       } else {
@@ -4419,6 +4427,19 @@ export default function App() {
                         setLogoRotation(0);
                         setLogoPosX(0.5);
                         setLogoPosY(0.5);
+                        const foundPreset = LOGO_PRESETS.find(p => p.slug === l.slug || p.url === l.src);
+                        const isPreStyled = foundPreset?.hasContainer === true;
+                        
+                        // If pre-styled iOS icon, use border radius crop with 0 padding; if transparent glyph, use clean white squircle background
+                        if (isPreStyled) {
+                          setLogoBackground(false);
+                          setLogoPadding(0);
+                        } else {
+                          setLogoBackground(true);
+                          setLogoBgColor('#FFFFFF');
+                          setLogoBgShape('rounded');
+                          setLogoPadding(8);
+                        }
                         startEditing('logo', 'size'); 
                       }} 
                       onLogoRemove={() => { 
@@ -4426,6 +4447,7 @@ export default function App() {
                         setLogoWidth(0.18);
                         setLogoHeight(0.18);
                         setLogoRotation(0);
+                        setLogoBackground(false);
                         if (logoPopup) cancelEditing(); 
                       }} 
                     />

@@ -73,7 +73,7 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
     heightRatio:    1.0,
     qrSize: 0.35,
     qrX:    0.50,
-    qrY:    0.555,
+    qrY:    0.601, // Shifted down 50px relative to 1080px (0.555 + 50/1080)
     defaultHeadline: tpl.headline,
     defaultHandle:   tpl.subtitle,
     headline:  tpl.headline,

@@ -3,6 +3,7 @@ import { Heart } from 'lucide-react';
 import { drawTemplateBackground, drawVCardTemplate } from './TemplateRenderer';
 import { generateQRMatrix, renderQR } from '../../utils/qrEngine';
 import { getTemplateStylingPreset } from '../../data/qrTemplates/templateStylingConfig';
+import { LOGO_PRESETS } from '../../data/logoPresets';
 
 const isVCard = (t) => t?.styleFamily === 'vcard';
 
@@ -20,6 +21,13 @@ export const TemplateCard = React.memo(function TemplateCard({
 }) {
   const canvasRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [renderTick, setRenderTick] = useState(0);
+
+  useEffect(() => {
+    const handleLoaded = () => setRenderTick(t => t + 1);
+    window.addEventListener('qr-template-loaded', handleLoaded);
+    return () => window.removeEventListener('qr-template-loaded', handleLoaded);
+  }, []);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -87,6 +95,19 @@ export const TemplateCard = React.memo(function TemplateCard({
         const qrTempCanvas = document.createElement('canvas');
         qrTempCanvas.width  = 160;
         qrTempCanvas.height = 160;
+        
+        let logoImageObj = null;
+        if (stylePreset?.logo) {
+          const foundLogo = LOGO_PRESETS.find(p => p.slug === stylePreset.logo);
+          if (foundLogo) {
+            const lImg = new Image();
+            lImg.src = foundLogo.url;
+            if (lImg.complete && lImg.naturalWidth !== 0) {
+              logoImageObj = lImg;
+            }
+          }
+        }
+
         renderQR(qrTempCanvas, {
           ...activeMatrix,
           size: 160,
@@ -98,6 +119,13 @@ export const TemplateCard = React.memo(function TemplateCard({
           eyeColor: stylePreset?.eyeColor || stylePreset?.qrColor || '#1877F2',
           eyeOuterColor: stylePreset?.eyeOuterColor || stylePreset?.qrColor || '#1877F2',
           syncEyes: true,
+          logoImage: logoImageObj,
+          logoWidth: 0.20,
+          logoHeight: 0.20,
+          logoBackground: Boolean(stylePreset?.logoBgColor),
+          logoBgColor: stylePreset?.logoBgColor || '#FFFFFF',
+          logoBgShape: stylePreset?.logoBgShape || 'rounded',
+          logoPadding: 6,
           quietZone: 0
         });
         ctx.save();
@@ -112,7 +140,7 @@ export const TemplateCard = React.memo(function TemplateCard({
         ctx.restore();
       }
     }
-  }, [template, headlineText, handleText]);
+  }, [template, headlineText, handleText, renderTick]);
 
   const vcardCard = isVCard(template);
 

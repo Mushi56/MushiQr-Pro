@@ -1,5 +1,6 @@
 // src/data/qrTemplates/templateStylingConfig.js
 // Custom tailored eye styles, dot styles, and brand platform colors for all QR templates
+// Note: Center logos removed in favor of top icon badge above headline text
 
 import { DOT_STYLES, EYE_STYLES } from '../../utils/qrEngine';
 
@@ -17,363 +18,551 @@ export const TEMPLATE_STYLING_MAP = {
     dotStyle: DOT_STYLES.FLUID,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#1877F2',
-    eyeOuterColor: '#0d47a1'
+    eyeOuterColor: '#0d47a1',
+    logo: null
   },
   'threads': {
     qrColor: '#2b2b2b',
     dotStyle: DOT_STYLES.DOTS,
     eyeStyle: EYE_STYLES.CIRCLE,
     eyeColor: '#2b2b2b',
-    eyeOuterColor: '#4a4a4a'
+    eyeOuterColor: '#4a4a4a',
+    logo: null
   },
   'x': {
     qrColor: '#24292e',
     dotStyle: DOT_STYLES.HEXAGON,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#24292e',
-    eyeOuterColor: '#333333'
+    eyeOuterColor: '#333333',
+    logo: null
+  },
+  'twitter': {
+    qrColor: '#1DA1F2',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#1DA1F2',
+    eyeOuterColor: '#0c85d0',
+    logo: null
   },
   'youtube': {
     qrColor: '#FF0000',
     dotStyle: DOT_STYLES.ROUNDED,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#FF0000',
-    eyeOuterColor: '#b31217'
+    eyeOuterColor: '#b31217',
+    logo: null
   },
   'tiktok': {
     qrColor: '#25F4EE',
     dotStyle: DOT_STYLES.STAR,
     eyeStyle: EYE_STYLES.CIRCLE,
     eyeColor: '#FE2C55',
-    eyeOuterColor: '#25F4EE'
+    eyeOuterColor: '#25F4EE',
+    logo: null
   },
   'linkedin': {
     qrColor: '#0A66C2',
     dotStyle: DOT_STYLES.OCTAGON,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#0A66C2',
-    eyeOuterColor: '#004182'
+    eyeOuterColor: '#004182',
+    logo: null
   },
   'reddit': {
     qrColor: '#FF4500',
     dotStyle: DOT_STYLES.DOTS,
     eyeStyle: EYE_STYLES.CIRCLE,
     eyeColor: '#FF4500',
-    eyeOuterColor: '#ad3b00'
+    eyeOuterColor: '#ad3b00',
+    logo: null
   },
   'discord': {
     qrColor: '#5865F2',
     dotStyle: DOT_STYLES.FLUID,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#5865F2',
-    eyeOuterColor: '#404EED'
+    eyeOuterColor: '#404EED',
+    logo: null
   },
   'spotify': {
     qrColor: '#1DB954',
-    dotStyle: DOT_STYLES.DOTS,
+    dotStyle: DOT_STYLES.CAPSULE,
     eyeStyle: EYE_STYLES.CIRCLE,
     eyeColor: '#1DB954',
-    eyeOuterColor: '#145c33'
+    eyeOuterColor: '#12833a',
+    logo: null
   },
   'snapchat': {
-    qrColor: '#E6DC00',
-    dotStyle: DOT_STYLES.STAR,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#1a1a1a',
-    eyeOuterColor: '#E6DC00'
+    qrColor: '#111111',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#111111',
+    eyeOuterColor: '#333333',
+    logo: null
   },
   'pinterest': {
-    qrColor: '#E60023',
-    dotStyle: DOT_STYLES.DOTS,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#E60023',
-    eyeOuterColor: '#ad081b'
+    qrColor: '#BD081C',
+    dotStyle: DOT_STYLES.FLOWER,
+    eyeStyle: EYE_STYLES.FLOWER,
+    eyeColor: '#BD081C',
+    eyeOuterColor: '#7a0512',
+    logo: null
   },
   'github': {
-    qrColor: '#24292e',
+    qrColor: '#24292F',
     dotStyle: DOT_STYLES.HEXAGON,
     eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#24292e',
-    eyeOuterColor: '#0d1117'
+    eyeColor: '#24292F',
+    eyeOuterColor: '#1b1f23',
+    logo: null
   },
   'telegram': {
     qrColor: '#229ED9',
     dotStyle: DOT_STYLES.FLUID,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#229ED9',
-    eyeOuterColor: '#1c5f8a'
+    eyeOuterColor: '#1c5f8a',
+    logo: null
   },
   'twitch': {
     qrColor: '#9146FF',
     dotStyle: DOT_STYLES.HEXAGON,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#9146FF',
-    eyeOuterColor: '#6441A5'
+    eyeOuterColor: '#6441A5',
+    logo: null
   },
   'vimeo': {
     qrColor: '#1AB7EA',
     dotStyle: DOT_STYLES.ROUNDED,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#1AB7EA',
-    eyeOuterColor: '#007799'
+    eyeOuterColor: '#007799',
+    logo: null
   },
   'medium': {
     qrColor: '#02B875',
     dotStyle: DOT_STYLES.DOTS,
     eyeStyle: EYE_STYLES.CIRCLE,
     eyeColor: '#02B875',
-    eyeOuterColor: '#0f2f24'
+    eyeOuterColor: '#0f2f24',
+    logo: null
   },
   'wechat': {
     qrColor: '#07C160',
     dotStyle: DOT_STYLES.FLUID,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#07C160',
-    eyeOuterColor: '#0a5c26'
+    eyeOuterColor: '#0a5c26',
+    logo: null
   },
   'skype': {
     qrColor: '#00AFF0',
     dotStyle: DOT_STYLES.DOTS,
     eyeStyle: EYE_STYLES.CIRCLE,
     eyeColor: '#00AFF0',
-    eyeOuterColor: '#0078D4'
+    eyeOuterColor: '#0078D4',
+    logo: null
   },
   'zoom': {
     qrColor: '#2D8CFF',
     dotStyle: DOT_STYLES.ROUNDED,
     eyeStyle: EYE_STYLES.ROUNDED,
     eyeColor: '#2D8CFF',
-    eyeOuterColor: '#0b5cad'
+    eyeOuterColor: '#0b5cad',
+    logo: null
   },
   'slack': {
     qrColor: '#4A154B',
     dotStyle: DOT_STYLES.OCTAGON,
-    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.TRIANGLE,
     eyeColor: '#ECB22E',
-    eyeOuterColor: '#4A154B'
+    eyeOuterColor: '#4A154B',
+    logo: null
   },
-
-  // ── Business Templates ──
-  'google': {
-    qrColor: '#4285F4',
+  'behance': {
+    qrColor: '#1769FF',
+    dotStyle: DOT_STYLES.SPARKLE,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#1769FF',
+    eyeOuterColor: '#0047cc',
+    logo: null
+  },
+  'dribbble': {
+    qrColor: '#EA4C89',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.CIRCLE,
+    eyeColor: '#EA4C89',
+    eyeOuterColor: '#b5235d',
+    logo: null
+  },
+  'soundcloud': {
+    qrColor: '#FF5500',
+    dotStyle: DOT_STYLES.CAPSULE,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#FF5500',
+    eyeOuterColor: '#cc4400',
+    logo: null
+  },
+  'patreon': {
+    qrColor: '#FF424D',
+    dotStyle: DOT_STYLES.DOTS,
+    eyeStyle: EYE_STYLES.CIRCLE,
+    eyeColor: '#FF424D',
+    eyeOuterColor: '#052D49',
+    logo: null
+  },
+  'etsy': {
+    qrColor: '#F16521',
+    dotStyle: DOT_STYLES.FLOWER,
+    eyeStyle: EYE_STYLES.FLOWER,
+    eyeColor: '#F16521',
+    eyeOuterColor: '#b84409',
+    logo: null
+  },
+  'amazon': {
+    qrColor: '#FF9900',
     dotStyle: DOT_STYLES.ROUNDED,
     eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#EA4335',
-    eyeOuterColor: '#4285F4'
+    eyeColor: '#FF9900',
+    eyeOuterColor: '#146eb4',
+    logo: null
   },
-  'website': {
-    qrColor: '#0f766e',
+  'shopify': {
+    qrColor: '#96BF48',
     dotStyle: DOT_STYLES.HEXAGON,
     eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#2dd4bf',
-    eyeOuterColor: '#0f766e'
+    eyeColor: '#96BF48',
+    eyeOuterColor: '#5c7929',
+    logo: null
   },
-  'yelp': {
-    qrColor: '#D32323',
+  'apple-music': {
+    qrColor: '#FC3C44',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#FC3C44',
+    eyeOuterColor: '#a11017',
+    logo: null
+  },
+  'whatsapp-channel': {
+    qrColor: '#25D366',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#25D366',
+    eyeOuterColor: '#075E54',
+    logo: null
+  },
+  'whatsapp': {
+    qrColor: '#25D366',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#25D366',
+    eyeOuterColor: '#075E54',
+    logo: null
+  },
+  'messenger': {
+    qrColor: '#0084FF',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#0084FF',
+    eyeOuterColor: '#0055b3',
+    logo: null
+  },
+  'instagram': {
+    qrColor: '#E4405F',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#E4405F',
+    eyeOuterColor: '#833AB4',
+    logo: null
+  },
+
+  // ── Business, Review & Utility Templates ──
+  'google-review': {
+    qrColor: '#4285F4',
     dotStyle: DOT_STYLES.STAR,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#D32323',
-    eyeOuterColor: '#FF6F61'
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#EA4335',
+    eyeOuterColor: '#4285F4',
+    logo: null
+  },
+  'google': {
+    qrColor: '#4285F4',
+    dotStyle: DOT_STYLES.STAR,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#EA4335',
+    eyeOuterColor: '#4285F4',
+    logo: null
+  },
+  'google-drive': {
+    qrColor: '#0F9D58',
+    dotStyle: DOT_STYLES.HEXAGON,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#4285F4',
+    eyeOuterColor: '#0F9D58',
+    logo: null
+  },
+  'trustpilot-review': {
+    qrColor: '#00B67A',
+    dotStyle: DOT_STYLES.STAR,
+    eyeStyle: EYE_STYLES.TRIANGLE,
+    eyeColor: '#00B67A',
+    eyeOuterColor: '#005a3c',
+    logo: null
   },
   'tripadvisor': {
     qrColor: '#34E0A1',
     dotStyle: DOT_STYLES.DOTS,
     eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#00AF87',
-    eyeOuterColor: '#004F32'
+    eyeColor: '#00AA6C',
+    eyeOuterColor: '#004f32',
+    logo: null
   },
-  'trustpilot': {
-    qrColor: '#00B67A',
+  'yelp': {
+    qrColor: '#FF1A1A',
     dotStyle: DOT_STYLES.STAR,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#00B67A',
-    eyeOuterColor: '#005138'
-  },
-  'apple-store': {
-    qrColor: '#0071e3',
-    dotStyle: DOT_STYLES.ROUNDED,
     eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#0071e3',
-    eyeOuterColor: '#003e8a'
+    eyeColor: '#FF1A1A',
+    eyeOuterColor: '#af0606',
+    logo: null
   },
-  'play-store': {
-    qrColor: '#01875f',
+  'bitcoin': {
+    qrColor: '#F7931A',
     dotStyle: DOT_STYLES.HEXAGON,
-    eyeStyle: EYE_STYLES.TRIANGLE, // pillow
-    eyeColor: '#01875f',
-    eyeOuterColor: '#004d36'
-  },
-  'portfolio': {
-    qrColor: '#7c3aed',
-    dotStyle: DOT_STYLES.FLUID,
-    eyeStyle: EYE_STYLES.FLOWER,
-    eyeColor: '#a78bfa',
-    eyeOuterColor: '#7c3aed'
-  },
-
-  // ── Communication Templates ──
-  'whatsapp': {
-    qrColor: '#25D366',
-    dotStyle: DOT_STYLES.DOTS,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#25D366',
-    eyeOuterColor: '#075E54'
-  },
-  'message': {
-    qrColor: '#0b93f6',
-    dotStyle: DOT_STYLES.FLUID,
     eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#4CD964',
-    eyeOuterColor: '#0b93f6'
+    eyeColor: '#F7931A',
+    eyeOuterColor: '#8a4b00',
+    logo: null
   },
-  'contact': {
-    qrColor: '#11998e',
-    dotStyle: DOT_STYLES.HEXAGON,
-    eyeStyle: EYE_STYLES.TRIANGLE, // pillow
-    eyeColor: '#38ef7d',
-    eyeOuterColor: '#11998e'
-  },
-  'email': {
-    qrColor: '#ea4335',
-    dotStyle: DOT_STYLES.ROUNDED,
-    eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#ea4335',
-    eyeOuterColor: '#b31217'
-  },
-  'call': {
-    qrColor: '#10b981',
-    dotStyle: DOT_STYLES.DOTS,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#10b981',
-    eyeOuterColor: '#065f46'
-  },
-
-  // ── Marketing Templates ──
-  'coupon': {
-    qrColor: '#dc2626',
-    dotStyle: DOT_STYLES.STAR,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#f97373',
-    eyeOuterColor: '#dc2626'
-  },
-  'feedback': {
-    qrColor: '#d97706',
+  'crypto': {
+    qrColor: '#627EEA',
     dotStyle: DOT_STYLES.OCTAGON,
-    eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#fbbf24',
-    eyeOuterColor: '#b45309'
+    eyeStyle: EYE_STYLES.TRIANGLE,
+    eyeColor: '#627EEA',
+    eyeOuterColor: '#2b3f8c',
+    logo: null
   },
-  'video': {
-    qrColor: '#e11d48',
+  'paypal': {
+    qrColor: '#0079C1',
     dotStyle: DOT_STYLES.FLUID,
-    eyeStyle: EYE_STYLES.TRIANGLE, // pillow
-    eyeColor: '#fb7185',
-    eyeOuterColor: '#9f1239'
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#00457C',
+    eyeOuterColor: '#0079C1',
+    logo: null
+  },
+  'cash-app': {
+    qrColor: '#00D632',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#00D632',
+    eyeOuterColor: '#008f21',
+    logo: null
+  },
+  'venmo': {
+    qrColor: '#008CFF',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#008CFF',
+    eyeOuterColor: '#005cb3',
+    logo: null
   },
   'menu': {
-    qrColor: '#c2410c',
-    dotStyle: DOT_STYLES.HEXAGON,
-    eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#fb923c',
-    eyeOuterColor: '#9a3412'
-  },
-  'sale': {
-    qrColor: '#b91c1c',
-    dotStyle: DOT_STYLES.STAR,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#ef4444',
-    eyeOuterColor: '#7f1d1d'
-  },
-  'promo': {
-    qrColor: '#4f46e5',
-    dotStyle: DOT_STYLES.FLUID,
-    eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#818cf8',
-    eyeOuterColor: '#3730a3'
-  },
-  'tip': {
-    qrColor: '#059669',
-    dotStyle: DOT_STYLES.DOTS,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#34d399',
-    eyeOuterColor: '#065f46'
-  },
-  'loyalty': {
-    qrColor: '#d97706',
-    dotStyle: DOT_STYLES.OCTAGON,
-    eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#fcd34d',
-    eyeOuterColor: '#b45309'
-  },
-
-  // ── Utility Templates ──
-  'google-drive': {
-    qrColor: '#1a73e8',
+    qrColor: '#FF5722',
     dotStyle: DOT_STYLES.ROUNDED,
     eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#34A853',
-    eyeOuterColor: '#1a73e8'
+    eyeColor: '#FF5722',
+    eyeOuterColor: '#b32d00',
+    logo: null
   },
-  'wifi': {
-    qrColor: '#1363DF',
-    dotStyle: DOT_STYLES.DOTS,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#47B5FF',
-    eyeOuterColor: '#06283D'
+  'digital-menu': {
+    qrColor: '#FF9800',
+    dotStyle: DOT_STYLES.FLOWER,
+    eyeStyle: EYE_STYLES.FLOWER,
+    eyeColor: '#FF9800',
+    eyeOuterColor: '#e65100',
+    logo: null
   },
-  'location': {
-    qrColor: '#ea4335',
-    dotStyle: DOT_STYLES.HEXAGON,
-    eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#f87171',
-    eyeOuterColor: '#991b1b'
-  },
-  'event': {
-    qrColor: '#8b5cf6',
-    dotStyle: DOT_STYLES.STAR,
-    eyeStyle: EYE_STYLES.CIRCLE,
-    eyeColor: '#c4b5fd',
-    eyeOuterColor: '#6d28d9'
-  },
-  'calendar': {
-    qrColor: '#2563eb',
+  'restaurant': {
+    qrColor: '#E64A19',
     dotStyle: DOT_STYLES.ROUNDED,
     eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#60a5fa',
-    eyeOuterColor: '#1e40af'
-  },
-  'pdf': {
-    qrColor: '#dc2626',
-    dotStyle: DOT_STYLES.OCTAGON,
-    eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#f87171',
-    eyeOuterColor: '#b91c1c'
-  },
-  'app-download': {
-    qrColor: '#0284c7',
-    dotStyle: DOT_STYLES.FLUID,
-    eyeStyle: EYE_STYLES.ROUNDED,
-    eyeColor: '#38bdf8',
-    eyeOuterColor: '#0369a1'
+    eyeColor: '#E64A19',
+    eyeOuterColor: '#8d1d00',
+    logo: null
   },
   'booking': {
-    qrColor: '#d4af37',
-    dotStyle: DOT_STYLES.HEXAGON,
-    eyeStyle: EYE_STYLES.TRIANGLE, // pillow
-    eyeColor: '#d4af37',
-    eyeOuterColor: '#1e3a5f'
+    qrColor: '#003580',
+    dotStyle: DOT_STYLES.DOTS,
+    eyeStyle: EYE_STYLES.CIRCLE,
+    eyeColor: '#003580',
+    eyeOuterColor: '#00224f',
+    logo: null
+  },
+  'reservation': {
+    qrColor: '#00B0FF',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#00B0FF',
+    eyeOuterColor: '#007bb3',
+    logo: null
+  },
+  'event': {
+    qrColor: '#7C4DFF',
+    dotStyle: DOT_STYLES.SPARKLE,
+    eyeStyle: EYE_STYLES.TRIANGLE,
+    eyeColor: '#7C4DFF',
+    eyeOuterColor: '#4a148c',
+    logo: null
   },
   'ticket': {
-    qrColor: '#7c3aed',
+    qrColor: '#FF6D00',
+    dotStyle: DOT_STYLES.OCTAGON,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#FF6D00',
+    eyeOuterColor: '#b34700',
+    logo: null
+  },
+  'movie': {
+    qrColor: '#E91E63',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#E91E63',
+    eyeOuterColor: '#880e4f',
+    logo: null
+  },
+  'download-app': {
+    qrColor: '#00BCD4',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#00BCD4',
+    eyeOuterColor: '#006064',
+    logo: null
+  },
+  'app': {
+    qrColor: '#00BCD4',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#00BCD4',
+    eyeOuterColor: '#006064',
+    logo: null
+  },
+  'survey': {
+    qrColor: '#2979FF',
+    dotStyle: DOT_STYLES.DOTS,
+    eyeStyle: EYE_STYLES.CIRCLE,
+    eyeColor: '#2979FF',
+    eyeOuterColor: '#004ecb',
+    logo: null
+  },
+  'feedback': {
+    qrColor: '#00C853',
     dotStyle: DOT_STYLES.STAR,
-    eyeStyle: EYE_STYLES.FLOWER,
-    eyeColor: '#fbbf24',
-    eyeOuterColor: '#4c1d95'
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#00C853',
+    eyeOuterColor: '#00701a',
+    logo: null
+  },
+  'loyalty': {
+    qrColor: '#FF6D00',
+    dotStyle: DOT_STYLES.SPARKLE,
+    eyeStyle: EYE_STYLES.TRIANGLE,
+    eyeColor: '#FF6D00',
+    eyeOuterColor: '#b34700',
+    logo: null
+  },
+  'wifi': {
+    qrColor: '#2196F3',
+    dotStyle: DOT_STYLES.CAPSULE,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#2196F3',
+    eyeOuterColor: '#0b7ad1',
+    logo: null
+  },
+  'website': {
+    qrColor: '#00BCD4',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#00BCD4',
+    eyeOuterColor: '#006064',
+    logo: null
+  },
+  'url': {
+    qrColor: '#00BCD4',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#00BCD4',
+    eyeOuterColor: '#006064',
+    logo: null
+  },
+  'pdf': {
+    qrColor: '#F44336',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#F44336',
+    eyeOuterColor: '#b71c1c',
+    logo: null
+  },
+  'document': {
+    qrColor: '#607D8B',
+    dotStyle: DOT_STYLES.DOTS,
+    eyeStyle: EYE_STYLES.CIRCLE,
+    eyeColor: '#607D8B',
+    eyeOuterColor: '#263238',
+    logo: null
+  },
+  'email': {
+    qrColor: '#EA4335',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#EA4335',
+    eyeOuterColor: '#9e1b0e',
+    logo: null
+  },
+  'gmail': {
+    qrColor: '#EA4335',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#EA4335',
+    eyeOuterColor: '#9e1b0e',
+    logo: null
+  },
+  'sms': {
+    qrColor: '#4CAF50',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#4CAF50',
+    eyeOuterColor: '#1b5e20',
+    logo: null
+  },
+  'message': {
+    qrColor: '#34C759',
+    dotStyle: DOT_STYLES.FLUID,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#34C759',
+    eyeOuterColor: '#1e7b34',
+    logo: null
+  },
+  'contact': {
+    qrColor: '#FF9800',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#FF9800',
+    eyeOuterColor: '#e65100',
+    logo: null
+  },
+  'vcard': {
+    qrColor: '#FFA36C',
+    dotStyle: DOT_STYLES.ROUNDED,
+    eyeStyle: EYE_STYLES.ROUNDED,
+    eyeColor: '#FFA36C',
+    eyeOuterColor: '#d96c2f',
+    logo: null
   }
 };
 
 /**
- * Resolves styling preset for a template
+ * Returns complete styling preset for a template
  */
 export function getTemplateStylingPreset(template) {
   if (!template) return null;
@@ -384,7 +573,8 @@ export function getTemplateStylingPreset(template) {
       qrColor: template.accent || '#FFA36C',
       bgColor: '#FFFFFF',
       dotStyle: DOT_STYLES.ROUNDED,
-      eyeStyle: EYE_STYLES.ROUNDED
+      eyeStyle: EYE_STYLES.ROUNDED,
+      logo: null
     };
   }
 
@@ -398,7 +588,8 @@ export function getTemplateStylingPreset(template) {
       dotStyle: custom.dotStyle,
       eyeStyle: custom.eyeStyle,
       eyeColor: custom.eyeColor || custom.qrColor,
-      eyeOuterColor: custom.eyeOuterColor || custom.qrColor
+      eyeOuterColor: custom.eyeOuterColor || custom.qrColor,
+      logo: null
     };
   }
 
@@ -413,6 +604,7 @@ export function getTemplateStylingPreset(template) {
     dotStyle: fallbackDot,
     eyeStyle: fallbackEye,
     eyeColor: fallbackColor,
-    eyeOuterColor: fallbackColor
+    eyeOuterColor: fallbackColor,
+    logo: null
   };
 }
