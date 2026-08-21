@@ -1023,6 +1023,33 @@ export function drawFrameTemplate(ctx, w, h, template, options = {}) {
     ctx.font = `800 ${Math.round(w * 0.028)}px 'Inter', sans-serif`;
     ctx.fillText(labelText, 0, 0);
     ctx.restore();
+  } else if (labelType === 'script') {
+    // ── Script / Neon Callout typography label ─────────────────────────────
+    const scriptY = frameY + frameHeight + h * 0.045;
+    ctx.save();
+    ctx.font = `700 italic ${Math.round(w * 0.042)}px 'Outfit', 'Montserrat', 'Inter', cursive, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Ambient glow for neon/script text
+    ctx.shadowColor = accent || '#00eaff';
+    ctx.shadowBlur = w * 0.025;
+    ctx.fillStyle = labelFg || accent || '#ffffff';
+    ctx.fillText(labelText, centerX, scriptY);
+    ctx.restore();
+  } else if (labelType !== 'none') {
+    // ── Fallback for any other labelType: elegant pill badge ───────────────
+    const pillW = frameWidth * 0.64;
+    const pillH = frameHeight * 0.16;
+    const pillX = centerX - pillW / 2;
+    const pillY = frameY + frameHeight - pillH * 0.75;
+    ctx.fillStyle = bgBadgeFill;
+    ctx.shadowColor = 'rgba(0,0,0,0.18)';
+    ctx.shadowBlur = w * 0.02;
+    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, pillH / 2);
+    ctx.fill();
+    ctx.fillStyle = fgBadgeText;
+    ctx.fillText(labelText, centerX, pillY + pillH / 2);
   }
 
     ctx.restore();

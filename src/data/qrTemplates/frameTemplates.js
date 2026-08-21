@@ -985,16 +985,18 @@ export const FRAME_TEMPLATES = [
     "name": "Deep Forest",
     "category": "Scan Me Frames",
     "styleFamily": "frame",
-    "shape": "blob",
+    "shape": "round",
     "labelType": "tag",
     "labelText": "SCAN ME",
-    "background": "linear-gradient(150deg,#0e3b24,#123f2a)",
-    "border": null,
-    "labelBg": "#123f2a",
+    "background": "linear-gradient(150deg, #0b2e1a 0%, #155724 50%, #28a745 100%)",
+    "border": "1px solid rgba(40, 167, 69, 0.4)",
+    "labelBg": "#0e3b24",
     "labelFg": "#ffffff",
-    "qrCard": "#ffffff",
-    "accent": "#123f2a",
-    "extra": [],
+    "qrCard": "#e8f5e9",
+    "accent": "#28a745",
+    "extra": [
+      "glow"
+    ],
     "qrType": "url",
     "fields": [
       {
@@ -1005,8 +1007,8 @@ export const FRAME_TEMPLATES = [
       }
     ],
     "preset": {
-      "qrColor": "#123f2a",
-      "bgColor": "#FFFFFF",
+      "qrColor": "#0e3b24",
+      "bgColor": "#e8f5e9",
       "dotStyle": "rounded",
       "eyeStyle": "rounded"
     }

@@ -93,9 +93,9 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
       drawBackground(ctx, w, h, options) {
         const coords = drawFrameTemplate(ctx, w, h, tpl, options);
         if (coords) {
-          this._vcardQrBoxX    = coords.qrBoxX;
-          this._vcardQrBoxY    = coords.qrBoxY;
-          this._vcardQrBoxSize = coords.qrBoxSize;
+          this._frameQrBoxX    = coords.qrBoxX;
+          this._frameQrBoxY    = coords.qrBoxY;
+          this._frameQrBoxSize = coords.qrBoxSize;
           this.qrSize = coords.qrBoxSize / w;
           this.qrX    = (coords.qrBoxX + coords.qrBoxSize / 2) / w;
           this.qrY    = (coords.qrBoxY + coords.qrBoxSize / 2) / h;

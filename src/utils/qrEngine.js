@@ -640,6 +640,15 @@ export function renderQR(canvas, options) {
       const inner   = boxSize - margin * 2;
       ctx.translate(boxX + margin, boxY + margin);
       ctx.scale(inner / w, inner / w);
+    } else if (options.template.styleFamily === 'frame' && options.template._frameQrBoxSize) {
+      // ── Scan Me Frame: use exact pixel coords stored by drawFrameTemplate ──
+      const boxX    = options.template._frameQrBoxX;
+      const boxY    = options.template._frameQrBoxY;
+      const boxSize = options.template._frameQrBoxSize;
+      const margin  = boxSize * 0.06; // 6% inner padding
+      const inner   = boxSize - margin * 2;
+      ctx.translate(boxX + margin, boxY + margin);
+      ctx.scale(inner / w, inner / w);
     } else if (options.template._stdQrBoxSize) {
       // ── Standard: use exact pixel coords from drawTemplateBackground ────────
       const boxX    = options.template._stdQrBoxX;
