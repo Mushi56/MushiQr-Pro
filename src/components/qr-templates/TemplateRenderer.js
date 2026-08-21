@@ -184,15 +184,16 @@ function drawRoundedRect(ctx, x, y, w, h, r) {
 }
 
 /**
- * Draws background decorative SVG shapes (from brand style 5 templates)
+ * Draws background decorative SVG shapes (from brand style 5 and network style templates)
  */
 function drawBgShapes(ctx, w, h, bgShapesSvg) {
   if (!bgShapesSvg) return;
-  const fullSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">${bgShapesSvg}</svg>`;
+  const fullSvg = bgShapesSvg.startsWith('<svg') 
+    ? bgShapesSvg 
+    : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">${bgShapesSvg}</svg>`;
   const img = getSvgImage(fullSvg);
   if (img && img.complete && img.naturalWidth !== 0) {
     ctx.save();
-    ctx.filter = `blur(${Math.round(w * 0.008)}px)`;
     ctx.drawImage(img, 0, 0, w, h);
     ctx.restore();
   }
@@ -210,6 +211,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.save();
 
   const isBrandStyle = template.styleFamily === 'brand' || Boolean(template.bgShapes);
+  const isNetworkStyle = template.styleFamily === 'network' || Boolean(template.netSvg);
   const typography = getBrandTypography(template.id, template.category);
 
   // 1. Outer Background Gradient
@@ -220,8 +222,10 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   }
   ctx.fillRect(0, 0, w, h);
 
-  // 2. Ambient background decorative glow or SVG shapes
-  if (isBrandStyle && template.bgShapes) {
+  // 2. Ambient background decorative glow, network web SVG, or SVG shapes
+  if (isNetworkStyle && template.netSvg) {
+    drawBgShapes(ctx, w, h, template.netSvg);
+  } else if (isBrandStyle && template.bgShapes) {
     drawBgShapes(ctx, w, h, template.bgShapes);
   } else {
     ctx.save();
@@ -263,56 +267,74 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.stroke();
   ctx.restore();
 
-  // 4. Platform Top Icon Slot (Original Template SVGs, shifted down 20px on standard 1080px canvas)
+  // ── Layout Geometry: Exact 12px Proportional Spacing ─────────────────────
+  // Base design scale: 300px width card -> (12 / 300) * w = 0.04 * w exact gap
+  const spacing12 = (12 / 300) * w;
+
+  // 1. Top Icon + Container
+  const containerSize = Math.round(w * 0.125);
+  const containerPad = Math.round(w * 0.016);
+  const iconSize = containerSize - containerPad * 2;
+  const containerRadius = containerSize * 0.28;
+
+  // 2. Headline Font Size & Height
+  const isBebas = typography.headlineFont.includes('Bebas');
+  const headlineFontSize = isBebas ? Math.round(w * 0.046) : Math.round(w * 0.036);
+  const letterSpacingPx = isBebas ? Math.round(w * 0.003) : Math.round(w * 0.0018);
+  const headlineApproxHeight = headlineFontSize * 0.85;
+
+  // 3. QR Frame / Holder
+  const isDarkQrFrame = template.isDarkQrFrame || false;
+  const qrFrameSize = w * 0.45;
+  const qrFrameX = (w - qrFrameSize) / 2;
+  const qrFrameRadius = w * 0.052;
+
+  // 4. Subtitle Font Size & Height
+  const subtitleFontSize = Math.round(w * 0.034);
+  const subtitleApproxHeight = subtitleFontSize * 0.85;
+
+  // Total stack height: IconContainer + Gap + Headline + Gap + QRFrame + Gap + Subtitle
+  const totalStackHeight = containerSize + spacing12 + headlineApproxHeight + spacing12 + qrFrameSize + spacing12 + subtitleApproxHeight;
+
+  // Vertically center the entire stack inside the central card
+  const stackStartY = cardY + (cardH - totalStackHeight) / 2;
+
+  // Exact positions calculated sequentially with spacing12
+  const containerY = stackStartY;
+  const containerX = (w - containerSize) / 2;
+  const iconX = (w - iconSize) / 2;
+  const iconY = containerY + containerPad;
+
+  const headlineTopY = containerY + containerSize + spacing12;
+  const headlineCenterY = headlineTopY + headlineApproxHeight / 2;
+
+  const qrFrameY = headlineTopY + headlineApproxHeight + spacing12;
+
+  const subtitleTopY = qrFrameY + qrFrameSize + spacing12;
+  const subtitleY = subtitleTopY + subtitleApproxHeight / 2;
+
+  // ── 4. Platform Top Icon Slot (with rounded corner container) ───────────────
   if (template.svg) {
     const iconImg = getSvgImage(template.svg);
     if (iconImg && iconImg.complete && iconImg.naturalWidth !== 0) {
-      const iconShiftY = (20 / 1080) * w;
-      const iconSize = w * 0.075;
-      const iconX = (w - iconSize) / 2;
-      const iconY = cardY + cardH * 0.115 - iconSize / 2 + iconShiftY;
+      ctx.save();
+      ctx.fillStyle = isLightBackground(template.background) 
+        ? 'rgba(0, 0, 0, 0.08)' 
+        : 'rgba(255, 255, 255, 0.15)';
+      drawRoundedRect(ctx, containerX, containerY, containerSize, containerSize, containerRadius);
+      ctx.fill();
+      ctx.restore();
+
       ctx.drawImage(iconImg, iconX, iconY, iconSize, iconSize);
     }
   }
 
-  // 5. Headline Text & Matching Glassy Container (Perfect Mathematical Centering, shifted down 50px on standard 1080px canvas)
+  // ── 5. Headline Text (Exact Spacing) ────────────────────────────────────────
   const headlineText = (options.templateHeadline || template.headline || '').toUpperCase();
-  const headlineShiftY = (50 / 1080) * w;
-  const headlineCenterY = cardY + cardH * 0.245 + headlineShiftY;
 
   ctx.save();
-  const isBebas = typography.headlineFont.includes('Bebas');
-  const headlineFontSize = isBebas ? Math.round(w * 0.042) : Math.round(w * 0.034);
-  const letterSpacingPx = isBebas ? Math.round(w * 0.003) : Math.round(w * 0.0018);
-  
   ctx.font = `${typography.headlineWeight} ${headlineFontSize}px ${typography.headlineFont}`;
-  
-  // Measure exact text bounds with actualBoundingBox when available
-  const textMetrics = ctx.measureText(headlineText);
-  const textWidth = textMetrics.width;
-  
-  // Vertical optical centering correction for canvas textBaseline: 'middle'
-  let opticalYOffset = 0;
-  if (textMetrics.actualBoundingBoxAscent && textMetrics.actualBoundingBoxDescent) {
-    const actualTextCenterY = (textMetrics.actualBoundingBoxAscent - textMetrics.actualBoundingBoxDescent) / 2;
-    // Optical shift to place the visual cap-height center exactly at headlineCenterY
-    opticalYOffset = (textMetrics.actualBoundingBoxAscent - textMetrics.actualBoundingBoxDescent) / 2 - (headlineFontSize * 0.35);
-  }
 
-  const badgePadX = w * 0.042;
-  const badgeHeight = Math.round(w * 0.072);
-  const badgeWidth = Math.round(textWidth + badgePadX * 2);
-  const badgeX = (w - badgeWidth) / 2;
-  const badgeY = headlineCenterY - badgeHeight / 2;
-
-  // Draw Glassy Container without stroke border
-  ctx.save();
-  ctx.fillStyle = glassyFill;
-  drawRoundedRect(ctx, badgeX, badgeY, badgeWidth, badgeHeight, badgeHeight / 2);
-  ctx.fill();
-  ctx.restore();
-
-  // Crisp High-Contrast Headline Text perfectly centered in badge
   const needsDarkText = isLightBackground(template.background);
   ctx.fillStyle = needsDarkText ? '#111111' : '#FFFFFF';
   ctx.textAlign = 'center';
@@ -321,20 +343,11 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
     ctx.letterSpacing = `${letterSpacingPx}px`;
   }
   
-  // In canvas 2D, letter-spacing shifts right slightly by half a letter-spacing unless compensated
   const letterSpacingComp = letterSpacingPx > 0 ? letterSpacingPx / 2 : 0;
-  ctx.fillText(headlineText, w * 0.5 + letterSpacingComp, badgeY + badgeHeight / 2);
+  ctx.fillText(headlineText, w * 0.5 + letterSpacingComp, headlineCenterY);
   ctx.restore();
 
-  // 6. QR Frame & QR White Box (shifted down 50px on standard 1080px canvas)
-  const qrShiftY = (50 / 1080) * w;
-  const isDarkQrFrame = template.isDarkQrFrame || false;
-  const qrFrameSize = w * 0.40;
-  const qrFrameX = (w - qrFrameSize) / 2;
-  const qrFrameCenterY = cardY + cardH * 0.555 + qrShiftY;
-  const qrFrameY = qrFrameCenterY - qrFrameSize / 2;
-  const qrFrameRadius = w * 0.050; // 15px on 300px
-
+  // ── 6. QR Frame & QR White Box (Exact Spacing) ──────────────────────────────
   // Translucent outer frame
   ctx.save();
   ctx.fillStyle = isDarkQrFrame ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)';
@@ -344,30 +357,28 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.fill();
   ctx.stroke();
 
-  // Inner QR box (uses strong contrast background color, responds directly to user-chosen bgColor/options.templateBgColor)
-  const qrBoxPadding = w * 0.0267; // 8px on 300px
+  // Inner QR box (uses strong contrast background color)
+  const qrBoxPadding = w * 0.0267;
   const qrBoxSize = qrFrameSize - qrBoxPadding * 2;
   const qrBoxX = qrFrameX + qrBoxPadding;
   const qrBoxY = qrFrameY + qrBoxPadding;
-  const qrBoxRadius = w * 0.0367; // 11px on 300px
+  const qrBoxRadius = w * 0.038;
 
   ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
   ctx.shadowBlur = w * 0.040;
   ctx.shadowOffsetY = w * 0.018;
-  // Use user-selected background color if provided, otherwise default to clean high-contrast crisp white/tint
   const holderBg = options.bgColor || options.templateBgColor || template.holderBg || '#FFFFFF';
   ctx.fillStyle = holderBg;
   drawRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, qrBoxRadius);
   ctx.fill();
   ctx.restore();
 
-  // 7. Bottom Username / Subtitle Row in Brand Typography
+  // ── 7. Bottom Username / Subtitle Row (Exact Spacing) ───────────────────────
   const subtitleText = options.templateHandleText || options.customText || template.subtitle || '';
-  const subtitleY = cardY + cardH * 0.895;
 
   ctx.save();
   ctx.fillStyle = needsDarkText ? '#111111' : '#FFFFFF';
-  ctx.font = `${typography.handleWeight} ${Math.round(w * 0.0315)}px ${typography.handleFont}`;
+  ctx.font = `${typography.handleWeight} ${subtitleFontSize}px ${typography.handleFont}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.letterSpacing = `${Math.round(w * 0.0012)}px`;

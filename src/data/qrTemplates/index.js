@@ -9,6 +9,7 @@ import { UTILITY_TEMPLATES }        from './utilityTemplates';
 import { BRAND_TEMPLATES }          from './brandTemplates';
 import { VCARD_TEMPLATES }          from './vcardTemplates';
 import { FRAME_TEMPLATES }          from './frameTemplates';
+import { NETWORK_TEMPLATES }        from './networkTemplates';
 
 export const TEMPLATE_CATEGORIES = [
   'All',
@@ -23,6 +24,7 @@ export const TEMPLATE_CATEGORIES = [
 
 export const ALL_TEMPLATES_REGISTRY = [
   ...FRAME_TEMPLATES,
+  ...NETWORK_TEMPLATES,
   ...SOCIAL_TEMPLATES,
   ...BUSINESS_TEMPLATES,
   ...COMMUNICATION_TEMPLATES,
@@ -59,6 +61,7 @@ export function searchTemplates(query = '', category = 'All') {
 
 export {
   FRAME_TEMPLATES,
+  NETWORK_TEMPLATES,
   SOCIAL_TEMPLATES,
   BUSINESS_TEMPLATES,
   COMMUNICATION_TEMPLATES,
