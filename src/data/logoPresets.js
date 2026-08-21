@@ -7,7 +7,7 @@ export const LOGO_PRESETS = [
   { slug: 'x-twitter', name: 'X (Twitter)', color: '#000000', url: '/presets/X_logo_2023.svg' },
   { slug: 'threads', name: 'Threads', color: '#000000', url: '/presets/Threads_(app)_logo.svg' },
   { slug: 'whatsapp', name: 'WhatsApp', color: '#25D366', url: '/presets/whatsapp-svgrepo-com.svg' },
-  { slug: 'youtube', name: 'YouTube', color: '#FF0000', url: '/presets/youtube.avif' }, // fallback or clean
+  { slug: 'youtube', name: 'YouTube', color: '#FF0000', url: '/presets/YouTube_full-color_icon_(2017).svg' },
   { slug: 'tiktok', name: 'TikTok', color: '#000000', url: '/presets/tiktok-logo-logo-svgrepo-com.svg' },
   { slug: 'linkedin', name: 'LinkedIn', color: '#0A66C2', url: '/presets/linkedin-1-svgrepo-com.svg' },
   { slug: 'telegram', name: 'Telegram', color: '#229ED9', url: '/presets/Telegram_logo.svg' },
