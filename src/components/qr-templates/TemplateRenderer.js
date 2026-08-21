@@ -107,24 +107,31 @@ export function getBrandTypography(templateId, category) {
   };
 }
 
-function parseLinearGradient(ctx, bgString, w, h) {
-  const grad = ctx.createLinearGradient(0, 0, w, h);
-  const colorStopRegex = /(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))\s+([0-9.]+)%/g;
-  let match;
-  let hasStops = false;
-  while ((match = colorStopRegex.exec(bgString)) !== null) {
-    hasStops = true;
-    const color = match[1];
-    const stop = parseFloat(match[2]) / 100;
-    try {
-      grad.addColorStop(Math.min(1, Math.max(0, stop)), color);
-    } catch (e) {}
+function parseBackground(ctx, bgString, x, y, w, h) {
+  if (!bgString) {
+    ctx.fillStyle = '#ffffff';
+    return;
   }
-  if (!hasStops) {
-    grad.addColorStop(0, '#111827');
-    grad.addColorStop(1, '#000000');
+  if (bgString.startsWith('linear-gradient')) {
+    const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+    const colorStopRegex = /(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))(?:\s+([0-9.]+)%)?/g;
+    let match;
+    const colors = [];
+    while ((match = colorStopRegex.exec(bgString)) !== null) {
+      colors.push({ color: match[1], stop: match[2] ? parseFloat(match[2]) / 100 : null });
+    }
+    if (colors.length > 0) {
+      colors.forEach((c, idx) => {
+        const stop = c.stop !== null ? c.stop : (colors.length > 1 ? idx / (colors.length - 1) : 0);
+        try {
+          grad.addColorStop(Math.min(1, Math.max(0, stop)), c.color);
+        } catch (e) {}
+      });
+      ctx.fillStyle = grad;
+      return;
+    }
   }
-  return grad;
+  ctx.fillStyle = bgString;
 }
 
 function isLightBackground(bgString) {
@@ -207,7 +214,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
 
   // 1. Outer Background Gradient
   if (template.background) {
-    ctx.fillStyle = parseLinearGradient(ctx, template.background, w, h);
+    parseBackground(ctx, template.background, 0, 0, w, h);
   } else {
     ctx.fillStyle = '#0f172a';
   }
@@ -785,45 +792,45 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
  */
 export function drawFrameTemplate(ctx, w, h, template, options = {}) {
   ctx.save();
+  try {
+    const shape = template.shape || 'soft';
+    const labelType = template.labelType || 'banner';
+    const labelText = (options.templateHeadline || template.labelText || 'SCAN ME').toUpperCase();
+    const labelBg = template.labelBg || '#111111';
+    const labelFg = template.labelFg || '#ffffff';
+    const accent = template.accent || '#111111';
+    const extra = template.extra || [];
 
-  const shape = template.shape || 'soft';
-  const labelType = template.labelType || 'banner';
-  const labelText = (options.templateHeadline || template.labelText || 'SCAN ME').toUpperCase();
-  const labelBg = template.labelBg || '#111111';
-  const labelFg = template.labelFg || '#ffffff';
-  const accent = template.accent || '#111111';
-  const extra = template.extra || [];
+    // Determine stage layout dimensions
+    const centerX = w / 2;
+    const centerY = h / 2;
 
-  // Determine stage layout dimensions
-  const centerX = w / 2;
-  const centerY = h / 2;
+    // Background fills and stage effects
+    const frameWidth = w * 0.72;
+    const frameHeight = h * 0.72;
+    const frameX = centerX - frameWidth / 2;
+    const frameY = centerY - frameHeight / 2 + (labelType === 'pill' || labelType === 'bubble' ? h * 0.04 : (labelType === 'banner' || labelType === 'flag' || labelType === 'tag' ? -h * 0.04 : 0));
 
-  // Background fills and stage effects
-  const frameWidth = w * 0.72;
-  const frameHeight = h * 0.72;
-  const frameX = centerX - frameWidth / 2;
-  const frameY = centerY - frameHeight / 2 + (labelType === 'pill' || labelType === 'bubble' ? h * 0.04 : (labelType === 'banner' || labelType === 'flag' || labelType === 'tag' ? -h * 0.04 : 0));
+    // Draw Frame Container with specific shapes
+    ctx.save();
 
-  // Draw Frame Container with specific shapes
-  ctx.save();
+    // Effects: Glow, Double border, Lift, Rainbow
+    if (extra.includes('glow')) {
+      ctx.shadowColor = accent;
+      ctx.shadowBlur = w * 0.08;
+    } else if (extra.includes('lift')) {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.20)';
+      ctx.shadowBlur = w * 0.04;
+      ctx.shadowOffsetX = w * 0.03;
+      ctx.shadowOffsetY = w * 0.035;
+    } else {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
+      ctx.shadowBlur = w * 0.03;
+      ctx.shadowOffsetY = w * 0.015;
+    }
 
-  // Effects: Glow, Double border, Lift, Rainbow
-  if (extra.includes('glow')) {
-    ctx.shadowColor = accent;
-    ctx.shadowBlur = w * 0.08;
-  } else if (extra.includes('lift')) {
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.20)';
-    ctx.shadowBlur = w * 0.04;
-    ctx.shadowOffsetX = w * 0.03;
-    ctx.shadowOffsetY = w * 0.035;
-  } else {
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
-    ctx.shadowBlur = w * 0.03;
-    ctx.shadowOffsetY = w * 0.015;
-  }
-
-  // Draw Frame Background (Gradient or solid)
-  parseBackground(ctx, template.background || '#ffffff', frameX, frameY, frameWidth, frameHeight);
+    // Draw Frame Background (Gradient or solid)
+    parseBackground(ctx, template.background || '#ffffff', frameX, frameY, frameWidth, frameHeight);
 
   // Path by shape
   ctx.beginPath();
@@ -1007,9 +1014,15 @@ export function drawFrameTemplate(ctx, w, h, template, options = {}) {
     ctx.restore();
   }
 
-  ctx.restore();
-  ctx.restore();
+    ctx.restore();
+    ctx.restore();
 
-  return { qrBoxX, qrBoxY, qrBoxSize };
+    return { qrBoxX, qrBoxY, qrBoxSize };
+  } catch (err) {
+    console.error('Error drawing frame template:', err);
+    ctx.restore();
+    const fallbackSize = w * 0.50;
+    return { qrBoxX: (w - fallbackSize) / 2, qrBoxY: (h - fallbackSize) / 2, qrBoxSize: fallbackSize };
+  }
 }
 
