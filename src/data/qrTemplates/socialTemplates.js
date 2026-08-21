@@ -216,10 +216,10 @@ export const SOCIAL_TEMPLATES = [
       { id: 'url', label: 'Snapchat Add Link', type: 'url', placeholder: 'https://snapchat.com/add/username' }
     ],
     preset: {
-      qrColor: '#000000',
+      qrColor: '#1a1a1a',
       bgColor: '#FFFFFF',
-      dotStyle: 'rounded',
-      eyeStyle: 'rounded'
+      dotStyle: 'star',
+      eyeStyle: 'circle'
     }
   },
   {

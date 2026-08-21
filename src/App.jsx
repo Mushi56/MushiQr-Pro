@@ -72,6 +72,7 @@ import ColorPicker from './components/ColorPicker';
 import Slider from './components/Slider';
 import Toggle from './components/Toggle';
 import LogoPresets from './components/LogoPresets';
+import { LOGO_PRESETS } from './data/logoPresets';
 import QRTypeSelector from './components/QRTypeSelector';
 import QRDataInput from './components/QRDataInput';
 import { DotStyleSelector, EyeStyleSelector } from './components/StyleSelectors';
@@ -1312,22 +1313,14 @@ export default function App() {
   const [isTemplateTextModalOpen, setIsTemplateTextModalOpen] = useState(false);
   const [templateCategory, setTemplateCategory] = useState('All');
   const applyLogoBySlug = (slug) => {
-    const LOGO_PRESETS = [
-      { slug: 'custom-icon', name: 'M Code Studio', color: '#D60036', url: '/logo.webp' },
-      { slug: 'facebook', name: 'Facebook', color: '#1877F2', url: '/presets/facebook.avif' },
-      { slug: 'whatsapp', name: 'WhatsApp', color: '#25D366', url: '/presets/whatsapp.avif' },
-      { slug: 'instagram', name: 'Instagram', color: '#E4405F', url: '/presets/instagram.avif' },
-      { slug: 'youtube', name: 'YouTube', color: '#FF0000', url: '/presets/youtube.avif' },
-      { slug: 'tiktok', name: 'TikTok', color: '#000000', url: '/presets/tiktok.avif' },
-      { slug: 'linkedin', name: 'LinkedIn', color: '#0A66C2', url: '/presets/linkedin.avif' },
-      { slug: 'twitter', name: 'Twitter', color: '#1DA1F2', url: '/presets/twitter.avif' }
-    ];
     const found = LOGO_PRESETS.find(item => item.slug === slug);
     if (found) {
       const img = new Image();
       img.onload = () => {
         setLogo({
           image: img,
+          width: 0.18,
+          height: 0.18,
           slug: found.slug,
           name: found.name,
           color: found.color,

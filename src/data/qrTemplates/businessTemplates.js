@@ -18,7 +18,7 @@ export const BUSINESS_TEMPLATES = [
       { id: 'url', label: 'Google Review / Maps Link', type: 'url', placeholder: 'https://g.page/r/yourbusiness/review' }
     ],
     preset: {
-      qrColor: '#000000',
+      qrColor: '#4285F4',
       bgColor: '#FFFFFF',
       dotStyle: 'rounded',
       eyeStyle: 'rounded'

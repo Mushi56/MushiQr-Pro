@@ -227,12 +227,23 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   const cardH = h - cardInset * 2;
   const cardRadius = w * 0.06; // 18px on 300px
 
-  const glassyFill = isBrandStyle ? 'rgba(255, 255, 255, 0.24)' : 'rgba(255, 255, 255, 0.08)';
-  const glassyStroke = isBrandStyle ? 'rgba(255, 255, 255, 0.50)' : 'rgba(255, 255, 255, 0.28)';
-  const glassyStrokeWidth = Math.max(1, w * 0.0025);
+  const isLightTpl = isLightBackground(template.background);
+  
+  // For light backgrounds (like Snapchat / Google), use contrasting dark-tinted glass + dark border
+  // For standard/dark backgrounds, use crisp translucent white glass + bright rim stroke
+  const glassyFill = isLightTpl 
+    ? 'rgba(0, 0, 0, 0.08)' 
+    : (isBrandStyle ? 'rgba(255, 255, 255, 0.24)' : 'rgba(255, 255, 255, 0.10)');
+  const glassyStroke = isLightTpl 
+    ? 'rgba(0, 0, 0, 0.22)' 
+    : (isBrandStyle ? 'rgba(255, 255, 255, 0.50)' : 'rgba(255, 255, 255, 0.32)');
+  const glassyStrokeWidth = Math.max(1.2, w * 0.003);
 
-  // Central Card Frame
+  // Central Card Frame with subtle backdrop depth
   ctx.save();
+  ctx.shadowColor = isLightTpl ? 'rgba(0, 0, 0, 0.12)' : 'rgba(0, 0, 0, 0.25)';
+  ctx.shadowBlur = w * 0.03;
+  ctx.shadowOffsetY = w * 0.01;
   ctx.fillStyle = glassyFill;
   ctx.strokeStyle = glassyStroke;
   ctx.lineWidth = glassyStrokeWidth;

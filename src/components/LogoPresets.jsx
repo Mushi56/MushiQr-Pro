@@ -3,50 +3,7 @@ import { UploadCloud, X, CheckCircle2 } from 'lucide-react';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import PaidCrownBadge from './PaidCrownBadge';
 import { usePremium } from '../services/premiumContext';
-
-const LOGO_PRESETS = [
-  { slug: 'custom-icon', name: 'M Code Studio', color: '#D60036', url: '/logo.webp' },
-  { slug: 'facebook', name: 'Facebook', color: '#1877F2', url: '/presets/facebook.avif' },
-  { slug: 'whatsapp', name: 'WhatsApp', color: '#25D366', url: '/presets/whatsapp.avif' },
-  { slug: 'instagram', name: 'Instagram', color: '#E4405F', url: '/presets/instagram.avif' },
-  { slug: 'youtube', name: 'YouTube', color: '#FF0000', url: '/presets/youtube.avif' },
-  { slug: 'tiktok', name: 'TikTok', color: '#000000', url: '/presets/tiktok.avif' },
-  { slug: 'linkedin', name: 'LinkedIn', color: '#0A66C2', url: '/presets/linkedin.avif' },
-  { slug: 'twitter', name: 'Twitter', color: '#1DA1F2', url: '/presets/twitter.avif' },
-  { slug: 'gmail', name: 'Gmail', color: '#EA4335', url: '/presets/gmail.avif' },
-  { slug: 'github', name: 'GitHub', color: '#24292F', url: '/presets/github.avif' },
-  { slug: 'spotify', name: 'Spotify', color: '#1DB954', url: '/presets/spotify.avif' },
-  { slug: 'apple', name: 'Apple', color: '#A2AAAD', url: '/presets/apple.avif' },
-  { slug: 'picsart', name: 'Picsart', color: '#00C5FF', url: '/presets/Picsart_26-07-18_11-14-07-816.avif' },
-  { slug: 'messenger', name: 'Messenger', color: '#0084FF', url: '/presets/messenger.avif' },
-  { slug: 'pinterest', name: 'Pinterest', color: '#BD081C', url: '/presets/pinterest.avif' },
-  { slug: 'reddit', name: 'Reddit', color: '#FF4500', url: '/presets/reddit.avif' },
-  { slug: 'internet', name: 'Internet', color: '#00BCD4', url: '/presets/internet.avif' },
-  { slug: 'wifi', name: 'WiFi', color: '#2196F3', url: '/presets/wifi.avif' },
-  { slug: 'id-card', name: 'ID Card', color: '#FF9800', url: '/presets/id-card.avif' },
-  { slug: 'sms', name: 'SMS', color: '#4CAF50', url: '/presets/sms.avif' },
-  { slug: 'pdf', name: 'PDF', color: '#F44336', url: '/presets/pdf.avif' },
-  { slug: 'bitcoin', name: 'Bitcoin', color: '#F7931A', url: '/presets/bitcoin.avif' },
-  { slug: 'chatting', name: 'Chatting', color: '#4CAF50', url: '/presets/chatting.avif' },
-  { slug: 'dribbble', name: 'Dribbble', color: '#EA4C89', url: '/presets/dribbble.avif' },
-  { slug: 'behance', name: 'Behance', color: '#1769FF', url: '/presets/behance.avif' },
-  { slug: 'whatsapp-1', name: 'WhatsApp Alt', color: '#25D366', url: '/presets/whatsapp (1).avif' },
-  { slug: 'gmail-1', name: 'Gmail Alt', color: '#EA4335', url: '/presets/gmail (1).avif' },
-  { slug: 'messenger-1', name: 'Messenger Alt', color: '#0084FF', url: '/presets/messenger (1).avif' },
-  { slug: 'wifi-1', name: 'WiFi Alt', color: '#2196F3', url: '/presets/wifi (1).avif' },
-  { slug: 'youtube-1', name: 'YouTube Alt', color: '#FF0000', url: '/presets/youtube (1).avif' },
-  { slug: 'google-calendar', name: 'Calendar', color: '#4285F4', url: '/presets/google-calendar.avif' },
-  { slug: 'google-maps', name: 'Maps', color: '#34A853', url: '/presets/google-maps.avif' },
-  { slug: 'google-play', name: 'Google Play', color: '#4285F4', url: '/presets/google-play.avif' },
-  { slug: 'internet-connection', name: 'Internet Conn', color: '#2196F3', url: '/presets/internet-connection.avif' },
-  { slug: 'january', name: 'January', color: '#E91E63', url: '/presets/january.avif' },
-  { slug: 'picture', name: 'Picture', color: '#9C27B0', url: '/presets/picture.avif' },
-  { slug: 'skype', name: 'Skype', color: '#00AFF0', url: '/presets/skype.avif' },
-  { slug: 'social', name: 'Social', color: '#3F51B5', url: '/presets/social.avif' },
-  { slug: 'tik-tok', name: 'TikTok Alt', color: '#000000', url: '/presets/tik-tok.avif' },
-  { slug: 'viber', name: 'Viber', color: '#7360F2', url: '/presets/viber.avif' },
-  { slug: 'vimeo', name: 'Vimeo', color: '#1AB7EA', url: '/presets/vimeo.avif' }
-];
+import { LOGO_PRESETS } from '../data/logoPresets';
 
 export default function LogoPresets({ logo, onLogoChange, onLogoRemove }) {
   const [loading, setLoading] = useState(null);
