@@ -130,7 +130,7 @@ export function TemplateGallery({
         </div>
       </div>
 
-      {/* Template Card Grid — 2 columns for vCard (landscape), 3 columns for standard square */}
+      {/* Template Card Grid — 2 columns for vCard (landscape) and Scan Me Frames, 3 columns for standard square */}
       {filteredTemplates.length > 0 ? (
         selectedCategory === 'vCard' ? (
           // Dedicated 2-per-row grid for vCard section
@@ -154,57 +154,148 @@ export function TemplateGallery({
               );
             })}
           </div>
+        ) : selectedCategory === 'Scan Me Frames' ? (
+          // Dedicated 3-per-row grid for Scan Me Frames section
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '10px'
+          }}>
+            {filteredTemplates.map(tpl => {
+              const isSelected = selectedTemplate?.id === tpl.id;
+              const isFav = favorites.includes(tpl.id);
+              return (
+                <TemplateCard
+                  key={tpl.id}
+                  template={tpl}
+                  isSelected={isSelected}
+                  onSelect={() => handleSelect(isSelected ? null : tpl)}
+                  isFavorite={isFav}
+                  onToggleFavorite={toggleFavorite}
+                />
+              );
+            })}
+          </div>
         ) : (
           // For other categories (e.g. All, Favorites, Social, Business)
           (() => {
             const vcards = filteredTemplates.filter(t => t.styleFamily === 'vcard');
-            const standards = filteredTemplates.filter(t => t.styleFamily !== 'vcard');
+            const frames = filteredTemplates.filter(t => t.styleFamily === 'frame' || t.category === 'Scan Me Frames');
+            const standards = filteredTemplates.filter(t => t.styleFamily !== 'vcard' && t.styleFamily !== 'frame' && t.category !== 'Scan Me Frames');
 
             return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {vcards.length > 0 && (
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '12px'
-                  }}>
-                    {vcards.map(tpl => {
-                      const isSelected = selectedTemplate?.id === tpl.id;
-                      const isFav = favorites.includes(tpl.id);
-                      return (
-                        <TemplateCard
-                          key={tpl.id}
-                          template={tpl}
-                          isSelected={isSelected}
-                          onSelect={() => handleSelect(isSelected ? null : tpl)}
-                          isFavorite={isFav}
-                          onToggleFavorite={toggleFavorite}
-                        />
-                      );
-                    })}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                {/* 1. Standard Square Templates */}
+                {standards.length > 0 && (
+                  <div>
+                    {selectedCategory === 'All' && (vcards.length > 0 || frames.length > 0) && (
+                      <div style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: 'var(--text-tertiary)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        marginBottom: '8px'
+                      }}>
+                        Templates
+                      </div>
+                    )}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '10px'
+                    }}>
+                      {standards.map(tpl => {
+                        const isSelected = selectedTemplate?.id === tpl.id;
+                        const isFav = favorites.includes(tpl.id);
+                        return (
+                          <TemplateCard
+                            key={tpl.id}
+                            template={tpl}
+                            isSelected={isSelected}
+                            onSelect={() => handleSelect(isSelected ? null : tpl)}
+                            isFavorite={isFav}
+                            onToggleFavorite={toggleFavorite}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 
-                {standards.length > 0 && (
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: '10px'
-                  }}>
-                    {standards.map(tpl => {
-                      const isSelected = selectedTemplate?.id === tpl.id;
-                      const isFav = favorites.includes(tpl.id);
-                      return (
-                        <TemplateCard
-                          key={tpl.id}
-                          template={tpl}
-                          isSelected={isSelected}
-                          onSelect={() => handleSelect(isSelected ? null : tpl)}
-                          isFavorite={isFav}
-                          onToggleFavorite={toggleFavorite}
-                        />
-                      );
-                    })}
+                {/* 2. Scan Me Frames Section (Separated 3-per-row) */}
+                {frames.length > 0 && (
+                  <div>
+                    {selectedCategory === 'All' && (
+                      <div style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: 'var(--text-tertiary)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        marginBottom: '8px'
+                      }}>
+                        Scan Me Frames
+                      </div>
+                    )}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '10px'
+                    }}>
+                      {frames.map(tpl => {
+                        const isSelected = selectedTemplate?.id === tpl.id;
+                        const isFav = favorites.includes(tpl.id);
+                        return (
+                          <TemplateCard
+                            key={tpl.id}
+                            template={tpl}
+                            isSelected={isSelected}
+                            onSelect={() => handleSelect(isSelected ? null : tpl)}
+                            isFavorite={isFav}
+                            onToggleFavorite={toggleFavorite}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. vCard Digital Cards Section (Separated) */}
+                {vcards.length > 0 && (
+                  <div>
+                    {selectedCategory === 'All' && (
+                      <div style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: 'var(--text-tertiary)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        marginBottom: '8px'
+                      }}>
+                        Digital vCards
+                      </div>
+                    )}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gap: '12px'
+                    }}>
+                      {vcards.map(tpl => {
+                        const isSelected = selectedTemplate?.id === tpl.id;
+                        const isFav = favorites.includes(tpl.id);
+                        return (
+                          <TemplateCard
+                            key={tpl.id}
+                            template={tpl}
+                            isSelected={isSelected}
+                            onSelect={() => handleSelect(isSelected ? null : tpl)}
+                            isFavorite={isFav}
+                            onToggleFavorite={toggleFavorite}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </div>
