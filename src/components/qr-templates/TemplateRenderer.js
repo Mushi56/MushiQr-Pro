@@ -252,23 +252,36 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
     }
   }
 
-  // 5. Headline Text & Matching Glassy Container
+  // 5. Headline Text & Matching Glassy Container (Perfect Mathematical Centering)
   const headlineText = (options.templateHeadline || template.headline || '').toUpperCase();
-  const headlineY = cardY + cardH * 0.245;
+  const headlineCenterY = cardY + cardH * 0.245;
 
   ctx.save();
-  const badgePadX = w * 0.038;
-  const badgeHeight = w * 0.068;
   const isBebas = typography.headlineFont.includes('Bebas');
   const headlineFontSize = isBebas ? Math.round(w * 0.042) : Math.round(w * 0.034);
+  const letterSpacingPx = isBebas ? Math.round(w * 0.003) : Math.round(w * 0.0018);
   
   ctx.font = `${typography.headlineWeight} ${headlineFontSize}px ${typography.headlineFont}`;
-  const textWidth = ctx.measureText(headlineText).width;
-  const badgeWidth = textWidth + badgePadX * 2;
-  const badgeX = (w - badgeWidth) / 2;
-  const badgeY = headlineY - badgeHeight / 2;
+  
+  // Measure exact text bounds with actualBoundingBox when available
+  const textMetrics = ctx.measureText(headlineText);
+  const textWidth = textMetrics.width;
+  
+  // Vertical optical centering correction for canvas textBaseline: 'middle'
+  let opticalYOffset = 0;
+  if (textMetrics.actualBoundingBoxAscent && textMetrics.actualBoundingBoxDescent) {
+    const actualTextCenterY = (textMetrics.actualBoundingBoxAscent - textMetrics.actualBoundingBoxDescent) / 2;
+    // Optical shift to place the visual cap-height center exactly at headlineCenterY
+    opticalYOffset = (textMetrics.actualBoundingBoxAscent - textMetrics.actualBoundingBoxDescent) / 2 - (headlineFontSize * 0.35);
+  }
 
-  // Draw Glassy Container with identical fill, stroke and thickness as the bigger box
+  const badgePadX = w * 0.042;
+  const badgeHeight = Math.round(w * 0.072);
+  const badgeWidth = Math.round(textWidth + badgePadX * 2);
+  const badgeX = (w - badgeWidth) / 2;
+  const badgeY = headlineCenterY - badgeHeight / 2;
+
+  // Draw Glassy Container with exact symmetry
   ctx.save();
   ctx.fillStyle = glassyFill;
   ctx.strokeStyle = glassyStroke;
@@ -278,15 +291,18 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.stroke();
   ctx.restore();
 
-  // Crisp High-Contrast Headline Text in Brand Typography
-  // Default to white text (#FFFFFF), and use dark text (#111111) only when background is light (e.g. bright yellow, light grey) where white would lack contrast
+  // Crisp High-Contrast Headline Text perfectly centered in badge
   const needsDarkText = isLightBackground(template.background);
-  
   ctx.fillStyle = needsDarkText ? '#111111' : '#FFFFFF';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.letterSpacing = isBebas ? `${Math.round(w * 0.003)}px` : `${Math.round(w * 0.0018)}px`;
-  ctx.fillText(headlineText, w * 0.5, headlineY);
+  if (typeof ctx.letterSpacing === 'string') {
+    ctx.letterSpacing = `${letterSpacingPx}px`;
+  }
+  
+  // In canvas 2D, letter-spacing shifts right slightly by half a letter-spacing unless compensated
+  const letterSpacingComp = letterSpacingPx > 0 ? letterSpacingPx / 2 : 0;
+  ctx.fillText(headlineText, w * 0.5 + letterSpacingComp, badgeY + badgeHeight / 2);
   ctx.restore();
 
   // 6. QR Frame & QR White Box
