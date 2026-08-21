@@ -115,6 +115,36 @@ function parseLinearGradient(ctx, bgString, w, h) {
   return grad;
 }
 
+function isLightBackground(bgString) {
+  if (!bgString || typeof bgString !== 'string') return false;
+  const s = bgString.toLowerCase();
+  if (s.includes('#fffc00') || s.includes('#fff') || s.includes('#e8eaed') || s.includes('#f3f4f6') || s.includes('rgb(255, 252') || s.includes('#fafafa')) {
+    return true;
+  }
+  // Check hex luminance of colors in gradient
+  const hexMatches = s.match(/#([0-9a-f]{3,6})/gi);
+  if (hexMatches && hexMatches.length > 0) {
+    let totalLum = 0;
+    let count = 0;
+    for (const h of hexMatches) {
+      let hex = h.slice(1);
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      if (hex.length === 6) {
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        totalLum += lum;
+        count++;
+      }
+    }
+    if (count > 0 && (totalLum / count) > 0.78) {
+      return true; // Light background -> needs dark text for contrast
+    }
+  }
+  return false;
+}
+
 function drawRoundedRect(ctx, x, y, w, h, r) {
   r = Math.min(r, w / 2, h / 2);
   ctx.beginPath();
@@ -249,8 +279,10 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.restore();
 
   // Crisp High-Contrast Headline Text in Brand Typography
-  const isDarkHeadline = template.isDarkHeadline || false;
-  ctx.fillStyle = isBrandStyle ? '#111111' : (isDarkHeadline ? '#000000' : '#FFFFFF');
+  // Default to white text (#FFFFFF), and use dark text (#111111) only when background is light (e.g. bright yellow, light grey) where white would lack contrast
+  const needsDarkText = isLightBackground(template.background);
+  
+  ctx.fillStyle = needsDarkText ? '#111111' : '#FFFFFF';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.letterSpacing = isBebas ? `${Math.round(w * 0.003)}px` : `${Math.round(w * 0.0018)}px`;
@@ -292,12 +324,11 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.restore();
 
   // 7. Bottom Username / Subtitle Row in Brand Typography
-  const isDarkUser = template.isDarkUser || false;
   const subtitleText = options.templateHandleText || options.customText || template.subtitle || '';
   const subtitleY = cardY + cardH * 0.895;
 
   ctx.save();
-  ctx.fillStyle = (isBrandStyle || isDarkUser) ? '#111111' : '#FFFFFF';
+  ctx.fillStyle = needsDarkText ? '#111111' : '#FFFFFF';
   ctx.font = `${typography.handleWeight} ${Math.round(w * 0.0315)}px ${typography.handleFont}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
