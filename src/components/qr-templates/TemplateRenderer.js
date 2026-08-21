@@ -298,14 +298,11 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   const badgeX = (w - badgeWidth) / 2;
   const badgeY = headlineCenterY - badgeHeight / 2;
 
-  // Draw Glassy Container with exact symmetry
+  // Draw Glassy Container without stroke border
   ctx.save();
   ctx.fillStyle = glassyFill;
-  ctx.strokeStyle = glassyStroke;
-  ctx.lineWidth = glassyStrokeWidth;
   drawRoundedRect(ctx, badgeX, badgeY, badgeWidth, badgeHeight, badgeHeight / 2);
   ctx.fill();
-  ctx.stroke();
   ctx.restore();
 
   // Crisp High-Contrast Headline Text perfectly centered in badge
@@ -780,3 +777,239 @@ export function drawVCardTemplate(ctx, W, H, template, options = {}) {
   // Return QR box coordinates so the caller can draw the QR code inside
   return { qrBoxX, qrBoxY, qrBoxSize };
 }
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * DRAW SCAN ME FRAME TEMPLATE (50 Standalone Frame Styles from qr-templates-premium-50-2.html)
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+export function drawFrameTemplate(ctx, w, h, template, options = {}) {
+  ctx.save();
+
+  const shape = template.shape || 'soft';
+  const labelType = template.labelType || 'banner';
+  const labelText = (options.templateHeadline || template.labelText || 'SCAN ME').toUpperCase();
+  const labelBg = template.labelBg || '#111111';
+  const labelFg = template.labelFg || '#ffffff';
+  const accent = template.accent || '#111111';
+  const extra = template.extra || [];
+
+  // Determine stage layout dimensions
+  const centerX = w / 2;
+  const centerY = h / 2;
+
+  // Background fills and stage effects
+  const frameWidth = w * 0.72;
+  const frameHeight = h * 0.72;
+  const frameX = centerX - frameWidth / 2;
+  const frameY = centerY - frameHeight / 2 + (labelType === 'pill' || labelType === 'bubble' ? h * 0.04 : (labelType === 'banner' || labelType === 'flag' || labelType === 'tag' ? -h * 0.04 : 0));
+
+  // Draw Frame Container with specific shapes
+  ctx.save();
+
+  // Effects: Glow, Double border, Lift, Rainbow
+  if (extra.includes('glow')) {
+    ctx.shadowColor = accent;
+    ctx.shadowBlur = w * 0.08;
+  } else if (extra.includes('lift')) {
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.20)';
+    ctx.shadowBlur = w * 0.04;
+    ctx.shadowOffsetX = w * 0.03;
+    ctx.shadowOffsetY = w * 0.035;
+  } else {
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
+    ctx.shadowBlur = w * 0.03;
+    ctx.shadowOffsetY = w * 0.015;
+  }
+
+  // Draw Frame Background (Gradient or solid)
+  parseBackground(ctx, template.background || '#ffffff', frameX, frameY, frameWidth, frameHeight);
+
+  // Path by shape
+  ctx.beginPath();
+  let frameRadius = 0;
+  if (shape === 'sharp') {
+    frameRadius = 0;
+    drawRoundedRect(ctx, frameX, frameY, frameWidth, frameHeight, 0);
+  } else if (shape === 'soft') {
+    frameRadius = frameWidth * 0.10;
+    drawRoundedRect(ctx, frameX, frameY, frameWidth, frameHeight, frameRadius);
+  } else if (shape === 'round') {
+    frameRadius = frameWidth * 0.20;
+    drawRoundedRect(ctx, frameX, frameY, frameWidth, frameHeight, frameRadius);
+  } else if (shape === 'circle') {
+    ctx.arc(centerX, frameY + frameHeight / 2, frameWidth / 2, 0, Math.PI * 2);
+  } else if (shape === 'arch') {
+    const rTop = frameWidth * 0.36;
+    const rBot = frameWidth * 0.06;
+    ctx.moveTo(frameX + rTop, frameY);
+    ctx.lineTo(frameX + frameWidth - rTop, frameY);
+    ctx.arcTo(frameX + frameWidth, frameY, frameX + frameWidth, frameY + rTop, rTop);
+    ctx.lineTo(frameX + frameWidth, frameY + frameHeight - rBot);
+    ctx.arcTo(frameX + frameWidth, frameY + frameHeight, frameX + frameWidth - rBot, frameY + frameHeight, rBot);
+    ctx.lineTo(frameX + rBot, frameY + frameHeight);
+    ctx.arcTo(frameX, frameY + frameHeight, frameX, frameY + frameHeight - rBot, rBot);
+    ctx.lineTo(frameX, frameY + rTop);
+    ctx.arcTo(frameX, frameY, frameX + rTop, frameY, rTop);
+    ctx.closePath();
+  } else if (shape === 'ticket') {
+    const notchR = frameWidth * 0.08;
+    const r = frameWidth * 0.07;
+    ctx.moveTo(frameX + r, frameY);
+    ctx.lineTo(frameX + frameWidth - r, frameY);
+    ctx.arcTo(frameX + frameWidth, frameY, frameX + frameWidth, frameY + r, r);
+    ctx.lineTo(frameX + frameWidth, frameY + frameHeight / 2 - notchR);
+    ctx.arc(frameX + frameWidth, frameY + frameHeight / 2, notchR, Math.PI * 1.5, Math.PI * 0.5, true);
+    ctx.lineTo(frameX + frameWidth, frameY + frameHeight - r);
+    ctx.arcTo(frameX + frameWidth, frameY + frameHeight, frameX + frameWidth - r, frameY + frameHeight, r);
+    ctx.lineTo(frameX + r, frameY + frameHeight);
+    ctx.arcTo(frameX, frameY + frameHeight, frameX, frameY + frameHeight - r, r);
+    ctx.lineTo(frameX, frameY + frameHeight / 2 + notchR);
+    ctx.arc(frameX, frameY + frameHeight / 2, notchR, Math.PI * 0.5, Math.PI * 1.5, true);
+    ctx.lineTo(frameX, frameY + r);
+    ctx.arcTo(frameX, frameY, frameX + r, frameY, r);
+    ctx.closePath();
+  } else {
+    frameRadius = frameWidth * 0.14;
+    drawRoundedRect(ctx, frameX, frameY, frameWidth, frameHeight, frameRadius);
+  }
+  ctx.fill();
+
+  // Border strokes if configured
+  if (template.border) {
+    ctx.lineWidth = Math.max(1.5, w * 0.006);
+    if (extra.includes('dashed')) {
+      ctx.setLineDash([w * 0.018, w * 0.012]);
+    }
+    ctx.strokeStyle = template.border.includes('#') ? template.border.match(/#[0-9a-fA-F]+/)[0] : accent;
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Inner QR Card Box
+  const qrBoxSize = shape === 'circle' || shape === 'hex' ? frameWidth * 0.62 : frameWidth * 0.70;
+  const qrBoxX = centerX - qrBoxSize / 2;
+  const qrBoxY = frameY + (frameHeight - qrBoxSize) / 2 + (labelType === 'banner' ? -frameHeight * 0.06 : (labelType === 'pill' ? frameHeight * 0.05 : 0));
+  const qrBoxRadius = qrBoxSize * 0.12;
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.22)';
+  ctx.shadowBlur = w * 0.03;
+  ctx.shadowOffsetY = w * 0.01;
+  ctx.fillStyle = template.qrCard || '#ffffff';
+  drawRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, qrBoxRadius);
+  ctx.fill();
+  ctx.restore();
+
+  // Draw Labels / Badges (pill, bubble, banner, flag, tag, corner, side, script)
+  ctx.save();
+  const labelFontSize = Math.round(w * 0.036);
+  ctx.font = `800 ${labelFontSize}px 'Inter', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const isShimmer = extra.includes('shimmer');
+  const bgBadgeFill = isShimmer ? '#e9d68a' : labelBg;
+  const fgBadgeText = isShimmer ? '#2a1e00' : labelFg;
+
+  if (labelType === 'pill') {
+    const pillW = frameWidth * 0.64;
+    const pillH = frameHeight * 0.16;
+    const pillX = centerX - pillW / 2;
+    const pillY = frameY - pillH * 0.35;
+    ctx.fillStyle = bgBadgeFill;
+    ctx.shadowColor = 'rgba(0,0,0,0.18)';
+    ctx.shadowBlur = w * 0.02;
+    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, pillH / 2);
+    ctx.fill();
+    ctx.fillStyle = fgBadgeText;
+    ctx.fillText(labelText, centerX, pillY + pillH / 2);
+  } else if (labelType === 'bubble') {
+    const bubW = frameWidth * 0.68;
+    const bubH = frameHeight * 0.17;
+    const bubX = centerX - bubW / 2;
+    const bubY = frameY - bubH - h * 0.025;
+    ctx.fillStyle = bgBadgeFill;
+    drawRoundedRect(ctx, bubX, bubY, bubW, bubH, bubH * 0.3);
+    ctx.fill();
+    // Bubble pointer
+    ctx.beginPath();
+    ctx.moveTo(centerX - w * 0.02, bubY + bubH);
+    ctx.lineTo(centerX + w * 0.02, bubY + bubH);
+    ctx.lineTo(centerX, bubY + bubH + h * 0.02);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = fgBadgeText;
+    ctx.fillText(labelText, centerX, bubY + bubH / 2);
+  } else if (labelType === 'banner') {
+    const banW = frameWidth * 0.76;
+    const banH = frameHeight * 0.16;
+    const banX = centerX - banW / 2;
+    const banY = frameY + frameHeight - banH * 1.15;
+    ctx.fillStyle = bgBadgeFill;
+    drawRoundedRect(ctx, banX, banY, banW, banH, banH * 0.35);
+    ctx.fill();
+    ctx.fillStyle = fgBadgeText;
+    ctx.fillText(labelText, centerX, banY + banH / 2);
+  } else if (labelType === 'flag') {
+    const flagW = frameWidth;
+    const flagH = frameHeight * 0.18;
+    const flagX = frameX;
+    const flagY = frameY + frameHeight + h * 0.01;
+    ctx.fillStyle = bgBadgeFill;
+    drawRoundedRect(ctx, flagX, flagY, flagW, flagH, 0);
+    ctx.fill();
+    ctx.fillStyle = fgBadgeText;
+    ctx.fillText(labelText, centerX, flagY + flagH / 2);
+  } else if (labelType === 'tag') {
+    const tagW = frameWidth * 0.64;
+    const tagH = frameHeight * 0.17;
+    const tagX = centerX - tagW / 2;
+    const tagY = frameY + frameHeight + h * 0.02;
+    ctx.fillStyle = bgBadgeFill;
+    // Tag pointer
+    ctx.beginPath();
+    ctx.moveTo(centerX - w * 0.02, tagY);
+    ctx.lineTo(centerX + w * 0.02, tagY);
+    ctx.lineTo(centerX, tagY - h * 0.015);
+    ctx.closePath();
+    ctx.fill();
+    drawRoundedRect(ctx, tagX, tagY, tagW, tagH, tagH * 0.3);
+    ctx.fill();
+    ctx.fillStyle = fgBadgeText;
+    ctx.fillText(labelText, centerX, tagY + tagH / 2);
+  } else if (labelType === 'corner') {
+    ctx.save();
+    ctx.translate(frameX + frameWidth - w * 0.06, frameY + h * 0.06);
+    ctx.rotate((40 * Math.PI) / 180);
+    ctx.fillStyle = bgBadgeFill;
+    const ribbonW = w * 0.28;
+    const ribbonH = h * 0.06;
+    ctx.fillRect(-ribbonW / 2, -ribbonH / 2, ribbonW, ribbonH);
+    ctx.fillStyle = fgBadgeText;
+    ctx.font = `800 ${Math.round(w * 0.028)}px 'Inter', sans-serif`;
+    ctx.fillText(labelText === 'SCAN ME' ? 'SCAN' : labelText, 0, 0);
+    ctx.restore();
+  } else if (labelType === 'side') {
+    const sideW = w * 0.09;
+    const sideH = frameHeight * 0.78;
+    const sideX = frameX + frameWidth;
+    const sideY = frameY + (frameHeight - sideH) / 2;
+    ctx.fillStyle = bgBadgeFill;
+    drawRoundedRect(ctx, sideX, sideY, sideW, sideH, sideW * 0.25);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(sideX + sideW / 2, sideY + sideH / 2);
+    ctx.rotate(Math.PI / 2);
+    ctx.fillStyle = fgBadgeText;
+    ctx.font = `800 ${Math.round(w * 0.028)}px 'Inter', sans-serif`;
+    ctx.fillText(labelText, 0, 0);
+    ctx.restore();
+  }
+
+  ctx.restore();
+  ctx.restore();
+
+  return { qrBoxX, qrBoxY, qrBoxSize };
+}
+

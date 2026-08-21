@@ -1,5 +1,5 @@
 import { ALL_50_TEMPLATES, getTemplateById } from '../data/qrTemplates';
-import { drawTemplateBackground, drawVCardTemplate } from '../components/qr-templates/TemplateRenderer';
+import { drawTemplateBackground, drawVCardTemplate, drawFrameTemplate } from '../components/qr-templates/TemplateRenderer';
 import { getTemplateStylingPreset } from '../data/qrTemplates/templateStylingConfig';
 
 const VCARD_HEIGHT_RATIO = 600 / 1050; // ≈ 0.5714 — landscape 1050×600
@@ -60,6 +60,49 @@ export const QR_TEMPLATES = ALL_50_TEMPLATES.map(tpl => {
       drawForeground: () => {}
     };
     return vcardTpl;
+  }
+
+  if (tpl.styleFamily === 'frame') {
+    return {
+      id:          tpl.id,
+      name:        tpl.name,
+      category:    tpl.category,
+      styleFamily: 'frame',
+      dimensions:  '1080 x 1080 px',
+      heightRatio: 1.0,
+      qrSize: 0.45,
+      qrX:    0.50,
+      qrY:    0.50,
+      shape:       tpl.shape,
+      labelType:   tpl.labelType,
+      labelText:   tpl.labelText,
+      background:  tpl.background,
+      border:      tpl.border,
+      labelBg:     tpl.labelBg,
+      labelFg:     tpl.labelFg,
+      qrCard:      tpl.qrCard,
+      accent:      tpl.accent,
+      extra:       tpl.extra,
+      defaultHeadline: tpl.labelText,
+      preset: tpl.preset || {
+        qrColor:   tpl.accent || '#000000',
+        bgColor:   '#FFFFFF',
+        dotStyle:  'rounded',
+        eyeStyle:  'rounded'
+      },
+      drawBackground(ctx, w, h, options) {
+        const coords = drawFrameTemplate(ctx, w, h, tpl, options);
+        if (coords) {
+          this._vcardQrBoxX    = coords.qrBoxX;
+          this._vcardQrBoxY    = coords.qrBoxY;
+          this._vcardQrBoxSize = coords.qrBoxSize;
+          this.qrSize = coords.qrBoxSize / w;
+          this.qrX    = (coords.qrBoxX + coords.qrBoxSize / 2) / w;
+          this.qrY    = (coords.qrBoxY + coords.qrBoxSize / 2) / h;
+        }
+      },
+      drawForeground: () => {}
+    };
   }
 
   // ── Standard square template (with tailored platform colors, diverse eyes & dots) ──

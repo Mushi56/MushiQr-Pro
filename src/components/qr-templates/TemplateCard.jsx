@@ -1,11 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
-import { drawTemplateBackground, drawVCardTemplate } from './TemplateRenderer';
+import { drawTemplateBackground, drawVCardTemplate, drawFrameTemplate } from './TemplateRenderer';
 import { generateQRMatrix, renderQR } from '../../utils/qrEngine';
 import { getTemplateStylingPreset } from '../../data/qrTemplates/templateStylingConfig';
 import { LOGO_PRESETS } from '../../data/logoPresets';
 
 const isVCard = (t) => t?.styleFamily === 'vcard';
+const isFrame = (t) => t?.styleFamily === 'frame';
 
 // Reusable shared static demo matrix for ultra-fast thumbnail generation without recomputing
 const DEMO_MATRIX = generateQRMatrix('https://mushiqr.pro', 'M');
@@ -60,6 +61,42 @@ export const TemplateCard = React.memo(function TemplateCard({
           ...activeMatrix,
           size: 160,
           qrColor: template.preset?.qrColor || '#000000',
+          bgColor: 'transparent',
+          bgTransparent: true,
+          dotStyle: template.preset?.dotStyle || 'rounded',
+          eyeStyle: template.preset?.eyeStyle || 'rounded',
+          quietZone: 0
+        });
+        ctx.save();
+        const margin = coords.qrBoxSize * 0.08;
+        ctx.drawImage(
+          qrTempCanvas,
+          coords.qrBoxX + margin,
+          coords.qrBoxY + margin,
+          coords.qrBoxSize - margin * 2,
+          coords.qrBoxSize - margin * 2
+        );
+        ctx.restore();
+      }
+    } else if (isFrame(template)) {
+      // ── Scan Me Frame thumbnail ───────────────────────────────────────────
+      const w = 260;
+      const h = 260;
+      canvas.width  = w;
+      canvas.height = h;
+
+      const coords = drawFrameTemplate(ctx, w, h, template, {
+        templateHeadline: headlineText || template.labelText
+      });
+
+      if (coords && activeMatrix) {
+        const qrTempCanvas = document.createElement('canvas');
+        qrTempCanvas.width  = 160;
+        qrTempCanvas.height = 160;
+        renderQR(qrTempCanvas, {
+          ...activeMatrix,
+          size: 160,
+          qrColor: template.preset?.qrColor || template.accent || '#000000',
           bgColor: 'transparent',
           bgTransparent: true,
           dotStyle: template.preset?.dotStyle || 'rounded',
