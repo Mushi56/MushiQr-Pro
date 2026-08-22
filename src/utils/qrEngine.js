@@ -1,6 +1,6 @@
 import qrcode from 'qrcode-generator';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
-import { drawTemplateBackground, drawVCardTemplate, drawFrameTemplate } from '../components/qr-templates/TemplateRenderer';
+import { drawTemplateBackground } from '../components/qr-templates/TemplateRenderer';
 
 /**
  * QR Code Generation Engine
@@ -490,11 +490,8 @@ export function renderQR(canvas, options) {
   if (!matrix || !canvas) return;
 
   const ctx = canvas.getContext('2d');
-  const isVCardTpl = options.template?.styleFamily === 'vcard';
-  const w = isVCardTpl ? (options.template?.canvasWidth || 1050) : size;
-  const h = isVCardTpl 
-    ? (options.template?.canvasHeight || 600) 
-    : (options.template?.heightRatio ? Math.round(size * options.template.heightRatio) : size);
+  const w = size;
+  const h = options.template?.heightRatio ? Math.round(size * options.template.heightRatio) : size;
   canvas.width = w;
   canvas.height = h;
   ctx.imageSmoothingEnabled = true;
@@ -629,36 +626,8 @@ export function renderQR(canvas, options) {
   if (options.template) {
     if (typeof options.template.drawBackground === 'function') {
       options.template.drawBackground(ctx, w, h, options);
-    } else if (options.template.styleFamily === 'vcard') {
-      const coords = drawVCardTemplate(ctx, w, h, options.template, {
-        name:     options.vcardName || 'Your Name',
-        jobTitle: options.vcardJobTitle || 'Job Title, Company',
-        phone:    options.vcardPhone || '+60 12-345 6789',
-        email:    options.vcardEmail || 'you@example.com',
-        address:  options.vcardAddress || '123 Business Street, Your City',
-        url:      options.vcardUrl || 'https://example.com'
-      });
-      if (coords) {
-        options.template._vcardQrBoxX = coords.qrBoxX;
-        options.template._vcardQrBoxY = coords.qrBoxY;
-        options.template._vcardQrBoxSize = coords.qrBoxSize;
-      }
-    } else if (options.template.styleFamily === 'frame') {
-      const coords = drawFrameTemplate(ctx, w, h, options.template, {
-        templateHeadline: options.templateHeadline || options.template.labelText
-      });
-      if (coords) {
-        options.template._frameQrBoxX = coords.qrBoxX;
-        options.template._frameQrBoxY = coords.qrBoxY;
-        options.template._frameQrBoxSize = coords.qrBoxSize;
-      }
     } else {
-      const coords = drawTemplateBackground(ctx, w, h, options.template, options);
-      if (coords) {
-        options.template._stdQrBoxX = coords.qrBoxX;
-        options.template._stdQrBoxY = coords.qrBoxY;
-        options.template._stdQrBoxSize = coords.qrBoxSize;
-      }
+      drawTemplateBackground(ctx, w, h, options.template, options);
     }
     ctx.save();
 

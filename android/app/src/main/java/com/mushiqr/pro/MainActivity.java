@@ -44,13 +44,27 @@ public class MainActivity extends BridgeActivity {
             }
         });
 
-        // Add native Javascript Interface for cold-boot launcher actions
+        // Add native Javascript Interface for cold-boot launcher actions and security
         webView.addJavascriptInterface(new Object() {
             @android.webkit.JavascriptInterface
             public String getPendingAction() {
                 String act = pendingAction;
                 pendingAction = null; // consume
                 return act;
+            }
+
+            @android.webkit.JavascriptInterface
+            public void setScreenSecurity(final boolean enable) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (enable) {
+                            getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                        } else {
+                            getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                        }
+                    }
+                });
             }
         }, "NativeAndroidApp");
 

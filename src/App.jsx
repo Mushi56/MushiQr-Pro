@@ -44,6 +44,7 @@ import {
   Paintbrush,
   Plus,
   Maximize,
+  Maximize2,
   Shapes,
   ScanLine,
   History,
@@ -132,6 +133,7 @@ import { MdOutlineQrCode2, MdQrCodeScanner } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { TemplateGallery } from './components/qr-templates/TemplateGallery';
 import { TemplateCustomizer } from './components/qr-templates/TemplateCustomizer';
+import { FullScreenPreviewModal } from './components/FullScreenPreviewModal';
 const QRDotsIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="mushi-pro-wide-dots">
     {/* Smaller Rounded Star (Preserving the shape and style) */}
@@ -1312,6 +1314,7 @@ export default function App() {
   const [isEditingTemplateText, setIsEditingTemplateText] = useState(false);
   const [isTemplateTextModalOpen, setIsTemplateTextModalOpen] = useState(false);
   const [templateCategory, setTemplateCategory] = useState('All');
+  const [isFullScreenPreviewOpen, setIsFullScreenPreviewOpen] = useState(false);
   const applyLogoBySlug = (slug) => {
     const found = LOGO_PRESETS.find(item => item.slug === slug);
     if (found) {
@@ -4369,17 +4372,46 @@ export default function App() {
           <>
             {/* ── QR Preview Card (always visible) ── */}
             <ErrorBoundary>
-              <section className="qr-preview-card">
-                <div 
-                  className={`qr-preview-wrapper ${getFrameClass()}`}
-                  style={
-                    selectedTemplate?.styleFamily === 'vcard'
-                      ? { maxWidth: '520px', aspectRatio: '7 / 4', width: '100%' }
-                      : selectedTemplate
-                      ? { maxWidth: '380px', aspectRatio: '1 / 1', width: '100%' }
-                      : { maxWidth: '350px', aspectRatio: '1 / 1', width: '100%' }
-                  }
-                >
+              <section className="qr-preview-card" style={{ position: 'relative' }}>
+                {qrMatrixInfo && (
+                  <button
+                    type="button"
+                    onClick={() => setIsFullScreenPreviewOpen(true)}
+                    title="Full Screen Preview (Pinch to Zoom)"
+                    aria-label="Full Screen Preview"
+                    style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      zIndex: 20,
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '10px',
+                      background: 'var(--bg-elevated, rgba(15, 23, 42, 0.85))',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                      border: '1px solid var(--border-color, rgba(255, 255, 255, 0.15))',
+                      color: 'var(--text-primary, #FFFFFF)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.transform = 'scale(1.08)';
+                      e.currentTarget.style.borderColor = 'var(--accent-primary, #FF2A55)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.borderColor = 'var(--border-color, rgba(255, 255, 255, 0.15))';
+                    }}
+                  >
+                    <Maximize2 size={18} />
+                  </button>
+                )}
+                <div className={`qr-preview-wrapper ${getFrameClass()}`}>
                   {!qrMatrixInfo ? (
                     <div className="preview-placeholder">
                       <span className="preview-placeholder-icon">
@@ -4397,11 +4429,7 @@ export default function App() {
                       style={{ 
                         willChange: 'transform',
                         cursor: isDraggingCanvas ? 'grabbing' : (logo?.image || textCenterEnabled ? 'move' : (selectedTemplate ? 'pointer' : 'default')),
-                        touchAction: 'none',
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                        display: 'block'
+                        touchAction: 'none'
                       }} 
                     />
                   )}
@@ -7735,6 +7763,14 @@ export default function App() {
         confirmText={deleteModalConfig.confirmText}
         iconType={deleteModalConfig.iconType}
         isDangerous={deleteModalConfig.isDangerous}
+      />
+      <FullScreenPreviewModal
+        isOpen={isFullScreenPreviewOpen}
+        onClose={() => setIsFullScreenPreviewOpen(false)}
+        sourceCanvasRef={canvasRef}
+        template={selectedTemplate}
+        headlineText={templateHeadlineText}
+        handleText={templateHandleText}
       />
     </div>
   );
