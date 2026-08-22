@@ -2,6 +2,29 @@
 // Universal Canvas 2D Renderer for all Follow Me, Social & Brand Pro Templates
 
 const svgImageCache = {};
+let _templateLoadTimer = null;
+
+function notifyTemplateLoaded() {
+  if (!_templateLoadTimer) {
+    _templateLoadTimer = requestAnimationFrame(() => {
+      _templateLoadTimer = null;
+      window.dispatchEvent(new CustomEvent('qr-template-loaded'));
+    });
+  }
+}
+
+let _sharedOffscreenCanvas = null;
+function getSharedOffscreen(w, h) {
+  if (typeof document === 'undefined') return null;
+  if (!_sharedOffscreenCanvas) {
+    _sharedOffscreenCanvas = document.createElement('canvas');
+  }
+  if (_sharedOffscreenCanvas.width !== w || _sharedOffscreenCanvas.height !== h) {
+    _sharedOffscreenCanvas.width = w;
+    _sharedOffscreenCanvas.height = h;
+  }
+  return _sharedOffscreenCanvas;
+}
 
 function getSvgImage(svgStringOrUrl) {
   if (!svgStringOrUrl) return null;
@@ -25,9 +48,7 @@ function getSvgImage(svgStringOrUrl) {
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(formattedSvg);
   }
 
-  img.onload = () => {
-    window.dispatchEvent(new CustomEvent('qr-template-loaded'));
-  };
+  img.onload = notifyTemplateLoaded;
   svgImageCache[svgStringOrUrl] = img;
   return img;
 }
@@ -214,27 +235,75 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   const isNetworkStyle = template.styleFamily === 'network' || Boolean(template.netSvg);
   const typography = getBrandTypography(template.id, template.category);
 
-  // 1. Outer Background Gradient
-  if (template.background) {
-    parseBackground(ctx, template.background, 0, 0, w, h);
-  } else {
-    ctx.fillStyle = '#0f172a';
-  }
-  ctx.fillRect(0, 0, w, h);
+  // 1 + 2. Background layer with 20% Gaussian blur (brand-style only).
+  // Gradient + bgShapes + glow spots are rendered to an offscreen canvas,
+  // then composited with a blur filter — card contents remain crisp.
+  if (isBrandStyle && template.bgShapes) {
+    const offscreen = getSharedOffscreen(w, h);
+    if (!offscreen) return { qrBoxX: w * 0.25, qrBoxY: h * 0.25, qrBoxSize: w * 0.5 };
+    const offCtx = offscreen.getContext('2d');
+    offCtx.clearRect(0, 0, w, h);
 
-  // 2. Ambient background decorative glow, network web SVG, or SVG shapes
-  if (isNetworkStyle && template.netSvg) {
+    // Gradient background on offscreen
+    if (template.background) {
+      parseBackground(offCtx, template.background, 0, 0, w, h);
+    } else {
+      offCtx.fillStyle = '#0f172a';
+    }
+    offCtx.fillRect(0, 0, w, h);
+
+    // Decorative SVG shapes
+    drawBgShapes(offCtx, w, h, template.bgShapes);
+
+    // story-light::before: 4 radial white ambient glow spots
+    const glowSpots = [
+      { cx: 0.80, cy: 0.12, r: 0.30, alpha: 0.65 },
+      { cx: 0.15, cy: 0.25, r: 0.25, alpha: 0.45 },
+      { cx: 0.85, cy: 0.82, r: 0.30, alpha: 0.40 },
+      { cx: 0.25, cy: 0.88, r: 0.25, alpha: 0.35 },
+    ];
+    for (const s of glowSpots) {
+      const gx = w * s.cx;
+      const gy = h * s.cy;
+      const gr = Math.max(w, h) * s.r;
+      const rg = offCtx.createRadialGradient(gx, gy, 0, gx, gy, gr);
+      rg.addColorStop(0, `rgba(255,255,255,${s.alpha})`);
+      rg.addColorStop(1, 'rgba(255,255,255,0)');
+      offCtx.fillStyle = rg;
+      offCtx.fillRect(0, 0, w, h);
+    }
+
+    // Composite to main canvas with 1% Gaussian blur.
+    // Overshoot by 2x blurPx on each side to prevent edge-fade artifacts.
+    const blurPx = Math.round(w * 0.01);
+    const over   = blurPx * 2;
+    ctx.save();
+    ctx.filter = `blur(${blurPx}px)`;
+    ctx.drawImage(offscreen, -over, -over, w + over * 2, h + over * 2);
+    ctx.filter = 'none';
+    ctx.restore();
+
+  } else if (isNetworkStyle && template.netSvg) {
+    if (template.background) {
+      parseBackground(ctx, template.background, 0, 0, w, h);
+    } else {
+      ctx.fillStyle = '#0f172a';
+    }
+    ctx.fillRect(0, 0, w, h);
     drawBgShapes(ctx, w, h, template.netSvg);
-  } else if (isBrandStyle && template.bgShapes) {
-    drawBgShapes(ctx, w, h, template.bgShapes);
   } else {
+    if (template.background) {
+      parseBackground(ctx, template.background, 0, 0, w, h);
+    } else {
+      ctx.fillStyle = '#0f172a';
+    }
+    ctx.fillRect(0, 0, w, h);
     ctx.save();
     ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
     ctx.filter = `blur(${Math.round(w * 0.08)}px)`;
     ctx.beginPath();
     ctx.arc(w * 0.85, h * 0.18, w * 0.20, 0, Math.PI * 2);
     ctx.fill();
-
     ctx.fillStyle = 'rgba(255, 255, 255, 0.10)';
     ctx.beginPath();
     ctx.arc(w * 0.20, h * 0.82, w * 0.17, 0, Math.PI * 2);

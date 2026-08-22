@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Heart } from 'lucide-react';
 import { drawTemplateBackground, drawVCardTemplate, drawFrameTemplate } from './TemplateRenderer';
 import { generateQRMatrix, renderQR } from '../../utils/qrEngine';
@@ -10,6 +10,18 @@ const isFrame = (t) => t?.styleFamily === 'frame';
 
 // Reusable shared static demo matrix for ultra-fast thumbnail generation without recomputing
 const DEMO_MATRIX = generateQRMatrix('https://mushiqr.pro', 'M');
+
+// Shared single offscreen thumbnail canvas to prevent DOM garbage collection overhead
+let _qrThumbCanvas = null;
+function getSharedThumbCanvas() {
+  if (typeof document === 'undefined') return null;
+  if (!_qrThumbCanvas) {
+    _qrThumbCanvas = document.createElement('canvas');
+    _qrThumbCanvas.width = 160;
+    _qrThumbCanvas.height = 160;
+  }
+  return _qrThumbCanvas;
+}
 
 export const TemplateCard = React.memo(function TemplateCard({
   template,
@@ -34,6 +46,7 @@ export const TemplateCard = React.memo(function TemplateCard({
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
+    const qrTempCanvas = getSharedThumbCanvas();
 
     const activeMatrix = DEMO_MATRIX;
 
@@ -45,18 +58,15 @@ export const TemplateCard = React.memo(function TemplateCard({
       canvas.height = H;
 
       const coords = drawVCardTemplate(ctx, W, H, template, {
-        name:    'Your Name',
+        name:     'Your Name',
         jobTitle: 'Job Title, Company',
-        phone:   '+60 12-345 6789',
-        email:   'you@example.com',
-        address: '123 Business Street, Your City',
-        url:     'https://example.com'
+        phone:    '+60 12-345 6789',
+        email:    'you@example.com',
+        address:  '123 Business Street, Your City',
+        url:      'https://example.com'
       });
 
-      if (coords && activeMatrix) {
-        const qrTempCanvas = document.createElement('canvas');
-        qrTempCanvas.width  = 160;
-        qrTempCanvas.height = 160;
+      if (coords && activeMatrix && qrTempCanvas) {
         renderQR(qrTempCanvas, {
           ...activeMatrix,
           size: 160,
@@ -89,10 +99,7 @@ export const TemplateCard = React.memo(function TemplateCard({
         templateHeadline: headlineText || template.labelText
       });
 
-      if (coords && activeMatrix) {
-        const qrTempCanvas = document.createElement('canvas');
-        qrTempCanvas.width  = 160;
-        qrTempCanvas.height = 160;
+      if (coords && activeMatrix && qrTempCanvas) {
         renderQR(qrTempCanvas, {
           ...activeMatrix,
           size: 160,
@@ -128,11 +135,7 @@ export const TemplateCard = React.memo(function TemplateCard({
 
       const stylePreset = getTemplateStylingPreset(template) || template.preset;
 
-      if (coords && activeMatrix) {
-        const qrTempCanvas = document.createElement('canvas');
-        qrTempCanvas.width  = 160;
-        qrTempCanvas.height = 160;
-        
+      if (coords && activeMatrix && qrTempCanvas) {
         let logoImageObj = null;
         if (stylePreset?.logo) {
           const foundLogo = LOGO_PRESETS.find(p => p.slug === stylePreset.logo);
@@ -181,16 +184,26 @@ export const TemplateCard = React.memo(function TemplateCard({
 
   const vcardCard = isVCard(template);
 
+  const handleClick = useCallback((e) => {
+    e.preventDefault();
+    if (onSelect) onSelect(template);
+  }, [onSelect, template]);
+
+  const handleFavClick = useCallback((e) => {
+    e.stopPropagation();
+    if (onToggleFavorite) onToggleFavorite(template.id);
+  }, [onToggleFavorite, template.id]);
+
   return (
     <div
-      onClick={onSelect}
+      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       role="button"
       tabIndex={0}
       style={{
         position:        'relative',
-        borderRadius:    '4px', // hard crisp edges
+        borderRadius:    '4px',
         overflow:        'hidden',
         cursor:          'pointer',
         border:          isSelected ? '2.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
@@ -243,13 +256,10 @@ export const TemplateCard = React.memo(function TemplateCard({
         </span>
       </div>
 
-      {/* Beautiful Favorite Heart Button (Top-Left Position) */}
+      {/* Favorite Heart Button (Top-Left Position) */}
       {onToggleFavorite && (
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(template.id);
-          }}
+          onClick={handleFavClick}
           style={{
             position:       'absolute',
             top:            '8px',

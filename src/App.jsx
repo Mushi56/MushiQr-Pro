@@ -2447,10 +2447,15 @@ export default function App() {
   const renderCanvas = useCallback(() => {
     if (!qrMatrixInfo || !canvasRef.current) return;
     
-    const executeRender = async () => {
-      // Fix: Wait for fonts to be ready so canvas renders correctly
-      if (document.fonts) await document.fonts.ready;
+    const executeRender = () => {
       if (!canvasRef.current) return;
+      
+      // If fonts are still loading in the background, schedule a redraw once ready without blocking instant render
+      if (document.fonts && document.fonts.status !== 'loaded') {
+        document.fonts.ready.then(() => {
+          if (canvasRef.current) executeRender();
+        }).catch(() => {});
+      }
       
       // Extract vCard content fields so template preview reflects live user input
       const isVCardTemplate = selectedTemplate?.styleFamily === 'vcard';
@@ -4365,7 +4370,16 @@ export default function App() {
             {/* ── QR Preview Card (always visible) ── */}
             <ErrorBoundary>
               <section className="qr-preview-card">
-                <div className={`qr-preview-wrapper ${getFrameClass()}`}>
+                <div 
+                  className={`qr-preview-wrapper ${getFrameClass()}`}
+                  style={
+                    selectedTemplate?.styleFamily === 'vcard'
+                      ? { maxWidth: '520px', aspectRatio: '7 / 4', width: '100%' }
+                      : selectedTemplate
+                      ? { maxWidth: '380px', aspectRatio: '1 / 1', width: '100%' }
+                      : { maxWidth: '350px', aspectRatio: '1 / 1', width: '100%' }
+                  }
+                >
                   {!qrMatrixInfo ? (
                     <div className="preview-placeholder">
                       <span className="preview-placeholder-icon">
@@ -4383,7 +4397,11 @@ export default function App() {
                       style={{ 
                         willChange: 'transform',
                         cursor: isDraggingCanvas ? 'grabbing' : (logo?.image || textCenterEnabled ? 'move' : (selectedTemplate ? 'pointer' : 'default')),
-                        touchAction: 'none'
+                        touchAction: 'none',
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        display: 'block'
                       }} 
                     />
                   )}
