@@ -58,9 +58,10 @@ import {
   Filter,
   Crop,
   Eraser,
+  Sparkles,
+  Wand2,
   Layers,
   AlertCircle,
-  Sparkles,
   LogOut,
   Edit2,
   ChevronRight,
@@ -135,6 +136,7 @@ import { TemplateGallery } from './components/qr-templates/TemplateGallery';
 import { TemplateCustomizer } from './components/qr-templates/TemplateCustomizer';
 import { FullScreenPreviewModal } from './components/FullScreenPreviewModal';
 import ImageCropShapeModal, { SHAPE_OPTIONS } from './components/ImageCropShapeModal';
+import { AI_ART_STYLES } from './utils/aiArtQrEngine';
 const QRDotsIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="mushi-pro-wide-dots">
     {/* Smaller Rounded Star (Preserving the shape and style) */}
@@ -1404,6 +1406,9 @@ export default function App() {
   const [qrBgImageOverlayOpacity, setQrBgImageOverlayOpacity] = useState(0.0);
   const [qrBgCardEnabled, setQrBgCardEnabled] = useState(false);
   const [qrBgCardOpacity, setQrBgCardOpacity] = useState(0.6);
+  const [aiArtQrEnabled, setAiArtQrEnabled] = useState(false);
+  const [aiArtBlend, setAiArtBlend] = useState(0.72);
+  const [aiArtStyle, setAiArtStyle] = useState('illustration');
   const [qrBgShape, setQrBgShape] = useState('full'); // 'full' | 'rounded' | 'squircle' | 'cut' | 'leaf' | 'circle'
   const [qrBgCardShape, setQrBgCardShape] = useState('rounded'); // 'rounded' | 'squircle' | 'cut' | 'leaf' | 'circle'
   const [qrSizeScale, setQrSizeScale] = useState(1.0);
@@ -1668,16 +1673,24 @@ export default function App() {
     return () => window.removeEventListener('appAction', handleAppAction);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const historyRef = useRef([]);
+  const historyIndexRef = useRef(-1);
+
   const getSnapshot = useCallback(() => {
     return {
-      qrType, qrData, qrColor, bgColor, bgTransparent, eyeColor, eyeOuterColor, syncEyes,
+      qrType, qrData, qrColor, bgColor, bgTransparent, eyeColor, eyeOuterColor, syncEyes, syncInnerOuterEyes,
       gradientEnabled, gradientColor1, gradientColor2, gradientType,
       qrTextureEnabled, qrTexture: qrTexture ? { src: qrTexture.src, name: qrTexture.name } : null,
       qrTextureSyncEyes,
+      qrBgImageEnabled, qrBgImage: qrBgImage ? { src: qrBgImage.src, name: qrBgImage.name } : null,
+      qrBgImageOpacity, qrBgImageBlur, qrBgImageOverlayOpacity,
+      qrBgCardEnabled, qrBgCardOpacity, qrBgShape, qrBgCardShape,
+      aiArtQrEnabled, aiArtBlend, aiArtStyle,
+      qrSizeScale, qrPosX, qrPosY,
       dotStyle, eyeStyle, dotPadding, eyePadding,
-      logo: logo ? { src: logo.src, name: logo.name } : null,
+      logo: logo ? { src: logo.src, name: logo.name, shape: logo.shape } : null,
       logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
-      logoOutline, logoOutlineColor, logoOutlineWidth, logoPosX, logoPosY,
+      logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity, logoPosX, logoPosY,
       logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
       logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, logoAspectRatioLocked,
       frameStyle, frameText, frameColor, frameFont, frameSize,
@@ -1689,15 +1702,21 @@ export default function App() {
       textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
       textCenterPosX, textCenterPosY, textCenterRotation,
       textCenterWidth, textCenterHeight,
+      selectedTemplate: selectedTemplate ? { id: selectedTemplate.id, name: selectedTemplate.name } : null,
+      templateHandleText,
       errorLevel
     };
   }, [
-    qrType, qrData, qrColor, bgColor, bgTransparent, eyeColor, eyeOuterColor, syncEyes,
+    qrType, qrData, qrColor, bgColor, bgTransparent, eyeColor, eyeOuterColor, syncEyes, syncInnerOuterEyes,
     gradientEnabled, gradientColor1, gradientColor2, gradientType,
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
+    qrBgImageEnabled, qrBgImage, qrBgImageOpacity, qrBgImageBlur, qrBgImageOverlayOpacity,
+    qrBgCardEnabled, qrBgCardOpacity, qrBgShape, qrBgCardShape,
+    aiArtQrEnabled, aiArtBlend, aiArtStyle,
+    qrSizeScale, qrPosX, qrPosY,
     dotStyle, eyeStyle, dotPadding, eyePadding,
     logo, logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
-    logoOutline, logoOutlineColor, logoOutlineWidth, logoPosX, logoPosY,
+    logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity, logoPosX, logoPosY,
     logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
     logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, logoAspectRatioLocked,
     frameStyle, frameText, frameColor, frameFont, frameSize,
@@ -1708,82 +1727,129 @@ export default function App() {
     textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
     textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
     textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight,
+    selectedTemplate, templateHandleText,
     errorLevel
   ]);
+
   const saveSnapshot = useCallback(() => {
     if (isInternalUpdate.current) return;
     if (!ignoreDirtyRef.current) {
       generatorIsDirtyRef.current = true;
     }
     const current = getSnapshot();
+    const currStr = JSON.stringify(current);
     
-    // Avoid saving if the current state matches the one we're already at in history
-    // This prevents Redo from breaking after an Undo action.
-    if (historyIndex >= 0 && history[historyIndex]) {
-      if (JSON.stringify(current) === JSON.stringify(history[historyIndex])) return;
+    // Avoid saving duplicate snapshot
+    const prevIdx = historyIndexRef.current;
+    if (prevIdx >= 0 && historyRef.current[prevIdx]) {
+      if (JSON.stringify(historyRef.current[prevIdx]) === currStr) return;
     }
-    setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      newHistory.push(current);
-      if (newHistory.length > 50) newHistory.shift();
-      return newHistory;
-    });
-    setHistoryIndex(prev => {
-      const newIndex = (historyIndex < 49) ? historyIndex + 1 : 49;
-      return newIndex;
-    });
-  }, [getSnapshot, historyIndex, history]);
+
+    const newHistory = historyRef.current.slice(0, prevIdx + 1);
+    newHistory.push(current);
+    if (newHistory.length > 50) newHistory.shift();
+
+    const newIndex = newHistory.length - 1;
+    historyRef.current = newHistory;
+    historyIndexRef.current = newIndex;
+    setHistory(newHistory);
+    setHistoryIndex(newIndex);
+  }, [getSnapshot]);
+
   const undo = useCallback(() => {
-    if (historyIndex <= 0) return;
-    const prevIndex = historyIndex - 1;
-    const snapshot = history[prevIndex];
+    const currIdx = historyIndexRef.current;
+    if (currIdx <= 0) return;
+    const prevIndex = currIdx - 1;
+    const snapshot = historyRef.current[prevIndex];
+    if (!snapshot) return;
+
+    isInternalUpdate.current = true;
     applySnapshot(snapshot);
+    historyIndexRef.current = prevIndex;
     setHistoryIndex(prevIndex);
-  }, [history, historyIndex]);
+    setTimeout(() => { isInternalUpdate.current = false; }, 200);
+  }, []);
+
   const redo = useCallback(() => {
-    if (historyIndex >= history.length - 1) return;
-    const nextIndex = historyIndex + 1;
-    const snapshot = history[nextIndex];
+    const currIdx = historyIndexRef.current;
+    if (currIdx >= historyRef.current.length - 1) return;
+    const nextIndex = currIdx + 1;
+    const snapshot = historyRef.current[nextIndex];
+    if (!snapshot) return;
+
+    isInternalUpdate.current = true;
     applySnapshot(snapshot);
+    historyIndexRef.current = nextIndex;
     setHistoryIndex(nextIndex);
-  }, [history, historyIndex]);
+    setTimeout(() => { isInternalUpdate.current = false; }, 200);
+  }, []);
+
   const applySnapshot = (s) => {
     isInternalUpdate.current = true;
     if (s.qrType !== undefined) setQrType(s.qrType);
     if (s.qrData !== undefined) setQrData(s.qrData);
-    if (s.qrTextureEnabled !== undefined) setQrTextureEnabled(s.qrTextureEnabled);
-    if (s.qrTextureSyncEyes !== undefined) setQrTextureSyncEyes(s.qrTextureSyncEyes);
-    if (s.qrTexture) {
-      const img = new Image();
-      img.onload = () => setQrTexture({ ...s.qrTexture, image: img });
-      img.src = s.qrTexture.src;
-    } else if (s.qrTexture === null) {
-      setQrTexture(null);
-    }
     if (s.qrColor !== undefined) setQrColor(s.qrColor);
     if (s.bgColor !== undefined) setBgColor(s.bgColor);
     if (s.bgTransparent !== undefined) setBgTransparent(s.bgTransparent);
     if (s.eyeColor !== undefined) setEyeColor(s.eyeColor);
     if (s.eyeOuterColor !== undefined) setEyeOuterColor(s.eyeOuterColor);
     if (s.syncEyes !== undefined) setSyncEyes(s.syncEyes);
+    if (s.syncInnerOuterEyes !== undefined) setSyncInnerOuterEyes(s.syncInnerOuterEyes);
+
+    // Gradients
     if (s.gradientEnabled !== undefined) setGradientEnabled(s.gradientEnabled);
     if (s.gradientColor1 !== undefined) setGradientColor1(s.gradientColor1);
     if (s.gradientColor2 !== undefined) setGradientColor2(s.gradientColor2);
     if (s.gradientType !== undefined) setGradientType(s.gradientType);
+
+    // Textures
+    if (s.qrTextureEnabled !== undefined) setQrTextureEnabled(s.qrTextureEnabled);
+    if (s.qrTextureSyncEyes !== undefined) setQrTextureSyncEyes(s.qrTextureSyncEyes);
+    if (s.qrTexture && s.qrTexture.src) {
+      const img = new Image();
+      img.onload = () => setQrTexture({ ...s.qrTexture, image: img });
+      img.src = s.qrTexture.src;
+    } else if (s.qrTexture === null) {
+      setQrTexture(null);
+    }
+
+    // Background Image & Studio
+    if (s.qrBgImageEnabled !== undefined) setQrBgImageEnabled(s.qrBgImageEnabled);
+    if (s.qrBgImage && s.qrBgImage.src) {
+      const img = new Image();
+      img.onload = () => setQrBgImage({ ...s.qrBgImage, image: img });
+      img.src = s.qrBgImage.src;
+    } else if (s.qrBgImage === null) {
+      setQrBgImage(null);
+    }
+    if (s.qrBgImageOpacity !== undefined) setQrBgImageOpacity(s.qrBgImageOpacity);
+    if (s.qrBgImageBlur !== undefined) setQrBgImageBlur(s.qrBgImageBlur);
+    if (s.qrBgImageOverlayOpacity !== undefined) setQrBgImageOverlayOpacity(s.qrBgImageOverlayOpacity);
+    if (s.qrBgCardEnabled !== undefined) setQrBgCardEnabled(s.qrBgCardEnabled);
+    if (s.qrBgCardOpacity !== undefined) setQrBgCardOpacity(s.qrBgCardOpacity);
+    if (s.qrBgShape !== undefined) setQrBgShape(s.qrBgShape);
+    if (s.qrBgCardShape !== undefined) setQrBgCardShape(s.qrBgCardShape);
+    if (s.aiArtQrEnabled !== undefined) setAiArtQrEnabled(s.aiArtQrEnabled);
+    if (s.aiArtBlend !== undefined) setAiArtBlend(s.aiArtBlend);
+    if (s.aiArtStyle !== undefined) setAiArtStyle(s.aiArtStyle);
+    if (s.qrSizeScale !== undefined) setQrSizeScale(s.qrSizeScale);
+    if (s.qrPosX !== undefined) setQrPosX(s.qrPosX);
+    if (s.qrPosY !== undefined) setQrPosY(s.qrPosY);
+
+    // Shapes & Eyes
     if (s.dotStyle !== undefined) setDotStyle(s.dotStyle);
     if (s.eyeStyle !== undefined) setEyeStyle(s.eyeStyle);
     if (s.dotPadding !== undefined) setDotPadding(s.dotPadding);
     if (s.eyePadding !== undefined) setEyePadding(s.eyePadding);
     
+    // Logo
     const logoData = s.logo || (s.logoSrc ? { src: s.logoSrc, name: s.logoName } : null);
     if (logoData && logoData.src) {
-      if (!logo || logo.src !== logoData.src) {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => setLogo({ src: logoData.src, name: logoData.name || 'Logo', image: img });
-        img.src = logoData.src;
-      }
-    } else {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => setLogo({ src: logoData.src, name: logoData.name || 'Logo', shape: logoData.shape || 'rounded', image: img });
+      img.src = logoData.src;
+    } else if (s.logo === null) {
       setLogo(null);
     }
     if (s.logoWidth !== undefined) setLogoWidth(s.logoWidth);
@@ -1793,11 +1859,23 @@ export default function App() {
     if (s.logoBackground !== undefined) setLogoBackground(s.logoBackground);
     if (s.logoBgColor !== undefined) setLogoBgColor(s.logoBgColor);
     if (s.logoBgShape !== undefined) setLogoBgShape(s.logoBgShape);
+    if (s.logoCrop !== undefined) setLogoCrop(s.logoCrop);
     if (s.logoOutline !== undefined) setLogoOutline(s.logoOutline);
     if (s.logoOutlineColor !== undefined) setLogoOutlineColor(s.logoOutlineColor);
     if (s.logoOutlineWidth !== undefined) setLogoOutlineWidth(s.logoOutlineWidth);
+    if (s.logoOutlineOpacity !== undefined) setLogoOutlineOpacity(s.logoOutlineOpacity);
     if (s.logoPosX !== undefined) setLogoPosX(s.logoPosX);
     if (s.logoPosY !== undefined) setLogoPosY(s.logoPosY);
+    if (s.logoOpacity !== undefined) setLogoOpacity(s.logoOpacity);
+    if (s.logoRotation !== undefined) setLogoRotation(s.logoRotation);
+    if (s.logoShadowEnabled !== undefined) setLogoShadowEnabled(s.logoShadowEnabled);
+    if (s.logoShadowColor !== undefined) setLogoShadowColor(s.logoShadowColor);
+    if (s.logoShadowBlur !== undefined) setLogoShadowBlur(s.logoShadowBlur);
+    if (s.logoShadowOffsetX !== undefined) setLogoShadowOffsetX(s.logoShadowOffsetX);
+    if (s.logoShadowOffsetY !== undefined) setLogoShadowOffsetY(s.logoShadowOffsetY);
+    if (s.logoInnerShadowEnabled !== undefined) setLogoInnerShadowEnabled(s.logoInnerShadowEnabled);
+    if (s.logoTexture !== undefined) setLogoTexture(s.logoTexture);
+
     if (s.logoEraseColorEnabled !== undefined) {
       setLogoEraseColorEnabled(s.logoEraseColorEnabled);
       if (!s.logoEraseColorEnabled) {
@@ -1815,6 +1893,8 @@ export default function App() {
     }
     if (s.logoEraseTolerance !== undefined) setLogoEraseTolerance(s.logoEraseTolerance);
     if (s.logoEraseSmoothing !== undefined) setLogoEraseSmoothing(s.logoEraseSmoothing);
+
+    // Frame
     if (s.frameStyle !== undefined) setFrameStyle(s.frameStyle);
     if (s.frameText !== undefined) setFrameText(s.frameText);
     if (s.frameColor !== undefined) setFrameColor(s.frameColor);
@@ -1828,6 +1908,8 @@ export default function App() {
     if (s.frameShadowColor !== undefined) setFrameShadowColor(s.frameShadowColor);
     if (s.framePosition !== undefined) setFramePosition(s.framePosition);
     if (s.frameRotation !== undefined) setFrameRotation(s.frameRotation);
+
+    // Center Text
     if (s.textCenterEnabled !== undefined) setTextCenterEnabled(s.textCenterEnabled);
     if (s.textCenterText !== undefined) setTextCenterText(s.textCenterText);
     if (s.textCenterSize !== undefined) setTextCenterSize(s.textCenterSize);
@@ -1844,30 +1926,55 @@ export default function App() {
     if (s.textCenterRotation !== undefined) setTextCenterRotation(s.textCenterRotation);
     if (s.textCenterWidth !== undefined) setTextCenterWidth(s.textCenterWidth);
     if (s.textCenterHeight !== undefined) setTextCenterHeight(s.textCenterHeight);
+
+    // Template & Error Level
+    if (s.selectedTemplate !== undefined) setSelectedTemplate(s.selectedTemplate);
+    if (s.templateHandleText !== undefined) setTemplateHandleText(s.templateHandleText);
     if (s.errorLevel !== undefined) setErrorLevel(s.errorLevel);
     
-    setTimeout(() => { isInternalUpdate.current = false; }, 50);
+    setTimeout(() => { isInternalUpdate.current = false; }, 100);
   };
-  // Initial snapshot
+
+  // Initial snapshot on mount
   useEffect(() => {
-    if (history.length === 0) {
+    if (historyRef.current.length === 0) {
       const initial = getSnapshot();
+      historyRef.current = [initial];
+      historyIndexRef.current = 0;
       setHistory([initial]);
       setHistoryIndex(0);
     }
   }, []);
-  // Debounced auto-save for continuous and discrete changes
+
+  // Debounced auto-save for all parameter changes
   useEffect(() => {
     const timer = setTimeout(() => {
       saveSnapshot();
-    }, 800); // Slightly faster debounce
+    }, 600);
     return () => clearTimeout(timer);
   }, [
-    qrColor, bgColor, logoWidth, logoHeight, logoPosX, logoPosY, textCenterSize, textCenterPosX, textCenterPosY,
-    frameSize, dotPadding, eyePadding, textCenterText, frameText,
-    dotStyle, eyeStyle, qrType, logo, syncEyes, gradientEnabled, frameStyle,
-    eyeColor, eyeOuterColor, logoBackground, logoOutline, textCenterEnabled,
-    framePosition, frameRotation, textCenterRotation
+    qrData, qrColor, bgColor, bgTransparent, eyeColor, eyeOuterColor, syncEyes, syncInnerOuterEyes,
+    gradientEnabled, gradientColor1, gradientColor2, gradientType,
+    qrTextureEnabled, qrTexture, qrTextureSyncEyes,
+    qrBgImageEnabled, qrBgImage, qrBgImageOpacity, qrBgImageBlur, qrBgImageOverlayOpacity,
+    qrBgCardEnabled, qrBgCardOpacity, qrBgShape, qrBgCardShape,
+    aiArtQrEnabled, aiArtBlend, aiArtStyle,
+    qrSizeScale, qrPosX, qrPosY,
+    dotStyle, eyeStyle, dotPadding, eyePadding,
+    logo, logoWidth, logoHeight, logoPadding, logoBackground, logoBgColor, logoBgShape,
+    logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity, logoPosX, logoPosY,
+    logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
+    logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop, logoAspectRatioLocked,
+    frameStyle, frameText, frameColor, frameFont, frameSize,
+    frameStrokeEnabled, frameStrokeWidth, frameStrokeColor,
+    frameShadowEnabled, frameShadowBlur, frameShadowColor,
+    framePosition, frameRotation,
+    textCenterEnabled, textCenterText, textCenterSize, textCenterColor, textCenterFont,
+    textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
+    textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
+    textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight,
+    selectedTemplate, templateHandleText,
+    errorLevel
   ]);
   const handleFontUpload = (e) => {
     const file = e.target.files[0];
@@ -2187,6 +2294,9 @@ export default function App() {
       backgroundImageOpacity: qrBgImageOpacity,
       backgroundImageBlur: qrBgImageBlur,
       backgroundImageOverlayOpacity: qrBgImageOverlayOpacity,
+      aiArtQrEnabled,
+      aiArtBlend,
+      aiArtStyle,
       qrBackgroundCardEnabled: qrBgCardEnabled,
       qrBackgroundCardOpacity: qrBgCardOpacity,
       qrBgShape,
@@ -2496,6 +2606,9 @@ export default function App() {
         backgroundImageOpacity: qrBgImageOpacity,
         backgroundImageBlur: qrBgImageBlur,
         backgroundImageOverlayOpacity: qrBgImageOverlayOpacity,
+        aiArtQrEnabled,
+        aiArtBlend,
+        aiArtStyle,
         qrBackgroundCardEnabled: qrBgCardEnabled,
         qrBackgroundCardOpacity: qrBgCardOpacity,
         qrBgShape,
@@ -2786,60 +2899,70 @@ export default function App() {
       const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
       const hSize = 24; 
       const checkH = (hx, hy, type) => {
-          if (localX >= hx - hSize && localX <= hx + hSize && localY >= hy - hSize && localY <= hy + hSize) {
-              setIsDraggingCanvas(true);
-              dragType.current = type;
-              dragStartOffset.current = { 
-                  x: localX, 
-                  y: localY, 
-                  startW: logoWidth, 
-                  startH: logoHeight, 
-                  startPosX: logoPosX, 
-                  startPosY: logoPosY, 
-                  startRotation: logoRotation,
-                  startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
-              };
-              e.preventDefault();
-              return true;
-          }
-          return false;
+        if (localX >= hx - hSize && localX <= hx + hSize && localY >= hy - hSize && localY <= hy + hSize) {
+          setIsDraggingCanvas(true);
+          dragType.current = type;
+          dragStartOffset.current = { 
+            x: localX, 
+            y: localY, 
+            startW: logoWidth, 
+            startH: logoHeight, 
+            startPosX: logoPosX, 
+            startPosY: logoPosY, 
+            startRotation: logoRotation,
+            startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
+          };
+          e.preventDefault();
+          return true;
+        }
+        return false;
       };
+
       // Only allow interacting with handles (resizing, rotating, deleting) if the logo is already selected
       if (canvasSelection === 'logo') {
-        // Bottom-Left Rotate Bracket (Offset -20, 20) with a larger hit area check (hSize = 24)
         const checkRotateLogo = (hx, hy) => {
-            const rotHSize = 24; // Extra generous touch target size for rotation handle
-            if (localX >= hx - rotHSize && localX <= hx + rotHSize && localY >= hy - rotHSize && localY <= hy + rotHSize) {
-                setIsDraggingCanvas(true);
-                dragType.current = 'rotate-logo';
-                dragStartOffset.current = { 
-                    x: localX, 
-                    y: localY, 
-                    startW: logoWidth, 
-                    startH: logoHeight, 
-                    startPosX: logoPosX, 
-                    startPosY: logoPosY, 
-                    startRotation: logoRotation,
-                    startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
-                };
-                e.preventDefault();
-                return true;
-            }
-            return false;
+          const rotHSize = 24;
+          if (localX >= hx - rotHSize && localX <= hx + rotHSize && localY >= hy - rotHSize && localY <= hy + rotHSize) {
+            setIsDraggingCanvas(true);
+            dragType.current = 'rotate-logo';
+            dragStartOffset.current = { 
+              x: localX, 
+              y: localY, 
+              startW: logoWidth, 
+              startH: logoHeight, 
+              startPosX: logoPosX, 
+              startPosY: logoPosY, 
+              startRotation: logoRotation,
+              startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
+            };
+            e.preventDefault();
+            return true;
+          }
+          return false;
         };
+
+        // 1. Check Top-Center Rotate Stalk Handle (ly - 26)
+        if (checkRotateLogo(centerX, ly - 26)) return;
+        // 2. Check Bottom-Left Rotate Bracket Handle (lx - 20, ly + lh + 20)
         if (checkRotateLogo(lx - 20, ly + lh + 20)) return;
-        if (checkH(lx + lw, ly + lh, 'resize-logo-br')) return;
-        if (checkH(lx + lw, ly + lh/2, 'resize-logo-r')) return;
-        if (checkH(lx + lw/2, ly + lh, 'resize-logo-b')) return;
-        
-        // Delete Button
+
+        // 3. Check Delete Button (Top-Right: lx + lw, ly)
         if (checkH(lx + lw, ly, 'delete-logo')) {
           setLogo(null);
+          setCanvasSelection(null);
           setIsDraggingCanvas(false);
           dragType.current = null;
+          showToast('Logo removed');
           e.preventDefault();
           return;
         }
+
+        // 4. Check Proportional Resize (Bottom-Right: lx + lw, ly + lh)
+        if (checkH(lx + lw, ly + lh, 'resize-logo-br')) return;
+
+        // 5. Check Stretch Handles (Right & Bottom)
+        if (checkH(lx + lw, ly + lh / 2, 'resize-logo-r')) return;
+        if (checkH(lx + lw / 2, ly + lh, 'resize-logo-b')) return;
       }
       
       // Clicking inside the body region always triggers dragging/selection
@@ -2896,40 +3019,50 @@ export default function App() {
       };
       // Only allow interacting with handles if text is already selected
       if (canvasSelection === 'text') {
-        // Bottom-Left Rotate Bracket (Offset -20, 20) with a larger hit area check (hSize = 24)
         const checkRotateText = (hx, hy) => {
-            const rotHSize = 24; // Extra generous touch target size for rotation handle
-            if (localX >= hx - rotHSize && localX <= hx + rotHSize && localY >= hy - rotHSize && localY <= hy + rotHSize) {
-                setIsDraggingCanvas(true);
-                dragType.current = 'rotate-text';
-                dragStartOffset.current = { 
-                    x: localX, 
-                    y: localY, 
-                    startSize: textCenterSize, 
-                    startPosX: textCenterPosX, 
-                    startPosY: textCenterPosY, 
-                    startRotation: textCenterRotation, 
-                    startW: tw / contentSize, 
-                    startH: th / contentSize,
-                    startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
-                };
-                e.preventDefault();
-                return true;
-            }
-            return false;
+          const rotHSize = 24;
+          if (localX >= hx - rotHSize && localX <= hx + rotHSize && localY >= hy - rotHSize && localY <= hy + rotHSize) {
+            setIsDraggingCanvas(true);
+            dragType.current = 'rotate-text';
+            dragStartOffset.current = { 
+              x: localX, 
+              y: localY, 
+              startSize: textCenterSize, 
+              startPosX: textCenterPosX, 
+              startPosY: textCenterPosY, 
+              startRotation: textCenterRotation, 
+              startW: tw / contentSize, 
+              startH: th / contentSize,
+              startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
+            };
+            e.preventDefault();
+            return true;
+          }
+          return false;
         };
+
+        // 1. Check Top-Center Rotate Stalk Handle (ty - 26)
+        if (checkRotateText(centerX, ty - 26)) return;
+        // 2. Check Bottom-Left Rotate Bracket Handle (tx - 20, ty + th + 20)
         if (checkRotateText(tx - 20, ty + th + 20)) return;
-        if (checkH(tx + tw, ty + th, 'resize-text-br')) return;
-        if (checkH(tx + tw, ty + th/2, 'resize-text-r')) return;
-        if (checkH(tx + tw/2, ty + th, 'resize-text-b')) return;
-        
+
+        // 3. Check Delete Button (Top-Right: tx + tw, ty)
         if (checkH(tx + tw, ty, 'delete-text')) {
           setTextCenterEnabled(false);
+          setCanvasSelection(null);
           setIsDraggingCanvas(false);
           dragType.current = null;
+          showToast('Text removed');
           e.preventDefault();
           return;
         }
+
+        // 4. Check Proportional Resize (Bottom-Right: tx + tw, ty + th)
+        if (checkH(tx + tw, ty + th, 'resize-text-br')) return;
+
+        // 5. Check Stretch Handles (Right & Bottom)
+        if (checkH(tx + tw, ty + th / 2, 'resize-text-r')) return;
+        if (checkH(tx + tw / 2, ty + th, 'resize-text-b')) return;
       }
       // Clicking inside the body region always triggers dragging/selection
       if (inRect(localX, localY, tx, ty, tw, th)) {
@@ -5448,7 +5581,7 @@ export default function App() {
                                               onConfirm: ({ image, src, name }) => {
                                                 setQrBgImage({ src, image, name });
                                                 setQrBgImageEnabled(true);
-                                                setEyeStyle('rounded');
+                                                setEyeStyle('square');
                                                 setDotStyle('rounded');
                                                 setQrBgCardEnabled(false);
                                                 setErrorLevel('H'); // Auto set high error correction for reliability
@@ -5492,7 +5625,7 @@ export default function App() {
                                         img.onload = () => {
                                           setQrBgImage({ src: p.url, image: img, name: p.name });
                                           setQrBgImageEnabled(true);
-                                          setEyeStyle('rounded');
+                                          setEyeStyle('square');
                                           setDotStyle('rounded');
                                           setQrBgCardEnabled(false);
                                           setErrorLevel('H'); // Auto set high error correction for reliability
@@ -5525,6 +5658,122 @@ export default function App() {
                           </div>
                           {qrBgImage && qrBgImageEnabled && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '4px' }} className="fade-in">
+                              
+                              {/* ── AI ILLUSTRATION ART QR SYNTHESIS CARD ── */}
+                              <div style={{
+                                background: aiArtQrEnabled 
+                                  ? 'linear-gradient(135deg, rgba(214,0,54,0.12) 0%, rgba(139,92,246,0.12) 100%)' 
+                                  : 'var(--bg-elevated)',
+                                border: aiArtQrEnabled 
+                                  ? '1.5px solid var(--accent-primary)' 
+                                  : '1px solid var(--border-color)',
+                                borderRadius: '16px',
+                                padding: '16px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '14px',
+                                boxShadow: aiArtQrEnabled ? '0 8px 24px rgba(214,0,54,0.15)' : 'none',
+                                transition: 'all 0.25s ease'
+                              }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{
+                                      width: '32px',
+                                      height: '32px',
+                                      borderRadius: '10px',
+                                      background: aiArtQrEnabled ? 'var(--accent-primary)' : 'rgba(255,255,255,0.08)',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      color: '#FFFFFF'
+                                    }}>
+                                      <Sparkles size={16} />
+                                    </div>
+                                    <div>
+                                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        AI Illustration QR Mode
+                                        <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', background: 'var(--accent-primary)', color: '#fff', fontWeight: 700 }}>PRO</span>
+                                      </div>
+                                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                        Fuses QR pixels directly into the artwork
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <Toggle checked={aiArtQrEnabled} onChange={setAiArtQrEnabled} />
+                                </div>
+
+                                {aiArtQrEnabled && (
+                                  <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '4px' }}>
+                                    {/* Style Selection Chips */}
+                                    <div>
+                                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                                        Illustration Art Style:
+                                      </div>
+                                      <div style={{
+                                        display: 'flex',
+                                        gap: '8px',
+                                        overflowX: 'auto',
+                                        paddingBottom: '4px',
+                                        scrollbarWidth: 'none',
+                                        msOverflowStyle: 'none'
+                                      }}>
+                                        {AI_ART_STYLES.map(s => {
+                                          const isSelected = aiArtStyle === s.id;
+                                          return (
+                                            <button
+                                              key={s.id}
+                                              onClick={() => setAiArtStyle(s.id)}
+                                              style={{
+                                                flex: '0 0 auto',
+                                                padding: '8px 12px',
+                                                borderRadius: '10px',
+                                                background: isSelected ? 'var(--accent-primary)' : 'var(--bg-primary)',
+                                                border: '1px solid',
+                                                borderColor: isSelected ? 'var(--accent-primary)' : 'var(--border-color)',
+                                                color: isSelected ? '#FFFFFF' : 'var(--text-primary)',
+                                                fontSize: '12px',
+                                                fontWeight: isSelected ? 700 : 500,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.15s ease'
+                                              }}
+                                            >
+                                              {s.name}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+
+                                    {/* Blend Slider */}
+                                    <Slider
+                                      label="AI Artistic Synthesis Blend"
+                                      min={0.4}
+                                      max={0.95}
+                                      step={0.02}
+                                      value={aiArtBlend}
+                                      onChange={setAiArtBlend}
+                                      formatValue={(v) => `${Math.round(v * 100)}%`}
+                                    />
+
+                                    {/* Live Scannability Badge */}
+                                    <div style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '8px',
+                                      background: 'rgba(52,199,89,0.12)',
+                                      border: '1px solid rgba(52,199,89,0.3)',
+                                      borderRadius: '10px',
+                                      padding: '8px 12px'
+                                    }}>
+                                      <ShieldCheck size={16} style={{ color: 'var(--success)' }} />
+                                      <span style={{ fontSize: '11.5px', color: 'var(--text-primary)', fontWeight: 600 }}>
+                                        100% Optical Scan Ready ✨
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
                               {/* Opacity Slider */}
                               <Slider 
                                 label="Image Opacity" 

@@ -211,6 +211,8 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   // History
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const historyRef = useRef([]);
+  const historyIndexRef = useRef(-1);
   const isUndoRedoActionRef = useRef(false);
   const [exportQuality, setExportQuality] = useState('Medium');
 
@@ -237,7 +239,10 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
   // Init history
   useEffect(() => {
-    setHistory([{ text, bcid, barColor, bgColor, barWidth, height, margin, displayValue }]);
+    const initial = { text, bcid, barColor, bgColor, barWidth, height, margin, displayValue };
+    historyRef.current = [initial];
+    historyIndexRef.current = 0;
+    setHistory([initial]);
     setHistoryIndex(0);
   }, []);
 
@@ -252,33 +257,58 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
     if (updates.height !== undefined) setHeight(updates.height);
     if (updates.margin !== undefined) setMargin(updates.margin);
     if (updates.displayValue !== undefined) setDisplayValue(updates.displayValue);
-    if (isUndoRedoActionRef.current) { isUndoRedoActionRef.current = false; return; }
-    const cleaned = history.slice(0, historyIndex + 1);
-    setHistory([...cleaned, newState]);
-    setHistoryIndex(cleaned.length);
+    
+    if (isUndoRedoActionRef.current) { 
+      return; 
+    }
+    
+    const prevIdx = historyIndexRef.current;
+    if (prevIdx >= 0 && historyRef.current[prevIdx]) {
+      if (JSON.stringify(historyRef.current[prevIdx]) === JSON.stringify(newState)) return;
+    }
+
+    const cleaned = historyRef.current.slice(0, prevIdx + 1);
+    cleaned.push(newState);
+    if (cleaned.length > 50) cleaned.shift();
+
+    const newIdx = cleaned.length - 1;
+    historyRef.current = cleaned;
+    historyIndexRef.current = newIdx;
+    setHistory(cleaned);
+    setHistoryIndex(newIdx);
   };
 
   const undo = () => {
-    if (historyIndex > 0) {
+    const currIdx = historyIndexRef.current;
+    if (currIdx > 0) {
       isUndoRedoActionRef.current = true;
-      const idx = historyIndex - 1;
+      const idx = currIdx - 1;
+      const s = historyRef.current[idx];
+      if (!s) return;
+      
+      historyIndexRef.current = idx;
       setHistoryIndex(idx);
-      const s = history[idx];
       setText(s.text); setBcid(s.bcid || 'code128'); setBarColor(s.barColor);
       setBgColor(s.bgColor); setBarWidth(s.barWidth); setHeight(s.height);
       setMargin(s.margin); setDisplayValue(s.displayValue);
+      setTimeout(() => { isUndoRedoActionRef.current = false; }, 150);
     }
   };
 
   const redo = () => {
-    if (historyIndex < history.length - 1) {
+    const currIdx = historyIndexRef.current;
+    if (currIdx < historyRef.current.length - 1) {
       isUndoRedoActionRef.current = true;
-      const idx = historyIndex + 1;
+      const idx = currIdx + 1;
+      const s = historyRef.current[idx];
+      if (!s) return;
+
+      historyIndexRef.current = idx;
       setHistoryIndex(idx);
-      const s = history[idx];
       setText(s.text); setBcid(s.bcid || 'code128'); setBarColor(s.barColor);
       setBgColor(s.bgColor); setBarWidth(s.barWidth); setHeight(s.height);
       setMargin(s.margin); setDisplayValue(s.displayValue);
+      setTimeout(() => { isUndoRedoActionRef.current = false; }, 150);
     }
   };
 

@@ -1,6 +1,7 @@
 import qrcode from 'qrcode-generator';
 import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import { drawTemplateBackground } from '../components/qr-templates/TemplateRenderer';
+import { synthesizeAiArtQR } from './aiArtQrEngine';
 
 /**
  * QR Code Generation Engine
@@ -500,6 +501,57 @@ export function renderQR(canvas, options) {
   // Clear canvas
   ctx.clearRect(0, 0, w, h);
 
+  // ── AI ILLUSTRATION ART QR SYNTHESIS MODE ──
+  if (options.aiArtQrEnabled && backgroundImage && !options.template) {
+    synthesizeAiArtQR(ctx, backgroundImage, matrix, moduleCount, {
+      size,
+      quietZone,
+      blendStrength: options.aiArtBlend !== undefined ? options.aiArtBlend : 0.72,
+      artStyle: options.aiArtStyle || 'illustration',
+      edgePreservation: options.aiArtEdgePreservation !== undefined ? options.aiArtEdgePreservation : 0.65
+    });
+
+    // Overlay optional Logo or Center Text if present
+    if (logo) {
+      drawLogo(ctx, logo, size, {
+        ...options,
+        contentX: quietZone * (size / (moduleCount + quietZone * 2)),
+        contentY: quietZone * (size / (moduleCount + quietZone * 2)),
+        contentSize: size - (quietZone * 2) * (size / (moduleCount + quietZone * 2)),
+        moduleCount,
+        quietZone
+      });
+    } else if (textCenter) {
+      drawCenterText(ctx, textCenter, size, {
+        textCenterSize,
+        textCenterFont,
+        textCenterColor,
+        textCenterStrokeEnabled,
+        textCenterStrokeWidth,
+        textCenterStrokeColor,
+        textCenterShadowEnabled,
+        textCenterShadowBlur,
+        textCenterShadowColor,
+        textCenterPosX,
+        textCenterPosY,
+        textCenterRotation,
+        textCenterWidth,
+        textCenterHeight,
+        logoPadding,
+        logoBackground,
+        logoBgColor,
+        logoBgShape,
+        contentX: quietZone * (size / (moduleCount + quietZone * 2)),
+        contentY: quietZone * (size / (moduleCount + quietZone * 2)),
+        contentSize: size - (quietZone * 2) * (size / (moduleCount + quietZone * 2)),
+        moduleCount,
+        quietZone
+      });
+    }
+
+    return canvas;
+  }
+
   const effectiveBgTransparent = bgTransparent;
 
   // Background & Clipping
@@ -931,24 +983,19 @@ export function renderQR(canvas, options) {
       const eyeCenterX = x + eyeSize / 2;
       const eyeCenterY = y + eyeSize / 2;
 
-      // ── Rounded Safety Backing behind Finder Eyes for 100% Recognition ──
+      // ── Hard-Corner Square Safety Backing behind Finder Eyes for 100% Recognition ──
       if (backgroundImageEnabled && backgroundImage && !options.template) {
         ctx.save();
         const pad = cellSize * 0.45;
         const plateX = x - pad;
         const plateY = y - pad;
         const plateSize = eyeSize + pad * 2;
-        const plateRadius = cellSize * 2.2; // Smooth rounded shape
 
         ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
         ctx.shadowBlur = 10;
         ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
         ctx.beginPath();
-        if (typeof ctx.roundRect === 'function') {
-          ctx.roundRect(plateX, plateY, plateSize, plateSize, plateRadius);
-        } else {
-          drawRoundedRect(ctx, plateX, plateY, plateSize, plateSize, plateRadius);
-        }
+        ctx.rect(plateX, plateY, plateSize, plateSize);
         ctx.fill();
         ctx.restore();
       }
@@ -2844,120 +2891,161 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
 
   ctx.restore();
 
-  // Draw Resize Handles (5-point system) if requested
+  // Draw Resize Handles if requested
   if (options.showHandle && options.selectedType === 'logo') {
     // Draw Center Alignment Guide Lines
     ctx.save();
-    ctx.strokeStyle = '#007AFF'; // Premium blue alignment guidelines
+    ctx.strokeStyle = '#007AFF';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([6, 4]);
     
     if (logoPosX === 0.5) {
-        ctx.beginPath();
-        ctx.moveTo(contentX + contentSize / 2, contentY);
-        ctx.lineTo(contentX + contentSize / 2, contentY + contentSize);
-        ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(contentX + contentSize / 2, contentY);
+      ctx.lineTo(contentX + contentSize / 2, contentY + contentSize);
+      ctx.stroke();
     }
     if (logoPosY === 0.5) {
-        ctx.beginPath();
-        ctx.moveTo(contentX, contentY + contentSize / 2);
-        ctx.lineTo(contentX + contentSize, contentY + contentSize / 2);
-        ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(contentX, contentY + contentSize / 2);
+      ctx.lineTo(contentX + contentSize, contentY + contentSize / 2);
+      ctx.stroke();
     }
     ctx.restore();
-    ctx.save();
-    ctx.translate(centerX, centerY);
-    ctx.rotate((logoRotation * Math.PI) / 180);
-    ctx.translate(-centerX, -centerY);
 
-    ctx.strokeStyle = '#007AFF'; 
-    ctx.lineWidth = 4.5; // Premium bold solid outline stroke
-    ctx.strokeRect(logoX, logoY, logoW, logoH);
-    
-    const hSize = 10;
-    const bigHSize = 16;
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeStyle = '#007AFF';
-    ctx.lineWidth = 2.5; // Bold handles stroke
-
-    const drawH = (hx, hy, size = hSize, isCircle = false) => {
-        ctx.beginPath();
-        if (isCircle) {
-            ctx.arc(hx, hy, size/2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-        } else {
-            ctx.fillRect(hx - size/2, hy - size/2, size, size);
-            ctx.strokeRect(hx - size/2, hy - size/2, size, size);
-        }
-    };
-
-    // 1. Bottom-Left Curved Rotate Bracket Arrow (Radius 16, Offset -20, 20)
-    const drawRotateBracket = (bx, by, angleStart, angleEnd, ox, oy) => {
-        ctx.save();
-        ctx.strokeStyle = '#007AFF';
-        ctx.lineWidth = 4.5; // Bold rotate bracket stroke
-        ctx.beginPath();
-        const ax = bx + ox;
-        const ay = by + oy;
-        ctx.arc(ax, ay, 16, angleStart, angleEnd); // Radius increased to 16
-        ctx.stroke();
-        
-        ctx.fillStyle = '#007AFF';
-        const drawArrow = (arrowX, arrowY, rotAngle) => {
-            ctx.save();
-            ctx.translate(arrowX, arrowY);
-            ctx.rotate(rotAngle);
-            ctx.beginPath();
-            ctx.moveTo(-4, -4);
-            ctx.lineTo(4, 0);
-            ctx.lineTo(-4, 4);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
-        };
-        
-        const e1x = ax + 16 * Math.cos(angleStart);
-        const e1y = ay + 16 * Math.sin(angleStart);
-        drawArrow(e1x, e1y, angleStart + Math.PI/2);
-        
-        const e2x = ax + 16 * Math.cos(angleEnd);
-        const e2y = ay + 16 * Math.sin(angleEnd);
-        drawArrow(e2x, e2y, angleEnd - Math.PI/2);
-        
-        ctx.restore();
-    };
-
-    // Draw only Bottom-Left rotate bracket (offset -20, 20)
-    drawRotateBracket(logoX, logoY + logoH, 0.5 * Math.PI, Math.PI, -20, 20);
-    
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeStyle = '#007AFF';
-
-    // 2. Right (Stretch X)
-    drawH(logoX + logoW, logoY + logoH/2); 
-
-    // 3. Bottom (Stretch Y)
-    drawH(logoX + logoW/2, logoY + logoH); 
-
-    // 4. Bottom-Right (Resize Proportional - Big Circle)
-    drawH(logoX + logoW, logoY + logoH, bigHSize, true);
-
-    // 5. Top-Right (Delete Button - Red Circle with X)
-    ctx.fillStyle = '#FF3B30';
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3.5; // Bold delete button X stroke
-    drawH(logoX + logoW, logoY, 22, true);
-    // Draw X
-    ctx.beginPath();
-    ctx.moveTo(logoX + logoW - 6, logoY - 6);
-    ctx.lineTo(logoX + logoW + 6, logoY + 6);
-    ctx.moveTo(logoX + logoW + 6, logoY - 6);
-    ctx.lineTo(logoX + logoW - 6, logoY + 6);
-    ctx.stroke();
-
-    ctx.restore();
+    drawTransformationBox(ctx, logoX, logoY, logoW, logoH, centerX, centerY, logoRotation, canvasSize, 'logo');
   }
+}
+
+/**
+ * Shared, DPI-scaled professional selection frame with resize, rotate, and delete controls
+ */
+function drawTransformationBox(ctx, boxX, boxY, boxW, boxH, centerX, centerY, rotation, canvasSize, type) {
+  const sf = Math.max(1, canvasSize / 512);
+  ctx.save();
+  ctx.translate(centerX, centerY);
+  ctx.rotate(((rotation || 0) * Math.PI) / 180);
+  ctx.translate(-centerX, -centerY);
+
+  // 1. Bounding Box Outline
+  ctx.strokeStyle = '#007AFF';
+  ctx.lineWidth = 2.5 * sf;
+  ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+  // 2. Corner Top-Left (Anchor Square)
+  const sqSize = 9 * sf;
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#007AFF';
+  ctx.lineWidth = 2 * sf;
+  ctx.fillRect(boxX - sqSize / 2, boxY - sqSize / 2, sqSize, sqSize);
+  ctx.strokeRect(boxX - sqSize / 2, boxY - sqSize / 2, sqSize, sqSize);
+
+  // 3. Top-Center Rotate Stalk & Handle
+  const rotStalkY = boxY - 26 * sf;
+  ctx.strokeStyle = '#007AFF';
+  ctx.lineWidth = 1.8 * sf;
+  ctx.setLineDash([3 * sf, 3 * sf]);
+  ctx.beginPath();
+  ctx.moveTo(centerX, boxY);
+  ctx.lineTo(centerX, rotStalkY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Top-Center Rotate Circle with Curved Arrow
+  const rotRadius = 11 * sf;
+  ctx.fillStyle = '#007AFF';
+  ctx.beginPath();
+  ctx.arc(centerX, rotStalkY, rotRadius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.6 * sf;
+  ctx.beginPath();
+  ctx.arc(centerX, rotStalkY, 5.5 * sf, 0.4 * Math.PI, 1.8 * Math.PI);
+  ctx.stroke();
+  // Arrowhead on top rotate circle
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(centerX + 5.5 * sf, rotStalkY);
+  ctx.lineTo(centerX + 2.5 * sf, rotStalkY - 3.5 * sf);
+  ctx.lineTo(centerX + 8.5 * sf, rotStalkY - 3.5 * sf);
+  ctx.closePath();
+  ctx.fill();
+
+  // 4. Bottom-Left Rotate Bracket (Alternative Grab Handle)
+  const brX = boxX - 20 * sf;
+  const brY = boxY + boxH + 20 * sf;
+  ctx.save();
+  ctx.strokeStyle = '#007AFF';
+  ctx.lineWidth = 3.5 * sf;
+  ctx.beginPath();
+  ctx.arc(brX, brY, 14 * sf, 0.5 * Math.PI, Math.PI);
+  ctx.stroke();
+  const drawBracketArrow = (ax, ay, rotAngle) => {
+    ctx.save();
+    ctx.translate(ax, ay);
+    ctx.rotate(rotAngle);
+    ctx.fillStyle = '#007AFF';
+    ctx.beginPath();
+    ctx.moveTo(-3 * sf, -3 * sf);
+    ctx.lineTo(4 * sf, 0);
+    ctx.lineTo(-3 * sf, 3 * sf);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  };
+  drawBracketArrow(brX + 14 * sf * Math.cos(0.5 * Math.PI), brY + 14 * sf * Math.sin(0.5 * Math.PI), Math.PI);
+  drawBracketArrow(brX + 14 * sf * Math.cos(Math.PI), brY + 14 * sf * Math.sin(Math.PI), Math.PI / 2);
+  ctx.restore();
+
+  // 5. Side Stretch Handles (Right & Bottom)
+  const stretchSize = 8 * sf;
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#007AFF';
+  ctx.lineWidth = 2 * sf;
+  // Right Stretch
+  ctx.fillRect(boxX + boxW - stretchSize / 2, boxY + boxH / 2 - stretchSize / 2, stretchSize, stretchSize);
+  ctx.strokeRect(boxX + boxW - stretchSize / 2, boxY + boxH / 2 - stretchSize / 2, stretchSize, stretchSize);
+  // Bottom Stretch
+  ctx.fillRect(boxX + boxW / 2 - stretchSize / 2, boxY + boxH - stretchSize / 2, stretchSize, stretchSize);
+  ctx.strokeRect(boxX + boxW / 2 - stretchSize / 2, boxY + boxH - stretchSize / 2, stretchSize, stretchSize);
+
+  // 6. Bottom-Right Proportional Resize Handle (Circle)
+  const resizeR = 12 * sf;
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#007AFF';
+  ctx.lineWidth = 2.5 * sf;
+  ctx.beginPath();
+  ctx.arc(boxX + boxW, boxY + boxH, resizeR, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // Inner resize dot
+  ctx.fillStyle = '#007AFF';
+  ctx.beginPath();
+  ctx.arc(boxX + boxW, boxY + boxH, 4 * sf, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 7. Top-Right Delete Action Button (Red circle with clean white ✕)
+  const delR = 13 * sf;
+  ctx.fillStyle = '#EF4444';
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2 * sf;
+  ctx.beginPath();
+  ctx.arc(boxX + boxW, boxY, delR, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // White ✕ stroke
+  const xSize = 4.5 * sf;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2.2 * sf;
+  ctx.beginPath();
+  ctx.moveTo(boxX + boxW - xSize, boxY - xSize);
+  ctx.lineTo(boxX + boxW + xSize, boxY + xSize);
+  ctx.moveTo(boxX + boxW + xSize, boxY - xSize);
+  ctx.lineTo(boxX + boxW - xSize, boxY + xSize);
+  ctx.stroke();
+
+  ctx.restore();
 }
 
 /**
@@ -3125,93 +3213,7 @@ function drawCenterText(ctx, text, canvasSize, options) {
         ctx.stroke();
     }
     ctx.restore();
-    ctx.save();
-    ctx.translate(centerX, centerY);
-    ctx.rotate((textCenterRotation * Math.PI) / 180);
-    ctx.translate(-centerX, -centerY);
-
-    ctx.strokeStyle = '#007AFF'; 
-    ctx.lineWidth = 4.5; // Premium bold solid outline stroke
-    ctx.strokeRect(logoX, logoY, paddedW, paddedH);
-    
-    const hSize = 10;
-    const bigHSize = 16;
-    
-    const drawH = (hx, hy, size = hSize, isCircle = false, color = '#ffffff', stroke = '#007AFF') => {
-        ctx.beginPath();
-        ctx.fillStyle = color;
-        ctx.strokeStyle = stroke;
-        ctx.lineWidth = 2.5; // Bold handles stroke
-        if (isCircle) {
-            ctx.arc(hx, hy, size/2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-        } else {
-            ctx.fillRect(hx - size/2, hy - size/2, size, size);
-            ctx.strokeRect(hx - size/2, hy - size/2, size, size);
-        }
-    };
-
-    // 1. Bottom-Left Curved Rotate Bracket Arrow (Radius 16, Offset -20, 20)
-    const drawRotateBracket = (bx, by, angleStart, angleEnd, ox, oy) => {
-        ctx.save();
-        ctx.strokeStyle = '#007AFF';
-        ctx.lineWidth = 4.5; // Bold rotate bracket stroke
-        ctx.beginPath();
-        const ax = bx + ox;
-        const ay = by + oy;
-        ctx.arc(ax, ay, 16, angleStart, angleEnd); // Radius increased to 16
-        ctx.stroke();
-        
-        ctx.fillStyle = '#007AFF';
-        const drawArrow = (arrowX, arrowY, rotAngle) => {
-            ctx.save();
-            ctx.translate(arrowX, arrowY);
-            ctx.rotate(rotAngle);
-            ctx.beginPath();
-            ctx.moveTo(-4, -4);
-            ctx.lineTo(4, 0);
-            ctx.lineTo(-4, 4);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
-        };
-        
-        const e1x = ax + 16 * Math.cos(angleStart);
-        const e1y = ay + 16 * Math.sin(angleStart);
-        drawArrow(e1x, e1y, angleStart + Math.PI/2);
-        
-        const e2x = ax + 16 * Math.cos(angleEnd);
-        const e2y = ay + 16 * Math.sin(angleEnd);
-        drawArrow(e2x, e2y, angleEnd - Math.PI/2);
-        
-        ctx.restore();
-    };
-
-    // Draw only Bottom-Left rotate bracket (offset -20, 20)
-    drawRotateBracket(logoX, logoY + paddedH, 0.5 * Math.PI, Math.PI, -20, 20);
-
-    // 2. Bottom-Right (Resize Proportional - Big Circle)
-    drawH(logoX + paddedW, logoY + paddedH, bigHSize, true);
-
-    // 3. Top-Right (Delete Button)
-    drawH(logoX + paddedW, logoY, 22, true, '#FF3B30', '#ffffff');
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3.5; // Bold delete button X stroke
-    ctx.beginPath();
-    ctx.moveTo(logoX + paddedW - 6, logoY - 6);
-    ctx.lineTo(logoX + paddedW + 6, logoY + 6);
-    ctx.moveTo(logoX + paddedW + 6, logoY - 6);
-    ctx.lineTo(logoX + paddedW - 6, logoY + 6);
-    ctx.stroke();
-
-    // 4. Right (Stretch X)
-    drawH(logoX + paddedW, logoY + paddedH/2);
-
-    // 5. Bottom (Stretch Y)
-    drawH(logoX + paddedW/2, logoY + paddedH);
-
-    ctx.restore();
+    drawTransformationBox(ctx, logoX, logoY, paddedW, paddedH, centerX, centerY, textCenterRotation, canvasSize, 'text');
   }
 }
 

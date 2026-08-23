@@ -1,13 +1,29 @@
 // src/components/ImageCropShapeModal.jsx
-// Interactive 1:1 Photo Crop & Multi-Shape Selection Modal (Square, Rounded, Circle, Hexagon, Octagon, Triangle, etc.)
-// Features live illuminated SVG cutout mask, dimmed exterior shroud, guidelines, and React portal rendering directly into document.body
+// Minimalist Icon-Driven 1:1 Photo Crop & Multi-Shape Masking Modal
+// Features: Flip H/V, Rotate L/R, Zoom, Pan, 10 Shape Masks, Live Illuminated SVG Cutout, and Icon Actions
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { 
-  X, Check, RotateCcw, ZoomIn, ZoomOut, Move,
+  X, Check, RotateCcw, RotateCw, ZoomIn, ZoomOut,
   Square, Circle, Triangle, Hexagon, Octagon, Heart, Star, Diamond, Shield
 } from 'lucide-react';
+
+const FlipHIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="8 5 3 12 8 19" />
+    <polyline points="16 5 21 12 16 19" />
+    <line x1="12" y1="2" x2="12" y2="22" strokeDasharray="3 3" />
+  </svg>
+);
+
+const FlipVIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="5 8 12 3 19 8" />
+    <polyline points="5 16 12 21 19 16" />
+    <line x1="2" y1="12" x2="22" y2="12" strokeDasharray="3 3" />
+  </svg>
+);
 
 export const SHAPE_OPTIONS = [
   { id: 'square', label: 'Square', icon: Square },
@@ -108,7 +124,6 @@ export function ImageCropShapeModal({
   isOpen,
   imageSrc,
   imageName = 'photo.png',
-  title = 'Crop & Shape Photo',
   initialShape = 'rounded',
   allowShapeSelect = true,
   onConfirm,
@@ -117,6 +132,9 @@ export function ImageCropShapeModal({
   const [selectedShape, setSelectedShape] = useState(initialShape || 'rounded');
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [rotation, setRotation] = useState(0); // 0, 90, 180, 270
+  const [flipH, setFlipH] = useState(false);
+  const [flipV, setFlipV] = useState(false);
   const [loadedImage, setLoadedImage] = useState(null);
   const [imgNaturalSize, setImgNaturalSize] = useState({ width: 0, height: 0 });
 
@@ -133,6 +151,9 @@ export function ImageCropShapeModal({
       setSelectedShape(initialShape || 'rounded');
       setZoom(1);
       setPan({ x: 0, y: 0 });
+      setRotation(0);
+      setFlipH(false);
+      setFlipV(false);
     }
   }, [isOpen, initialShape]);
 
@@ -175,7 +196,7 @@ export function ImageCropShapeModal({
       const t2 = e.touches[1];
       const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
       const scale = dist / touchDistRef.current;
-      setZoom(Math.min(Math.max(initialZoomRef.current * scale, 1.0), 4.0));
+      setZoom(Math.min(Math.max(initialZoomRef.current * scale, 0.3), 4.0));
     } else if (e.touches.length === 1 && isDraggingRef.current) {
       e.preventDefault();
       const dx = e.touches[0].clientX - dragStartRef.current.x;
@@ -216,12 +237,15 @@ export function ImageCropShapeModal({
   const handleWheel = (e) => {
     e.preventDefault();
     const zoomDelta = e.deltaY < 0 ? 0.15 : -0.15;
-    setZoom(prev => Math.min(Math.max(prev + zoomDelta, 1.0), 4.0));
+    setZoom(prev => Math.min(Math.max(prev + zoomDelta, 0.3), 4.0));
   };
 
   const handleReset = () => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setRotation(0);
+    setFlipH(false);
+    setFlipV(false);
   };
 
   // ── Helper to draw shape clipping paths on export canvas ──
@@ -357,21 +381,24 @@ export function ImageCropShapeModal({
       drawH = drawW / imgAspect;
     }
 
-    const drawX = (previewBoxSize - drawW) / 2 + pan.x;
-    const drawY = (previewBoxSize - drawH) / 2 + pan.y;
-
-    const finalDrawX = drawX * scaleFactor;
-    const finalDrawY = drawY * scaleFactor;
-    const finalDrawW = drawW * scaleFactor;
-    const finalDrawH = drawH * scaleFactor;
-
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = exportSize;
     tempCanvas.height = exportSize;
     const tempCtx = tempCanvas.getContext('2d');
     tempCtx.imageSmoothingEnabled = true;
     tempCtx.imageSmoothingQuality = 'high';
-    tempCtx.drawImage(loadedImage, finalDrawX, finalDrawY, finalDrawW, finalDrawH);
+
+    // Apply Pan, Zoom, Rotation, and Flips around center
+    tempCtx.save();
+    tempCtx.translate(exportSize / 2, exportSize / 2);
+    tempCtx.translate(pan.x * scaleFactor, pan.y * scaleFactor);
+    tempCtx.rotate((rotation * Math.PI) / 180);
+    tempCtx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+
+    const finalDrawW = drawW * scaleFactor;
+    const finalDrawH = drawH * scaleFactor;
+    tempCtx.drawImage(loadedImage, -finalDrawW / 2, -finalDrawH / 2, finalDrawW, finalDrawH);
+    tempCtx.restore();
 
     if (selectedShape !== 'square') {
       ctx.save();
@@ -391,7 +418,7 @@ export function ImageCropShapeModal({
         src: dataUrl,
         name: imageName,
         shape: selectedShape,
-        cropData: { zoom, pan, shape: selectedShape }
+        cropData: { zoom, pan, rotation, flipH, flipV, shape: selectedShape }
       });
     };
     outputImg.src = dataUrl;
@@ -425,7 +452,7 @@ export function ImageCropShapeModal({
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: '440px',
+          maxWidth: '380px',
           background: 'var(--bg-elevated, #111625)',
           borderRadius: '24px',
           border: '1px solid var(--border-color, rgba(255, 255, 255, 0.14))',
@@ -439,51 +466,9 @@ export function ImageCropShapeModal({
           zIndex: 10000000
         }}
       >
-        {/* Header */}
-        <div style={{
-          padding: '18px 20px 14px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))'
-        }}>
-          <div>
-            <div style={{ fontSize: '17px', fontWeight: 800, letterSpacing: '-0.2px' }}>{title}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary, #94A3B8)', marginTop: '2px' }}>
-              Drag to position &amp; pinch to scale inside shape
-            </div>
-          </div>
-          <button 
-            onClick={onCancel}
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: 'var(--bg-hover, rgba(255, 255, 255, 0.08))',
-              border: 'none',
-              color: 'var(--text-primary, #FFFFFF)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
-              e.currentTarget.style.color = '#EF4444';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'var(--bg-hover, rgba(255, 255, 255, 0.08))';
-              e.currentTarget.style.color = 'var(--text-primary, #FFFFFF)';
-            }}
-          >
-            <X size={18} />
-          </button>
-        </div>
-
         {/* Viewport Area (260x260 1:1 Canvas) */}
         <div style={{
-          padding: '20px',
+          padding: '24px 20px 14px 20px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -513,7 +498,7 @@ export function ImageCropShapeModal({
               background: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px) 0 0 / 16px 16px, #000000'
             }}
           >
-            {/* Underlying Scaled & Panned Image */}
+            {/* Underlying Scaled, Rotated, & Flipped Image */}
             {loadedImage ? (
               <div
                 style={{
@@ -522,7 +507,7 @@ export function ImageCropShapeModal({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  transform: `translate(${pan.x}px, ${pan.y}px)`,
+                  transform: `translate(${pan.x}px, ${pan.y}px) rotate(${rotation}deg) scale(${flipH ? -1 : 1}, ${flipV ? -1 : 1})`,
                   pointerEvents: 'none'
                 }}
               >
@@ -543,7 +528,7 @@ export function ImageCropShapeModal({
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-secondary)' }}>
-                Loading image...
+                ...
               </div>
             )}
 
@@ -562,9 +547,7 @@ export function ImageCropShapeModal({
             >
               <defs>
                 <mask id="shape-cutout-mask">
-                  {/* Everything white is rendered (the dark backdrop) */}
                   <rect x="0" y="0" width="260" height="260" fill="#FFFFFF" />
-                  {/* The shape cutout in black creates the crystal clear window */}
                   <path d={currentShapePath} fill="#000000" />
                 </mask>
               </defs>
@@ -575,7 +558,7 @@ export function ImageCropShapeModal({
                 y="0" 
                 width="260" 
                 height="260" 
-                fill="rgba(5, 8, 16, 0.72)" 
+                fill="rgba(5, 8, 16, 0.75)" 
                 mask="url(#shape-cutout-mask)" 
               />
 
@@ -599,194 +582,231 @@ export function ImageCropShapeModal({
                 strokeLinecap="round"
               />
             </svg>
-
-            {/* Floating Move Indicator */}
-            <div style={{
-              position: 'absolute',
-              bottom: '10px',
-              right: '10px',
-              padding: '4px 8px',
-              borderRadius: '20px',
-              background: 'rgba(0, 0, 0, 0.75)',
-              backdropFilter: 'blur(8px)',
-              fontSize: '11px',
-              fontWeight: 600,
-              color: 'rgba(255, 255, 255, 0.9)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              pointerEvents: 'none',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-              border: '1px solid rgba(255,255,255,0.1)'
-            }}>
-              <Move size={12} color="var(--accent-primary)" />
-              <span>Pan &amp; Scale</span>
-            </div>
           </div>
 
           {/* Zoom Slider Bar */}
           <div style={{
-            marginTop: '16px',
+            marginTop: '14px',
             width: '100%',
-            maxWidth: '280px',
+            maxWidth: '260px',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px'
+            gap: '8px'
           }}>
             <button 
-              onClick={() => setZoom(z => Math.max(1.0, z - 0.2))}
-              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex' }}
+              onClick={() => setZoom(z => Math.max(0.3, z - 0.15))}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: '4px' }}
             >
               <ZoomOut size={16} />
             </button>
             <input 
               type="range"
-              min="1.0"
+              min="0.3"
               max="4.0"
-              step="0.05"
+              step="0.02"
               value={zoom}
               onChange={e => setZoom(parseFloat(e.target.value))}
               style={{ flex: 1, accentColor: 'var(--accent-primary, #D60036)', cursor: 'pointer' }}
             />
             <button 
-              onClick={() => setZoom(z => Math.min(4.0, z + 0.2))}
-              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex' }}
+              onClick={() => setZoom(z => Math.min(4.0, z + 0.15))}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: '4px' }}
             >
               <ZoomIn size={16} />
-            </button>
-            <button 
-              onClick={handleReset}
-              title="Reset Position"
-              style={{
-                background: 'var(--bg-elevated)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                padding: '4px 8px',
-                color: 'var(--text-primary)',
-                fontSize: '11px',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              <RotateCcw size={11} />
-              <span>Reset</span>
             </button>
           </div>
         </div>
 
-        {/* Shape Selection Carousel / Grid */}
+        {/* Minimalist Shape Icons Carousel (No Text Labels) */}
         {allowShapeSelect && (
           <div style={{
-            padding: '16px 20px',
+            padding: '10px 16px',
             borderTop: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '10px'
+            gap: '8px',
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch'
           }}>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary, #FFFFFF)' }}>
-              Choose Photo Shape Mask:
-            </div>
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              overflowX: 'auto',
-              paddingBottom: '4px',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch'
-            }}>
-              {SHAPE_OPTIONS.map(s => {
-                const isSelected = selectedShape === s.id;
-                const IconComponent = s.icon;
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => setSelectedShape(s.id)}
-                    style={{
-                      flex: '0 0 auto',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '8px 12px',
-                      borderRadius: '14px',
-                      background: isSelected ? 'var(--accent-primary, #D60036)' : 'var(--bg-primary, #0B0F19)',
-                      border: '1px solid',
-                      borderColor: isSelected ? 'var(--accent-primary, #D60036)' : 'var(--border-color, rgba(255, 255, 255, 0.1))',
-                      color: isSelected ? '#FFFFFF' : 'var(--text-secondary, #94A3B8)',
-                      cursor: 'pointer',
-                      transition: 'all 0.18s ease'
-                    }}
-                  >
-                    <IconComponent size={20} />
-                    <span style={{ fontSize: '11px', fontWeight: isSelected ? 700 : 500, whiteSpace: 'nowrap' }}>
-                      {s.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            {SHAPE_OPTIONS.map(s => {
+              const isSelected = selectedShape === s.id;
+              const IconComponent = s.icon;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setSelectedShape(s.id)}
+                  title={s.label}
+                  style={{
+                    flex: '0 0 auto',
+                    width: '38px',
+                    height: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '10px',
+                    background: isSelected ? 'var(--accent-primary, #D60036)' : 'var(--bg-primary, #0B0F19)',
+                    border: '1px solid',
+                    borderColor: isSelected ? 'var(--accent-primary, #D60036)' : 'var(--border-color, rgba(255, 255, 255, 0.1))',
+                    color: isSelected ? '#FFFFFF' : 'var(--text-secondary, #94A3B8)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <IconComponent size={20} />
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {/* Footer Actions */}
+        {/* Bottom Action Row: Cancel Icon, Transform Tools (Flip H/V, Rotate L/R, Reset), Apply Icon */}
         <div style={{
-          padding: '16px 20px',
+          padding: '12px 16px',
           borderTop: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: '12px',
+          justifyContent: 'space-between',
           background: 'var(--bg-elevated, #111625)'
         }}>
+          {/* Cancel Icon Button */}
           <button
             onClick={onCancel}
+            title="Cancel"
             style={{
-              padding: '10px 20px',
+              width: '42px',
+              height: '42px',
               borderRadius: '12px',
-              background: 'transparent',
-              border: '1px solid var(--border-color, rgba(255, 255, 255, 0.15))',
-              color: 'var(--text-secondary, #94A3B8)',
-              fontSize: '13.5px',
-              fontWeight: 600,
+              background: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              color: '#EF4444',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
               transition: 'all 0.15s ease'
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
-              e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-              e.currentTarget.style.color = '#EF4444';
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.25)';
+              e.currentTarget.style.transform = 'scale(1.05)';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.borderColor = 'var(--border-color, rgba(255, 255, 255, 0.15))';
-              e.currentTarget.style.color = 'var(--text-secondary, #94A3B8)';
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+              e.currentTarget.style.transform = 'scale(1)';
             }}
           >
-            Cancel
+            <X size={22} strokeWidth={2.4} />
           </button>
+
+          {/* Transformation Tools (Rotate CCW, Rotate CW, Flip H, Flip V, Reset) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {/* Rotate Left (CCW) */}
+            <button
+              onClick={() => setRotation(r => (r - 90 + 360) % 360)}
+              title="Rotate Left 90°"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                background: 'var(--bg-primary, #0B0F19)',
+                border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
+                color: 'var(--text-primary, #FFFFFF)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <RotateCcw size={18} />
+            </button>
+
+            {/* Rotate Right (CW) */}
+            <button
+              onClick={() => setRotation(r => (r + 90) % 360)}
+              title="Rotate Right 90°"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                background: 'var(--bg-primary, #0B0F19)',
+                border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
+                color: 'var(--text-primary, #FFFFFF)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <RotateCw size={18} />
+            </button>
+
+            {/* Flip Horizontal */}
+            <button
+              onClick={() => setFlipH(f => !f)}
+              title="Flip Horizontal"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                background: flipH ? 'var(--accent-primary, #D60036)' : 'var(--bg-primary, #0B0F19)',
+                border: '1px solid',
+                borderColor: flipH ? 'var(--accent-primary, #D60036)' : 'var(--border-color, rgba(255, 255, 255, 0.1))',
+                color: flipH ? '#FFFFFF' : 'var(--text-primary, #FFFFFF)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <FlipHIcon size={18} />
+            </button>
+
+            {/* Flip Vertical */}
+            <button
+              onClick={() => setFlipV(f => !f)}
+              title="Flip Vertical"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                background: flipV ? 'var(--accent-primary, #D60036)' : 'var(--bg-primary, #0B0F19)',
+                border: '1px solid',
+                borderColor: flipV ? 'var(--accent-primary, #D60036)' : 'var(--border-color, rgba(255, 255, 255, 0.1))',
+                color: flipV ? '#FFFFFF' : 'var(--text-primary, #FFFFFF)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <FlipVIcon size={18} />
+            </button>
+          </div>
+
+          {/* Apply Icon Button */}
           <button
             onClick={handleConfirm}
+            title="Apply"
             style={{
-              padding: '10px 24px',
+              width: '42px',
+              height: '42px',
               borderRadius: '12px',
               background: 'var(--accent-primary, #D60036)',
               border: 'none',
               color: '#FFFFFF',
-              fontSize: '13.5px',
-              fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              justifyContent: 'center',
               cursor: 'pointer',
               boxShadow: '0 4px 14px rgba(214, 0, 54, 0.4)',
               transition: 'all 0.15s ease'
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.transform = 'scale(1.03)';
+              e.currentTarget.style.transform = 'scale(1.06)';
               e.currentTarget.style.boxShadow = '0 6px 20px rgba(214, 0, 54, 0.55)';
             }}
             onMouseLeave={e => {
@@ -794,8 +814,7 @@ export function ImageCropShapeModal({
               e.currentTarget.style.boxShadow = '0 4px 14px rgba(214, 0, 54, 0.4)';
             }}
           >
-            <Check size={16} strokeWidth={2.6} />
-            <span>Apply Photo Shape</span>
+            <Check size={22} strokeWidth={2.8} />
           </button>
         </div>
       </div>
