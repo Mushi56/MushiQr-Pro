@@ -502,64 +502,67 @@ export function renderQR(canvas, options) {
   ctx.clearRect(0, 0, w, h);
 
   // ── AI ILLUSTRATION ART QR SYNTHESIS MODE ──
-  if (options.aiArtQrEnabled && backgroundImage && !options.template) {
-    synthesizeAiArtQR(ctx, backgroundImage, matrix, moduleCount, {
+  const effectiveBgImg = backgroundImage?.image || backgroundImage || options.qrBgImage?.image || options.qrBgImage;
+  if (options.aiArtQrEnabled && effectiveBgImg && !options.template) {
+    const synthesized = synthesizeAiArtQR(ctx, effectiveBgImg, matrix, moduleCount, {
       size,
       quietZone,
-      blendStrength: options.aiArtBlend !== undefined ? options.aiArtBlend : 0.72,
+      blendStrength: options.aiArtBlend !== undefined ? options.aiArtBlend : 0.85,
       artStyle: options.aiArtStyle || 'illustration',
       edgePreservation: options.aiArtEdgePreservation !== undefined ? options.aiArtEdgePreservation : 0.65
     });
 
-    // Overlay optional Logo or Center Text if present
-    if (logo) {
-      drawLogo(ctx, logo, size, {
-        ...options,
-        contentX: quietZone * (size / (moduleCount + quietZone * 2)),
-        contentY: quietZone * (size / (moduleCount + quietZone * 2)),
-        contentSize: size - (quietZone * 2) * (size / (moduleCount + quietZone * 2)),
-        moduleCount,
-        quietZone
-      });
-    } else if (textCenter) {
-      drawCenterText(ctx, textCenter, size, {
-        textCenterSize,
-        textCenterFont,
-        textCenterColor,
-        textCenterStrokeEnabled,
-        textCenterStrokeWidth,
-        textCenterStrokeColor,
-        textCenterShadowEnabled,
-        textCenterShadowBlur,
-        textCenterShadowColor,
-        textCenterPosX,
-        textCenterPosY,
-        textCenterRotation,
-        textCenterWidth,
-        textCenterHeight,
-        logoPadding,
-        logoBackground,
-        logoBgColor,
-        logoBgShape,
-        contentX: quietZone * (size / (moduleCount + quietZone * 2)),
-        contentY: quietZone * (size / (moduleCount + quietZone * 2)),
-        contentSize: size - (quietZone * 2) * (size / (moduleCount + quietZone * 2)),
-        moduleCount,
-        quietZone
-      });
-    }
+    if (synthesized) {
+      // Overlay optional Logo or Center Text if present
+      if (logo) {
+        drawLogo(ctx, logo, size, {
+          ...options,
+          contentX: quietZone * (size / (moduleCount + quietZone * 2)),
+          contentY: quietZone * (size / (moduleCount + quietZone * 2)),
+          contentSize: size - (quietZone * 2) * (size / (moduleCount + quietZone * 2)),
+          moduleCount,
+          quietZone
+        });
+      } else if (textCenter) {
+        drawCenterText(ctx, textCenter, size, {
+          textCenterSize,
+          textCenterFont,
+          textCenterColor,
+          textCenterStrokeEnabled,
+          textCenterStrokeWidth,
+          textCenterStrokeColor,
+          textCenterShadowEnabled,
+          textCenterShadowBlur,
+          textCenterShadowColor,
+          textCenterPosX,
+          textCenterPosY,
+          textCenterRotation,
+          textCenterWidth,
+          textCenterHeight,
+          logoPadding,
+          logoBackground,
+          logoBgColor,
+          logoBgShape,
+          contentX: quietZone * (size / (moduleCount + quietZone * 2)),
+          contentY: quietZone * (size / (moduleCount + quietZone * 2)),
+          contentSize: size - (quietZone * 2) * (size / (moduleCount + quietZone * 2)),
+          moduleCount,
+          quietZone
+        });
+      }
 
-    return canvas;
+      return canvas;
+    }
   }
 
   const effectiveBgTransparent = bgTransparent;
 
   // Background & Clipping
-  const hasBgShape = !effectiveBgTransparent && qrBgShape && qrBgShape !== 'full' && !options.template;
+  const hasBgShape = !effectiveBgTransparent && qrBgShape && qrBgShape !== 'full' && qrBgShape !== 'none' && !options.template;
   
   if (hasBgShape || (backgroundImageEnabled && backgroundImage && !options.template)) {
     ctx.save();
-    if (qrBgShape && qrBgShape !== 'full') {
+    if (qrBgShape && qrBgShape !== 'full' && qrBgShape !== 'none') {
       ctx.beginPath();
       const r = size * 0.12; // corner radius
       if (qrBgShape === 'circle') {
@@ -743,7 +746,7 @@ export function renderQR(canvas, options) {
   }
 
   // Adjust content area for background shape corners to fit perfectly with margins
-  if (qrBgShape && qrBgShape !== 'full') {
+  if (qrBgShape && qrBgShape !== 'full' && qrBgShape !== 'none') {
     let shapeScale = 1.0;
     if (qrBgShape === 'circle') {
       shapeScale = 0.68; // Leave a nice margin (0.707 is absolute max)

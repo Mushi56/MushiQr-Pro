@@ -1935,6 +1935,222 @@ export default function App() {
     setTimeout(() => { isInternalUpdate.current = false; }, 100);
   };
 
+  const resetGenerator = useCallback(() => {
+    isInternalUpdate.current = true;
+    ignoreDirtyRef.current = true;
+    generatorIsDirtyRef.current = false;
+    setLoadedItemId(null);
+    
+    // Content
+    setQrType(QR_TYPES.URL);
+    setQrData({ url: 'https://example.com' });
+    setErrorLevel('M');
+    
+    // Colors & Appearance
+    setQrColor('#000000');
+    setBgColor('#ffffff');
+    setBgTransparent(false);
+    setSyncEyes(true);
+    setSyncInnerOuterEyes(true);
+    setEyeColor('');
+    setEyeOuterColor('');
+    setActivePreset(null);
+    
+    // Gradient
+    setGradientEnabled(false);
+    setGradientColor1('#6c5ce7');
+    setGradientColor2('#a78bfa');
+    setGradientType('linear');
+    
+    // Textures
+    setQrTexture(null);
+    setQrTextureEnabled(false);
+    setQrTextureSyncEyes(true);
+    
+    // Background Image & AI Art QR
+    setQrBgImage(null);
+    setQrBgImageEnabled(false);
+    setQrBgImageOpacity(1);
+    setQrBgImageBlur(0);
+    setQrBgImageOverlayOpacity(0);
+    setQrBgCardEnabled(false);
+    setQrBgCardOpacity(1);
+    setQrBgShape('full');
+    setQrBgCardShape('rounded');
+    setAiArtQrEnabled(false);
+    setAiArtBlend(0.85);
+    setAiArtStyle('illustration');
+    setQrSizeScale(1);
+    setQrPosX(0.5);
+    setQrPosY(0.5);
+    
+    // Shapes
+    setDotStyle(DOT_STYLES.DENSO);
+    setEyeStyle(EYE_STYLES.SQUARE);
+    setDotPadding(0);
+    setEyePadding(0);
+    
+    // Logo
+    setLogo(null);
+    setLogoWidth(0.18);
+    setLogoHeight(0.18);
+    setLogoAspectRatioLocked(true);
+    setLogoPadding(10);
+    setLogoBackground(false);
+    setLogoBgColor('#ffffff');
+    setLogoBgShape('circle');
+    setLogoOutline(false);
+    setLogoOutlineColor('#ffffff');
+    setLogoOutlineWidth(3);
+    setLogoOutlineOpacity(1);
+    setLogoPosX(0.5);
+    setLogoPosY(0.5);
+    setLogoOpacity(1);
+    setLogoRotation(0);
+    setLogoShadowEnabled(false);
+    setLogoShadowColor('#000000');
+    setLogoShadowBlur(10);
+    setLogoShadowOffsetX(0);
+    setLogoShadowOffsetY(4);
+    setLogoInnerShadowEnabled(false);
+    setLogoEraseColorEnabled(false);
+    setLogoEraseMode('none');
+    setLogoTexture('none');
+    setLogoCrop('none');
+    
+    // Frame
+    setFrameStyle('none');
+    setFrameText('SCAN ME');
+    setFrameColor('');
+    setFrameFont('Outfit');
+    setFrameSize(1);
+    setFrameStrokeEnabled(false);
+    setFrameShadowEnabled(false);
+    setFramePosition('bottom');
+    setFrameRotation(0);
+    
+    // Center Text
+    setTextCenterEnabled(false);
+    setTextCenterText('SCAN ME');
+    setTextCenterSize(0.08);
+    setTextCenterColor('#000000');
+    setTextCenterFont('Outfit');
+    setTextCenterStrokeEnabled(false);
+    setTextCenterShadowEnabled(false);
+    setTextCenterPosX(0.5);
+    setTextCenterPosY(0.5);
+    setTextCenterRotation(0);
+    setTextCenterWidth(null);
+    setTextCenterHeight(null);
+    
+    // Template
+    setSelectedTemplate(null);
+    setTemplateHeadlineText('');
+    setTemplateHandleText('');
+    
+    // Popups & Active Tabs
+    setLogoPopup(null);
+    setTextPopup(null);
+    setColorPopup(null);
+    setShapePopup(null);
+    setCanvasSelection(null);
+    setActiveTab('content');
+    setTabHistory([]);
+    
+    // Clear history stack and re-seed with fresh baseline
+    const freshSnapshot = {
+      qrData: { url: 'https://example.com' },
+      qrColor: '#000000',
+      bgColor: '#ffffff',
+      bgTransparent: false,
+      eyeColor: '',
+      eyeOuterColor: '',
+      syncEyes: true,
+      syncInnerOuterEyes: true,
+      gradientEnabled: false,
+      gradientColor1: '#6c5ce7',
+      gradientColor2: '#a78bfa',
+      gradientType: 'linear',
+      qrTextureEnabled: false,
+      qrTexture: null,
+      qrTextureSyncEyes: true,
+      qrBgImageEnabled: false,
+      qrBgImage: null,
+      qrBgImageOpacity: 1,
+      qrBgImageBlur: 0,
+      qrBgImageOverlayOpacity: 0,
+      qrBgCardEnabled: false,
+      qrBgCardOpacity: 1,
+      qrBgShape: 'full',
+      qrBgCardShape: 'rounded',
+      aiArtQrEnabled: false,
+      aiArtBlend: 0.85,
+      aiArtStyle: 'illustration',
+      qrSizeScale: 1,
+      qrPosX: 0.5,
+      qrPosY: 0.5,
+      dotStyle: DOT_STYLES.DENSO,
+      eyeStyle: EYE_STYLES.SQUARE,
+      dotPadding: 0,
+      eyePadding: 0,
+      logo: null,
+      logoWidth: 0.18,
+      logoHeight: 0.18,
+      logoAspectRatioLocked: true,
+      logoPadding: 10,
+      logoBackground: false,
+      logoBgColor: '#ffffff',
+      logoBgShape: 'circle',
+      logoOutline: false,
+      logoOutlineColor: '#ffffff',
+      logoOutlineWidth: 3,
+      logoOutlineOpacity: 1,
+      logoPosX: 0.5,
+      logoPosY: 0.5,
+      logoOpacity: 1,
+      logoRotation: 0,
+      logoShadowEnabled: false,
+      logoInnerShadowEnabled: false,
+      logoEraseColorEnabled: false,
+      logoTexture: 'none',
+      logoCrop: 'none',
+      frameStyle: 'none',
+      frameText: 'SCAN ME',
+      frameColor: '',
+      frameFont: 'Outfit',
+      frameSize: 1,
+      frameStrokeEnabled: false,
+      frameShadowEnabled: false,
+      framePosition: 'bottom',
+      frameRotation: 0,
+      textCenterEnabled: false,
+      textCenterText: 'SCAN ME',
+      textCenterSize: 0.08,
+      textCenterColor: '#000000',
+      textCenterFont: 'Outfit',
+      textCenterStrokeEnabled: false,
+      textCenterShadowEnabled: false,
+      textCenterPosX: 0.5,
+      textCenterPosY: 0.5,
+      textCenterRotation: 0,
+      textCenterWidth: null,
+      textCenterHeight: null,
+      selectedTemplate: null,
+      templateHandleText: '',
+      errorLevel: 'M'
+    };
+    historyRef.current = [freshSnapshot];
+    historyIndexRef.current = 0;
+    setHistory([freshSnapshot]);
+    setHistoryIndex(0);
+    
+    setTimeout(() => {
+      isInternalUpdate.current = false;
+      ignoreDirtyRef.current = false;
+      generatorIsDirtyRef.current = false;
+    }, 200);
+  }, []);
+
   // Initial snapshot on mount
   useEffect(() => {
     if (historyRef.current.length === 0) {
@@ -2124,15 +2340,15 @@ export default function App() {
         }
       }
     }
-    generatorIsDirtyRef.current = false;
     const nextPage = unsavedChangesModal.nextPage;
     setUnsavedChangesModal({ isOpen: false, nextPage: null });
+    resetGenerator();
     performNavigation(nextPage);
   };
   const handleDiscardAndExit = () => {
-    generatorIsDirtyRef.current = false;
     const nextPage = unsavedChangesModal.nextPage;
     setUnsavedChangesModal({ isOpen: false, nextPage: null });
+    resetGenerator();
     performNavigation(nextPage);
   };
   const handleCancelExit = () => {
@@ -2485,62 +2701,6 @@ export default function App() {
     navigateTo('generator');
     showToast('Template loaded');
   };
-  const resetGenerator = () => {
-    ignoreDirtyRef.current = true;
-    setLoadedItemId(null);
-    generatorIsDirtyRef.current = false; // reset dirty flag on fresh generator open
-    setTimeout(() => {
-      ignoreDirtyRef.current = false;
-      generatorIsDirtyRef.current = false;
-    }, 1000);
-    // Content
-    setQrType(QR_TYPES.URL);
-    setQrData({ url: 'https://example.com' });
-    setErrorLevel('M');
-    // Appearance
-    setQrColor('#000000');
-    setBgColor('#ffffff');
-    setBgTransparent(false);
-    setSyncEyes(true);
-    setEyeColor('');
-    setEyeOuterColor('');
-    setActivePreset(null);
-    // Gradient
-    setGradientEnabled(false);
-    setGradientColor1('#6c5ce7');
-    setGradientColor2('#a78bfa');
-    setGradientType('linear');
-    // Shapes
-    setDotStyle(DOT_STYLES.DENSO);
-    setEyeStyle(EYE_STYLES.SQUARE);
-    setDotPadding(0);
-    setEyePadding(0);
-    // Logo
-    setLogo(null);
-    setLogoWidth(0.18);
-    setLogoHeight(0.18);
-    setLogoPadding(10);
-    setLogoBackground(false);
-    setLogoBgColor('#ffffff');
-    setLogoBgShape('circle');
-    setLogoOutline(false);
-    setLogoOutlineColor('#ffffff');
-    setLogoOutlineWidth(3);
-    setLogoOutlineOpacity(1);
-    setLogoPosX(0.5);
-    setLogoPosY(0.5);
-    setTextCenterPosX(0.5);
-    setTextCenterPosY(0.5);
-    setTextCenterWidth(null);
-    setTextCenterHeight(null);
-    // Frame
-    setFrameStyle('none');
-    setFrameText('SCAN ME');
-    setFrameColor('');
-    // Tabs
-    setActiveTab('content');
-    setTabHistory([]);
-  };
   // ── Generate QR Matrix ──
   const regenerateMatrix = useCallback(() => {
     const dataString = formatQRData(qrType, qrData);
@@ -2680,6 +2840,7 @@ export default function App() {
     qrTextureEnabled, qrTexture, qrTextureSyncEyes,
     qrBgImageEnabled, qrBgImage, qrBgImageOpacity, qrBgImageBlur, qrBgImageOverlayOpacity, qrBgCardEnabled, qrBgCardOpacity,
     qrBgShape, qrBgCardShape, qrSizeScale, qrPosX, qrPosY,
+    aiArtQrEnabled, aiArtBlend, aiArtStyle,
     activeTab, canvasSelection,
     selectedTemplate, templateHeadlineText, templateHandleText,
     qrData, qrType
@@ -2689,6 +2850,9 @@ export default function App() {
     if (logo?.image && !logo.image.complete) {
       logo.image.onload = renderCanvas;
       logo.image.onerror = () => showToast('Logo failed to load', 'error');
+    }
+    if (qrBgImage?.image && !qrBgImage.image.complete) {
+      qrBgImage.image.onload = renderCanvas;
     }
     if (qrTexture?.image && !qrTexture.image.complete) {
       qrTexture.image.onload = renderCanvas;
@@ -2701,7 +2865,7 @@ export default function App() {
     return () => {
       window.removeEventListener('qr-template-loaded', handleTemplateLoad);
     };
-  }, [renderCanvas, logo, qrTexture, activePage, selectedTemplate, templateHeadlineText, templateHandleText]);
+  }, [renderCanvas, logo, qrBgImage, qrTexture, activePage, selectedTemplate, templateHeadlineText, templateHandleText]);
   const getQRContentArea = useCallback(() => {
     const size = 512;
     const padding = size * 0.03;
@@ -5667,55 +5831,61 @@ export default function App() {
                                 border: aiArtQrEnabled 
                                   ? '1.5px solid var(--accent-primary)' 
                                   : '1px solid var(--border-color)',
-                                borderRadius: '16px',
-                                padding: '16px',
+                                borderRadius: '18px',
+                                padding: '14px 16px',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: '14px',
                                 boxShadow: aiArtQrEnabled ? '0 8px 24px rgba(214,0,54,0.15)' : 'none',
-                                transition: 'all 0.25s ease'
+                                transition: 'all 0.25s ease',
+                                boxSizing: 'border-box',
+                                width: '100%'
                               }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
                                     <div style={{
-                                      width: '32px',
-                                      height: '32px',
-                                      borderRadius: '10px',
+                                      width: '36px',
+                                      height: '36px',
+                                      borderRadius: '12px',
                                       background: aiArtQrEnabled ? 'var(--accent-primary)' : 'rgba(255,255,255,0.08)',
                                       display: 'flex',
                                       alignItems: 'center',
                                       justifyContent: 'center',
-                                      color: '#FFFFFF'
+                                      color: '#FFFFFF',
+                                      flexShrink: 0,
+                                      boxShadow: aiArtQrEnabled ? '0 4px 12px rgba(214,0,54,0.3)' : 'none',
+                                      transition: 'all 0.2s ease'
                                     }}>
-                                      <Sparkles size={16} />
+                                      <Sparkles size={18} />
                                     </div>
-                                    <div>
-                                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        AI Illustration QR Mode
-                                        <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', background: 'var(--accent-primary)', color: '#fff', fontWeight: 700 }}>PRO</span>
+                                    <div style={{ minWidth: 0, flex: 1 }}>
+                                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                        <span>AI Illustration QR</span>
+                                        <span style={{ fontSize: '9px', padding: '2px 6px', borderRadius: '6px', background: 'var(--accent-primary)', color: '#fff', fontWeight: 800, letterSpacing: '0.5px' }}>PRO</span>
                                       </div>
-                                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: 1.3 }}>
                                         Fuses QR pixels directly into the artwork
                                       </div>
                                     </div>
                                   </div>
-                                  <Toggle checked={aiArtQrEnabled} onChange={setAiArtQrEnabled} />
+                                  <div style={{ flexShrink: 0 }}>
+                                    <Toggle checked={aiArtQrEnabled} onChange={setAiArtQrEnabled} />
+                                  </div>
                                 </div>
 
                                 {aiArtQrEnabled && (
-                                  <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '4px' }}>
-                                    {/* Style Selection Chips */}
+                                  <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '2px' }}>
+                                    {/* Style Selection Grid */}
                                     <div>
-                                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                                        Illustration Art Style:
+                                      <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '8px' }}>
+                                        Illustration Art Style
                                       </div>
                                       <div style={{
-                                        display: 'flex',
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
                                         gap: '8px',
-                                        overflowX: 'auto',
-                                        paddingBottom: '4px',
-                                        scrollbarWidth: 'none',
-                                        msOverflowStyle: 'none'
+                                        width: '100%',
+                                        boxSizing: 'border-box'
                                       }}>
                                         {AI_ART_STYLES.map(s => {
                                           const isSelected = aiArtStyle === s.id;
@@ -5724,20 +5894,37 @@ export default function App() {
                                               key={s.id}
                                               onClick={() => setAiArtStyle(s.id)}
                                               style={{
-                                                flex: '0 0 auto',
-                                                padding: '8px 12px',
-                                                borderRadius: '10px',
+                                                padding: '10px 12px',
+                                                borderRadius: '12px',
                                                 background: isSelected ? 'var(--accent-primary)' : 'var(--bg-primary)',
-                                                border: '1px solid',
+                                                border: '1.5px solid',
                                                 borderColor: isSelected ? 'var(--accent-primary)' : 'var(--border-color)',
                                                 color: isSelected ? '#FFFFFF' : 'var(--text-primary)',
-                                                fontSize: '12px',
-                                                fontWeight: isSelected ? 700 : 500,
                                                 cursor: 'pointer',
-                                                transition: 'all 0.15s ease'
+                                                textAlign: 'left',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '3px',
+                                                transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                boxShadow: isSelected ? '0 4px 14px rgba(214, 0, 54, 0.22)' : 'none',
+                                                boxSizing: 'border-box',
+                                                minHeight: '52px',
+                                                justifyContent: 'center'
                                               }}
                                             >
-                                              {s.name}
+                                              <div style={{ fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                                <span>{s.name}</span>
+                                                <span style={{ 
+                                                  width: '6px', 
+                                                  height: '6px', 
+                                                  borderRadius: '50%', 
+                                                  background: isSelected ? '#FFFFFF' : 'var(--border-color)', 
+                                                  display: 'inline-block' 
+                                                }} />
+                                              </div>
+                                              <div style={{ fontSize: '9.5px', color: isSelected ? 'rgba(255,255,255,0.85)' : 'var(--text-secondary)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {s.desc}
+                                              </div>
                                             </button>
                                           );
                                         })}
@@ -5745,29 +5932,46 @@ export default function App() {
                                     </div>
 
                                     {/* Blend Slider */}
-                                    <Slider
-                                      label="AI Artistic Synthesis Blend"
-                                      min={0.4}
-                                      max={0.95}
-                                      step={0.02}
-                                      value={aiArtBlend}
-                                      onChange={setAiArtBlend}
-                                      formatValue={(v) => `${Math.round(v * 100)}%`}
-                                    />
+                                    <div style={{ width: '100%' }}>
+                                      <Slider
+                                        label="AI Artistic Synthesis Blend"
+                                        min={0.40}
+                                        max={1.0}
+                                        step={0.02}
+                                        value={aiArtBlend}
+                                        onChange={setAiArtBlend}
+                                        formatValue={(v) => `${Math.round(v * 100)}%`}
+                                      />
+                                    </div>
 
                                     {/* Live Scannability Badge */}
                                     <div style={{
                                       display: 'flex',
                                       alignItems: 'center',
+                                      justifyContent: 'space-between',
                                       gap: '8px',
-                                      background: 'rgba(52,199,89,0.12)',
-                                      border: '1px solid rgba(52,199,89,0.3)',
-                                      borderRadius: '10px',
-                                      padding: '8px 12px'
+                                      background: aiArtBlend >= 0.75 ? 'rgba(16, 185, 129, 0.12)' : (aiArtBlend >= 0.5 ? 'rgba(6, 182, 212, 0.12)' : 'rgba(139, 92, 246, 0.12)'),
+                                      border: aiArtBlend >= 0.75 ? '1px solid rgba(16, 185, 129, 0.3)' : (aiArtBlend >= 0.5 ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid rgba(139, 92, 246, 0.3)'),
+                                      borderRadius: '12px',
+                                      padding: '9px 12px',
+                                      boxSizing: 'border-box',
+                                      width: '100%'
                                     }}>
-                                      <ShieldCheck size={16} style={{ color: 'var(--success)' }} />
-                                      <span style={{ fontSize: '11.5px', color: 'var(--text-primary)', fontWeight: 600 }}>
-                                        100% Optical Scan Ready ✨
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <ShieldCheck size={16} color={aiArtBlend >= 0.75 ? '#10B981' : (aiArtBlend >= 0.5 ? '#06B6D4' : '#8B5CF6')} />
+                                        <span style={{ fontSize: '11.5px', color: 'var(--text-primary)', fontWeight: 700 }}>
+                                          {aiArtBlend >= 0.75 ? '100% Optical Scan Ready' : (aiArtBlend >= 0.5 ? 'High Reliability Scan' : 'Subtle Halftone Mode')}
+                                        </span>
+                                      </div>
+                                      <span style={{ 
+                                        fontSize: '10px', 
+                                        fontWeight: 800, 
+                                        color: aiArtBlend >= 0.75 ? '#10B981' : (aiArtBlend >= 0.5 ? '#06B6D4' : '#8B5CF6'),
+                                        background: aiArtBlend >= 0.75 ? 'rgba(16, 185, 129, 0.2)' : (aiArtBlend >= 0.5 ? 'rgba(6, 182, 212, 0.2)' : 'rgba(139, 92, 246, 0.2)'),
+                                        padding: '2px 7px',
+                                        borderRadius: '6px'
+                                      }}>
+                                        {aiArtBlend >= 0.75 ? 'OPTIMAL' : (aiArtBlend >= 0.5 ? 'BALANCED' : 'ARTISTIC')}
                                       </span>
                                     </div>
                                   </div>
