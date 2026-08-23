@@ -134,6 +134,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { TemplateGallery } from './components/qr-templates/TemplateGallery';
 import { TemplateCustomizer } from './components/qr-templates/TemplateCustomizer';
 import { FullScreenPreviewModal } from './components/FullScreenPreviewModal';
+import ImageCropShapeModal, { SHAPE_OPTIONS } from './components/ImageCropShapeModal';
 const QRDotsIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="2 2 20 20" fill="currentColor" className="mushi-pro-wide-dots">
     {/* Smaller Rounded Star (Preserving the shape and style) */}
@@ -1315,6 +1316,7 @@ export default function App() {
   const [isTemplateTextModalOpen, setIsTemplateTextModalOpen] = useState(false);
   const [templateCategory, setTemplateCategory] = useState('All');
   const [isFullScreenPreviewOpen, setIsFullScreenPreviewOpen] = useState(false);
+  const [cropModalConfig, setCropModalConfig] = useState(null);
   const applyLogoBySlug = (slug) => {
     const found = LOGO_PRESETS.find(item => item.slug === slug);
     if (found) {
@@ -4481,19 +4483,9 @@ export default function App() {
                         setLogoRotation(0);
                         setLogoPosX(0.5);
                         setLogoPosY(0.5);
-                        const foundPreset = LOGO_PRESETS.find(p => p.slug === l.slug || p.url === l.src);
-                        const isPreStyled = foundPreset?.hasContainer === true;
-                        
-                        // If pre-styled iOS icon, use border radius crop with 0 padding; if transparent glyph, use clean white squircle background
-                        if (isPreStyled) {
-                          setLogoBackground(false);
-                          setLogoPadding(0);
-                        } else {
-                          setLogoBackground(true);
-                          setLogoBgColor('#FFFFFF');
-                          setLogoBgShape('rounded');
-                          setLogoPadding(8);
-                        }
+                        // Keep background box disabled so logo sits cleanly on the QR code without a background box
+                        setLogoBackground(false);
+                        setLogoPadding(0);
                         startEditing('logo', 'size'); 
                       }} 
                       onLogoRemove={() => { 
@@ -4812,17 +4804,90 @@ export default function App() {
                         </div>
                       )}
                       {logoPopup === 'crop' && (
-                        <div className="fade-in">
-                           <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>Quick Shape Crop</div>
-                           <div className="seg-control" style={{ marginBottom: '16px' }}>
-                             <button className={`seg-btn ${logoCrop === 'none' ? 'active' : ''}`} onClick={() => setLogoCrop('none')}>None</button>
-                             <button className={`seg-btn ${logoCrop === 'circle' ? 'active' : ''}`} onClick={() => setLogoCrop('circle')}>Circle</button>
-                             <button className={`seg-btn ${logoCrop === 'rounded' ? 'active' : ''}`} onClick={() => setLogoCrop('rounded')}>Rounded</button>
-                             <button className={`seg-btn ${logoCrop === 'square' ? 'active' : ''}`} onClick={() => setLogoCrop('square')}>Square</button>
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                             <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>Logo Shape Mask</span>
+                             {logo?.src && (
+                               <button
+                                 onClick={() => {
+                                   setCropModalConfig({
+                                     isOpen: true,
+                                     imageSrc: logo.src,
+                                     imageName: logo.name || 'logo.png',
+                                     title: 'Interactive 1:1 Logo Cropper',
+                                     initialShape: logoCrop !== 'none' ? logoCrop : 'rounded',
+                                     onConfirm: ({ image, src, name, shape }) => {
+                                       setLogo(prev => ({ ...prev, image, src, name }));
+                                       setLogoCrop(shape);
+                                       setCropModalConfig(null);
+                                     }
+                                   });
+                                 }}
+                                 style={{
+                                   background: 'var(--accent-soft, rgba(214, 0, 54, 0.15))',
+                                   border: '1px solid var(--accent-primary)',
+                                   borderRadius: '10px',
+                                   padding: '4px 10px',
+                                   color: 'var(--accent-primary)',
+                                   fontSize: '12px',
+                                   fontWeight: 700,
+                                   cursor: 'pointer',
+                                   display: 'flex',
+                                   alignItems: 'center',
+                                   gap: '4px'
+                                 }}
+                               >
+                                 <Crop size={13} />
+                                 <span>Custom 1:1 Crop</span>
+                               </button>
+                             )}
                            </div>
-                           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                             Select a shape to instantly mask your logo.
-                           </p>
+                           <div style={{
+                             display: 'flex',
+                             gap: '8px',
+                             overflowX: 'auto',
+                             padding: '4px 0 8px 0',
+                             scrollbarWidth: 'none',
+                             msOverflowStyle: 'none',
+                             WebkitOverflowScrolling: 'touch'
+                           }}>
+                             <button 
+                               className={`seg-btn ${logoCrop === 'none' ? 'active' : ''}`} 
+                               onClick={() => setLogoCrop('none')}
+                               style={{ flex: '0 0 auto', padding: '8px 14px', borderRadius: '12px' }}
+                             >
+                               None
+                             </button>
+                             {SHAPE_OPTIONS.map(s => {
+                               const isActive = logoCrop === s.id;
+                               const ShapeIcon = s.icon;
+                               return (
+                                 <button
+                                   key={s.id}
+                                   onClick={() => setLogoCrop(s.id)}
+                                   style={{
+                                     flex: '0 0 auto',
+                                     display: 'flex',
+                                     alignItems: 'center',
+                                     gap: '6px',
+                                     padding: '8px 14px',
+                                     borderRadius: '12px',
+                                     background: isActive ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                                     color: isActive ? '#FFFFFF' : 'var(--text-primary)',
+                                     border: '1px solid',
+                                     borderColor: isActive ? 'var(--accent-primary)' : 'var(--border-color)',
+                                     cursor: 'pointer',
+                                     fontSize: '13px',
+                                     fontWeight: isActive ? 700 : 500,
+                                     transition: 'all 0.18s ease'
+                                   }}
+                                 >
+                                   <ShapeIcon size={16} />
+                                   <span>{s.label}</span>
+                                 </button>
+                               );
+                             })}
+                           </div>
                         </div>
                       )}
                       {/* TEXT PROPERTIES */}
@@ -5374,13 +5439,22 @@ export default function App() {
                                         if (file) {
                                           const reader = new FileReader();
                                           reader.onload = (re) => {
-                                            const img = new Image();
-                                            img.onload = () => {
-                                              setQrBgImage({ src: re.target.result, image: img, name: file.name });
-                                              setQrBgImageEnabled(true);
-                                              setErrorLevel('H'); // Auto set high error correction for reliability
-                                            };
-                                            img.src = re.target.result;
+                                            setCropModalConfig({
+                                              isOpen: true,
+                                              imageSrc: re.target.result,
+                                              imageName: file.name,
+                                              title: 'Crop & Shape Background Photo',
+                                              initialShape: 'square',
+                                              onConfirm: ({ image, src, name }) => {
+                                                setQrBgImage({ src, image, name });
+                                                setQrBgImageEnabled(true);
+                                                setEyeStyle('rounded');
+                                                setDotStyle('rounded');
+                                                setQrBgCardEnabled(false);
+                                                setErrorLevel('H'); // Auto set high error correction for reliability
+                                                setCropModalConfig(null);
+                                              }
+                                            });
                                           };
                                           reader.readAsDataURL(file);
                                         }
@@ -5418,6 +5492,9 @@ export default function App() {
                                         img.onload = () => {
                                           setQrBgImage({ src: p.url, image: img, name: p.name });
                                           setQrBgImageEnabled(true);
+                                          setEyeStyle('rounded');
+                                          setDotStyle('rounded');
+                                          setQrBgCardEnabled(false);
                                           setErrorLevel('H'); // Auto set high error correction for reliability
                                         };
                                         img.src = p.url;
@@ -7784,6 +7861,18 @@ export default function App() {
         headlineText={templateHeadlineText}
         handleText={templateHandleText}
       />
+      {cropModalConfig && (
+        <ImageCropShapeModal
+          isOpen={Boolean(cropModalConfig?.isOpen)}
+          imageSrc={cropModalConfig?.imageSrc}
+          imageName={cropModalConfig?.imageName}
+          title={cropModalConfig?.title || 'Crop & Shape Photo'}
+          initialShape={cropModalConfig?.initialShape || 'rounded'}
+          allowShapeSelect={cropModalConfig?.allowShapeSelect !== false}
+          onConfirm={cropModalConfig?.onConfirm}
+          onCancel={() => setCropModalConfig(null)}
+        />
+      )}
     </div>
   );
 }

@@ -771,10 +771,12 @@ export function renderQR(canvas, options) {
   const totalModules = moduleCount + quietZone * 2;
   const cellSize = contentSize / totalModules;
 
-  // Draw high-contrast container card behind the QR code (excluding frame text)
-  if (backgroundImageEnabled && backgroundImage && qrBackgroundCardEnabled) {
+  // Draw high-contrast container card behind the QR code (only if explicitly enabled)
+  if (backgroundImageEnabled && backgroundImage && qrBackgroundCardEnabled && !options.template) {
     ctx.save();
-    ctx.fillStyle = `rgba(255, 255, 255, ${qrBackgroundCardOpacity})`;
+    ctx.fillStyle = `rgba(255, 255, 255, ${qrBackgroundCardOpacity !== undefined ? qrBackgroundCardOpacity : 0.8})`;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+    ctx.shadowBlur = 16;
     
     const qrGridSize = moduleCount * cellSize;
     const qrX = contentX + quietZone * cellSize;
@@ -852,6 +854,59 @@ export function renderQR(canvas, options) {
     fillStyle = parseColorOrGradient(ctx, contentX, contentY, contentSize, contentSize, qrColor);
   }
 
+  // --- BACKGROUND IMAGE AI SMART PIXEL SAMPLING ---
+  let bgPixelData = null;
+  if (backgroundImageEnabled && backgroundImage && !options.template) {
+    try {
+      const sampleCanvas = document.createElement('canvas');
+      sampleCanvas.width = size;
+      sampleCanvas.height = size;
+      const sCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+      
+      const imgRatio = backgroundImage.width / backgroundImage.height;
+      let drawWidth, drawHeight, sx, sy;
+      if (imgRatio > 1) {
+        drawHeight = backgroundImage.height;
+        drawWidth = backgroundImage.height;
+        sx = (backgroundImage.width - drawWidth) / 2;
+        sy = 0;
+      } else {
+        drawWidth = backgroundImage.width;
+        drawHeight = backgroundImage.width;
+        sx = 0;
+        sy = (backgroundImage.height - drawHeight) / 2;
+      }
+      sCtx.drawImage(backgroundImage, sx, sy, drawWidth, drawHeight, 0, 0, size, size);
+      bgPixelData = sCtx.getImageData(0, 0, size, size).data;
+    } catch (e) {
+      console.warn('Could not sample background image for adaptive contrast:', e);
+    }
+  }
+
+  // Helper to measure perceived luminance under any coordinate
+  const getSampledLuminance = (px, py, r = 4) => {
+    if (!bgPixelData) return 255;
+    let totalLum = 0;
+    let count = 0;
+    const startX = Math.max(0, Math.floor(px - r));
+    const endX = Math.min(size - 1, Math.floor(px + r));
+    const startY = Math.max(0, Math.floor(py - r));
+    const endY = Math.min(size - 1, Math.floor(py + r));
+
+    for (let y = startY; y <= endY; y += 2) {
+      for (let x = startX; x <= endX; x += 2) {
+        const idx = (y * size + x) * 4;
+        const red = bgPixelData[idx];
+        const green = bgPixelData[idx + 1];
+        const blue = bgPixelData[idx + 2];
+        const lum = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+        totalLum += lum;
+        count++;
+      }
+    }
+    return count > 0 ? totalLum / count : 255;
+  };
+
   // --- TEXTURE HANDLING PREP ---
   let silhouetteCanvas, silhouetteCtx;
   if (qrTextureEnabled && qrTexture?.image) {
@@ -861,7 +916,7 @@ export function renderQR(canvas, options) {
     silhouetteCtx = silhouetteCanvas.getContext('2d');
   }
 
-  // 1. Draw Eyes (Finder Patterns)
+  // 1. Draw Eyes (Finder Patterns) with Sleek Rounded Safety Plates
   if (!options.hideEyes) {
     const eyePositions = [
       { r: 0, c: 0, type: 'top-left' }, // Top-left
@@ -872,24 +927,75 @@ export function renderQR(canvas, options) {
     eyePositions.forEach(pos => {
       const x = contentX + (pos.c + quietZone) * cellSize;
       const y = contentY + (pos.r + quietZone) * cellSize;
+      const eyeSize = cellSize * 7;
+      const eyeCenterX = x + eyeSize / 2;
+      const eyeCenterY = y + eyeSize / 2;
+
+      // ── Rounded Safety Backing behind Finder Eyes for 100% Recognition ──
+      if (backgroundImageEnabled && backgroundImage && !options.template) {
+        ctx.save();
+        const pad = cellSize * 0.45;
+        const plateX = x - pad;
+        const plateY = y - pad;
+        const plateSize = eyeSize + pad * 2;
+        const plateRadius = cellSize * 2.2; // Smooth rounded shape
+
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(plateX, plateY, plateSize, plateSize, plateRadius);
+        } else {
+          drawRoundedRect(ctx, plateX, plateY, plateSize, plateSize, plateRadius);
+        }
+        ctx.fill();
+        ctx.restore();
+      }
       
       const useEyeColor = syncEyes ? fillStyle : (eyeColor || qrColor);
       const useEyeOuterColor = syncEyes ? fillStyle : (eyeOuterColor || useEyeColor);
+
+      const parsedInner = typeof useEyeColor === 'string' ? parseColorOrGradient(ctx, x, y, eyeSize, eyeSize, useEyeColor) : useEyeColor;
+      const parsedOuter = typeof useEyeOuterColor === 'string' ? parseColorOrGradient(ctx, x, y, eyeSize, eyeSize, useEyeOuterColor) : useEyeOuterColor;
       
-      const parsedInner = typeof useEyeColor === 'string' ? parseColorOrGradient(ctx, x, y, cellSize * 7, cellSize * 7, useEyeColor) : useEyeColor;
-      const parsedOuter = typeof useEyeOuterColor === 'string' ? parseColorOrGradient(ctx, x, y, cellSize * 7, cellSize * 7, useEyeOuterColor) : useEyeOuterColor;
-      
-      // If texture enabled and syncing eyes, draw eye on silhouette
       if (qrTextureEnabled && qrTexture?.image && qrTextureSyncEyes) {
-        drawEye(silhouetteCtx, x, y, cellSize * 7, eyeStyle, '#000', '#000', pos.type);
+        drawEye(silhouetteCtx, x, y, eyeSize, eyeStyle, '#000', '#000', pos.type);
       } else {
-        drawEye(ctx, x, y, cellSize * 7, eyeStyle, parsedOuter, parsedInner, pos.type);
+        drawEye(ctx, x, y, eyeSize, eyeStyle, parsedOuter, parsedInner, pos.type);
       }
     });
   }
   
-  // 2. Draw QR modules
+  // 2. Draw QR modules with AI Adaptive Dual-Tone Halftone Processing
   if (!options.hideDots) {
+    // Pass A: On messy/dark photo regions, render subtle light substrate on empty spaces
+    if (backgroundImageEnabled && backgroundImage && !options.template && bgPixelData) {
+      for (let row = 0; row < moduleCount; row++) {
+        for (let col = 0; col < moduleCount; col++) {
+          if (isFinderPattern(row, col, moduleCount)) continue;
+          if (matrix[row][col]) continue; // Only process empty modules (0)
+
+          const x = contentX + (col + quietZone) * cellSize;
+          const y = contentY + (row + quietZone) * cellSize;
+          const moduleCenterX = x + cellSize / 2;
+          const moduleCenterY = y + cellSize / 2;
+          const localLum = getSampledLuminance(moduleCenterX, moduleCenterY, cellSize * 0.45);
+
+          // If photo under empty cell is dark, brighten it slightly so camera binarizer doesn't mistake it for a dot
+          if (localLum < 125) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
+            ctx.beginPath();
+            ctx.arc(moduleCenterX, moduleCenterY, cellSize * 0.42, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    // Pass B: Render Active Dots with Adaptive Micro-Backing
     for (let row = 0; row < moduleCount; row++) {
       for (let col = 0; col < moduleCount; col++) {
         if (isFinderPattern(row, col, moduleCount)) continue;
@@ -897,6 +1003,8 @@ export function renderQR(canvas, options) {
 
         const x = contentX + (col + quietZone) * cellSize;
         const y = contentY + (row + quietZone) * cellSize;
+        const moduleCenterX = x + cellSize / 2;
+        const moduleCenterY = y + cellSize / 2;
 
         const neighbors = {
           top: row > 0 && matrix[row-1][col] && !isFinderPattern(row-1, col, moduleCount),
@@ -909,8 +1017,30 @@ export function renderQR(canvas, options) {
           silhouetteCtx.fillStyle = '#000';
           drawDotModule(silhouetteCtx, x, y, cellSize, dotStyle, neighbors, options, row, col);
         } else {
-          ctx.fillStyle = fillStyle;
-          drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, options, row, col);
+          // AI Adaptive Micro-Backing for Photo Backgrounds
+          if (backgroundImageEnabled && backgroundImage && !options.template && bgPixelData) {
+            const localLum = getSampledLuminance(moduleCenterX, moduleCenterY, cellSize * 0.45);
+            
+            ctx.save();
+            // Draw protective micro-base under the active dot
+            if (localLum < 145) {
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.90)';
+              ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+              ctx.shadowBlur = 4;
+              ctx.beginPath();
+              ctx.arc(moduleCenterX, moduleCenterY, cellSize * 0.46, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            ctx.restore();
+
+            ctx.save();
+            ctx.fillStyle = '#000000'; // Pure solid black module for 100% camera decodability
+            drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, options, row, col);
+            ctx.restore();
+          } else {
+            ctx.fillStyle = fillStyle;
+            drawDotModule(ctx, x, y, cellSize, dotStyle, neighbors, options, row, col);
+          }
         }
       }
     }
@@ -2572,22 +2702,73 @@ function drawLogo(ctx, logoImg, canvasSize, options) {
       const pctx = procCanvas.getContext('2d');
       
       // Apply Crop Mask BEFORE drawing the image if it's a mask
-      if (logoCrop !== 'none') {
+      if (logoCrop && logoCrop !== 'none') {
         pctx.beginPath();
+        const minDim = Math.min(logoW, logoH);
+        const halfW = logoW / 2;
+        const halfH = logoH / 2;
+        const radius = minDim / 2;
+
         if (logoCrop === 'circle') {
-          pctx.arc(logoW/2, logoH/2, Math.min(logoW, logoH)/2, 0, Math.PI * 2);
+          pctx.arc(halfW, halfH, radius, 0, Math.PI * 2);
         } else if (logoCrop === 'rounded') {
-          const r = Math.min(logoW, logoH) * 0.2;
-          // Compatible rounded rect
-          pctx.moveTo(r, 0);
-          pctx.lineTo(logoW - r, 0);
-          pctx.quadraticCurveTo(logoW, 0, logoW, r);
-          pctx.lineTo(logoW, logoH - r);
-          pctx.quadraticCurveTo(logoW, logoH, logoW - r, logoH);
-          pctx.lineTo(r, logoH);
-          pctx.quadraticCurveTo(0, logoH, 0, logoH - r);
-          pctx.lineTo(0, r);
-          pctx.quadraticCurveTo(0, 0, r, 0);
+          const r = minDim * 0.22;
+          pctx.roundRect ? pctx.roundRect(0, 0, logoW, logoH, r) : pctx.rect(0, 0, logoW, logoH);
+        } else if (logoCrop === 'hexagon') {
+          for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i - Math.PI / 2;
+            const x = halfW + radius * Math.cos(angle);
+            const y = halfH + radius * Math.sin(angle);
+            if (i === 0) pctx.moveTo(x, y);
+            else pctx.lineTo(x, y);
+          }
+          pctx.closePath();
+        } else if (logoCrop === 'octagon') {
+          for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI / 4) * i - Math.PI / 8;
+            const x = halfW + radius * Math.cos(angle);
+            const y = halfH + radius * Math.sin(angle);
+            if (i === 0) pctx.moveTo(x, y);
+            else pctx.lineTo(x, y);
+          }
+          pctx.closePath();
+        } else if (logoCrop === 'triangle') {
+          pctx.moveTo(halfW, 0);
+          pctx.lineTo(logoW, logoH);
+          pctx.lineTo(0, logoH);
+          pctx.closePath();
+        } else if (logoCrop === 'diamond') {
+          pctx.moveTo(halfW, 0);
+          pctx.lineTo(logoW, halfH);
+          pctx.lineTo(halfW, logoH);
+          pctx.lineTo(0, halfH);
+          pctx.closePath();
+        } else if (logoCrop === 'heart') {
+          const topCurve = logoH * 0.3;
+          pctx.moveTo(halfW, logoH * 0.25);
+          pctx.bezierCurveTo(halfW, logoH * 0.05, 0, logoH * 0.05, 0, topCurve);
+          pctx.bezierCurveTo(0, logoH * 0.55, halfW * 0.6, logoH * 0.75, halfW, logoH * 0.95);
+          pctx.bezierCurveTo(logoW - halfW * 0.6, logoH * 0.75, logoW, logoH * 0.55, logoW, topCurve);
+          pctx.bezierCurveTo(logoW, logoH * 0.05, halfW, logoH * 0.05, halfW, logoH * 0.25);
+          pctx.closePath();
+        } else if (logoCrop === 'star') {
+          const outerR = radius;
+          const innerR = outerR * 0.42;
+          for (let i = 0; i < 10; i++) {
+            const r = i % 2 === 0 ? outerR : innerR;
+            const angle = (Math.PI / 5) * i - Math.PI / 2;
+            const x = halfW + r * Math.cos(angle);
+            const y = halfH + r * Math.sin(angle);
+            if (i === 0) pctx.moveTo(x, y);
+            else pctx.lineTo(x, y);
+          }
+          pctx.closePath();
+        } else if (logoCrop === 'shield') {
+          pctx.moveTo(0, 0);
+          pctx.lineTo(logoW, 0);
+          pctx.lineTo(logoW, logoH * 0.55);
+          pctx.bezierCurveTo(logoW, logoH * 0.82, halfW, logoH * 0.95, halfW, logoH);
+          pctx.bezierCurveTo(halfW, logoH * 0.95, 0, logoH * 0.82, 0, logoH * 0.55);
           pctx.closePath();
         } else {
           pctx.rect(0, 0, logoW, logoH);
