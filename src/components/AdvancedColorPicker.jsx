@@ -92,8 +92,10 @@ export default function AdvancedColorPicker({ isOpen, initialColor, onConfirm, o
     const rect = wheelRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    const x = e.clientX - centerX;
-    const y = e.clientY - centerY;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const x = clientX - centerX;
+    const y = clientY - centerY;
     let angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
     if (angle < 0) angle += 360;
     updateColor(angle, stateRef.current.s, stateRef.current.v);
@@ -102,33 +104,68 @@ export default function AdvancedColorPicker({ isOpen, initialColor, onConfirm, o
   const handleSVMove = useCallback((e) => {
     if (!diamondRef.current) return;
     const rect = diamondRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-    updateColor(stateRef.current.h, x * 100, (1 - y) * 100);
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const dx = clientX - centerX;
+    const dy = clientY - centerY;
+
+    // Account for 45deg rotation of the diamond square (rotate by -45deg to align with square axes)
+    const w = diamondRef.current.offsetWidth || 130;
+    const h = diamondRef.current.offsetHeight || 130;
+    const INV_SQRT2 = 0.7071067811865475;
+    const localX = (dx + dy) * INV_SQRT2;
+    const localY = (-dx + dy) * INV_SQRT2;
+
+    const normX = Math.max(0, Math.min(1, (localX + w / 2) / w));
+    const normY = Math.max(0, Math.min(1, (localY + h / 2) / h));
+
+    updateColor(stateRef.current.h, normX * 100, (1 - normY) * 100);
   }, [updateColor]);
 
   const onHueStart = (e) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     isDraggingRef.current = 'hue';
-    window.addEventListener('pointermove', handleHueMove);
+    try {
+      if (e.target.setPointerCapture && e.pointerId !== undefined) {
+        e.target.setPointerCapture(e.pointerId);
+      }
+    } catch (err) {}
+    window.addEventListener('pointermove', handleHueMove, { passive: false });
+    window.addEventListener('touchmove', handleHueMove, { passive: false });
     window.addEventListener('pointerup', onDragEnd);
+    window.addEventListener('touchend', onDragEnd);
+    window.addEventListener('touchcancel', onDragEnd);
     handleHueMove(e);
   };
 
   const onSVStart = (e) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     e.stopPropagation();
     isDraggingRef.current = 'sv';
-    window.addEventListener('pointermove', handleSVMove);
+    try {
+      if (e.target.setPointerCapture && e.pointerId !== undefined) {
+        e.target.setPointerCapture(e.pointerId);
+      }
+    } catch (err) {}
+    window.addEventListener('pointermove', handleSVMove, { passive: false });
+    window.addEventListener('touchmove', handleSVMove, { passive: false });
     window.addEventListener('pointerup', onDragEnd);
+    window.addEventListener('touchend', onDragEnd);
+    window.addEventListener('touchcancel', onDragEnd);
     handleSVMove(e);
   };
 
   const onDragEnd = () => {
     isDraggingRef.current = false;
     window.removeEventListener('pointermove', handleHueMove);
+    window.removeEventListener('touchmove', handleHueMove);
     window.removeEventListener('pointermove', handleSVMove);
+    window.removeEventListener('touchmove', handleSVMove);
     window.removeEventListener('pointerup', onDragEnd);
+    window.removeEventListener('touchend', onDragEnd);
+    window.removeEventListener('touchcancel', onDragEnd);
   };
 
   const handleHexChange = (e) => {

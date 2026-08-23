@@ -2603,125 +2603,133 @@ export default function App() {
   }, [frameStyle]);
   // ── Pipette Handling ──
   // ── Pipette Handling ──
+  const sampleCanvasColor = useCallback((clientX, clientY) => {
+    if (!canvasRef.current) return null;
+    const canvas = canvasRef.current;
+    const canvasRect = canvas.getBoundingClientRect();
+    if (!canvasRect.width || !canvasRect.height) return null;
+
+    // Check if within bounds (or within margin when dragging)
+    const isNearby = (
+      clientX >= canvasRect.left - 50 &&
+      clientX <= canvasRect.right + 50 &&
+      clientY >= canvasRect.top - 50 &&
+      clientY <= canvasRect.bottom + 50
+    );
+    if (!isNearby) return null;
+
+    const scaleX = canvas.width / canvasRect.width;
+    const scaleY = canvas.height / canvasRect.height;
+    const x = Math.max(0, Math.min(Math.floor((clientX - canvasRect.left) * scaleX), canvas.width - 1));
+    const y = Math.max(0, Math.min(Math.floor((clientY - canvasRect.top) * scaleY), canvas.height - 1));
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return null;
+
+    try {
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`;
+      return { hex, x, y };
+    } catch (err) {
+      console.warn("Failed to sample pixel:", err);
+      return null;
+    }
+  }, []);
+
   const updateLoupe = useCallback((clientX, clientY) => {
     if (!canvasRef.current || !loupeCanvasRef.current) return;
     const mainCanvas = canvasRef.current;
     const loupeCanvas = loupeCanvasRef.current;
     const canvasRect = mainCanvas.getBoundingClientRect();
-    const scale = 512 / canvasRect.width;
-    const x = (clientX - canvasRect.left) * scale;
-    const y = (clientY - canvasRect.top) * scale;
+    if (!canvasRect.width || !canvasRect.height) return;
+
+    const scaleX = mainCanvas.width / canvasRect.width;
+    const scaleY = mainCanvas.height / canvasRect.height;
+    const x = Math.max(0, Math.min(Math.floor((clientX - canvasRect.left) * scaleX), mainCanvas.width - 1));
+    const y = Math.max(0, Math.min(Math.floor((clientY - canvasRect.top) * scaleY), mainCanvas.height - 1));
+
     const ctx = loupeCanvas.getContext('2d');
+    if (!ctx) return;
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, 80, 80);
-    // Source size: 11x11 pixels from main canvas (zooms by ~7.3x)
-    const srcSize = 11; 
+
+    // Dynamic magnification window based on canvas resolution
+    const srcSize = Math.max(9, Math.round(13 * (mainCanvas.width / 512)));
     const sx = Math.floor(x - srcSize / 2);
     const sy = Math.floor(y - srcSize / 2);
-    // Draw magnified pixels
+
     try {
       ctx.drawImage(mainCanvas, sx, sy, srcSize, srcSize, 0, 0, 80, 80);
     } catch (err) {
       console.error("Loupe draw error:", err);
     }
-    // Draw central pixel outline (crosshair)
+
+    // Crosshair target box
     const pixelSize = 80 / srcSize;
     const cx = Math.floor(srcSize / 2) * pixelSize;
     const cy = Math.floor(srcSize / 2) * pixelSize;
-    // Draw a border around the central pixel (the pixel currently being picked)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.lineWidth = 1.5;
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.lineWidth = 2;
     ctx.strokeRect(cx, cy, pixelSize, pixelSize);
-    
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.lineWidth = 0.5;
+
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+    ctx.lineWidth = 1;
     ctx.strokeRect(cx - 0.5, cy - 0.5, pixelSize + 1, pixelSize + 1);
   }, []);
+
   const handlePipettePointerDown = useCallback((e) => {
     if (!canvasRef.current) return;
     try {
-      e.target.setPointerCapture(e.pointerId);
+      if (e.target.setPointerCapture && e.pointerId !== undefined) {
+        e.target.setPointerCapture(e.pointerId);
+      }
     } catch (err) {}
-    const canvas = canvasRef.current;
-    const canvasRect = canvas.getBoundingClientRect();
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-    if (
-      clientX >= canvasRect.left &&
-      clientX <= canvasRect.right &&
-      clientY >= canvasRect.top &&
-      clientY <= canvasRect.bottom
-    ) {
-      const scale = 512 / canvasRect.width;
-      const x = (clientX - canvasRect.left) * scale;
-      const y = (clientY - canvasRect.top) * scale;
-      
-      const ctx = canvas.getContext('2d');
-      try {
-        const pixel = ctx.getImageData(x, y, 1, 1).data;
-        const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`;
-        
-        setHoverColor(hex);
-        setHoverPos({ x: clientX, y: clientY });
-        
-        // Update the loupe canvas immediately on pointer down
-        setTimeout(() => updateLoupe(clientX, clientY), 0);
-        
-        // On desktop click style (pointerType === 'mouse') picks color immediately on click
-        if (e.pointerType === 'mouse') {
-          if (pipetteTarget?.setter) {
-            pipetteTarget.setter(hex);
-          }
-          setIsPipetteActive(false);
-          setHoverColor(null);
-          setAdvPicker(prev => ({ ...prev, open: true, color: hex }));
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const sample = sampleCanvasColor(clientX, clientY);
+
+    if (sample) {
+      setHoverColor(sample.hex);
+      setHoverPos({ x: clientX, y: clientY });
+      setTimeout(() => updateLoupe(clientX, clientY), 0);
+
+      // On desktop click style (pointerType === 'mouse') picks color immediately on click
+      if (e.pointerType === 'mouse') {
+        if (pipetteTarget?.setter) {
+          pipetteTarget.setter(sample.hex);
         }
-      } catch (err) {
-        console.error("Failed to sample color:", err);
+        setIsPipetteActive(false);
+        setHoverColor(null);
+        setAdvPicker(prev => ({ ...prev, open: true, color: sample.hex }));
       }
     }
-    e.preventDefault();
-  }, [pipetteTarget, updateLoupe]);
+    if (e.cancelable) e.preventDefault();
+  }, [pipetteTarget, sampleCanvasColor, updateLoupe]);
+
   const handlePipettePointerMove = useCallback((e) => {
     if (!canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const canvasRect = canvas.getBoundingClientRect();
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-    
-    if (
-      clientX >= canvasRect.left &&
-      clientX <= canvasRect.right &&
-      clientY >= canvasRect.top &&
-      clientY <= canvasRect.bottom
-    ) {
-      const scale = 512 / canvasRect.width;
-      const x = (clientX - canvasRect.left) * scale;
-      const y = (clientY - canvasRect.top) * scale;
-      
-      const ctx = canvas.getContext('2d');
-      try {
-        const pixel = ctx.getImageData(x, y, 1, 1).data;
-        const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`;
-        setHoverColor(hex);
-        setHoverPos({ x: clientX, y: clientY });
-        
-        // Update the loupe canvas immediately on move
-        updateLoupe(clientX, clientY);
-      } catch (err) {
-        setHoverColor(null);
-      }
-    } else {
-      setHoverColor(null);
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const sample = sampleCanvasColor(clientX, clientY);
+
+    if (sample) {
+      setHoverColor(sample.hex);
+      setHoverPos({ x: clientX, y: clientY });
+      updateLoupe(clientX, clientY);
     }
-    e.preventDefault();
-  }, [updateLoupe]);
+    if (e.cancelable) e.preventDefault();
+  }, [sampleCanvasColor, updateLoupe]);
+
   const handlePipettePointerUp = useCallback((e) => {
     try {
-      e.target.releasePointerCapture(e.pointerId);
+      if (e.target.releasePointerCapture && e.pointerId !== undefined) {
+        e.target.releasePointerCapture(e.pointerId);
+      }
     } catch (err) {}
-    // On touch screen, lifting finger completes selection
-    if (e.pointerType === 'touch' && hoverColor) {
+    // On touch screen or mouse release with selected color, complete selection
+    if (hoverColor) {
       if (pipetteTarget?.setter) {
         pipetteTarget.setter(hoverColor);
       }
@@ -2729,7 +2737,7 @@ export default function App() {
       setHoverColor(null);
       setAdvPicker(prev => ({ ...prev, open: true, color: hoverColor }));
     }
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
   }, [hoverColor, pipetteTarget]);
   // ── Canvas Interaction (Drag to Position) ──
   const handleCanvasInteraction = useCallback((e) => {
@@ -6681,6 +6689,10 @@ export default function App() {
           onPointerDown={handlePipettePointerDown}
           onPointerMove={handlePipettePointerMove}
           onPointerUp={handlePipettePointerUp}
+          onTouchStart={handlePipettePointerDown}
+          onTouchMove={handlePipettePointerMove}
+          onTouchEnd={handlePipettePointerUp}
+          onTouchCancel={handlePipettePointerUp}
           style={{
             position: 'fixed',
             inset: 0,
