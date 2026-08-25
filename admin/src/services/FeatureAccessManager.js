@@ -1,5 +1,5 @@
 // src/services/FeatureAccessManager.js
-// â”€â”€â”€ Phase 2 Centralized Feature Registry & Feature Access Manager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Phase 2 Centralized Feature Registry & Feature Access Manager ──────────
 // Authoritative single-client access decision layer. Evaluates canonical
 // Feature Registry, global feature flags, subscription plan assignments,
 // and real-time Firebase Firestore updates.
@@ -7,14 +7,15 @@
 import { auth, db } from './firebase';
 import { onIdTokenChanged } from 'firebase/auth';
 import { doc, getDoc, onSnapshot, collection, getDocs } from 'firebase/firestore';
+import { ALL_TEMPLATES_REGISTRY } from '../data/qrTemplates';
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// 1. CANONICAL FEATURE REGISTRY (78 Granular User-Facing Capabilities)
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. CANONICAL FEATURE REGISTRY (78 Granular User-Facing Capabilities + All Templates)
+// ═══════════════════════════════════════════════════════════════════════════
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
 // 1. CANONICAL FEATURE REGISTRY (8 Pure Core Categories)
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
 
 export const FEATURE_CATEGORIES = {
   QR_GENERATOR:      { id: 'QR_GENERATOR',      name: 'QR Code Generator',   icon: 'QrCode',    color: '#D60036', desc: 'QR formats, engine, styling, logos & templates' },
@@ -27,7 +28,7 @@ export const FEATURE_CATEGORIES = {
   SETTINGS:          { id: 'SETTINGS',          name: 'Settings',            icon: 'Settings',  color: '#64748B', desc: 'App preferences, themes, storage & account' },
 };
 
-// â”€â”€â”€ SUBCATEGORY DEFINITIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SUBCATEGORY DEFINITIONS ─────────────────────────────────────────────
 export const CATEGORY_SUBCATEGORIES = {
   QR_GENERATOR:      ['Content', 'Color', 'Style', 'Logo', 'Template', 'Text', 'Save & Export', 'QR Engine'],
   BARCODE_GENERATOR: ['1D Standards', '2D Standards', 'Barcode Appearance', 'Export'],
@@ -39,9 +40,9 @@ export const CATEGORY_SUBCATEGORIES = {
   SETTINGS:          ['General & Theme', 'Storage', 'Cloud & Sync', 'Account & Security'],
 };
 
-export const FEATURE_REGISTRY = [
-  // â”€â”€ 1. QR CODE GENERATOR â”€â”€
-  // â”€â”€ 1.0 Subcategory Navigation Tabs (Bottom Navbar Modules) â”€â”€
+export const CORE_FEATURE_REGISTRY = [
+  // ── 1. QR CODE GENERATOR ──
+  // ── 1.0 Subcategory Navigation Tabs (Bottom Navbar Modules) ──
   { featureId: 'qr_tab_content',   displayName: 'Content Tab & Editor',     category: 'QR_GENERATOR', subcategory: 'Content', description: 'Enable Content tab in bottom navigation', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_tab_color',     displayName: 'Color Tab & Styling',      category: 'QR_GENERATOR', subcategory: 'Color',   description: 'Enable Color tab in bottom navigation',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_tab_style',     displayName: 'Style / Shapes Tab',       category: 'QR_GENERATOR', subcategory: 'Style',   description: 'Enable Style tab in bottom navigation',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -49,7 +50,7 @@ export const FEATURE_REGISTRY = [
   { featureId: 'qr_tab_template',  displayName: 'Template Tab & Gallery',   category: 'QR_GENERATOR', subcategory: 'Template',description: 'Enable Template tab in bottom navigation',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_tab_text',      displayName: 'Text Tab & Typography',    category: 'QR_GENERATOR', subcategory: 'Text',    description: 'Enable Text tab in bottom navigation',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 1.1 Content Tab (Content Types & Formats) â”€â”€
+  // ── 1.1 Content Tab (Content Types & Formats) ──
   { featureId: 'qr_text',      displayName: 'Plain Text QR',            category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate plain text QR code',        defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_url',       displayName: 'Website URL QR',           category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate website URL QR code',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_wifi',      displayName: 'Wi-Fi Network QR',         category: 'QR_GENERATOR', subcategory: 'Content', description: 'Generate Wi-Fi credentials QR',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -123,27 +124,27 @@ export const FEATURE_REGISTRY = [
   { featureId: 'qr_canvas_positioning', displayName: 'Canvas 3x3 Position Grid',      category: 'QR_GENERATOR', subcategory: 'Style', description: '9-point alignment & X/Y repositioning',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_position_reset',     displayName: 'Reset Position Center Button',  category: 'QR_GENERATOR', subcategory: 'Style', description: 'Reset matrix position back to center',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 1.4 Logo Tab (Presets, Upload, Transforms & Background) â”€â”€
+  // ── 1.4 Logo Tab (Presets, Upload, Transforms & Background) ──
   { featureId: 'custom_logo_presets',   displayName: 'Brand Logo Presets Gallery', category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Select pre-installed social & fintech logos',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'custom_logo_upload',    displayName: 'Custom Brand Logo Upload',   category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Upload personal image/photo inside QR',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'qr_logo_transforms',    displayName: 'Logo Rotate, Size & Opacity',category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Rotate, scale, opacity & shadow tools',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_logo_bg_remover',    displayName: 'Logo Background Remover & Crop',category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Remove logo background & crop tools',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'qr_logo_stroke_shadow', displayName: 'Logo Stroke & Drop Shadow',  category: 'QR_GENERATOR', subcategory: 'Logo', description: 'Outline border & drop shadow effects',      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 1.5 Template Tab (Galleries, Premium & Cloud Library) â”€â”€
+  // ── 1.5 Template Tab (Galleries, Premium & Cloud Library) ──
   { featureId: 'templates_browse',        displayName: 'Browse Templates Gallery',   category: 'QR_GENERATOR', subcategory: 'Template', description: 'Explore pre-designed QR template styles',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'templates_free_apply',    displayName: 'Apply Standard Templates',   category: 'QR_GENERATOR', subcategory: 'Template', description: 'Use free standard pre-designed templates',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'templates_premium_apply', displayName: 'Apply Premium Pro Templates',category: 'QR_GENERATOR', subcategory: 'Template', description: 'Use high-conversion premium templates',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'templates_save_custom',   displayName: 'Save Custom User Template', category: 'QR_GENERATOR', subcategory: 'Template', description: 'Save active design as template',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'templates_cloud_library', displayName: 'Cloud Template Library',    category: 'QR_GENERATOR', subcategory: 'Template', description: 'Access community cloud template library', defaultEnabled: true, requiresAuthentication: true,  allowSuperAdminOverride: true, defaultPlan: 'weekly' },
 
-  // â”€â”€ 1.6 Text Tab (Center Text, Fonts, Styling & Rotation) â”€â”€
+  // ── 1.6 Text Tab (Center Text, Fonts, Styling & Rotation) ──
   { featureId: 'qr_center_text',    displayName: 'Add Text & Center Text Embed',  category: 'QR_GENERATOR', subcategory: 'Text', description: 'Embed text inside QR center or badge',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'qr_text_fonts',     displayName: 'Custom Google Fonts Typography', category: 'QR_GENERATOR', subcategory: 'Text', description: 'Outfit, Inter, Roboto & bespoke font library',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_text_styling',   displayName: 'Text Stroke, Color & Shadow',   category: 'QR_GENERATOR', subcategory: 'Text', description: 'Text outline, color & shadow styling',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_text_transforms',displayName: 'Text Rotate & Position Controls',category: 'QR_GENERATOR', subcategory: 'Text', description: 'Angle rotation & precise positioning',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 1.7 Save & Export (File Downloads, Vectors & Sharing) â”€â”€
+  // ── 1.7 Save & Export (File Downloads, Vectors & Sharing) ──
   { featureId: 'export_png',           displayName: 'PNG Image Export',             category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Download high-res PNG image',            defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'export_jpg',           displayName: 'JPG Image Export',             category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Download compressed JPG image',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'export_svg',           displayName: 'SVG Vector Export',            category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Download scalable SVG vector file',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
@@ -154,13 +155,13 @@ export const FEATURE_REGISTRY = [
   { featureId: 'export_quality_ultra', displayName: 'Export Quality: 4K Ultra (4096px)',category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Export ultra 4K resolution (4096px)',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'export_native_share',  displayName: 'Native OS Share Sheet',        category: 'QR_GENERATOR', subcategory: 'Save & Export', description: 'Share file directly to social apps',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 1.8 QR Engine (Matrix Generator, Error Levels & Quiet Zone) â”€â”€
+  // ── 1.8 QR Engine (Matrix Generator, Error Levels & Quiet Zone) ──
   { featureId: 'qr_matrix_engine',    displayName: 'Core QR Matrix Generator', category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Standard QR matrix generation core',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_error_correction', displayName: 'Error Correction Levels',  category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Adjust L/M/Q/H error tolerance levels',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_quiet_zone',       displayName: 'Quiet Zone Margin Slider', category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Adjust margin padding around QR code',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'qr_size_custom',      displayName: 'Custom Resolution Slider', category: 'QR_GENERATOR', subcategory: 'QR Engine', description: 'Render high-density custom resolutions',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 2. BARCODE GENERATOR â”€â”€
+  // ── 2. BARCODE GENERATOR ──
   { featureId: 'barcode_code128',    displayName: 'Code 128 Standard',         category: 'BARCODE_GENERATOR', subcategory: '1D Standards', description: 'Standard logistics 1D barcode',             defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'barcode_code39',     displayName: 'Code 39 Industrial',         category: 'BARCODE_GENERATOR', subcategory: '1D Standards', description: 'Industrial legacy 1D barcode',              defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'barcode_ean13',      displayName: 'EAN-13 Retail',              category: 'BARCODE_GENERATOR', subcategory: '1D Standards', description: 'Global retail 13-digit standard',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -243,7 +244,7 @@ export const FEATURE_REGISTRY = [
   { featureId: 'batch_native_share',      displayName: 'Native OS Share Sheet for ZIP',category: 'BULK_GENERATOR', subcategory: 'Bulk Export',       description: 'Share ZIP archive directly to WhatsApp/Drive',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'batch_save_documents',    displayName: 'Save to Local Documents',     category: 'BULK_GENERATOR', subcategory: 'Bulk Export',         description: 'Save ZIP directly to device Documents folder',defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 4. SCANNER â”€â”€
+  // ── 4. SCANNER ──
   { featureId: 'scanner_camera_live',    displayName: 'Live Lens Camera Scanning',   category: 'SCANNER', subcategory: 'Camera Lens',  description: 'Real-time camera lens barcode scan',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'scanner_image_upload',   displayName: 'Gallery Image Scanning',      category: 'SCANNER', subcategory: 'Camera Lens',  description: 'Scan QR/barcode from local photo',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'scanner_flashlight',     displayName: 'Flashlight Torch Toggle',     category: 'SCANNER', subcategory: 'Detection',    description: 'Camera flashlight activation',         defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -251,7 +252,7 @@ export const FEATURE_REGISTRY = [
   { featureId: 'scanner_barcode_detect', displayName: '1D & 2D Format Auto-Detect',  category: 'SCANNER', subcategory: 'Detection',    description: 'Automatic detection of 14 formats',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'scanner_result_actions', displayName: 'Result Actions & Copy',       category: 'SCANNER', subcategory: 'Scan Results', description: 'Copy text, open URL from scan',        defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 5. HOME SCREEN â”€â”€
+  // ── 5. HOME SCREEN ──
   { featureId: 'home_view',             displayName: 'Home Dashboard View',       category: 'HOME', subcategory: 'Dashboard',     description: 'Access main Home screen',                    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true,  defaultPlan: 'free' },
   { featureId: 'home_recent_items',     displayName: 'Recent Activity Grid',      category: 'HOME', subcategory: 'Dashboard',     description: 'Display recent items on Home',               defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true,  defaultPlan: 'free' },
   { featureId: 'home_quick_qr',         displayName: 'Quick QR Shortcuts',        category: 'HOME', subcategory: 'Quick Actions', description: 'Quick QR creation cards',                    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true,  defaultPlan: 'free' },
@@ -259,19 +260,19 @@ export const FEATURE_REGISTRY = [
   { featureId: 'home_scanner_shortcut', displayName: 'Quick Scanner Launch Card', category: 'HOME', subcategory: 'Quick Actions', description: 'Scanner launcher card',                     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true,  defaultPlan: 'free' },
   { featureId: 'home_batch_shortcut',   displayName: 'Batch Generator Launch Card',category:'HOME', subcategory: 'Quick Actions', description: 'Batch generator card',                      defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true,  defaultPlan: 'weekly' },
 
-  // â”€â”€ 6. SAVED â”€â”€
+  // ── 6. SAVED ──
   { featureId: 'saved_view',          displayName: 'Saved Collection Screen', category: 'SAVED', subcategory: 'Collection',     description: 'Access bookmarked QR collection',    defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'saved_save_action',   displayName: 'Bookmark / Save Action',  category: 'SAVED', subcategory: 'Save / Remove',  description: 'Bookmark QR code to saved list',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'saved_delete_action', displayName: 'Remove Bookmarked Item',  category: 'SAVED', subcategory: 'Save / Remove',  description: 'Delete item from saved list',        defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'saved_search_filter', displayName: 'Search & Filter Saved',   category: 'SAVED', subcategory: 'Search & Filter',description: 'Search query filter in saved list',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 7. HISTORY â”€â”€
+  // ── 7. HISTORY ──
   { featureId: 'history_view',       displayName: 'Creation History Screen', category: 'HISTORY', subcategory: 'History View',       description: 'View generation & scan logs',          defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'history_save_auto',  displayName: 'Auto-Save Generation Log',category: 'HISTORY', subcategory: 'Automatic History',  description: 'Auto-log created items to history',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'history_delete_item',displayName: 'Delete History Log Item', category: 'HISTORY', subcategory: 'History Management', description: 'Delete single entry from history',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'history_clear_all',  displayName: 'Clear History Range',     category: 'HISTORY', subcategory: 'History Management', description: 'Clear history log by time window',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
 
-  // â”€â”€ 8. SETTINGS â”€â”€
+  // ── 8. SETTINGS ──
   { featureId: 'settings_view',         displayName: 'View Settings Page',       category: 'SETTINGS', subcategory: 'General & Theme',    description: 'Access app preferences screen',        defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'settings_theme_toggle', displayName: 'Dark / Light Theme Toggle',category: 'SETTINGS', subcategory: 'General & Theme',    description: 'Switch app visual theme mode',         defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'settings_haptics',      displayName: 'Haptic Vibration Feedback',category: 'SETTINGS', subcategory: 'General & Theme',    description: 'Enable/disable haptic vibrations',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -285,7 +286,7 @@ export const FEATURE_REGISTRY = [
   { featureId: 'account_subscription_status', displayName: 'Subscription Badge Display', category: 'SETTINGS', subcategory: 'Account & Security',description: 'Display active subscription plan',     defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true,  defaultPlan: 'free' },
   { featureId: 'account_logout',              displayName: 'Account Log Out Action',     category: 'SETTINGS', subcategory: 'Account & Security',description: 'Revoke active session token',          defaultEnabled: true, requiresAuthentication: true,  allowSuperAdminOverride: false, defaultPlan: 'free' },
 
-  // â”€â”€ LEGACY 16 COMPATIBILITY MAPPINGS â”€â”€
+  // ── LEGACY 16 COMPATIBILITY MAPPINGS ──
   { featureId: 'qr_generator',     displayName: 'Legacy QR Generator',      category: 'QR_GENERATOR',     subcategory: 'QR Engine',         description: 'Legacy container ID for QR engine',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'barcode_generator', displayName: 'Legacy Barcode Generator', category: 'BARCODE_GENERATOR',subcategory: 'Barcode Appearance', description: 'Legacy container ID for Barcode engine',  defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
   { featureId: 'scanner',          displayName: 'Legacy Scanner',            category: 'SCANNER',       subcategory: 'Camera Lens',       description: 'Legacy container ID for Scanner',         defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -300,17 +301,40 @@ export const FEATURE_REGISTRY = [
   { featureId: 'save_location',    displayName: 'Legacy Save Location',      category: 'SETTINGS',      subcategory: 'Storage',           description: 'Legacy container ID for Save Location',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
 ];
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+export const TEMPLATE_FEATURE_REGISTRY = (ALL_TEMPLATES_REGISTRY || []).map(tpl => ({
+  featureId: `qr_template_${tpl.id}`,
+  displayName: `${tpl.name} Template`,
+  category: 'QR_GENERATOR',
+  subcategory: 'Template',
+  description: `Template: ${tpl.name} (${tpl.category || 'Standard'})`,
+  defaultEnabled: true,
+  requiresAuthentication: false,
+  allowSuperAdminOverride: true,
+  defaultPlan: 'free',
+  templateMeta: {
+    id: tpl.id,
+    name: tpl.name,
+    category: tpl.category,
+    styleFamily: tpl.styleFamily
+  }
+}));
+
+export const FEATURE_REGISTRY = [
+  ...CORE_FEATURE_REGISTRY,
+  ...TEMPLATE_FEATURE_REGISTRY
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
 // 2. SUBSCRIPTION PLAN DEFINITIONS (Exactly 4 Plans)
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
 export const CANONICAL_PLANS = ['free', 'weekly', 'monthly', 'yearly'];
 
 export const DEFAULT_FREE_FEATURES = FEATURE_REGISTRY.filter(f => f.defaultPlan === 'free').map(f => f.featureId);
 export const DEFAULT_PAID_FEATURES = FEATURE_REGISTRY.map(f => f.featureId);
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
 // 3. REASON & STATUS CODES
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
 export const REASON = {
   ALLOWED: 'ALLOWED',
   FEATURE_DISABLED: 'FEATURE_DISABLED',
@@ -327,11 +351,11 @@ export const STATUS = {
   UNKNOWN_FEATURE: 'unknown_feature',
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// 4. CENTRALIZED FEATURE ACCESS MANAGER CLASS (Online & Offline Resilient)
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 import bundledDefaults from '../config/bundled_cloud_defaults.json';
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. CENTRALIZED FEATURE ACCESS MANAGER CLASS (Online & Offline Resilient)
+// ═══════════════════════════════════════════════════════════════════════════
 const STORAGE_KEYS = {
   GLOBAL_FLAGS: 'mushiqr_cached_global_flags',
   PLAN_CONFIGS: 'mushiqr_cached_plan_configs',
@@ -457,7 +481,10 @@ class FeatureAccessManagerService {
             localStorage.setItem('mushiqr_config_version', String(this.configVersion));
             localStorage.setItem('mushiqr_last_synced_at', String(this.lastSyncedAt));
           } catch {}
-          if (data.plans) this.planConfigs = data.plans;
+          if (data.plans) {
+            this.planConfigs = { ...this.planConfigs, ...data.plans };
+            try { localStorage.setItem(STORAGE_KEYS.PLAN_CONFIGS, JSON.stringify(this.planConfigs)); } catch {}
+          }
         }
         this.notifyListeners();
       }, (err) => console.warn('[FeatureAccessManager] Membership config listener notice:', err.message));
@@ -473,8 +500,11 @@ class FeatureAccessManagerService {
         colSnap.forEach(d => {
           plans[d.id] = d.data();
         });
-        if (Object.keys(plans).length > 0 && !this.membershipConfig?.plans) {
-          this.planConfigs = plans;
+        if (Object.keys(plans).length > 0) {
+          this.planConfigs = { ...this.planConfigs, ...plans };
+          try {
+            localStorage.setItem(STORAGE_KEYS.PLAN_CONFIGS, JSON.stringify(this.planConfigs));
+          } catch {}
         }
         this.notifyListeners();
       }, (err) => console.warn('[FeatureAccessManager] Plans listener notice:', err.message));
@@ -534,7 +564,7 @@ class FeatureAccessManagerService {
       return 'free';
     }
 
-    // Explicit lifetime protection â€” NEVER downgrade lifetime customers
+    // Explicit lifetime protection — NEVER downgrade lifetime customers
     if (rawPlan === 'lifetime' || sub.isLifetime) {
       return 'lifetime';
     }
@@ -906,7 +936,7 @@ class FeatureAccessManagerService {
     if (!target) return true;
 
     // 1. If explicit tab flag is turned OFF by admin, hide immediately
-    if (this._resolveFlagValue(target.tabFlag) === false) return false;
+    if (this.globalFlags[target.tabFlag] === false) return false;
 
     // 2. If all child features under this tab are turned OFF globally, hide tab
     return this.isSubcategoryAllowed('QR_GENERATOR', target.subcat, target.tabFlag);

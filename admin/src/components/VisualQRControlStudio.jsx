@@ -22,6 +22,7 @@ import { setFeatureFlagCloud, setFeatureFlagsBatchCloud, setFeaturesTierBatchClo
 import { FEATURE_REGISTRY } from '../services/FeatureAccessManager';
 import { drawDotModule, drawEye, renderQR, generateQRMatrix } from '../utils/qrEngine.js';
 import { QR_TEMPLATES } from '../utils/qrTemplates.js';
+import { TemplateCard } from '../components/qr-templates/TemplateCard';
 import qrcode from 'qrcode-generator';
 
 // ─── 1. RAW CATALOG DATA ───────────────────────────────────────────────────
@@ -437,89 +438,93 @@ function getSampleMatrixDirect() {
   }
 }
 
-function TemplatePreviewCanvas({ template }) {
-  const canvasRef = useRef(null);
-  const [tick, setTick] = useState(0);
-
-  useEffect(() => {
-    const handler = () => setTick(t => t + 1);
-    window.addEventListener('qr-template-loaded', handler);
-    return () => window.removeEventListener('qr-template-loaded', handler);
-  }, []);
-
-  useEffect(() => {
-    if (!canvasRef.current || !template) return;
-    try {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      const w = 480;
-      const h = template.heightRatio ? Math.round(w * template.heightRatio) : Math.round(w * 1.25);
-      canvas.width = w;
-      canvas.height = h;
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.clearRect(0, 0, w, h);
-
-      // 1. Draw template background
-      if (template.drawBackground) {
-        template.drawBackground(ctx, w, h);
-      }
-
-      // 2. Draw real custom QR code inside placeholder slot
-      ctx.save();
-      const tplQrSize = w * (template.qrSize || 0.44);
-      const tplQrX = w * (template.qrX || 0.5) - tplQrSize / 2;
-      const tplQrY = h * (template.qrY || 0.54) - tplQrSize / 2;
-
-      const activeMatrixInfo = generateQRMatrix('https://mushiqr.pro') || getSampleMatrixDirect();
-
-      if (activeMatrixInfo) {
-        const qrTempCanvas = document.createElement('canvas');
-        qrTempCanvas.width = 512;
-        qrTempCanvas.height = 512;
-
-        const optionsForQR = {
-          ...activeMatrixInfo,
-          size: 512,
-          qrColor: template.preset?.qrColor || '#000000',
-          bgColor: template.preset?.bgColor || '#FFFFFF',
-          bgTransparent: template.preset?.bgTransparent ?? false,
-          qrBgShape: 'full',
-          dotStyle: template.preset?.dotStyle || 'rounded',
-          eyeStyle: template.preset?.eyeStyle || 'rounded',
-          eyeColor: template.preset?.eyeColor || '',
-          eyeOuterColor: template.preset?.eyeOuterColor || '',
-          syncEyes: true,
-          quietZone: 2,
-        };
-
-        renderQR(qrTempCanvas, optionsForQR);
-        ctx.drawImage(qrTempCanvas, tplQrX, tplQrY, tplQrSize, tplQrSize);
-      }
-      ctx.restore();
-
-      // 3. Draw template foreground overlay
-      if (template.drawForeground) {
-        template.drawForeground(ctx, w, h);
-      }
-    } catch (err) {
-      console.warn('[TemplatePreviewCanvas] Render error for template:', template?.id, err);
-    }
-  }, [template, tick]);
+function TemplateItemControlTile({ tpl, enabled, isPaid, updating, onToggleEnable, onToggleTier }) {
+  const isOff = !enabled;
+  const isDarkMode = typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false;
 
   return (
     <div style={{
-      width: '100%',
-      aspectRatio: template.heightRatio ? `1 / ${template.heightRatio}` : '1 / 1.25',
-      borderRadius: 10,
-      overflow: 'hidden',
-      background: '#0d1117',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      boxShadow: '0 4px 14px rgba(0,0,0,0.35)'
+      background: isOff ? (isDarkMode ? 'rgba(15, 18, 33, 0.4)' : '#F8FAFC') : 'var(--ad-input)',
+      border: `1.5px solid ${isOff ? (isDarkMode ? 'rgba(239, 68, 68, 0.3)' : '#FCA5A5') : (isPaid ? (isDarkMode ? 'rgba(245, 158, 11, 0.35)' : '#FCD34D') : (isDarkMode ? 'rgba(16, 185, 129, 0.35)' : '#6EE7B7'))}`,
+      borderRadius: 14, padding: '10px',
+      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+      gap: 8, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
+      boxShadow: isPaid ? '0 2px 8px rgba(245, 158, 11, 0.08)' : '0 2px 8px rgba(16, 185, 129, 0.08)',
+      boxSizing: 'border-box', minWidth: 0
     }}>
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+      {/* High Performance Viewport-Aware Cached Thumbnail */}
+      <div style={{ width: '100%', borderRadius: 8, overflow: 'hidden' }}>
+        <TemplateCard template={tpl} />
+      </div>
+
+      {/* Info */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{
+          fontSize: 11.5, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.2,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+        }}>
+          {tpl.name}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4, marginTop: 2 }}>
+          <span style={{
+            fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 4,
+            background: 'var(--ad-card)', color: 'var(--ad-text-sec)',
+            border: '1px solid var(--ad-border)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          }}>
+            {tpl.category || 'Standard'}
+          </span>
+          <span style={{ fontSize: 8.5, color: 'var(--ad-text-sec)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {tpl.styleFamily || 'poster'}
+          </span>
+        </div>
+      </div>
+
+      {/* Bottom Controls Bar: Active Switch + 1-Click Free/Pro Toggle */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        paddingTop: 8, borderTop: '1px solid var(--ad-border)', gap: 6
+      }}>
+        <button
+          type="button"
+          disabled={updating}
+          onClick={onToggleEnable}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px',
+            borderRadius: 7,
+            border: `1.5px solid ${enabled ? (isDarkMode ? 'rgba(34, 197, 94, 0.45)' : '#86EFAC') : (isDarkMode ? 'rgba(239, 68, 68, 0.45)' : '#FCA5A5')}`,
+            background: enabled ? (isDarkMode ? 'rgba(34, 197, 94, 0.18)' : '#F0FDF4') : (isDarkMode ? 'rgba(239, 68, 68, 0.18)' : '#FEF2F2'),
+            color: enabled ? (isDarkMode ? '#4ADE80' : '#15803D') : (isDarkMode ? '#F87171' : '#B91C1C'),
+            fontSize: 9.5, fontWeight: 800,
+            cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0
+          }}
+        >
+          <Power size={10} strokeWidth={2.5} />
+          <span>{enabled ? 'ON' : 'OFF'}</span>
+        </button>
+
+        <button
+          type="button"
+          disabled={updating}
+          onClick={onToggleTier}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px',
+            borderRadius: 100, border: `1.5px solid ${isPaid ? '#F59E0B' : '#10B981'}`,
+            background: isPaid ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            color: '#FFFFFF', fontSize: 9.5, fontWeight: 800,
+            cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0,
+            boxShadow: isPaid ? '0 2px 6px rgba(245, 158, 11, 0.35)' : '0 2px 6px rgba(16, 185, 129, 0.35)'
+          }}
+        >
+          {updating ? (
+            <RefreshCw size={10} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
+          ) : isPaid ? (
+            <Crown size={10} fill="#fff" color="#fff" strokeWidth={2.2} />
+          ) : (
+            <Shield size={10} strokeWidth={2.5} />
+          )}
+          <span>{isPaid ? 'PRO' : 'FREE'}</span>
+        </button>
+      </div>
     </div>
   );
 }
@@ -983,7 +988,13 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
     ],
     template: [
       { id: 'all', label: 'All', count: ALL_TEMPLATES.length, icon: Layers },
-      { id: 'templates', label: 'Templates', count: ALL_TEMPLATES.length, icon: LayoutGrid }
+      { id: 'Scan Me Frames', label: 'Frames', count: ALL_TEMPLATES.filter(t => t.category === 'Scan Me Frames' || t.styleFamily === 'frame').length, icon: LayoutGrid },
+      { id: 'vCard', label: 'vCard', count: ALL_TEMPLATES.filter(t => t.category === 'vCard' || t.styleFamily === 'vcard').length, icon: User },
+      { id: 'Social Media', label: 'Social Media', count: ALL_TEMPLATES.filter(t => t.category === 'Social Media').length, icon: MessageCircle },
+      { id: 'Business', label: 'Business', count: ALL_TEMPLATES.filter(t => t.category === 'Business').length, icon: FileSpreadsheet },
+      { id: 'Communication', label: 'Communication', count: ALL_TEMPLATES.filter(t => t.category === 'Communication').length, icon: Mail },
+      { id: 'Marketing', label: 'Marketing', count: ALL_TEMPLATES.filter(t => t.category === 'Marketing').length, icon: Sparkles },
+      { id: 'Utility', label: 'Utility', count: ALL_TEMPLATES.filter(t => t.category === 'Utility').length, icon: SlidersHorizontal }
     ],
     text: [
       { id: 'all', label: 'All', count: ALL_TEXT_CONTROLS.length + ALL_TEXT_SHAPES.length + ALL_FONTS.length, icon: Layers },
@@ -1993,26 +2004,42 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
         </div>
       )}
 
-      {/* ── TAB 5: TEMPLATE (10 Pro Poster Templates) ────────────────────── */}
+      {/* ── TAB 5: TEMPLATE (All 200+ Categorized Templates) ─────────────── */}
       {activeTab === 'template' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* 10 Pro Poster Templates */}
-          {(activeSubTab === 'all' || activeSubTab === 'templates') && (
-            <SectionCatalog
-              title="Templates"
-              subtitle="Pre-styled 1080x1350 vertical posters for Instagram, Facebook, WhatsApp, YouTube, TikTok, etc."
-              icon={LayoutGrid}
-              onMakeFree={() => handleBatchActiveTabTier('free', ALL_TEMPLATES.map(t => `qr_template_${t.id}`))}
-              onMakePro={() => handleBatchActiveTabTier('paid', ALL_TEMPLATES.map(t => `qr_template_${t.id}`))}
-              onEnableAll={() => handleBatchActiveTabEnable(true, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
-              onDisableAll={() => handleBatchActiveTabEnable(false, ALL_TEMPLATES.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
-            >
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: 10 }}>
-                {ALL_TEMPLATES
-                  .filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.title.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(tpl => {
+          {(() => {
+            const currentCategoryTemplates = ALL_TEMPLATES.filter(t => {
+              if (activeSubTab === 'all') return true;
+              if (activeSubTab === 'Scan Me Frames') return t.category === 'Scan Me Frames' || t.styleFamily === 'frame';
+              if (activeSubTab === 'vCard') return t.category === 'vCard' || t.styleFamily === 'vcard';
+              return t.category === activeSubTab;
+            });
+
+            const filteredDisplayTemplates = currentCategoryTemplates.filter(t => {
+              if (!searchQuery) return true;
+              const q = searchQuery.toLowerCase();
+              return (t.name || '').toLowerCase().includes(q) ||
+                     (t.category || '').toLowerCase().includes(q) ||
+                     (t.id || '').toLowerCase().includes(q);
+            });
+
+            const title = activeSubTab === 'all' ? 'All Templates' : `${activeSubTab} Templates`;
+            const subtitle = `Manage access tier (Free vs Pro) and visibility for ${filteredDisplayTemplates.length} templates.`;
+
+            return (
+              <SectionCatalog
+                title={title}
+                subtitle={subtitle}
+                icon={LayoutGrid}
+                onMakeFree={() => handleBatchActiveTabTier('free', currentCategoryTemplates.map(t => `qr_template_${t.id}`))}
+                onMakePro={() => handleBatchActiveTabTier('paid', currentCategoryTemplates.map(t => `qr_template_${t.id}`))}
+                onEnableAll={() => handleBatchActiveTabEnable(true, currentCategoryTemplates.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
+                onDisableAll={() => handleBatchActiveTabEnable(false, currentCategoryTemplates.map(t => ({ key: `qr_template_${t.id}`, name: t.name })), 'Templates')}
+              >
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
+                  {filteredDisplayTemplates.map(tpl => {
                     const key = `qr_template_${tpl.id}`;
-                    const state = getItemState(key, true, 'weekly');
+                    const state = getItemState(key, true, 'free');
                     return (
                       <TemplateItemControlTile
                         key={key}
@@ -2025,9 +2052,10 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
                       />
                     );
                   })}
-              </div>
-            </SectionCatalog>
-          )}
+                </div>
+              </SectionCatalog>
+            );
+          })()}
         </div>
       )}
 
@@ -2214,85 +2242,6 @@ export default function VisualQRControlStudio({ currentUser, isDark = false }) {
           )}
         </div>
       )}
-    </div>
-  );
-}
-
-function TemplateItemControlTile({ tpl, enabled, isPaid, updating, onToggleEnable, onToggleTier }) {
-  const isOff = !enabled;
-
-  return (
-    <div style={{
-      background: isOff ? 'rgba(15, 18, 33, 0.4)' : 'var(--ad-input)',
-      border: `1.5px solid ${isOff ? 'rgba(239, 68, 68, 0.3)' : (isPaid ? 'rgba(245, 158, 11, 0.35)' : 'rgba(16, 185, 129, 0.35)')}`,
-      borderRadius: 14, padding: '10px 8px',
-      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-      gap: 8, opacity: isOff ? 0.65 : 1, transition: 'all 0.18s ease',
-      boxShadow: isPaid ? '0 4px 14px rgba(245, 158, 11, 0.1)' : '0 4px 14px rgba(16, 185, 129, 0.1)'
-    }}>
-      {/* Visual Poster Thumbnail Card */}
-      <TemplatePreviewCanvas template={tpl} />
-
-      {/* Details */}
-      <div style={{ minWidth: 0 }}>
-        <div style={{
-          fontSize: 11, fontWeight: 800, color: 'var(--ad-text)', lineHeight: 1.25,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-        }}>
-          {tpl.name}
-        </div>
-        <div style={{
-          fontSize: 9.5, color: 'var(--ad-text-sec)', marginTop: 2,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-        }}>
-          {tpl.actionText} · {tpl.defaultHandle}
-        </div>
-      </div>
-
-      {/* Controls Bar */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        paddingTop: 6, borderTop: '1px solid var(--ad-border)', gap: 4
-      }}>
-        <button
-          type="button"
-          disabled={updating}
-          onClick={onToggleEnable}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px',
-            borderRadius: 6, border: `1px solid ${enabled ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
-            background: enabled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            color: enabled ? '#22C55E' : '#EF4444', fontSize: 9, fontWeight: 800,
-            cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0
-          }}
-        >
-          <Power size={9} strokeWidth={2.5} />
-          <span>{enabled ? 'ON' : 'OFF'}</span>
-        </button>
-
-        <button
-          type="button"
-          disabled={updating}
-          onClick={onToggleTier}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px',
-            borderRadius: 100, border: `1.5px solid ${isPaid ? '#F59E0B' : '#10B981'}`,
-            background: isPaid ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-            color: '#FFFFFF', fontSize: 9, fontWeight: 800,
-            cursor: updating ? 'not-allowed' : 'pointer', flexShrink: 0,
-            boxShadow: isPaid ? '0 2px 6px rgba(245, 158, 11, 0.35)' : '0 2px 6px rgba(16, 185, 129, 0.35)'
-          }}
-        >
-          {updating ? (
-            <RefreshCw size={9} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
-          ) : isPaid ? (
-            <Crown size={9} fill="#fff" color="#fff" strokeWidth={2.2} />
-          ) : (
-            <Shield size={9} strokeWidth={2.5} />
-          )}
-          <span>{isPaid ? 'PRO' : 'FREE'}</span>
-        </button>
-      </div>
     </div>
   );
 }

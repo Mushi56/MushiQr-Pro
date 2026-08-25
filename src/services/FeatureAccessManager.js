@@ -7,9 +7,10 @@
 import { auth, db } from './firebase';
 import { onIdTokenChanged } from 'firebase/auth';
 import { doc, getDoc, onSnapshot, collection, getDocs } from 'firebase/firestore';
+import { ALL_TEMPLATES_REGISTRY } from '../data/qrTemplates';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 1. CANONICAL FEATURE REGISTRY (78 Granular User-Facing Capabilities)
+// 1. CANONICAL FEATURE REGISTRY (78 Granular User-Facing Capabilities + All Templates)
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -39,7 +40,7 @@ export const CATEGORY_SUBCATEGORIES = {
   SETTINGS:          ['General & Theme', 'Storage', 'Cloud & Sync', 'Account & Security'],
 };
 
-export const FEATURE_REGISTRY = [
+export const CORE_FEATURE_REGISTRY = [
   // ── 1. QR CODE GENERATOR ──
   // ── 1.0 Subcategory Navigation Tabs (Bottom Navbar Modules) ──
   { featureId: 'qr_tab_content',   displayName: 'Content Tab & Editor',     category: 'QR_GENERATOR', subcategory: 'Content', description: 'Enable Content tab in bottom navigation', defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'free' },
@@ -298,6 +299,29 @@ export const FEATURE_REGISTRY = [
   { featureId: 'premium_templates',displayName: 'Legacy Premium Templates',  category: 'QR_GENERATOR',  subcategory: 'Templates',        description: 'Legacy container ID for Templates',       defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'bulk_generation',  displayName: 'Legacy Bulk Generation',    category: 'BULK_GENERATOR',subcategory: 'Batch Screen',      description: 'Legacy container ID for Batch',           defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
   { featureId: 'save_location',    displayName: 'Legacy Save Location',      category: 'SETTINGS',      subcategory: 'Storage',           description: 'Legacy container ID for Save Location',   defaultEnabled: true, requiresAuthentication: false, allowSuperAdminOverride: true, defaultPlan: 'weekly' },
+];
+
+export const TEMPLATE_FEATURE_REGISTRY = (ALL_TEMPLATES_REGISTRY || []).map(tpl => ({
+  featureId: `qr_template_${tpl.id}`,
+  displayName: `${tpl.name} Template`,
+  category: 'QR_GENERATOR',
+  subcategory: 'Template',
+  description: `Template: ${tpl.name} (${tpl.category || 'Standard'})`,
+  defaultEnabled: true,
+  requiresAuthentication: false,
+  allowSuperAdminOverride: true,
+  defaultPlan: 'free',
+  templateMeta: {
+    id: tpl.id,
+    name: tpl.name,
+    category: tpl.category,
+    styleFamily: tpl.styleFamily
+  }
+}));
+
+export const FEATURE_REGISTRY = [
+  ...CORE_FEATURE_REGISTRY,
+  ...TEMPLATE_FEATURE_REGISTRY
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -848,15 +872,6 @@ class FeatureAccessManagerService {
 
     if (['qr_generator', 'home_quick_qr', 'home_view', 'history_view', 'saved_view', 'settings_view'].includes(norm)) {
       return false;
-    }
-
-    // Standard pre-designed templates are free by default
-    if (norm.startsWith('qr_template_')) {
-      const freeTemplates = ['google', 'whatsapp', 'facebook', 'youtube', 'tiktok', 'instagram', 'twitter', 'linkedin', 'wifi', 'website', 'contact', 'email'];
-      const subId = norm.replace('qr_template_', '');
-      if (freeTemplates.includes(subId)) {
-        return false;
-      }
     }
 
     // 3. Check if any paid plans dynamically contain this feature

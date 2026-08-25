@@ -4,7 +4,6 @@ import { Heart, Clock } from 'lucide-react';
 import { TEMPLATE_CATEGORIES } from '../../data/qrTemplates';
 import { TemplateCard } from './TemplateCard';
 import { FeatureAccessManager } from '../../services/FeatureAccessManager';
-import { usePremium } from '../../services/premiumContext';
 
 export const TemplateGallery = React.memo(function TemplateGallery({
   templates,
@@ -15,7 +14,6 @@ export const TemplateGallery = React.memo(function TemplateGallery({
   headlineText,
   handleText
 }) {
-  const { showPaywall } = usePremium();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [favorites, setFavorites] = useState(() => {
     try {
@@ -46,12 +44,6 @@ export const TemplateGallery = React.memo(function TemplateGallery({
 
   const handleCardClick = useCallback((tpl) => {
     if (tpl) {
-      const access = FeatureAccessManager.canUseFeature(`qr_template_${tpl.id}`);
-      if (!access.allowed) {
-        showPaywall(`qr_template_${tpl.id}`);
-        return;
-      }
-
       if (selectedTemplate?.id === tpl.id) {
         onSelectTemplate(null);
       } else {
@@ -69,7 +61,7 @@ export const TemplateGallery = React.memo(function TemplateGallery({
     } else {
       onSelectTemplate(null);
     }
-  }, [selectedTemplate?.id, onSelectTemplate, showPaywall]);
+  }, [selectedTemplate?.id, onSelectTemplate]);
 
   const filteredTemplates = useMemo(() => {
     let list = templates;

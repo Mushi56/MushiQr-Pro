@@ -4,7 +4,6 @@ import { drawTemplateBackground, drawVCardTemplate, drawFrameTemplate } from './
 import { generateQRMatrix, renderQR } from '../../utils/qrEngine';
 import { getTemplateStylingPreset } from '../../data/qrTemplates/templateStylingConfig';
 import { LOGO_PRESETS } from '../../data/logoPresets';
-import PaidCrownBadge from '../PaidCrownBadge';
 
 const isVCard = (t) => t?.styleFamily === 'vcard';
 const isFrame = (t) => t?.styleFamily === 'frame';
@@ -370,13 +369,6 @@ export const TemplateCard = React.memo(function TemplateCard({
           />
         </button>
       )}
-
-      {/* Dynamic Pro/Paid Crown Badge controlled by Super Admin Panel */}
-      <PaidCrownBadge 
-        featureId={`qr_template_${template.id}`} 
-        position="corner" 
-        size={11}
-      />
     </div>
   );
 });
