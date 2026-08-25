@@ -2,16 +2,6 @@
 // Universal Canvas 2D Renderer for all Follow Me, Social & Brand Pro Templates
 
 const svgImageCache = {};
-let _templateLoadTimer = null;
-
-function notifyTemplateLoaded() {
-  if (!_templateLoadTimer) {
-    _templateLoadTimer = requestAnimationFrame(() => {
-      _templateLoadTimer = null;
-      window.dispatchEvent(new CustomEvent('qr-template-loaded'));
-    });
-  }
-}
 
 let _sharedOffscreenCanvas = null;
 function getSharedOffscreen(w, h) {
@@ -26,14 +16,21 @@ function getSharedOffscreen(w, h) {
   return _sharedOffscreenCanvas;
 }
 
-function getSvgImage(svgStringOrUrl) {
+export function getSvgImage(svgStringOrUrl, onLoaded) {
   if (!svgStringOrUrl) return null;
   if (svgImageCache[svgStringOrUrl]) {
-    return svgImageCache[svgStringOrUrl];
+    const cachedImg = svgImageCache[svgStringOrUrl];
+    if (onLoaded && !cachedImg.complete) {
+      cachedImg.addEventListener('load', onLoaded, { once: true });
+    }
+    return cachedImg;
   }
   
   const img = new Image();
   img.crossOrigin = 'anonymous';
+  if (onLoaded) {
+    img.addEventListener('load', onLoaded, { once: true });
+  }
 
   if (svgStringOrUrl.startsWith('/') || svgStringOrUrl.startsWith('http') || svgStringOrUrl.startsWith('data:')) {
     img.src = svgStringOrUrl;
@@ -48,7 +45,6 @@ function getSvgImage(svgStringOrUrl) {
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(formattedSvg);
   }
 
-  img.onload = notifyTemplateLoaded;
   svgImageCache[svgStringOrUrl] = img;
   return img;
 }
@@ -207,12 +203,12 @@ function drawRoundedRect(ctx, x, y, w, h, r) {
 /**
  * Draws background decorative SVG shapes (from brand style 5 and network style templates)
  */
-function drawBgShapes(ctx, w, h, bgShapesSvg) {
+function drawBgShapes(ctx, w, h, bgShapesSvg, onLoaded) {
   if (!bgShapesSvg) return;
   const fullSvg = bgShapesSvg.startsWith('<svg') 
     ? bgShapesSvg 
     : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">${bgShapesSvg}</svg>`;
-  const img = getSvgImage(fullSvg);
+  const img = getSvgImage(fullSvg, onLoaded);
   if (img && img.complete && img.naturalWidth !== 0) {
     ctx.save();
     ctx.drawImage(img, 0, 0, w, h);
@@ -253,7 +249,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
     offCtx.fillRect(0, 0, w, h);
 
     // Decorative SVG shapes
-    drawBgShapes(offCtx, w, h, template.bgShapes);
+    drawBgShapes(offCtx, w, h, template.bgShapes, options.onAssetLoaded);
 
     // story-light::before: 4 radial white ambient glow spots
     const glowSpots = [
@@ -290,7 +286,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
       ctx.fillStyle = '#0f172a';
     }
     ctx.fillRect(0, 0, w, h);
-    drawBgShapes(ctx, w, h, template.netSvg);
+    drawBgShapes(ctx, w, h, template.netSvg, options.onAssetLoaded);
   } else {
     if (template.background) {
       parseBackground(ctx, template.background, 0, 0, w, h);
@@ -384,7 +380,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
 
   // ── 4. Platform Top Icon Slot (with rounded corner container) ───────────────
   if (template.svg) {
-    const iconImg = getSvgImage(template.svg);
+    const iconImg = getSvgImage(template.svg, options.onAssetLoaded);
     if (iconImg && iconImg.complete && iconImg.naturalWidth !== 0) {
       ctx.save();
       ctx.fillStyle = isLightBackground(template.background) 
@@ -402,7 +398,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   const headlineText = (options.templateHeadline || template.headline || '').toUpperCase();
 
   ctx.save();
-  ctx.font = `${typography.headlineWeight} ${headlineFontSize}px ${typography.headlineFont}`;
+  ctx.font = `${typography.headlineWeight} ${headlineFontSize}px ${options.templateFont ? `'${options.templateFont}', ` : ''}${typography.headlineFont}`;
 
   const needsDarkText = isLightBackground(template.background);
   ctx.fillStyle = needsDarkText ? '#111111' : '#FFFFFF';
@@ -447,7 +443,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
 
   ctx.save();
   ctx.fillStyle = needsDarkText ? '#111111' : '#FFFFFF';
-  ctx.font = `${typography.handleWeight} ${subtitleFontSize}px ${typography.handleFont}`;
+  ctx.font = `${typography.handleWeight} ${subtitleFontSize}px ${options.templateFont ? `'${options.templateFont}', ` : ''}${typography.handleFont}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.letterSpacing = `${Math.round(w * 0.0012)}px`;
@@ -991,7 +987,7 @@ export function drawFrameTemplate(ctx, w, h, template, options = {}) {
   // Draw Labels / Badges (pill, bubble, banner, flag, tag, corner, side, script)
   ctx.save();
   const labelFontSize = Math.round(w * 0.036);
-  ctx.font = `800 ${labelFontSize}px 'Inter', sans-serif`;
+  ctx.font = `800 ${labelFontSize}px ${options.templateFont ? `'${options.templateFont}', ` : ''}'Inter', sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
@@ -1074,7 +1070,7 @@ export function drawFrameTemplate(ctx, w, h, template, options = {}) {
     const ribbonH = h * 0.06;
     ctx.fillRect(-ribbonW / 2, -ribbonH / 2, ribbonW, ribbonH);
     ctx.fillStyle = fgBadgeText;
-    ctx.font = `800 ${Math.round(w * 0.028)}px 'Inter', sans-serif`;
+    ctx.font = `800 ${Math.round(w * 0.028)}px ${options.templateFont ? `'${options.templateFont}', ` : ''}'Inter', sans-serif`;
     ctx.fillText(labelText === 'SCAN ME' ? 'SCAN' : labelText, 0, 0);
     ctx.restore();
   } else if (labelType === 'side') {

@@ -23,7 +23,6 @@
     "webContentsDebuggingEnabled": true
   },
   "server": {
-    "url": "https://mushiqr-pro.vercel.app/",
     "androidScheme": "https",
     "cleartext": true
   }

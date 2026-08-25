@@ -5,7 +5,7 @@ import { TEMPLATE_CATEGORIES } from '../../data/qrTemplates';
 import { TemplateCard } from './TemplateCard';
 import { FeatureAccessManager } from '../../services/FeatureAccessManager';
 
-export function TemplateGallery({
+export const TemplateGallery = React.memo(function TemplateGallery({
   templates,
   selectedTemplate,
   onSelectTemplate,
@@ -307,4 +307,4 @@ export function TemplateGallery({
       )}
     </div>
   );
-}
+});

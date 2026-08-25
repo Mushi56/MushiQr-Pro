@@ -187,3 +187,9 @@ export function getUserTemplates() {
 export function getAllTemplates() {
   return [...QR_TEMPLATES, ...getUserTemplates()];
 }
+
+export function getAppTemplateById(id) {
+  if (!id) return null;
+  const all = getAllTemplates();
+  return all.find(t => t.id === id) || null;
+}

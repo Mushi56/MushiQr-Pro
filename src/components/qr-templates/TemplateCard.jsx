@@ -11,6 +11,13 @@ const isFrame = (t) => t?.styleFamily === 'frame';
 // Reusable shared static demo matrix for ultra-fast thumbnail generation without recomputing
 const DEMO_MATRIX = generateQRMatrix('https://mushiqr.pro', 'M');
 
+// Module-level in-memory thumbnail cache (max 400 entries)
+const templateThumbnailCache = new Map();
+
+function getTemplateThumbnailKey(template, headlineText, handleText) {
+  return `${template?.id || 'tpl'}__${headlineText || ''}__${handleText || ''}`;
+}
+
 // Shared single offscreen thumbnail canvas to prevent DOM garbage collection overhead
 let _qrThumbCanvas = null;
 function getSharedThumbCanvas() {
@@ -32,23 +39,54 @@ export const TemplateCard = React.memo(function TemplateCard({
   headlineText,
   handleText
 }) {
+  const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [renderTick, setRenderTick] = useState(0);
+  const [localTick, setLocalTick] = useState(0);
 
-  useEffect(() => {
-    const handleLoaded = () => setRenderTick(t => t + 1);
-    window.addEventListener('qr-template-loaded', handleLoaded);
-    return () => window.removeEventListener('qr-template-loaded', handleLoaded);
-  }, []);
+  const cacheKey = getTemplateThumbnailKey(template, headlineText, handleText);
+  const [cachedImgSrc, setCachedImgSrc] = useState(() => templateThumbnailCache.get(cacheKey) || null);
+  const [isVisible, setIsVisible] = useState(() => Boolean(templateThumbnailCache.has(cacheKey)));
 
+  // Viewport-aware lazy observer (250px preload buffer)
   useEffect(() => {
-    if (!canvasRef.current) return;
-    const canvas = canvasRef.current;
+    if (isVisible) return;
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        setIsVisible(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '250px' });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isVisible]);
+
+  // Thumbnail generation & caching
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const key = getTemplateThumbnailKey(template, headlineText, handleText);
+    const existing = templateThumbnailCache.get(key);
+    if (existing) {
+      if (cachedImgSrc !== existing) setCachedImgSrc(existing);
+      return;
+    }
+
+    const canvas = canvasRef.current || (typeof document !== 'undefined' ? document.createElement('canvas') : null);
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const qrTempCanvas = getSharedThumbCanvas();
+    if (!ctx) return;
 
+    const qrTempCanvas = getSharedThumbCanvas();
     const activeMatrix = DEMO_MATRIX;
+    const onAssetLoaded = () => setLocalTick(t => t + 1);
 
     if (isVCard(template)) {
       // ── vCard 16:9 thumbnail ─────────────────────────────────────────────
@@ -63,7 +101,8 @@ export const TemplateCard = React.memo(function TemplateCard({
         phone:    '+60 12-345 6789',
         email:    'you@example.com',
         address:  '123 Business Street, Your City',
-        url:      'https://example.com'
+        url:      'https://example.com',
+        onAssetLoaded
       });
 
       if (coords && activeMatrix && qrTempCanvas) {
@@ -96,7 +135,8 @@ export const TemplateCard = React.memo(function TemplateCard({
       canvas.height = h;
 
       const coords = drawFrameTemplate(ctx, w, h, template, {
-        templateHeadline: headlineText || template.labelText
+        templateHeadline: headlineText || template.labelText,
+        onAssetLoaded
       });
 
       if (coords && activeMatrix && qrTempCanvas) {
@@ -130,7 +170,8 @@ export const TemplateCard = React.memo(function TemplateCard({
 
       const coords = drawTemplateBackground(ctx, w, h, template, {
         templateHeadline:   headlineText || template.headline,
-        templateHandleText: handleText   || template.subtitle
+        templateHandleText: handleText   || template.subtitle,
+        onAssetLoaded
       });
 
       const stylePreset = getTemplateStylingPreset(template) || template.preset;
@@ -180,7 +221,21 @@ export const TemplateCard = React.memo(function TemplateCard({
         ctx.restore();
       }
     }
-  }, [template, headlineText, handleText, renderTick]);
+
+    try {
+      const dataUrl = canvas.toDataURL('image/webp', 0.90) || canvas.toDataURL('image/png');
+      if (dataUrl && dataUrl.length > 50) {
+        if (templateThumbnailCache.size > 400) {
+          const firstKey = templateThumbnailCache.keys().next().value;
+          templateThumbnailCache.delete(firstKey);
+        }
+        templateThumbnailCache.set(key, dataUrl);
+        setCachedImgSrc(dataUrl);
+      }
+    } catch {
+      // Fallback to active canvas
+    }
+  }, [template, headlineText, handleText, isVisible, localTick]);
 
   const vcardCard = isVCard(template);
 
@@ -196,6 +251,7 @@ export const TemplateCard = React.memo(function TemplateCard({
 
   return (
     <div
+      ref={containerRef}
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -216,15 +272,38 @@ export const TemplateCard = React.memo(function TemplateCard({
         flexDirection:   'column'
       }}
     >
-      <canvas
-        ref={canvasRef}
-        style={{
-          width:      '100%',
-          height:     '100%',
-          display:    'block',
-          objectFit:  'contain'
-        }}
-      />
+      {cachedImgSrc ? (
+        <img
+          src={cachedImgSrc}
+          alt={template.name}
+          loading="lazy"
+          style={{
+            width:         '100%',
+            height:        '100%',
+            display:       'block',
+            objectFit:     'contain',
+            pointerEvents: 'none'
+          }}
+        />
+      ) : isVisible ? (
+        <canvas
+          ref={canvasRef}
+          style={{
+            width:      '100%',
+            height:     '100%',
+            display:    'block',
+            objectFit:  'contain'
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width:      '100%',
+            height:     '100%',
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.07) 100%)'
+          }}
+        />
+      )}
 
       {/* Template Name Overlay — Appears on Hover */}
       <div style={{

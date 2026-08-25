@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, Component } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, Component } from 'react';
 import { App as CapApp } from '@capacitor/app';
 import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
@@ -100,7 +100,7 @@ import {
   getUserCloudCounts,
   handleLogoutClear
 } from './utils/storage';
-import { QR_TEMPLATES, getAllTemplates, getUserTemplates } from './utils/qrTemplates';
+import { QR_TEMPLATES, getAllTemplates, getUserTemplates, getAppTemplateById } from './utils/qrTemplates';
 import QRScanner from './components/QRScanner';
 import HistoryPage from './components/HistoryPage';
 import HomePage from './components/HomePage';
@@ -1314,6 +1314,7 @@ export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [templateHeadlineText, setTemplateHeadlineText] = useState('');
   const [templateHandleText, setTemplateHandleText] = useState('');
+  const [templateFont, setTemplateFont] = useState('Outfit');
   const [isEditingTemplateText, setIsEditingTemplateText] = useState(false);
   const [isTemplateTextModalOpen, setIsTemplateTextModalOpen] = useState(false);
   const [templateCategory, setTemplateCategory] = useState('All');
@@ -1353,8 +1354,8 @@ export default function App() {
       return;
     }
     setSelectedTemplate(tpl);
-    setTemplateHeadlineText(tpl.headline || tpl.defaultHeadline || '');
-    setTemplateHandleText(tpl.subtitle || tpl.defaultHandle || '');
+    setTemplateHeadlineText(tpl.headline || tpl.defaultHeadline || tpl.labelText || '');
+    setTemplateHandleText(tpl.subtitle || tpl.defaultHandle || tpl.handle || '');
     setQrBgImage(null);
     setQrBgImageEnabled(false);
     setQrTexture(null);
@@ -1483,6 +1484,58 @@ export default function App() {
   const [textCenterRotation, setTextCenterRotation] = useState(0);
   const [textCenterWidth, setTextCenterWidth] = useState(null); // null means auto
   const [textCenterHeight, setTextCenterHeight] = useState(null); // null means auto
+  // ── Multiple Custom Text Layers ──
+  const [customTexts, setCustomTexts] = useState([]);
+
+  const addCustomText = (initialProps = {}) => {
+    generatorIsDirtyRef.current = true;
+    const newId = 'txt_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+    const newText = {
+      id: newId,
+      text: 'Double click to edit',
+      posX: 0.5,
+      posY: 0.5,
+      size: 0.08,
+      font: 'Outfit',
+      color: '#000000',
+      rotation: 0,
+      strokeEnabled: false,
+      strokeWidth: 5,
+      strokeColor: '#ffffff',
+      shadowEnabled: false,
+      shadowBlur: 10,
+      shadowColor: 'rgba(0,0,0,0.5)',
+      width: null,
+      height: null,
+      ...initialProps
+    };
+    setCustomTexts(prev => [...prev, newText]);
+    setCanvasSelection('custom-text-' + newId);
+    setTextEditMode('custom-' + newId);
+    setActiveTab('text');
+    setTextPopup('input');
+    return newId;
+  };
+
+  const updateCustomText = (id, updates) => {
+    generatorIsDirtyRef.current = true;
+    setCustomTexts(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
+  };
+
+  const removeCustomText = (id) => {
+    generatorIsDirtyRef.current = true;
+    setCustomTexts(prev => prev.filter(item => item.id !== id));
+    if (canvasSelection === 'custom-text-' + id) {
+      setCanvasSelection(null);
+      setTextEditMode('center');
+    }
+  };
+
+  const selectedCustomTextId = canvasSelection && canvasSelection.startsWith('custom-text-') 
+    ? canvasSelection.replace('custom-text-', '') 
+    : (textEditMode.startsWith('custom-') ? textEditMode.replace('custom-', '') : null);
+  const activeCustomText = customTexts.find(t => t.id === selectedCustomTextId) || null;
+
   const [colorPopup, setColorPopup] = useState(null);
   const [shapePopup, setShapePopup] = useState(null);
   // ── References ──
@@ -1495,6 +1548,26 @@ export default function App() {
   const [qrMatrixInfo, setQrMatrixInfo] = useState(null);
   const [toast, setToast] = useState(null);
   const [exportSuccessInfo, setExportSuccessInfo] = useState(null);
+
+  const galleryQrOptions = useMemo(() => ({
+    qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
+    eyeColor, eyeOuterColor, syncEyes,
+    gradientEnabled, gradientColor1, gradientColor2, gradientType,
+    qrTextureEnabled, qrTexture, qrTextureSyncEyes,
+    qrBgShape, qrSizeScale, qrPosX, qrPosY,
+    logo: logo?.image, logoWidth, logoHeight, logoPadding,
+    logoBackground, logoBgColor, logoBgShape,
+    logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity
+  }), [
+    qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
+    eyeColor, eyeOuterColor, syncEyes,
+    gradientEnabled, gradientColor1, gradientColor2, gradientType,
+    qrTextureEnabled, qrTexture, qrTextureSyncEyes,
+    qrBgShape, qrSizeScale, qrPosX, qrPosY,
+    logo?.image, logoWidth, logoHeight, logoPadding,
+    logoBackground, logoBgColor, logoBgShape,
+    logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity
+  ]);
   const [downloadingFormat, setDownloadingFormat] = useState(null);
   // ── Advanced Picker State ──
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', setter: null });
@@ -1702,8 +1775,12 @@ export default function App() {
       textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
       textCenterPosX, textCenterPosY, textCenterRotation,
       textCenterWidth, textCenterHeight,
+      customTexts,
+      selectedTemplateId: selectedTemplate?.id || null,
       selectedTemplate: selectedTemplate ? { id: selectedTemplate.id, name: selectedTemplate.name } : null,
+      templateHeadlineText,
       templateHandleText,
+      templateFont,
       errorLevel
     };
   }, [
@@ -1727,7 +1804,8 @@ export default function App() {
     textCenterStrokeEnabled, textCenterStrokeWidth, textCenterStrokeColor,
     textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
     textCenterPosX, textCenterPosY, textCenterRotation, textCenterWidth, textCenterHeight,
-    selectedTemplate, templateHandleText,
+    customTexts,
+    selectedTemplate, templateHeadlineText, templateHandleText, templateFont,
     errorLevel
   ]);
 
@@ -1927,9 +2005,22 @@ export default function App() {
     if (s.textCenterWidth !== undefined) setTextCenterWidth(s.textCenterWidth);
     if (s.textCenterHeight !== undefined) setTextCenterHeight(s.textCenterHeight);
 
-    // Template & Error Level
-    if (s.selectedTemplate !== undefined) setSelectedTemplate(s.selectedTemplate);
+    // Template & Headline / Handle
+    if (s.selectedTemplateId !== undefined || s.selectedTemplate !== undefined) {
+      const tplId = s.selectedTemplateId !== undefined 
+        ? s.selectedTemplateId 
+        : (s.selectedTemplate?.id || (typeof s.selectedTemplate === 'string' ? s.selectedTemplate : null));
+      if (tplId) {
+        const fullTpl = getAppTemplateById(tplId);
+        setSelectedTemplate(fullTpl);
+      } else {
+        setSelectedTemplate(null);
+      }
+    }
+    if (s.customTexts !== undefined) setCustomTexts(s.customTexts || []);
+    if (s.templateHeadlineText !== undefined) setTemplateHeadlineText(s.templateHeadlineText);
     if (s.templateHandleText !== undefined) setTemplateHandleText(s.templateHandleText);
+    if (s.templateFont !== undefined) setTemplateFont(s.templateFont);
     if (s.errorLevel !== undefined) setErrorLevel(s.errorLevel);
     
     setTimeout(() => { isInternalUpdate.current = false; }, 100);
@@ -2043,10 +2134,12 @@ export default function App() {
     setTextCenterWidth(null);
     setTextCenterHeight(null);
     
-    // Template
+    // Template & Custom Texts
     setSelectedTemplate(null);
     setTemplateHeadlineText('');
     setTemplateHandleText('');
+    setTemplateFont('Outfit');
+    setCustomTexts([]);
     
     // Popups & Active Tabs
     setLogoPopup(null);
@@ -2135,8 +2228,12 @@ export default function App() {
       textCenterRotation: 0,
       textCenterWidth: null,
       textCenterHeight: null,
+      customTexts: [],
+      selectedTemplateId: null,
       selectedTemplate: null,
+      templateHeadlineText: '',
       templateHandleText: '',
+      templateFont: 'Outfit',
       errorLevel: 'M'
     };
     historyRef.current = [freshSnapshot];
@@ -2492,6 +2589,9 @@ export default function App() {
       ...qrMatrixInfo, 
       size: exportSize,
       template: selectedTemplate,
+      templateHeadline: templateHeadlineText || selectedTemplate?.headline || selectedTemplate?.defaultHeadline || selectedTemplate?.labelText || '',
+      templateHandleText: templateHandleText || selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || selectedTemplate?.handle || '',
+      templateFont,
       ...vcardExportFields,
       qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
       eyeColor,
@@ -2540,6 +2640,7 @@ export default function App() {
       textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
       textCenterPosX, textCenterPosY, textCenterRotation,
       textCenterWidth, textCenterHeight,
+      customTexts,
       logoPosX, logoPosY,
       logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
       logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop,
@@ -2748,6 +2849,7 @@ export default function App() {
         template: selectedTemplate,
         templateHeadline: templateHeadlineText || selectedTemplate?.headline || selectedTemplate?.defaultHeadline || '',
         templateHandleText: templateHandleText || selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || '',
+        templateFont,
         ...vcardFields,
         qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
         eyeColor,
@@ -2796,10 +2898,11 @@ export default function App() {
         textCenterShadowEnabled, textCenterShadowBlur, textCenterShadowColor,
         textCenterPosX, textCenterPosY, textCenterRotation,
         textCenterWidth, textCenterHeight,
+        customTexts,
         logoPosX, logoPosY,
         logoOpacity, logoRotation, logoShadowEnabled, logoShadowColor, logoShadowBlur, logoShadowOffsetX, logoShadowOffsetY,
         logoInnerShadowEnabled, logoEraseColorEnabled, logoEraseColor, logoEraseTolerance, logoEraseSmoothing, logoTexture, logoCrop,
-        showHandle: canvasSelection === 'logo' || canvasSelection === 'text' || canvasSelection === 'frame-text',
+        showHandle: !!canvasSelection && !isPipetteActive,
         selectedType: canvasSelection === 'text' ? 'text' : (canvasSelection === 'frame-text' ? 'frame-text' : canvasSelection)
       });
       // Cache latest thumbnail base64 data url for saving to history later
@@ -2842,7 +2945,8 @@ export default function App() {
     qrBgShape, qrBgCardShape, qrSizeScale, qrPosX, qrPosY,
     aiArtQrEnabled, aiArtBlend, aiArtStyle,
     activeTab, canvasSelection,
-    selectedTemplate, templateHeadlineText, templateHandleText,
+    selectedTemplate, templateHeadlineText, templateHandleText, templateFont,
+    customTexts,
     qrData, qrType
   ]);
   useEffect(() => {
@@ -2858,14 +2962,7 @@ export default function App() {
       qrTexture.image.onload = renderCanvas;
       qrTexture.image.onerror = () => showToast('Texture failed to load', 'error');
     }
-    const handleTemplateLoad = () => {
-      renderCanvas();
-    };
-    window.addEventListener('qr-template-loaded', handleTemplateLoad);
-    return () => {
-      window.removeEventListener('qr-template-loaded', handleTemplateLoad);
-    };
-  }, [renderCanvas, logo, qrBgImage, qrTexture, activePage, selectedTemplate, templateHeadlineText, templateHandleText]);
+  }, [renderCanvas, logo, qrBgImage, qrTexture, activePage, selectedTemplate, templateHeadlineText, templateHandleText, templateFont, customTexts]);
   const getQRContentArea = useCallback(() => {
     const size = 512;
     const padding = size * 0.03;
@@ -3312,21 +3409,134 @@ export default function App() {
         return;
       }
     }
-    // 4. Check Template Text Click
+    // 3. Check Custom Text Layers
+    if (customTexts && customTexts.length > 0) {
+      for (let i = customTexts.length - 1; i >= 0; i--) {
+        const item = customTexts[i];
+        if (!item || !item.text) continue;
+        const fontSize = contentSize * (item.size || 0.08);
+        tempCtx.current.font = `bold ${fontSize}px '${item.font || 'Outfit'}', sans-serif`;
+        const metrics = tempCtx.current.measureText(item.text);
+        const tw = item.width ? (item.width * contentSize) : (metrics.width + 20);
+        const th = item.height ? (item.height * contentSize) : ((fontSize * 0.8) + 20);
+
+        const tx = contentX + (contentSize - tw) * (item.posX ?? 0.5);
+        const ty = contentY + (contentSize - th) * (item.posY ?? 0.5);
+        const centerX = tx + tw / 2;
+        const centerY = ty + th / 2;
+        const dx_raw = x - centerX;
+        const dy_raw = y - centerY;
+        const ang = (-(item.rotation || 0) * Math.PI) / 180;
+        const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
+        const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
+        const hSize = 24;
+
+        const checkH = (hx, hy, type) => {
+          if (localX >= hx - hSize && localX <= hx + hSize && localY >= hy - hSize && localY <= hy + hSize) {
+            setIsDraggingCanvas(true);
+            dragType.current = type;
+            dragStartOffset.current = {
+              x: localX,
+              y: localY,
+              startSize: item.size || 0.08,
+              startPosX: item.posX ?? 0.5,
+              startPosY: item.posY ?? 0.5,
+              startRotation: item.rotation || 0,
+              startW: tw / contentSize,
+              startH: th / contentSize,
+              startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI,
+              customTextId: item.id
+            };
+            e.preventDefault();
+            return true;
+          }
+          return false;
+        };
+
+        if (canvasSelection === 'custom-text-' + item.id) {
+          const checkRotate = (hx, hy) => {
+            const rotHSize = 24;
+            if (localX >= hx - rotHSize && localX <= hx + rotHSize && localY >= hy - rotHSize && localY <= hy + rotHSize) {
+              setIsDraggingCanvas(true);
+              dragType.current = 'rotate-custom-text-' + item.id;
+              dragStartOffset.current = {
+                x: localX,
+                y: localY,
+                startSize: item.size || 0.08,
+                startPosX: item.posX ?? 0.5,
+                startPosY: item.posY ?? 0.5,
+                startRotation: item.rotation || 0,
+                startW: tw / contentSize,
+                startH: th / contentSize,
+                startMouseAngle: Math.atan2(y - centerY, x - centerX) * 180 / Math.PI,
+                customTextId: item.id
+              };
+              e.preventDefault();
+              return true;
+            }
+            return false;
+          };
+
+          // 1. Top rotate stalk
+          if (checkRotate(centerX, ty - 26)) return;
+          // 2. Bottom-left rotate bracket
+          if (checkRotate(tx - 20, ty + th + 20)) return;
+          // 3. Delete button
+          if (checkH(tx + tw, ty, 'delete-custom-text-' + item.id)) {
+            removeCustomText(item.id);
+            setCanvasSelection(null);
+            setIsDraggingCanvas(false);
+            dragType.current = null;
+            showToast('Text layer removed');
+            e.preventDefault();
+            return;
+          }
+          // 4. Resize bottom-right
+          if (checkH(tx + tw, ty + th, 'resize-custom-text-br-' + item.id)) return;
+          // 5. Side stretch
+          if (checkH(tx + tw, ty + th / 2, 'resize-custom-text-r-' + item.id)) return;
+          if (checkH(tx + tw / 2, ty + th, 'resize-custom-text-b-' + item.id)) return;
+        }
+
+        // Body hit test
+        if (inRect(localX, localY, tx, ty, tw, th)) {
+          setCanvasSelection('custom-text-' + item.id);
+          setTextEditMode('custom-' + item.id);
+          setActiveTab('text');
+          setTextPopup('input');
+          setIsDraggingCanvas(true);
+          dragType.current = 'custom-text-' + item.id;
+          dragStartOffset.current = { x: x - tx, y: y - ty, customTextId: item.id };
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+
+    // 4. Check Template Text Direct Click
     if (selectedTemplate) {
       if (selectedTemplate.styleFamily === 'vcard') {
-        // For vCard landscape: Left text panel occupies entire left portion (x <= 360)
         if (x <= 360) {
           setIsTemplateTextModalOpen(true);
           e.preventDefault();
           return;
         }
       } else {
-        // For standard square templates:
-        // - Top Headline container: y <= 160
-        // - Bottom Handle/Subtitle: y >= 360
-        if (y <= 160 || y >= 360) {
-          setIsTemplateTextModalOpen(true);
+        // Top Headline / Label
+        if (y <= 170) {
+          setCanvasSelection('template-headline');
+          setTextEditMode('template-top');
+          setActiveTab('text');
+          setTextPopup('input');
+          e.preventDefault();
+          return;
+        }
+        // Bottom Subtitle / Handle (non-frame templates)
+        if (y >= 350 && selectedTemplate.styleFamily !== 'frame') {
+          setCanvasSelection('template-handle');
+          setTextEditMode('template-bottom');
+          setActiveTab('text');
+          setTextPopup('input');
           e.preventDefault();
           return;
         }
@@ -3337,7 +3547,7 @@ export default function App() {
     if (!isPipetteActive) {
       setCanvasSelection(null);
     }
-  }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, logoPadding, getQRContentArea, canvasSelection, getSnapshot, frameStyle, frameText, frameSize, frameFont, framePosition, frameRotation, selectedTemplate]);
+  }, [qrMatrixInfo, logo, logoWidth, logoHeight, logoPosX, logoPosY, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, customTexts, logoPadding, getQRContentArea, canvasSelection, getSnapshot, frameStyle, frameText, frameSize, frameFont, framePosition, frameRotation, selectedTemplate]);
   const handleCanvasDoubleClick = useCallback((e) => {
     if (!canvasRef.current || !qrMatrixInfo) return;
     if (selectedTemplate) {
@@ -3742,8 +3952,99 @@ export default function App() {
       
       setTextCenterPosX(Math.round(valX * 1000) / 1000);
       setTextCenterPosY(Math.round(valY * 1000) / 1000);
+    } else if (dragType.current && dragType.current.startsWith('rotate-custom-text-')) {
+      const id = dragStartOffset.current.customTextId;
+      const item = customTexts.find(t => t.id === id);
+      if (item) {
+        const fontSize = contentSize * (item.size || 0.08);
+        tempCtx.current.font = `bold ${fontSize}px '${item.font || 'Outfit'}', sans-serif`;
+        const metrics = tempCtx.current.measureText(item.text);
+        const tw = item.width ? (item.width * contentSize) : (metrics.width + 20);
+        const th = item.height ? (item.height * contentSize) : ((fontSize * 0.8) + 20);
+        const tx = contentX + (contentSize - tw) * (item.posX ?? 0.5);
+        const ty = contentY + (contentSize - th) * (item.posY ?? 0.5);
+        const centerX = tx + tw / 2;
+        const centerY = ty + th / 2;
+        const currentMouseAngle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
+        const angleDelta = currentMouseAngle - dragStartOffset.current.startMouseAngle;
+        let newRotation = dragStartOffset.current.startRotation + angleDelta;
+        let normalizedRot = (newRotation % 360 + 360) % 360;
+        const snapTargets = [0, 45, 90, 135, 180, 225, 270, 315, 360];
+        for (const target of snapTargets) {
+          if (Math.abs(normalizedRot - target) <= 4) {
+            normalizedRot = target === 360 ? 0 : target;
+            break;
+          }
+        }
+        updateCustomText(id, { rotation: Math.round(normalizedRot) });
+      }
+    } else if (dragType.current && dragType.current.startsWith('resize-custom-text-')) {
+      const id = dragStartOffset.current.customTextId;
+      const item = customTexts.find(t => t.id === id);
+      if (item) {
+        const fontSize = contentSize * (item.size || 0.08);
+        tempCtx.current.font = `bold ${fontSize}px '${item.font || 'Outfit'}', sans-serif`;
+        const metrics = tempCtx.current.measureText(item.text);
+        const tw = item.width ? (item.width * contentSize) : (metrics.width + 20);
+        const th = item.height ? (item.height * contentSize) : ((fontSize * 0.8) + 20);
+        const tx = contentX + (contentSize - tw) * (item.posX ?? 0.5);
+        const ty = contentY + (contentSize - th) * (item.posY ?? 0.5);
+        const centerX = tx + tw / 2;
+        const centerY = ty + th / 2;
+        const dx_raw = x - centerX;
+        const dy_raw = y - centerY;
+        const ang = (-(item.rotation || 0) * Math.PI) / 180;
+        const localX = centerX + dx_raw * Math.cos(ang) - dy_raw * Math.sin(ang);
+        const localY = centerY + dx_raw * Math.sin(ang) + dy_raw * Math.cos(ang);
+        const diffX = (localX - dragStartOffset.current.x) / contentSize;
+        const diffY = (localY - dragStartOffset.current.y) / contentSize;
+
+        let newW = dragStartOffset.current.startW;
+        let newH = dragStartOffset.current.startH;
+        let newSize = dragStartOffset.current.startSize;
+
+        if (dragType.current.includes('-br-')) {
+          const scale = Math.max(0.1, (dragStartOffset.current.startW + diffX) / dragStartOffset.current.startW);
+          newW = Math.max(0.05, Math.min(0.8, dragStartOffset.current.startW * scale));
+          newH = Math.max(0.05, Math.min(0.8, dragStartOffset.current.startH * scale));
+          newSize = Math.max(0.02, Math.min(0.4, dragStartOffset.current.startSize * scale));
+        } else if (dragType.current.includes('-r-')) {
+          newW = Math.max(0.05, Math.min(0.8, dragStartOffset.current.startW + diffX));
+        } else if (dragType.current.includes('-b-')) {
+          newH = Math.max(0.05, Math.min(0.8, dragStartOffset.current.startH + diffY));
+        }
+
+        updateCustomText(id, {
+          size: Math.round(newSize * 1000) / 1000,
+          width: Math.round(newW * 100) / 100,
+          height: Math.round(newH * 100) / 100
+        });
+      }
+    } else if (dragType.current && dragType.current.startsWith('custom-text-')) {
+      const id = dragStartOffset.current.customTextId;
+      const item = customTexts.find(t => t.id === id);
+      if (item) {
+        const fontSize = contentSize * (item.size || 0.08);
+        tempCtx.current.font = `bold ${fontSize}px '${item.font || 'Outfit'}', sans-serif`;
+        const metrics = tempCtx.current.measureText(item.text);
+        const tw = item.width ? (item.width * contentSize) : (metrics.width + 20);
+        const th = item.height ? (item.height * contentSize) : ((fontSize * 0.8) + 20);
+
+        const newTx = x - dragStartOffset.current.x;
+        const newTy = y - dragStartOffset.current.y;
+        let valX = Math.max(0, Math.min(1, (newTx - contentX) / Math.max(1, contentSize - tw)));
+        let valY = Math.max(0, Math.min(1, (newTy - contentY) / Math.max(1, contentSize - th)));
+
+        if (Math.abs(valX - 0.5) <= 0.02) valX = 0.5;
+        if (Math.abs(valY - 0.5) <= 0.02) valY = 0.5;
+
+        updateCustomText(id, {
+          posX: Math.round(valX * 1000) / 1000,
+          posY: Math.round(valY * 1000) / 1000
+        });
+      }
     }
-  }, [isDraggingCanvas, qrMatrixInfo, logo, logoWidth, logoHeight, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, textCenterFont, logoPadding, getQRContentArea, framePosition, frameRotation, frameSize, setFrameRotation, setFrameSize]);
+  }, [isDraggingCanvas, qrMatrixInfo, logo, logoWidth, logoHeight, logoRotation, textCenterEnabled, textCenterText, textCenterSize, textCenterWidth, textCenterHeight, textCenterPosX, textCenterPosY, textCenterRotation, textCenterFont, customTexts, logoPadding, getQRContentArea, framePosition, frameRotation, frameSize, setFrameRotation, setFrameSize]);
   const stopCanvasDrag = useCallback(() => {
     setIsDraggingCanvas(false);
     dragType.current = null;
@@ -4806,18 +5107,9 @@ export default function App() {
                     <TemplateGallery
                       templates={ALL_TEMPLATES}
                       selectedTemplate={selectedTemplate}
-                      onSelectTemplate={(tpl) => applyTemplate(tpl)}
+                      onSelectTemplate={applyTemplate}
                       qrMatrixInfo={qrMatrixInfo}
-                      currentQrOptions={{
-                        qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
-                        eyeColor, eyeOuterColor, syncEyes,
-                        gradientEnabled, gradientColor1, gradientColor2, gradientType,
-                        qrTextureEnabled, qrTexture, qrTextureSyncEyes,
-                        qrBgShape, qrSizeScale, qrPosX, qrPosY,
-                        logo: logo?.image, logoWidth, logoHeight, logoPadding,
-                        logoBackground, logoBgColor, logoBgShape,
-                        logoOutline, logoOutlineColor, logoOutlineWidth, logoOutlineOpacity
-                      }}
+                      currentQrOptions={galleryQrOptions}
                       headlineText={templateHeadlineText}
                       handleText={templateHandleText}
                     />
@@ -5189,7 +5481,312 @@ export default function App() {
                       )}
                       {/* TEXT PROPERTIES */}
                       {textPopup === 'input' && (
-                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                          {/* Add Text Layer Action Header */}
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newId = addCustomText({
+                                  text: 'SCAN ME',
+                                  posX: 0.5,
+                                  posY: 0.5,
+                                  size: 0.08,
+                                  font: 'Outfit',
+                                  color: '#000000'
+                                });
+                                setCanvasSelection('custom-text-' + newId);
+                                setTextEditMode('custom-' + newId);
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                width: '100%',
+                                padding: '12px 16px',
+                                borderRadius: '14px',
+                                background: 'var(--accent-primary)',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                fontSize: '13.5px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 14px rgba(214, 0, 54, 0.25)',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              <Plus size={18} />
+                              <span>+ Add Text Layer</span>
+                            </button>
+                          </div>
+
+                          {/* Text Layer Switcher Chips */}
+                          {(customTexts.length > 0 || selectedTemplate || textCenterEnabled || frameStyle !== 'none') && (
+                            <div style={{
+                              display: 'flex',
+                              gap: '6px',
+                              overflowX: 'auto',
+                              padding: '2px 0 6px 0',
+                              scrollbarWidth: 'none',
+                              msOverflowStyle: 'none',
+                              WebkitOverflowScrolling: 'touch'
+                            }}>
+                              {customTexts.map((ct, idx) => {
+                                const isSel = canvasSelection === 'custom-text-' + ct.id;
+                                return (
+                                  <button
+                                    key={ct.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setCanvasSelection('custom-text-' + ct.id);
+                                      setTextEditMode('custom-' + ct.id);
+                                    }}
+                                    style={{
+                                      flex: '0 0 auto',
+                                      padding: '6px 12px',
+                                      borderRadius: '10px',
+                                      border: '1px solid',
+                                      borderColor: isSel ? 'var(--accent-primary)' : 'var(--border-color)',
+                                      background: isSel ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                                      color: isSel ? '#FFFFFF' : 'var(--text-primary)',
+                                      fontSize: '12px',
+                                      fontWeight: isSel ? 700 : 500,
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '6px'
+                                    }}
+                                  >
+                                    <span>{ct.text ? `"${ct.text.slice(0, 10)}"` : `Text ${idx + 1}`}</span>
+                                  </button>
+                                );
+                              })}
+                              {selectedTemplate && selectedTemplate.styleFamily !== 'vcard' && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setCanvasSelection('template-headline');
+                                      setTextEditMode('template-top');
+                                    }}
+                                    style={{
+                                      flex: '0 0 auto',
+                                      padding: '6px 12px',
+                                      borderRadius: '10px',
+                                      border: '1px solid',
+                                      borderColor: textEditMode === 'template-top' ? 'var(--accent-primary)' : 'var(--border-color)',
+                                      background: textEditMode === 'template-top' ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                                      color: textEditMode === 'template-top' ? '#FFFFFF' : 'var(--text-primary)',
+                                      fontSize: '12px',
+                                      fontWeight: textEditMode === 'template-top' ? 700 : 500,
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    Top Headline
+                                  </button>
+                                  {selectedTemplate.styleFamily !== 'frame' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setCanvasSelection('template-handle');
+                                        setTextEditMode('template-bottom');
+                                      }}
+                                      style={{
+                                        flex: '0 0 auto',
+                                        padding: '6px 12px',
+                                        borderRadius: '10px',
+                                        border: '1px solid',
+                                        borderColor: textEditMode === 'template-bottom' ? 'var(--accent-primary)' : 'var(--border-color)',
+                                        background: textEditMode === 'template-bottom' ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                                        color: textEditMode === 'template-bottom' ? '#FFFFFF' : 'var(--text-primary)',
+                                        fontSize: '12px',
+                                        fontWeight: textEditMode === 'template-bottom' ? 700 : 500,
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      Bottom Handle
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                              {textCenterEnabled && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setCanvasSelection('text');
+                                    setTextEditMode('center');
+                                  }}
+                                  style={{
+                                    flex: '0 0 auto',
+                                    padding: '6px 12px',
+                                    borderRadius: '10px',
+                                    border: '1px solid',
+                                    borderColor: textEditMode === 'center' ? 'var(--accent-primary)' : 'var(--border-color)',
+                                    background: textEditMode === 'center' ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                                    color: textEditMode === 'center' ? '#FFFFFF' : 'var(--text-primary)',
+                                    fontSize: '12px',
+                                    fontWeight: textEditMode === 'center' ? 700 : 500,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Center Text
+                                </button>
+                              )}
+                              {frameStyle !== 'none' && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setCanvasSelection('frame-text');
+                                    setTextEditMode('frame');
+                                  }}
+                                  style={{
+                                    flex: '0 0 auto',
+                                    padding: '6px 12px',
+                                    borderRadius: '10px',
+                                    border: '1px solid',
+                                    borderColor: textEditMode === 'frame' ? 'var(--accent-primary)' : 'var(--border-color)',
+                                    background: textEditMode === 'frame' ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                                    color: textEditMode === 'frame' ? '#FFFFFF' : 'var(--text-primary)',
+                                    fontSize: '12px',
+                                    fontWeight: textEditMode === 'frame' ? 700 : 500,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Frame Text
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          {/* ACTIVE CUSTOM TEXT EDITOR */}
+                          {activeCustomText && (
+                            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1.5px solid var(--accent-primary)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-primary)', display: 'inline-block' }} />
+                                  Custom Text Layer
+                                </span>
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      addCustomText({
+                                        ...activeCustomText,
+                                        id: undefined,
+                                        posX: Math.min(0.9, (activeCustomText.posX || 0.5) + 0.05),
+                                        posY: Math.min(0.9, (activeCustomText.posY || 0.5) + 0.05)
+                                      });
+                                    }}
+                                    style={{
+                                      background: 'var(--bg-primary)',
+                                      border: '1px solid var(--border-color)',
+                                      borderRadius: '8px',
+                                      padding: '4px 8px',
+                                      color: 'var(--text-secondary)',
+                                      fontSize: '11px',
+                                      fontWeight: 600,
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    Duplicate
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      removeCustomText(activeCustomText.id);
+                                      setCanvasSelection(null);
+                                    }}
+                                    style={{
+                                      background: 'rgba(255, 59, 48, 0.1)',
+                                      border: '1px solid rgba(255, 59, 48, 0.3)',
+                                      borderRadius: '8px',
+                                      padding: '4px 8px',
+                                      color: '#ff3b30',
+                                      fontSize: '11px',
+                                      fontWeight: 700,
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '4px'
+                                    }}
+                                  >
+                                    <Trash2 size={12} />
+                                    <span>Delete</span>
+                                  </button>
+                                </div>
+                              </div>
+                              <input 
+                                type="text" 
+                                maxLength={60} 
+                                value={activeCustomText.text || ''} 
+                                onChange={(e) => updateCustomText(activeCustomText.id, { text: e.target.value, width: null, height: null })} 
+                                placeholder="Type your text..." 
+                                className="text-input-premium" 
+                                style={{ width: '100%', borderColor: 'var(--accent-primary)' }} 
+                              />
+                            </div>
+                          )}
+
+                          {/* TEMPLATE HEADLINE (TOP TEXT) */}
+                          {selectedTemplate && (textEditMode === 'template-top' || (!activeCustomText && textEditMode !== 'center' && textEditMode !== 'frame' && textEditMode !== 'template-bottom')) && selectedTemplate.styleFamily !== 'vcard' && (
+                            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                  Top Headline Text ({selectedTemplate.name})
+                                </span>
+                                {(templateHeadlineText && templateHeadlineText !== (selectedTemplate.headline || selectedTemplate.defaultHeadline || selectedTemplate.labelText || '')) && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setTemplateHeadlineText('')}
+                                    style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+                                  >
+                                    Reset
+                                  </button>
+                                )}
+                              </div>
+                              <input
+                                type="text"
+                                maxLength={40}
+                                value={templateHeadlineText !== '' ? templateHeadlineText : (selectedTemplate.headline || selectedTemplate.defaultHeadline || selectedTemplate.labelText || '')}
+                                onChange={(e) => setTemplateHeadlineText(e.target.value)}
+                                placeholder="Type top headline..."
+                                className="text-input-premium"
+                                style={{ width: '100%', textTransform: 'uppercase' }}
+                              />
+                            </div>
+                          )}
+
+                          {/* TEMPLATE SUBTITLE / HANDLE (BOTTOM TEXT) */}
+                          {selectedTemplate && (textEditMode === 'template-bottom' || (!activeCustomText && textEditMode !== 'center' && textEditMode !== 'frame' && textEditMode === 'template-bottom')) && selectedTemplate.styleFamily !== 'frame' && selectedTemplate.styleFamily !== 'vcard' && (
+                            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                  Bottom Subtitle / Handle ({selectedTemplate.name})
+                                </span>
+                                {(templateHandleText && templateHandleText !== (selectedTemplate.subtitle || selectedTemplate.defaultHandle || selectedTemplate.handle || '')) && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setTemplateHandleText('')}
+                                    style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+                                  >
+                                    Reset
+                                  </button>
+                                )}
+                              </div>
+                              <input
+                                type="text"
+                                maxLength={40}
+                                value={templateHandleText !== '' ? templateHandleText : (selectedTemplate.subtitle || selectedTemplate.defaultHandle || selectedTemplate.handle || '')}
+                                onChange={(e) => setTemplateHandleText(e.target.value)}
+                                placeholder="Type bottom subtitle/handle..."
+                                className="text-input-premium"
+                                style={{ width: '100%' }}
+                              />
+                            </div>
+                          )}
+
+                          {/* CENTER TEXT */}
                           <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <Toggle
                               label={
@@ -5236,6 +5833,8 @@ export default function App() {
                               />
                             )}
                           </div>
+
+                          {/* FRAME TEXT */}
                           <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <Toggle
                               label={
@@ -5303,13 +5902,43 @@ export default function App() {
                           <button onClick={() => fontInputRef.current?.click()} className="font-scroll-btn-wide"><Plus size={14} /> Add Font</button>
                           <input type="file" ref={fontInputRef} style={{ display: 'none' }} accept=".ttf,.otf,.woff,.woff2" onChange={handleFontUpload} />
                           <div className="fonts-grid">
-                            {customFonts.map(font => (
-                              <button key={font.id} onClick={() => { if (textEditMode === 'center') setTextCenterFont(font.id); else { setFrameFont(font.id); if (frameStyle === 'none') setFrameStyle('text'); } }} className={`font-btn ${(textEditMode === 'center' ? textCenterFont : frameFont) === font.id ? 'active' : ''}`} style={{ fontFamily: font.id }}>{font.label} ★</button>
-                            ))}
+                            {customFonts.map(font => {
+                              const isFontActive = activeCustomText 
+                                ? activeCustomText.font === font.id 
+                                : (textEditMode === 'template-top' || textEditMode === 'template-bottom' || selectedTemplate)
+                                  ? templateFont === font.id
+                                  : (textEditMode === 'center' ? textCenterFont === font.id : frameFont === font.id);
+                              return (
+                                <button 
+                                  key={font.id} 
+                                  onClick={() => {
+                                    if (activeCustomText) {
+                                      updateCustomText(activeCustomText.id, { font: font.id });
+                                    } else if (textEditMode === 'template-top' || textEditMode === 'template-bottom' || selectedTemplate) {
+                                      setTemplateFont(font.id);
+                                    } else if (textEditMode === 'center') {
+                                      setTextCenterFont(font.id);
+                                    } else {
+                                      setFrameFont(font.id);
+                                      if (frameStyle === 'none') setFrameStyle('text');
+                                    }
+                                  }} 
+                                  className={`font-btn ${isFontActive ? 'active' : ''}`} 
+                                  style={{ fontFamily: font.id }}
+                                >
+                                  {font.label} ★
+                                </button>
+                              );
+                            })}
                             {FONT_OPTIONS
                               .filter(font => FeatureAccessManager.isFeatureEnabled(`qr_font_${font.id}`))
                               .map(font => {
                                 const featId = `qr_font_${font.id}`;
+                                const isFontActive = activeCustomText 
+                                  ? activeCustomText.font === font.id 
+                                  : (textEditMode === 'template-top' || textEditMode === 'template-bottom' || selectedTemplate)
+                                    ? templateFont === font.id
+                                    : (textEditMode === 'center' ? textCenterFont === font.id : frameFont === font.id);
                                 return (
                                   <button 
                                     key={font.id} 
@@ -5319,10 +5948,18 @@ export default function App() {
                                         showPaywall(featId);
                                         return;
                                       }
-                                      if (textEditMode === 'center') setTextCenterFont(font.id); 
-                                      else { setFrameFont(font.id); if (frameStyle === 'none') setFrameStyle('text'); }
+                                      if (activeCustomText) {
+                                        updateCustomText(activeCustomText.id, { font: font.id });
+                                      } else if (textEditMode === 'template-top' || textEditMode === 'template-bottom' || selectedTemplate) {
+                                        setTemplateFont(font.id);
+                                      } else if (textEditMode === 'center') {
+                                        setTextCenterFont(font.id);
+                                      } else {
+                                        setFrameFont(font.id);
+                                        if (frameStyle === 'none') setFrameStyle('text');
+                                      }
                                     }} 
-                                    className={`font-btn ${(textEditMode === 'center' ? textCenterFont : frameFont) === font.id ? 'active' : ''}`} 
+                                    className={`font-btn ${isFontActive ? 'active' : ''}`} 
                                     style={{ fontFamily: font.id, position: 'relative' }}
                                   >
                                     <PaidCrownBadge featureId={featId} fallbackFeatureId="qr_text_fonts" position="corner" size={9} />
@@ -5333,9 +5970,26 @@ export default function App() {
                           </div>
                         </div>
                       )}
+
                       {textPopup === 'size' && (
                         <div className="fade-in">
-                          {textEditMode === 'center' ? (
+                          {activeCustomText ? (
+                            <Slider 
+                              label="Text Size" 
+                              min={2} 
+                              max={100} 
+                              step={1} 
+                              value={Math.round((((activeCustomText.size || 0.08) - 0.02) / 0.33) * 98 + 2)} 
+                              onChange={(val) => {
+                                const newSize = 0.02 + ((val - 2) / 98) * 0.33;
+                                updateCustomText(activeCustomText.id, {
+                                  size: Math.round(newSize * 1000) / 1000,
+                                  width: null,
+                                  height: null
+                                });
+                              }} 
+                            />
+                          ) : textEditMode === 'center' ? (
                             <Slider 
                               label="Size" 
                               min={2} 
@@ -5361,49 +6015,137 @@ export default function App() {
                           )}
                         </div>
                       )}
+
                       {textPopup === 'color' && (
                         <div className="fade-in">
-                          {textEditMode === 'center' ? (
+                          {activeCustomText ? (
+                            renderColorOrGradientPicker("Text Color", activeCustomText.color || '#000000', (col) => updateCustomText(activeCustomText.id, { color: col }), handleOpenAdv)
+                          ) : textEditMode === 'center' ? (
                             renderColorOrGradientPicker("Text Color", textCenterColor, setTextCenterColor, handleOpenAdv)
                           ) : (
                             renderColorOrGradientPicker("Frame Color", frameColor, setFrameColor, handleOpenAdv)
                           )}
                         </div>
                       )}
+
                       {textPopup === 'stroke' && (
                         <div className="fade-in">
-                          <Toggle label="Enable Stroke" checked={textEditMode === 'center' ? textCenterStrokeEnabled : frameStrokeEnabled} onChange={textEditMode === 'center' ? setTextCenterStrokeEnabled : setFrameStrokeEnabled} />
-                          {(textEditMode === 'center' ? textCenterStrokeEnabled : frameStrokeEnabled) && (
+                          <Toggle 
+                            label="Enable Stroke" 
+                            checked={activeCustomText ? (activeCustomText.strokeEnabled || false) : (textEditMode === 'center' ? textCenterStrokeEnabled : frameStrokeEnabled)} 
+                            onChange={(val) => {
+                              if (activeCustomText) {
+                                updateCustomText(activeCustomText.id, { strokeEnabled: val });
+                              } else if (textEditMode === 'center') {
+                                setTextCenterStrokeEnabled(val);
+                              } else {
+                                setFrameStrokeEnabled(val);
+                              }
+                            }} 
+                          />
+                          {(activeCustomText ? activeCustomText.strokeEnabled : (textEditMode === 'center' ? textCenterStrokeEnabled : frameStrokeEnabled)) && (
                             <div className="fade-in" style={{ marginTop: '14px' }}>
-                              {textEditMode === 'center' ? (
+                              {activeCustomText ? (
+                                renderColorOrGradientPicker("Stroke Color", activeCustomText.strokeColor || '#ffffff', (col) => updateCustomText(activeCustomText.id, { strokeColor: col }), handleOpenAdv)
+                              ) : textEditMode === 'center' ? (
                                 renderColorOrGradientPicker("Stroke Color", textCenterStrokeColor, setTextCenterStrokeColor, handleOpenAdv)
                               ) : (
                                 renderColorOrGradientPicker("Stroke Color", frameStrokeColor, setFrameStrokeColor, handleOpenAdv)
                               )}
                               <div style={{ marginTop: '14px' }}>
-                                <Slider label="Stroke Width" min={1} max={textEditMode === 'center' ? 100 : 20} value={textEditMode === 'center' ? textCenterStrokeWidth : frameStrokeWidth} onChange={textEditMode === 'center' ? setTextCenterStrokeWidth : setFrameStrokeWidth} />
+                                <Slider 
+                                  label="Stroke Width" 
+                                  min={1} 
+                                  max={100} 
+                                  value={activeCustomText ? (activeCustomText.strokeWidth || 4) : (textEditMode === 'center' ? textCenterStrokeWidth : frameStrokeWidth)} 
+                                  onChange={(val) => {
+                                    if (activeCustomText) {
+                                      updateCustomText(activeCustomText.id, { strokeWidth: val });
+                                    } else if (textEditMode === 'center') {
+                                      setTextCenterStrokeWidth(val);
+                                    } else {
+                                      setFrameStrokeWidth(val);
+                                    }
+                                  }} 
+                                />
                               </div>
                             </div>
                           )}
                         </div>
                       )}
+
                       {textPopup === 'shadow' && (
                         <div className="fade-in">
-                          <Toggle label="Enable Shadow" checked={textEditMode === 'center' ? textCenterShadowEnabled : frameShadowEnabled} onChange={textEditMode === 'center' ? setTextCenterShadowEnabled : setFrameShadowEnabled} />
-                          {(textEditMode === 'center' ? textCenterShadowEnabled : frameShadowEnabled) && (
+                          <Toggle 
+                            label="Enable Shadow" 
+                            checked={activeCustomText ? (activeCustomText.shadowEnabled || false) : (textEditMode === 'center' ? textCenterShadowEnabled : frameShadowEnabled)} 
+                            onChange={(val) => {
+                              if (activeCustomText) {
+                                updateCustomText(activeCustomText.id, { shadowEnabled: val });
+                              } else if (textEditMode === 'center') {
+                                setTextCenterShadowEnabled(val);
+                              } else {
+                                setFrameShadowEnabled(val);
+                              }
+                            }} 
+                          />
+                          {(activeCustomText ? activeCustomText.shadowEnabled : (textEditMode === 'center' ? textCenterShadowEnabled : frameShadowEnabled)) && (
                             <div className="fade-in" style={{ marginTop: '14px' }}>
                               <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px' }}>Shadow Color</div>
                               <div className="swatch-grid-mini" style={{ marginBottom: '12px' }}>
-                                <ColorPicker isSwatch={true} icon={Pipette} iconSize={14} value={textEditMode === 'center' ? textCenterShadowColor : frameShadowColor} onChange={textEditMode === 'center' ? setTextCenterShadowColor : setFrameShadowColor} onOpenAdvanced={handleOpenAdv} />
+                                <ColorPicker 
+                                  isSwatch={true} 
+                                  icon={Pipette} 
+                                  iconSize={14} 
+                                  value={activeCustomText ? (activeCustomText.shadowColor || '#000000') : (textEditMode === 'center' ? textCenterShadowColor : frameShadowColor)} 
+                                  onChange={(col) => {
+                                    if (activeCustomText) {
+                                      updateCustomText(activeCustomText.id, { shadowColor: col });
+                                    } else if (textEditMode === 'center') {
+                                      setTextCenterShadowColor(col);
+                                    } else {
+                                      setFrameShadowColor(col);
+                                    }
+                                  }} 
+                                  onOpenAdvanced={handleOpenAdv} 
+                                />
                                 {SWATCH_PRESETS.map(color => (
-                                  <div key={color} className={`swatch-item${(textEditMode === 'center' ? textCenterShadowColor : frameShadowColor) === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => textEditMode === 'center' ? setTextCenterShadowColor(color) : setFrameShadowColor(color)} />
+                                  <div 
+                                    key={color} 
+                                    className={`swatch-item${(activeCustomText ? activeCustomText.shadowColor : (textEditMode === 'center' ? textCenterShadowColor : frameShadowColor)) === color ? ' active' : ''}`} 
+                                    style={{ backgroundColor: color }} 
+                                    onClick={() => {
+                                      if (activeCustomText) {
+                                        updateCustomText(activeCustomText.id, { shadowColor: color });
+                                      } else if (textEditMode === 'center') {
+                                        setTextCenterShadowColor(color);
+                                      } else {
+                                        setFrameShadowColor(color);
+                                      }
+                                    }} 
+                                  />
                                 ))}
                               </div>
-                              <Slider label="Shadow Blur" min={0} max={30} value={textEditMode === 'center' ? textCenterShadowBlur : frameShadowBlur} onChange={textEditMode === 'center' ? setTextCenterShadowBlur : setFrameShadowBlur} />
+                              <Slider 
+                                label="Shadow Blur" 
+                                min={0} 
+                                max={30} 
+                                value={activeCustomText ? (activeCustomText.shadowBlur || 8) : (textEditMode === 'center' ? textCenterShadowBlur : frameShadowBlur)} 
+                                onChange={(val) => {
+                                  if (activeCustomText) {
+                                    updateCustomText(activeCustomText.id, { shadowBlur: val });
+                                  } else if (textEditMode === 'center') {
+                                    setTextCenterShadowBlur(val);
+                                  } else {
+                                    setFrameShadowBlur(val);
+                                  }
+                                }} 
+                              />
                             </div>
                           )}
                         </div>
                       )}
+
                       {textPopup === 'bg' && (
                         <div className="fade-in">
                           {textEditMode === 'center' && (
@@ -5440,32 +6182,84 @@ export default function App() {
                           )}
                         </div>
                       )}
+
                       {textPopup === 'pos' && (
                         <div className="fade-in">
                           <div style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
                             <div style={{ display: 'flex', justifyContent: 'center' }}>
                               <div className="pos-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', padding: '8px', background: 'var(--bg-elevated)', borderRadius: '16px' }}>
                                 {[0, 0.5, 1].map(y => [0, 0.5, 1].map(x => (
-                                  <button key={`${x}-${y}`} onClick={() => { setTextCenterPosX(x); setTextCenterPosY(y); }} style={{ width: '36px', height: '36px', borderRadius: '8px', border: '1px solid var(--border-color)', background: textCenterPosX === x && textCenterPosY === y ? 'var(--accent-primary)' : 'var(--bg-primary)', cursor: 'pointer', transition: 'all 0.2s ease' }} />
+                                  <button 
+                                    key={`${x}-${y}`} 
+                                    onClick={() => { 
+                                      if (activeCustomText) {
+                                        updateCustomText(activeCustomText.id, { posX: x, posY: y });
+                                      } else {
+                                        setTextCenterPosX(x); 
+                                        setTextCenterPosY(y); 
+                                      }
+                                    }} 
+                                    style={{ 
+                                      width: '36px', 
+                                      height: '36px', 
+                                      borderRadius: '8px', 
+                                      border: '1px solid var(--border-color)', 
+                                      background: (activeCustomText ? (activeCustomText.posX === x && activeCustomText.posY === y) : (textCenterPosX === x && textCenterPosY === y)) ? 'var(--accent-primary)' : 'var(--bg-primary)', 
+                                      cursor: 'pointer', 
+                                      transition: 'all 0.2s ease' 
+                                    }} 
+                                  />
                                 )))}
                               </div>
                             </div>
-                            <Slider label="Horizontal" value={textCenterPosX} min={0} max={1} step={0.01} onChange={setTextCenterPosX} />
-                            <Slider label="Vertical" value={textCenterPosY} min={0} max={1} step={0.01} onChange={setTextCenterPosY} />
+                            <Slider 
+                              label="Horizontal" 
+                              value={activeCustomText ? (activeCustomText.posX ?? 0.5) : textCenterPosX} 
+                              min={0} 
+                              max={1} 
+                              step={0.01} 
+                              onChange={(val) => {
+                                if (activeCustomText) {
+                                  updateCustomText(activeCustomText.id, { posX: val });
+                                } else {
+                                  setTextCenterPosX(val);
+                                }
+                              }} 
+                            />
+                            <Slider 
+                              label="Vertical" 
+                              value={activeCustomText ? (activeCustomText.posY ?? 0.5) : textCenterPosY} 
+                              min={0} 
+                              max={1} 
+                              step={0.01} 
+                              onChange={(val) => {
+                                if (activeCustomText) {
+                                  updateCustomText(activeCustomText.id, { posY: val });
+                                } else {
+                                  setTextCenterPosY(val);
+                                }
+                              }} 
+                            />
                           </div>
                         </div>
                       )}
+
                       {textPopup === 'rotate' && (
                         <div className="fade-in">
                           <Slider 
                             label="Rotation" 
-                            value={textEditMode === 'center' ? textCenterRotation : frameRotation} 
+                            value={activeCustomText ? (activeCustomText.rotation || 0) : (textEditMode === 'center' ? textCenterRotation : frameRotation)} 
                             min={0} 
                             max={360} 
                             step={1} 
                             onChange={(val) => {
-                              if (textEditMode === 'center') setTextCenterRotation(val);
-                              else setFrameRotation(val);
+                              if (activeCustomText) {
+                                updateCustomText(activeCustomText.id, { rotation: val });
+                              } else if (textEditMode === 'center') {
+                                setTextCenterRotation(val);
+                              } else {
+                                setFrameRotation(val);
+                              }
                             }} 
                           />
                         </div>
@@ -6493,7 +7287,7 @@ export default function App() {
                              </button>
                            )}
                            {(() => {
-                             const isTextEnabled = textCenterEnabled || frameStyle !== 'none';
+                             const isTextEnabled = textCenterEnabled || frameStyle !== 'none' || customTexts.length > 0 || !!selectedTemplate;
                              const handleTextToolClick = (tool) => {
                                if (!isTextEnabled) {
                                  showToast('Please enable Center Text or Frame Text first', 'info');
@@ -6943,11 +7737,12 @@ export default function App() {
                   }} 
                 />
               ) : (
-                /* Standard headline & subtitle inputs */
+                /* Standard & Frame headline & subtitle inputs */
                 <>
+                  {/* Top Headline / Frame Banner Input */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                      Top Headline Banner
+                      {selectedTemplate?.styleFamily === 'frame' ? 'Frame Banner / Text' : 'Top Headline Banner'}
                     </label>
                     <input
                       type="text"
@@ -6957,7 +7752,7 @@ export default function App() {
                         generatorIsDirtyRef.current = true;
                         setTemplateHeadlineText(e.target.value);
                       }}
-                      placeholder={selectedTemplate?.headline || selectedTemplate?.defaultHeadline || 'Enter headline...'}
+                      placeholder={selectedTemplate?.labelText || selectedTemplate?.headline || selectedTemplate?.defaultHeadline || 'Enter text...'}
                       style={{
                         padding: '12px 14px',
                         borderRadius: '12px',
@@ -6972,37 +7767,94 @@ export default function App() {
                     />
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                      Bottom Handle / Text
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={templateHandleText}
-                      onChange={(e) => {
-                        generatorIsDirtyRef.current = true;
-                        setTemplateHandleText(e.target.value);
-                      }}
-                      placeholder={selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || 'Enter handle / username...'}
-                      style={{
-                        padding: '12px 14px',
-                        borderRadius: '12px',
-                        border: '1px solid var(--border-color)',
-                        background: 'var(--bg-elevated)',
-                        color: 'var(--text-primary)',
-                        fontSize: '14px',
-                        fontWeight: 600,
-                        outline: 'none'
-                      }}
-                    />
+                  {/* Bottom Handle / Subtitle Input (Only for templates that support subtitle/handle, hidden for frame templates) */}
+                  {selectedTemplate?.styleFamily !== 'frame' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Bottom Handle / Subtitle
+                      </label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={templateHandleText}
+                        onChange={(e) => {
+                          generatorIsDirtyRef.current = true;
+                          setTemplateHandleText(e.target.value);
+                        }}
+                        placeholder={selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || selectedTemplate?.handle || 'Enter handle / username...'}
+                        style={{
+                          padding: '12px 14px',
+                          borderRadius: '12px',
+                          border: '1px solid var(--border-color)',
+                          background: 'var(--bg-elevated)',
+                          color: 'var(--text-primary)',
+                          fontSize: '14px',
+                          fontWeight: 600,
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Typography & Font Family Selector */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Font Family
+                      </label>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent-primary)', background: 'rgba(214,0,54,0.1)', padding: '2px 8px', borderRadius: '6px' }}>
+                        {templateFont}
+                      </span>
+                    </div>
+                    
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(95px, 1fr))',
+                      gap: '8px',
+                      maxHeight: '160px',
+                      overflowY: 'auto',
+                      paddingRight: '2px'
+                    }}>
+                      {FONT_OPTIONS.map(font => {
+                        const isSelected = templateFont === font.id;
+                        return (
+                          <button
+                            key={font.id}
+                            type="button"
+                            onClick={() => {
+                              generatorIsDirtyRef.current = true;
+                              setTemplateFont(font.id);
+                            }}
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: '10px',
+                              border: isSelected ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                              background: isSelected ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                              color: isSelected ? '#FFFFFF' : 'var(--text-primary)',
+                              fontFamily: font.id,
+                              fontSize: '13px',
+                              fontWeight: isSelected ? 700 : 500,
+                              cursor: 'pointer',
+                              textAlign: 'center',
+                              transition: 'all 0.15s ease',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                          >
+                            {font.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {selectedTemplate && (
                     <button
                       onClick={() => {
-                        setTemplateHeadlineText(selectedTemplate.headline || selectedTemplate.defaultHeadline || '');
-                        setTemplateHandleText(selectedTemplate.subtitle || selectedTemplate.defaultHandle || '');
+                        setTemplateHeadlineText(selectedTemplate.headline || selectedTemplate.defaultHeadline || selectedTemplate.labelText || '');
+                        setTemplateHandleText(selectedTemplate.subtitle || selectedTemplate.defaultHandle || selectedTemplate.handle || '');
+                        setTemplateFont('Outfit');
                       }}
                       style={{
                         alignSelf: 'flex-start',
@@ -7015,10 +7867,11 @@ export default function App() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
-                        padding: '4px 0'
+                        padding: '4px 0',
+                        marginTop: '4px'
                       }}
                     >
-                      <RotateCcw size={13} /> Reset text to default
+                      <RotateCcw size={13} /> Reset text &amp; font to default
                     </button>
                   )}
                 </>
@@ -8333,13 +9186,6 @@ function TemplatePreviewCanvas({ template, theme, qrMatrixInfo, currentQrOptions
   const ref = useRef(null);
   const [tick, setTick] = useState(0);
 
-  // Re-draw whenever a template image finishes loading
-  useEffect(() => {
-    const handler = () => setTick(t => t + 1);
-    window.addEventListener('qr-template-loaded', handler);
-    return () => window.removeEventListener('qr-template-loaded', handler);
-  }, []);
-
   useEffect(() => {
     if (!ref.current) return;
     const canvas = ref.current;
@@ -8352,9 +9198,11 @@ function TemplatePreviewCanvas({ template, theme, qrMatrixInfo, currentQrOptions
     ctx.imageSmoothingQuality = 'high';
     ctx.clearRect(0, 0, w, h);
 
+    const onAssetLoaded = () => setTick(t => t + 1);
+
     // 1. Draw template background
     if (template.drawBackground) {
-      template.drawBackground(ctx, w, h);
+      template.drawBackground(ctx, w, h, { onAssetLoaded });
     }
 
     // 2. Draw real QR code inside placeholder slot

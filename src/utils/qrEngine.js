@@ -1171,6 +1171,20 @@ export function renderQR(canvas, options) {
     });
   }
 
+  // ── Custom Multi-Text Layers ──
+  if (options.customTexts && Array.isArray(options.customTexts) && options.customTexts.length > 0) {
+    drawCustomTexts(ctx, options.customTexts, size, {
+      ...options,
+      contentX,
+      contentY,
+      contentSize,
+      moduleCount,
+      quietZone,
+      showHandle: options.showHandle,
+      selectedType: options.selectedType
+    });
+  }
+
   if (options.template) {
     ctx.restore();
   }
@@ -3218,6 +3232,115 @@ function drawCenterText(ctx, text, canvasSize, options) {
     ctx.restore();
     drawTransformationBox(ctx, logoX, logoY, paddedW, paddedH, centerX, centerY, textCenterRotation, canvasSize, 'text');
   }
+}
+
+/**
+ * Draw custom free-floating text layers with individual styling, transformation frame, and handles
+ */
+function drawCustomTexts(ctx, customTexts, canvasSize, options) {
+  const {
+    contentX = 0,
+    contentY = 0,
+    contentSize = canvasSize,
+    showHandle = false,
+    selectedType = null
+  } = options;
+
+  customTexts.forEach((item) => {
+    if (!item || !item.text) return;
+    const {
+      id,
+      text,
+      posX = 0.5,
+      posY = 0.5,
+      size = 0.08,
+      font = 'Outfit',
+      color = '#000000',
+      rotation = 0,
+      strokeEnabled = false,
+      strokeWidth = 5,
+      strokeColor = '#ffffff',
+      shadowEnabled = false,
+      shadowBlur = 10,
+      shadowColor = 'rgba(0,0,0,0.5)',
+      width = null,
+      height = null,
+      padding = 10
+    } = item;
+
+    const fontSize = contentSize * (size || 0.08);
+    ctx.save();
+    ctx.font = `bold ${fontSize}px '${font || 'Outfit'}', sans-serif`;
+    const metrics = ctx.measureText(text);
+    const textWidth = metrics.width;
+    const textHeight = fontSize * 0.8;
+
+    const paddedW = width ? (width * contentSize) : (textWidth + padding * 2);
+    const paddedH = height ? (height * contentSize) : (textHeight + padding * 2);
+
+    const rawX = contentX + (contentSize - paddedW) * posX;
+    const rawY = contentY + (contentSize - paddedH) * posY;
+
+    const textX = rawX;
+    const textY = rawY;
+    const centerX = textX + paddedW / 2;
+    const centerY = textY + paddedH / 2;
+
+    ctx.translate(centerX, centerY);
+    ctx.rotate(((rotation || 0) * Math.PI) / 180);
+    ctx.translate(-centerX, -centerY);
+
+    // Setup Text Properties
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // 1. Stroke (behind fill)
+    if (strokeEnabled) {
+      ctx.save();
+      ctx.strokeStyle = parseColorOrGradient(ctx, textX, textY, paddedW, paddedH, strokeColor || '#ffffff');
+      ctx.lineWidth = fontSize * ((strokeWidth || 5) / 100);
+      ctx.lineJoin = 'round';
+      ctx.miterLimit = 2;
+      ctx.strokeText(text, centerX, centerY + fontSize * 0.045);
+      ctx.restore();
+    }
+
+    // 2. Shadow & Fill
+    ctx.save();
+    if (shadowEnabled) {
+      ctx.shadowColor = shadowColor || 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = shadowBlur || 10;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+    }
+    ctx.fillStyle = parseColorOrGradient(ctx, textX, textY, paddedW, paddedH, color || '#000000');
+    ctx.fillText(text, centerX, centerY + fontSize * 0.045);
+    ctx.restore();
+    ctx.restore();
+
+    // Draw Transformation Frame if selected
+    if (showHandle && selectedType === 'custom-text-' + id) {
+      ctx.save();
+      ctx.strokeStyle = '#007AFF';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 4]);
+      if (Math.abs(posX - 0.5) < 0.01) {
+        ctx.beginPath();
+        ctx.moveTo(contentX + contentSize / 2, contentY);
+        ctx.lineTo(contentX + contentSize / 2, contentY + contentSize);
+        ctx.stroke();
+      }
+      if (Math.abs(posY - 0.5) < 0.01) {
+        ctx.beginPath();
+        ctx.moveTo(contentX, contentY + contentSize / 2);
+        ctx.lineTo(contentX + contentSize, contentY + contentSize / 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      drawTransformationBox(ctx, textX, textY, paddedW, paddedH, centerX, centerY, rotation, canvasSize, 'custom-text');
+    }
+  });
 }
 
 /**
