@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, ZoomIn, ZoomOut, RotateCcw, Lock } from 'lucide-react';
+import { App as CapApp } from '@capacitor/app';
 
 export function FullScreenPreviewModal({
   isOpen,
@@ -43,6 +44,34 @@ export function FullScreenPreviewModal({
     }
   }, [isOpen, sourceCanvasRef, template, headlineText, handleText]);
 
+  // ── Android Hardware Back Button & Browser History Back Navigation ──
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let backHandlerPromise = null;
+    try {
+      backHandlerPromise = CapApp.addListener('backButton', () => {
+        onClose();
+      });
+    } catch (e) {}
+
+    try {
+      window.history.pushState({ modal: 'fullscreen-preview' }, '');
+    } catch (e) {}
+
+    const handlePopState = () => {
+      onClose();
+    };
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      if (backHandlerPromise && typeof backHandlerPromise.then === 'function') {
+        backHandlerPromise.then(handle => handle?.remove && handle.remove());
+      }
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [isOpen, onClose]);
+
   // ── Multi-Layer Screenshot & Capture Security ──
   useEffect(() => {
     if (!isOpen) return;
@@ -58,8 +87,8 @@ export function FullScreenPreviewModal({
 
     // 2. Prevent Keyboard Screen Capture Shortcuts (PrintScreen, Snipping Tool, Print, Save)
     const handleKeyDown = (e) => {
-      // Escape to close
-      if (e.key === 'Escape') {
+      // Escape or Backspace to close
+      if (e.key === 'Escape' || e.key === 'Backspace') {
         onClose();
         return;
       }
@@ -353,7 +382,7 @@ export function FullScreenPreviewModal({
         </div>
       )}
 
-      {/* ── Top Header Controls (App-Consistent Floating Close Button) ── */}
+      {/* ── Top Header Controls (Floating Close Button) ── */}
       <div
         style={{
           position: 'absolute',

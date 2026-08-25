@@ -1,6 +1,9 @@
 // src/components/qr-templates/TemplateRenderer.js
 // Universal Canvas 2D Renderer for all Follow Me, Social & Brand Pro Templates
 
+import { TEMPLATE_LOGO_ICON_MAP } from '../../data/qrTemplates/templateIconMap';
+import { TEMPLATE_ICONS } from '../../data/qrTemplates/templateIcons';
+
 const svgImageCache = {};
 
 let _sharedOffscreenCanvas = null;
@@ -30,6 +33,7 @@ export function getSvgImage(svgStringOrUrl, onLoaded) {
   img.crossOrigin = 'anonymous';
   if (onLoaded) {
     img.addEventListener('load', onLoaded, { once: true });
+    img.addEventListener('error', onLoaded, { once: true });
   }
 
   if (svgStringOrUrl.startsWith('/') || svgStringOrUrl.startsWith('http') || svgStringOrUrl.startsWith('data:')) {
@@ -203,7 +207,7 @@ function drawRoundedRect(ctx, x, y, w, h, r) {
 /**
  * Draws background decorative SVG shapes (from brand style 5 and network style templates)
  */
-function drawBgShapes(ctx, w, h, bgShapesSvg, onLoaded) {
+function drawBgShapes(ctx, w, h, bgShapesSvg, onLoaded, onPending) {
   if (!bgShapesSvg) return;
   const fullSvg = bgShapesSvg.startsWith('<svg') 
     ? bgShapesSvg 
@@ -213,6 +217,8 @@ function drawBgShapes(ctx, w, h, bgShapesSvg, onLoaded) {
     ctx.save();
     ctx.drawImage(img, 0, 0, w, h);
     ctx.restore();
+  } else {
+    if (onPending) onPending();
   }
 }
 
@@ -249,7 +255,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
     offCtx.fillRect(0, 0, w, h);
 
     // Decorative SVG shapes
-    drawBgShapes(offCtx, w, h, template.bgShapes, options.onAssetLoaded);
+    drawBgShapes(offCtx, w, h, template.bgShapes, options.onAssetLoaded, options.onAssetPending);
 
     // story-light::before: 4 radial white ambient glow spots
     const glowSpots = [
@@ -286,7 +292,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
       ctx.fillStyle = '#0f172a';
     }
     ctx.fillRect(0, 0, w, h);
-    drawBgShapes(ctx, w, h, template.netSvg, options.onAssetLoaded);
+    drawBgShapes(ctx, w, h, template.netSvg, options.onAssetLoaded, options.onAssetPending);
   } else {
     if (template.background) {
       parseBackground(ctx, template.background, 0, 0, w, h);
@@ -379,8 +385,9 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   const subtitleY = subtitleTopY + subtitleApproxHeight / 2;
 
   // ── 4. Platform Top Icon Slot (with rounded corner container) ───────────────
-  if (template.svg) {
-    const iconImg = getSvgImage(template.svg, options.onAssetLoaded);
+  const svgSource = template.svg || (template.id ? TEMPLATE_LOGO_ICON_MAP[template.id] : null) || (template.id ? TEMPLATE_ICONS[template.id] : null) || (template.qrType ? TEMPLATE_ICONS[template.qrType] : null);
+  if (svgSource) {
+    const iconImg = getSvgImage(svgSource, options.onAssetLoaded);
     if (iconImg && iconImg.complete && iconImg.naturalWidth !== 0) {
       ctx.save();
       ctx.fillStyle = isLightBackground(template.background) 
@@ -391,6 +398,8 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
       ctx.restore();
 
       ctx.drawImage(iconImg, iconX, iconY, iconSize, iconSize);
+    } else {
+      if (options.onAssetPending) options.onAssetPending();
     }
   }
 

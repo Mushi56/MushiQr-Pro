@@ -75,7 +75,7 @@ export const TemplateCard = React.memo(function TemplateCard({
 
     const key = getTemplateThumbnailKey(template, headlineText, handleText);
     const existing = templateThumbnailCache.get(key);
-    if (existing) {
+    if (existing && localTick === 0) {
       if (cachedImgSrc !== existing) setCachedImgSrc(existing);
       return;
     }
@@ -85,9 +85,12 @@ export const TemplateCard = React.memo(function TemplateCard({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    let hasPendingAssets = false;
+    const onAssetPending = () => { hasPendingAssets = true; };
+    const onAssetLoaded = () => setLocalTick(t => t + 1);
+
     const qrTempCanvas = getSharedThumbCanvas();
     const activeMatrix = DEMO_MATRIX;
-    const onAssetLoaded = () => setLocalTick(t => t + 1);
 
     if (isVCard(template)) {
       // ── vCard 16:9 thumbnail ─────────────────────────────────────────────
@@ -103,7 +106,8 @@ export const TemplateCard = React.memo(function TemplateCard({
         email:    'you@example.com',
         address:  '123 Business Street, Your City',
         url:      'https://example.com',
-        onAssetLoaded
+        onAssetLoaded,
+        onAssetPending
       });
 
       if (coords && activeMatrix && qrTempCanvas) {
@@ -137,7 +141,8 @@ export const TemplateCard = React.memo(function TemplateCard({
 
       const coords = drawFrameTemplate(ctx, w, h, template, {
         templateHeadline: headlineText || template.labelText,
-        onAssetLoaded
+        onAssetLoaded,
+        onAssetPending
       });
 
       if (coords && activeMatrix && qrTempCanvas) {
@@ -172,7 +177,8 @@ export const TemplateCard = React.memo(function TemplateCard({
       const coords = drawTemplateBackground(ctx, w, h, template, {
         templateHeadline:   headlineText || template.headline,
         templateHandleText: handleText   || template.subtitle,
-        onAssetLoaded
+        onAssetLoaded,
+        onAssetPending
       });
 
       const stylePreset = getTemplateStylingPreset(template) || template.preset;
@@ -223,18 +229,20 @@ export const TemplateCard = React.memo(function TemplateCard({
       }
     }
 
-    try {
-      const dataUrl = canvas.toDataURL('image/webp', 0.90) || canvas.toDataURL('image/png');
-      if (dataUrl && dataUrl.length > 50) {
-        if (templateThumbnailCache.size > 400) {
-          const firstKey = templateThumbnailCache.keys().next().value;
-          templateThumbnailCache.delete(firstKey);
+    if (!hasPendingAssets) {
+      try {
+        const dataUrl = canvas.toDataURL('image/webp', 0.90) || canvas.toDataURL('image/png');
+        if (dataUrl && dataUrl.length > 50) {
+          if (templateThumbnailCache.size > 400) {
+            const firstKey = templateThumbnailCache.keys().next().value;
+            templateThumbnailCache.delete(firstKey);
+          }
+          templateThumbnailCache.set(key, dataUrl);
+          setCachedImgSrc(dataUrl);
         }
-        templateThumbnailCache.set(key, dataUrl);
-        setCachedImgSrc(dataUrl);
+      } catch {
+        // Fallback to active canvas
       }
-    } catch {
-      // Fallback to active canvas
     }
   }, [template, headlineText, handleText, isVisible, localTick]);
 
