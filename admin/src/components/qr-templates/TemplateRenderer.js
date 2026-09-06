@@ -404,7 +404,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   }
 
   // ── 5. Headline Text (Exact Spacing) ────────────────────────────────────────
-  const headlineText = (options.templateHeadline || template.headline || '').toUpperCase();
+  const headlineText = (options.templateHeadline !== undefined ? options.templateHeadline : (template.headline || '')).toUpperCase();
 
   ctx.save();
   ctx.font = `${typography.headlineWeight} ${headlineFontSize}px ${options.templateFont ? `'${options.templateFont}', ` : ''}${typography.headlineFont}`;
@@ -448,7 +448,7 @@ export function drawTemplateBackground(ctx, w, h, template, options = {}) {
   ctx.restore();
 
   // ── 7. Bottom Username / Subtitle Row (Exact Spacing) ───────────────────────
-  const subtitleText = options.templateHandleText || options.customText || template.subtitle || '';
+  const subtitleText = options.templateHandleText !== undefined ? options.templateHandleText : (options.customText !== undefined ? options.customText : (template.subtitle || ''));
 
   ctx.save();
   ctx.fillStyle = needsDarkText ? '#111111' : '#FFFFFF';
@@ -880,7 +880,7 @@ export function drawFrameTemplate(ctx, w, h, template, options = {}) {
   try {
     const shape = template.shape || 'soft';
     const labelType = template.labelType || 'banner';
-    const labelText = (options.templateHeadline || template.labelText || 'SCAN ME').toUpperCase();
+    const labelText = (options.templateHeadline !== undefined ? options.templateHeadline : (template.labelText || 'SCAN ME')).toUpperCase();
     const labelBg = template.labelBg || '#111111';
     const labelFg = template.labelFg || '#ffffff';
     const accent = template.accent || '#111111';

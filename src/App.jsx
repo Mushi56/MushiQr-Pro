@@ -2589,8 +2589,8 @@ export default function App() {
       ...qrMatrixInfo, 
       size: exportSize,
       template: selectedTemplate,
-      templateHeadline: templateHeadlineText || selectedTemplate?.headline || selectedTemplate?.defaultHeadline || selectedTemplate?.labelText || '',
-      templateHandleText: templateHandleText || selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || selectedTemplate?.handle || '',
+      templateHeadline: templateHeadlineText !== undefined ? templateHeadlineText : (selectedTemplate?.headline || selectedTemplate?.defaultHeadline || selectedTemplate?.labelText || ''),
+      templateHandleText: templateHandleText !== undefined ? templateHandleText : (selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || selectedTemplate?.handle || ''),
       templateFont,
       ...vcardExportFields,
       qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
@@ -2847,8 +2847,8 @@ export default function App() {
       renderQR(canvasRef.current, {
         ...qrMatrixInfo, size: 1024,
         template: selectedTemplate,
-        templateHeadline: templateHeadlineText || selectedTemplate?.headline || selectedTemplate?.defaultHeadline || '',
-        templateHandleText: templateHandleText || selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || '',
+        templateHeadline: templateHeadlineText !== undefined ? templateHeadlineText : (selectedTemplate?.headline || selectedTemplate?.defaultHeadline || selectedTemplate?.labelText || ''),
+        templateHandleText: templateHandleText !== undefined ? templateHandleText : (selectedTemplate?.subtitle || selectedTemplate?.defaultHandle || selectedTemplate?.handle || ''),
         templateFont,
         ...vcardFields,
         qrColor, bgColor, bgTransparent, dotStyle, eyeStyle,
@@ -5735,10 +5735,10 @@ export default function App() {
                                 <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
                                   Top Headline Text ({selectedTemplate.name})
                                 </span>
-                                {(templateHeadlineText && templateHeadlineText !== (selectedTemplate.headline || selectedTemplate.defaultHeadline || selectedTemplate.labelText || '')) && (
+                                {(templateHeadlineText !== (selectedTemplate.headline || selectedTemplate.defaultHeadline || selectedTemplate.labelText || '')) && (
                                   <button
                                     type="button"
-                                    onClick={() => setTemplateHeadlineText('')}
+                                    onClick={() => setTemplateHeadlineText(selectedTemplate.headline || selectedTemplate.defaultHeadline || selectedTemplate.labelText || '')}
                                     style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                   >
                                     Reset
@@ -5748,9 +5748,9 @@ export default function App() {
                               <input
                                 type="text"
                                 maxLength={40}
-                                value={templateHeadlineText !== '' ? templateHeadlineText : (selectedTemplate.headline || selectedTemplate.defaultHeadline || selectedTemplate.labelText || '')}
+                                value={templateHeadlineText}
                                 onChange={(e) => setTemplateHeadlineText(e.target.value)}
-                                placeholder="Type top headline..."
+                                placeholder={selectedTemplate.headline || selectedTemplate.defaultHeadline || selectedTemplate.labelText || 'Type top headline...'}
                                 className="text-input-premium"
                                 style={{ width: '100%', textTransform: 'uppercase' }}
                               />
@@ -5764,10 +5764,10 @@ export default function App() {
                                 <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
                                   Bottom Subtitle / Handle ({selectedTemplate.name})
                                 </span>
-                                {(templateHandleText && templateHandleText !== (selectedTemplate.subtitle || selectedTemplate.defaultHandle || selectedTemplate.handle || '')) && (
+                                {(templateHandleText !== (selectedTemplate.subtitle || selectedTemplate.defaultHandle || selectedTemplate.handle || '')) && (
                                   <button
                                     type="button"
-                                    onClick={() => setTemplateHandleText('')}
+                                    onClick={() => setTemplateHandleText(selectedTemplate.subtitle || selectedTemplate.defaultHandle || selectedTemplate.handle || '')}
                                     style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                   >
                                     Reset
@@ -5777,9 +5777,9 @@ export default function App() {
                               <input
                                 type="text"
                                 maxLength={40}
-                                value={templateHandleText !== '' ? templateHandleText : (selectedTemplate.subtitle || selectedTemplate.defaultHandle || selectedTemplate.handle || '')}
+                                value={templateHandleText}
                                 onChange={(e) => setTemplateHandleText(e.target.value)}
-                                placeholder="Type bottom subtitle/handle..."
+                                placeholder={selectedTemplate.subtitle || selectedTemplate.defaultHandle || selectedTemplate.handle || 'Type bottom subtitle/handle...'}
                                 className="text-input-premium"
                                 style={{ width: '100%' }}
                               />

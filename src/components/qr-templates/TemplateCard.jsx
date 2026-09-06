@@ -140,7 +140,7 @@ export const TemplateCard = React.memo(function TemplateCard({
       canvas.height = h;
 
       const coords = drawFrameTemplate(ctx, w, h, template, {
-        templateHeadline: headlineText || template.labelText,
+        templateHeadline: headlineText !== undefined ? headlineText : template.labelText,
         onAssetLoaded,
         onAssetPending
       });
@@ -175,8 +175,8 @@ export const TemplateCard = React.memo(function TemplateCard({
       canvas.height = h;
 
       const coords = drawTemplateBackground(ctx, w, h, template, {
-        templateHeadline:   headlineText || template.headline,
-        templateHandleText: handleText   || template.subtitle,
+        templateHeadline:   headlineText !== undefined ? headlineText : template.headline,
+        templateHandleText: handleText !== undefined ? handleText : template.subtitle,
         onAssetLoaded,
         onAssetPending
       });
