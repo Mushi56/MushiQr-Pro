@@ -951,7 +951,8 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR, currentUser, o
         className="scanner-upper-navbar" 
         style={{ 
           position: 'relative', 
-          borderBottom: '1px solid rgba(0, 0, 0, 0.08)', 
+          border: 'none',
+          borderBottom: 'none', 
           display: 'flex', 
           width: '100%', 
           height: 'calc(64px + env(safe-area-inset-top, 0px))',
@@ -969,7 +970,7 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR, currentUser, o
           opacity: 1,
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none',
-          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+          boxShadow: 'none',
           color: '#111827'
         }}
       >
