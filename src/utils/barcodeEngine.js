@@ -738,11 +738,20 @@ export function renderBarcode(canvas, text, options = {}) {
       text: renderText,
       scale: effectiveBarWidth,
       includetext: effectiveDisplayValue,
-      textxalign: 'center',
       barcolor: cleanBarColor,
       paddingwidth: effectiveMargin,
       paddingheight: effectiveMargin
     };
+
+    // For linear codes without standard guard patterns, align text to center.
+    // For EAN/UPC retail standards (ean13, ean8, upca, upce), NEVER override textxalign
+    // because bwip-js places numbers in specific standard guard-bar cutouts (left/right groups).
+    // Overriding textxalign='center' forces numbers directly over the center and outer guard bars!
+    const retailStandards = ['ean13', 'ean8', 'upca', 'upce'];
+    if (!retailStandards.includes(bcid)) {
+      bwipOptions.textxalign = 'center';
+    }
+
 
     // CRITICAL: Only apply vertical height when height is applicable (e.g. 1D barcodes).
     // For 2D matrix codes (Data Matrix, MaxiCode, Aztec, QR, Han Xin, Micro QR),
