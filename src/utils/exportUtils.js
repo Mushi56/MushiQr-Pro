@@ -153,20 +153,24 @@ export async function downloadJPG(canvas, filename = 'qrcode', category = 'QR Co
   }
 }
 
-export async function downloadSVG(canvas, filename = 'qrcode', category = 'QR Codes') {
+export async function downloadSVG(canvasOrSvgString, filename = 'qrcode', category = 'QR Codes') {
   const check = FeatureAccessManager.canUseFeature('export_svg');
   if (!check.allowed) {
     throw new Error(`Export SVG blocked: ${check.reason}`);
   }
 
-  const pngBase64 = canvas.toDataURL('image/png').split(',')[1];
-
-  const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+  let svgContent = '';
+  if (typeof canvasOrSvgString === 'string') {
+    svgContent = canvasOrSvgString;
+  } else if (canvasOrSvgString && canvasOrSvgString.toDataURL) {
+    const pngBase64 = canvasOrSvgString.toDataURL('image/png').split(',')[1];
+    svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="${canvas.width}" height="${canvas.height}"
-     viewBox="0 0 ${canvas.width} ${canvas.height}">
-  <image width="${canvas.width}" height="${canvas.height}" xlink:href="data:image/png;base64,${pngBase64}"/>
+     width="${canvasOrSvgString.width}" height="${canvasOrSvgString.height}"
+     viewBox="0 0 ${canvasOrSvgString.width} ${canvasOrSvgString.height}">
+  <image width="${canvasOrSvgString.width}" height="${canvasOrSvgString.height}" xlink:href="data:image/png;base64,${pngBase64}"/>
 </svg>`;
+  }
 
   if (Capacitor.isNativePlatform()) {
     return await saveFileNative(btoa(unescape(encodeURIComponent(svgContent))), `${filename}.svg`, category);

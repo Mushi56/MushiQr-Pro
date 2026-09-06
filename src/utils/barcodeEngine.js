@@ -733,25 +733,48 @@ export function renderBarcode(canvas, text, options = {}) {
       renderText = `(01)${cleanDigits}`;
     }
 
+    // High-DPI Super-sampling Multiplier for ultra-crisp Retina/HD quality
+    // similar to the 1024px renderQR resolution
+    const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 2) : 2;
+    // Base scale multiplied by high-DPI factor (minimum 3x for pristine vector/text sharpness)
+    const renderScale = options.isThumbnail ? effectiveBarWidth : Math.max(effectiveBarWidth * Math.max(dpr, 3), 4);
+
     const bwipOptions = {
       bcid: targetBcid,
       text: renderText,
-      scale: effectiveBarWidth,
-      includetext: effectiveDisplayValue,
+      scale: renderScale,
       barcolor: cleanBarColor,
-      paddingwidth: effectiveMargin,
-      paddingheight: effectiveMargin
+      paddingwidth: effectiveMargin * (options.isThumbnail ? 1 : Math.max(dpr, 2)),
+      paddingheight: effectiveMargin * (options.isThumbnail ? 1 : Math.max(dpr, 2))
     };
 
-    // For linear codes without standard guard patterns, align text to center.
-    // For EAN/UPC retail standards (ean13, ean8, upca, upce), NEVER override textxalign
-    // because bwip-js places numbers in specific standard guard-bar cutouts (left/right groups).
-    // Overriding textxalign='center' forces numbers directly over the center and outer guard bars!
-    const retailStandards = ['ean13', 'ean8', 'upca', 'upce'];
-    if (!retailStandards.includes(bcid)) {
-      bwipOptions.textxalign = 'center';
+    // Text display and positioning
+    if (effectiveDisplayValue === false || effectiveDisplayValue === 'hidden') {
+      bwipOptions.includetext = false;
+    } else {
+      bwipOptions.includetext = true;
+      if (options.textPosition === 'above') {
+        bwipOptions.textgaps = 5;
+        bwipOptions.alttext = renderText;
+      }
     }
 
+    // Text Font options (OCR-B default for retail, OCR-A / monospace fallback)
+    if (options.textFont === 'monospace') {
+      bwipOptions.textfont = 'Courier';
+    } else if (options.textFont === 'sans') {
+      bwipOptions.textfont = 'Helvetica';
+    } else {
+      bwipOptions.textfont = 'OCR-B';
+    }
+
+    // For linear codes without standard guard patterns, align text
+    // For EAN/UPC retail standards (ean13, ean8, upca, upce), NEVER override textxalign
+    // because bwip-js places numbers in specific standard guard-bar cutouts (left/right groups).
+    const retailStandards = ['ean13', 'ean8', 'upca', 'upce'];
+    if (!retailStandards.includes(bcid)) {
+      bwipOptions.textxalign = options.textAlign || 'center';
+    }
 
     // CRITICAL: Only apply vertical height when height is applicable (e.g. 1D barcodes).
     // For 2D matrix codes (Data Matrix, MaxiCode, Aztec, QR, Han Xin, Micro QR),
@@ -760,7 +783,7 @@ export function renderBarcode(canvas, text, options = {}) {
       bwipOptions.height = effectiveHeight / 10;
     }
 
-    if (cleanBgColor) {
+    if (cleanBgColor && cleanBgColor.toLowerCase() !== 'transparent') {
       bwipOptions.backgroundcolor = cleanBgColor;
     }
 
@@ -782,4 +805,108 @@ export function renderBarcode(canvas, text, options = {}) {
       ctx.fillText('Please verify validation rules', 160, 75);
     }
   }
+}
+
+/**
+ * Generate pure vector SVG barcode string using bwip-js
+ */
+export function renderBarcodeSVG(text, options = {}) {
+  const {
+    bcid = 'code128',
+    barColor = '#000000',
+    bgColor = '#ffffff',
+    barWidth,
+    height,
+    displayValue,
+    margin,
+    textPosition = 'below',
+    textAlign = 'center',
+    textFont = 'ocrb'
+  } = options;
+
+  const standard = BARCODE_STANDARDS[bcid] || BARCODE_STANDARDS.code128;
+  const effectiveBarWidth = barWidth !== undefined && barWidth !== null
+    ? barWidth
+    : (standard.defaultBarWidth !== undefined ? standard.defaultBarWidth : 2);
+  const effectiveHeight = height !== undefined && height !== null
+    ? height
+    : standard.defaultHeight;
+  const effectiveMargin = margin !== undefined && margin !== null
+    ? margin
+    : (standard.defaultMargin !== undefined ? standard.defaultMargin : 16);
+  const effectiveDisplayValue = displayValue !== undefined && displayValue !== null
+    ? (bcid === 'maxicode' ? false : displayValue)
+    : (standard.defaultDisplayValue !== undefined ? standard.defaultDisplayValue : true);
+
+  const cleanBarColor = barColor && barColor.startsWith('#') ? barColor.replace('#', '') : '000000';
+  const cleanBgColor = bgColor && bgColor.startsWith('#') ? bgColor.replace('#', '') : null;
+
+  const bcidMap = {
+    'gs1databar': 'databaromni',
+    'gs1128': 'gs1-128',
+    'i25': 'interleaved2of5',
+    'codabar': 'rationalizedCodabar',
+    'aztec': 'azteccode',
+    'microqrcode': 'microqrcode',
+    'channelcode': 'channelcode',
+    'code16k': 'code16k',
+    'code49': 'code49',
+    'codablockf': 'codablockf',
+    'hanxin': 'hanxin',
+    'royalmail': 'royalmail',
+    'telepen': 'telepen',
+    'pharmacode': 'pharmacode',
+    'msi': 'msi',
+    'maxicode': 'maxicode',
+    'qrcode': 'qrcode',
+    'upce': 'upce',
+    'postnet': 'postnet',
+    'planet': 'planet'
+  };
+  const targetBcid = bcidMap[bcid] || bcid;
+
+  let renderText = text || ' ';
+  if (bcid === 'gs1databar') {
+    let clean = renderText.replace(/^\(01\)/, '');
+    let cleanDigits = clean.replace(/\D/g, '');
+    if (cleanDigits.length === 14) cleanDigits = cleanDigits.slice(0, 13);
+    renderText = `(01)${cleanDigits}`;
+  }
+
+  const bwipOptions = {
+    bcid: targetBcid,
+    text: renderText,
+    scale: effectiveBarWidth,
+    barcolor: cleanBarColor,
+    paddingwidth: effectiveMargin,
+    paddingheight: effectiveMargin
+  };
+
+  if (effectiveDisplayValue === false || effectiveDisplayValue === 'hidden') {
+    bwipOptions.includetext = false;
+  } else {
+    bwipOptions.includetext = true;
+    if (textPosition === 'above') {
+      bwipOptions.textgaps = 5;
+      bwipOptions.alttext = renderText;
+    }
+  }
+
+  if (textFont === 'monospace') bwipOptions.textfont = 'Courier';
+  else if (textFont === 'sans') bwipOptions.textfont = 'Helvetica';
+
+  const retailStandards = ['ean13', 'ean8', 'upca', 'upce'];
+  if (!retailStandards.includes(bcid)) {
+    bwipOptions.textxalign = textAlign || 'center';
+  }
+
+  if (standard.heightApplicable && effectiveHeight) {
+    bwipOptions.height = effectiveHeight / 10;
+  }
+
+  if (cleanBgColor && cleanBgColor.toLowerCase() !== 'transparent') {
+    bwipOptions.backgroundcolor = cleanBgColor;
+  }
+
+  return bwipjs.toSVG(bwipOptions);
 }

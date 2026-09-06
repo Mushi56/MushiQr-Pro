@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Save, Palette, Sliders, Undo2, Redo2, ChevronDown,
   FileImage, FileCode, FileText, Copy, Bookmark, Share2,
-  Menu, Home, History, Moon, Sun, Info, Shield,
+  Menu, Home, History as HistoryIcon, Moon, Sun, Info, Shield,
   FileText as FileIcon, AlertCircle, Layers, Pencil, Barcode, Pipette,
-  Check, X, Crown
+  Check, X, Crown, Scan, CheckCircle2, Printer, Sparkles, FolderDown
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
-import { renderBarcode, BARCODE_STANDARDS } from '../utils/barcodeEngine';
+import { renderBarcode, renderBarcodeSVG, BARCODE_STANDARDS } from '../utils/barcodeEngine';
+import { BARCODE_SPECS, validateBarcodeChecksum, calculateEAN13CheckDigit, calculateUPCACheckDigit } from '../utils/barcodeStandardsExtended';
 import { saveToSaved, saveToHistory } from '../utils/storage';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -16,70 +17,23 @@ import { FeatureAccessManager } from '../services/FeatureAccessManager';
 import AppIcon from './AppIcon';
 import AdvancedColorPicker from './AdvancedColorPicker';
 import BarcodeDataModal from './BarcodeDataModal';
-import ColorPicker from './ColorPicker';
 import PaidCrownBadge from './PaidCrownBadge';
 import { usePremium } from '../services/premiumContext';
 
-// ─── Color Presets ────────────────────────────────────────────────────────────
-const COLOR_PRESETS = [
-  { name: 'Classic', qr: '#000000', bg: '#FFFFFF' },
-  { name: 'Ocean', qr: '#0055ff', bg: '#eef4ff' },
-  { name: 'Forest', qr: '#008844', bg: '#f0fff4' },
-  { name: 'Sunset', qr: '#ff4400', bg: '#fff5f0' },
-  { name: 'Purple', qr: '#8800cc', bg: '#faf0ff' },
-  { name: 'Dark', qr: '#00ffff', bg: '#111122' },
-  { name: 'Monochrome', qr: '#ffffff', bg: '#000000' },
-  { name: 'Cyberpunk', qr: '#ffff00', bg: '#110022' }
-];
+// Modular Subcomponents
+import BarcodeFormatSelector from './barcode/BarcodeFormatSelector';
+import BarcodePreviewCard from './barcode/BarcodePreviewCard';
+import BarcodeContentTab from './barcode/BarcodeContentTab';
+import BarcodeColorsTab from './barcode/BarcodeColorsTab';
+import BarcodeDimensionsTab from './barcode/BarcodeDimensionsTab';
+import BarcodeStyleTab from './barcode/BarcodeStyleTab';
+import BarcodeQualityModal from './barcode/BarcodeQualityModal';
+import BarcodeInfoModal from './barcode/BarcodeInfoModal';
+import BarcodeLabelModal from './barcode/BarcodeLabelModal';
+import BarcodeTestScanModal from './barcode/BarcodeTestScanModal';
+import BarcodeHistoryModal from './barcode/BarcodeHistoryModal';
 
-function formatDisplayValue(val, type) {
-  if (!val) return '';
-  const digits = String(val).replace(/\D/g, '');
-  switch (type) {
-    case 'ean13': {
-      if (digits.length >= 13) return `${digits.slice(0, 1)} ${digits.slice(1, 7)} ${digits.slice(7, 13)}`;
-      return val;
-    }
-    case 'upca': {
-      if (digits.length >= 12) return `${digits.slice(0, 1)} ${digits.slice(1, 6)} ${digits.slice(6, 11)} ${digits.slice(11, 12)}`;
-      return val;
-    }
-    case 'ean8': {
-      if (digits.length >= 8) return `${digits.slice(0, 4)} ${digits.slice(4, 8)}`;
-      return val;
-    }
-    case 'upce': {
-      if (digits.length >= 8) return `${digits.slice(0, 1)} ${digits.slice(1, 7)} ${digits.slice(7, 8)}`;
-      return val;
-    }
-    default: return val;
-  }
-}
-
-function parseFormattedValue(val, type) {
-  const digits = String(val || '').replace(/\D/g, '');
-  switch (type) {
-    case 'ean13': return { format: '13', data: digits };
-    case 'upca': return { format: '12', data: digits };
-    case 'ean8': return { format: '8', data: digits };
-    case 'upce': return { format: '8', data: digits };
-    case 'itf14': return { format: '14', data: digits };
-    case 'codabar': {
-      const hasStart = /^[A-D]/i.test(val || '');
-      const hasStop = /[A-D]$/i.test(val || '');
-      return {
-        start: hasStart ? (val || '').slice(0, 1).toUpperCase() : 'A',
-        body: (val || '').slice(hasStart ? 1 : 0, hasStop ? -1 : undefined) || '',
-        stop: hasStop ? (val || '').slice(-1).toUpperCase() : 'B'
-      };
-    }
-    case 'postnet': return { format: digits.length <= 5 ? '5' : digits.length <= 9 ? '9' : '11', data: digits };
-    case 'planet': return { format: digits.length <= 11 ? '11' : digits.length <= 12 ? '12' : digits.length <= 13 ? '13' : '14', data: digits };
-    default: return { data: val || '' };
-  }
-}
-
-// ─── Parse text → structured fields for BarcodeDataModal ─────────────────────
+// ─── Helpers for Barcode Data Modal ─────────────────────────────────────────
 function parseValueToFields(val, type) {
   const digits = (val || '').replace(/\D/g, '');
   switch (type) {
@@ -103,8 +57,15 @@ function parseValueToFields(val, type) {
   }
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, setLoadedBarcodeItem, theme, setTheme, effectiveTheme }) {
+export default function BarcodePage({
+  onNavigate,
+  showToast,
+  loadedBarcodeItem,
+  setLoadedBarcodeItem,
+  theme,
+  setTheme,
+  effectiveTheme
+}) {
   const { showPaywall } = usePremium();
   const [, setFamTick] = useState(0);
 
@@ -169,6 +130,8 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       </div>
     );
   }
+
+  // ─── Core Barcode State ───────────────────────────────────────────────────
   const [bcid, setBcid] = useState(() => {
     if (loadedBarcodeItem) return loadedBarcodeItem.style?.bcid || 'ean13';
     return 'ean13';
@@ -184,9 +147,13 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
     return '#000000';
   });
   const [bgColor, setBgColor] = useState(() => {
-    if (loadedBarcodeItem) return loadedBarcodeItem.style?.bgColor || '#ffffff';
-    return '#ffffff';
+    if (loadedBarcodeItem) return loadedBarcodeItem.style?.bgColor || '#FFFFFF';
+    return '#FFFFFF';
   });
+  const [isTransparentBg, setIsTransparentBg] = useState(() => {
+    return loadedBarcodeItem?.style?.bgColor === 'transparent';
+  });
+
   const [barWidth, setBarWidth] = useState(() => {
     if (loadedBarcodeItem?.style?.barWidth !== undefined) return loadedBarcodeItem.style.barWidth;
     return initialStandard.defaultBarWidth !== undefined ? initialStandard.defaultBarWidth : 2;
@@ -204,34 +171,54 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
     return initialStandard.defaultDisplayValue !== undefined ? initialStandard.defaultDisplayValue : true;
   });
 
+  // Style properties
+  const [textPosition, setTextPosition] = useState(() => loadedBarcodeItem?.style?.textPosition || 'below');
+  const [textAlign, setTextAlign] = useState(() => loadedBarcodeItem?.style?.textAlign || 'center');
+  const [textFont, setTextFont] = useState(() => loadedBarcodeItem?.style?.textFont || 'ocrb');
+  const [hasBorder, setHasBorder] = useState(() => !!loadedBarcodeItem?.style?.hasBorder);
+  const [borderWidth, setBorderWidth] = useState(() => loadedBarcodeItem?.style?.borderWidth || 2);
+  const [autoCheckDigit, setAutoCheckDigit] = useState(true);
+
+  // Active Bottom Tab: 'content' (BARCODE) | 'color' (COLORS) | 'size' (DIMENSIONS) | 'style' (STYLE)
   const [activeTab, setActiveTab] = useState('content');
+
+  // UI Modals
+  const [isQualityModalOpen, setIsQualityModalOpen] = useState(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
+  const [isTestScanOpen, setIsTestScanOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [advPicker, setAdvPicker] = useState({ open: false, color: '#000000', type: 'bar' });
+  const [isDataModalOpen, setIsDataModalOpen] = useState(false);
+  const [modalInitialFields, setModalInitialFields] = useState({});
+  const [pendingBcid, setPendingBcid] = useState(null);
+
+  // Header menus
   const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState('PNG');
+  const [exportQuality, setExportQuality] = useState('Medium');
 
-  // History
+  // Undo / Redo History
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const historyRef = useRef([]);
   const historyIndexRef = useRef(-1);
   const isUndoRedoActionRef = useRef(false);
-  const [exportQuality, setExportQuality] = useState('Medium');
 
   const canvasRef = useRef(null);
 
-  // Data modal
-  const [isDataModalOpen, setIsDataModalOpen] = useState(false);
-  const [modalInitialFields, setModalInitialFields] = useState({});
-  const [pendingBcid, setPendingBcid] = useState(null);
+  const currentStandard = BARCODE_STANDARDS[bcid] || BARCODE_STANDARDS.code128;
+  const spec = BARCODE_SPECS[bcid] || {};
+  const isDataValid = currentStandard.validate(text);
 
-  // Handle click outside menu / dropdowns to close them
+  // Click outside handling for dropdowns
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (isMenuOpen && !e.target.closest('.btn-menu-toggle') && !e.target.closest('.app-dropdown-menu')) {
         setIsMenuOpen(false);
       }
-      if (formatDropdownOpen && !e.target.closest('.btn-header-save') && !e.target.closest('.save-as-dropdown')) {
+      if (formatDropdownOpen && !e.target.closest('.save-split-header-btn') && !e.target.closest('.save-as-dropdown')) {
         setFormatDropdownOpen(false);
       }
     };
@@ -241,7 +228,10 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
   // Init history
   useEffect(() => {
-    const initial = { text, bcid, barColor, bgColor, barWidth, height, margin, displayValue };
+    const initial = {
+      text, bcid, barColor, bgColor, isTransparentBg, barWidth, height, margin,
+      displayValue, textPosition, textAlign, textFont, hasBorder, borderWidth
+    };
     historyRef.current = [initial];
     historyIndexRef.current = 0;
     setHistory([initial]);
@@ -249,21 +239,29 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
   }, []);
 
   const updateStateAndHistory = (updates) => {
-    const cur = { text, bcid, barColor, bgColor, barWidth, height, margin, displayValue };
+    const cur = {
+      text, bcid, barColor, bgColor, isTransparentBg, barWidth, height, margin,
+      displayValue, textPosition, textAlign, textFont, hasBorder, borderWidth
+    };
     const newState = { ...cur, ...updates };
+
     if (updates.text !== undefined) setText(updates.text);
     if (updates.bcid !== undefined) setBcid(updates.bcid);
     if (updates.barColor !== undefined) setBarColor(updates.barColor);
     if (updates.bgColor !== undefined) setBgColor(updates.bgColor);
+    if (updates.isTransparentBg !== undefined) setIsTransparentBg(updates.isTransparentBg);
     if (updates.barWidth !== undefined) setBarWidth(updates.barWidth);
     if (updates.height !== undefined) setHeight(updates.height);
     if (updates.margin !== undefined) setMargin(updates.margin);
     if (updates.displayValue !== undefined) setDisplayValue(updates.displayValue);
-    
-    if (isUndoRedoActionRef.current) { 
-      return; 
-    }
-    
+    if (updates.textPosition !== undefined) setTextPosition(updates.textPosition);
+    if (updates.textAlign !== undefined) setTextAlign(updates.textAlign);
+    if (updates.textFont !== undefined) setTextFont(updates.textFont);
+    if (updates.hasBorder !== undefined) setHasBorder(updates.hasBorder);
+    if (updates.borderWidth !== undefined) setBorderWidth(updates.borderWidth);
+
+    if (isUndoRedoActionRef.current) return;
+
     const prevIdx = historyIndexRef.current;
     if (prevIdx >= 0 && historyRef.current[prevIdx]) {
       if (JSON.stringify(historyRef.current[prevIdx]) === JSON.stringify(newState)) return;
@@ -287,12 +285,14 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       const idx = currIdx - 1;
       const s = historyRef.current[idx];
       if (!s) return;
-      
       historyIndexRef.current = idx;
       setHistoryIndex(idx);
-      setText(s.text); setBcid(s.bcid || 'code128'); setBarColor(s.barColor);
-      setBgColor(s.bgColor); setBarWidth(s.barWidth); setHeight(s.height);
-      setMargin(s.margin); setDisplayValue(s.displayValue);
+      setText(s.text); setBcid(s.bcid || 'ean13'); setBarColor(s.barColor);
+      setBgColor(s.bgColor); setIsTransparentBg(s.isTransparentBg || false);
+      setBarWidth(s.barWidth); setHeight(s.height); setMargin(s.margin);
+      setDisplayValue(s.displayValue); setTextPosition(s.textPosition || 'below');
+      setTextAlign(s.textAlign || 'center'); setTextFont(s.textFont || 'ocrb');
+      setHasBorder(s.hasBorder || false); setBorderWidth(s.borderWidth || 2);
       setTimeout(() => { isUndoRedoActionRef.current = false; }, 150);
     }
   };
@@ -304,113 +304,173 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       const idx = currIdx + 1;
       const s = historyRef.current[idx];
       if (!s) return;
-
       historyIndexRef.current = idx;
       setHistoryIndex(idx);
-      setText(s.text); setBcid(s.bcid || 'code128'); setBarColor(s.barColor);
-      setBgColor(s.bgColor); setBarWidth(s.barWidth); setHeight(s.height);
-      setMargin(s.margin); setDisplayValue(s.displayValue);
+      setText(s.text); setBcid(s.bcid || 'ean13'); setBarColor(s.barColor);
+      setBgColor(s.bgColor); setIsTransparentBg(s.isTransparentBg || false);
+      setBarWidth(s.barWidth); setHeight(s.height); setMargin(s.margin);
+      setDisplayValue(s.displayValue); setTextPosition(s.textPosition || 'below');
+      setTextAlign(s.textAlign || 'center'); setTextFont(s.textFont || 'ocrb');
+      setHasBorder(s.hasBorder || false); setBorderWidth(s.borderWidth || 2);
       setTimeout(() => { isUndoRedoActionRef.current = false; }, 150);
     }
   };
 
-  const currentStandard = BARCODE_STANDARDS[bcid] || BARCODE_STANDARDS.code128;
-  const isDataValid = currentStandard.validate(text);
+  // Render barcode whenever attributes change
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    renderBarcode(canvasRef.current, text, {
+      bcid,
+      barColor,
+      bgColor: isTransparentBg ? 'transparent' : bgColor,
+      barWidth,
+      height,
+      margin,
+      displayValue,
+      textPosition,
+      textAlign,
+      textFont
+    });
+  }, [text, bcid, barColor, bgColor, isTransparentBg, barWidth, height, margin, displayValue, textPosition, textAlign, textFont]);
 
-  // Open data modal
-  const openDataModal = (targetBcid = bcid) => {
-    const fields = parseValueToFields(text, targetBcid);
-    setModalInitialFields(fields);
-    setPendingBcid(targetBcid);
-    setIsDataModalOpen(true);
-  };
-
-  // Apply modal result
-  const handleModalApply = (compiledValue) => {
-    const updates = { text: compiledValue };
-    if (pendingBcid && pendingBcid !== bcid) {
-      updates.bcid = pendingBcid;
-    }
-    updateStateAndHistory(updates);
-    setIsDataModalOpen(false);
-    setPendingBcid(null);
-  };
-
-  // Load from home / saved
+  // Load from external navigation (History or Home)
   useEffect(() => {
     if (loadedBarcodeItem) {
       const val = loadedBarcodeItem.displayText || loadedBarcodeItem.qrData?.text || '';
       const s = loadedBarcodeItem.style || {};
-      const targetBcid = s.bcid || 'code128';
-      const std = BARCODE_STANDARDS[targetBcid] || BARCODE_STANDARDS.code128;
+      const targetBcid = s.bcid || 'ean13';
+      const std = BARCODE_STANDARDS[targetBcid] || BARCODE_STANDARDS.ean13;
+
       if (val) setText(val);
       if (s.bcid) setBcid(s.bcid);
       if (s.barColor) setBarColor(s.barColor);
-      if (s.bgColor) setBgColor(s.bgColor);
+      if (s.bgColor) {
+        setBgColor(s.bgColor);
+        setIsTransparentBg(s.bgColor === 'transparent');
+      }
       setBarWidth(s.barWidth !== undefined ? s.barWidth : (std.defaultBarWidth || 2));
       setHeight(s.height !== undefined ? s.height : (std.defaultHeight || 85));
       setMargin(s.margin !== undefined ? s.margin : (std.defaultMargin || 16));
-      setDisplayValue(s.displayValue !== undefined ? s.displayValue : (std.defaultDisplayValue !== undefined ? std.defaultDisplayValue : true));
-      // Auto-open modal for editing
-      const fields = parseValueToFields(val, targetBcid);
-      setModalInitialFields(fields);
-      setPendingBcid(targetBcid);
-      setIsDataModalOpen(true);
+      setDisplayValue(s.displayValue !== undefined ? s.displayValue : true);
+      if (s.textPosition) setTextPosition(s.textPosition);
+      if (s.textAlign) setTextAlign(s.textAlign);
+      if (s.textFont) setTextFont(s.textFont);
+
       setLoadedBarcodeItem(null);
     }
   }, [loadedBarcodeItem, setLoadedBarcodeItem]);
 
-  // Render barcode whenever state changes
-  useEffect(() => {
-    if (!canvasRef.current) return;
-    renderBarcode(canvasRef.current, text, { bcid, barColor, bgColor, barWidth, height, margin, displayValue });
-  }, [text, bcid, barColor, bgColor, barWidth, height, margin, displayValue]);
+  // Format selection handler
+  const handleSelectFormat = (newBcid) => {
+    const std = BARCODE_STANDARDS[newBcid] || BARCODE_STANDARDS.code128;
+    updateStateAndHistory({
+      bcid: newBcid,
+      text: std.defaultValue,
+      barWidth: std.defaultBarWidth !== undefined ? std.defaultBarWidth : 2,
+      height: std.defaultHeight !== undefined ? std.defaultHeight : 85,
+      margin: std.defaultMargin !== undefined ? std.defaultMargin : 16,
+      displayValue: std.defaultDisplayValue !== undefined ? std.defaultDisplayValue : true
+    });
+  };
 
+  // Duplicate & Edit action
+  const handleDuplicateAndEdit = () => {
+    const duplicateText = text ? `${text}` : currentStandard.defaultValue;
+    // Open structured fields modal so user can edit right away
+    const fields = parseValueToFields(duplicateText, bcid);
+    setModalInitialFields(fields);
+    setPendingBcid(bcid);
+    setIsDataModalOpen(true);
+    showToast('Duplicating configuration for edit', 'info');
+  };
+
+  // Save to Saved & History
+  const handleSaveToArchive = () => {
+    if (!isDataValid) {
+      showToast(currentStandard.errorMsg, 'error');
+      return;
+    }
+    try {
+      const entry = {
+        qrType: 'BARCODE',
+        qrData: { text },
+        displayText: text,
+        thumbnail: canvasRef.current.toDataURL('image/jpeg', 0.8),
+        style: {
+          bcid, barColor, bgColor: isTransparentBg ? 'transparent' : bgColor,
+          barWidth, height, margin, displayValue, textPosition, textAlign, textFont, hasBorder, borderWidth
+        }
+      };
+      saveToSaved(entry);
+      saveToHistory(entry);
+      showToast('Added to Saved Barcodes', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to save barcode', 'error');
+    }
+  };
+
+  // Export handlers
   const handleDownload = async (format) => {
     if (!canvasRef.current || !isDataValid) return;
     try {
       const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
       const filename = `barcode_${bcid}_${text.replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}`;
-      
-      // Scale based on exportQuality (Low=1x, Medium=2x, High=3x, Ultra=4x)
       const scaleMap = { 'Low': 1, 'Medium': 2, 'High': 3, 'Ultra': 4 };
       const scale = scaleMap[exportQuality] || 3;
-      
-      const tempCanvas = document.createElement('canvas');
-      renderBarcode(tempCanvas, text, {
-        bcid,
-        barColor,
-        bgColor,
-        barWidth: barWidth * scale,
-        height, // keep base height unscaled as bwip-js scale factor handles overall scaling
-        margin: margin * scale,
-        displayValue
-      });
 
       let result;
-      if (format === 'PNG') result = await downloadPNG(tempCanvas, filename, 'Barcodes');
-      else if (format === 'JPG') result = await downloadJPG(tempCanvas, filename, 'Barcodes');
-      else if (format === 'SVG') result = await downloadSVG(tempCanvas, filename, 'Barcodes');
-      else if (format === 'PDF') result = await downloadPDF(tempCanvas, filename, 'Barcodes');
-      
+      if (format === 'SVG') {
+        // True vector barcode export via bwipjs.toSVG
+        const svgString = renderBarcodeSVG(text, {
+          bcid,
+          barColor,
+          bgColor: isTransparentBg ? 'transparent' : bgColor,
+          barWidth,
+          height,
+          margin,
+          displayValue,
+          textPosition,
+          textAlign,
+          textFont
+        });
+        result = await downloadSVG(svgString, filename, 'Barcodes');
+      } else {
+        const tempCanvas = document.createElement('canvas');
+        renderBarcode(tempCanvas, text, {
+          bcid,
+          barColor,
+          bgColor: isTransparentBg ? 'transparent' : bgColor,
+          barWidth: barWidth * scale,
+          height,
+          margin: margin * scale,
+          displayValue,
+          textPosition,
+          textAlign,
+          textFont
+        });
+
+        if (format === 'PNG') result = await downloadPNG(tempCanvas, filename, 'Barcodes');
+        else if (format === 'JPG') result = await downloadJPG(tempCanvas, filename, 'Barcodes');
+        else if (format === 'PDF') result = await downloadPDF(tempCanvas, filename, 'Barcodes');
+      }
+
       if (result === 'gallery') showToast('Saved to Gallery', 'success');
       else if (result === 'share') showToast('Share Sheet Opened', 'success');
       else showToast('Saved successfully', 'success');
-    } catch (err) { console.error(err); showToast('Export failed', 'error'); }
-  };
 
-  const handleSave = () => {
-    if (!isDataValid) { showToast(currentStandard.errorMsg, 'error'); return; }
-    try {
-      saveToSaved({
+      // Also record in history
+      saveToHistory({
         qrType: 'BARCODE',
         qrData: { text },
         displayText: text,
         thumbnail: canvasRef.current.toDataURL('image/jpeg', 0.8),
         style: { bcid, barColor, bgColor, barWidth, height, margin, displayValue }
       });
-      showToast('Added to Saved', 'success');
-    } catch (err) { console.error(err); showToast('Failed to save', 'error'); }
+    } catch (err) {
+      console.error(err);
+      showToast('Export failed', 'error');
+    }
   };
 
   const handleCopy = async () => {
@@ -419,8 +479,10 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       if (!blob) return;
       try {
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        showToast('Copied to clipboard!', 'success');
-      } catch { showToast('Failed to copy.', 'error'); }
+        showToast('Copied barcode image to clipboard!', 'success');
+      } catch {
+        showToast('Failed to copy', 'error');
+      }
     }, 'image/png');
   };
 
@@ -433,41 +495,71 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       const saved = await Filesystem.writeFile({ path: fileName, data: base64Data, directory: Directory.Cache });
       await Share.share({ title: `Barcode (${bcid.toUpperCase()})`, url: saved.uri, dialogTitle: 'Share Barcode' });
     } catch {
-      try {
-        const dataUrl = canvasRef.current.toDataURL('image/png');
-        const blob = await (await fetch(dataUrl)).blob();
-        const file = new File([blob], 'barcode.png', { type: 'image/png' });
-        if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: 'My Barcode', text });
-        else handleDownload('PNG');
-      } catch { handleDownload('PNG'); }
+      handleDownload('PNG');
     }
   };
 
-  const openAdvancedPicker = (type, color) => setAdvPicker({ open: true, color, type });
-  const handleAdvColorChange = (c) => { if (advPicker.type === 'bar') setBarColor(c); else setBgColor(c); };
-  const handleAdvColorConfirm = (c) => {
-    if (advPicker.type === 'bar') updateStateAndHistory({ barColor: c });
-    else updateStateAndHistory({ bgColor: c });
-    setAdvPicker(p => ({ ...p, open: false }));
-  };
-
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: 'var(--bg-primary)', position: 'relative' }}>
-      {/* ── Top Header ── */}
-      <header className="app-header">
-        <div className="app-logo">
-          <AppIcon size={46} noBackground />
-          <div style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
+    <div style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      backgroundColor: 'var(--bg-primary, #FAFAFC)',
+      position: 'relative'
+    }}>
+      {/* ── TOP APP BAR ── */}
+      <header className="app-header" style={{
+        background: 'var(--bg-card, #FFFFFF)',
+        borderBottom: '1px solid var(--border-color, rgba(0,0,0,0.06))',
+        padding: '0 16px',
+        height: 56,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexShrink: 0
+      }}>
+        {/* Left: App Logo & Undo/Redo Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div onClick={() => onNavigate && onNavigate('home')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <AppIcon size={38} noBackground />
+          </div>
+          <span style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary, #1C1C1E)', letterSpacing: '-0.3px', marginLeft: 4 }}>
+            Barcode Generator
+          </span>
+          <div style={{ display: 'flex', gap: 6, marginLeft: 8 }}>
             <button onClick={undo} disabled={historyIndex <= 0} title="Undo" style={undoRedoStyle(historyIndex <= 0)}>
-              <Undo2 size={18} strokeWidth={2.5} />
+              <Undo2 size={16} strokeWidth={2.5} />
             </button>
             <button onClick={redo} disabled={historyIndex >= history.length - 1} title="Redo" style={undoRedoStyle(historyIndex >= history.length - 1)}>
-              <Redo2 size={18} strokeWidth={2.5} />
+              <Redo2 size={16} strokeWidth={2.5} />
             </button>
           </div>
         </div>
 
-        <div className="app-header-actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        {/* Right Header Actions: Save/Export Split Button & Info/Menu */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Info Icon */}
+          <button
+            onClick={() => setIsInfoModalOpen(true)}
+            title="Symbology Information"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+              background: 'var(--bg-hover, rgba(0,0,0,0.04))',
+              color: 'var(--text-secondary, #636366)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <Info size={18} />
+          </button>
+
           {/* Export Split Button */}
           <div style={{ position: 'relative' }}>
             <div
@@ -475,49 +567,41 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                background: 'var(--accent-gradient)',
-                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #D6003D 0%, #FF2E63 100%)',
+                borderRadius: 12,
                 padding: '2px',
-                boxShadow: '0 4px 14px rgba(214, 0, 54, 0.25)',
-                height: '38px',
+                boxShadow: '0 4px 14px rgba(214, 0, 61, 0.25)',
+                height: 36,
                 opacity: !isDataValid ? 0.5 : 1,
                 pointerEvents: !isDataValid ? 'none' : 'auto'
               }}
             >
-              {/* Main Button: Default PNG Normal Quality Save */}
               <button
-                onClick={() => {
-                  if (!isDataValid) { showToast(currentStandard.errorMsg, 'error'); return; }
-                  handleDownload('PNG');
-                }}
+                onClick={() => handleDownload('PNG')}
                 disabled={!isDataValid}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: 6,
                   background: 'transparent',
                   border: 'none',
                   color: '#FFFFFF',
-                  padding: '0 12px',
-                  fontSize: '12px',
-                  fontWeight: 700,
+                  padding: '0 10px',
+                  fontSize: 12,
+                  fontWeight: 800,
                   cursor: 'pointer',
                   height: '100%'
                 }}
-                title="Save as PNG (Normal Quality)"
               >
-                <Save size={16} color="#FFFFFF" />
+                <Save size={15} color="#FFFFFF" />
                 <span>Save</span>
               </button>
 
-              {/* Vertical Separation Line */}
-              <div style={{ width: '1px', height: '18px', background: 'rgba(255, 255, 255, 0.35)', flexShrink: 0 }} />
+              <div style={{ width: 1, height: 16, background: 'rgba(255, 255, 255, 0.35)', flexShrink: 0 }} />
 
-              {/* Chevron Dropdown Arrow */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!isDataValid) { showToast(currentStandard.errorMsg, 'error'); return; }
                   setFormatDropdownOpen(!formatDropdownOpen);
                 }}
                 disabled={!isDataValid}
@@ -532,76 +616,87 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                   cursor: 'pointer',
                   height: '100%'
                 }}
-                title="Export Options"
               >
                 <ChevronDown size={14} style={{ transform: formatDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
               </button>
             </div>
+
+            {/* Save & Export Dropdown Menu */}
             {formatDropdownOpen && isDataValid && (
-              <div className="app-dropdown-menu save-as-dropdown fade-in" style={{ top: 'calc(100% + 12px)', right: 0, width: 280 }}>
-                <div style={{ padding: 12 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.5px' }}>Export Format</div>
-                  <div className="format-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                    {[
-                      { label: 'PNG', featId: 'export_png', Icon: FileImage },
-                      { label: 'SVG', featId: 'export_svg', Icon: FileCode },
-                      { label: 'PDF', featId: 'export_pdf', Icon: FileText },
-                      { label: 'JPG', featId: 'export_jpg', Icon: FileImage }
-                    ].map(({ label, featId, Icon }) => (
-                      <button
-                        key={label}
-                        className={`format-option ${selectedFormat === label ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const access = FeatureAccessManager.canUseFeature(featId);
-                          if (!access.allowed) {
-                            showPaywall(featId);
-                            return;
-                          }
-                          setSelectedFormat(label);
-                          setFormatDropdownOpen(false);
-                          handleDownload(label);
-                        }}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '6px',
-                          aspectRatio: '1 / 1',
-                          padding: '0',
-                          background: selectedFormat === label ? 'var(--accent-soft)' : 'var(--bg-hover)',
-                          border: '1px solid',
-                          borderColor: selectedFormat === label ? 'var(--accent-primary)' : 'transparent',
-                          borderRadius: '12px',
-                          color: selectedFormat === label ? 'var(--accent-primary)' : 'var(--text-primary)',
-                          cursor: 'pointer',
-                          position: 'relative',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <PaidCrownBadge featureId={featId} position="floating" size={8} />
-                        <Icon size={18} />
-                        <span style={{ fontSize: '10px', fontWeight: 700 }}>{label}</span>
-                      </button>
-                    ))}
-                  </div>
+              <div className="app-dropdown-menu save-as-dropdown fade-in" style={{
+                position: 'absolute',
+                top: 'calc(100% + 8px)',
+                right: 0,
+                width: 280,
+                background: 'var(--bg-card, #FFFFFF)',
+                borderRadius: 18,
+                boxShadow: '0 12px 32px rgba(0,0,0,0.15)',
+                border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+                zIndex: 200,
+                padding: 12
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary, #8E8E93)', textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.5px' }}>
+                  Export Format
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                  {[
+                    { label: 'PNG', featId: 'export_png', Icon: FileImage },
+                    { label: 'SVG', featId: 'export_svg', Icon: FileCode },
+                    { label: 'PDF', featId: 'export_pdf', Icon: FileText },
+                    { label: 'JPG', featId: 'export_jpg', Icon: FileImage }
+                  ].map(({ label, featId, Icon }) => (
+                    <button
+                      key={label}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const check = FeatureAccessManager.canUseFeature(featId);
+                        if (!check.allowed) {
+                          showPaywall(featId);
+                          return;
+                        }
+                        setSelectedFormat(label);
+                        setFormatDropdownOpen(false);
+                        handleDownload(label);
+                      }}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        aspectRatio: '1 / 1',
+                        padding: 0,
+                        background: selectedFormat === label ? 'rgba(214, 0, 61, 0.08)' : 'var(--bg-hover, #F2F2F7)',
+                        border: selectedFormat === label ? '1.5px solid var(--accent-primary, #D6003D)' : '1px solid transparent',
+                        borderRadius: 12,
+                        color: selectedFormat === label ? 'var(--accent-primary, #D6003D)' : 'var(--text-primary, #1C1C1E)',
+                        cursor: 'pointer',
+                        position: 'relative'
+                      }}
+                    >
+                      <PaidCrownBadge featureId={featId} position="floating" size={8} />
+                      <Icon size={18} />
+                      <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>
+                    </button>
+                  ))}
                 </div>
 
-                <div style={{ height: 1, background: 'var(--border-color)', margin: 0 }} />
+                <div style={{ height: 1, background: 'var(--border-color, rgba(0,0,0,0.06))', margin: '12px 0' }} />
 
-                <div style={{ padding: 12 }}>
+                {/* Export Quality Section */}
+                <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Export Quality</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary, #8E8E93)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>
+                      Export Quality
+                    </div>
                     <span style={{ 
                       fontSize: '10px', 
                       fontWeight: 800, 
-                      color: 'var(--accent-primary)',
-                      background: 'var(--accent-soft)',
-                      padding: '3px 8px',
+                      color: 'var(--accent-primary, #D6003D)',
+                      background: 'rgba(214, 0, 61, 0.08)',
+                      padding: '2px 8px',
                       borderRadius: '6px',
-                      border: '1px solid rgba(214, 0, 54, 0.15)',
-                      letterSpacing: '0.5px'
+                      letterSpacing: '0.4px'
                     }}>
                       {exportQuality === 'Low' && '512px'}
                       {exportQuality === 'Medium' && '1024px'}
@@ -609,7 +704,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                       {exportQuality === 'Ultra' && '4096px'}
                     </span>
                   </div>
-                  <div style={{ padding: '0 8px', marginTop: 12, marginBottom: 8 }}>
+                  <div style={{ padding: '0 4px', marginTop: 8, marginBottom: 8 }}>
                     <input
                       type="range"
                       min="0"
@@ -627,8 +722,8 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                         const selected = steps[parseInt(e.target.value)] || 'High';
                         const targetFeat = featMap[selected];
                         if (targetFeat) {
-                          const access = FeatureAccessManager.canUseFeature(targetFeat);
-                          if (!access.allowed) {
+                          const check = FeatureAccessManager.canUseFeature(targetFeat);
+                          if (!check.allowed) {
                             showPaywall(targetFeat);
                             return;
                           }
@@ -638,7 +733,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                       className="export-quality-slider"
                       style={{ width: '100%', cursor: 'pointer' }}
                     />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 9, fontWeight: 600, color: 'var(--text-muted)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 9, fontWeight: 600, color: 'var(--text-muted, #8E8E93)' }}>
                       <span style={{ position: 'relative' }}>
                         Low <PaidCrownBadge featureId="export_quality_low" position="floating" size={7} />
                       </span>
@@ -655,474 +750,593 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                   </div>
                 </div>
 
-                <div style={{ height: 1, background: 'var(--border-color)', margin: 0 }} />
+                <div style={{ height: 1, background: 'var(--border-color, rgba(0,0,0,0.06))', margin: '12px 0' }} />
 
-                <div style={{ padding: 12 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.5px' }}>Quick Actions</div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button className="menu-link-btn" onClick={(e) => { e.stopPropagation(); handleCopy(); setFormatDropdownOpen(false); }} style={{ flex: 1, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, padding: 0 }} title="Copy"><Copy size={20} /></button>
-                    <button className="menu-link-btn" onClick={(e) => { e.stopPropagation(); handleSave(); setFormatDropdownOpen(false); }} style={{ flex: 1, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, padding: 0 }} title="Save"><Bookmark size={20} /></button>
-                    <button className="menu-link-btn" onClick={(e) => { e.stopPropagation(); handleShare(); setFormatDropdownOpen(false); }} style={{ flex: 1, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, padding: 0 }} title="Share"><Share2 size={20} /></button>
+                {/* Transparent Background Option */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '2px 0'
+                }}>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary, #8E8E93)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Transparent Background
+                    </div>
+                    <span style={{ fontSize: 10, color: 'var(--text-muted, #8E8E93)', display: 'block', marginTop: 1 }}>
+                      {isTransparentBg ? 'Exporting without white background' : 'White background included'}
+                    </span>
                   </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const next = !isTransparentBg;
+                      updateStateAndHistory({
+                        isTransparentBg: next,
+                        bgColor: next ? 'transparent' : '#FFFFFF'
+                      });
+                    }}
+                    style={{
+                      width: 44,
+                      height: 26,
+                      borderRadius: 16,
+                      background: isTransparentBg ? 'var(--accent-primary, #D6003D)' : 'var(--bg-hover, #E5E5EA)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      transition: 'background 0.2s ease',
+                      padding: 2,
+                      flexShrink: 0
+                    }}
+                  >
+                    <div style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      background: '#FFFFFF',
+                      transform: isTransparentBg ? 'translateX(18px)' : 'translateX(0px)',
+                      transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
+                    }} />
+                  </button>
+                </div>
+
+                <div style={{ height: 1, background: 'var(--border-color, rgba(0,0,0,0.06))', margin: '12px 0' }} />
+
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary, #8E8E93)', textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.5px' }}>
+                  Quick Actions
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleCopy(); setFormatDropdownOpen(false); }}
+                    style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, border: '1px solid var(--border-color, rgba(0,0,0,0.08))', background: 'var(--bg-hover, #F2F2F7)', cursor: 'pointer' }}
+                    title="Copy Image"
+                  >
+                    <Copy size={18} />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleSaveToArchive(); setFormatDropdownOpen(false); }}
+                    style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, border: '1px solid var(--border-color, rgba(0,0,0,0.08))', background: 'var(--bg-hover, #F2F2F7)', cursor: 'pointer' }}
+                    title="Bookmark to Saved"
+                  >
+                    <Bookmark size={18} />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleShare(); setFormatDropdownOpen(false); }}
+                    style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, border: '1px solid var(--border-color, rgba(0,0,0,0.08))', background: 'var(--bg-hover, #F2F2F7)', cursor: 'pointer' }}
+                    title="Share Barcode"
+                  >
+                    <Share2 size={18} />
+                  </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Menu */}
+          {/* Navigation Menu Toggle */}
           <div style={{ position: 'relative' }}>
-            <button className={`btn-menu-toggle ${isMenuOpen ? 'active' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Menu">
-              <Menu size={20} />
+            <button
+              className={`btn-menu-toggle ${isMenuOpen ? 'active' : ''}`}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Menu"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+                background: 'var(--bg-hover, rgba(0,0,0,0.04))',
+                color: 'var(--text-secondary, #636366)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              <Menu size={18} />
             </button>
             {isMenuOpen && (
-              <div className="app-dropdown-menu fade-in" style={{ top: 'calc(100% + 12px)', right: 0 }}>
-                <div className="menu-links">
-                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); onNavigate('home'); }}><Home size={16} /> Home</button>
-                  <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); onNavigate('history'); }}><History size={16} /> History</button>
-                  <button className="menu-link-btn" onClick={() => {
-                    const next = theme === 'dark' ? 'light' : theme === 'light' ? 'auto' : 'dark';
-                    setTheme(next);
-                  }}>
-                    {theme === 'dark' ? (
-                      <Moon size={16} />
-                    ) : theme === 'light' ? (
-                      <Sun size={16} />
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 2v20" />
-                        <path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" />
-                        <circle cx="12" cy="12" r="10" />
-                      </svg>
-                    )}
-                    Theme <span style={{ textTransform: 'capitalize', marginLeft: 4, color: 'var(--accent-primary)', fontWeight: 'bold' }}>{theme}</span>
-                  </button>
-                  <div style={{ height: 1, background: 'var(--border-color)', margin: '4px 8px' }} />
-                  <button className="menu-link-btn" onClick={() => setIsMenuOpen(false)}><Info size={16} /> About</button>
-                  <button className="menu-link-btn" onClick={() => setIsMenuOpen(false)}><Shield size={16} /> Privacy Policy</button>
-                  <button className="menu-link-btn" onClick={() => setIsMenuOpen(false)}><FileIcon size={16} /> Terms</button>
-                </div>
+              <div className="app-dropdown-menu fade-in" style={{
+                position: 'absolute',
+                top: 'calc(100% + 8px)',
+                right: 0,
+                width: 180,
+                background: 'var(--bg-card, #FFFFFF)',
+                borderRadius: 16,
+                boxShadow: '0 12px 32px rgba(0,0,0,0.15)',
+                border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+                zIndex: 200,
+                padding: 6
+              }}>
+                <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); onNavigate('home'); }}>
+                  <Home size={15} /> Home
+                </button>
+                <button className="menu-link-btn" onClick={() => { setIsMenuOpen(false); setIsHistoryOpen(true); }}>
+                  <HistoryIcon size={15} /> History
+                </button>
+                <button className="menu-link-btn" onClick={() => {
+                  const next = theme === 'dark' ? 'light' : theme === 'light' ? 'auto' : 'dark';
+                  setTheme(next);
+                }}>
+                  {theme === 'dark' ? <Moon size={15} /> : <Sun size={15} />}
+                  Theme ({theme})
+                </button>
               </div>
             )}
           </div>
         </div>
       </header>
 
-      {/* ── Canvas Preview (Match QR Creator styling) ── */}
-      <section className="qr-preview-card" style={{ position: 'relative', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', width: '100%', boxSizing: 'border-box' }}>
-        <div className="qr-preview-wrapper" style={{
-          aspectRatio: 'auto',
-          width: '100%',
-          maxWidth: '340px',
-          height: currentStandard.category === '2d-matrix' ? '210px' : '160px',
-          padding: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'height 0.2s ease'
-        }}>
-          <div style={{ background: bgColor || '#fff', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', boxSizing: 'border-box' }}>
-            <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-          </div>
-        </div>
-      </section>
+      {/* ── HERO PREVIEW CARD ── */}
+      <BarcodePreviewCard
+        canvasRef={canvasRef}
+        bcid={bcid}
+        text={text}
+        barColor={barColor}
+        bgColor={bgColor}
+        isDataValid={isDataValid}
+        currentStandard={currentStandard}
+        spec={spec}
+        hasBorder={hasBorder}
+        borderWidth={borderWidth}
+      />
 
-      {/* Spacing wrapper for body content */}
-      <div style={{ flex: 1, padding: '16px var(--main-padding-x) 90px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', width: '100%', boxSizing: 'border-box' }}>
-        {activeTab === 'content' && (
-          <>
-            {/* Type badge */}
-            <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, width: '100%', justifyContent: 'flex-start' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{currentStandard.name}</span>
-              <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--text-muted)', display: 'inline-block' }} />
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{currentStandard.desc}</span>
-            </div>
+      {/* ── SECONDARY ACTION TOOLBAR CHIPS ── */}
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        padding: '10px 16px',
+        overflowX: 'auto',
+        background: 'var(--bg-primary, #FAFAFC)',
+        borderBottom: '1px solid var(--border-color, rgba(0,0,0,0.05))',
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none',
+        flexShrink: 0
+      }}>
+        {/* Test Scan */}
+        <button
+          onClick={() => setIsTestScanOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 12px',
+            borderRadius: 20,
+            border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+            background: 'var(--bg-card, #FFFFFF)',
+            color: 'var(--text-primary, #1C1C1E)',
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+          }}
+        >
+          <Scan size={14} color="var(--accent-primary, #D6003D)" />
+          <span>Test Scan</span>
+        </button>
 
-            {/* Barcode Type Grid (freely swipe/scroll with extra space in the content section) */}
-            <div className="barcode-type-tabs">
-              {Object.entries(BARCODE_STANDARDS)
-                .filter(([key]) => FeatureAccessManager.isFeatureEnabled(`barcode_${key}`))
-                .map(([key, standard]) => (
-                <button
-                  key={key}
-                  className={`type-tab ${bcid === key ? 'active' : ''}`}
-                  style={{ minHeight: '90px', padding: '8px 6px 30px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-                  onClick={() => {
-                    const access = FeatureAccessManager.canUseFeature(`barcode_${key}`);
-                    if (!access.allowed) {
-                      showPaywall(`barcode_${key}`);
-                      return;
-                    }
-                    if (bcid !== key) {
-                      updateStateAndHistory({
-                        bcid: key,
-                        text: standard.defaultValue,
-                        barWidth: standard.defaultBarWidth !== undefined ? standard.defaultBarWidth : 2,
-                        height: standard.defaultHeight !== undefined ? standard.defaultHeight : 85,
-                        margin: standard.defaultMargin !== undefined ? standard.defaultMargin : 16,
-                        displayValue: standard.defaultDisplayValue !== undefined ? standard.defaultDisplayValue : true
-                      });
-                    }
-                  }}
-                >
-                  <PaidCrownBadge featureId={`barcode_${key}`} position="floating" size={9} />
-                  {bcid === key && (
-                    <>
-                      <div 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const existingFields = parseValueToFields(text, key);
-                          setModalInitialFields(existingFields);
-                          setPendingBcid(key);
-                          setIsDataModalOpen(true);
-                        }}
-                        style={{
-                          position: 'absolute',
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          height: '24px',
-                          background: 'var(--accent-primary)',
-                          color: 'white',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          zIndex: 10,
-                          cursor: 'pointer',
-                          borderBottomLeftRadius: '8px',
-                          borderBottomRightRadius: '8px',
-                          gap: '4px',
-                          fontWeight: 800,
-                          fontSize: '9px',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.4px',
-                          boxShadow: '0 -2px 6px rgba(0,0,0,0.1)'
-                        }}
-                      >
-                        <Pencil size={10} strokeWidth={3} />
-                        <span>Edit</span>
-                      </div>
-                      <div style={{
-                        position: 'absolute',
-                        top: 2,
-                        left: 2,
-                        background: standard.validate(text) ? '#34C759' : '#FF3B30',
-                        color: 'white',
-                        borderRadius: '50%',
-                        width: 14,
-                        height: 14,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-                        zIndex: 5
-                      }}>
-                        {standard.validate(text) ? (
-                          <Check size={8} strokeWidth={4} />
-                        ) : (
-                          <X size={8} strokeWidth={4} />
-                        )}
-                      </div>
-                    </>
-                  )}
-                  <span className="type-tab-icon" style={{ width: '100%', height: '40px', background: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
-                    <MiniBarcodePreview type={key} data={standard.defaultValue} />
-                  </span>
-                  <span style={{ fontSize: '10px', fontWeight: 700, width: '100%', display: 'block', marginTop: '6px', lineHeight: 1.1, textAlign: 'center' }}>
-                    {standard.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
+        {/* Barcode Quality */}
+        <button
+          onClick={() => setIsQualityModalOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 12px',
+            borderRadius: 20,
+            border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+            background: 'var(--bg-card, #FFFFFF)',
+            color: 'var(--text-primary, #1C1C1E)',
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+          }}
+        >
+          <Sparkles size={14} color="#FF9500" />
+          <span>Quality Check</span>
+        </button>
 
-        {/* COLOR TAB */}
-        {activeTab === 'color' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', padding: '4px 0 20px', boxSizing: 'border-box', marginTop: 'auto' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Bar Color</label>
-                <div className="swatch-grid-mini">
-                  <ColorPicker isSwatch={true} icon={Pipette} value={barColor} onChange={(c) => updateStateAndHistory({ barColor: c })} onOpenAdvanced={(c) => openAdvancedPicker('bar', c)} />
-                  {['#000000', '#FF3B30', '#007AFF', '#34C759', '#FFCC00', '#AF52DE'].map(color => (
-                    <div key={color} className={`swatch-item${barColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => updateStateAndHistory({ barColor: color })} />
-                  ))}
-                </div>
-              </div>
+        {/* Print / Label Mode */}
+        <button
+          onClick={() => setIsLabelModalOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 12px',
+            borderRadius: 20,
+            border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+            background: 'var(--bg-card, #FFFFFF)',
+            color: 'var(--text-primary, #1C1C1E)',
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+          }}
+        >
+          <Printer size={14} color="var(--accent-primary, #D6003D)" />
+          <span>Label Sheet</span>
+        </button>
 
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Background Color</label>
-                <div className="swatch-grid-mini">
-                  <ColorPicker isSwatch={true} icon={Pipette} value={bgColor} onChange={(c) => updateStateAndHistory({ bgColor: c })} onOpenAdvanced={(c) => openAdvancedPicker('bg', c)} />
-                  {['#FFFFFF', '#F2F2F7', '#E5E5EA', '#EFEFF4', '#000000', '#0A0A0F'].map(color => (
-                    <div key={color} className={`swatch-item${bgColor === color ? ' active' : ''}`} style={{ backgroundColor: color }} onClick={() => updateStateAndHistory({ bgColor: color })} />
-                  ))}
-                </div>
-              </div>
-            </div>
+        {/* Batch Generator Entry Point */}
+        <button
+          onClick={() => onNavigate && onNavigate('batch', { defaultType: 'BARCODE' })}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 12px',
+            borderRadius: 20,
+            border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+            background: 'var(--bg-card, #FFFFFF)',
+            color: 'var(--text-primary, #1C1C1E)',
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+          }}
+        >
+          <Layers size={14} color="#0055FF" />
+          <span>Batch Generator</span>
+        </button>
 
-            <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Presets</label>
-              <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '4px 0 10px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
-                {COLOR_PRESETS.map(p => {
-                  const sel = barColor.toUpperCase() === p.qr.toUpperCase() && bgColor.toUpperCase() === p.bg.toUpperCase();
-                  return (
-                    <button key={p.name} onClick={() => updateStateAndHistory({ barColor: p.qr, bgColor: p.bg })}
-                      style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, background: 'none', border: 'none', padding: 0, cursor: 'pointer', width: 54 }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 12, background: p.bg, border: sel ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: sel ? '0 8px 16px rgba(255,59,48,0.25)' : '0 2px 6px rgba(0,0,0,0.06)', transition: 'all 0.2s ease' }}>
-                        <div style={{ width: 20, height: 20, borderRadius: 4, background: p.qr }} />
-                      </div>
-                      <span style={{ fontSize: 10, fontWeight: sel ? 700 : 500, color: sel ? 'var(--accent-primary)' : 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', textAlign: 'center' }}>{p.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Duplicate & Edit */}
+        <button
+          onClick={handleDuplicateAndEdit}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 12px',
+            borderRadius: 20,
+            border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+            background: 'var(--bg-card, #FFFFFF)',
+            color: 'var(--text-primary, #1C1C1E)',
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+          }}
+        >
+          <Copy size={14} color="var(--text-secondary, #636366)" />
+          <span>Duplicate & Edit</span>
+        </button>
 
-        {/* DIMENSIONS TAB */}
-        {activeTab === 'size' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', padding: '4px 0 20px', boxSizing: 'border-box', marginTop: 'auto' }}>
-            {/* Standard Category & Info Banner */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'var(--bg-elevated)',
-              padding: '10px 14px',
-              borderRadius: '12px',
-              border: '1px solid var(--border-color)'
-            }}>
-              <div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
-                  {currentStandard.name} Dimensions
-                </span>
-                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                  {currentStandard.category === '2d-matrix'
-                    ? '2D Matrix (1:1 Fixed Geometric Ratio - Never Stretched)'
-                    : currentStandard.category === '2d-stacked'
-                    ? '2D Stacked Multi-Row Standard'
-                    : '1D Linear Barcode Standard'}
-                </span>
-              </div>
-              <span style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: 'var(--accent-primary)',
-                background: 'rgba(214,0,54,0.1)',
-                padding: '3px 8px',
-                borderRadius: '6px',
-                textTransform: 'uppercase'
-              }}>
-                {currentStandard.category.replace('-', ' ')}
-              </span>
-            </div>
-
-            {/* Scale / Bar Width Slider */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                  {currentStandard.scaleLabel || 'Bar Thickness'} ({barWidth}x)
-                </label>
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
-                  {barWidth}x
-                </span>
-              </div>
-              <input
-                type="range"
-                min={currentStandard.minBarWidth || 1}
-                max={currentStandard.maxBarWidth || 4}
-                step={currentStandard.stepBarWidth || 1}
-                value={barWidth}
-                onChange={(e) => updateStateAndHistory({ barWidth: parseFloat(e.target.value) })}
-                style={{ width: '100%', cursor: 'pointer' }}
-              />
-            </div>
-
-            {/* Height Slider: Only for standards where height is applicable (1D and stacked) */}
-            {currentStandard.heightApplicable ? (
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                    Bar Height ({height || currentStandard.defaultHeight || 80}px)
-                  </label>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
-                    {height || currentStandard.defaultHeight || 80}px
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={currentStandard.minHeight || 30}
-                  max={currentStandard.maxHeight || 160}
-                  step={currentStandard.stepHeight || 5}
-                  value={height || currentStandard.defaultHeight || 80}
-                  onChange={(e) => updateStateAndHistory({ height: parseInt(e.target.value) })}
-                  style={{ width: '100%', cursor: 'pointer' }}
-                />
-              </div>
-            ) : (
-              <div style={{
-                background: 'rgba(52, 199, 89, 0.08)',
-                border: '1px solid rgba(52, 199, 89, 0.25)',
-                borderRadius: '10px',
-                padding: '10px 12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <Check size={14} color="#34C759" style={{ flexShrink: 0 }} />
-                <span style={{ fontSize: '11px', color: 'var(--text-primary)', fontWeight: 600, lineHeight: 1.3 }}>
-                  Height locked to 1:1 square/hexagonal ratio. Matrix modules are always preserved without stretching.
-                </span>
-              </div>
-            )}
-
-            {/* Quiet Zone Slider */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                  Quiet Zone ({margin}px)
-                </label>
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
-                  {margin}px
-                </span>
-              </div>
-              <input
-                type="range"
-                min={4}
-                max={40}
-                step={2}
-                value={margin}
-                onChange={(e) => updateStateAndHistory({ margin: parseInt(e.target.value) })}
-                style={{ width: '100%', cursor: 'pointer' }}
-              />
-            </div>
-
-            {/* Text Label Toggle */}
-            {bcid !== 'maxicode' && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-primary)', padding: '10px 14px', borderRadius: 12, border: '1px solid var(--border-color)' }}>
-                <div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>Show Text Label</span>
-                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                    {currentStandard.category === '2d-matrix'
-                      ? 'Show human-readable text under 2D matrix'
-                      : 'Display human-readable text under bars'}
-                  </span>
-                </div>
-                <button
-                  onClick={() => updateStateAndHistory({ displayValue: !displayValue })}
-                  style={{
-                    background: displayValue ? 'var(--accent-primary)' : 'var(--bg-hover)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 8,
-                    padding: '6px 14px',
-                    color: displayValue ? 'white' : 'var(--text-secondary)',
-                    fontWeight: 700,
-                    fontSize: 11,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {displayValue ? 'ON' : 'OFF'}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        {/* History */}
+        <button
+          onClick={() => setIsHistoryOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 12px',
+            borderRadius: 20,
+            border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+            background: 'var(--bg-card, #FFFFFF)',
+            color: 'var(--text-primary, #1C1C1E)',
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+          }}
+        >
+          <HistoryIcon size={14} color="var(--text-secondary, #636366)" />
+          <span>History</span>
+        </button>
       </div>
 
-      {/* ── Bottom Nav Tabs ── */}
-      <nav className="bottom-nav" style={{ zIndex: 100 }}>
+      {/* ── SCROLLABLE BODY CONTENT ── */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '16px 16px 90px 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        boxSizing: 'border-box',
+        width: '100%'
+      }}>
+        <div style={{ maxWidth: 480, width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* TAB 1: BARCODE CONTENT & FORMAT SELECTION */}
+          {activeTab === 'content' && (
+            <>
+              {/* Content Input, GS1 Auto-check digit & Modulo breakdown */}
+              <BarcodeContentTab
+                bcid={bcid}
+                text={text}
+                onChangeText={(val) => updateStateAndHistory({ text: val })}
+                currentStandard={currentStandard}
+                spec={spec}
+                autoCheckDigit={autoCheckDigit}
+                onToggleAutoCheckDigit={() => setAutoCheckDigit(!autoCheckDigit)}
+                onOpenDataModal={() => {
+                  const fields = parseValueToFields(text, bcid);
+                  setModalInitialFields(fields);
+                  setPendingBcid(bcid);
+                  setIsDataModalOpen(true);
+                }}
+              />
+
+              <div style={{ height: 1, background: 'var(--border-color, rgba(0,0,0,0.06))', margin: '4px 0' }} />
+
+              {/* Format Selection Card */}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary, #636366)', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block', marginBottom: 8 }}>
+                  SELECT BARCODE FORMAT
+                </label>
+                <BarcodeFormatSelector
+                  selectedBcid={bcid}
+                  onSelectFormat={handleSelectFormat}
+                  onOpenInfo={(targetId) => {
+                    setPendingBcid(targetId);
+                    setIsInfoModalOpen(true);
+                  }}
+                  showPaywall={showPaywall}
+                />
+              </div>
+            </>
+          )}
+
+          {/* TAB 2: COLORS */}
+          {activeTab === 'color' && (
+            <BarcodeColorsTab
+              barColor={barColor}
+              bgColor={bgColor}
+              isTransparentBg={isTransparentBg}
+              onChangeColors={(updates) => updateStateAndHistory(updates)}
+              onOpenAdvancedPicker={(type, c) => setAdvPicker({ open: true, color: c, type })}
+            />
+          )}
+
+          {/* TAB 3: DIMENSIONS */}
+          {activeTab === 'size' && (
+            <BarcodeDimensionsTab
+              bcid={bcid}
+              currentStandard={currentStandard}
+              spec={spec}
+              barWidth={barWidth}
+              height={height}
+              margin={margin}
+              onChangeDimensions={(updates) => updateStateAndHistory(updates)}
+            />
+          )}
+
+          {/* TAB 4: STYLE */}
+          {activeTab === 'style' && (
+            <BarcodeStyleTab
+              bcid={bcid}
+              displayValue={displayValue}
+              textPosition={textPosition}
+              textAlign={textAlign}
+              textFont={textFont}
+              hasBorder={hasBorder}
+              borderWidth={borderWidth}
+              decorativeMargin={margin}
+              onChangeStyle={(updates) => updateStateAndHistory(updates)}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* ── BOTTOM NAVIGATION (BARCODE, COLORS, DIMENSIONS, STYLE) ── */}
+      <nav className="bottom-nav" style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: 'var(--bg-card, #FFFFFF)',
+        borderTop: '1px solid var(--border-color, rgba(0,0,0,0.06))',
+        height: 60,
+        display: 'flex',
+        alignItems: 'center',
+        zIndex: 100,
+        boxShadow: '0 -4px 16px rgba(0,0,0,0.03)'
+      }}>
         {[
-          { id: 'content', label: 'Barcode', Icon: Barcode },
-          { id: 'color', label: 'Colors', Icon: Palette },
-          { id: 'size', label: 'Dimensions', Icon: Sliders }
-        ].map(tab => (
-          <button key={tab.id} className={`bottom-nav-tab${activeTab === tab.id ? ' active' : ''}`}
-            onClick={() => setActiveTab(tab.id)} style={{ flex: 1 }}>
-            <div className="bottom-nav-highlight" />
-            <span className="bottom-nav-icon"><tab.Icon size={20} strokeWidth={2} /></span>
-            <span className="bottom-nav-label" style={{ fontSize: 11, fontWeight: 700 }}>{tab.label}</span>
-          </button>
-        ))}
+          { id: 'content', label: 'BARCODE', Icon: Barcode },
+          { id: 'color', label: 'COLORS', Icon: Palette },
+          { id: 'size', label: 'DIMENSIONS', Icon: Sliders },
+          { id: 'style', label: 'STYLE', Icon: Layers }
+        ].map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                background: 'transparent',
+                border: 'none',
+                height: '100%',
+                cursor: 'pointer',
+                color: isActive ? 'var(--accent-primary, #D6003D)' : 'var(--text-secondary, #636366)',
+                transition: 'color 0.2s',
+                position: 'relative'
+              }}
+            >
+              {isActive && (
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  width: 32,
+                  height: 3,
+                  background: 'var(--accent-primary, #D6003D)',
+                  borderRadius: '0 0 4px 4px'
+                }} />
+              )}
+              <tab.Icon size={19} strokeWidth={isActive ? 2.5 : 2} />
+              <span style={{ fontSize: 10, fontWeight: isActive ? 800 : 600, letterSpacing: '0.3px' }}>
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
       </nav>
 
-      {/* ── Advanced Color Picker ── */}
+      {/* ── MODALS ── */}
+
+      {/* Quality Audit Modal */}
+      <BarcodeQualityModal
+        isOpen={isQualityModalOpen}
+        onClose={() => setIsQualityModalOpen(false)}
+        bcid={bcid}
+        text={text}
+        barColor={barColor}
+        bgColor={isTransparentBg ? 'transparent' : bgColor}
+        isDataValid={isDataValid}
+        currentStandard={currentStandard}
+        spec={spec}
+        barWidth={barWidth}
+        margin={margin}
+      />
+
+      {/* Technical Info Modal */}
+      <BarcodeInfoModal
+        isOpen={isInfoModalOpen}
+        onClose={() => {
+          setIsInfoModalOpen(false);
+          setPendingBcid(null);
+        }}
+        bcid={pendingBcid || bcid}
+        standard={BARCODE_STANDARDS[pendingBcid || bcid] || currentStandard}
+        spec={BARCODE_SPECS[pendingBcid || bcid] || spec}
+      />
+
+      {/* Print / Label Mode Modal */}
+      <BarcodeLabelModal
+        isOpen={isLabelModalOpen}
+        onClose={() => setIsLabelModalOpen(false)}
+        canvasRef={canvasRef}
+        bcid={bcid}
+        text={text}
+        showToast={showToast}
+      />
+
+      {/* Test Scan Verification Modal */}
+      <BarcodeTestScanModal
+        isOpen={isTestScanOpen}
+        onClose={() => setIsTestScanOpen(false)}
+        targetBcid={bcid}
+        targetText={text}
+      />
+
+      {/* Barcode History Modal */}
+      <BarcodeHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        onSelectHistoryItem={(item) => {
+          const val = item.displayText || item.qrData?.text || '';
+          const s = item.style || {};
+          const targetBcid = s.bcid || 'ean13';
+          const std = BARCODE_STANDARDS[targetBcid] || BARCODE_STANDARDS.ean13;
+
+          updateStateAndHistory({
+            text: val,
+            bcid: targetBcid,
+            barColor: s.barColor || '#000000',
+            bgColor: s.bgColor || '#FFFFFF',
+            isTransparentBg: s.bgColor === 'transparent',
+            barWidth: s.barWidth !== undefined ? s.barWidth : (std.defaultBarWidth || 2),
+            height: s.height !== undefined ? s.height : (std.defaultHeight || 85),
+            margin: s.margin !== undefined ? s.margin : (std.defaultMargin || 16),
+            displayValue: s.displayValue !== undefined ? s.displayValue : true,
+            textPosition: s.textPosition || 'below',
+            textAlign: s.textAlign || 'center',
+            textFont: s.textFont || 'ocrb'
+          });
+          showToast('Loaded barcode from history', 'success');
+        }}
+        showToast={showToast}
+      />
+
+      {/* Advanced Color Picker */}
       <AdvancedColorPicker
         isOpen={advPicker.open}
         initialColor={advPicker.color}
-        onChange={handleAdvColorChange}
-        onConfirm={handleAdvColorConfirm}
-        onCancel={() => { handleAdvColorChange(advPicker.color); setAdvPicker(p => ({ ...p, open: false })); }}
+        onChange={(c) => {
+          if (advPicker.type === 'bar') setBarColor(c);
+          else setBgColor(c);
+        }}
+        onConfirm={(c) => {
+          if (advPicker.type === 'bar') updateStateAndHistory({ barColor: c });
+          else updateStateAndHistory({ bgColor: c, isTransparentBg: false });
+          setAdvPicker(p => ({ ...p, open: false }));
+        }}
+        onCancel={() => {
+          if (advPicker.type === 'bar') setBarColor(advPicker.color);
+          else setBgColor(advPicker.color);
+          setAdvPicker(p => ({ ...p, open: false }));
+        }}
       />
 
-      {/* ── Premium Barcode Data Modal ── */}
+      {/* Structured Barcode Fields Modal */}
       <BarcodeDataModal
         isOpen={isDataModalOpen}
         bcid={pendingBcid || bcid}
-        standard={BARCODE_STANDARDS[pendingBcid || bcid] || BARCODE_STANDARDS.code128}
+        standard={BARCODE_STANDARDS[pendingBcid || bcid] || currentStandard}
         initialFields={modalInitialFields}
-        onApply={handleModalApply}
-        onClose={() => { setIsDataModalOpen(false); setPendingBcid(null); }}
+        onApply={(compiledValue) => {
+          const updates = { text: compiledValue };
+          if (pendingBcid && pendingBcid !== bcid) {
+            updates.bcid = pendingBcid;
+          }
+          updateStateAndHistory(updates);
+          setIsDataModalOpen(false);
+          setPendingBcid(null);
+        }}
+        onClose={() => {
+          setIsDataModalOpen(false);
+          setPendingBcid(null);
+        }}
       />
     </div>
   );
 }
 
-// ─── Mini Preview Canvas ──────────────────────────────────────────────────────
-function MiniBarcodePreview({ type, data }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const std = BARCODE_STANDARDS[type] || BARCODE_STANDARDS.code128;
-    const is2D = std.category === '2d-matrix';
-    const isStacked = std.category === '2d-stacked';
-
-    // Tailored scale for thumbnail icon so each barcode renders its authentic code sharply
-    let thumbScale = 1;
-    if (type === 'microqrcode') thumbScale = 1.6;
-    else if (type === 'datamatrix') thumbScale = 1.3;
-    else if (type === 'qrcode' || type === 'aztec' || type === 'hanxin') thumbScale = 1.1;
-    else if (type === 'maxicode') thumbScale = 0.85;
-    else if (type === 'pdf417') thumbScale = 1;
-    else if (type === 'gs1128' || type === 'telepen' || type === 'planet') thumbScale = 0.75;
-
-    renderBarcode(ref.current, data || std.defaultValue, {
-      bcid: type,
-      barColor: '#000000',
-      bgColor: '#ffffff',
-      barWidth: thumbScale,
-      height: is2D || isStacked ? null : 26,
-      margin: 2,
-      displayValue: false
-    });
-  }, [type, data]);
-
-  return (
-    <canvas
-      ref={ref}
-      style={{
-        display: 'block',
-        maxWidth: '100%',
-        maxHeight: '100%',
-        objectFit: 'contain'
-      }}
-    />
-  );
-}
-
-// ─── Undo/Redo Button Styles ──────────────────────────────────────────────────
 function undoRedoStyle(disabled) {
   return {
-    width: 36, height: 36, borderRadius: 10,
-    background: 'var(--bg-hover)',
-    border: '1px solid var(--border-color)',
-    color: disabled ? 'var(--text-tertiary)' : 'var(--accent-primary)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    background: 'var(--bg-hover, rgba(0,0,0,0.04))',
+    border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
+    color: disabled ? 'var(--text-muted, #C7C7CC)' : 'var(--accent-primary, #D6003D)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     cursor: disabled ? 'default' : 'pointer',
-    transition: 'all 0.2s ease',
-    opacity: disabled ? 0.45 : 1
+    opacity: disabled ? 0.45 : 1,
+    transition: 'all 0.2s ease'
   };
 }
