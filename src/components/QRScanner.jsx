@@ -614,23 +614,6 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR, currentUser, o
       console.error('Failed to generate thumbnail for scanned QR:', err);
     }
 
-    const isUrl = parsed.type === 'Website' || /^https?:\/\//i.test(decodedText.trim()) || /^www\./i.test(decodedText.trim());
-    let targetUrl = decodedText.trim();
-    if (isUrl && !/^https?:\/\//i.test(targetUrl)) {
-      targetUrl = 'https://' + targetUrl;
-    }
-
-    let shouldAutoOpen = true;
-    try {
-      const prefs = JSON.parse(localStorage.getItem('qrgen_preferences') || '{}');
-      if (prefs.autoOpenUrl !== undefined) {
-        shouldAutoOpen = prefs.autoOpenUrl !== false;
-      } else {
-        const legacy = localStorage.getItem('qrgen_auto_open_url');
-        shouldAutoOpen = legacy !== null ? legacy !== 'false' : true;
-      }
-    } catch {}
-
     import('../utils/storage').then(({ saveToHistory }) => {
       saveToHistory({
         source: 'scan',
@@ -641,30 +624,8 @@ export default function QRScanner({ onBack, navigateTo, onLoadQR, currentUser, o
       });
     });
 
-    if (shouldAutoOpen && isUrl) {
-      // Navigate directly to link without opening result page
-      if (Capacitor.isNativePlatform()) {
-        Browser.open({ url: targetUrl, windowName: '_system' }).catch(() => {
-          window.open(targetUrl, '_blank', 'noopener,noreferrer');
-        });
-      } else {
-        const opened = window.open(targetUrl, '_blank', 'noopener,noreferrer');
-        if (!opened) {
-          window.location.assign(targetUrl);
-        }
-      }
-
-      // Re-enable scanning after returning
-      setTimeout(() => {
-        if (mountedRef.current) {
-          scanHandledRef.current = false;
-          try { qrScannerRef.current?.resume(); } catch {}
-        }
-      }, 1500);
-    } else {
-      // Toggle closed or non-URL: navigate to result page
-      setStatus('DETECTED');
-    }
+    // Always transition to DETECTED state so the result card stays visible on screen
+    setStatus('DETECTED');
   }, [playBeep]);
 
   const startScanner = useCallback(async () => {

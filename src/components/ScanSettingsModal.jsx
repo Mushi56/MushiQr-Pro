@@ -4,13 +4,13 @@ import { getPreferences, savePreferences } from '../utils/storage';
 
 export default function ScanSettingsModal({ isOpen, onClose, showToast }) {
   const [scanSound, setScanSound] = useState(() => getPreferences().scanSound !== false);
-  const [autoOpenUrl, setAutoOpenUrl] = useState(() => getPreferences().autoOpenUrl !== false);
+  const [autoOpenUrl, setAutoOpenUrl] = useState(() => getPreferences().autoOpenUrl === true);
 
   useEffect(() => {
     if (isOpen) {
       const prefs = getPreferences();
       setScanSound(prefs.scanSound !== false);
-      setAutoOpenUrl(prefs.autoOpenUrl !== false);
+      setAutoOpenUrl(prefs.autoOpenUrl === true);
     }
   }, [isOpen]);
 

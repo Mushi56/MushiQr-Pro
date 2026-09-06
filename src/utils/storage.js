@@ -268,14 +268,14 @@ export function getPreferences() {
     }
     if (prefs.autoOpenUrl === undefined) {
       const legacyAutoOpen = localStorage.getItem('qrgen_auto_open_url');
-      prefs.autoOpenUrl = legacyAutoOpen !== null ? legacyAutoOpen !== 'false' : true;
+      prefs.autoOpenUrl = legacyAutoOpen === 'true';
     }
     return prefs;
   } catch {
     return { 
       saveLocation: 'Pictures/Mushi QR Pro',
       scanSound: true,
-      autoOpenUrl: true
+      autoOpenUrl: false
     };
   }
 }
