@@ -169,13 +169,15 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       </div>
     );
   }
-  const [text, setText] = useState(() => {
-    if (loadedBarcodeItem) return loadedBarcodeItem.displayText || loadedBarcodeItem.qrData?.text || '7501031311309';
-    return '7501031311309';
-  });
   const [bcid, setBcid] = useState(() => {
     if (loadedBarcodeItem) return loadedBarcodeItem.style?.bcid || 'ean13';
     return 'ean13';
+  });
+  const initialStandard = BARCODE_STANDARDS[loadedBarcodeItem?.style?.bcid || 'ean13'] || BARCODE_STANDARDS.ean13;
+
+  const [text, setText] = useState(() => {
+    if (loadedBarcodeItem) return loadedBarcodeItem.displayText || loadedBarcodeItem.qrData?.text || initialStandard.defaultValue;
+    return initialStandard.defaultValue;
   });
   const [barColor, setBarColor] = useState(() => {
     if (loadedBarcodeItem) return loadedBarcodeItem.style?.barColor || '#000000';
@@ -186,20 +188,20 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
     return '#ffffff';
   });
   const [barWidth, setBarWidth] = useState(() => {
-    if (loadedBarcodeItem) return loadedBarcodeItem.style?.barWidth !== undefined ? loadedBarcodeItem.style.barWidth : 2;
-    return 2;
+    if (loadedBarcodeItem?.style?.barWidth !== undefined) return loadedBarcodeItem.style.barWidth;
+    return initialStandard.defaultBarWidth !== undefined ? initialStandard.defaultBarWidth : 2;
   });
   const [height, setHeight] = useState(() => {
-    if (loadedBarcodeItem) return loadedBarcodeItem.style?.height !== undefined ? loadedBarcodeItem.style.height : 90;
-    return 90;
+    if (loadedBarcodeItem?.style?.height !== undefined) return loadedBarcodeItem.style.height;
+    return initialStandard.defaultHeight !== undefined ? initialStandard.defaultHeight : 85;
   });
   const [margin, setMargin] = useState(() => {
-    if (loadedBarcodeItem) return loadedBarcodeItem.style?.margin !== undefined ? loadedBarcodeItem.style.margin : 16;
-    return 16;
+    if (loadedBarcodeItem?.style?.margin !== undefined) return loadedBarcodeItem.style.margin;
+    return initialStandard.defaultMargin !== undefined ? initialStandard.defaultMargin : 16;
   });
   const [displayValue, setDisplayValue] = useState(() => {
-    if (loadedBarcodeItem) return loadedBarcodeItem.style?.displayValue !== undefined ? loadedBarcodeItem.style.displayValue : true;
-    return true;
+    if (loadedBarcodeItem?.style?.displayValue !== undefined) return loadedBarcodeItem.style.displayValue;
+    return initialStandard.defaultDisplayValue !== undefined ? initialStandard.defaultDisplayValue : true;
   });
 
   const [activeTab, setActiveTab] = useState('content');
@@ -340,14 +342,15 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
       const val = loadedBarcodeItem.displayText || loadedBarcodeItem.qrData?.text || '';
       const s = loadedBarcodeItem.style || {};
       const targetBcid = s.bcid || 'code128';
+      const std = BARCODE_STANDARDS[targetBcid] || BARCODE_STANDARDS.code128;
       if (val) setText(val);
       if (s.bcid) setBcid(s.bcid);
       if (s.barColor) setBarColor(s.barColor);
       if (s.bgColor) setBgColor(s.bgColor);
-      if (s.barWidth !== undefined) setBarWidth(s.barWidth);
-      if (s.height !== undefined) setHeight(s.height);
-      if (s.margin !== undefined) setMargin(s.margin);
-      if (s.displayValue !== undefined) setDisplayValue(s.displayValue);
+      setBarWidth(s.barWidth !== undefined ? s.barWidth : (std.defaultBarWidth || 2));
+      setHeight(s.height !== undefined ? s.height : (std.defaultHeight || 85));
+      setMargin(s.margin !== undefined ? s.margin : (std.defaultMargin || 16));
+      setDisplayValue(s.displayValue !== undefined ? s.displayValue : (std.defaultDisplayValue !== undefined ? std.defaultDisplayValue : true));
       // Auto-open modal for editing
       const fields = parseValueToFields(val, targetBcid);
       setModalInitialFields(fields);
@@ -706,7 +709,17 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 
       {/* ── Canvas Preview (Match QR Creator styling) ── */}
       <section className="qr-preview-card" style={{ position: 'relative', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', width: '100%', boxSizing: 'border-box' }}>
-        <div className="qr-preview-wrapper" style={{ aspectRatio: 'auto', width: '100%', maxWidth: '340px', height: '160px', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="qr-preview-wrapper" style={{
+          aspectRatio: 'auto',
+          width: '100%',
+          maxWidth: '340px',
+          height: currentStandard.category === '2d-matrix' ? '210px' : '160px',
+          padding: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'height 0.2s ease'
+        }}>
           <div style={{ background: bgColor || '#fff', padding: '16px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', boxSizing: 'border-box' }}>
             <canvas ref={canvasRef} style={{ display: 'block', maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
           </div>
@@ -740,8 +753,14 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                       return;
                     }
                     if (bcid !== key) {
-                      setBcid(key);
-                      setText(standard.defaultValue);
+                      updateStateAndHistory({
+                        bcid: key,
+                        text: standard.defaultValue,
+                        barWidth: standard.defaultBarWidth !== undefined ? standard.defaultBarWidth : 2,
+                        height: standard.defaultHeight !== undefined ? standard.defaultHeight : 85,
+                        margin: standard.defaultMargin !== undefined ? standard.defaultMargin : 16,
+                        displayValue: standard.defaultDisplayValue !== undefined ? standard.defaultDisplayValue : true
+                      });
                     }
                   }}
                 >
@@ -805,7 +824,7 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
                       </div>
                     </>
                   )}
-                  <span className="type-tab-icon" style={{ width: '100%', height: '36px', background: '#fff', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
+                  <span className="type-tab-icon" style={{ width: '100%', height: '40px', background: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: bcid === key ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)', padding: '2px', boxSizing: 'border-box' }}>
                     <MiniBarcodePreview type={key} data={standard.defaultValue} />
                   </span>
                   <span style={{ fontSize: '10px', fontWeight: 700, width: '100%', display: 'block', marginTop: '6px', lineHeight: 1.1, textAlign: 'center' }}>
@@ -865,29 +884,150 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
         {/* DIMENSIONS TAB */}
         {activeTab === 'size' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%', padding: '4px 0 20px', boxSizing: 'border-box', marginTop: 'auto' }}>
-            {[
-              { label: `Bar Thickness (${barWidth}px)`, key: 'barWidth', min: 1, max: 4, step: 1, val: barWidth },
-              { label: `Height (${height}px)`, key: 'height', min: 50, max: 180, step: 10, val: height },
-              { label: `Quiet Zone (${margin}px)`, key: 'margin', min: 8, max: 40, step: 4, val: margin },
-            ].map(({ label, key, min, max, step, val }) => (
-              <div key={key}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{label}</label>
-                <input type="range" min={min} max={max} step={step} value={val}
-                  onChange={(e) => updateStateAndHistory({ [key]: parseInt(e.target.value) })}
-                  style={{ width: '100%', cursor: 'pointer' }} />
-              </div>
-            ))}
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-primary)', padding: '10px 14px', borderRadius: 12, border: '1px solid var(--border-color)' }}>
+            {/* Standard Category & Info Banner */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'var(--bg-elevated)',
+              padding: '10px 14px',
+              borderRadius: '12px',
+              border: '1px solid var(--border-color)'
+            }}>
               <div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>Show Text Label</span>
-                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Display human-readable text under bars</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
+                  {currentStandard.name} Dimensions
+                </span>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                  {currentStandard.category === '2d-matrix'
+                    ? '2D Matrix (1:1 Fixed Geometric Ratio - Never Stretched)'
+                    : currentStandard.category === '2d-stacked'
+                    ? '2D Stacked Multi-Row Standard'
+                    : '1D Linear Barcode Standard'}
+                </span>
               </div>
-              <button onClick={() => updateStateAndHistory({ displayValue: !displayValue })}
-                style={{ background: displayValue ? 'var(--accent-primary)' : 'var(--bg-hover)', border: '1px solid var(--border-color)', borderRadius: 8, padding: '6px 14px', color: displayValue ? 'white' : 'var(--text-secondary)', fontWeight: 700, fontSize: 11, cursor: 'pointer', transition: 'all 0.2s' }}>
-                {displayValue ? 'ON' : 'OFF'}
-              </button>
+              <span style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: 'var(--accent-primary)',
+                background: 'rgba(214,0,54,0.1)',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                textTransform: 'uppercase'
+              }}>
+                {currentStandard.category.replace('-', ' ')}
+              </span>
             </div>
+
+            {/* Scale / Bar Width Slider */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                  {currentStandard.scaleLabel || 'Bar Thickness'} ({barWidth}x)
+                </label>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
+                  {barWidth}x
+                </span>
+              </div>
+              <input
+                type="range"
+                min={currentStandard.minBarWidth || 1}
+                max={currentStandard.maxBarWidth || 4}
+                step={currentStandard.stepBarWidth || 1}
+                value={barWidth}
+                onChange={(e) => updateStateAndHistory({ barWidth: parseFloat(e.target.value) })}
+                style={{ width: '100%', cursor: 'pointer' }}
+              />
+            </div>
+
+            {/* Height Slider: Only for standards where height is applicable (1D and stacked) */}
+            {currentStandard.heightApplicable ? (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                    Bar Height ({height || currentStandard.defaultHeight || 80}px)
+                  </label>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
+                    {height || currentStandard.defaultHeight || 80}px
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={currentStandard.minHeight || 30}
+                  max={currentStandard.maxHeight || 160}
+                  step={currentStandard.stepHeight || 5}
+                  value={height || currentStandard.defaultHeight || 80}
+                  onChange={(e) => updateStateAndHistory({ height: parseInt(e.target.value) })}
+                  style={{ width: '100%', cursor: 'pointer' }}
+                />
+              </div>
+            ) : (
+              <div style={{
+                background: 'rgba(52, 199, 89, 0.08)',
+                border: '1px solid rgba(52, 199, 89, 0.25)',
+                borderRadius: '10px',
+                padding: '10px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <Check size={14} color="#34C759" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '11px', color: 'var(--text-primary)', fontWeight: 600, lineHeight: 1.3 }}>
+                  Height locked to 1:1 square/hexagonal ratio. Matrix modules are always preserved without stretching.
+                </span>
+              </div>
+            )}
+
+            {/* Quiet Zone Slider */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                  Quiet Zone ({margin}px)
+                </label>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
+                  {margin}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min={4}
+                max={40}
+                step={2}
+                value={margin}
+                onChange={(e) => updateStateAndHistory({ margin: parseInt(e.target.value) })}
+                style={{ width: '100%', cursor: 'pointer' }}
+              />
+            </div>
+
+            {/* Text Label Toggle */}
+            {bcid !== 'maxicode' && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-primary)', padding: '10px 14px', borderRadius: 12, border: '1px solid var(--border-color)' }}>
+                <div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>Show Text Label</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                    {currentStandard.category === '2d-matrix'
+                      ? 'Show human-readable text under 2D matrix'
+                      : 'Display human-readable text under bars'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => updateStateAndHistory({ displayValue: !displayValue })}
+                  style={{
+                    background: displayValue ? 'var(--accent-primary)' : 'var(--bg-hover)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 8,
+                    padding: '6px 14px',
+                    color: displayValue ? 'white' : 'var(--text-secondary)',
+                    fontWeight: 700,
+                    fontSize: 11,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {displayValue ? 'ON' : 'OFF'}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -933,18 +1073,44 @@ export default function BarcodePage({ onNavigate, showToast, loadedBarcodeItem, 
 // ─── Mini Preview Canvas ──────────────────────────────────────────────────────
 function MiniBarcodePreview({ type, data }) {
   const ref = useRef(null);
-  // Some 2D/complex types don't render well in a widescreen thumbnail, use code128 fallback for display only
-  const FALLBACK_AS_1D = new Set(['aztec', 'maxicode', 'hanxin', 'microqrcode', 'codablockf', 'code49']);
-  const previewType = FALLBACK_AS_1D.has(type) ? 'code128' : type;
-  const previewData = FALLBACK_AS_1D.has(type) ? type.toUpperCase().slice(0, 8) : data;
 
   useEffect(() => {
     if (!ref.current) return;
-    const ctx = ref.current.getContext('2d');
-    ctx.clearRect(0, 0, 80, 32);
-    renderBarcode(ref.current, previewData, { bcid: previewType, barColor: '#000', bgColor: '#fff', barWidth: 1.2, height: 28, margin: 2, displayValue: false });
-  }, [previewType, previewData]);
-  return <canvas ref={ref} width={80} height={32} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+    const std = BARCODE_STANDARDS[type] || BARCODE_STANDARDS.code128;
+    const is2D = std.category === '2d-matrix';
+    const isStacked = std.category === '2d-stacked';
+
+    // Tailored scale for thumbnail icon so each barcode renders its authentic code sharply
+    let thumbScale = 1;
+    if (type === 'microqrcode') thumbScale = 1.6;
+    else if (type === 'datamatrix') thumbScale = 1.3;
+    else if (type === 'qrcode' || type === 'aztec' || type === 'hanxin') thumbScale = 1.1;
+    else if (type === 'maxicode') thumbScale = 0.85;
+    else if (type === 'pdf417') thumbScale = 1;
+    else if (type === 'gs1128' || type === 'telepen' || type === 'planet') thumbScale = 0.75;
+
+    renderBarcode(ref.current, data || std.defaultValue, {
+      bcid: type,
+      barColor: '#000000',
+      bgColor: '#ffffff',
+      barWidth: thumbScale,
+      height: is2D || isStacked ? null : 26,
+      margin: 2,
+      displayValue: false
+    });
+  }, [type, data]);
+
+  return (
+    <canvas
+      ref={ref}
+      style={{
+        display: 'block',
+        maxWidth: '100%',
+        maxHeight: '100%',
+        objectFit: 'contain'
+      }}
+    />
+  );
 }
 
 // ─── Undo/Redo Button Styles ──────────────────────────────────────────────────

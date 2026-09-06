@@ -9,7 +9,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '4006381333931',
     hint: '12 digits (13th check digit is auto-calculated)',
     validate: (val) => /^\d{12,13}$/.test(val),
-    errorMsg: 'Must be exactly 12 or 13 digits'
+    errorMsg: 'Must be exactly 12 or 13 digits',
+    category: '1d-retail',
+    defaultBarWidth: 2,
+    defaultHeight: 85,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 160,
+    stepHeight: 5
   },
   'upca': {
     name: 'UPC-A',
@@ -18,7 +31,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '012345678905',
     hint: '11 digits (12th check digit is auto-calculated)',
     validate: (val) => /^\d{11,12}$/.test(val),
-    errorMsg: 'Must be exactly 11 or 12 digits'
+    errorMsg: 'Must be exactly 11 or 12 digits',
+    category: '1d-retail',
+    defaultBarWidth: 2,
+    defaultHeight: 85,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 160,
+    stepHeight: 5
   },
   'code128': {
     name: 'Code 128',
@@ -27,7 +53,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'MushiPro-128',
     hint: 'Supports all standard ASCII characters',
     validate: (val) => /^[\x00-\x7F]+$/.test(val),
-    errorMsg: 'Must contain ASCII characters only'
+    errorMsg: 'Must contain ASCII characters only',
+    category: '1d-industrial',
+    defaultBarWidth: 2,
+    defaultHeight: 80,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 160,
+    stepHeight: 5
   },
   'code39': {
     name: 'Code 39',
@@ -36,7 +75,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'MUSHI 39',
     hint: 'Supports A-Z, 0-9, space, -, ., $, /, +, %',
     validate: (val) => /^[A-Z0-9\-\.\ \$\/\+\%]+$/.test(val.toUpperCase()),
-    errorMsg: 'A-Z, 0-9, spaces, and - . $ / + % characters only'
+    errorMsg: 'A-Z, 0-9, spaces, and - . $ / + % characters only',
+    category: '1d-industrial',
+    defaultBarWidth: 2,
+    defaultHeight: 80,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 160,
+    stepHeight: 5
   },
   'datamatrix': {
     name: 'Data Matrix',
@@ -45,7 +97,17 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'DataMatrix-Standard',
     hint: 'Supports full alphanumeric/binary data',
     validate: (val) => val.length > 0 && val.length <= 1000,
-    errorMsg: 'Cannot be empty or exceed 1000 characters'
+    errorMsg: 'Cannot be empty or exceed 1000 characters',
+    category: '2d-matrix',
+    defaultBarWidth: 3,
+    defaultHeight: null,
+    defaultMargin: 12,
+    defaultDisplayValue: false,
+    heightApplicable: false,
+    scaleLabel: 'Module Size',
+    minBarWidth: 1,
+    maxBarWidth: 6,
+    stepBarWidth: 1
   },
   'itf14': {
     name: 'ITF-14',
@@ -54,7 +116,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '10012345678902',
     hint: '13 digits (14th check digit is auto-calculated)',
     validate: (val) => /^\d{13,14}$/.test(val),
-    errorMsg: 'Must be exactly 13 or 14 digits'
+    errorMsg: 'Must be exactly 13 or 14 digits',
+    category: '1d-retail',
+    defaultBarWidth: 2,
+    defaultHeight: 90,
+    defaultMargin: 18,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 50,
+    maxHeight: 160,
+    stepHeight: 5
   },
   'ean8': {
     name: 'EAN-8',
@@ -63,7 +138,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '40123455',
     hint: '7 digits (8th check digit is auto-calculated)',
     validate: (val) => /^\d{7,8}$/.test(val),
-    errorMsg: 'Must be exactly 7 or 8 digits'
+    errorMsg: 'Must be exactly 7 or 8 digits',
+    category: '1d-retail',
+    defaultBarWidth: 2,
+    defaultHeight: 75,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 140,
+    stepHeight: 5
   },
   'gs1databar': {
     name: 'GS1 DataBar',
@@ -72,7 +160,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '01234567890128',
     hint: 'Exactly 13 or 14 digits (GTIN)',
     validate: (val) => /^(?:\(01\))?\d{13,14}$/.test(val),
-    errorMsg: 'Must be exactly 13 or 14 digits (optional (01) prefix)'
+    errorMsg: 'Must be exactly 13 or 14 digits (optional (01) prefix)',
+    category: '1d-retail',
+    defaultBarWidth: 2,
+    defaultHeight: 65,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 35,
+    maxHeight: 130,
+    stepHeight: 5
   },
   'pdf417': {
     name: 'PDF417',
@@ -81,7 +182,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'PDF417-ID-FORMAT',
     hint: '2D stacked layout (holds hundreds of characters)',
     validate: (val) => val.length > 0 && val.length <= 1500,
-    errorMsg: 'Cannot be empty or exceed 1500 characters'
+    errorMsg: 'Cannot be empty or exceed 1500 characters',
+    category: '2d-stacked',
+    defaultBarWidth: 2,
+    defaultHeight: null,
+    defaultMargin: 14,
+    defaultDisplayValue: false,
+    heightApplicable: true,
+    scaleLabel: 'Module Width',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 30,
+    maxHeight: 120,
+    stepHeight: 5
   },
   'code93': {
     name: 'Code 93',
@@ -90,7 +204,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'COMPACT-93',
     hint: 'Supports A-Z, 0-9, space, -, ., $, /, +, %',
     validate: (val) => /^[A-Z0-9\-\.\ \$\/\+\%]+$/.test(val.toUpperCase()),
-    errorMsg: 'A-Z, 0-9, spaces, and - . $ / + % characters only'
+    errorMsg: 'A-Z, 0-9, spaces, and - . $ / + % characters only',
+    category: '1d-industrial',
+    defaultBarWidth: 2,
+    defaultHeight: 80,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 160,
+    stepHeight: 5
   },
   'upce': {
     name: 'UPC-E',
@@ -99,7 +226,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '01234565',
     hint: '6, 7, or 8 numeric digits only',
     validate: (val) => /^\d{6,8}$/.test(val),
-    errorMsg: 'Must be 6, 7 or 8 digits'
+    errorMsg: 'Must be 6, 7 or 8 digits',
+    category: '1d-retail',
+    defaultBarWidth: 2,
+    defaultHeight: 75,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 140,
+    stepHeight: 5
   },
   'codabar': {
     name: 'Codabar',
@@ -108,7 +248,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'A1234567B',
     hint: 'Starts/ends with letters A-D, numeric body',
     validate: (val) => /^[A-D][0-9\-\$\:\/\.\+]+[A-D]$/i.test(val),
-    errorMsg: 'Must start and end with A-D and contain only numeric/special chars'
+    errorMsg: 'Must start and end with A-D and contain only numeric/special chars',
+    category: '1d-industrial',
+    defaultBarWidth: 2,
+    defaultHeight: 75,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 140,
+    stepHeight: 5
   },
   'code11': {
     name: 'Code 11',
@@ -117,7 +270,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '123-456-789',
     hint: 'Numeric digits and hyphens only',
     validate: (val) => /^[0-9\-]+$/.test(val),
-    errorMsg: 'Digits and hyphens only'
+    errorMsg: 'Digits and hyphens only',
+    category: '1d-industrial',
+    defaultBarWidth: 2,
+    defaultHeight: 75,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 140,
+    stepHeight: 5
   },
   'msi': {
     name: 'MSI Plessey',
@@ -126,7 +292,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '1234567',
     hint: 'Numeric digits only',
     validate: (val) => /^\d+$/.test(val),
-    errorMsg: 'Digits only'
+    errorMsg: 'Digits only',
+    category: '1d-retail',
+    defaultBarWidth: 2,
+    defaultHeight: 75,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 140,
+    stepHeight: 5
   },
   'i25': {
     name: 'Interleaved 2 of 5',
@@ -135,7 +314,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '12345678',
     hint: 'Even number of digits only (e.g. 12, 3456)',
     validate: (val) => /^\d+$/.test(val) && val.length % 2 === 0,
-    errorMsg: 'Digits only (must be even length)'
+    errorMsg: 'Digits only (must be even length)',
+    category: '1d-industrial',
+    defaultBarWidth: 2,
+    defaultHeight: 75,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 40,
+    maxHeight: 140,
+    stepHeight: 5
   },
   'postnet': {
     name: 'Postnet',
@@ -144,7 +336,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '12345',
     hint: 'Exactly 5, 9 or 11 digits for US zip routing',
     validate: (val) => /^\d{5}$|^\d{9}$|^\d{11}$/.test(val),
-    errorMsg: 'Must be 5, 9 or 11 digits'
+    errorMsg: 'Must be 5, 9 or 11 digits',
+    category: '1d-postal',
+    defaultBarWidth: 2,
+    defaultHeight: 45,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 3,
+    stepBarWidth: 1,
+    minHeight: 25,
+    maxHeight: 75,
+    stepHeight: 5
   },
   'planet': {
     name: 'Planet',
@@ -153,7 +358,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '12345678901',
     hint: 'Exactly 11, 12, 13 or 14 digits',
     validate: (val) => /^\d{11,12}$|^\d{13,14}$/.test(val),
-    errorMsg: 'Must be 11, 12, 13 or 14 digits'
+    errorMsg: 'Must be 11, 12, 13 or 14 digits',
+    category: '1d-postal',
+    defaultBarWidth: 2,
+    defaultHeight: 45,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 3,
+    stepBarWidth: 1,
+    minHeight: 25,
+    maxHeight: 75,
+    stepHeight: 5
   },
   'royalmail': {
     name: 'Royal Mail Customer Code',
@@ -162,7 +380,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'SN34RD1A',
     hint: 'Alphanumeric postal routing characters (RM4SCC)',
     validate: (val) => /^[A-Z0-9]+$/i.test(val),
-    errorMsg: 'Alphanumeric characters only'
+    errorMsg: 'Alphanumeric characters only',
+    category: '1d-postal',
+    defaultBarWidth: 2,
+    defaultHeight: 50,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 3,
+    stepBarWidth: 1,
+    minHeight: 25,
+    maxHeight: 80,
+    stepHeight: 5
   },
   'gs1128': {
     name: 'GS1-128',
@@ -171,7 +402,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '(01)00012345678905(10)ABC-123',
     hint: 'ASCII with GS1 AI codes in parentheses e.g. (01)1234',
     validate: (val) => /^[\x00-\x7F]+$/.test(val),
-    errorMsg: 'Must contain ASCII characters only'
+    errorMsg: 'Must contain ASCII characters only',
+    category: '1d-industrial',
+    defaultBarWidth: 1.5,
+    defaultHeight: 80,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 3,
+    stepBarWidth: 0.5,
+    minHeight: 40,
+    maxHeight: 160,
+    stepHeight: 5
   },
   'telepen': {
     name: 'Telepen',
@@ -180,7 +424,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'TELEPEN-ASCII',
     hint: 'Supports all 128 ASCII characters',
     validate: (val) => /^[\x00-\x7F]+$/.test(val),
-    errorMsg: 'Must contain ASCII characters only'
+    errorMsg: 'Must contain ASCII characters only',
+    category: '1d-industrial',
+    defaultBarWidth: 1.5,
+    defaultHeight: 80,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 3,
+    stepBarWidth: 0.5,
+    minHeight: 40,
+    maxHeight: 160,
+    stepHeight: 5
   },
   'pharmacode': {
     name: 'Pharmacode',
@@ -189,7 +446,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '11309',
     hint: 'Integer value between 3 and 131070 only',
     validate: (val) => /^\d+$/.test(val) && parseInt(val) >= 3 && parseInt(val) <= 131070,
-    errorMsg: 'Numeric value between 3 and 131070 only'
+    errorMsg: 'Numeric value between 3 and 131070 only',
+    category: '1d-industrial',
+    defaultBarWidth: 2,
+    defaultHeight: 65,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 35,
+    maxHeight: 130,
+    stepHeight: 5
   },
   'aztec': {
     name: 'Aztec Code',
@@ -198,7 +468,17 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'AZTEC-TICKET-DATA',
     hint: 'High-density 2D transit matrix',
     validate: (val) => val.length > 0 && val.length <= 1500,
-    errorMsg: 'Cannot be empty or exceed 1500 characters'
+    errorMsg: 'Cannot be empty or exceed 1500 characters',
+    category: '2d-matrix',
+    defaultBarWidth: 3,
+    defaultHeight: null,
+    defaultMargin: 12,
+    defaultDisplayValue: false,
+    heightApplicable: false,
+    scaleLabel: 'Module Size',
+    minBarWidth: 1,
+    maxBarWidth: 6,
+    stepBarWidth: 1
   },
   'maxicode': {
     name: 'MaxiCode',
@@ -207,7 +487,17 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'UPS-MAXICODE-DATA',
     hint: 'Hexagonal matrix layout (holds up to 138 chars)',
     validate: (val) => val.length > 0 && val.length <= 138,
-    errorMsg: 'Cannot exceed 138 characters'
+    errorMsg: 'Cannot exceed 138 characters',
+    category: '2d-matrix',
+    defaultBarWidth: 2,
+    defaultHeight: null,
+    defaultMargin: 12,
+    defaultDisplayValue: false,
+    heightApplicable: false,
+    scaleLabel: 'Grid Scale',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1
   },
   'qrcode': {
     name: 'QR Code (2D)',
@@ -216,7 +506,17 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'QR-INTEGRATION',
     hint: 'Standard 2D Quick Response format',
     validate: (val) => val.length > 0,
-    errorMsg: 'Cannot be empty'
+    errorMsg: 'Cannot be empty',
+    category: '2d-matrix',
+    defaultBarWidth: 3,
+    defaultHeight: null,
+    defaultMargin: 12,
+    defaultDisplayValue: false,
+    heightApplicable: false,
+    scaleLabel: 'Module Size',
+    minBarWidth: 1,
+    maxBarWidth: 6,
+    stepBarWidth: 1
   },
   'microqrcode': {
     name: 'Micro QR',
@@ -225,7 +525,17 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'MICRO-QR',
     hint: 'Miniaturized QR layout for tiny footprints',
     validate: (val) => val.length > 0 && val.length <= 35,
-    errorMsg: 'Cannot exceed 35 characters'
+    errorMsg: 'Cannot exceed 35 characters',
+    category: '2d-matrix',
+    defaultBarWidth: 4,
+    defaultHeight: null,
+    defaultMargin: 12,
+    defaultDisplayValue: false,
+    heightApplicable: false,
+    scaleLabel: 'Module Size',
+    minBarWidth: 2,
+    maxBarWidth: 8,
+    stepBarWidth: 1
   },
   'hanxin': {
     name: 'Han Xin Code',
@@ -234,7 +544,17 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'HANXIN-2D-CODE',
     hint: '2D matrix optimized for Chinese character sets',
     validate: (val) => val.length > 0 && val.length <= 1000,
-    errorMsg: 'Cannot be empty or exceed 1000 characters'
+    errorMsg: 'Cannot be empty or exceed 1000 characters',
+    category: '2d-matrix',
+    defaultBarWidth: 3,
+    defaultHeight: null,
+    defaultMargin: 12,
+    defaultDisplayValue: false,
+    heightApplicable: false,
+    scaleLabel: 'Module Size',
+    minBarWidth: 1,
+    maxBarWidth: 6,
+    stepBarWidth: 1
   },
   'codablockf': {
     name: 'Codablock F',
@@ -243,7 +563,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'CODABLOCK-F-DATA',
     hint: 'Stacked alphanumeric layout',
     validate: (val) => /^[\x00-\x7F]+$/.test(val),
-    errorMsg: 'Must contain ASCII characters only'
+    errorMsg: 'Must contain ASCII characters only',
+    category: '2d-stacked',
+    defaultBarWidth: 2,
+    defaultHeight: null,
+    defaultMargin: 14,
+    defaultDisplayValue: false,
+    heightApplicable: true,
+    scaleLabel: 'Module Width',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 30,
+    maxHeight: 120,
+    stepHeight: 5
   },
   'code16k': {
     name: 'Code 16K',
@@ -252,7 +585,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'CODE-16K-DATA',
     hint: 'Stacked layout supporting ASCII',
     validate: (val) => /^[\x00-\x7F]+$/.test(val),
-    errorMsg: 'Must contain ASCII characters only'
+    errorMsg: 'Must contain ASCII characters only',
+    category: '2d-stacked',
+    defaultBarWidth: 2,
+    defaultHeight: null,
+    defaultMargin: 14,
+    defaultDisplayValue: false,
+    heightApplicable: true,
+    scaleLabel: 'Module Width',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 30,
+    maxHeight: 120,
+    stepHeight: 5
   },
   'code49': {
     name: 'Code 49',
@@ -261,7 +607,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: 'CODE-49-DATA',
     hint: 'Compact stacked layout up to 81 characters',
     validate: (val) => /^[\x00-\x7F]+$/.test(val) && val.length <= 81,
-    errorMsg: 'Must contain ASCII and not exceed 81 characters'
+    errorMsg: 'Must contain ASCII and not exceed 81 characters',
+    category: '2d-stacked',
+    defaultBarWidth: 2,
+    defaultHeight: null,
+    defaultMargin: 14,
+    defaultDisplayValue: false,
+    heightApplicable: true,
+    scaleLabel: 'Module Width',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 30,
+    maxHeight: 120,
+    stepHeight: 5
   },
   'channelcode': {
     name: 'Channel Code',
@@ -270,7 +629,20 @@ export const BARCODE_STANDARDS = {
     defaultValue: '123456',
     hint: 'Positive integer up to 7 digits',
     validate: (val) => /^\d+$/.test(val) && parseInt(val) >= 0 && parseInt(val) <= 9999999,
-    errorMsg: 'Positive integers up to 7 digits only'
+    errorMsg: 'Positive integers up to 7 digits only',
+    category: '1d-industrial',
+    defaultBarWidth: 2,
+    defaultHeight: 70,
+    defaultMargin: 16,
+    defaultDisplayValue: true,
+    heightApplicable: true,
+    scaleLabel: 'Bar Thickness',
+    minBarWidth: 1,
+    maxBarWidth: 4,
+    stepBarWidth: 1,
+    minHeight: 35,
+    maxHeight: 140,
+    stepHeight: 5
   }
 };
 
@@ -298,11 +670,29 @@ export function renderBarcode(canvas, text, options = {}) {
     bcid = 'code128',
     barColor = '#000000',
     bgColor = '#ffffff',
-    barWidth = 2,
-    height = 90,
-    displayValue = true,
-    margin = 16
+    barWidth,
+    height,
+    displayValue,
+    margin
   } = options;
+
+  const standard = BARCODE_STANDARDS[bcid] || BARCODE_STANDARDS.code128;
+
+  const effectiveBarWidth = barWidth !== undefined && barWidth !== null
+    ? barWidth
+    : (standard.defaultBarWidth !== undefined ? standard.defaultBarWidth : 2);
+
+  const effectiveHeight = height !== undefined && height !== null
+    ? height
+    : standard.defaultHeight;
+
+  const effectiveMargin = margin !== undefined && margin !== null
+    ? margin
+    : (standard.defaultMargin !== undefined ? standard.defaultMargin : 16);
+
+  const effectiveDisplayValue = displayValue !== undefined && displayValue !== null
+    ? (bcid === 'maxicode' ? false : displayValue)
+    : (standard.defaultDisplayValue !== undefined ? standard.defaultDisplayValue : true);
 
   const cleanBarColor = barColor && barColor.startsWith('#') ? barColor.replace('#', '') : '000000';
   const cleanBgColor = bgColor && bgColor.startsWith('#') ? bgColor.replace('#', '') : null;
@@ -315,7 +705,7 @@ export function renderBarcode(canvas, text, options = {}) {
       'i25': 'interleaved2of5',
       'codabar': 'rationalizedCodabar',
       'aztec': 'azteccode',
-      'microqrcode': 'microqrcode',  // already correct key in bwip-js
+      'microqrcode': 'microqrcode',
       'channelcode': 'channelcode',
       'code16k': 'code16k',
       'code49': 'code49',
@@ -346,14 +736,20 @@ export function renderBarcode(canvas, text, options = {}) {
     const bwipOptions = {
       bcid: targetBcid,
       text: renderText,
-      scale: barWidth,
-      height: height / 10, // approximate standard conversion
-      includetext: displayValue,
+      scale: effectiveBarWidth,
+      includetext: effectiveDisplayValue,
       textxalign: 'center',
       barcolor: cleanBarColor,
-      paddingwidth: margin,
-      paddingheight: margin
+      paddingwidth: effectiveMargin,
+      paddingheight: effectiveMargin
     };
+
+    // CRITICAL: Only apply vertical height when height is applicable (e.g. 1D barcodes).
+    // For 2D matrix codes (Data Matrix, MaxiCode, Aztec, QR, Han Xin, Micro QR),
+    // NEVER force height so that modules remain 1:1 square/hexagonal and NEVER stretch!
+    if (standard.heightApplicable && effectiveHeight) {
+      bwipOptions.height = effectiveHeight / 10;
+    }
 
     if (cleanBgColor) {
       bwipOptions.backgroundcolor = cleanBgColor;
